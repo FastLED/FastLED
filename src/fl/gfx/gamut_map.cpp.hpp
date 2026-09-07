@@ -244,35 +244,71 @@ bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
         }
     }
 
-    // With every component of `per_white` positive, full white relaxes every
-    // upper bound on the RGB drives, so the brightest neutral is
-    // min_i (1 + per_white_i) / neutral_drive_i. A negative component means
-    // more white *raises* that drive, full white is no longer optimal, and
-    // the closed form does not hold -- so fall back to the three-emitter
-    // bound, which is attainable and merely conservative.
-    bool white_helps_every_channel = true;
+    // The three-emitter bound, reached with the white emitter off. Whatever
+    // else happens this neutral is attainable: at 1 / max(d0) the RGB drives
+    // are exactly in [0, 1] with no white at all.
+    i32 largest_neutral_drive = neutral_drives[0];
+    for (int i = 1; i < 3; ++i) {
+        if (neutral_drives[i] > largest_neutral_drive) {
+            largest_neutral_drive = neutral_drives[i];
+        }
+    }
+    i64 reachable = (static_cast<i64>(kGamutFullDrive) << 16) /
+                    static_cast<i64>(largest_neutral_drive);
+
+    // An upper bound on what the white emitter can add. Along the D65 ray
+    // the RGB drives are s * d0 - w * dW, so the *upper* limit on drive i is
+    // loosest at w = 1 when dW_i is positive and at w = 0 when it is
+    // negative -- hence max(dW_i, 0). Dropping the lower limits, and letting
+    // each channel pick its own w, are both relaxations, so this is an upper
+    // bound and never an under-estimate.
+    i64 optimistic = static_cast<i64>(kOklabQ16MaxMagnitude);
     for (int i = 0; i < 3; ++i) {
-        if (out->allocation.per_white[i] < 0) {
-            white_helps_every_channel = false;
+        const i32 per_white = out->allocation.per_white[i];
+        const i64 numerator = static_cast<i64>(kGamutFullDrive) +
+                              (per_white > 0 ? static_cast<i64>(per_white) : 0);
+        const i64 candidate =
+            (numerator << 16) / static_cast<i64>(neutral_drives[i]);
+        if (candidate < optimistic) {
+            optimistic = candidate;
         }
     }
 
-    i64 scale_wide = static_cast<i64>(kOklabQ16MaxMagnitude);
-    for (int i = 0; i < 3; ++i) {
-        const i64 numerator = white_helps_every_channel
-            ? static_cast<i64>(kGamutFullDrive) +
-                  static_cast<i64>(out->allocation.per_white[i])
-            : static_cast<i64>(kGamutFullDrive);
-        const i64 candidate =
-            (numerator << 16) / static_cast<i64>(neutral_drives[i]);
-        if (candidate < scale_wide) {
-            scale_wide = candidate;
+    // That upper bound is not generally attainable, and treating it as if it
+    // were is a real bug rather than a theoretical one: it enforces only the
+    // upper limits on the RGB drives, and full white can push a *different*
+    // channel negative. With dW = (0.9, 0.05, 0.05) against
+    // d0 = (0.21, 0.72, 0.07) the formula gives 1.468, where the red drive
+    // works out at 1.468 * 0.21 - 0.9 = -0.59. Storing that would leave the
+    // mapper with a zero-chroma candidate its own halving search cannot
+    // satisfy, and the fallback would then return four zero drives for a
+    // colour that is not black.
+    //
+    // So the bound is bisected between the two at bind time. This is not an
+    // iterative solver in the A3/B11 sense: it runs once per profile, never
+    // per pixel, and the per-pixel path sees only the stored result.
+    if (optimistic > reachable) {
+        i64 low = reachable;
+        i64 high = optimistic;
+        for (int step = 0; step < 24; ++step) {
+            const i64 middle = (low + high) / 2;
+            const i32 trial_scale = static_cast<i32>(middle);
+            const i32 trial[3] = {
+                scaleGamutQ16(kGamutD65Q16[0], trial_scale),
+                scaleGamutQ16(kGamutD65Q16[1], trial_scale),
+                scaleGamutQ16(kGamutD65Q16[2], trial_scale),
+            };
+            i32 trial_drives[4];
+            if (allocateWhitePreferredQ16(out->allocation, trial, trial_drives)) {
+                low = middle;
+            } else {
+                high = middle;
+            }
         }
+        reachable = low;
     }
-    if (scale_wide < 0) {
-        return false;
-    }
-    const i32 scale = static_cast<i32>(scale_wide);
+
+    const i32 scale = static_cast<i32>(reachable);
     const i32 brightest_neutral[3] = {
         scaleGamutQ16(kGamutD65Q16[0], scale),
         scaleGamutQ16(kGamutD65Q16[1], scale),

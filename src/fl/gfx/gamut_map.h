@@ -75,17 +75,13 @@ struct GamutMapRgbwQ16 {
     /// adds -- 2.398 against 1.398 for a white at D65 and unit luminance,
     /// exactly the one unit it contributes.
     ///
-    /// Still closed form. Along the D65 neutral ray the RGB drives are
-    /// s * d0 - w * dW, and when every component of dW is positive, pushing
-    /// w to full scale relaxes every upper bound, so
-    /// s_max = min_i (1 + dW_i) / d0_i. Measured against a 60-step bisection
-    /// the two agree to 1e-12.
-    ///
-    /// When some component of dW is negative -- a white emitter outside the
-    /// RGB triangle, where more white *raises* an RGB drive -- full white is
-    /// no longer optimal and the closed form does not hold. The bound then
-    /// falls back to the three-emitter one, which is attainable and merely
-    /// conservative rather than wrong.
+    /// Derived at bind time by bisecting between two bounds: the
+    /// three-emitter one, always reachable with the white emitter off, and a
+    /// relaxation of the problem that ignores the lower limits on the RGB
+    /// drives. The relaxation is an upper bound but not generally
+    /// attainable -- full white can push a channel negative -- so it is
+    /// tested rather than trusted. The bisection runs once per profile,
+    /// never per pixel.
     i32 max_neutral_lightness;
 };
 

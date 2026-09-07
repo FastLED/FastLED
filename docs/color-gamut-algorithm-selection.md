@@ -377,18 +377,32 @@ So `mapAndAllocateRgbwQ16` runs the same eight halvings as the three-emitter
 path but takes every feasibility decision through the white-preferred
 allocation.
 
-Its lightness bound is closed form for the same reason the three-emitter one
-is. Along the D65 neutral ray the RGB drives are `s·d0 − w·dW`, and when every
-component of `dW` is positive, pushing `w` to full scale relaxes every upper
-bound, so `s_max = min_i (1 + dW_i) / d0_i`. Measured against a 60-step
-bisection the two agree to 1e-12, and for a white at D65 and unit luminance
-the bound moves from **1.398** to **2.398** times D65 — exactly the one unit
-the white emitter contributes.
+Its lightness bound is derived once, at bind time, between two numbers that
+are cheap to compute and easy to be sure of.
 
-A negative component of `dW` means a white emitter outside the RGB triangle,
-where more white *raises* an RGB drive; full white is then not optimal and
-the closed form does not hold. The bound falls back to the three-emitter one
-there, which is attainable and merely conservative rather than wrong.
+The lower one is the three-emitter bound, `1 / max(d0)`, reached with the
+white emitter off — always attainable. The upper one relaxes the problem:
+along the D65 ray the RGB drives are `s·d0 − w·dW`, so the *upper* limit on
+drive `i` is loosest at `w = 1` when `dW_i` is positive and at `w = 0` when
+it is negative, giving `min_i (1 + max(dW_i, 0)) / d0_i`. Dropping the lower
+limits, and letting each channel pick its own `w`, are both relaxations, so
+that is an upper bound and never an under-estimate.
+
+**The upper bound is not generally attainable, and an earlier revision of
+this stored it directly.** It enforces only the upper limits, and full white
+can push a *different* channel negative: with `dW = (0.9, 0.05, 0.05)`
+against `d0 = (0.21, 0.72, 0.07)` the formula returns 1.468, where the red
+drive is `1.468 × 0.21 − 0.9 = −0.59`. Storing that leaves the mapper with a
+zero-chroma candidate its own halving search cannot satisfy, and the
+fallback then returns four zero drives for a colour that is not black.
+
+So the bound is bisected between the two, using the allocation itself as the
+feasibility test. That is not an iterative solver in the A3/B11 sense — it
+runs once per profile, never per pixel, and the per-pixel path sees only the
+stored result. Where the relaxation happens to be tight, which includes the
+ordinary case of a white emitter at D65 and unit luminance, the bisection
+converges straight to it: the bound moves from **1.398** to **2.398** times
+D65, exactly the one unit that emitter contributes.
 
 ### What this leaves
 

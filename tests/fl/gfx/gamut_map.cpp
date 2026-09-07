@@ -564,6 +564,8 @@ FL_TEST_CASE("Gamut map leaves an in-gamut ramp exactly where it found it") {
         FL_CHECK_LT(fl::fabsf(reproduced[1] / sum - 0.3290f), 0.002f);
     }
     FL_CHECK_GT(exercised, 20);
+}
+
 // The white emitter the corpus's `rgbw` device uses: D65 at unit luminance.
 constexpr i32 kWhiteD65[3] = {62289, 65536, 71372};
 
@@ -653,6 +655,50 @@ FL_TEST_CASE("RGBW lightness bound is the brighter one the white emitter buys") 
     };
     FL_CHECK_FALSE(
         allocateWhitePreferredQ16(rgbw.allocation, too_bright, drives));
+}
+
+FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
+    // Regression. The closed form min_i (1 + dW_i) / d0_i enforces only the
+    // *upper* limits on the RGB drives. Full white can push a different
+    // channel negative, and then the "brightest neutral" is not in the hull
+    // at all -- which would leave the halving search with a zero-chroma
+    // candidate it cannot satisfy and the fallback returning four zero
+    // drives for a colour that is not black.
+    //
+    // This white emitter is built to do exactly that: its drives through the
+    // RGB matrix are about (0.9, 0.05, 0.05) against a D65 neutral needing
+    // (0.21, 0.72, 0.07), so the formula returns 1.468 while the red drive
+    // there is 1.468 * 0.21 - 0.9 = -0.59.
+    const i32 skewed_white[3] = {q16(1.8955f), q16(1.0f), q16(0.74847f)};
+
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), skewed_white, &rgbw));
+
+    // Pin the premise: this fixture really is the awkward shape, so the test
+    // cannot go quiet if the emitter columns or the solve move.
+    FL_REQUIRE_GT(rgbw.allocation.per_white[0], rgbw.allocation.per_white[1]);
+    FL_REQUIRE_GT(rgbw.allocation.per_white[0], kFullDrive / 2);
+
+    // The stored bound must name a neutral the device can actually make.
+    i32 brightest[3];
+    {
+        // Recover the neutral from the stored lightness by inverting OKLab.
+        const i32 lab[3] = {rgbw.max_neutral_lightness, 0, 0};
+        oklabToXyzQ16(lab, brightest);
+    }
+    i32 drives[4];
+    FL_CHECK(allocateWhitePreferredQ16(rgbw.allocation, brightest, drives));
+
+    // And the mapper must not collapse a real colour to black through it.
+    i32 xyz[3];
+    xyzAt(0.45f, 0.40f, 3.0f, xyz);
+    i32 mapped[4];
+    mapAndAllocateRgbwQ16(rgbw, xyz, mapped);
+    FL_CHECK_GT(mapped[0] + mapped[1] + mapped[2] + mapped[3], kFullDrive / 8);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(mapped[i], 0);
+        FL_CHECK_LE(mapped[i], kFullDrive);
+    }
 }
 
 FL_TEST_CASE("RGBW mapper always returns drives inside [0, 1]") {
