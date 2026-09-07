@@ -37,9 +37,18 @@ namespace fl {
 
 /// Everything the per-pixel path needs, derived once when a profile binds.
 ///
-/// Deliberately a plain aggregate of the stages' own bind-time state rather
+/// Deliberately a plain carrier of the stages' own bind-time state rather
 /// than a rebuilt copy of it: the matrices here are the ones those modules
 /// produce, so there is no second place for them to drift.
+///
+/// Not aggregate-initializable, and not by accident. `FluxScalar` has no
+/// default constructor -- there is no sensible "unset" amplitude -- so the
+/// member below carries an initializer, and in C++11, which this project
+/// builds as, a class with one is not an aggregate. `StreamingPipelineQ16 p
+/// = {transfer, source, gamut, flux};` does not compile and never has.
+/// Members are therefore free to be grouped by meaning rather than pinned by
+/// position, and `buildStreamingPipelineQ16` is the only thing that should
+/// be filling one in.
 struct StreamingPipelineQ16 {
     /// The source's transfer function, applied per code.
     TransferFunction transfer;
