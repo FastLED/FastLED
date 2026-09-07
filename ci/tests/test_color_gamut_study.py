@@ -116,10 +116,15 @@ class TestColorGamutStudy(unittest.TestCase):
     ) -> None:
         """Quantizing to the working domain must not cost accuracy.
 
-        The report selects eight halvings on float64 numbers, but the
-        embedded path runs in s16.16. If quantization made it worse the
-        selection would not carry over, so the equivalence is pinned here
-        rather than assumed.
+        The report selects eight halvings on float64 numbers while the
+        embedded path runs in s16.16, so the equivalence is pinned rather
+        than assumed.
+
+        The lightness search is quantized too, including its internal branch
+        decisions. Rounding only its returned value leaves 30 comparisons in
+        float64 and does not exercise the fixed-point path at all -- an
+        earlier version of this test did that and reported numbers that did
+        not survive.
         """
 
         import math
@@ -129,27 +134,41 @@ class TestColorGamutStudy(unittest.TestCase):
         def quantize(value: float) -> float:
             return round(value * 65536) / 65536
 
+        def quantized_point(lightness: float, a: float, b: float) -> Xyz:
+            point = _xyz_from_oklab((lightness, a, b))
+            return (quantize(point[0]), quantize(point[1]), quantize(point[2]))
+
+        def attainable_quantized(lightness: float) -> float:
+            if is_feasible(self.inverse, quantized_point(lightness, 0.0, 0.0)):
+                return quantize(lightness)
+            low, high = 0.0, lightness
+            for _ in range(30):
+                middle = quantize((low + high) / 2.0)
+                if is_feasible(self.inverse, quantized_point(middle, 0.0, 0.0)):
+                    low = middle
+                else:
+                    high = middle
+            return low
+
         worst = 0.0
         for target, reference in self.cases:
             polar = _oklch_from_xyz(target)
-            lightness = quantize(attainable_lightness(self.inverse, polar.lightness))
+            lightness = attainable_quantized(polar.lightness)
             hue = math.radians(polar.hue_degrees)
             cosine, sine = quantize(math.cos(hue)), quantize(math.sin(hue))
             low, high = 0.0, quantize(polar.chroma)
             for _ in range(8):
                 chroma = quantize((low + high) / 2.0)
-                trial = _xyz_from_oklab(
-                    (lightness, quantize(chroma * cosine), quantize(chroma * sine))
+                trial = quantized_point(
+                    lightness, quantize(chroma * cosine), quantize(chroma * sine)
                 )
-                trial = (quantize(trial[0]), quantize(trial[1]), quantize(trial[2]))
                 if is_feasible(self.inverse, trial):
                     low = chroma
                 else:
                     high = chroma
-            mapped = _xyz_from_oklab(
-                (lightness, quantize(low * cosine), quantize(low * sine))
+            mapped = quantized_point(
+                lightness, quantize(low * cosine), quantize(low * sine)
             )
-            mapped = (quantize(mapped[0]), quantize(mapped[1]), quantize(mapped[2]))
             self.assertTrue(is_feasible(self.inverse, mapped))
             worst = max(
                 worst,
@@ -157,7 +176,11 @@ class TestColorGamutStudy(unittest.TestCase):
                     xyz_to_lab(mapped, D65_WHITE), xyz_to_lab(reference, D65_WHITE)
                 ),
             )
-        self.assertLess(worst, 0.5)
+        # Pin the documented result, not merely the A1 budget. Asserting only
+        # `< 0.5` would accept a threefold degradation from 0.152 without
+        # noticing, which is the regression this test exists to catch.
+        S16_16_BASELINE = 0.152
+        self.assertLess(worst, S16_16_BASELINE * 1.05)
 
     def test_over_bright_targets_are_mapped_into_the_hull(
         self: "TestColorGamutStudy",

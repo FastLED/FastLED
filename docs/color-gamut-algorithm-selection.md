@@ -98,23 +98,35 @@ and A1 cannot be met by clamping.
 ## Precision: s16.16 is enough, and it is already there
 
 The selected algorithm still has to survive the working domain's arithmetic.
-Every intermediate -- the clamped lightness, the hue sine and cosine, the
-chroma bisection bounds, and the XYZ result of each trial -- was quantized to
-a fixed fraction and the mapping re-scored:
+Every intermediate quantized to a fixed fraction -- including the branch
+decisions inside the lightness search, not merely its result -- and the
+mapping re-scored:
 
 | fraction bits | worst ΔE2000 | mean ΔE2000 | infeasible results |
 | --- | --- | --- | --- |
 | 8 | 4.861 | 0.804 | 0 |
-| 10 | 3.795 | 0.487 | 1 |
+| 10 | 1.467 | 0.368 | 0 |
 | 12 | 1.504 | 0.262 | 0 |
 | 14 | 0.420 | 0.100 | 0 |
 | **16** | **0.152** | **0.052** | 0 |
 
 At 16 fractional bits the fixed-point mapping is indistinguishable from the
 float64 one -- both score 0.152 -- so quantization contributes nothing
-measurable on top of the eight-halving truncation. 14 bits passes with almost
-no margin, and at 10 bits precision loss pushes one result outside the hull
-entirely, which is the failure that matters more than the ΔE.
+measurable on top of the eight-halving truncation. 14 bits passes with little
+margin, which is worth knowing: the choice is comfortable *at* 16 and
+marginal one step below.
+
+The 10-bit row scores better than the 12-bit one. That is not an error and
+not a reason to prefer it: at coarse quantization the rounding happens to
+land bisection endpoints favourably on this corpus, and nothing about that
+generalises.
+
+Quantizing the lightness search matters. An earlier version of this table
+rounded only the *result* of that search while its 30 internal comparisons
+ran in float64, and reported 3.795 with one infeasible result at 10 bits.
+Neither survives quantizing the branch decisions themselves. The 12-, 14- and
+16-bit rows were unaffected, but a measurement that quantizes only the
+boundaries of a stage is not measuring that stage.
 
 s16.16 is what P6's stages already use, so the mapper needs no wider
 intermediate than the pipeline carries anyway.
