@@ -109,14 +109,36 @@ def main() -> int:
     try:
         with RpcBench(args.port) as bench:
             schema = bench.call_flat("rpc.discover", args=[])
-            methods = schema.get("schema", []) if isinstance(schema, dict) else []
+            # `call_flat` collapses a timeout or transport error to None, so a
+            # failed discover is not evidence about the firmware. Reporting it
+            # as a missing method sends the reader hunting for a build-config
+            # problem that does not exist.
+            if not isinstance(schema, dict):
+                print(
+                    "FAIL — rpc.discover did not return a schema object "
+                    f"(got {type(schema).__name__}); cannot tell whether "
+                    "rpSpiLoopback is present. This is a host/transport "
+                    "failure, not a firmware gap."
+                )
+                return 1
+            methods = schema.get("schema", [])
             method_names = {
                 entry[0]
                 for entry in methods
                 if isinstance(entry, list) and entry and isinstance(entry[0], str)
             }
+            if not method_names:
+                print(
+                    "FAIL — rpc.discover returned a schema with no parseable "
+                    f"method names (keys: {sorted(schema)}); the response shape "
+                    "may have changed."
+                )
+                return 1
             if "rpSpiLoopback" not in method_names:
-                print("FAIL — deployed firmware schema does not contain rpSpiLoopback")
+                print(
+                    "FAIL — deployed firmware schema does not contain "
+                    f"rpSpiLoopback ({len(method_names)} methods discovered)"
+                )
                 return 1
             passed = all(
                 run_case(bench, args.spi_index, mosi_pin, miso_pin, sck_pin, clock_hz)
