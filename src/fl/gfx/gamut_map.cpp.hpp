@@ -106,7 +106,7 @@ struct RgbwFeasible {
 
     bool operator()(const i32 (&xyz)[3]) const FL_NO_EXCEPT {
         i32 drives[4];
-        return allocateWhitePreferredQ16(allocation, xyz, drives);
+        return allocateEmitterDrivesQ16(allocation, xyz, drives);
     }
 };
 
@@ -227,11 +227,12 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
 
 bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
                           const i32 (&white_xyz)[3],
+                          WhiteAllocationPolicy policy,
                           GamutMapRgbwQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
-    if (!buildWhiteAllocationQ16(profile, white_xyz, &out->allocation)) {
+    if (!buildWhiteAllocationQ16(profile, white_xyz, policy, &out->allocation)) {
         return false;
     }
 
@@ -299,7 +300,7 @@ bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
                 scaleGamutQ16(kGamutD65Q16[2], trial_scale),
             };
             i32 trial_drives[4];
-            if (allocateWhitePreferredQ16(out->allocation, trial, trial_drives)) {
+            if (allocateEmitterDrivesQ16(out->allocation, trial, trial_drives)) {
                 low = middle;
             } else {
                 high = middle;
@@ -322,7 +323,7 @@ bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
 
 void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
                            i32 (&drives)[4]) FL_NO_EXCEPT {
-    if (allocateWhitePreferredQ16(map.allocation, xyz, drives)) {
+    if (allocateEmitterDrivesQ16(map.allocation, xyz, drives)) {
         // Already inside the device's hull -- which, with a white emitter,
         // is a good deal larger than the RGB one.
         return;
@@ -342,7 +343,7 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
         largestFeasibleChroma(lab, lightness, RgbwFeasible{map.allocation});
     i32 mapped_xyz[3];
     chromaCandidateXyz(lab, lightness, factor, mapped_xyz);
-    if (allocateWhitePreferredQ16(map.allocation, mapped_xyz, drives)) {
+    if (allocateEmitterDrivesQ16(map.allocation, mapped_xyz, drives)) {
         return;
     }
     // The accepted candidate can fall a few ULP outside on the final
@@ -351,7 +352,7 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
     const i32 neutral_lab[3] = {lightness, 0, 0};
     i32 neutral_xyz[3];
     oklabToXyzQ16(neutral_lab, neutral_xyz);
-    if (!allocateWhitePreferredQ16(map.allocation, neutral_xyz, drives)) {
+    if (!allocateEmitterDrivesQ16(map.allocation, neutral_xyz, drives)) {
         drives[0] = 0;
         drives[1] = 0;
         drives[2] = 0;

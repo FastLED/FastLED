@@ -35,6 +35,28 @@
 
 namespace fl {
 
+/// Which end of the feasible white interval to take (C3).
+///
+/// The interval exists because the preimage is not unique: any white level
+/// inside it reproduces the target exactly, with the RGB drives making up
+/// the difference. Picking an end is a policy, not a calculation, which is
+/// why it is per profile rather than per pixel.
+enum class WhiteAllocationPolicy {
+    /// As much white as the target allows. C3's default -- the white emitter
+    /// is usually the efficient one and the better colour renderer.
+    WhitePreferred,
+
+    /// As little as the target allows, which for most targets is none. The
+    /// per-profile override C3 asks for: a device whose white emitter
+    /// renders worse than its primaries, or whose primaries are wanted for
+    /// saturation, takes this end instead.
+    ///
+    /// Not the same as ignoring the white emitter. Where RGB alone cannot
+    /// reach the target, this returns the *smallest* white level that makes
+    /// it reachable rather than failing.
+    RgbPreferred,
+};
+
 /// Everything the per-pixel allocation needs, derived once when a profile
 /// binds.
 struct WhiteAllocationQ16 {
@@ -46,6 +68,9 @@ struct WhiteAllocationQ16 {
     /// Precomputing this is what leaves the per-pixel path with a single
     /// matrix multiply. It does not depend on the pixel.
     i32 per_white[3];
+
+    /// Which end of the interval this profile takes.
+    WhiteAllocationPolicy policy;
 };
 
 /// Derive the allocation for a three-primary profile plus one white emitter.
@@ -57,10 +82,12 @@ struct WhiteAllocationQ16 {
 /// emitter the RGB primaries cannot express at all.
 bool buildWhiteAllocationQ16(const EmitterProfile& profile,
                              const i32 (&white_xyz)[3],
+                             WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT;
 
-/// One pixel: XYZ in s16.16 to four drives, white as large as the target
-/// allows. Order is red, green, blue, white.
+/// One pixel: XYZ in s16.16 to four drives, in the order red, green, blue,
+/// white, at whichever end of the feasible interval the profile's policy
+/// names.
 ///
 /// False when no white level keeps the RGB drives in range, which means the
 /// target is outside the device hull -- the gamut mapper's job, not this
@@ -73,8 +100,8 @@ bool buildWhiteAllocationQ16(const EmitterProfile& profile,
 /// level, at the price of i64 multiplies that are not obviously cheaper on
 /// an 8-bit target. Nobody has measured which wins, so the straightforward
 /// version is what ships.
-bool allocateWhitePreferredQ16(const WhiteAllocationQ16& allocation,
-                               const i32 (&xyz)[3],
-                               i32 (&drives)[4]) FL_NO_EXCEPT;
+bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
+                              const i32 (&xyz)[3],
+                              i32 (&drives)[4]) FL_NO_EXCEPT;
 
 }  // namespace fl

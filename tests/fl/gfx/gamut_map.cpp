@@ -586,7 +586,8 @@ FL_TEST_CASE("RGBW mapper leaves alone what the RGB hull wrongly rejects") {
     };
 
     GamutMapRgbwQ16 rgbw;
-    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
     GamutMapQ16 rgb_only;
     FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &rgb_only));
 
@@ -611,7 +612,7 @@ FL_TEST_CASE("RGBW mapper leaves alone what the RGB hull wrongly rejects") {
         i32 drives[4];
         mapAndAllocateRgbwQ16(rgbw, xyz, drives);
         i32 direct[4];
-        FL_REQUIRE(allocateWhitePreferredQ16(rgbw.allocation, xyz, direct));
+        FL_REQUIRE(allocateEmitterDrivesQ16(rgbw.allocation, xyz, direct));
         for (int i = 0; i < 4; ++i) {
             FL_CHECK_EQ(drives[i], direct[i]);
             FL_CHECK_GE(drives[i], 0);
@@ -627,7 +628,8 @@ FL_TEST_CASE("RGBW lightness bound is the brighter one the white emitter buys") 
     // at the three-emitter value would leave the mapper dimming RGBW
     // neutrals for no reason.
     GamutMapRgbwQ16 rgbw;
-    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
     GamutMapQ16 rgb_only;
     FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &rgb_only));
 
@@ -647,14 +649,14 @@ FL_TEST_CASE("RGBW lightness bound is the brighter one the white emitter buys") 
 
     // And that neutral must actually be reachable, while 5% brighter is not.
     i32 drives[4];
-    FL_CHECK(allocateWhitePreferredQ16(rgbw.allocation, expected_neutral, drives));
+    FL_CHECK(allocateEmitterDrivesQ16(rgbw.allocation, expected_neutral, drives));
     const i32 too_bright[3] = {
         static_cast<i32>(expected_neutral[0] * 1.05f),
         static_cast<i32>(expected_neutral[1] * 1.05f),
         static_cast<i32>(expected_neutral[2] * 1.05f),
     };
     FL_CHECK_FALSE(
-        allocateWhitePreferredQ16(rgbw.allocation, too_bright, drives));
+        allocateEmitterDrivesQ16(rgbw.allocation, too_bright, drives));
 }
 
 FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
@@ -672,7 +674,8 @@ FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
     const i32 skewed_white[3] = {q16(1.8955f), q16(1.0f), q16(0.74847f)};
 
     GamutMapRgbwQ16 rgbw;
-    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), skewed_white, &rgbw));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), skewed_white,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
 
     // Pin the premise: this fixture really is the awkward shape, so the test
     // cannot go quiet if the emitter columns or the solve move.
@@ -687,7 +690,7 @@ FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
         oklabToXyzQ16(lab, brightest);
     }
     i32 drives[4];
-    FL_CHECK(allocateWhitePreferredQ16(rgbw.allocation, brightest, drives));
+    FL_CHECK(allocateEmitterDrivesQ16(rgbw.allocation, brightest, drives));
 
     // And the mapper must not collapse a real colour to black through it.
     i32 xyz[3];
@@ -701,9 +704,57 @@ FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
     }
 }
 
+FL_TEST_CASE("RGBW mapper honours the allocation policy") {
+    // Nothing else here exercises RgbPreferred through the mapper, so a
+    // regression that dropped `policy` on the floor in buildGamutMapRgbwQ16
+    // -- leaving every device white-preferred -- would pass the whole file.
+    GamutMapRgbwQ16 white_first;
+    GamutMapRgbwQ16 rgb_first;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::WhitePreferred,
+                                    &white_first));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::RgbPreferred,
+                                    &rgb_first));
+
+    // The policy must reach the stored allocation.
+    FL_CHECK(white_first.allocation.policy ==
+             WhiteAllocationPolicy::WhitePreferred);
+    FL_CHECK(rgb_first.allocation.policy == WhiteAllocationPolicy::RgbPreferred);
+
+    // It changes the drives, never which targets are reachable, so the
+    // lightness bound has to come out the same either way.
+    FL_CHECK_EQ(white_first.max_neutral_lightness,
+                rgb_first.max_neutral_lightness);
+
+    int differed = 0;
+    for (int step = 1; step <= 10; ++step) {
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, static_cast<float>(step) / 10.0f, xyz);
+
+        i32 with_white[4];
+        i32 with_rgb[4];
+        mapAndAllocateRgbwQ16(white_first, xyz, with_white);
+        mapAndAllocateRgbwQ16(rgb_first, xyz, with_rgb);
+
+        FL_CHECK_LE(with_rgb[3], with_white[3]);
+        if (with_rgb[3] < with_white[3]) {
+            ++differed;
+        }
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_GE(with_rgb[i], 0);
+            FL_CHECK_LE(with_rgb[i], kFullDrive);
+        }
+    }
+    // Guard against the two never diverging, which would make the checks
+    // above pass whatever the mapper did with the policy.
+    FL_CHECK_GT(differed, 5);
+}
+
 FL_TEST_CASE("RGBW mapper always returns drives inside [0, 1]") {
     GamutMapRgbwQ16 rgbw;
-    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65, &rgbw));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
 
     int exercised = 0;
     for (int hue = 0; hue < 36; ++hue) {
@@ -717,7 +768,7 @@ FL_TEST_CASE("RGBW mapper always returns drives inside [0, 1]") {
             i32 xyz[3];
             xyzAt(x, y, luminance, xyz);
             i32 probe[4];
-            if (allocateWhitePreferredQ16(rgbw.allocation, xyz, probe)) {
+            if (allocateEmitterDrivesQ16(rgbw.allocation, xyz, probe)) {
                 continue;  // nothing for the mapper to do
             }
             ++exercised;
