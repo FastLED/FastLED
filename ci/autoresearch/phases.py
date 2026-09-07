@@ -573,6 +573,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     rp_uart_index=args.rp_uart_index,
                 )
             )
+        if args.bitbang:
+            # Portable GPIO fallback. Name matches
+            # BitBangChannelDriver::getName(), which the firmware resolves
+            # against the manager's registered drivers at runtime.
+            drivers.append("BIT_BANG")
         if args.lcd:
             drivers.append("LCD_CLOCKLESS")
         if args.lcd_spi:
