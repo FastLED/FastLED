@@ -20,6 +20,7 @@
 #include "fl/gfx/gradient.cpp.hpp"
 #include "fl/gfx/hsv16.cpp.hpp"
 #include "fl/gfx/leds.cpp.hpp"
+#include "fl/gfx/oklab_q16.cpp.hpp"
 #include "fl/gfx/raster_sparse.cpp.hpp"
 #include "fl/gfx/rectangular_draw_buffer.cpp.hpp"
 #include "fl/gfx/rgbw.cpp.hpp"
