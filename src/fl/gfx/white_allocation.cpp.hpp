@@ -17,33 +17,40 @@ constexpr i32 kWhiteFullDrive = 65536;
 /// a quarter of one code at 8-bit output.
 constexpr i32 kWhiteSlack = 64;
 
-/// `(numerator << 16) / denominator`, in s16.16, with `denominator` non-zero.
+/// `(numerator << 16) / denominator` as s16.16, kept in i64.
 ///
 /// Named for this file because .cpp.hpp files share a translation unit under
 /// the unity build, so an anonymous namespace does not isolate it.
 ///
 /// The shift happens in i64: a numerator near i32's range shifted left by 16
-/// needs 47 bits.
+/// needs 47 bits. The result stays there too, and is deliberately not
+/// clamped.
 ///
-/// The quotient is clamped before narrowing, and that is not theoretical. A
-/// dim white emitter gives a small `per_white` slope -- at a slope of one
-/// raw unit and a full-scale numerator the quotient is 2^32, past i32, where
-/// narrowing is implementation-defined and could turn a valid upper bound
-/// into zero and suppress the white entirely.
+/// An earlier revision clamped it to full drive and argued the clamp was
+/// decision-preserving -- a bound outside +/-1.0 either does not bind or
+/// means infeasible, so the min and max that follow reach the same verdict
+/// either way. The argument does not hold: it turns a lower bound of
+/// "w >= 6.64", which no drive can satisfy, into "w >= 1.0", which an upper
+/// bound of exactly 1.0 then meets, so the interval collapses to a single
+/// point instead of being empty.
 ///
-/// Clamping at full drive is decision-preserving rather than a fudge: the
-/// caller only ever takes `min` against full drive and `max` against zero,
-/// so a bound outside +/-1.0 already says "this constraint does not bind"
-/// or "infeasible", and it still says that after the clamp.
-i32 divideWhiteQ16(i32 numerator, i32 denominator) FL_NO_EXCEPT {
+/// That is latent here rather than a live bug, and it is worth being precise
+/// about why. The drives are `at_zero - level * per_white`, which reproduce
+/// the target for *any* level -- that is an identity, not a property of the
+/// level -- so the real feasibility test is the range check on the drives at
+/// the end, and it rejects these targets whether or not the bound was
+/// clamped. A sweep of 300 000 random targets finds no difference in what
+/// this function returns.
+///
+/// It is still wrong to leave. The bound is consumed as an interval, and any
+/// caller that uses the interval for something other than picking one of its
+/// two ends inherits the collapse -- which is exactly how it was found, by
+/// work on a two-white allocation that bisects over totals. i64 costs
+/// nothing: the comparisons that follow are between values the caller
+/// already holds, and the chosen level is inside [0, full] before narrowing.
+i64 divideWhiteQ16(i32 numerator, i32 denominator) FL_NO_EXCEPT {
     const i64 scaled = static_cast<i64>(numerator) << 16;
-    i64 quotient = scaled / static_cast<i64>(denominator);
-    if (quotient > kWhiteFullDrive) {
-        quotient = kWhiteFullDrive;
-    } else if (quotient < -static_cast<i64>(kWhiteFullDrive)) {
-        quotient = -kWhiteFullDrive;
-    }
-    return static_cast<i32>(quotient);
+    return scaled / static_cast<i64>(denominator);
 }
 
 /// Scale an s16.16 value by an s16.16 factor, rounding to nearest.
@@ -96,16 +103,16 @@ bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
     // shift -- measured at white = 886 where the reference says 0. The
     // slack lives on the drive check below, which is what actually decides
     // feasibility.
-    i32 low = 0;
-    i32 high = kWhiteFullDrive;
+    i64 low = 0;
+    i64 high = kWhiteFullDrive;
     for (int i = 0; i < 3; ++i) {
         const i32 slope = allocation.per_white[i];
         if (slope != 0) {
             // Dividing by a negative slope swaps which bound is which.
-            const i32 first = divideWhiteQ16(at_zero[i], slope);
-            const i32 second = divideWhiteQ16(at_zero[i] - kWhiteFullDrive, slope);
-            const i32 upper = slope > 0 ? first : second;
-            const i32 lower = slope > 0 ? second : first;
+            const i64 first = divideWhiteQ16(at_zero[i], slope);
+            const i64 second = divideWhiteQ16(at_zero[i] - kWhiteFullDrive, slope);
+            const i64 upper = slope > 0 ? first : second;
+            const i64 lower = slope > 0 ? second : first;
             if (upper < high) {
                 high = upper;
             }
@@ -129,9 +136,10 @@ bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
         return false;
     }
 
-    // Either end reproduces the target exactly; which one is policy.
-    const i32 level =
-        allocation.policy == WhiteAllocationPolicy::RgbPreferred ? low : high;
+    // Either end reproduces the target exactly; which one is policy. Both
+    // ends are inside [0, full] by construction, so the narrowing is safe.
+    const i32 level = static_cast<i32>(
+        allocation.policy == WhiteAllocationPolicy::RgbPreferred ? low : high);
     i32 rgb[3];
     for (int i = 0; i < 3; ++i) {
         const i32 drive = at_zero[i] - scaleWhiteQ16(allocation.per_white[i], level);
