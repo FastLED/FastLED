@@ -11,6 +11,7 @@
 #include "fl/gfx/corkscrew.cpp.hpp"
 #include "fl/gfx/crgb_extra.cpp.hpp"
 #include "fl/gfx/crgb_json.cpp.hpp"
+#include "fl/gfx/device_solve.cpp.hpp"
 #include "fl/gfx/downscale.cpp.hpp"
 #include "fl/gfx/fill.cpp.hpp"
 #include "fl/gfx/five_bit_hd_gamma.cpp.hpp"
