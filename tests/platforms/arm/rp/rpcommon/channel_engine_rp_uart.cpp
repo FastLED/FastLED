@@ -28,6 +28,7 @@ class RpUartPeripheralMock final : public IRpUartPeripheral {
         return configureOk;
     }
     u32 actualBaudRate() const FL_NO_EXCEPT override { return achievedBaud; }
+    u32 maxBaudRate() const FL_NO_EXCEPT override { return maxBaud; }
     bool startTxDma(const u8* data, size_t size) FL_NO_EXCEPT override {
         ++startCalls;
         bytes = size;
@@ -56,6 +57,9 @@ class RpUartPeripheralMock final : public IRpUartPeripheral {
     u8 firstByte = 0;
     u32 timeUs = 0;
     u32 achievedBaud = 0;
+    // Default to the generic ceiling so existing cases keep their
+    // previous behavior; zero-clock cases set this to 0 explicitly.
+    u32 maxBaud = kRpUartBaudCeiling;
     i32 baudOffset = 0;
 };
 
@@ -77,6 +81,41 @@ FL_TEST_CASE("RP UART accepts only hardware-UART TX pins") {
     FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(8, 0)));
     FL_CHECK(uart1.canHandle(makeWs2812Channel(8, 0)));
     FL_CHECK_FALSE(uart1.canHandle(makeWs2812Channel(0, 0)));
+}
+
+FL_TEST_CASE("RP UART declines when the backend reports no usable UART clock") {
+    // The SDK's uart_init() returns 0 when the UART clock is not running, so a
+    // backend reporting maxBaudRate()==0 must be refused up front rather than
+    // accepted and failed later in configure(). See FastLED#3899.
+    auto peripheral = fl::make_shared<RpUartPeripheralMock>();
+    peripheral->maxBaud = 0;
+    ChannelEngineRpUart uart0(peripheral, 0);
+
+    FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(0, 0)));
+    FL_CHECK_FALSE(uart0.lastError().empty());
+}
+
+FL_TEST_CASE("RP UART declines when the timing needs more baud than the backend has") {
+    // A ceiling below what the chipset timing needs must be refused, and must
+    // say so: a bare false left the diagnostic empty, which made an
+    // unreachable-baud board look identical to a wiring fault.
+    auto peripheral = fl::make_shared<RpUartPeripheralMock>();
+    peripheral->maxBaud = 100000;   // far below any WS2812 wave10 requirement
+    ChannelEngineRpUart uart0(peripheral, 0);
+
+    FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(0, 0)));
+    FL_CHECK_FALSE(uart0.lastError().empty());
+}
+
+FL_TEST_CASE("RP UART accepts a pin it would otherwise take once the ceiling is adequate") {
+    // Guards the two cases above against trivially passing: same pin, same
+    // channel, only the reported ceiling differs.
+    auto peripheral = fl::make_shared<RpUartPeripheralMock>();
+    ChannelEngineRpUart uart0(peripheral, 0);
+    FL_CHECK(uart0.canHandle(makeWs2812Channel(0, 0)));
+
+    peripheral->maxBaud = 0;
+    FL_CHECK_FALSE(uart0.canHandle(makeWs2812Channel(0, 0)));
 }
 
 FL_TEST_CASE("RP UART encoder represents every byte and preserves DMA versus wire drain") {

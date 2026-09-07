@@ -44,11 +44,21 @@ bool ChannelEngineRpUart::canHandle(const ChannelDataPtr& data) const FL_NO_EXCE
     // the required baud out of range entirely. Record why we declined --
     // returning a bare false here left the diagnostic empty and made an
     // unreachable-baud board look identical to a wiring fault. See #3899.
-    const u32 max_baud = mPeripheral ? mPeripheral->maxBaudRate()
-                                     : kRpUartBaudCeiling;
+    if (!mPeripheral) {
+        mLastError = "RP UART: no peripheral backend";
+        return false;
+    }
+    const u32 max_baud = mPeripheral->maxBaudRate();
+    if (max_baud == 0) {
+        mLastError = "RP UART: UART clock unavailable";
+        return false;
+    }
     if (!canRepresentTimingForMaxBaud(data->getTiming(), max_baud)) {
-        mLastError = "RP UART: chipset timing needs a baud above this board's "
-                     "clk_peri/16 ceiling";
+        // Deliberately does not name clk_peri: the ceiling is whatever the
+        // backend reports, and only the RP hardware backend derives it from
+        // clk_peri/16.
+        mLastError = "RP UART: chipset timing needs a baud above the UART "
+                     "backend maximum";
         return false;
     }
     return true;
@@ -165,9 +175,8 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
         mLastError = mError;
         return false;
     }
-    const Wave10Lut lut = buildWave10LutForMaxBaud(
-        channel->getTiming(),
-        mPeripheral ? mPeripheral->maxBaudRate() : kRpUartBaudCeiling);
+    const Wave10Lut lut =
+        buildWave10LutForMaxBaud(channel->getTiming(), mPeripheral->maxBaudRate());
     if (lut.pulses_per_bit == 0) {
         mError = "RP UART: timing is not representable";
         mLastError = mError;

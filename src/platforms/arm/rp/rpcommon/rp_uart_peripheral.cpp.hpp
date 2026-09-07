@@ -103,7 +103,10 @@ u32 RpUartPeripheral::maxBaudRate() const FL_NO_EXCEPT {
     // RP2350 hardware as achieved 3000000 with start refused. See #3899.
     const u32 peri_hz = static_cast<u32>(clock_get_hz(clk_peri));
     if (peri_hz == 0) {
-        return kRpUartBaudCeiling;
+        // The SDK's uart_init() returns 0 when the UART clock is not running,
+        // so configure() would fail anyway. Reporting the generic ceiling here
+        // would let canHandle() accept a channel that can never be sent.
+        return 0;
     }
     const u32 hw_max = peri_hz / 16u;
     return hw_max < kRpUartBaudCeiling ? hw_max : kRpUartBaudCeiling;
