@@ -233,6 +233,31 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         }
         const fl::u32 delay_hz_us = fl::micros() - delay_hz_t0;
 
+        // Compile-time NS: cycles_from_ns_*() folds to a constant, so the
+        // runtime u64 divide disappears while the platform busy-wait still
+        // runs. If this is fast, the divide carried the cost; if it is still
+        // slow, the cost is inside the busy-wait. Fixed at 400ns (WS2812 T0H)
+        // because a template argument cannot come from the RPC payload -- the
+        // `ns` parameter only steers the runtime variants above.
+        const fl::u32 delay_ct_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            fl::delayNanoseconds<400>();
+        }
+        const fl::u32 delay_ct_us = fl::micros() - delay_ct_t0;
+
+        // Pure cycle-counted loop: no ns->cycles conversion and no platform
+        // busy-wait wrapper. This is the floor a hand-rolled bit loop could
+        // reach. 60 cycles ~= 400ns at 150MHz. delaycycles<> is specialized
+        // only up to 50 with no generic fallback, so 60 is composed from two
+        // specializations rather than written as delaycycles<60>(), which is
+        // an undefined reference at link time.
+        const fl::u32 delay_cyc_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            fl::delaycycles<50>();
+            fl::delaycycles<10>();
+        }
+        const fl::u32 delay_cyc_us = fl::micros() - delay_cyc_t0;
+
         // pin < 0 leaves every slot inactive, so applyNibble performs no GPIO
         // write at all — that isolates the LUT and call overhead from the
         // cost of the pin write itself.
@@ -272,6 +297,15 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("delay_overhead_us", delay_per - nop_per);
         response.set("delay_hz_overhead_us", delay_hz_per - nop_per);
         response.set("write_byte_overhead_us", wb_per - nop_per);
+        const double delay_ct_per = static_cast<double>(delay_ct_us) / denom;
+        const double delay_cyc_per = static_cast<double>(delay_cyc_us) / denom;
+        response.set("delay_ct_us_per_iter", delay_ct_per);
+        response.set("delay_cycles_us_per_iter", delay_cyc_per);
+        response.set("delay_ct_overhead_us", delay_ct_per - nop_per);
+        response.set("delay_cycles_overhead_us", delay_cyc_per - nop_per);
+        // Cost attributable to the runtime ns->cycles conversion: the gap
+        // between the runtime and compile-time forms at the same 400ns.
+        response.set("ns_conversion_us", delay_hz_per - delay_ct_per);
         response.set("clock_query_us", delay_per - delay_hz_per);
         // One clockless bit issues three delays and three writeByte calls.
         response.set("predicted_bit_overhead_us",
