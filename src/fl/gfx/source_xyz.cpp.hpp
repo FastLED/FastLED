@@ -17,7 +17,7 @@ i32 quantizeQ16(float v) FL_NO_EXCEPT {
 /// One matrix row against the pixel. The accumulator is i64 because the
 /// three Q16xQ16 products are Q32: at full scale each term is ~4.3e9, which
 /// overflows i32 on its own.
-i32 dotRowQ16(const i32 row[3], u16 r, u16 g, u16 b) FL_NO_EXCEPT {
+i32 dotRowQ16(const i32 (&row)[3], u16 r, u16 g, u16 b) FL_NO_EXCEPT {
     const i64 acc = static_cast<i64>(row[0]) * static_cast<i64>(r)
                   + static_cast<i64>(row[1]) * static_cast<i64>(g)
                   + static_cast<i64>(row[2]) * static_cast<i64>(b);
@@ -51,7 +51,7 @@ bool buildSourceMatrixQ16(const RgbPrimaries& primaries,
 }
 
 void linearRgbToXyzQ16(const SourceMatrixQ16& matrix, u16 r, u16 g, u16 b,
-                       i32 out_xyz[3]) FL_NO_EXCEPT {
+                       i32 (&out_xyz)[3]) FL_NO_EXCEPT {
     out_xyz[0] = dotRowQ16(matrix.m[0], r, g, b);
     out_xyz[1] = dotRowQ16(matrix.m[1], r, g, b);
     out_xyz[2] = dotRowQ16(matrix.m[2], r, g, b);

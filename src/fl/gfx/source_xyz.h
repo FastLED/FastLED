@@ -35,6 +35,6 @@ bool buildSourceMatrixQ16(const RgbPrimaries& primaries,
 /// 0.0015%, against a 0.5% budget -- and it buys an exact shift in place of a
 /// division by 65535 in the per-pixel path.
 void linearRgbToXyzQ16(const SourceMatrixQ16& matrix, u16 r, u16 g, u16 b,
-                       i32 out_xyz[3]) FL_NO_EXCEPT;
+                       i32 (&out_xyz)[3]) FL_NO_EXCEPT;
 
 }  // namespace fl

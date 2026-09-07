@@ -37,17 +37,23 @@ def reference_table(transfer: TransferFunction) -> list[int]:
 
 
 class TestTransferLutMatchesReference(unittest.TestCase):
-    def test_srgb_table_matches_reference(self) -> None:
+    def test_srgb_table_matches_reference(
+        self: "TestTransferLutMatchesReference",
+    ) -> None:
         self.assertEqual(
             parse_table("SRGB_DECODE_LUT"), reference_table(TransferFunction.SRGB)
         )
 
-    def test_bt709_table_matches_reference(self) -> None:
+    def test_bt709_table_matches_reference(
+        self: "TestTransferLutMatchesReference",
+    ) -> None:
         self.assertEqual(
             parse_table("BT709_DECODE_LUT"), reference_table(TransferFunction.BT709)
         )
 
-    def test_tables_are_full_length_and_hit_both_endpoints(self) -> None:
+    def test_tables_are_full_length_and_hit_both_endpoints(
+        self: "TestTransferLutMatchesReference",
+    ) -> None:
         for name in ("SRGB_DECODE_LUT", "BT709_DECODE_LUT"):
             table = parse_table(name)
             with self.subTest(table=name):
@@ -55,7 +61,9 @@ class TestTransferLutMatchesReference(unittest.TestCase):
                 self.assertEqual(table[0], 0)
                 self.assertEqual(table[255], 65535)
 
-    def test_srgb_and_bt709_are_not_the_same_table(self) -> None:
+    def test_srgb_and_bt709_are_not_the_same_table(
+        self: "TestTransferLutMatchesReference",
+    ) -> None:
         # A copy-paste of one table over the other would otherwise pass every
         # endpoint and monotonicity check in the C++ suite.
         self.assertNotEqual(
