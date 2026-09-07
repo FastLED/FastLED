@@ -159,11 +159,45 @@ def map_oklch_bisect(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
     return _xyz_from_oklab((polar.lightness, low * math.cos(hue), low * math.sin(hue)))
 
 
+def map_oklch_bounded(
+    forward: Matrix3, inverse: Matrix3, xyz: Xyz, iterations: int
+) -> Xyz:
+    """OKLCh chroma compression with a fixed iteration count.
+
+    The distinction from an iterative *solver* matters for A3/B11: this runs
+    a constant number of halvings and returns, rather than looping until a
+    convergence criterion is met. Its cost is known at compile time.
+    """
+
+    if is_feasible(inverse, xyz):
+        return xyz
+    polar = _oklch_from_xyz(xyz)
+    hue = math.radians(polar.hue_degrees)
+    low, high = 0.0, polar.chroma
+    for _ in range(iterations):
+        chroma = (low + high) / 2.0
+        candidate = _xyz_from_oklab(
+            (polar.lightness, chroma * math.cos(hue), chroma * math.sin(hue))
+        )
+        if is_feasible(inverse, candidate):
+            low = chroma
+        else:
+            high = chroma
+    return _xyz_from_oklab((polar.lightness, low * math.cos(hue), low * math.sin(hue)))
+
+
+def map_oklch_bisect_8(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
+    """The selected embedded algorithm: eight halvings, no table."""
+
+    return map_oklch_bounded(forward, inverse, xyz, 8)
+
+
 CANDIDATES = {
     "clip": map_clip,
     "max-normalize": map_max_normalize,
     "desaturate-to-neutral": map_desaturate_to_neutral,
     "oklch-bisect": map_oklch_bisect,
+    "oklch-bisect-8": map_oklch_bisect_8,
 }
 
 

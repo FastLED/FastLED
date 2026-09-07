@@ -87,6 +87,28 @@ class TestColorGamutStudy(unittest.TestCase):
                 with self.subTest(candidate=name, target=target):
                     self.assertTrue(is_feasible(self.inverse, mapped))
 
+    def test_the_selected_algorithm_meets_the_a1_budget(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # The report selects eight halvings. If this stops holding, the
+        # recorded selection is no longer supported by anything.
+        score = score_candidate(
+            "oklch-bisect-8", self.forward, self.inverse, self.cases
+        )
+        self.assertLess(score.worst_delta_e, 0.5)
+
+    def test_bounded_search_beats_a_large_lookup_table(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # The selection rests on this comparison: eight halvings need no
+        # storage and still beat a 16 KB table, because a grid cannot
+        # represent the gamut boundary's corners at the primaries.
+        LARGEST_LUT_WORST_DELTA_E = 2.434  # 64 x 128 conservative, 16 KB
+        eight = score_candidate(
+            "oklch-bisect-8", self.forward, self.inverse, self.cases
+        )
+        self.assertLess(eight.worst_delta_e, LARGEST_LUT_WORST_DELTA_E)
+
     def test_feasibility_checks_both_bounds(
         self: "TestColorGamutStudy",
     ) -> None:

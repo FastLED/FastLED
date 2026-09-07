@@ -30,7 +30,52 @@ relative colorimetry, profile white at full drive, dark surround.
 
 A1's budget is max ΔE2000 ≤ 0.5 at identity brightness.
 
+## Cost: how much search is actually needed
+
+The reference and the unbounded bisection both run to convergence, which no
+per-pixel path can afford. Two bounded options were measured over the same 20
+vectors.
+
+**Fixed iteration count**, no table:
+
+| halvings | worst ΔE2000 | mean ΔE2000 |
+| --- | --- | --- |
+| 2 | 10.149 | 3.166 |
+| 4 | 1.604 | 0.590 |
+| 6 | 0.623 | 0.214 |
+| **8** | **0.152** | **0.046** |
+| 10 | 0.030 | 0.010 |
+
+**LUT of maximum chroma over an (L, hue) grid**, two variants -- one
+interpolating and shrinking on infeasibility, one storing the per-cell
+minimum so a lookup never overshoots:
+
+| grid | table bytes (u16) | worst, shrink-on-miss | worst, conservative |
+| --- | --- | --- | --- |
+| 8 x 16 | 256 | 4.406 | 10.992 |
+| 16 x 32 | 1 024 | 4.373 | 7.631 |
+| 32 x 64 | 4 096 | 2.180 | 4.621 |
+| 64 x 128 | 16 384 | -- | 2.434 |
+
+## Selection: eight halvings, no table
+
+Eight halvings meet A1 with about a 3x margin and need **no table at all**.
+A 16 KB LUT scores 2.434, which is worse than *four* halvings -- so the
+"optionally LUT-backed" option in #4041 resolves to no for this budget.
+
+The reason is geometric: the OKLCh gamut boundary has sharp corners at the
+primaries, and a grid cannot represent a corner without enormous resolution.
+Refining along the ray costs nothing to store and lands on the corner
+directly.
+
+Eight halvings is also a *bounded* computation rather than an iterative
+solver in the A3/B11 sense. Its cost is fixed at compile time; it does not
+loop until a convergence criterion is met, which is the property that makes
+`nnls3` unacceptable per pixel.
+
 ## What this means
+
+
 
 **The objective is what matters; the search is not.** OKLCh chroma
 compression implemented as a plain 30-iteration bisection reproduces the
