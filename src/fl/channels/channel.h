@@ -18,6 +18,7 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/ichannel.h"
 #include "fl/channels/options.h"
+#include "fl/gfx/pipeline.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/weak_ptr.h"
@@ -314,6 +315,12 @@ private:
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     EOrder mRgbOrder;
+#if FL_COLOR_PROFILE_RUNTIME
+    /// The colour pipeline this channel's binding describes, or empty when
+    /// nothing is bound. Derived in `reconcileColorProfile`, since building
+    /// it inverts matrices and bisects a lightness bound -- not per frame.
+    fl::optional<StreamingPipelineQ16> mPipeline;
+#endif
     fl::weak_ptr<IChannelDriver> mDriver;  // Weak reference to driver (prevents dangling pointers)
     bool mDriverPreBound = false;    // True if setDriver() was called (legacy addLeds<> path).
                                      // When true, showPixels() uses mDriver directly and skips
