@@ -3,6 +3,7 @@
 #include "fl/gfx/source_xyz.h"
 #include "fl/gfx/color_profile.h"
 #include "fl/stl/int.h"
+#include "fl/stl/limits.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -65,6 +66,27 @@ FL_TEST_CASE("Collinear primaries are rejected rather than producing garbage") {
                                   Chromaticity(0.3f, 0.3f), Chromaticity(0.3127f, 0.3290f));
     FL_CHECK_FALSE(buildSourceMatrixQ16(degenerate, &matrix));
     FL_CHECK_FALSE(buildSourceMatrixQ16(SourceProfile::srgbBt709().primaries, nullptr));
+}
+
+FL_TEST_CASE("Non-finite primaries are rejected, not converted") {
+    // Neither xyY_to_XYZ's `y < 1e-12f` guard nor invert3x3's determinant
+    // guard stops a NaN, since comparisons against NaN are all false. It
+    // would reach the float-to-i32 cast, which is undefined behaviour.
+    const float nan_value = numeric_limits<float>::quiet_NaN();
+    SourceMatrixQ16 matrix;
+    RgbPrimaries bad = SourceProfile::srgbBt709().primaries;
+    bad.red = Chromaticity(nan_value, 0.330f);
+    FL_CHECK_FALSE(buildSourceMatrixQ16(bad, &matrix));
+
+    bad = SourceProfile::srgbBt709().primaries;
+    bad.white = Chromaticity(0.3127f, nan_value);
+    FL_CHECK_FALSE(buildSourceMatrixQ16(bad, &matrix));
+
+    bad = SourceProfile::srgbBt709().primaries;
+    bad.green = Chromaticity(0.300f, 0.0f);
+    FL_CHECK_FALSE(buildSourceMatrixQ16(bad, &matrix));
+
+    FL_CHECK(buildSourceMatrixQ16(SourceProfile::srgbBt709().primaries, &matrix));
 }
 
 FL_TEST_CASE("Fixed-point XYZ tracks the P5 float64 reference") {
