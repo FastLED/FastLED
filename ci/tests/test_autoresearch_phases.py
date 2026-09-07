@@ -20,6 +20,7 @@ from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import BuildDriver, DeployResult
 from ci.autoresearch.context import QuietContext, RunContext
 from ci.autoresearch.phases import (
+    RP2XXX_ENVIRONMENTS,
     _build_environment_for_mode,
     _is_valid_rp_concurrency_result,
     _parse_args_and_build_commands,
@@ -1592,6 +1593,44 @@ class TestResolvePortAndEnvironment:
             final_environment=environment,
             upload_port=None,
             rpc_smoke_mode=True,
+        )
+
+        with (
+            patch(f"{_PATCH_MOD}.auto_detect_upload_port") as auto_detect,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver",
+                return_value=_make_mock_driver(),
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+
+        assert rc is None
+        assert ctx.upload_port is None
+        auto_detect.assert_not_called()
+
+    @pytest.mark.parametrize("environment", sorted(RP2XXX_ENVIRONMENTS))
+    def test_rp2xxx_driver_mode_delegates_port_selection_to_fbuild(
+        self, environment: str
+    ) -> None:
+        """Driver runs defer RP port selection to fbuild too (#3836).
+
+        RP USB identities are published by FastLED/boards and reach us
+        through fbuild, so a local ``auto_detect_upload_port`` scan would be
+        re-deriving data we already have. Deferral was once granted only to
+        ``--rpc-smoke``/``--watchdog-soak``, which left driver modes such as
+        ``--parlio`` resolving the port locally.
+        """
+        args = _make_args(
+            environment=environment,
+            upload_port=None,
+            parlio=True,
+            rpc_smoke=False,
+        )
+        ctx = _make_ctx(
+            args=args,
+            final_environment=environment,
+            upload_port=None,
+            rpc_smoke_mode=False,
         )
 
         with (
