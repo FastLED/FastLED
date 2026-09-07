@@ -25,6 +25,7 @@
 #include "fl/gfx/sample.cpp.hpp"
 #include "fl/gfx/splat.cpp.hpp"
 #include "fl/gfx/tile2x2.cpp.hpp"
+#include "fl/gfx/transfer.cpp.hpp"
 #include "fl/gfx/upscale.cpp.hpp"
 #include "fl/gfx/xypath.cpp.hpp"
 #include "fl/gfx/xypath_impls.cpp.hpp"
