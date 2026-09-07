@@ -95,6 +95,30 @@ So the embedded path must implement the OKLCh objective. That is the finding:
 the cheap options are not "slightly worse", they are not in the same range,
 and A1 cannot be met by clamping.
 
+## Precision: s16.16 is enough, and it is already there
+
+The selected algorithm still has to survive the working domain's arithmetic.
+Every intermediate -- the clamped lightness, the hue sine and cosine, the
+chroma bisection bounds, and the XYZ result of each trial -- was quantized to
+a fixed fraction and the mapping re-scored:
+
+| fraction bits | worst ΔE2000 | mean ΔE2000 | infeasible results |
+| --- | --- | --- | --- |
+| 8 | 4.861 | 0.804 | 0 |
+| 10 | 3.795 | 0.487 | 1 |
+| 12 | 1.504 | 0.262 | 0 |
+| 14 | 0.420 | 0.100 | 0 |
+| **16** | **0.152** | **0.052** | 0 |
+
+At 16 fractional bits the fixed-point mapping is indistinguishable from the
+float64 one -- both score 0.152 -- so quantization contributes nothing
+measurable on top of the eight-halving truncation. 14 bits passes with almost
+no margin, and at 10 bits precision loss pushes one result outside the hull
+entirely, which is the failure that matters more than the ΔE.
+
+s16.16 is what P6's stages already use, so the mapper needs no wider
+intermediate than the pipeline carries anyway.
+
 ## Is the feasible chroma ray actually connected?
 
 Bisection assumes it is. The reference does not, so the assumption was tested
