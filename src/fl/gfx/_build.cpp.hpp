@@ -23,6 +23,7 @@
 #include "fl/gfx/rgbw_colorimetric.cpp.hpp"
 #include "fl/gfx/rgbww.cpp.hpp"
 #include "fl/gfx/sample.cpp.hpp"
+#include "fl/gfx/source_xyz.cpp.hpp"
 #include "fl/gfx/splat.cpp.hpp"
 #include "fl/gfx/tile2x2.cpp.hpp"
 #include "fl/gfx/transfer.cpp.hpp"
