@@ -258,6 +258,54 @@ embedded mapper relies on bisection, either:
 Recording this rather than leaving it implicit: the table above is evidence
 for the *objective*, and only provisional evidence for the *search*.
 
+## Is the mapping continuous enough to animate?
+
+#4041's acceptance criteria ask that out-of-gamut mapping be continuous.
+Strictly, it is not. The halving search returns a quantized scale factor, so
+a target crossing the gamut boundary steps rather than glides. The question
+worth answering is how large the step is against the output's own
+quantization, so that is what was measured — worst summed change across the
+three drives between adjacent samples, at the shipped eight halvings:
+
+| path | worst | as 8-bit codes | worst / mean step |
+| --- | --- | --- | --- |
+| neutral → deep red | 0.002914 | 0.74 | 1.3x |
+| **boundary crossing (4 000 samples)** | 0.003128 | **0.80** | **42.8x** |
+| hue sweep, fully out of gamut | 0.003189 | 0.81 | 4.6x |
+| neutral luminance ramp | 0.004028 | 1.03 | 1.2x |
+
+The last column is the discontinuity showing itself: on the boundary
+crossing the worst step is forty-odd times the typical one, which is exactly
+what a jump looks like. It is still under one 8-bit code, which is why
+nothing bands.
+
+### More halvings do not remove it
+
+The obvious response is to spend halvings on it. That was measured too, and
+it buys less than it looks:
+
+| halvings | worst on the boundary crossing | as 8-bit codes |
+| --- | --- | --- |
+| 6 | 0.012482 | 3.18 |
+| **8** | **0.003128** | **0.80** |
+| 10 | 0.001160 | 0.30 |
+| 12 | 0.000992 | 0.25 |
+| 14 | 0.000916 | 0.23 |
+
+It falls to a floor rather than to zero, and past ten halvings the worst
+step also moves to a different point on the path. So the search resolution
+is part of the discontinuity and not all of it; the rest is the entry
+check's rounding slack and s16.16 itself. Worth knowing before anyone
+spends per-pixel work trying to smooth this out.
+
+Eight halvings keeps every path under about one 8-bit code. At a wider
+output depth the step is proportionally more visible — 0.31% of full drive
+is roughly 13 codes at 12-bit — so a device driving finer than 8 bits
+through a slow gradient is the case that would want re-measuring.
+
+`tests/fl/gfx/gamut_map.cpp` pins the bound at 1.5 codes, which six halvings
+fails.
+
 ## Devices with a white emitter (C3)
 
 A white emitter makes the emitter matrix wide: the preimage of a target is no

@@ -421,6 +421,151 @@ FL_TEST_CASE("Gamut map survives a profile bright enough to overflow the scale")
     }
 }
 
+FL_TEST_CASE("Gamut map moves smoothly enough to animate") {
+    // #4041's acceptance criteria ask that out-of-gamut mapping be
+    // continuous. Strictly it is not: the halving search returns a quantized
+    // scale factor, so crossing the gamut boundary steps rather than glides.
+    // What matters is the size of the step against the output's own
+    // quantization, so that is what this measures.
+    //
+    // Measured at the shipped eight halvings, worst summed change in the
+    // three drives between adjacent samples:
+    //
+    //   path                     worst      as 8-bit codes   worst / mean
+    //   ------------------------ ---------- ---------------- ------------
+    //   neutral -> deep red      0.002914   0.74             1.3x
+    //   boundary crossing (fine) 0.003128   0.80             42.8x
+    //   hue sweep, out of gamut  0.003189   0.81             4.6x
+    //   neutral luminance ramp   0.004028   1.03             1.2x
+    //
+    // The 42.8x on the boundary crossing is the discontinuity showing: the
+    // worst step there is forty-odd times the typical one. It is still under
+    // one 8-bit code, which is why it does not band.
+    //
+    // Raising the halving count shrinks it to a floor rather than to zero --
+    // 0.30 codes at ten halvings, 0.25 at twelve, 0.23 at fourteen -- and the
+    // worst step moves elsewhere on the path. So the search resolution is
+    // part of it and not all of it; the residual is the entry check's slack
+    // boundary and Q16 itself. Worth knowing before anyone spends halvings
+    // trying to smooth this out.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    struct Path {
+        float x0, y0, x1, y1;
+        float luminance;  // zero means ramp it instead of the chromaticity
+        int steps;
+    };
+    const Path kPaths[] = {
+        {0.3127f, 0.3290f, 0.72f, 0.26f, 0.4f, 400},
+        {0.55f, 0.33f, 0.62f, 0.30f, 0.4f, 4000},
+        {0.70f, 0.28f, 0.10f, 0.70f, 0.4f, 2000},
+        {0.3127f, 0.3290f, 0.3127f, 0.3290f, 0.0f, 400},
+    };
+
+    for (const auto& path : kPaths) {
+        i32 previous[3] = {0, 0, 0};
+        float worst = 0.0f;
+        int mapped_samples = 0;
+        for (int step = 0; step <= path.steps; ++step) {
+            const float t = static_cast<float>(step) / path.steps;
+            const float x = path.x0 + t * (path.x1 - path.x0);
+            const float y = path.y0 + t * (path.y1 - path.y0);
+            const float luminance =
+                path.luminance > 0.0f ? path.luminance : (0.02f + t * 1.6f);
+            i32 xyz[3];
+            xyzAt(x, y, luminance, xyz);
+            i32 plain[3];
+            solveRgbDrivesQ16(map.solve, xyz, plain);
+            for (int i = 0; i < 3; ++i) {
+                if (plain[i] < 0 || plain[i] > kFullDrive) {
+                    ++mapped_samples;
+                    break;
+                }
+            }
+            i32 drives[3];
+            mapAndSolveDrivesQ16(map, xyz, drives);
+            if (step > 0) {
+                float jump = 0.0f;
+                for (int i = 0; i < 3; ++i) {
+                    jump += fl::fabsf(toFloat(drives[i] - previous[i]));
+                }
+                if (jump > worst) {
+                    worst = jump;
+                }
+            }
+            for (int i = 0; i < 3; ++i) {
+                previous[i] = drives[i];
+            }
+        }
+        // Every path has to actually cross into the mapped branch. A fixture
+        // or solve change that left one entirely in gamut would leave this
+        // measuring the plain solve's smoothness and saying nothing at all
+        // about the mapper.
+        FL_REQUIRE_GT(mapped_samples, 0);
+        // 1.5 codes at 8-bit: about twice the worst measured, so platform
+        // float differences do not make this flaky, while a mapper that
+        // started stepping by a visible amount would fail.
+        FL_CHECK_LT(worst, 1.5f / 255.0f);
+    }
+}
+
+FL_TEST_CASE("Gamut map leaves an in-gamut ramp exactly where it found it") {
+    // The other half of #4041's acceptance criteria: in-gamut vectors
+    // preserve chromaticity, and neutral ramps stay neutral. A mapper that
+    // compressed slightly even inside the hull would pass the continuity
+    // check above while quietly desaturating everything.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    int exercised = 0;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 40.0f;
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, luminance, xyz);
+        i32 plain[3];
+        solveRgbDrivesQ16(map.solve, xyz, plain);
+        bool in_range = true;
+        for (int i = 0; i < 3; ++i) {
+            if (plain[i] < 0 || plain[i] > kFullDrive) {
+                in_range = false;
+            }
+        }
+        if (!in_range) {
+            continue;
+        }
+        ++exercised;
+        i32 drives[3];
+        mapAndSolveDrivesQ16(map, xyz, drives);
+        for (int i = 0; i < 3; ++i) {
+            FL_CHECK_EQ(drives[i], plain[i]);
+        }
+        // And the light those drives actually make is still D65. Comparing
+        // drives against the plain solve, as above, cannot show this: the
+        // two are equal by assertion, so any ratio between them is 1 by
+        // construction. Pushing the drives back through the emitter columns
+        // and checking the chromaticity is independent of the solve, and is
+        // what would catch a wrong matrix that happened to be applied
+        // consistently.
+        float reproduced[3] = {0.0f, 0.0f, 0.0f};
+        const float emitters[3][2] = {
+            {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+        for (int e = 0; e < 3; ++e) {
+            float column[3];
+            colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                              column);
+            for (int i = 0; i < 3; ++i) {
+                reproduced[i] += toFloat(drives[e]) * column[i];
+            }
+        }
+        const float sum = reproduced[0] + reproduced[1] + reproduced[2];
+        FL_REQUIRE_GT(sum, 1e-4f);
+        FL_CHECK_LT(fl::fabsf(reproduced[0] / sum - 0.3127f), 0.002f);
+        FL_CHECK_LT(fl::fabsf(reproduced[1] / sum - 0.3290f), 0.002f);
+    }
+    FL_CHECK_GT(exercised, 20);
+}
+
 FL_TEST_CASE("Gamut map rejects a degenerate profile") {
     EmitterProfile collinear = rgbDevice();
     collinear.xy_g[0] = 0.6400f;
