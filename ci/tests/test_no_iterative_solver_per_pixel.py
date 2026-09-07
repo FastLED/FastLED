@@ -32,17 +32,30 @@ FORBIDDEN = ("nnls3", "solve_rgb_colorimetric", "build_rgb_colorimetric_cache")
 
 
 def call_pattern(symbol: str) -> re.Pattern[str]:
-    """Match an actual call to `symbol`, not a mention of its name.
+    """Match a call to `symbol`, tolerating comments between name and paren.
 
-    Deliberately not comment-stripping. Stripping with a regex treats `//`
-    inside a string literal as a comment start -- `"https://x"; nnls3(...)`
-    would lose the call and the assertion would pass while the reference
-    stood. Matching the call shape instead needs no stripping: prose in the
-    comments here says "nnls3" without a following parenthesis, so it does
-    not match, while any real invocation does.
+    Deliberately a regex rather than a C++ token scan, and the trade is worth
+    stating. A full tokenizer has to get raw strings, character literals and
+    line continuations right; getting *that* wrong silently weakens the very
+    guard it implements, and it is a lot of machinery for a check on five
+    files we control.
+
+    So this matches the identifier followed by an open paren, allowing
+    whitespace and block or line comments in between -- which covers
+    `nnls3 /* why */ (args)`. Two known limits:
+
+    * A comment or string literal that itself contains `nnls3(` fails the
+      test. That is a false positive, so it fails closed; the fix is obvious
+      to whoever hits it.
+    * Preprocessor tricks that split the identifier would evade it. Anyone
+      doing that is deliberately defeating the guard, not tripping over it.
+
+    Prose naming the symbol without a following paren -- as the comments in
+    these files do -- does not match.
     """
 
-    return re.compile(r"\b" + re.escape(symbol) + r"\s*\(")
+    gap = r"(?:\s|/\*.*?\*/|//[^\n]*\n)*"
+    return re.compile(r"\b" + re.escape(symbol) + gap + r"\(", re.S)
 
 
 class TestNoIterativeSolverPerPixel(unittest.TestCase):
