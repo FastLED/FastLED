@@ -22,6 +22,10 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/singleton.h"
 #include "fl/system/heap.h"
+#include "fl/system/delay.h"
+#include "fl/system/pin.h"
+#include "fl/system/pins.h"
+#include "platforms/cpu_frequency.h"
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
@@ -163,6 +167,115 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("success", true);
         response.set("total_us", static_cast<int64_t>(total_us));
         response.set("us_per_iter", us_per_iter);
+        return response;
+    });
+
+    // Probe 2d: bit-bang cost attribution (FastLED#4203). The portable
+    // BIT_BANG driver stretches every WS2812 bit by a constant ~2-3us, which
+    // makes its output undecodable. The captures prove the cost is constant
+    // per bit but cannot say which call carries it, so measure the candidates
+    // against a common loop baseline instead of guessing:
+    //   nop        - empty-loop floor for this board
+    //   delayNs    - fl::delayNanoseconds(ns): runtime u64 divide, and on
+    //                ESP32 an esp_clk_cpu_freq() query on every call
+    //   delayNsHz  - same with the clock frequency hoisted out; the gap
+    //                against delayNs is exactly the per-call clock query
+    //   writeByte  - DigitalMultiWrite8::writeByte(): nibble LUT lookups plus
+    //                two out-of-line applyNibble() calls
+    // A bit costs 3x delay + 3x writeByte, so these numbers reconstruct the
+    // measured per-bit overhead directly.
+    remote.bind("perfProbeBitBangCost", [](const fl::json& args) -> fl::json {
+        int iterations = 20000;
+        int ns = 400;          // WS2812 T0H — the budget being blown
+        int pin = -1;          // -1 keeps GPIO untouched (default, safe)
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            const fl::json &cfg = args[0];
+            if (cfg.contains("iterations") && cfg["iterations"].is_int()) {
+                iterations = static_cast<int>(cfg["iterations"].as_int().value());
+            }
+            if (cfg.contains("ns") && cfg["ns"].is_int()) {
+                ns = static_cast<int>(cfg["ns"].as_int().value());
+            }
+            if (cfg.contains("pin") && cfg["pin"].is_int()) {
+                pin = static_cast<int>(cfg["pin"].as_int().value());
+            }
+        }
+        fl::json response = fl::json::object();
+        response.set("iterations", static_cast<int64_t>(iterations));
+        response.set("ns", static_cast<int64_t>(ns));
+        response.set("pin", static_cast<int64_t>(pin));
+        if (iterations < 1000 || iterations > 1000000 || ns < 0) {
+            response.set("success", false);
+            response.set("error", "out_of_range");
+            return response;
+        }
+
+        const fl::u32 requested_ns = static_cast<fl::u32>(ns);
+        const fl::u32 hz = static_cast<fl::u32>(FL_CPU_FREQUENCY());
+
+        // Baseline: same loop shape, no payload.
+        volatile int sink = 0;
+        const fl::u32 nop_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            sink += 1;
+        }
+        const fl::u32 nop_us = fl::micros() - nop_t0;
+
+        const fl::u32 delay_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            fl::delayNanoseconds(requested_ns);
+        }
+        const fl::u32 delay_us = fl::micros() - delay_t0;
+
+        const fl::u32 delay_hz_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            fl::delayNanoseconds(requested_ns, hz);
+        }
+        const fl::u32 delay_hz_us = fl::micros() - delay_hz_t0;
+
+        // pin < 0 leaves every slot inactive, so applyNibble performs no GPIO
+        // write at all — that isolates the LUT and call overhead from the
+        // cost of the pin write itself.
+        fl::Pins8 pins8;
+        for (int i = 0; i < 8; ++i) {
+            pins8.pins[i] = -1;
+        }
+        if (pin >= 0) {
+            fl::pinMode(pin, fl::PinMode::Output);
+            pins8.pins[0] = pin;
+        }
+        fl::DigitalMultiWrite8 writer;
+        writer.init(pins8);
+        const fl::u32 wb_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            writer.writeByte(static_cast<fl::u8>(i & 0xFF));
+        }
+        const fl::u32 wb_us = fl::micros() - wb_t0;
+        if (pin >= 0) {
+            fl::digitalWrite(pin, fl::PinValue::Low);
+        }
+        (void)sink;
+
+        const double denom = static_cast<double>(iterations);
+        const double nop_per = static_cast<double>(nop_us) / denom;
+        const double delay_per = static_cast<double>(delay_us) / denom;
+        const double delay_hz_per = static_cast<double>(delay_hz_us) / denom;
+        const double wb_per = static_cast<double>(wb_us) / denom;
+
+        response.set("success", true);
+        response.set("cpu_hz", static_cast<int64_t>(hz));
+        response.set("nop_us_per_iter", nop_per);
+        response.set("delay_us_per_iter", delay_per);
+        response.set("delay_hz_us_per_iter", delay_hz_per);
+        response.set("write_byte_us_per_iter", wb_per);
+        // Cost above the loop floor, i.e. what the caller actually pays.
+        response.set("delay_overhead_us", delay_per - nop_per);
+        response.set("delay_hz_overhead_us", delay_hz_per - nop_per);
+        response.set("write_byte_overhead_us", wb_per - nop_per);
+        response.set("clock_query_us", delay_per - delay_hz_per);
+        // One clockless bit issues three delays and three writeByte calls.
+        response.set("predicted_bit_overhead_us",
+                     3.0 * ((delay_per - nop_per) + (wb_per - nop_per)));
         return response;
     });
 
