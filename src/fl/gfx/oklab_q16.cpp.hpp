@@ -97,10 +97,20 @@ i32 signedCbrtQ16(i32 raw) FL_NO_EXCEPT {
 ///
 /// Inputs are clamped first, so the largest magnitude squared is 2^36 and
 /// the product with the third factor is 2^38 -- comfortably inside i64.
+/// Largest cube-rooted LMS the inverse will cube, as an s16.16 raw value.
+///
+/// This is where the inverse's overflow risk actually lives, so this is
+/// where it is bounded -- rather than by narrowing the OKLab domain, which
+/// would silently truncate colours the forward transform can produce.
+///
+/// 16.0 cubes to 4096, and the final matrix widens that by at most
+/// 3 * 1.5869 to about 19 500 -- an s16.16 raw value of 1.28e9, inside i32
+/// with room to spare. The bound does not bind on real input: XYZ (0, 0, 24),
+/// the most extreme case anyone has produced here, has a largest root of 2.5.
+constexpr i32 kOklabQ16MaxCubeRoot = 16 * 65536;
+
 i32 signedCubeQ16(i32 raw) FL_NO_EXCEPT {
-    // Bounded by the LMS root the inverse can produce from a clamped OKLab
-    // input: 3 * 1.3 * 4.0, rounded up.
-    const i32 clamped = clampOklabQ16(raw, 16 * 65536);
+    const i32 clamped = clampOklabQ16(raw, kOklabQ16MaxCubeRoot);
     const i64 magnitude = clamped < 0 ? -static_cast<i64>(clamped)
                                       : static_cast<i64>(clamped);
     const i64 squared = (magnitude * magnitude + 32768) >> 16;
@@ -111,9 +121,9 @@ i32 signedCubeQ16(i32 raw) FL_NO_EXCEPT {
 }  // namespace
 
 void xyzToOklabQ16(const i32 (&xyz)[3], i32 (&out_lab)[3]) FL_NO_EXCEPT {
-    const i32 clamped[3] = {clampOklabQ16(xyz[0], kOklabQ16MaxXyz),
-                            clampOklabQ16(xyz[1], kOklabQ16MaxXyz),
-                            clampOklabQ16(xyz[2], kOklabQ16MaxXyz)};
+    const i32 clamped[3] = {clampOklabQ16(xyz[0], kOklabQ16MaxMagnitude),
+                            clampOklabQ16(xyz[1], kOklabQ16MaxMagnitude),
+                            clampOklabQ16(xyz[2], kOklabQ16MaxMagnitude)};
     i32 lms[3];
     dotOklabMatrixQ16(kLmsFromXyz, clamped, lms);
     const i32 root[3] = {
@@ -122,9 +132,9 @@ void xyzToOklabQ16(const i32 (&xyz)[3], i32 (&out_lab)[3]) FL_NO_EXCEPT {
 }
 
 void oklabToXyzQ16(const i32 (&lab)[3], i32 (&out_xyz)[3]) FL_NO_EXCEPT {
-    const i32 clamped[3] = {clampOklabQ16(lab[0], kOklabQ16MaxLab),
-                            clampOklabQ16(lab[1], kOklabQ16MaxLab),
-                            clampOklabQ16(lab[2], kOklabQ16MaxLab)};
+    const i32 clamped[3] = {clampOklabQ16(lab[0], kOklabQ16MaxMagnitude),
+                            clampOklabQ16(lab[1], kOklabQ16MaxMagnitude),
+                            clampOklabQ16(lab[2], kOklabQ16MaxMagnitude)};
     i32 root[3];
     dotOklabMatrixQ16(kLmsRootFromOklab, clamped, root);
     const i32 lms[3] = {

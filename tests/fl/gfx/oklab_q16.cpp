@@ -175,23 +175,40 @@ FL_TEST_CASE("OKLab Q16 loses accuracy near black, and this is why") {
     FL_CHECK_LT(worst, 0.01f);
 }
 
-FL_TEST_CASE("OKLab Q16 chroma scaling preserves hue exactly") {
-    // The mapper compresses chroma by scaling (a, b) toward zero rather than
-    // converting to polar. That is only hue-preserving if the ratio b/a is
-    // untouched, which scaling by a common factor guarantees -- no atan2,
-    // hypot, cos or sin anywhere in the per-pixel path.
-    const i32 xyz[3] = {toQ16(0.35f), toQ16(0.22f), toQ16(0.9f)};
-    i32 lab[3];
-    xyzToOklabQ16(xyz, lab);
-    FL_REQUIRE_NE(lab[1], 0);
-    for (i32 numerator = 1; numerator <= 8; ++numerator) {
-        const i64 scale = static_cast<i64>(numerator) * 65536 / 8;
-        const i32 scaled_a = static_cast<i32>((scale * lab[1] + 32768) >> 16);
-        const i32 scaled_b = static_cast<i32>((scale * lab[2] + 32768) >> 16);
-        // b/a is unchanged, to within the rounding of the two products.
-        const float want = static_cast<float>(lab[2]) / static_cast<float>(lab[1]);
-        const float got = static_cast<float>(scaled_b) / static_cast<float>(scaled_a);
-        FL_CHECK_LT(fl::fabsf(got - want), 0.001f);
+FL_TEST_CASE("OKLab Q16 round-trips chroma the forward transform can produce") {
+    // Regression, and a replacement for a test that could not fail.
+    //
+    // The previous version scaled lab[1] and lab[2] here in the test and
+    // then checked their ratio was unchanged -- an arithmetic identity that
+    // passes for any implementation whatsoever. The real hue-preservation
+    // test needs the production chroma-compression path, which lives in the
+    // P7 mapper; it is in tests/fl/gfx/gamut_map.cpp, with a control leg.
+    //
+    // What belongs here is the composition property the mapper relies on:
+    // whatever OKLab the forward transform produces, the inverse must accept
+    // without clamping. The two directions had different bounds, and
+    // XYZ (0, 0, 24) -- inside the forward's domain -- produces a = -4.08,
+    // which the old inverse bound of 4.0 truncated silently.
+    const float kExtremes[][3] = {
+        {0.0f, 0.0f, 24.0f},   // the reported case
+        {0.0f, 0.0f, 48.0f},
+        {24.0f, 0.0f, 0.0f},
+        {0.0f, 24.0f, 0.0f},
+        {4.94f, 3.0f, 13.42f}, // three unit-luminance sRGB emitters summed
+    };
+    for (const auto& sample : kExtremes) {
+        const i32 xyz[3] = {toQ16(sample[0]), toQ16(sample[1]), toQ16(sample[2])};
+        i32 lab[3];
+        i32 back[3];
+        xyzToOklabQ16(xyz, lab);
+        oklabToXyzQ16(lab, back);
+        for (int i = 0; i < 3; ++i) {
+            // Relative, because these carry XYZ in the tens where one ULP of
+            // s16.16 is a far smaller share of the value than it is near 1.
+            const float want = fromQ16(xyz[i]);
+            const float got = fromQ16(back[i]);
+            FL_CHECK_LT(fl::fabsf(got - want), 0.01f + 0.002f * fl::fabsf(want));
+        }
     }
 }
 
@@ -246,7 +263,9 @@ FL_TEST_CASE("OKLab Q16 clamps rather than overflowing on absurd input") {
     i32 xyz[3];
     oklabToXyzQ16(huge, xyz);
     for (int i = 0; i < 3; ++i) {
-        // The inverse clamps tighter because it cubes its intermediate.
+        // The inverse takes the same input bound; its overflow protection is
+        // the cube-root clamp inside, which caps the cube at 4096 and the
+        // matrix that follows at about 19 500.
         FL_CHECK_LT(fl::fabsf(fromQ16(xyz[i])), 20000.0f);
     }
 }
