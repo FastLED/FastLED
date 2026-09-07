@@ -15,8 +15,23 @@
 
 #include "fl/stl/stdint.h"
 
+// FL_IS_RP2040 / FL_IS_RP2350 for the advertising-name default below.
+#include "platforms/is_platform.h"
+
 // BLE configuration constants
+//
+// The advertising name is what a host scan matches on, so it has to name the
+// board that actually answered. It was hardcoded "FastLED-C6", which meant an
+// RP2350W advertised under a C6 name and the scan log reported the wrong chip.
+#ifndef AUTORESEARCH_BLE_DEVICE_NAME
+#if defined(FL_IS_RP2350)
+#define AUTORESEARCH_BLE_DEVICE_NAME "FastLED-RP2350"
+#elif defined(FL_IS_RP2040)
+#define AUTORESEARCH_BLE_DEVICE_NAME "FastLED-RP2040"
+#else
 #define AUTORESEARCH_BLE_DEVICE_NAME "FastLED-C6"
+#endif
+#endif
 
 /// @brief State for BLE autoresearch
 struct AutoResearchBleState {

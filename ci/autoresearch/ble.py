@@ -66,7 +66,7 @@ async def run_ble_autoresearch(
         print(f"  {Fore.GREEN}Connected to device (serial){Style.RESET_ALL}")
 
         # Step 2: Start BLE on device via serial RPC
-        print("\n--- Step 2: Start BLE GATT server on ESP32 ---")
+        print("\n--- Step 2: Start BLE GATT server on the connected device ---")
         response = await serial_client.send("startBle", {}, timeout=30.0)
         ble_info = response.data
 
@@ -79,7 +79,15 @@ async def run_ble_autoresearch(
             print(f"  {Fore.RED}Failed to start BLE: {error}{Style.RESET_ALL}")
             return 1
 
-        device_name = ble_info.get("device_name", "FastLED-C6")
+        # No C6-shaped default: this path also serves RP2350W, and inventing
+        # a name here produced scan logs that named the wrong board.
+        device_name = ble_info.get("device_name")
+        if not isinstance(device_name, str) or not device_name:
+            print(
+                f"  {Fore.RED}Device did not report a BLE advertising name; "
+                f"cannot scan for it{Style.RESET_ALL}"
+            )
+            return 1
         print(
             f"  {Fore.GREEN}BLE started: name={device_name}, "
             f"service={ble_info.get('service_uuid', '?')}{Style.RESET_ALL}"
