@@ -9,6 +9,7 @@ by anything.
 from __future__ import annotations
 
 import json
+import math
 import unittest
 from pathlib import Path
 
@@ -23,7 +24,14 @@ from ci.color_gamut_study import (
     oklch_q16,
     score_candidate,
 )
-from ci.color_reference import Xyz, _invert_3x3, delta_e2000, xyz_to_lab
+from ci.color_reference import (
+    Xyz,
+    _invert_3x3,
+    _oklch_from_xyz,
+    _xyz_from_oklab,
+    delta_e2000,
+    xyz_to_lab,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -130,10 +138,6 @@ class TestColorGamutStudy(unittest.TestCase):
         not survive.
         """
 
-        import math
-
-        from ci.color_reference import _oklch_from_xyz, _xyz_from_oklab
-
         def quantize(value: float) -> float:
             return round(value * 65536) / 65536
 
@@ -189,10 +193,6 @@ class TestColorGamutStudy(unittest.TestCase):
         self: "TestColorGamutStudy", ulp_error: int
     ) -> float:
         """Worst dE2000 of the selected mapper, cube root included."""
-
-        import math
-
-        from ci.color_reference import _xyz_from_oklab
 
         def quantize(value: float) -> float:
             return round(value * 65536) / 65536
@@ -338,10 +338,6 @@ class TestColorGamutStudy(unittest.TestCase):
         rather than asserted in prose. A coarse sweep on every run; the dense
         1.9M-sample sweep behind the report's claim is recorded there.
         """
-
-        import math
-
-        from ci.color_reference import _xyz_from_oklab
 
         for lightness_step in range(1, 10):
             lightness = lightness_step / 10.0
