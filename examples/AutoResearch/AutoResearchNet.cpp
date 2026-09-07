@@ -959,10 +959,28 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
                         fl::strncmp(status_line + 9, expected_status_code, 3) == 0;
     const bool content_ok = expected_fragment == nullptr ||
                             fl::strstr(response, expected_fragment) != nullptr;
+
+    // A short body is a failure even when the fragment is in it. The loop
+    // above can leave early two ways -- the peer closing, or the deadline --
+    // and both can happen mid-body, which is exactly the truncation this
+    // change is about not tolerating. Without this, a response cut off after
+    // the fragment reads as a pass.
+    //
+    // Only checkable when the peer declared a length; without one there is
+    // nothing to compare against and the close is the only end-of-body
+    // signal there is.
+    const bool body_complete = content_length < 0 || body_read >= content_length;
+
     result.set("status_line", status_line);
-    result.set("passed", passed && content_ok);
-    if (!passed || !content_ok) {
-        result.set("error", passed ? "Unexpected response body" : "Unexpected HTTP status");
+    result.set("content_length", static_cast<int32_t>(content_length));
+    result.set("body_read", static_cast<int32_t>(body_read));
+    result.set("passed", passed && content_ok && body_complete);
+    if (!passed) {
+        result.set("error", "Unexpected HTTP status");
+    } else if (!body_complete) {
+        result.set("error", "Truncated response body");
+    } else if (!content_ok) {
+        result.set("error", "Unexpected response body");
     }
     return result;
 }
