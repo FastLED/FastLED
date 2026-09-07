@@ -374,6 +374,14 @@ uint32_t frame_counter = 0;
 // Keeping the extern "C" hook out of this .ino avoids Arduino prototype
 // generation with C++ linkage during fbuild deploy.
 
+// Consecutive watchdog resets before AutoResearch gives up and drops into the
+// bootloader (#3713). Three tolerates a one-off glitch or a deliberate
+// watchdog-recovery test while still escaping quickly enough to matter on an
+// unattended bench.
+#ifndef AUTORESEARCH_BOOTLOADER_ESCAPE_RESETS
+#define AUTORESEARCH_BOOTLOADER_ESCAPE_RESETS 3
+#endif
+
 void setup() {
     // Arm the WDT before doing any real work so a hang here (RPC bind
     // null-deref, stalled static-init, wedged Serial handshake) auto-
@@ -381,6 +389,19 @@ void setup() {
     // dead sketch. FL_WATCHDOG_AUTO() at loop() re-arms with the
     // shorter loop-scoped timeout once setup() has finished.
     fl::Watchdog::instance().begin(AUTORESEARCH_SETUP_WATCHDOG_TIMEOUT_MS);
+
+    // Boot-loop escape (#3713). The WDT above turns a hang into a reboot, but
+    // a hang that recurs every boot just reboots forever and the board is only
+    // ever briefly enumerated -- unattended, that is indistinguishable from a
+    // brick. After N consecutive watchdog resets, drop to the bootloader
+    // instead, where the board re-enumerates as a flashable target and a host
+    // can push working firmware without anyone holding BOOTSEL.
+    //
+    // Placed immediately after begin() so it runs before anything that could
+    // hang -- serial, RPC bind, or a peripheral absent on this board variant.
+    fl::Watchdog::instance().setBootloaderEscapeThreshold(
+        AUTORESEARCH_BOOTLOADER_ESCAPE_RESETS);
+    fl::Watchdog::instance().escapeToBootloaderIfLooping();
 
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
