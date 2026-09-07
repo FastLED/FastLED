@@ -40,14 +40,36 @@ PER_PIXEL_STAGES = (
 # array is the hand-rolled version of the same thing.
 FORBIDDEN_TYPES = ("CRGB", "CRGBW")
 
-# `u8 name[` -- an 8-bit buffer. Single `u8` scalars are fine and common
-# (a code coming in, a channel count), which is why this looks for the
-# array form specifically rather than for the type.
-U8_BUFFER = re.compile(r"\bu8\s+\w+\s*\[")
+# An 8-bit buffer. Single `u8` scalars are fine and common -- a code coming
+# in, a channel count -- so this looks for the array form rather than the
+# type.
+#
+# The scan runs from `u8` to the first `[`, refusing to cross `;{}()` or `=`.
+# Crossing `;` would let one statement's `u8` match the next statement's
+# subscript; refusing `=` is what keeps `u8 value = table[i];` from reading
+# as a declaration, since there the bracket is a subscript on the right-hand
+# side. What it does catch, and the simpler `u8 \w+ \[` did not, is the
+# second declarator in `u8 code, intermediate[3];`.
+U8_BUFFER = re.compile(r"\bu8\s+[^;{}()=]*\[")
+
+
+# One pass over the four lexical forms that can contain each other's
+# delimiters, so precedence is decided by which starts first rather than by
+# the order of separate substitutions. Stripping comments before strings
+# would treat the `//` in a URL literal as a comment and eat the rest of the
+# line; stripping strings before comments would treat a quote inside a
+# comment as opening one.
+_LEXICAL = re.compile(
+    r'"(?:[^"\\\n]|\\.)*"'
+    r"|'(?:[^'\\\n]|\\.)*'"
+    r"|/\*.*?\*/"
+    r"|//[^\n]*",
+    re.S,
+)
 
 
 def strip_comments_and_strings(source: str) -> str:
-    """Remove block comments, line comments and string literals.
+    """Remove block comments, line comments, and string and char literals.
 
     Without this the check trips on prose: every one of these files
     *discusses* RGB8, because explaining why there is no RGB8 intermediate is
@@ -58,10 +80,15 @@ def strip_comments_and_strings(source: str) -> str:
     this test looks.
     """
 
-    source = re.sub(r"/\*.*?\*/", " ", source, flags=re.S)
-    source = re.sub(r"//[^\n]*", " ", source)
-    source = re.sub(r'"(?:[^"\\]|\\.)*"', '""', source)
-    return source
+    def replace(match: "re.Match[str]") -> str:
+        text = match.group(0)
+        if text.startswith('"'):
+            return '""'
+        if text.startswith("'"):
+            return "''"
+        return " "
+
+    return _LEXICAL.sub(replace, source)
 
 
 class TestNoRgb8Intermediate(unittest.TestCase):
@@ -112,14 +139,54 @@ class TestNoRgb8Intermediate(unittest.TestCase):
 
     def test_the_check_can_actually_fail(self: "TestNoRgb8Intermediate") -> None:
         # A structural test that cannot fail is worth nothing, and this one is
-        # all regexes over text. Feed it the shape it is meant to catch.
-        planted = "void f() { u8 scratch[3]; CRGB mid; }"
-        self.assertIsNotNone(U8_BUFFER.search(planted))
-        self.assertRegex(strip_comments_and_strings(planted), r"\bCRGB\b")
-        # And the comment stripping really does hide prose, which is the
-        # other half of the trade.
-        prose = "// CRGB is deliberately absent here\nvoid f() {}"
-        self.assertNotRegex(strip_comments_and_strings(prose), r"\bCRGB\b")
+        # all regexes over text. Feed it the shapes it is meant to catch.
+        self.assertIsNotNone(U8_BUFFER.search("void f() { u8 scratch[3]; }"))
+        self.assertRegex(
+            strip_comments_and_strings("void f() { CRGB mid; }"), r"\bCRGB\b"
+        )
+
+        # The second declarator, which an earlier `u8 \w+ \[` pattern missed
+        # entirely: `code` is a legitimate scalar and `intermediate` is the
+        # buffer B3 forbids, in one statement.
+        self.assertIsNotNone(U8_BUFFER.search("u8 code, intermediate[3];"))
+
+    def test_the_check_does_not_fire_on_legitimate_code(
+        self: "TestNoRgb8Intermediate",
+    ) -> None:
+        # The other half. A guard that flags ordinary code gets disabled, so
+        # these are the forms it must leave alone.
+        for allowed in (
+            "u8 code = 0;",  # a scalar
+            "u8 value = table[index];",  # a subscript, not a buffer
+            "void f(u8 r, u8 g, u8 b) {}",  # parameters
+            "const u16 table[256] = {};",  # 16-bit is the working type
+        ):
+            with self.subTest(source=allowed):
+                self.assertIsNone(U8_BUFFER.search(allowed))
+
+    def test_prose_and_literals_are_stripped_correctly(
+        self: "TestNoRgb8Intermediate",
+    ) -> None:
+        # Comments discussing RGB8 are exactly what these files are full of,
+        # so the stripping has to hide them.
+        self.assertNotRegex(
+            strip_comments_and_strings(
+                "// CRGB is deliberately absent here\nvoid f() {}"
+            ),
+            r"\bCRGB\b",
+        )
+
+        # And the precedence has to be decided by which form starts first.
+        # Stripping comments before strings ate the rest of a line after a
+        # URL literal, which would have hidden real code from the check.
+        survived = strip_comments_and_strings(
+            'const char* url = "http://example.com"; CRGB mid;'
+        )
+        self.assertRegex(survived, r"\bCRGB\b")
+
+        # The mirror case: a quote inside a comment must not open a string.
+        survived = strip_comments_and_strings("// it's fine\nCRGB mid;")
+        self.assertRegex(survived, r"\bCRGB\b")
 
 
 if __name__ == "__main__":
