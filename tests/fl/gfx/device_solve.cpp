@@ -120,6 +120,45 @@ FL_TEST_CASE("Fixed-point solve tracks the P5 float64 reference") {
     }
 }
 
+FL_TEST_CASE("Chromaticities outside the CIE simplex are rejected") {
+    // Checking x and y independently is not enough: {0.8, 0.8} passes that
+    // and gives z = 1 - x - y = -0.6, so xyY_to_XYZ produces a negative Z
+    // for something claiming to be a physical emitter, and invert3x3 will
+    // happily invert the resulting nonsingular matrix.
+    EmitterSolveMatrixQ16 matrix;
+    EmitterProfile outside = rgbDevice();
+    outside.xy_r[0] = 0.8f;
+    outside.xy_r[1] = 0.8f;
+    FL_CHECK_FALSE(buildRgbSolveMatrixQ16(outside, &matrix));
+
+    // The simplex boundary itself is legal: x + y == 1 means z == 0, which
+    // is a real monochromatic-locus emitter.
+    EmitterProfile boundary = rgbDevice();
+    boundary.xy_r[0] = 0.7f;
+    boundary.xy_r[1] = 0.3f;
+    FL_CHECK(buildRgbSolveMatrixQ16(boundary, &matrix));
+}
+
+FL_TEST_CASE("An extreme target saturates instead of wrapping") {
+    // Wrapping would turn an out-of-gamut overshoot into a wildly wrong
+    // colour of the opposite sign, which the gamut mapper downstream would
+    // then treat as a legitimate drive.
+    EmitterSolveMatrixQ16 matrix;
+    FL_REQUIRE(buildRgbSolveMatrixQ16(rgbDevice(), &matrix));
+
+    // Aligned with the green row, whose Y coefficient is about 1.34: the
+    // product exceeds s16.16 where an all-equal input would not, because
+    // this inverse's row sums are all below 1.
+    const i32 xyz[3] = {0, 2147483647, 0};
+    i32 drives[3];
+    solveRgbDrivesQ16(matrix, xyz, drives);
+    FL_CHECK_EQ(drives[1], 2147483647);
+    // The other two stay in range and keep their signs, so saturation is
+    // per-component rather than poisoning the whole solve.
+    FL_CHECK(drives[0] < 0);
+    FL_CHECK(drives[2] < 0);
+}
+
 FL_TEST_CASE("Degenerate and non-finite emitter profiles are rejected") {
     EmitterSolveMatrixQ16 matrix;
     FL_CHECK_FALSE(buildRgbSolveMatrixQ16(rgbDevice(), nullptr));

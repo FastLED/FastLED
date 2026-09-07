@@ -14,6 +14,16 @@
 
 namespace fl {
 
+// These three symbols are public for the same reason the P6 stage headers
+// are: the pipeline is being landed stage by stage, and the `show()` wiring
+// that will call them needs P7's gamut mapper first. They are not exposed
+// through `fl/gfx/gfx.h` and are not part of the sketch-facing API.
+//
+// The existing colorimetric API cannot carry this. `solve_rgb_colorimetric`
+// is float and may fall back to `nnls3`, which A3/B11 forbid per pixel --
+// that is precisely what this replaces on the streaming path, and
+// ci/tests/test_no_iterative_solver_per_pixel.py enforces the separation.
+
 /// Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives.
 ///
 /// Entries exceed 1.0 for realistic primaries -- the blue emitter's Z is

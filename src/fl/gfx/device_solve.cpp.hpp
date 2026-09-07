@@ -10,11 +10,20 @@ namespace {
 // unit under the unity build, so an anonymous namespace does not isolate them
 // from same-named helpers in sibling files.
 
-bool isUsableSolveChromaticity(const float xy[2]) FL_NO_EXCEPT {  // ok array parameter
+bool isUsableSolveChromaticity(const float (&xy)[2]) FL_NO_EXCEPT {
     // Self-comparison rejects NaN, which every relational guard downstream
     // lets through because comparisons against NaN are false.
-    return xy[0] == xy[0] && xy[1] == xy[1] && xy[0] > 0.0f && xy[0] < 1.0f &&
-           xy[1] > 1e-6f && xy[1] < 1.0f;
+    if (!(xy[0] == xy[0]) || !(xy[1] == xy[1])) {
+        return false;
+    }
+    if (xy[0] <= 0.0f || xy[0] >= 1.0f || xy[1] <= 1e-6f || xy[1] >= 1.0f) {
+        return false;
+    }
+    // Inside the CIE xy simplex. Checking the coordinates independently is
+    // not enough: {0.8, 0.8} passes that and gives z = 1 - x - y = -0.6, so
+    // xyY_to_XYZ yields a negative Z for a physical emitter. The boundary
+    // itself is legal, so the test is on the sum exceeding 1.
+    return xy[0] + xy[1] <= 1.0f;
 }
 
 bool isUsableLuminance(float lum) FL_NO_EXCEPT {
@@ -26,12 +35,34 @@ i32 quantizeSolveQ16(float v) FL_NO_EXCEPT {
     return static_cast<i32>(scaled >= 0.0f ? scaled + 0.5f : scaled - 0.5f);
 }
 
+/// Largest coefficient magnitude the build accepts, in whole units.
+///
+/// Chosen so the i64 accumulator cannot overflow for *any* i32 input:
+/// 3 * (kMaxCoefficient << 16) * 2^31 stays under 2^63. Real emitter
+/// inverses sit near 1, and the largest column entry in a plausible profile
+/// is the blue emitter's Z at about 13, so this is enormously permissive
+/// while still being a proof rather than an assumption.
+constexpr i32 kMaxCoefficient = 21845;  // floor(2^32 / 3) >> 16
+
 i32 dotSolveRowQ16(const i32 (&row)[3], const i32 (&v)[3]) FL_NO_EXCEPT {
     const i64 acc = static_cast<i64>(row[0]) * static_cast<i64>(v[0])
                   + static_cast<i64>(row[1]) * static_cast<i64>(v[1])
                   + static_cast<i64>(row[2]) * static_cast<i64>(v[2]);
-    return static_cast<i32>(acc >= 0 ? (acc + 32768) >> 16
-                                     : -((-acc + 32768) >> 16));
+    const i64 rounded = acc >= 0 ? (acc + 32768) >> 16
+                                 : -((-acc + 32768) >> 16);
+    // Saturate rather than wrap. An extreme target can still land outside
+    // s16.16 after the shift, and wrapping would turn an out-of-gamut
+    // overshoot into a wildly wrong colour of the opposite sign, which the
+    // gamut mapper downstream would then treat as legitimate.
+    constexpr i64 kMax = 2147483647;
+    constexpr i64 kMin = -2147483647 - 1;
+    if (rounded > kMax) {
+        return static_cast<i32>(kMax);
+    }
+    if (rounded < kMin) {
+        return static_cast<i32>(kMin);
+    }
+    return static_cast<i32>(rounded);
 }
 
 }  // namespace
@@ -76,7 +107,9 @@ bool buildRgbSolveMatrixQ16(const EmitterProfile& profile,
             // undefined behaviour. invert3x3's determinant guard does not
             // catch NaN, so check the result rather than trusting it.
             const float value = inverse[row][col];
-            if (!(value == value) || value > 32767.0f || value < -32767.0f) {
+            if (!(value == value) ||
+                value > static_cast<float>(kMaxCoefficient) ||
+                value < -static_cast<float>(kMaxCoefficient)) {
                 return false;
             }
             out->m[row][col] = quantizeSolveQ16(value);

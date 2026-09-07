@@ -31,6 +31,20 @@ PER_PIXEL_STAGES = (
 FORBIDDEN = ("nnls3", "solve_rgb_colorimetric", "build_rgb_colorimetric_cache")
 
 
+def call_pattern(symbol: str) -> re.Pattern[str]:
+    """Match an actual call to `symbol`, not a mention of its name.
+
+    Deliberately not comment-stripping. Stripping with a regex treats `//`
+    inside a string literal as a comment start -- `"https://x"; nnls3(...)`
+    would lose the call and the assertion would pass while the reference
+    stood. Matching the call shape instead needs no stripping: prose in the
+    comments here says "nnls3" without a following parenthesis, so it does
+    not match, while any real invocation does.
+    """
+
+    return re.compile(r"\b" + re.escape(symbol) + r"\s*\(")
+
+
 class TestNoIterativeSolverPerPixel(unittest.TestCase):
     def test_stage_files_exist(self: "TestNoIterativeSolverPerPixel") -> None:
         # Guards against the list silently going stale if a file is renamed:
@@ -44,16 +58,11 @@ class TestNoIterativeSolverPerPixel(unittest.TestCase):
     ) -> None:
         for name in PER_PIXEL_STAGES:
             text = (GFX / name).read_text(encoding="utf-8")
-            # Strip comments so the prose explaining *why* nnls3 is banned
-            # does not trip the check that bans it.
-            without_line_comments = re.sub(r"//[^\n]*", "", text)
-            code = re.sub(r"/\*.*?\*/", "", without_line_comments, flags=re.S)
             for symbol in FORBIDDEN:
                 with self.subTest(stage=name, symbol=symbol):
-                    self.assertNotIn(
-                        symbol,
-                        code,
-                        f"{name} references {symbol} on the per-pixel path; "
+                    self.assertIsNone(
+                        call_pattern(symbol).search(text),
+                        f"{name} calls {symbol} on the per-pixel path; "
                         "iterative solves belong at profile/cache build time "
                         "(A3/B11).",
                     )
