@@ -3,6 +3,7 @@
 #include "fl/gfx/source_xyz.h"
 #include "fl/gfx/color_profile.h"
 #include "fl/stl/int.h"
+#include "fl/stl/limits.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -71,7 +72,7 @@ FL_TEST_CASE("Non-finite primaries are rejected, not converted") {
     // Neither xyY_to_XYZ's `y < 1e-12f` guard nor invert3x3's determinant
     // guard stops a NaN, since comparisons against NaN are all false. It
     // would reach the float-to-i32 cast, which is undefined behaviour.
-    const float nan_value = 0.0f / (sizeof(int) > 100 ? 1.0f : 0.0f);
+    const float nan_value = numeric_limits<float>::quiet_NaN();
     SourceMatrixQ16 matrix;
     RgbPrimaries bad = SourceProfile::srgbBt709().primaries;
     bad.red = Chromaticity(nan_value, 0.330f);

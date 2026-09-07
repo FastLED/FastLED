@@ -9,6 +9,7 @@
 #include "fl/gfx/color_profile.h"
 #include "fl/gfx/source_xyz.h"
 #include "fl/stl/int.h"
+#include "fl/stl/limits.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -114,7 +115,7 @@ FL_TEST_CASE("Non-finite chromaticities are rejected, not converted") {
     // comparison against NaN is false. Without an explicit check it reaches
     // the float-to-i32 cast, and converting a NaN there is undefined
     // behaviour rather than merely a wrong colour.
-    const float nan_value = 0.0f / (sizeof(int) > 100 ? 1.0f : 0.0f);
+    const float nan_value = numeric_limits<float>::quiet_NaN();
     AdaptationMatrixQ16 matrix;
     FL_CHECK_FALSE(buildBradfordMatrixQ16(Chromaticity(nan_value, 0.3290f), kD65, &matrix));
     FL_CHECK_FALSE(buildBradfordMatrixQ16(kD50, Chromaticity(0.3127f, nan_value), &matrix));
