@@ -103,9 +103,16 @@ def _driver_name_for_environment(
     final_environment: str | None,
     rp_pio_index: int = 1,
     rp_uart_index: int = 0,
+    rp_spi_index: int = 0,
 ) -> str:
     if driver == "SPI" and _is_teensy4_environment(final_environment):
         return "SPI_UNIFIED"
+    if driver == "SPI" and _active_rp2xxx_environment(final_environment) is not None:
+        # RP registers its two fixed PL022 blocks as concrete "SPI0"/"SPI1"
+        # engines; the portable "SPI" bus name is not a runtime driver here, so
+        # sending it fails with `UnknownDriver: Driver 'SPI' not available`.
+        # Same shape as the FLEX_IO and UART cases below.
+        return f"SPI{rp_spi_index}"
     if (
         driver == "FLEX_IO"
         and _active_rp2xxx_environment(final_environment) is not None
@@ -564,7 +571,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.rmt:
             drivers.append("RMT")
         if args.spi:
-            drivers.append(_driver_name_for_environment("SPI", final_environment))
+            drivers.append(
+                _driver_name_for_environment(
+                    "SPI",
+                    final_environment,
+                    rp_spi_index=args.rp_spi_index,
+                )
+            )
         if args.uart:
             drivers.append(
                 _driver_name_for_environment(
