@@ -759,6 +759,7 @@ void pollNetServer() {}
 #include "fl/net/wifi.h"
 #include "fl/stl/array.h"
 #include "fl/stl/cstdio.h"
+#include "fl/stl/cstdlib.h"  // fl::atol for Content-Length
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/unique_ptr.h"
@@ -871,16 +872,83 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         }
     }
     status_line[length] = '\0';
-    char response[256] = {};
-    size_t response_length = 0;
-    while (static_cast<int32_t>(millis() - deadline_ms) < 0 &&
-           (client.connected() || client.available())) {
-        while (client.available() && response_length + 1 < sizeof(response)) {
+
+    // Read one header line at a time, honouring the deadline. Returns false
+    // only when the deadline expires with the line unfinished.
+    auto read_header_line = [&](char* out, size_t out_size) -> bool {
+        size_t used = 0;
+        while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+            if (!client.available()) {
+                if (!client.connected()) {
+                    break;
+                }
+                FastLED.watchdog().feed();
+                delay(1);
+                continue;
+            }
             const int ch = client.read();
             if (ch < 0) {
                 break;
             }
-            response[response_length++] = static_cast<char>(ch);
+            if (ch == '\n') {
+                out[used] = '\0';
+                return true;
+            }
+            if (ch != '\r' && used + 1 < out_size) {
+                out[used++] = static_cast<char>(ch);
+            }
+        }
+        out[used] = '\0';
+        return false;
+    };
+
+    // Consume headers and capture Content-Length. Stopping on the body's
+    // declared length is what makes this terminate promptly: the request asks
+    // for `Connection: close`, but `client.connected()` does not go false
+    // quickly enough to end the read, so the old loop waited out its whole 2 s
+    // deadline on every request -- ~2.2 s x 12 requests = the 26.5 s measured
+    // in FastLED#4173, almost all of it idle.
+    long content_length = -1;
+    char header[128];
+    while (read_header_line(header, sizeof(header))) {
+        if (header[0] == '\0') {
+            break;  // blank line: headers done
+        }
+        if (content_length < 0 &&
+            fl::strncmp(header, "Content-Length:", 15) == 0) {
+            const char* value = header + 15;
+            while (*value == ' ') {
+                ++value;
+            }
+            content_length = fl::atol(value);
+        }
+    }
+
+    // Record the body only. It used to hold headers *and* body, so a response
+    // with long headers could push the fragment being asserted out of the
+    // 256-byte window entirely.
+    char response[256] = {};
+    size_t response_length = 0;
+    long body_read = 0;
+    while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+        if (content_length >= 0 && body_read >= content_length) {
+            break;  // complete -- do not wait on the connection state
+        }
+        if (client.available()) {
+            const int ch = client.read();
+            if (ch < 0) {
+                break;
+            }
+            ++body_read;
+            // Keep draining past the buffer so the socket is not abandoned
+            // mid-response; only the first 256 bytes are recorded.
+            if (response_length + 1 < sizeof(response)) {
+                response[response_length++] = static_cast<char>(ch);
+            }
+            continue;
+        }
+        if (!client.connected()) {
+            break;  // server closed and nothing buffered: body is done
         }
         FastLED.watchdog().feed();
         delay(1);
