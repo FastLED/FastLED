@@ -45,6 +45,17 @@ FL_TEST_CASE("Scaling preserves channel ratios, which is what keeps hue fixed") 
     FL_CHECK_EQ(drives[1], drives[2] * 2);
 }
 
+FL_TEST_CASE("Composition is not associative, and the header says so") {
+    // Q16 rounding breaks associativity. Pinned because the API previously
+    // claimed the opposite, and a caller chaining three scalars would be
+    // relying on something that does not hold.
+    const FluxScalar a = FluxScalar::fromRawQ16(1);
+    const FluxScalar b = FluxScalar::fromRawQ16(32768);
+    const FluxScalar c = FluxScalar::fromRawQ16(32768);
+    FL_CHECK_EQ(a.composedWith(b).composedWith(c).rawQ16(), 1);
+    FL_CHECK_EQ(a.composedWith(b.composedWith(c)).rawQ16(), 0);
+}
+
 FL_TEST_CASE("Composition is multiplicative and order-independent") {
     const FluxScalar half = FluxScalar::fromRawQ16(32768);
     const FluxScalar quarter = FluxScalar::fromRawQ16(16384);

@@ -21,7 +21,7 @@ namespace fl {
 class FluxScalar {
   public:
     /// Identity. Drives pass through unchanged.
-    static FluxScalar unity() FL_NO_EXCEPT { return FluxScalar(65536); }
+    static FluxScalar unity() FL_NO_EXCEPT;
 
     /// `setBrightness(b)` as the linear flux scalar b/255. 255 is exactly
     /// unity, so full brightness cannot dim the output by a rounding step.
@@ -30,14 +30,19 @@ class FluxScalar {
     /// A limiter fraction already in s16.16, clamped to [0, 1].
     static FluxScalar fromRawQ16(i32 raw) FL_NO_EXCEPT;
 
-    /// Multiplicative composition. Associative and commutative, so the order
-    /// brightness and the limiter are combined cannot change the result.
+    /// Multiplicative composition, commutative: combining brightness and the
+    /// limiter in either order gives the same scalar, which is all C4 needs.
+    ///
+    /// It is NOT associative -- Q16 rounding breaks that. With raw values
+    /// 1, 32768, 32768, `(a.composedWith(b)).composedWith(c)` is 1 while
+    /// `a.composedWith(b.composedWith(c))` is 0. Compose at most two scalars,
+    /// or keep wider precision across the chain.
     FluxScalar composedWith(FluxScalar other) const FL_NO_EXCEPT;
 
-    i32 rawQ16() const FL_NO_EXCEPT { return mRawQ16; }
+    i32 rawQ16() const FL_NO_EXCEPT;
 
   private:
-    explicit FluxScalar(i32 raw) FL_NO_EXCEPT : mRawQ16(raw) {}
+    explicit FluxScalar(i32 raw) FL_NO_EXCEPT;
     i32 mRawQ16;
 };
 

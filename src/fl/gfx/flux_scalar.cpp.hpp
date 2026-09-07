@@ -8,6 +8,12 @@ namespace {
 constexpr i32 kUnityQ16 = 65536;
 }  // namespace
 
+FluxScalar::FluxScalar(i32 raw) FL_NO_EXCEPT : mRawQ16(raw) {}
+
+i32 FluxScalar::rawQ16() const FL_NO_EXCEPT { return mRawQ16; }
+
+FluxScalar FluxScalar::unity() FL_NO_EXCEPT { return FluxScalar(kUnityQ16); }
+
 FluxScalar FluxScalar::fromBrightness(u8 brightness) FL_NO_EXCEPT {
     // Round to nearest so mid brightnesses are not biased low. 255 lands on
     // exactly 65536: 255 * 65536 / 255.
