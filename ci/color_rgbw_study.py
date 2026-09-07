@@ -20,8 +20,39 @@ someone to try.
 from __future__ import annotations
 
 import itertools
+from dataclasses import dataclass
 
-from ci.color_reference import Matrix3, Xyz, _invert_3x3, _matvec
+from ci.color_reference import Matrix3, Xyz, _matvec
+
+
+@dataclass(frozen=True, slots=True)
+class WhiteLevelRange:
+    """The white drives that keep every RGB drive inside [0, 1]."""
+
+    lowest: float
+    highest: float
+
+
+@dataclass(frozen=True, slots=True)
+class WhitePreferredDrives:
+    """One device's drives under the C3 white-preferred policy."""
+
+    red: float
+    green: float
+    blue: float
+    white: float
+
+
+@dataclass(frozen=True, slots=True)
+class TwoWhiteLevels:
+    """Drives for a pair of white emitters."""
+
+    first: float
+    second: float
+
+    @property
+    def total(self: "TwoWhiteLevels") -> float:
+        return self.first + self.second
 
 
 # Slack on the drive bounds. The allocation is compared against a float64
@@ -47,7 +78,7 @@ def rgb_matrix(columns: list[Xyz]) -> Matrix3:
 
 def white_level_range(
     inverse: Matrix3, target: Xyz, white: Xyz
-) -> tuple[float, float] | None:
+) -> WhiteLevelRange | None:
     """The interval of white drives that keeps the RGB drives in [0, 1].
 
     This is the whole trick. With the white emitter at drive w, the RGB
@@ -81,15 +112,15 @@ def white_level_range(
             return None
     if low > high + 1e-12:
         return None
-    return low, high
+    return WhiteLevelRange(low, high)
 
 
 def allocate_one_white(
     inverse: Matrix3, target: Xyz, white: Xyz
-) -> tuple[float, float, float, float] | None:
+) -> WhitePreferredDrives | None:
     """White-preferred drives for an RGB + one white device.
 
-    Returns (r, g, b, w), or None when the target is outside the hull.
+    None when the target is outside the hull.
 
     White-preferred means the top of the interval above, so this is closed
     form: one matrix multiply for the target, one for the white column (which
@@ -99,19 +130,21 @@ def allocate_one_white(
     span = white_level_range(inverse, target, white)
     if span is None:
         return None
-    level = span[1]
+    level = span.highest
     at_zero = _matvec(inverse, target)
     per_white = _matvec(inverse, white)
-    drives = [at_zero[i] - level * per_white[i] for i in range(3)]
-    if any(d < -DRIVE_TOLERANCE or d > 1.0 + DRIVE_TOLERANCE for d in drives):
-        return None
-    clamped = [min(max(d, 0.0), 1.0) for d in drives]
-    return (clamped[0], clamped[1], clamped[2], level)
+    clamped: list[float] = []
+    for index in range(3):
+        drive = at_zero[index] - level * per_white[index]
+        if drive < -DRIVE_TOLERANCE or drive > 1.0 + DRIVE_TOLERANCE:
+            return None
+        clamped.append(min(max(drive, 0.0), 1.0))
+    return WhitePreferredDrives(clamped[0], clamped[1], clamped[2], level)
 
 
 def most_white_two(
     inverse: Matrix3, target: Xyz, first: Xyz, second: Xyz
-) -> tuple[float, float] | None:
+) -> TwoWhiteLevels | None:
     """Largest total white for two white emitters, by exact 2D enumeration.
 
     With two whites the problem stops being one-dimensional: maximizing
@@ -138,7 +171,7 @@ def most_white_two(
     def inside(w1: float, w2: float) -> bool:
         return all(a * w1 + b * w2 <= c + 1e-7 for a, b, c in constraints)
 
-    best: tuple[float, float] | None = None
+    best: TwoWhiteLevels | None = None
     for (a1, b1, c1), (a2, b2, c2) in itertools.combinations(constraints, 2):
         determinant = a1 * b2 - a2 * b1
         if abs(determinant) < 1e-12:
@@ -147,8 +180,8 @@ def most_white_two(
         w2 = (a1 * c2 - a2 * c1) / determinant
         if not inside(w1, w2):
             continue
-        if best is None or w1 + w2 > best[0] + best[1] + 1e-12:
-            best = (w1, w2)
+        if best is None or w1 + w2 > best.total + 1e-12:
+            best = TwoWhiteLevels(w1, w2)
     return best
 
 
@@ -162,11 +195,11 @@ def best_single_white(
     this loses, and why.
     """
 
-    levels = []
+    best: float | None = None
     for white in (first, second):
         span = white_level_range(inverse, target, white)
-        if span is not None:
-            levels.append(span[1])
-    if not levels:
-        return None
-    return max(levels)
+        if span is None:
+            continue
+        if best is None or span.highest > best:
+            best = span.highest
+    return best

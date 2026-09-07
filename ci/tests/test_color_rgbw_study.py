@@ -10,9 +10,10 @@ from __future__ import annotations
 import json
 import random
 import unittest
+from dataclasses import dataclass
 from pathlib import Path
 
-from ci.color_reference import _invert_3x3
+from ci.color_reference import Xyz, _invert_3x3, _matvec
 from ci.color_rgbw_study import (
     allocate_one_white,
     best_single_white,
@@ -34,15 +35,25 @@ D65_WHITE_COLUMN = emitter_column(0.3127, 0.3290)
 D50_WHITE_COLUMN = emitter_column(0.3457, 0.3585)
 
 
-def corpus_vectors(profile: str) -> list[tuple[tuple[float, ...], list[float]]]:
+@dataclass(frozen=True, slots=True)
+class CorpusVector:
+    """One reference vector: the target, and the drives the reference chose."""
+
+    target: Xyz
+    emitter_light: list[float]
+
+
+def corpus_vectors(profile: str) -> list[CorpusVector]:
     corpus = json.loads(GOLDEN.read_text(encoding="utf-8"))
-    out = []
+    out: list[CorpusVector] = []
     for vector in corpus["vectors"]:
         if vector["device_profile"] != profile:
             continue
         stages = vector["stages"]
         mapped = stages["mapped_xyz"]
-        out.append(((mapped[0], mapped[1], mapped[2]), stages["emitter_light"]))
+        out.append(
+            CorpusVector((mapped[0], mapped[1], mapped[2]), stages["emitter_light"])
+        )
     return out
 
 
@@ -66,12 +77,13 @@ class TestOneWhiteIsClosedForm(unittest.TestCase):
         """
 
         worst = 0.0
-        for target, reference in corpus_vectors("rgbw"):
-            drives = allocate_one_white(self.inverse, target, D65_WHITE_COLUMN)
-            self.assertIsNotNone(drives, msg=f"no allocation for {target}")
+        for vector in corpus_vectors("rgbw"):
+            drives = allocate_one_white(self.inverse, vector.target, D65_WHITE_COLUMN)
+            self.assertIsNotNone(drives, msg=f"no allocation for {vector.target}")
             assert drives is not None
-            for got, want in zip(drives, reference):
-                worst = max(worst, abs(got - want))
+            got = (drives.red, drives.green, drives.blue, drives.white)
+            for actual, want in zip(got, vector.emitter_light):
+                worst = max(worst, abs(actual - want))
         self.assertLess(worst, 1e-12)
 
     def test_it_reproduces_the_reference_with_an_off_axis_white(
@@ -81,33 +93,35 @@ class TestOneWhiteIsClosedForm(unittest.TestCase):
         # Nothing in the derivation assumed the white sat on the neutral
         # axis, and this is what says so.
         worst = 0.0
-        for target, reference in corpus_vectors("non_d65_white"):
-            drives = allocate_one_white(self.inverse, target, D50_WHITE_COLUMN)
+        for vector in corpus_vectors("non_d65_white"):
+            drives = allocate_one_white(self.inverse, vector.target, D50_WHITE_COLUMN)
             self.assertIsNotNone(drives)
             assert drives is not None
-            for got, want in zip(drives, reference):
-                worst = max(worst, abs(got - want))
+            got = (drives.red, drives.green, drives.blue, drives.white)
+            for actual, want in zip(got, vector.emitter_light):
+                worst = max(worst, abs(actual - want))
         self.assertLess(worst, 1e-12)
 
     def test_the_white_level_is_maximal(self: "TestOneWhiteIsClosedForm") -> None:
         # White-*preferred* is the policy, so pushing the white any higher
         # has to break the RGB drives. Checked directly rather than trusted.
-        from ci.color_reference import _matvec
-
         per_white = _matvec(self.inverse, D65_WHITE_COLUMN)
         at_least_one_capped = 0
-        for target, _ in corpus_vectors("rgbw"):
-            drives = allocate_one_white(self.inverse, target, D65_WHITE_COLUMN)
+        for vector in corpus_vectors("rgbw"):
+            drives = allocate_one_white(self.inverse, vector.target, D65_WHITE_COLUMN)
             assert drives is not None
-            if drives[3] >= 1.0 - 1e-12:
+            if drives.white >= 1.0 - 1e-12:
                 at_least_one_capped += 1
                 continue
-            nudged = drives[3] + 1e-6
-            at_zero = _matvec(self.inverse, target)
-            rgb = [at_zero[i] - nudged * per_white[i] for i in range(3)]
+            nudged = drives.white + 1e-6
+            at_zero = _matvec(self.inverse, vector.target)
+            escaped = False
+            for index in range(3):
+                drive = at_zero[index] - nudged * per_white[index]
+                if drive < -1e-9 or drive > 1.0 + 1e-9:
+                    escaped = True
             self.assertTrue(
-                any(v < -1e-9 or v > 1.0 + 1e-9 for v in rgb),
-                msg=f"white could have gone higher for {target}",
+                escaped, msg=f"white could have gone higher for {vector.target}"
             )
         # And the sweep must not have been all saturated emitters.
         self.assertLess(at_least_one_capped, len(corpus_vectors("rgbw")))
@@ -129,8 +143,9 @@ class TestTwoWhitesNeedMoreThanOne(unittest.TestCase):
         """
 
         both = 0
-        for _, reference in corpus_vectors("rgbww"):
-            if reference[3] > 1e-12 and reference[4] > 1e-12:
+        for vector in corpus_vectors("rgbww"):
+            light = vector.emitter_light
+            if light[3] > 1e-12 and light[4] > 1e-12:
                 both += 1
         self.assertEqual(both, 0)
 
@@ -152,7 +167,9 @@ class TestTwoWhitesNeedMoreThanOne(unittest.TestCase):
         mixing_wins = 0
         worst_gap = 0.0
         for _ in range(2000):
-            drives = [random.random() for _ in range(5)]
+            drives: list[float] = []
+            for _emitter in range(5):
+                drives.append(random.random())
             target = tuple(
                 sum(columns[e][i] * drives[e] for e in range(5)) for i in range(3)
             )
@@ -165,7 +182,7 @@ class TestTwoWhitesNeedMoreThanOne(unittest.TestCase):
             if single is None or pair is None:
                 continue
             checked += 1
-            gap = (pair[0] + pair[1]) - single
+            gap = pair.total - single
             if gap > 1e-7:
                 mixing_wins += 1
                 worst_gap = max(worst_gap, gap)

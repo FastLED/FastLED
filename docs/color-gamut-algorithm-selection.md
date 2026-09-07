@@ -274,10 +274,18 @@ simplifies to it later.
 ### What this leaves
 
 `rgbw` and `non_d65_white` are settled and ready to implement. `rgbww` needs
-either the 2D enumeration above — bounded at 28 candidate vertices, so not an
-iterative solver in the A3/B11 sense, but not free either — or a closed form
-nobody has found yet. It also needs corpus vectors bright enough to tell the
-two apart before any of it can be trusted.
+either the 2D enumeration above — or a closed form nobody has found yet. It
+also needs corpus vectors bright enough to tell the two apart before any of it
+can be trusted.
+
+The enumeration is bounded but not cheap. `most_white_two` builds ten
+constraints — six from the RGB drive bounds, four from the box on the two
+white drives — and intersects every unordered pair: 45 of them, of which five
+are structurally parallel, leaving **40** candidate intersections to test for
+feasibility. That is a constant known at compile time, so it is not an
+iterative solver in the A3/B11 sense, but it is roughly forty times the work
+of the one-white case and would want its own cost measurement before going
+per-pixel.
 
 ## Not covered
 
