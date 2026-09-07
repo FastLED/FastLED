@@ -229,10 +229,10 @@ FL_TEST_CASE("Static profile create sugar binds the constexpr profile without ru
 
 FL_TEST_CASE("Fallback is propagated through the channel event surface") {
     CRGB leds[1] = {};
-    ColorProfileFallbackEvent captured;
+    ColorProfileEvent captured{};
     bool received = false;
     const int listener = FastLED.channelEvents().onColorProfileFallback.add(
-        [&](const ColorProfileFallbackEvent& event) { captured = event; received = true; });
+        [&](const ColorProfileEvent& event) { captured = event; received = true; });
     ChannelOptions options;
     options.requestColorManagement(SourceProfile::linearSrgb());
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
@@ -287,9 +287,9 @@ FL_TEST_CASE("Enum selector resolves to the static profile for actual channel cr
 
 FL_TEST_CASE("Legacy and profile transitions emit one warning event per direction") {
     ChannelOptions options;
-    fl::vector<ColorProfileWarningEvent> events;
+    fl::vector<ColorProfileEvent> events;
     const int listener = FastLED.channelEvents().onColorProfileWarning.add(
-        [&](const ColorProfileWarningEvent& event) { events.push_back(event); });
+        [&](const ColorProfileEvent& event) { events.push_back(event); });
 
     FL_REQUIRE(options.setColorProfile(kFixtureProfile));
     options.setLegacyCorrection(CRGB(255, 128, 64));
@@ -300,8 +300,8 @@ FL_TEST_CASE("Legacy and profile transitions emit one warning event per directio
     FastLED.channelEvents().onColorProfileWarning.remove(listener);
 
     FL_REQUIRE_EQ(events.size(), size_t(2));
-    FL_CHECK_EQ(events[0].kind, ColorProfileWarning::ProfileClearedByLegacy);
-    FL_CHECK_EQ(events[1].kind, ColorProfileWarning::LegacyClearedByProfile);
+    FL_CHECK_EQ(events[0].warning, ColorProfileWarning::ProfileClearedByLegacy);
+    FL_CHECK_EQ(events[1].warning, ColorProfileWarning::LegacyClearedByProfile);
 }
 
 FL_TEST_CASE("FastLED add enum sugar binds static profile without controller-owned allocation") {
