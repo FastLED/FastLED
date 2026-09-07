@@ -209,6 +209,105 @@ FL_TEST_CASE("fl::Watchdog — isInSafeMode trips at threshold") {
 }
 
 // =============================================================================
+// Boot-loop bootloader escape (issue #3713 / #3714)
+//
+// A board that wedges before USB bring-up is invisible to the host, so no
+// host-side tool can recover it. The escape lets the device break its own
+// boot loop by rebooting into the bootloader, where it is flashable again.
+// =============================================================================
+
+FL_TEST_CASE("fl::Watchdog - bootloader escape is opt-in and defaults to off") {
+    Watchdog& dog = Watchdog::instance();
+    FL_CHECK_EQ(dog.bootloaderEscapeThreshold(), 0);
+    FL_CHECK_FALSE(dog.shouldEscapeToBootloader());
+}
+
+FL_TEST_CASE("fl::Watchdog - setBootloaderEscapeThreshold round-trips") {
+    Watchdog& dog = Watchdog::instance();
+    dog.setBootloaderEscapeThreshold(3);
+    FL_CHECK_EQ(dog.bootloaderEscapeThreshold(), 3);
+    dog.setBootloaderEscapeThreshold(0);   // restore the default
+    FL_CHECK_EQ(dog.bootloaderEscapeThreshold(), 0);
+}
+
+FL_TEST_CASE("fl::Watchdog - a threshold of zero never escapes, however many crashes") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.setBootloaderEscapeThreshold(0);
+
+    for (int i = 0; i < 2; ++i) {
+        dog.onTimeout([](void*) {}, nullptr);
+        dog.begin(30);
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+    }
+    dog.disable();
+
+    FL_CHECK(dog.consecutiveCrashCount() >= 2);
+    // Disabled is disabled -- this is what keeps the escape opt-in.
+    FL_CHECK_FALSE(dog.shouldEscapeToBootloader());
+    FL_CHECK_FALSE(dog.escapeToBootloaderIfLooping());
+
+    dog.markCleanShutdown();
+}
+
+FL_TEST_CASE("fl::Watchdog - escape trips once consecutive crashes reach the threshold") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.setBootloaderEscapeThreshold(2);
+
+    FL_CHECK_FALSE(dog.shouldEscapeToBootloader());   // no crashes yet
+
+    for (int i = 0; i < 2; ++i) {
+        dog.onTimeout([](void*) {}, nullptr);
+        dog.begin(30);
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+    }
+    dog.disable();
+
+    FL_CHECK(dog.consecutiveCrashCount() >= 2);
+    FL_CHECK(dog.shouldEscapeToBootloader());
+
+    // A clean boot breaks the loop, so the next boot must not escape.
+    dog.markCleanShutdown();
+    FL_CHECK_FALSE(dog.shouldEscapeToBootloader());
+
+    dog.setBootloaderEscapeThreshold(0);
+}
+
+FL_TEST_CASE("fl::Watchdog - escape preserves the crash count when unsupported") {
+    // The stub has no bootloader reboot, so the escape reports failure. It
+    // must not zero the counter on the way out: discarding the evidence would
+    // hide the very boot loop we are trying to detect.
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.setBootloaderEscapeThreshold(1);
+
+    dog.onTimeout([](void*) {}, nullptr);
+    dog.begin(30);
+    fl::this_thread::sleep_for(fl::chrono::milliseconds(200));  // ok sleep for
+    dog.disable();
+
+    const fl::u16 before = dog.consecutiveCrashCount();
+    FL_CHECK(before >= 1);
+    FL_CHECK(dog.shouldEscapeToBootloader());
+
+    FL_CHECK_FALSE(dog.escapeToBootloaderIfLooping());   // stub: unsupported
+    FL_CHECK_EQ(dog.consecutiveCrashCount(), before);
+
+    dog.setBootloaderEscapeThreshold(0);
+    dog.markCleanShutdown();
+}
+
+FL_TEST_CASE("fl::Watchdog - escape and safe mode are independent knobs") {
+    Watchdog& dog = Watchdog::instance();
+    dog.setSafeModeThreshold(2);
+    dog.setBootloaderEscapeThreshold(7);
+    FL_CHECK_EQ(dog.safeModeThreshold(), 2);
+    FL_CHECK_EQ(dog.bootloaderEscapeThreshold(), 7);
+    dog.setBootloaderEscapeThreshold(0);
+}
+
+// =============================================================================
 // New API tests (issue #2755): resetCauseName + ResetInfo + ScopedWatchdog
 // =============================================================================
 

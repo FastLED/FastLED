@@ -5,6 +5,7 @@
 ///   - ResetInfo::describe()        Tier 1 human-readable description writer
 ///   - ResetInfo::subcauseName()    Tier 1 default (per-platform impls may shadow)
 ///   - Watchdog::lastResetInfo()    Tier 1 default (returns {cause, 0, 0})
+///   - Watchdog boot-loop bootloader escape (#3713)
 ///   - ScopedWatchdog ctor/dtor     Tier 1.5 RAII guard
 ///
 /// Per FastLED conventions this file is included from exactly one translation
@@ -92,6 +93,35 @@ fl::size ResetInfo::describe(fl::span<char> out, bool verbose) const FL_NO_EXCEP
 // Default: lift the normalized cause into a ResetInfo, leaving
 // subcauseId/rawRegister at 0. Per-platform richer extraction will be wired
 // through a follow-up to issue #2755 (every backend uses this default for now).
+// =============================================================================
+// Boot-loop bootloader escape (#3713)
+//
+// Platform-agnostic policy layered over the per-platform crash counter and
+// bootloader reboot. Kept here rather than in each `.impl.hpp` so all 13
+// backends share one implementation.
+// =============================================================================
+
+fl::u16 Watchdog::bootloaderEscapeThreshold() const FL_NO_EXCEPT {
+    return mBootloaderEscapeThreshold;
+}
+
+void Watchdog::setBootloaderEscapeThreshold(fl::u16 threshold) FL_NO_EXCEPT {
+    mBootloaderEscapeThreshold = threshold;
+}
+
+bool Watchdog::shouldEscapeToBootloader() const FL_NO_EXCEPT {
+    return mBootloaderEscapeThreshold != 0
+        && consecutiveCrashCount() >= mBootloaderEscapeThreshold;
+}
+
+bool Watchdog::escapeToBootloaderIfLooping() FL_NO_EXCEPT {
+    if (!shouldEscapeToBootloader()) return false;
+    // Deliberately does NOT clear the crash counter: where bootloader reboot
+    // is unsupported this returns false, and zeroing the count would destroy
+    // the evidence of the very boot loop being detected.
+    return rebootIntoBootloader();
+}
+
 ResetInfo Watchdog::lastResetInfo() const FL_NO_EXCEPT {
     ResetInfo info{};
     info.cause = lastResetCause();
