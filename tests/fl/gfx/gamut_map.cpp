@@ -704,6 +704,53 @@ FL_TEST_CASE("RGBW lightness bound stays reachable for a skewed white") {
     }
 }
 
+FL_TEST_CASE("RGBW mapper honours the allocation policy") {
+    // Nothing else here exercises RgbPreferred through the mapper, so a
+    // regression that dropped `policy` on the floor in buildGamutMapRgbwQ16
+    // -- leaving every device white-preferred -- would pass the whole file.
+    GamutMapRgbwQ16 white_first;
+    GamutMapRgbwQ16 rgb_first;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::WhitePreferred,
+                                    &white_first));
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::RgbPreferred,
+                                    &rgb_first));
+
+    // The policy must reach the stored allocation.
+    FL_CHECK(white_first.allocation.policy ==
+             WhiteAllocationPolicy::WhitePreferred);
+    FL_CHECK(rgb_first.allocation.policy == WhiteAllocationPolicy::RgbPreferred);
+
+    // It changes the drives, never which targets are reachable, so the
+    // lightness bound has to come out the same either way.
+    FL_CHECK_EQ(white_first.max_neutral_lightness,
+                rgb_first.max_neutral_lightness);
+
+    int differed = 0;
+    for (int step = 1; step <= 10; ++step) {
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, static_cast<float>(step) / 10.0f, xyz);
+
+        i32 with_white[4];
+        i32 with_rgb[4];
+        mapAndAllocateRgbwQ16(white_first, xyz, with_white);
+        mapAndAllocateRgbwQ16(rgb_first, xyz, with_rgb);
+
+        FL_CHECK_LE(with_rgb[3], with_white[3]);
+        if (with_rgb[3] < with_white[3]) {
+            ++differed;
+        }
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_GE(with_rgb[i], 0);
+            FL_CHECK_LE(with_rgb[i], kFullDrive);
+        }
+    }
+    // Guard against the two never diverging, which would make the checks
+    // above pass whatever the mapper did with the policy.
+    FL_CHECK_GT(differed, 5);
+}
+
 FL_TEST_CASE("RGBW mapper always returns drives inside [0, 1]") {
     GamutMapRgbwQ16 rgbw;
     FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,

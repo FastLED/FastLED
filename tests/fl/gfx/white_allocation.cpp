@@ -341,11 +341,46 @@ FL_TEST_CASE("RGB-preferred still uses white when RGB alone cannot reach") {
 
     i32 drives[4];
     FL_REQUIRE(allocateEmitterDrivesQ16(rgb_first, xyz, drives));
-    FL_CHECK_GT(drives[3], 0);
     for (int i = 0; i < 4; ++i) {
         FL_CHECK_GE(drives[i], 0);
         FL_CHECK_LE(drives[i], kFullDrive);
     }
+
+    // The *smallest* white that works, not merely some white. Checking only
+    // that the level is above zero would pass for any feasible answer,
+    // including the white-preferred one, which is the whole thing this test
+    // is supposed to distinguish.
+    //
+    // Derived here from the drives RGB alone would need: every channel above
+    // full scale has to be brought down, and the one needing the most white
+    // to get there sets the floor.
+    float smallest_that_works = 0.0f;
+    for (int i = 0; i < 3; ++i) {
+        const float slope = toFloat(rgb_first.per_white[i]);
+        const float start = toFloat(rgb_only[i]);
+        float needed = 0.0f;
+        if (slope > 0.0f) {
+            needed = (start - 1.0f) / slope;
+        } else if (slope < 0.0f) {
+            needed = start / slope;
+        }
+        if (needed > smallest_that_works) {
+            smallest_that_works = needed;
+        }
+    }
+    FL_REQUIRE_GT(smallest_that_works, 0.0f);
+    FL_CHECK_LT(fl::fabsf(toFloat(drives[3]) - smallest_that_works),
+                16.0f / 65536.0f);
+
+    // And it really is less than what white-preferred would have chosen, so
+    // the two policies are distinguishable on this target.
+    WhiteAllocationQ16 white_first;
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &white_first));
+    i32 white_drives[4];
+    FL_REQUIRE(allocateEmitterDrivesQ16(white_first, xyz, white_drives));
+    FL_CHECK_LT(drives[3], white_drives[3]);
 }
 
 FL_TEST_CASE("White allocation rejects profiles it cannot work with") {
