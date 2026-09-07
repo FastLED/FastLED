@@ -23,7 +23,7 @@ relative colorimetry, profile white at full drive, dark surround.
 
 | algorithm | worst ΔE2000 | mean ΔE2000 |
 | --- | --- | --- |
-| clip negative drives | 20.652 | 3.923 |
+| clip drives into [0, 1] | 20.652 | 3.923 |
 | max-normalize | 20.652 | 3.923 |
 | desaturate toward neutral | 14.893 | 2.101 |
 | **OKLCh chroma compression** | **0.000** | **0.000** |

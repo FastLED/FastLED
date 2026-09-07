@@ -76,7 +76,12 @@ def is_feasible(inverse: Matrix3, xyz: Xyz) -> bool:
 
 
 def map_clip(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
-    """Clamp negative drives to zero. The cheapest thing that can be done."""
+    """Clamp each drive into [0, 1]. The cheapest thing that can be done.
+
+    Both bounds, not just the lower one: a target can be outside the hull for
+    being too bright as well as too saturated, and a mapper that returns an
+    over-unity drive has not mapped anything.
+    """
 
     drives = _matvec(inverse, xyz)
     clamped: Xyz = (
@@ -88,7 +93,11 @@ def map_clip(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
 
 
 def map_max_normalize(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
-    """Clamp, then scale so the largest drive is at most full scale."""
+    """Clamp negatives, then scale so the largest drive is at most full scale.
+
+    The normalization makes the upper clamp unnecessary here: scaling by the
+    largest drive already brings everything to at most 1.
+    """
 
     drives = _matvec(inverse, xyz)
     clamped: Xyz = (
