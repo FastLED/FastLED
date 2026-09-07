@@ -87,6 +87,33 @@ class TestColorGamutStudy(unittest.TestCase):
                 with self.subTest(candidate=name, target=target):
                     self.assertTrue(is_feasible(self.inverse, mapped))
 
+    def test_feasibility_checks_both_bounds(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # Checking only the lower bound accepts a target needing drives above
+        # full scale -- too bright rather than too saturated -- which no
+        # device can produce and which the mappers would return unchanged.
+        forward = self.forward
+        over_bright = (
+            forward.row0[0] * 2.0,
+            forward.row1[0] * 2.0,
+            forward.row2[0] * 2.0,
+        )
+        self.assertFalse(is_feasible(self.inverse, over_bright))
+
+        at_full_scale = (forward.row0[0], forward.row1[0], forward.row2[0])
+        self.assertTrue(is_feasible(self.inverse, at_full_scale))
+
+    def test_scores_cover_every_case_rather_than_a_subset(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # A candidate scored on fewer cases than another is not comparable to
+        # it, so the harness must count them all or raise.
+        for name in CANDIDATES:
+            with self.subTest(candidate=name):
+                score = score_candidate(name, self.forward, self.inverse, self.cases)
+                self.assertEqual(score.vector_count, len(self.cases))
+
     def test_in_gamut_targets_pass_through_untouched(
         self: "TestColorGamutStudy",
     ) -> None:

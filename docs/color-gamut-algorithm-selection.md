@@ -1,6 +1,6 @@
 # Gamut-mapping algorithm selection (P7)
 
-#4041 asks for a comparison of clipping, max-normalization, OKLCh compression
+Issue #4041 asks for a comparison of clipping, max-normalization, OKLCh compression
 and a constrained solve, in order to "pick the smallest algorithm meeting the
 A1 budget on embedded hardware". This records that comparison and the choice
 it forces.

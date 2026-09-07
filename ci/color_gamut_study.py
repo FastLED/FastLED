@@ -29,7 +29,7 @@ from ci.color_reference import (
 
 
 D65_WHITE: Xyz = (0.9504559270516716, 1.0, 1.0890577507598784)
-FEASIBILITY_TOLERANCE = -1e-12
+FEASIBILITY_TOLERANCE = 1e-12
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,7 +56,21 @@ def emitter_matrix(primaries: tuple[tuple[float, float], ...]) -> Matrix3:
 
 
 def is_feasible(inverse: Matrix3, xyz: Xyz) -> bool:
-    return min(_matvec(inverse, xyz)) >= FEASIBILITY_TOLERANCE
+    """True when every emitter drive lies within [0, 1].
+
+    Both bounds matter. Checking only the lower one accepts a target that
+    needs drives above full scale -- too bright rather than too saturated --
+    which no device can produce, and the mapper would then return it
+    unchanged. The corpus's out-of-gamut vectors all fail on the lower bound
+    (max drive observed: 0.81), so this does not move the recorded scores;
+    it stops the harness from being wrong on a corpus that does contain them.
+    """
+
+    drives = _matvec(inverse, xyz)
+    for drive in drives:
+        if drive < -FEASIBILITY_TOLERANCE or drive > 1.0 + FEASIBILITY_TOLERANCE:
+            return False
+    return True
 
 
 def map_clip(forward: Matrix3, inverse: Matrix3, xyz: Xyz) -> Xyz:
@@ -163,18 +177,28 @@ def score_candidate(
 
     worst = 0.0
     total = 0.0
-    counted = 0
     for target, reference in cases:
         mapped = CANDIDATES[name](forward, inverse, target)
-        # CIEDE2000 is only defined for non-negative XYZ.
-        if min(mapped) < 0.0 or min(reference) < 0.0:
-            continue
+        # CIEDE2000 is only defined for non-negative XYZ. Raise rather than
+        # skip: silently dropping a case shrinks the denominator, and a
+        # candidate that fails often would then be scored on the subset it
+        # happens to handle and look better than one that handles everything.
+        if min(mapped) < 0.0:
+            raise ValueError(
+                f"candidate {name!r} produced negative XYZ {mapped} for "
+                f"target {target}; it cannot be scored on a partial corpus"
+            )
+        if min(reference) < 0.0:
+            raise ValueError(
+                f"reference mapped result {reference} is negative for target "
+                f"{target}; the corpus is outside the CIELAB domain here"
+            )
         delta = delta_e2000(
             xyz_to_lab(mapped, D65_WHITE), xyz_to_lab(reference, D65_WHITE)
         )
         total += delta
-        counted += 1
         if delta > worst:
             worst = delta
+    counted = len(cases)
     mean = total / counted if counted else 0.0
     return CandidateScore(name, worst, mean, counted)
