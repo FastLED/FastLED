@@ -1,111 +1,73 @@
-// ok cpp include
-#include "platforms/cycle_type.h"
+/// @file cycle_type.cpp
+/// @brief Host tests for the shared ns->cycles conversion.
+
 #include "test.h"
-#include "fl/stl/type_traits.h"
-#include "fl/stl/int.h"
+
 #include "fl/stl/static_assert.h"
-
-using namespace fl;
-
-FL_TEST_CASE("fl::cycle_t type definition") {
-    FL_SUBCASE("cycle_t exists and is signed") {
-        cycle_t value = 0;
-        FL_CHECK_EQ(value, 0);
-
-        // Test that cycle_t is signed
-        cycle_t negative = -1;
-        FL_CHECK(negative < 0);
-    }
-
-#if defined(__AVR__)
-    FL_SUBCASE("cycle_t is int on AVR platforms") {
-        // On AVR, cycle_t should be int (typically 16-bit)
-        FL_STATIC_ASSERT(fl::is_same<cycle_t, int>::value,
-                     "cycle_t should be int on AVR");
-
-        // Verify it's the expected size for AVR
-        FL_CHECK_EQ(sizeof(cycle_t), sizeof(int));
-    }
-#else
-    FL_SUBCASE("cycle_t is fl::i64 on non-AVR platforms") {
-        // On non-AVR platforms, cycle_t should be fl::i64
-        FL_STATIC_ASSERT(fl::is_same<cycle_t, fl::i64>::value,
-                     "cycle_t should be fl::i64 on non-AVR");
-
-        // Verify it's 64-bit
-        FL_CHECK_EQ(sizeof(cycle_t), 8);
-    }
-#endif
-
-    FL_SUBCASE("cycle_t basic arithmetic") {
-        cycle_t a = 100;
-        cycle_t b = 50;
-
-        FL_CHECK_EQ(a + b, 150);
-        FL_CHECK_EQ(a - b, 50);
-        FL_CHECK_EQ(a * 2, 200);
-        FL_CHECK_EQ(a / 2, 50);
-    }
-
-    FL_SUBCASE("cycle_t can represent fixed-point values") {
-        // cycle_t is described as 8.8 fixed point
-        // This means 8 bits for integer part, 8 bits for fractional part
-        // Value 256 would represent 1.0 in 8.8 fixed point
-
-        cycle_t one_fixed = 256;  // 1.0 in 8.8 fixed point
-        cycle_t half_fixed = 128; // 0.5 in 8.8 fixed point
-
-        FL_CHECK_EQ(one_fixed + half_fixed, 384); // 1.5 in 8.8 fixed point
-        FL_CHECK_EQ(one_fixed * 2, 512);          // 2.0 in 8.8 fixed point
-    }
-
-    FL_SUBCASE("cycle_t comparison operations") {
-        cycle_t a = 100;
-        cycle_t b = 50;
-        cycle_t c = 100;
-
-        FL_CHECK(a > b);
-        FL_CHECK(b < a);
-        FL_CHECK(a >= c);
-        FL_CHECK(a <= c);
-        FL_CHECK(a == c);
-        FL_CHECK(a != b);
-    }
-
-    FL_SUBCASE("cycle_t range and limits") {
-#if defined(__AVR__)
-        // On AVR, int is typically 16-bit signed
-        cycle_t max_val = 32767;
-        cycle_t min_val = -32768;
-#else
-        // On non-AVR, we have full 64-bit range
-        cycle_t large_val = 1000000000LL;
-        cycle_t small_val = -1000000000LL;
-
-        FL_CHECK(large_val > 0);
-        FL_CHECK(small_val < 0);
-#endif
-    }
-
-    FL_SUBCASE("cycle_t default initialization") {
-        cycle_t default_value = cycle_t();
-        FL_CHECK_EQ(default_value, 0);
-    }
-
-    FL_SUBCASE("cycle_t assignment and copy") {
-        cycle_t a = 42;
-        cycle_t b = a;
-        FL_CHECK_EQ(b, 42);
-
-        cycle_t c;
-        c = a;
-        FL_CHECK_EQ(c, 42);
-    }
-}
-
-// Grouped tests
-#include "tests/fl/stl/limits.hpp"
+#include "platforms/cycle_type.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
-} // FL_TEST_FILE
+using namespace fl;
+
+namespace {
+
+// The exact form the platform delay headers used before FastLED#4203, kept
+// here as the oracle the fast path must match bit for bit.
+u32 reference_cycles_from_ns(u32 ns, u32 hz) {
+    return static_cast<u32>(((fl::u64)ns * (fl::u64)hz + 999999999ULL)
+                            / 1000000000ULL);
+}
+
+constexpr u32 kClocks[] = {
+    8000000u,   16000000u,  48000000u,  80000000u,  120000000u,
+    125000000u, 133000000u, 150000000u, 160000000u, 168000000u,
+    180000000u, 240000000u, 300000000u, 480000000u, 600000000u,
+    1000000000u,
+};
+
+}  // namespace
+
+FL_TEST_CASE("cycles_from_ns matches the exact 64-bit form on the fast path") {
+    // The fast path trades the 64-bit divide for 32-bit arithmetic; it is only
+    // a valid trade if it is exactly equal, not merely close.
+    for (u32 hz : kClocks) {
+        for (u32 ns = 0; ns <= 4100u; ++ns) {
+            FL_REQUIRE_EQ(cycles_from_ns(ns, hz),
+                          reference_cycles_from_ns(ns, hz));
+        }
+    }
+}
+
+FL_TEST_CASE("cycles_from_ns matches beyond the fast-path bound") {
+    for (u32 hz : kClocks) {
+        for (u32 ns : {5000u, 10000u, 20000u, 100000u, 1000000u, 100000000u}) {
+            FL_REQUIRE_EQ(cycles_from_ns(ns, hz),
+                          reference_cycles_from_ns(ns, hz));
+        }
+    }
+}
+
+FL_TEST_CASE("cycles_from_ns fast path cannot overflow u32") {
+    // ns * (hz / 1000) + 999999 must stay under 2^32-1 everywhere the fast
+    // path is taken. An overflow here would silently produce a far too short
+    // delay rather than a compile or runtime error.
+    constexpr fl::u64 kU32Max = 4294967295ULL;
+    for (u32 hz : kClocks) {
+        const fl::u64 product =
+            static_cast<fl::u64>(4000u) * (hz / 1000u) + 999999ULL;
+        FL_REQUIRE(product <= kU32Max);
+    }
+}
+
+FL_TEST_CASE("cycles_from_ns rounds up and is usable in a constant expression") {
+    // Round-up matters: a truncating conversion under-delays every clockless
+    // bit, which is the failure mode the callers cannot tolerate.
+    FL_CHECK_EQ(cycles_from_ns(400u, 150000000u), 60u);
+    FL_CHECK_EQ(cycles_from_ns(1u, 150000000u), 1u);
+    FL_CHECK_EQ(cycles_from_ns(0u, 150000000u), 0u);
+    FL_STATIC_ASSERT(cycles_from_ns(400u, 150000000u) == 60u,
+                     "must fold at compile time for delayNanoseconds<NS>()");
+}
+
+}  // FL_TEST_FILE
