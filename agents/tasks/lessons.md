@@ -85,3 +85,48 @@
   Callgrind budget were both reporting a real host regression, and a
   re-baseline would have recorded it as the new normal. Read the callgrind
   deltas in the artifact before rewriting the file.
+- A harness `PASS` means what the harness checked, not what its name implies.
+  `runParallelTest` skips RX loopback validation for the RP `PIO0`+`PIO1` pair
+  (`AutoResearchRemoteRunParallelTest.cpp:308`, `is_rp_pio_pair`), so its PASS
+  proves channel creation and a clean shared `show()` — not byte-correct output.
+  It was quoted as "decisive loopback evidence" on #3899 and had to be retracted.
+  Read what a green result asserts before citing it as evidence for a checklist
+  item.
+- On a HIL bench, most "device faults" are host-side. Four in one session on
+  RP2350W: a 20 ms RPC timeout that read as a hung board (`--timeout` is a
+  whole-run deadline for `--net-peer`, not a per-phase one); `deployed firmware
+  schema does not contain rpSpiLoopback` on a board that exposes it (a failed
+  `rpc.discover` collapsed to `None`); `zero_capture` on SPI that was an
+  unfitted jumper; and `serial driver may be wedged` that was a dead fbuild
+  daemon. Check the transport and the harness before concluding anything about
+  silicon.
+- A second `RpcBench` on a port another client already holds connects without
+  error and is then inert — every call returns `None`, while the first client
+  keeps working (FastLED#4207). Because the failure is silent, callers read the
+  `None` as a statement about the device. Any code spawning a device script
+  against a port the harness still holds must release it first.
+- When an error path swallows its own signal, stop reasoning and instrument.
+  Four successive hypotheses for one `None` (short timeout, `call_flat` frame
+  shape, payload size, then the real cause) were each refuted by the next run,
+  because `call_flat` collapses every exception to `None`. A twenty-line
+  two-client repro settled it immediately and was available the whole time.
+- Verify a fix landed on the hardware you think you flashed. A failed build
+  followed by a successful RPC answers from resident firmware, so "after"
+  numbers can be byte-identical to "before" and look like a null result. Check
+  for a field only the new build emits.
+- Exhaustive equivalence checks written in Python cannot see C overflow. A
+  32-bit fast path for `cycles_from_ns` compared equal to the 64-bit oracle
+  across every sampled input while silently overflowing `u32` above 215 MHz;
+  only a separate explicit overflow counter caught it. Assert the width bound,
+  not just the values.
+- Peer-network autoresearch reflashes the fixture as well as the DUT. The
+  RP2350W has a watchdog/bootloader escape armed (#4167/#4172); the ESP32-C6
+  has none. A wedged C6 CDC gives `EBUSY` with no holding process, and every
+  recovery handle (usbfs, `authorized`, `unbind`, `remove`) is root-only — so
+  an unattended bench has no way back. Assess the fixture's recovery path, not
+  just the DUT's, before running `--net-peer --ota`.
+- Building the non-W `rp2350` target changes the board's USB product string, so
+  `/dev/serial/by-id` renames from `..._Pico_2W_<serial>` to `..._Pico_2_<serial>`.
+  Anything addressing the board by the old by-id path silently stops resolving
+  and presents as a missing board. The serial is stable across both variants,
+  which is why fbuild's `SER=<serial>` selector is the robust way to address it.
