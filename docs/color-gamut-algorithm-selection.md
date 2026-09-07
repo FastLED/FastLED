@@ -167,6 +167,50 @@ also pass -- so if 22 steps per root ever turns out to cost too much on an
 guessed at. Both ends are pinned by
 `ci/tests/test_color_gamut_study.py`.
 
+### The mapper needs no trigonometry
+
+Compressing chroma at constant hue reads as a polar operation -- convert to
+(L, C, h), scale C, convert back -- which would put `atan2`, `hypot`, `cos`
+and `sin` in the per-pixel path. It does not have to. Since `a = C cos h` and
+`b = C sin h`, scaling C by t at fixed h is exactly scaling both a and b by
+t. Hue is preserved by construction because the ratio b/a is untouched.
+
+Scored over the same 20 vectors, the two formulations agree: **0.1491**
+for the polar route against **0.1521** for scaling (a, b). The scaling form
+is marginally worse -- it rounds t*a and t*b rather than C, cos h and sin h
+-- and comfortably inside the budget either way. So the embedded mapper uses
+it, and needs no trigonometry at all.
+
+### The whole transform, end to end, in integers
+
+`src/fl/gfx/oklab_q16.{h,cpp.hpp}` implements OKLab in the working domain.
+Modelling that implementation exactly -- s16.16 matrix *coefficients*, not
+just s16.16 values, the integer cube root, integer cubes, integer bisection
+and the scaling form above -- and scoring it over the corpus gives **0.1526
+dE2000**, against the 0.152 recorded for the float64 study. Quantizing the
+coefficients costs nothing measurable.
+
+One limit is worth recording rather than discovering later. The inverse
+followed by the forward transform loses accuracy near black: OKLab
+cube-roots the cone responses, and that root's derivative,
+`1 / (3 * lms^(2/3))`, diverges as a response approaches zero -- around
+L = 0.05 it is about 1200. Restricted to in-gamut colours the worst round
+trip there is roughly 300 ULP of s16.16, about 0.005 in OKLab lightness,
+against 5 to 15 ULP above L = 0.35.
+
+This is conditioning, not a representation choice, and two plausible fixes
+were measured before that conclusion was drawn:
+
+| carried at | worst round trip at L = 0.05 | mapper dE2000 |
+| --- | --- | --- |
+| lms in Q16 (shipped) | 5 474 ULP | 0.1526 |
+| lms in Q32 | 3 655 ULP | 0.1560 |
+| XYZ in Q32 | ~1 193 ULP equivalent | -- |
+
+Widening lms makes the mapper *worse*, and widening XYZ -- which the whole
+P6 working domain would have to follow -- only improves it about fourfold.
+Neither buys anything the budget needs, so the simpler implementation ships.
+
 ## Is the feasible chroma ray actually connected?
 
 Bisection assumes it is. The reference does not, so the assumption was tested
