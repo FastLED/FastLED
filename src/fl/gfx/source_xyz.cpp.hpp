@@ -23,6 +23,28 @@ bool isUsableSourceChromaticity(Chromaticity c) FL_NO_EXCEPT {
            c.y > 1e-6f && c.y < 1.0f;
 }
 
+/// True when the three primaries enclose an actual area of chromaticity.
+///
+/// `invert3x3`'s determinant guard cannot catch a degenerate set. It rejects
+/// below 1e-20, and for chromaticities of order 1 the float32 cancellation
+/// floor is around 1e-7: primaries with red and green *identical* compute a
+/// determinant of -1.09e-7 and sail straight through, yielding an inverse
+/// scaled by 1/det -- about 9e6 -- of pure rounding noise. Measured, not
+/// assumed.
+///
+/// So the degeneracy is caught here instead, geometrically, where the
+/// quantity has meaning: twice the area of the primary triangle. A real
+/// gamut is nowhere near the threshold -- sRGB's is 0.224, three and a half
+/// thousand times larger.
+bool sourcePrimariesEncloseArea(const RgbPrimaries& primaries) FL_NO_EXCEPT {
+    const float ux = primaries.green.x - primaries.red.x;
+    const float uy = primaries.green.y - primaries.red.y;
+    const float vx = primaries.blue.x - primaries.red.x;
+    const float vy = primaries.blue.y - primaries.red.y;
+    const float twice_area = ux * vy - uy * vx;
+    return twice_area > 1e-4f || twice_area < -1e-4f;
+}
+
 /// Round-to-nearest quantization of a float into s16.16.
 i32 quantizeQ16(float v) FL_NO_EXCEPT {
     const float scaled = v * 65536.0f;
@@ -52,6 +74,9 @@ bool buildSourceMatrixQ16(const RgbPrimaries& primaries,
         !isUsableSourceChromaticity(primaries.green) ||
         !isUsableSourceChromaticity(primaries.blue) ||
         !isUsableSourceChromaticity(primaries.white)) {
+        return false;
+    }
+    if (!sourcePrimariesEncloseArea(primaries)) {
         return false;
     }
     const float xy_r[2] = {primaries.red.x, primaries.red.y};
