@@ -23,10 +23,27 @@ constexpr i32 kWhiteSlack = 64;
 /// the unity build, so an anonymous namespace does not isolate it.
 ///
 /// The shift happens in i64: a numerator near i32's range shifted left by 16
-/// needs 47 bits, which is exactly the overflow this exists to avoid.
+/// needs 47 bits.
+///
+/// The quotient is clamped before narrowing, and that is not theoretical. A
+/// dim white emitter gives a small `per_white` slope -- at a slope of one
+/// raw unit and a full-scale numerator the quotient is 2^32, past i32, where
+/// narrowing is implementation-defined and could turn a valid upper bound
+/// into zero and suppress the white entirely.
+///
+/// Clamping at full drive is decision-preserving rather than a fudge: the
+/// caller only ever takes `min` against full drive and `max` against zero,
+/// so a bound outside +/-1.0 already says "this constraint does not bind"
+/// or "infeasible", and it still says that after the clamp.
 i32 divideWhiteQ16(i32 numerator, i32 denominator) FL_NO_EXCEPT {
     const i64 scaled = static_cast<i64>(numerator) << 16;
-    return static_cast<i32>(scaled / static_cast<i64>(denominator));
+    i64 quotient = scaled / static_cast<i64>(denominator);
+    if (quotient > kWhiteFullDrive) {
+        quotient = kWhiteFullDrive;
+    } else if (quotient < -static_cast<i64>(kWhiteFullDrive)) {
+        quotient = -kWhiteFullDrive;
+    }
+    return static_cast<i32>(quotient);
 }
 
 /// Scale an s16.16 value by an s16.16 factor, rounding to nearest.
