@@ -108,7 +108,15 @@ def main() -> int:
     print(f"  SCK: GPIO{sck_pin} (output only)")
     try:
         with RpcBench(args.port) as bench:
-            schema = bench.call_flat("rpc.discover", args=[])
+            # rpc.discover is a built-in, not one of the positional-C++-param
+            # methods call_flat() exists for, so call() is the right API here.
+            # Note this is NOT what makes the discover succeed: when this
+            # script runs under `bash autoresearch`, the harness already holds
+            # an RpcBench on the same port and the second connection's
+            # responses do not come back, so discover returns None either way.
+            # Run standalone (`uv run python -m ci.autoresearch.
+            # test_rp_spi_loopback --port ...`) until that is addressed.
+            schema = bench.call("rpc.discover", timeout=30.0)
             # `call_flat` collapses a timeout or transport error to None, so a
             # failed discover is not evidence about the firmware. Reporting it
             # as a missing method sends the reader hunting for a build-config
