@@ -98,9 +98,9 @@ and A1 cannot be met by clamping.
 ## Precision: s16.16 is enough, and it is already there
 
 The selected algorithm still has to survive the working domain's arithmetic.
-Every intermediate quantized to a fixed fraction -- including the branch
-decisions inside the lightness search, not merely its result -- and the
-mapping re-scored:
+Every intermediate was quantized to a fixed number of fractional bits --
+including the branch decisions inside the lightness search, not merely its
+result -- and the mapping was then re-scored:
 
 | fraction bits | worst ΔE2000 | mean ΔE2000 | infeasible results |
 | --- | --- | --- | --- |
@@ -116,9 +116,9 @@ measurable on top of the eight-halving truncation. 14 bits passes with little
 margin, which is worth knowing: the choice is comfortable *at* 16 and
 marginal one step below.
 
-The 10-bit row scores better than the 12-bit one. That is not an error and
-not a reason to prefer it: at coarse quantization the rounding happens to
-land bisection endpoints favourably on this corpus, and nothing about that
+The 10-bit row scores better than the 12-bit one. That is neither an error
+nor a reason to prefer it: at coarse quantization the rounding happens to land
+bisection endpoints favourably on this corpus, and nothing about that
 generalises.
 
 Quantizing the lightness search matters. An earlier version of this table
