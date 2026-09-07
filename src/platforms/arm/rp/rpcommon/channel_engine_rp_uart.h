@@ -62,7 +62,7 @@ class ChannelEngineRpUart final : public IChannelDriver {
     bool mLastStartSucceeded;
     size_t mLastEncodedSize;
     u32 mLastActualBaud;
-    fl::string mLastError;
+    mutable fl::string mLastError;   // also set from const canHandle()
 };
 
 }  // namespace fl

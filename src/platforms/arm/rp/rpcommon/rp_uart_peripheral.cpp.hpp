@@ -11,6 +11,7 @@
 #include "fl/stl/stdint.h"
 
 // IWYU pragma: begin_keep
+#include "hardware/clocks.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
 #include "hardware/regs/uart.h"
@@ -92,6 +93,23 @@ bool RpUartPeripheral::configure(const RpUartConfig& config) FL_NO_EXCEPT {
 
 u32 RpUartPeripheral::actualBaudRate() const FL_NO_EXCEPT {
     return mActualBaudRate;
+}
+
+u32 RpUartPeripheral::maxBaudRate() const FL_NO_EXCEPT {
+    // The PL011 divides clk_peri by 16, so clk_peri/16 is the ceiling the
+    // hardware can actually reach. Assuming the generic 6.25 MHz value made
+    // the encoder pick a baud `uart_init()` then clamped, which the
+    // achieved-baud check rejected as "outside tolerance" -- reported on
+    // RP2350 hardware as achieved 3000000 with start refused. See #3899.
+    const u32 peri_hz = static_cast<u32>(clock_get_hz(clk_peri));
+    if (peri_hz == 0) {
+        // The SDK's uart_init() returns 0 when the UART clock is not running,
+        // so configure() would fail anyway. Reporting the generic ceiling here
+        // would let canHandle() accept a channel that can never be sent.
+        return 0;
+    }
+    const u32 hw_max = peri_hz / 16u;
+    return hw_max < kRpUartBaudCeiling ? hw_max : kRpUartBaudCeiling;
 }
 
 bool RpUartPeripheral::startTxDma(const u8* data, size_t size) FL_NO_EXCEPT {

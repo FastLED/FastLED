@@ -17,6 +17,7 @@ class RpUartPeripheral final : public IRpUartPeripheral {
 
     bool configure(const RpUartConfig& config) FL_NO_EXCEPT override;
     u32 actualBaudRate() const FL_NO_EXCEPT override;
+    u32 maxBaudRate() const FL_NO_EXCEPT override;
     bool startTxDma(const u8* data, size_t size) FL_NO_EXCEPT override;
     bool isDmaBusy() const FL_NO_EXCEPT override;
     bool isWireBusy() const FL_NO_EXCEPT override;

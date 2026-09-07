@@ -22,12 +22,23 @@ struct RpUartConfig {
 /// DMA completion only means that the UART FIFO has accepted every source
 /// byte.  `isWireBusy()` remains true while the PL011 shift register sends the
 /// final start/data/stop bits, which is why it is deliberately separate.
+/// Generic ceiling used when a backend cannot report its own clocking.
+constexpr u32 kRpUartBaudCeiling = 6250000;
+
 class IRpUartPeripheral {
   public:
     virtual ~IRpUartPeripheral() FL_NO_EXCEPT = default;
 
     virtual bool configure(const RpUartConfig& config) FL_NO_EXCEPT = 0;
     virtual u32 actualBaudRate() const FL_NO_EXCEPT = 0;
+
+    /// Highest baud this backend can actually reach, or 0 when the UART is
+    /// unusable (for example clk_peri is not running).
+    ///
+    /// The PL011 divides clk_peri by 16, so clk_peri bounds the achievable
+    /// baud. Deliberately pure: a backend that silently reported the generic
+    /// ceiling would let the engine accept timing the hardware cannot send.
+    virtual u32 maxBaudRate() const FL_NO_EXCEPT = 0;
     virtual bool startTxDma(const u8* data, size_t size) FL_NO_EXCEPT = 0;
     virtual bool isDmaBusy() const FL_NO_EXCEPT = 0;
     virtual bool isWireBusy() const FL_NO_EXCEPT = 0;
