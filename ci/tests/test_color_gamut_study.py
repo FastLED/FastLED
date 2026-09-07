@@ -16,8 +16,11 @@ from ci.color_gamut_study import (
     CANDIDATES,
     D65_WHITE,
     attainable_lightness,
+    cbrt_q16,
     emitter_matrix,
+    integer_cube_root,
     is_feasible,
+    oklch_q16,
     score_candidate,
 )
 from ci.color_reference import Xyz, _invert_3x3, delta_e2000, xyz_to_lab
@@ -181,6 +184,131 @@ class TestColorGamutStudy(unittest.TestCase):
         # noticing, which is the regression this test exists to catch.
         S16_16_BASELINE = 0.152
         self.assertLess(worst, S16_16_BASELINE * 1.05)
+
+    def _map_with_fixed_point_root(
+        self: "TestColorGamutStudy", ulp_error: int
+    ) -> float:
+        """Worst dE2000 of the selected mapper, cube root included."""
+
+        import math
+
+        from ci.color_reference import _xyz_from_oklab
+
+        def quantize(value: float) -> float:
+            return round(value * 65536) / 65536
+
+        def quantized_point(lightness: float, a: float, b: float) -> Xyz:
+            point = _xyz_from_oklab((lightness, a, b))
+            return (quantize(point[0]), quantize(point[1]), quantize(point[2]))
+
+        def attainable_quantized(lightness: float) -> float:
+            if is_feasible(self.inverse, quantized_point(lightness, 0.0, 0.0)):
+                return quantize(lightness)
+            low, high = 0.0, lightness
+            for _ in range(30):
+                middle = quantize((low + high) / 2.0)
+                if is_feasible(self.inverse, quantized_point(middle, 0.0, 0.0)):
+                    low = middle
+                else:
+                    high = middle
+            return low
+
+        worst = 0.0
+        for target, reference in self.cases:
+            polar = oklch_q16(target, ulp_error)
+            lightness = attainable_quantized(polar.lightness)
+            hue = math.radians(polar.hue_degrees)
+            cosine, sine = quantize(math.cos(hue)), quantize(math.sin(hue))
+            low, high = 0.0, quantize(polar.chroma)
+            for _ in range(8):
+                trial_chroma = quantize((low + high) / 2.0)
+                trial = quantized_point(
+                    lightness,
+                    quantize(trial_chroma * cosine),
+                    quantize(trial_chroma * sine),
+                )
+                if is_feasible(self.inverse, trial):
+                    low = trial_chroma
+                else:
+                    high = trial_chroma
+            mapped = quantized_point(
+                lightness, quantize(low * cosine), quantize(low * sine)
+            )
+            self.assertTrue(is_feasible(self.inverse, mapped))
+            worst = max(
+                worst,
+                delta_e2000(
+                    xyz_to_lab(mapped, D65_WHITE), xyz_to_lab(reference, D65_WHITE)
+                ),
+            )
+        return worst
+
+    def test_integer_cube_root_is_exact(self: "TestColorGamutStudy") -> None:
+        # The defining property, not a float comparison: this models
+        # `fl::icbrt64`, and a model that inherited float's rounding would
+        # not be evidence about the integer implementation.
+        for value in [0, 1, 7, 8, 9, 26, 27, 28, 10**6, (1 << 63)]:
+            root = integer_cube_root(value)
+            self.assertLessEqual(root**3, value)
+            self.assertGreater((root + 1) ** 3, value)
+        self.assertEqual(integer_cube_root((1 << 64) - 1), 2642245)
+
+    def test_cbrt_q16_matches_the_real_cube_root(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        # Truncation toward zero, so the error is in [0, 1) ULP of Q16 --
+        # measured against the cube root of the *quantized* input, which is
+        # the only thing the fixed-point path is given. Comparing against the
+        # root of the real value instead folds in the input's own rounding,
+        # and near zero the cube root amplifies that sharply: at v = 0.01 the
+        # derivative is about 7, so half a ULP in turns into three and a half
+        # out. That is a property of the domain, not of this implementation.
+        for numerator in range(1, 400):
+            value = numerator / 97.0
+            quantized_input = round(value * 65536) / 65536
+            got = cbrt_q16(value)
+            want = quantized_input ** (1.0 / 3.0)
+            self.assertLessEqual(got, want)
+            self.assertGreater(got, want - 1.0 / 65536)
+        self.assertEqual(cbrt_q16(-8.0), -2.0)
+        self.assertEqual(cbrt_q16(27.0), 3.0)
+
+    def test_a_fixed_point_cube_root_does_not_degrade_the_mapper(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        """The claim `src/fl/math/fixed_point/icbrt.h` exists to support.
+
+        The earlier precision test quantized every stage *around* the cube
+        root while computing the root itself in float64 -- so it measured the
+        stages on either side of it. Driving the forward transform with the
+        integer root closes that gap.
+        """
+
+        S16_16_BASELINE = 0.152
+        self.assertLess(self._map_with_fixed_point_root(0), S16_16_BASELINE * 1.05)
+
+    def test_the_cube_root_accuracy_cliff_is_where_it_is_documented(
+        self: "TestColorGamutStudy",
+    ) -> None:
+        """Pins how much cube-root error the A1 budget can absorb.
+
+        This is what says the exact integer root is not merely sufficient but
+        has room to spare, and it keeps the door open for a cheaper
+        approximation: anything holding under ~64 ULP would also pass. Without
+        it, `icbrt.h`'s recorded table is an unverifiable comment.
+        """
+
+        A1_BUDGET = 0.5
+        for ulp_error in (64, -64):
+            with self.subTest(ulp_error=ulp_error):
+                self.assertLess(self._map_with_fixed_point_root(ulp_error), A1_BUDGET)
+        # And it is a real cliff, not an asymptote -- a root off by 1024 ULP
+        # blows the budget outright.
+        for ulp_error in (1024, -1024):
+            with self.subTest(ulp_error=ulp_error):
+                self.assertGreater(
+                    self._map_with_fixed_point_root(ulp_error), A1_BUDGET
+                )
 
     def test_over_bright_targets_are_mapped_into_the_hull(
         self: "TestColorGamutStudy",

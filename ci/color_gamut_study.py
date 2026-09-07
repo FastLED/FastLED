@@ -20,6 +20,7 @@ from typeguard import typechecked
 
 from ci.color_reference import (
     Matrix3,
+    Oklch,
     Xyz,
     _invert_3x3,
     _matvec,
@@ -201,6 +202,85 @@ def attainable_lightness(inverse: Matrix3, lightness: float) -> float:
         else:
             high = middle
     return low
+
+
+Q16_ONE = 65536
+
+
+@typechecked
+def integer_cube_root(value: int) -> int:
+    """Largest integer whose cube does not exceed `value`.
+
+    Mirrors `fl::icbrt64` in `src/fl/math/fixed_point/icbrt.h`, which is what
+    the embedded mapper calls. Modelled here so the accuracy claim behind that
+    implementation is measured rather than asserted.
+    """
+
+    if value < 0:
+        raise ValueError(f"cube root domain is non-negative, got {value}")
+    if value == 0:
+        return 0
+    root = 1 << ((value.bit_length() + 2) // 3)
+    while True:
+        lower = (2 * root + value // (root * root)) // 3
+        if lower >= root:
+            return root
+        root = lower
+
+
+@typechecked
+def cbrt_q16(value: float, ulp_error: int = 0) -> float:
+    """Signed cube root as the s16.16 path computes it.
+
+    For a Q16 raw `r` standing for r/2^16, the root `y` satisfies
+    (y/2^16)^3 = r/2^16, so y^3 = r * 2^32 -- the root is the integer cube
+    root of the raw value shifted left by 32. `ulp_error` perturbs the result
+    to measure how much accuracy the mapper actually needs.
+    """
+
+    sign = -1.0 if value < 0.0 else 1.0
+    raw = round(abs(value) * Q16_ONE)
+    root = integer_cube_root(raw << 32) + ulp_error
+    return sign * max(root, 0) / Q16_ONE
+
+
+_LMS_FROM_XYZ = (
+    (0.8190224432164319, 0.3619062562801221, -0.12887378261216414),
+    (0.0329836671980271, 0.9292868468965546, 0.03614466816999844),
+    (0.048177199566046255, 0.26423952494422764, 0.6335478258136937),
+)
+_OKLAB_FROM_LMS_ROOT = (
+    (0.2104542553, 0.7936177850, -0.0040720468),
+    (1.9779984951, -2.4285922050, 0.4505937099),
+    (0.0259040371, 0.7827717662, -0.8086757660),
+)
+
+
+@typechecked
+def oklch_q16(xyz: Xyz, ulp_error: int = 0) -> Oklch:
+    """(lightness, chroma, hue degrees) with every stage quantized to Q16.
+
+    The precision study previously reached OKLCh through float64 cube roots
+    even while quantizing everything around them, which measured the stages
+    on either side of the root and not the root itself. This closes that gap.
+    """
+
+    def quantize(value: float) -> float:
+        return round(value * Q16_ONE) / Q16_ONE
+
+    lms = [
+        quantize(sum(_LMS_FROM_XYZ[i][j] * xyz[j] for j in range(3))) for i in range(3)
+    ]
+    root = [quantize(cbrt_q16(value, ulp_error)) for value in lms]
+    lab = [
+        quantize(sum(_OKLAB_FROM_LMS_ROOT[i][j] * root[j] for j in range(3)))
+        for i in range(3)
+    ]
+    return Oklch(
+        lab[0],
+        math.hypot(lab[1], lab[2]),
+        math.degrees(math.atan2(lab[2], lab[1])) % 360.0,
+    )
 
 
 @typechecked

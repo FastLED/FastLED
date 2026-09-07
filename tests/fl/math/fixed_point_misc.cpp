@@ -435,6 +435,125 @@ FL_TEST_CASE("pow boundary - far from 1.0 not snapped (#2969)") {
     FL_SUBCASE("u8x24  pow(2, 0.5)") { test_pow_above_one_unsigned_impl<u8x24>();  }
 }
 
+// =============================================================================
+// Integer and fixed-point cube root (#4041)
+// =============================================================================
+//
+// The P7 gamut mapper works in OKLab, whose forward transform needs three
+// cube roots per pixel. `docs/color-gamut-algorithm-selection.md` selects
+// eight OKLCh halvings in s16.16 and records the resulting worst error as
+// 0.152 dE2000 against an A1 budget of 0.5.
+//
+// How accurate the root has to be was measured against that budget by
+// perturbing it and re-scoring the mapper over the corpus's 20 out-of-gamut
+// vectors:
+//
+//     cube root error  |  worst dE2000
+//     ---------------- |  ------------
+//     exact            |     0.149
+//     +/-  64 ULP      |     0.200
+//     +/- 256 ULP      |     0.459   (A1's budget is 0.5 -- marginal)
+//     +/- 1024 ULP     |     1.717   (over budget)
+//
+// So ~256 ULP is the cliff and the implementation below, being exact to
+// within one ULP, clears it by more than two orders of magnitude. The point
+// of recording the curve is that a *cheaper* approximate root remains on the
+// table: anything holding under about 64 ULP would also do.
+
+FL_TEST_CASE("icbrt64 satisfies the defining property of a cube root") {
+    // y is the cube root of x exactly when y^3 <= x < (y+1)^3. Asserting the
+    // property rather than comparing against a reference means the test does
+    // not inherit a second implementation's bugs, and needs no float.
+    const fl::u64 kProbes[] = {
+        0u, 1u, 2u, 7u, 8u, 9u, 26u, 27u, 28u, 63u, 64u, 65u,
+        999u, 1000u, 1001u, 1000000u, 4294967296ull,
+        1ull << 32, 1ull << 48, 1ull << 62, 1ull << 63,
+        0xFFFFFFFFFFFFFFFFull,
+    };
+    for (fl::u64 x : kProbes) {
+        const fl::u64 y = fl::icbrt64(x);
+        FL_CHECK_LE(y * y * y, x);
+        // (y+1)^3 overflows u64 only past the largest root it can return.
+        if (y + 1 <= 2642245ull) {
+            FL_CHECK_GT((y + 1) * (y + 1) * (y + 1), x);
+        }
+    }
+}
+
+FL_TEST_CASE("icbrt64 is exact on perfect cubes and their neighbours") {
+    for (fl::u64 k = 1; k < 2000; ++k) {
+        const fl::u64 cube = k * k * k;
+        FL_CHECK_EQ(fl::icbrt64(cube), k);
+        FL_CHECK_EQ(fl::icbrt64(cube - 1), k - 1);
+        FL_CHECK_EQ(fl::icbrt64(cube + 1), k);
+    }
+    // The widest root the u64 domain can produce.
+    FL_CHECK_EQ(fl::icbrt64(0xFFFFFFFFFFFFFFFFull), 2642245u);
+}
+
+FL_TEST_CASE("s16x16 cbrt truncates toward zero, exactly") {
+    // Pins the identity the implementation rests on -- y^3 = raw * 2^32 --
+    // in integer arithmetic, so nothing here inherits float's rounding. This
+    // is what makes the error bound [0, 1) ULP rather than a tolerance.
+    for (int i = 1; i <= 4096; ++i) {
+        const fl::i32 raw = i * 524287;  // a stride coprime with 2, up to ~2^31
+        const fl::u64 x = static_cast<fl::u64>(raw) << 32;
+        const fl::u64 y = static_cast<fl::u64>(
+            fl::s16x16::cbrt(fl::s16x16::from_raw(raw)).raw());
+        FL_CHECK_LE(y * y * y, x);
+        FL_CHECK_GT((y + 1) * (y + 1) * (y + 1), x);
+    }
+}
+
+FL_TEST_CASE("s16x16 cbrt agrees with the float cube root") {
+    // A cross-check against an independent implementation. The slack is two
+    // ULPs rather than one because both sides carry error the fixed-point
+    // path does not: `s16x16(value)` truncates the input, and float32 `powf`
+    // is itself inexact near the top of the range. The exact bound is pinned
+    // in integer arithmetic by the test above.
+    for (int i = 1; i <= 4096; ++i) {
+        // 32767, not 32768: s16x16 tops out just below 2^15, and
+        // `s16x16(32768.0f)` overflows its i32 raw to INT32_MIN -- which
+        // this loop found the first time it ran to the endpoint.
+        const float value = static_cast<float>(i) * (32767.0f / 4096.0f);
+        const fl::s16x16 root = fl::s16x16::cbrt(fl::s16x16(value));
+        const float want = fl::powf(value, 1.0f / 3.0f);
+        FL_CHECK_LT(fl::fabsf(root.to_float() - want), 2.0f / 65536.0f);
+    }
+}
+
+FL_TEST_CASE("s16x16 cbrt is exact where the root is representable") {
+    FL_CHECK_EQ(fl::s16x16::cbrt(fl::s16x16(0.0f)).raw(), 0);
+    FL_CHECK_EQ(fl::s16x16::cbrt(fl::s16x16(1.0f)).raw(), fl::s16x16(1.0f).raw());
+    FL_CHECK_EQ(fl::s16x16::cbrt(fl::s16x16(8.0f)).raw(), fl::s16x16(2.0f).raw());
+    FL_CHECK_EQ(fl::s16x16::cbrt(fl::s16x16(27.0f)).raw(), fl::s16x16(3.0f).raw());
+    FL_CHECK_EQ(fl::s16x16::cbrt(fl::s16x16(-8.0f)).raw(), fl::s16x16(-2.0f).raw());
+}
+
+FL_TEST_CASE("s16x16 cbrt is odd, and its widest input does not overflow") {
+    for (int i = 1; i <= 512; ++i) {
+        const fl::s16x16 x = fl::s16x16::from_raw(i * 65536);
+        FL_CHECK_EQ(fl::s16x16::cbrt(-x).raw(), -fl::s16x16::cbrt(x).raw());
+    }
+    // INT32_MIN is the one input whose magnitude is not representable as a
+    // positive i32; negating it in 32 bits would be UB. The shift it feeds
+    // reaches exactly 2^63, the largest value the u64 domain accepts.
+    const fl::s16x16 widest = fl::s16x16::from_raw(-2147483647 - 1);
+    FL_CHECK_EQ(fl::s16x16::cbrt(widest).raw(), fl::s16x16(-32.0f).raw());
+}
+
+FL_TEST_CASE("icbrt64 and s16x16 cbrt are usable in constant expressions") {
+    // C++11 constexpr forbids loops, so both are written as tail recursion.
+    // A change that quietly makes either non-constexpr would still compile
+    // and still pass every runtime check above.
+    FL_STATIC_ASSERT(fl::icbrt64(27) == 3, "icbrt64 must be constexpr");
+    FL_STATIC_ASSERT(fl::icbrt64(0xFFFFFFFFFFFFFFFFull) == 2642245u,
+                     "icbrt64 must be constexpr across the whole domain");
+    FL_STATIC_ASSERT(fl::s16x16::cbrt(fl::s16x16::from_raw(8 * 65536)).raw() ==
+                         2 * 65536,
+                     "s16x16::cbrt must be constexpr");
+}
+
 } // anonymous namespace
 
 } // FL_TEST_FILE
