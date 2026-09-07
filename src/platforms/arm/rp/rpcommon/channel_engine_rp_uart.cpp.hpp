@@ -6,12 +6,6 @@
 
 namespace fl {
 
-namespace {
-// RP2040 PL011 is clocked from clk_peri.  Keep a conservative 6.25 MHz
-// ceiling here rather than inheriting ESP32's 5 MHz policy; the achieved-baud
-// check below is the final hardware-specific timing admission.
-constexpr u32 kRpUartMaxBaudRate = 6250000;
-}
 
 ChannelEngineRpUart::ChannelEngineRpUart(
     fl::shared_ptr<IRpUartPeripheral> peripheral, u8 uart_index) FL_NO_EXCEPT
@@ -42,8 +36,22 @@ bool ChannelEngineRpUart::isValidTxPin(int pin) const FL_NO_EXCEPT {
 }
 
 bool ChannelEngineRpUart::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
-    return data && data->isClockless() && isValidTxPin(data->getPin()) &&
-           canRepresentTimingForMaxBaud(data->getTiming(), kRpUartMaxBaudRate);
+    if (!data || !data->isClockless() || !isValidTxPin(data->getPin())) {
+        return false;
+    }
+    // Ask the backend what it can actually reach rather than assuming a fixed
+    // ceiling: the PL011 is bounded by clk_peri/16, so a slow clk_peri can put
+    // the required baud out of range entirely. Record why we declined --
+    // returning a bare false here left the diagnostic empty and made an
+    // unreachable-baud board look identical to a wiring fault. See #3899.
+    const u32 max_baud = mPeripheral ? mPeripheral->maxBaudRate()
+                                     : kRpUartBaudCeiling;
+    if (!canRepresentTimingForMaxBaud(data->getTiming(), max_baud)) {
+        mLastError = "RP UART: chipset timing needs a baud above this board's "
+                     "clk_peri/16 ceiling";
+        return false;
+    }
+    return true;
 }
 
 void ChannelEngineRpUart::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
@@ -157,8 +165,9 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
         mLastError = mError;
         return false;
     }
-    const Wave10Lut lut = buildWave10LutForMaxBaud(channel->getTiming(),
-                                                    kRpUartMaxBaudRate);
+    const Wave10Lut lut = buildWave10LutForMaxBaud(
+        channel->getTiming(),
+        mPeripheral ? mPeripheral->maxBaudRate() : kRpUartBaudCeiling);
     if (lut.pulses_per_bit == 0) {
         mError = "RP UART: timing is not representable";
         mLastError = mError;
