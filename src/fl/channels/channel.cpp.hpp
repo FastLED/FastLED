@@ -177,7 +177,8 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
     if (channel->reconcileColorProfile(config.options)) {
-        events.onColorProfileFallback({channel->id(), channel->colorProfileStatus(), {}});
+        events.onColorProfileFallback(
+            ColorProfileEvent{channel->id(), channel->colorProfileStatus(), {}});
     }
 #endif
     channel->mName = makeName(channel->mId, config.mName);
@@ -334,7 +335,7 @@ void Channel::applyConfig(const ChannelConfig& config) {
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
     if (reconcileColorProfile(config.options)) {
-        events.onColorProfileFallback({id(), colorProfileStatus(), {}});
+        events.onColorProfileFallback(ColorProfileEvent{id(), colorProfileStatus(), {}});
     }
 #endif
     events.onChannelConfigured(*this, config);

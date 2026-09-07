@@ -285,6 +285,34 @@ FL_TEST_CASE("Enum selector resolves to the static profile for actual channel cr
     FL_CHECK_EQ(channel->emitterProfile(), &profiles::WS2812B);
 }
 
+// A rejected profile must not consume the one-time warning. clearColorProfile()
+// leaves mCorrection/mTemperature untouched, so if the flag were spent on the
+// rejected attempt the next valid profile would clear the caller's legacy
+// settings with no warning at all.
+FL_TEST_CASE("A rejected profile does not consume the legacy-cleared warning") {
+    ChannelOptions options;
+    fl::vector<ColorProfileEvent> events;
+    const int listener = FastLED.channelEvents().onColorProfileWarning.add(
+        [&](const ColorProfileEvent& event) { events.push_back(event); });
+
+    options.setLegacyCorrection(CRGB(255, 128, 64));
+
+    // Rejected: a zero native code depth fails validation.
+    EmitterProfile invalid = kFixtureProfile;
+    invalid.native_code_depth = 0;
+    FL_REQUIRE_FALSE(options.setColorProfile(invalid));
+    FL_CHECK_EQ(events.size(), size_t(0));
+
+    // The valid profile that follows is the one that actually clears the
+    // legacy correction, so it must be the one that warns.
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile));
+    FastLED.channelEvents().onColorProfileWarning.remove(listener);
+
+    FL_REQUIRE_EQ(events.size(), size_t(1));
+    FL_CHECK_EQ(events[0].warning, ColorProfileWarning::LegacyClearedByProfile);
+    FL_CHECK_EQ(options.mCorrection, UncorrectedColor);
+}
+
 FL_TEST_CASE("Legacy and profile transitions emit one warning event per direction") {
     ChannelOptions options;
     fl::vector<ColorProfileEvent> events;

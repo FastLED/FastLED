@@ -86,12 +86,9 @@ struct ChannelOptions {
         FL_UNUSED(profile); FL_UNUSED(source); FL_UNUSED(global_source); FL_UNUSED(gamut);
         return false;
 #else
-        if (!hasColorProfile() && (mCorrection != UncorrectedColor || mTemperature != UncorrectedTemperature) &&
-            !mWarnedLegacyCleared) {
-            FL_WARN_F("Color profile clears legacy correction/temperature");
-            ChannelEvents::instance().onColorProfileWarning({-1, {}, ColorProfileWarning::LegacyClearedByProfile});
-            mWarnedLegacyCleared = true;
-        }
+        // Captured before mStaticProfile is cleared below, so the warning
+        // condition still sees whether a profile was bound on entry.
+        const bool had_profile = hasColorProfile();
         mColorProfile.mStaticProfile = nullptr;
         if (profile.native_code_depth == 0 || profile.native_code_depth > 16 ||
             !validChromaticity(profile.xy_r) || !validChromaticity(profile.xy_g) ||
@@ -107,6 +104,18 @@ struct ChannelOptions {
             !monotonic(profile.response_lut_b, profile.response_lut_size)) {
             clearColorProfile();
             return false;
+        }
+        // Warn only once validation has passed. Warning earlier consumed
+        // mWarnedLegacyCleared on a profile that was then rejected, and
+        // clearColorProfile() leaves mCorrection/mTemperature alone -- so the
+        // next *valid* profile cleared the caller's legacy settings silently.
+        if (!had_profile &&
+            (mCorrection != UncorrectedColor || mTemperature != UncorrectedTemperature) &&
+            !mWarnedLegacyCleared) {
+            FL_WARN_F("Color profile clears legacy correction/temperature");
+            ChannelEvents::instance().onColorProfileWarning(
+                ColorProfileEvent{-1, {}, ColorProfileWarning::LegacyClearedByProfile});
+            mWarnedLegacyCleared = true;
         }
         mColorProfile.mStorage = fl::make_shared<ColorProfileStorage>(profile);
         mColorProfile.mSource = source;
@@ -221,7 +230,8 @@ private:
 #if FL_COLOR_PROFILE_RUNTIME
         if (hasColorProfile() && !mWarnedProfileCleared) {
             FL_WARN_F("Legacy correction/temperature clears color profile");
-            ChannelEvents::instance().onColorProfileWarning({-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
+            ChannelEvents::instance().onColorProfileWarning(
+                ColorProfileEvent{-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
             mWarnedProfileCleared = true;
         }
 #endif
