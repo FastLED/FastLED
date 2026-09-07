@@ -13,6 +13,7 @@ import asyncio
 import base64
 import hashlib
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -20,7 +21,7 @@ import httpx
 from colorama import Fore, Style
 
 from ci.autoresearch.net import create_wifi_manager
-from ci.rpc_client import RpcClient, RpcTimeoutError
+from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -44,6 +45,67 @@ def _served_request_count(status: dict[str, Any]) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         return 0
     return value if value >= 0 else 0
+
+
+async def _settle_link(
+    client: "RpcClient",
+    label: str,
+    remaining_timeout: "Callable[[], float]",
+) -> None:
+    """Ping `client` until it answers, or raise naming the board that did not.
+
+    Exists because the opening request of the peer-OTA run could time out
+    against a device that was demonstrably healthy on both sides of the
+    window. Without this the failure surfaced as a bare
+    `No response with ID 1`, which names neither the board nor the call.
+
+    `remaining_timeout` is the run's own budget helper. Settling must not
+    invent a window of its own: three fixed 10 s pings plus their backoffs
+    could outlast a shorter caller deadline, so each ping is clamped to
+    whatever the run has left and raises once that is exhausted.
+    """
+    last: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            await client.send("ping", {}, timeout=min(10.0, remaining_timeout()))
+            if attempt > 1:
+                print(f"  {label} link settled after {attempt} attempts")
+            return
+        except KeyboardInterrupt as ki:
+            # Not strictly required -- KeyboardInterrupt derives from
+            # BaseException, so the tuple below never catches it. Kept
+            # explicit so a later widening of that tuple cannot silently
+            # start swallowing Ctrl-C mid-retry. A bare `raise` would trip
+            # KBI002: this repo requires the handler notify the main thread.
+            handle_keyboard_interrupt(ki)
+            raise
+        except (RpcError, RpcTimeoutError, RuntimeError) as exc:
+            # RuntimeError is here because a failed *write* arrives as one:
+            # `PyserialMonitor.write` converts `serial.SerialException` into
+            # `RuntimeError("Serial write error: ...")`, and `RpcClient.send`
+            # only retries `RpcTimeoutError`, so it comes straight out. Left
+            # uncaught it defeats the point of this helper twice over -- no
+            # retry, and a bare transport error naming neither the board nor
+            # the call, which is exactly the failure #3956 was about.
+            #
+            # Normalizing that at the `RpcClient.send` boundary would be the
+            # better home for it, and is not this change's to make: 31
+            # modules use RpcClient, and some of them (ci/autoresearch/
+            # decode.py) rely on a bare `except RuntimeError` to report
+            # transport failures cleanly. Filed separately.
+            #
+            # The cost of the wider catch is that a genuine bug retries twice
+            # before surfacing. It still surfaces: the raised error carries
+            # the original text.
+            last = exc
+            print(f"  {label} did not answer ping (attempt {attempt}/3): {exc}")
+            # No backoff after the final attempt -- it would just delay the
+            # error by 2 s.
+            if attempt < 3:
+                await asyncio.sleep(2.0)
+    raise RpcTimeoutError(
+        f"{label} did not answer ping after 3 attempts; last error: {last}"
+    )
 
 
 async def run_ota_peer_autoresearch(
@@ -106,6 +168,16 @@ async def run_ota_peer_autoresearch(
         )
         await primary.connect(boot_wait=3.0, drain_boot=True)
         await peer.connect(boot_wait=3.0, drain_boot=True)
+
+        # Settle both links before the first real call. The peer flash runs
+        # for ~60-90 s after the primary's, and the first request on the
+        # primary was timing out even though the device answered `status`
+        # immediately when queried standalone a moment later, and had just
+        # served a schema fetch (FastLED#3956). One dropped opening request
+        # should not sink the whole run, so ping with a bounded retry and
+        # report which link is at fault when it genuinely is unreachable.
+        await _settle_link(primary, "RP2350W", rpc_timeout)
+        await _settle_link(peer, "ESP32-C6", rpc_timeout)
 
         primary_status = await rpc_data(primary, "status", {})
         peer_status = await rpc_data(peer, "status", {})
