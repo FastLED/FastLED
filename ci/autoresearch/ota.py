@@ -61,6 +61,14 @@ async def _settle_link(client: "RpcClient", label: str) -> None:
             if attempt > 1:
                 print(f"  {label} link settled after {attempt} attempts")
             return
+        except KeyboardInterrupt as ki:
+            # Not strictly required -- KeyboardInterrupt derives from
+            # BaseException, so the tuple below never catches it. Kept
+            # explicit so a later widening of that tuple cannot silently
+            # start swallowing Ctrl-C mid-retry. A bare `raise` would trip
+            # KBI002: this repo requires the handler notify the main thread.
+            handle_keyboard_interrupt(ki)
+            raise
         except (RpcError, RpcTimeoutError) as exc:
             last = exc
             print(f"  {label} did not answer ping (attempt {attempt}/3): {exc}")
