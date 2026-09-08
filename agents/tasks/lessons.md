@@ -130,3 +130,34 @@
   Anything addressing the board by the old by-id path silently stops resolving
   and presents as a missing board. The serial is stable across both variants,
   which is why fbuild's `SER=<serial>` selector is the robust way to address it.
+- A single artifact is not a sample when the property depends on cache-hit
+  status. I cleared the "missing exec bit" hypothesis (#4205) after checking
+  `tests/runner` alone and finding it executable — it had simply been freshly
+  linked rather than served from cache that run. A later survey found 4 of 4
+  ELF executables in the build dir lacking `+x`. Enumerate the whole class
+  before ruling out a permissions or attribute defect.
+- Finding a real bug in the right subsystem is not the same as finding the
+  cause. `mtime_stabilizer.py` genuinely matched 0 of 383 outputs on Linux
+  (it globbed only `*.dll`), and fixing it was correct — but the #4212 stale
+  failures recurred, because the stabilizer compares outputs against *input
+  file* mtimes while the #3011 guard compares against *build start*. Different
+  comparison, so satisfying one says nothing about the other. Re-run and
+  confirm the symptom actually clears before claiming causation.
+- When a build system reports an opaque wrapper error, force the underlying
+  exception out before theorising. `ERROR: Unhandled python OSError ... return
+  code 13` named neither the file nor the errno; `MESON_FORCE_BACKTRACE=1`
+  turned it into `PermissionError: [Errno 13] Permission denied: <path>` in
+  one step. The "13" was the errno, not an exit code — the message actively
+  misdirects.
+- Check what a manifest actually is before calling it truncated. `help`
+  returning 36 of `rpc.discover`'s 72 methods looked like a response-size cap;
+  it is a hand-maintained `kHelpEntries[]` table in
+  `AutoResearchRemotePinMethods.cpp`. A new RPC method must be added there too
+  or `--rpc-smoke` fails on it.
+- On RP, `ClocklessController` acquires PIO/DMA/pin resources in `init()` and
+  every `release*` call in `clockless_rp_pio.h` is an error-path rollback.
+  Before #4214 there was no destructor, so successful controllers leaked their
+  state machine, program space, DMA channel, pin claim, and `dma_buf` — and
+  left `dma_chan_waits[]` pointing at a destroyed `mWait` for the shared ISR.
+  When testing resource arbitration, always include a control leg that claims
+  and then releases; the starved leg alone cannot see a leak.
