@@ -306,6 +306,11 @@ public:
                 mPioOffset = -1;
             }
             resources.releasePioStateMachine(mPio, mSm);
+            // Undo pio_gpio_init(): releasing the pin in the ledger alone
+            // leaves the pad muxed to a now-disabled PIO and still driving.
+            // Matches the teardown in rp_pio_tx_peripheral.cpp.hpp.
+            gpio_set_function(DATA_PIN, GPIO_FUNC_SIO);
+            gpio_set_dir(DATA_PIN, GPIO_IN);
             resources.releasePins(DATA_PIN, 1);
             mPio = nullptr;
             mSm = -1;
