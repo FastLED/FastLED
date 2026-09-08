@@ -552,6 +552,7 @@ async def run_net_peer_autoresearch(
             rp_ip: str | None = None
             wifi_status: dict[str, Any] = {}
             join_started = time.monotonic()
+            polls = 0
             for _ in range(kJoinPollAttempts):
                 # Stop polling once the whole-run deadline is close enough that
                 # continuing would starve the remaining cycles -- and, more
@@ -559,6 +560,7 @@ async def run_net_peer_autoresearch(
                 # diagnostics below need in order to report at all.
                 if deadline - time.monotonic() < kJoinReserveSeconds:
                     break
+                polls += 1
                 wifi_status = await rpc_data(primary, "wifiStatus")
                 candidate_ip = wifi_status.get("ip")
                 if wifi_status.get("connected") and isinstance(candidate_ip, str):
@@ -571,10 +573,19 @@ async def run_net_peer_autoresearch(
                 # is indistinguishable between "still associating", "auth
                 # rejected" and "associated but no DHCP lease", which are three
                 # different problems with three different fixes.
+                # Report the polls actually made. Quoting the configured
+                # maximum would overstate the evidence whenever the deadline
+                # reserve cut the loop short, which is exactly the case a
+                # reader needs to distinguish from a full unsuccessful sweep.
+                cut_short = (
+                    " (stopped early to reserve deadline for this report)"
+                    if polls < kJoinPollAttempts
+                    else ""
+                )
                 raise RpcTimeoutError(
                     "RP2350W did not join the ESP32-C6 AP after "
-                    f"{join_elapsed:.1f}s ({kJoinPollAttempts} polls); "
-                    f"last wifiStatus={wifi_status!r}"
+                    f"{join_elapsed:.1f}s across {polls} wifiStatus "
+                    f"poll(s){cut_short}; last wifiStatus={wifi_status!r}"
                 )
             print(f"  RP2350W joined in {join_elapsed:.1f}s -> {rp_ip}")
 
