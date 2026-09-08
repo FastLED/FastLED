@@ -90,6 +90,13 @@ ParlioRawTestState& parlioRawTestState() {
 fl::json autoResearchDeviceJson(const fl::string& name) {
     if (name == "RMT") return fl::deviceJson<fl::Bus::RMT>();
     if (name == "SPI" || name == "SPI_UNIFIED") return fl::deviceJson<fl::Bus::SPI>();
+    // RP registers its two fixed PL022 blocks under the concrete names
+    // "SPI0"/"SPI1". Without these they fell through to the generic tail
+    // below, which hardcodes which=0 and echoes the driver name into
+    // bus_name/vendor_name/device_name -- so `drivers` reported SPI1 with
+    // which=0 and no real bus metadata, unlike UART0/UART1 and PIO0/1/2.
+    if (name == "SPI0") return fl::deviceJson<fl::Bus::SPI, 0>();
+    if (name == "SPI1") return fl::deviceJson<fl::Bus::SPI, 1>();
     if (name == "UART" || name == "LPUART" || name == "UART0") {
         return fl::deviceJson<fl::Bus::UART, 0>();
     }
