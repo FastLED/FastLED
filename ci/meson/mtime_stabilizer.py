@@ -192,12 +192,18 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
                 continue
             if not _is_native_executable(candidate):
                 continue
+            # Fail loudly rather than continuing: an executable we cannot
+            # chmod is one the test runner will die on later with an opaque
+            # PermissionError, which is the exact failure this function
+            # exists to prevent.
             try:
                 # Mirror the read bits, the way a linker would.
                 readable = mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
                 os.chmod(candidate, mode | (readable >> 2))
-            except OSError:
-                continue
+            except OSError as exc:
+                raise OSError(
+                    f"cannot restore the executable bit on {candidate}: {exc}"
+                ) from exc
             restored += 1
 
     if restored > 0:

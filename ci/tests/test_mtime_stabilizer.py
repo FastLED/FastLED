@@ -8,12 +8,24 @@ test with "DLL mtime predates this build's start".
 """
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
-from ci.meson.mtime_stabilizer import stabilize_dll_mtimes
+from typeguard import typechecked
+
+from ci.meson.mtime_stabilizer import restore_executable_bits, stabilize_dll_mtimes
 
 
-def _build_tree(root: Path, suffix: str) -> tuple[Path, Path]:
+@typechecked
+@dataclass
+class BuildTree:
+    """The two paths a stabilizer test needs to reason about."""
+
+    symbols: Path
+    dll: Path
+
+
+def _build_tree(root: Path, suffix: str) -> BuildTree:
     """Lay out the parts of a build directory the stabilizer looks at."""
     native = root / "ci" / "meson" / "native"
     (native / f"fastled.{suffix}.p").mkdir(parents=True)
@@ -24,7 +36,7 @@ def _build_tree(root: Path, suffix: str) -> tuple[Path, Path]:
     (root / "examples").mkdir()
     dll = root / "tests" / f"cled_controller.{suffix}"
     dll.write_text("payload")
-    return symbols, dll
+    return BuildTree(symbols=symbols, dll=dll)
 
 
 def _age(path: Path, seconds: float) -> None:
@@ -37,7 +49,8 @@ def test_stabilizes_every_host_shared_library_suffix(tmp_path: Path) -> None:
     for suffix in ("dll", "so", "dylib"):
         root = tmp_path / suffix
         root.mkdir()
-        symbols, dll = _build_tree(root, suffix)
+        tree = _build_tree(root, suffix)
+        symbols, dll = tree.symbols, tree.dll
 
         # zccache restores the link result with its original, older mtime.
         _age(dll, 7 * 3600)
@@ -49,7 +62,8 @@ def test_stabilizes_every_host_shared_library_suffix(tmp_path: Path) -> None:
 
 def test_leaves_already_fresh_outputs_alone(tmp_path: Path) -> None:
     """A fresh link must not be touched, so real staleness still shows."""
-    symbols, dll = _build_tree(tmp_path, "so")
+    tree = _build_tree(tmp_path, "so")
+    symbols, dll = tree.symbols, tree.dll
     _age(symbols, 60)
     before = dll.stat().st_mtime
 
@@ -60,7 +74,8 @@ def test_leaves_already_fresh_outputs_alone(tmp_path: Path) -> None:
 def test_symbols_file_alone_establishes_the_input_mtime(tmp_path: Path) -> None:
     """libcrash_handler.a is absent here; the suffix-matched symbols file must
     still be found, otherwise the stabilizer bails out with nothing to do."""
-    symbols, dll = _build_tree(tmp_path, "so")
+    tree = _build_tree(tmp_path, "so")
+    symbols, dll = tree.symbols, tree.dll
     _age(dll, 7 * 3600)
 
     assert not (tmp_path / "ci" / "meson" / "native" / "libcrash_handler.a").exists()
@@ -76,8 +91,6 @@ def _elf(path: Path, mode: int = 0o644) -> Path:
 
 def test_restores_lost_executable_bit(tmp_path: Path) -> None:
     """A cache-restored binary comes back without +x; the run dies on it."""
-    from ci.meson.mtime_stabilizer import restore_executable_bits
-
     (tmp_path / "tests").mkdir()
     (tmp_path / "examples").mkdir()
     runner = _elf(tmp_path / "tests" / "runner")
@@ -92,8 +105,6 @@ def test_restores_lost_executable_bit(tmp_path: Path) -> None:
 
 def test_leaves_libraries_and_data_files_alone(tmp_path: Path) -> None:
     """Shared objects and non-binaries must not be marked executable."""
-    from ci.meson.mtime_stabilizer import restore_executable_bits
-
     (tmp_path / "tests").mkdir()
     (tmp_path / "examples").mkdir()
     lib = _elf(tmp_path / "tests" / "fastled_core.so")
