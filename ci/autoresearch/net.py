@@ -437,6 +437,32 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
+    """Print the sub-test tally so the payload leg is visible, not inferred.
+
+    runNetClientTest only surfaces a single `success` boolean, but that boolean
+    is `passed == 12` over a fixed battery that includes the 4096-byte FNV-1a
+    POST /echo round trip. #3899 asks for decisive evidence of >=4 KiB payloads
+    in both directions, so print the tally and the payload row rather than
+    leaving it to be deduced from the exit status.
+    """
+    passed = data.get("tests_passed")
+    failed = data.get("tests_failed")
+    print(f"  {label}: tests_passed={passed} tests_failed={failed}")
+    results = data.get("results")
+    if not isinstance(results, list):
+        return
+    for entry in results:
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("test", ""))
+        if "echo" in name.lower() or "byte" in name.lower():
+            print(
+                f"    {label} payload: test={name!r} "
+                f"bytes={entry.get('bytes')} passed={entry.get('passed')}"
+            )
+
+
 async def run_net_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -562,6 +588,7 @@ async def run_net_peer_autoresearch(
             )
             if not rp_to_c6.get("success"):
                 raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
+            _summarize_client_tests("RP2350W -> ESP32-C6", rp_to_c6)
             c6_to_rp = await rpc_data(
                 peer,
                 "runNetClientTest",
@@ -570,6 +597,7 @@ async def run_net_peer_autoresearch(
             )
             if not c6_to_rp.get("success"):
                 raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")
+            _summarize_client_tests("ESP32-C6 -> RP2350W", c6_to_rp)
 
             stop_result = await rpc_data(primary, "stopNet")
             if not stop_result.get("success"):
