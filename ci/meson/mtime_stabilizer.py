@@ -30,6 +30,7 @@ import stat
 import time
 from pathlib import Path
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
@@ -93,6 +94,9 @@ def stabilize_dll_mtimes(build_dir: Path, verbose: bool = False) -> int:
                 mtime = abs_path.stat().st_mtime
                 if mtime > max_input_mtime:
                     max_input_mtime = mtime
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
             except OSError:
                 pass
 
@@ -124,6 +128,9 @@ def stabilize_dll_mtimes(build_dir: Path, verbose: bool = False) -> int:
             if output_mtime <= max_input_mtime:
                 os.utime(str(output_path), (touch_time, touch_time))
                 touched += 1
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except OSError:
             pass
 
@@ -160,6 +167,9 @@ def _is_native_executable(path: Path) -> bool:
     try:
         with open(path, "rb") as handle:
             magic = handle.read(4)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except OSError as exc:
         raise OSError(f"cannot inspect {path} for an executable header: {exc}") from exc
     return magic == _ELF_MAGIC or magic in _MACHO_MAGICS
@@ -189,11 +199,17 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
             continue
         try:
             entries = sorted(target_dir.iterdir())
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except OSError as exc:
             raise OSError(f"cannot list {target_dir}: {exc}") from exc
         for candidate in entries:
             try:
                 is_file = candidate.is_file()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
             except OSError as exc:
                 raise OSError(f"cannot stat {candidate}: {exc}") from exc
             if not is_file or candidate.suffix in _NON_EXECUTABLE_SUFFIXES:
@@ -203,6 +219,9 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
             # runner then dies on.
             try:
                 mode = candidate.stat().st_mode
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
             except OSError as exc:
                 raise OSError(f"cannot stat {candidate}: {exc}") from exc
             if mode & 0o111:
@@ -217,6 +236,9 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
                 # Mirror the read bits, the way a linker would.
                 readable = mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
                 os.chmod(candidate, mode | (readable >> 2))
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
             except OSError as exc:
                 raise OSError(
                     f"cannot restore the executable bit on {candidate}: {exc}"
