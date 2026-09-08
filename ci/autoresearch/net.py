@@ -445,22 +445,47 @@ def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
     POST /echo round trip. #3899 asks for decisive evidence of >=4 KiB payloads
     in both directions, so print the tally and the payload row rather than
     leaving it to be deduced from the exit status.
+
+    A missing field is treated as a failure rather than printed as None: the
+    point of this function is to make the payload leg auditable, and a report
+    that cannot substantiate it is not evidence of a pass.
     """
-    passed = data.get("tests_passed")
-    failed = data.get("tests_failed")
-    print(f"  {label}: tests_passed={passed} tests_failed={failed}")
+    for field in ("tests_passed", "tests_failed"):
+        value = data.get(field)
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise RpcError(
+                f"{label}: runNetClientTest response is missing an integer "
+                f"{field!r}; cannot substantiate the payload leg: {data!r}"
+            )
     results = data.get("results")
     if not isinstance(results, list):
-        return
-    for entry in results:
-        if not isinstance(entry, dict):
-            continue
-        name = str(entry.get("test", ""))
-        if "echo" in name.lower() or "byte" in name.lower():
-            print(
-                f"    {label} payload: test={name!r} "
-                f"bytes={entry.get('bytes')} passed={entry.get('passed')}"
-            )
+        raise RpcError(
+            f"{label}: runNetClientTest response has no 'results' array; "
+            f"cannot substantiate the payload leg: {data!r}"
+        )
+    print(
+        f"  {label}: tests_passed={data['tests_passed']} "
+        f"tests_failed={data['tests_failed']}"
+    )
+    payload_rows = [
+        entry
+        for entry in results
+        if isinstance(entry, dict)
+        and (
+            "echo" in str(entry.get("test", "")).lower()
+            or "byte" in str(entry.get("test", "")).lower()
+        )
+    ]
+    if not payload_rows:
+        raise RpcError(
+            f"{label}: no payload echo row in runNetClientTest results; "
+            f"the >=4 KiB leg did not run: {results!r}"
+        )
+    for entry in payload_rows:
+        print(
+            f"    {label} payload: test={entry.get('test')!r} "
+            f"bytes={entry.get('bytes')} passed={entry.get('passed')}"
+        )
 
 
 async def run_net_peer_autoresearch(
