@@ -150,12 +150,18 @@ _MACHO_MAGICS = {
 
 
 def _is_native_executable(path: Path) -> bool:
-    """Whether the file starts with a native executable magic number."""
+    """Whether the file starts with a native executable magic number.
+
+    Read errors propagate. Treating an unreadable file as "not an
+    executable" would silently skip exactly the artifact this module exists
+    to repair, and the run would then fail later on a PermissionError with
+    no connection to the real cause.
+    """
     try:
         with open(path, "rb") as handle:
             magic = handle.read(4)
-    except OSError:
-        return False
+    except OSError as exc:
+        raise OSError(f"cannot inspect {path} for an executable header: {exc}") from exc
     return magic == _ELF_MAGIC or magic in _MACHO_MAGICS
 
 
@@ -181,13 +187,24 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
         target_dir = build_dir / directory
         if not target_dir.is_dir():
             continue
-        for candidate in sorted(target_dir.iterdir()):
-            if not candidate.is_file() or candidate.suffix in _NON_EXECUTABLE_SUFFIXES:
+        try:
+            entries = sorted(target_dir.iterdir())
+        except OSError as exc:
+            raise OSError(f"cannot list {target_dir}: {exc}") from exc
+        for candidate in entries:
+            try:
+                is_file = candidate.is_file()
+            except OSError as exc:
+                raise OSError(f"cannot stat {candidate}: {exc}") from exc
+            if not is_file or candidate.suffix in _NON_EXECUTABLE_SUFFIXES:
                 continue
+            # A stat failure is an inspection failure, not evidence that the
+            # file needs nothing; swallowing it would skip a binary that the
+            # runner then dies on.
             try:
                 mode = candidate.stat().st_mode
-            except OSError:
-                continue
+            except OSError as exc:
+                raise OSError(f"cannot stat {candidate}: {exc}") from exc
             if mode & 0o111:
                 continue
             if not _is_native_executable(candidate):

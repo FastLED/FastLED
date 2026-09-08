@@ -11,6 +11,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+import pytest
 from typeguard import typechecked
 
 from ci.meson.mtime_stabilizer import restore_executable_bits, stabilize_dll_mtimes
@@ -114,3 +115,23 @@ def test_leaves_libraries_and_data_files_alone(tmp_path: Path) -> None:
     assert restore_executable_bits(tmp_path) == 0
     assert not lib.stat().st_mode & 0o111
     assert not data.stat().st_mode & 0o111
+
+
+def test_unreadable_binary_raises_instead_of_being_skipped(tmp_path: Path) -> None:
+    """An inspection failure must not read as "nothing to do".
+
+    Silently skipping a file we cannot inspect drops exactly the artifact
+    this module repairs, and the run then dies later on a PermissionError
+    with no connection to the cause.
+    """
+    from ci.meson.mtime_stabilizer import restore_executable_bits
+
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "examples").mkdir()
+    binary = _elf(tmp_path / "tests" / "runner", mode=0o000)  # unreadable
+
+    try:
+        with pytest.raises(OSError, match="cannot inspect"):
+            restore_executable_bits(tmp_path)
+    finally:
+        os.chmod(binary, 0o644)  # let tmp_path cleanup succeed
