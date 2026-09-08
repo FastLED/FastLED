@@ -987,6 +987,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         "ws2814": "WS2814",
         "ws2818": "WS2818",
         "ucs7604": "UCS7604-800KHZ",
+        "ws2811-400": "WS2811-400KHZ",
     }
     timing_name = chipset_timing_map.get(args.chipset, "WS2812B-V5")
 
