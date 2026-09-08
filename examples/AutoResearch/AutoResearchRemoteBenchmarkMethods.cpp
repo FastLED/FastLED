@@ -209,15 +209,32 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             response.set("error", "out_of_range");
             return response;
         }
+        // Six timed loops each run `iterations` times, so the wall time is
+        // roughly 6 * iterations * ns. AutoResearch's loop watchdog is 5 s;
+        // cap the estimate well under it so a large ns cannot turn this probe
+        // into a watchdog reset on an unattended bench.
+        constexpr fl::u64 kMaxProbeNs = 2000000000ULL;  // 2 s
+        const fl::u64 estimated_ns =
+            static_cast<fl::u64>(iterations) * static_cast<fl::u64>(ns) * 6ULL;
+        if (estimated_ns > kMaxProbeNs) {
+            response.set("success", false);
+            response.set("error", "duration_budget_exceeded");
+            response.set("estimated_ns", static_cast<int64_t>(estimated_ns));
+            response.set("budget_ns", static_cast<int64_t>(kMaxProbeNs));
+            return response;
+        }
 
         const fl::u32 requested_ns = static_cast<fl::u32>(ns);
         const fl::u32 hz = static_cast<fl::u32>(FL_CPU_FREQUENCY());
 
-        // Baseline: same loop shape, no payload.
-        volatile int sink = 0;
+        // Baseline: same loop shape, no payload. An empty memory barrier
+        // keeps the loop alive without adding work of its own -- the previous
+        // `volatile int` read-modify-write costs a load, add and store to
+        // memory every iteration, which inflates nop_per and therefore
+        // under-reports every overhead computed by subtracting it.
         const fl::u32 nop_t0 = fl::micros();
         for (int i = 0; i < iterations; ++i) {
-            sink += 1;
+            __asm__ __volatile__("" ::: "memory");
         }
         const fl::u32 nop_us = fl::micros() - nop_t0;
 
@@ -239,6 +256,17 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         // slow, the cost is inside the busy-wait. Fixed at 400ns (WS2812 T0H)
         // because a template argument cannot come from the RPC payload -- the
         // `ns` parameter only steers the runtime variants above.
+        // Runtime form pinned to 400 ns. ns_conversion_us subtracts the
+        // compile-time 400 ns loop, and the compile-time form cannot take its
+        // duration from the RPC payload -- so comparing it against the
+        // caller-supplied `ns` above would difference two different delays
+        // and misattribute the gap to conversion cost.
+        const fl::u32 delay_hz400_t0 = fl::micros();
+        for (int i = 0; i < iterations; ++i) {
+            fl::delayNanoseconds(400u, hz);
+        }
+        const fl::u32 delay_hz400_us = fl::micros() - delay_hz400_t0;
+
         const fl::u32 delay_ct_t0 = fl::micros();
         for (int i = 0; i < iterations; ++i) {
             fl::delayNanoseconds<400>();
@@ -247,7 +275,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
 
         // Pure cycle-counted loop: no ns->cycles conversion and no platform
         // busy-wait wrapper. This is the floor a hand-rolled bit loop could
-        // reach. 60 cycles ~= 400ns at 150MHz. delaycycles<> is specialized
+        // reach. The board reports cpu_hz=125000000, so 400ns is 50 cycles;
+        // 60 is kept as a small deliberate overshoot. delaycycles<> is specialized
         // only up to 50 with no generic fallback, so 60 is composed from two
         // specializations rather than written as delaycycles<60>(), which is
         // an undefined reference at link time.
@@ -279,7 +308,6 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         if (pin >= 0) {
             fl::digitalWrite(pin, fl::PinValue::Low);
         }
-        (void)sink;
 
         const double denom = static_cast<double>(iterations);
         const double nop_per = static_cast<double>(nop_us) / denom;
@@ -304,8 +332,11 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("delay_ct_overhead_us", delay_ct_per - nop_per);
         response.set("delay_cycles_overhead_us", delay_cyc_per - nop_per);
         // Cost attributable to the runtime ns->cycles conversion: the gap
-        // between the runtime and compile-time forms at the same 400ns.
-        response.set("ns_conversion_us", delay_hz_per - delay_ct_per);
+        // between the runtime and compile-time forms, both at 400 ns.
+        const double delay_hz400_per =
+            static_cast<double>(delay_hz400_us) / iterations;
+        response.set("delay_hz400_us_per_iter", delay_hz400_per);
+        response.set("ns_conversion_us", delay_hz400_per - delay_ct_per);
         response.set("clock_query_us", delay_per - delay_hz_per);
         // One clockless bit issues three delays and three writeByte calls.
         response.set("predicted_bit_overhead_us",
