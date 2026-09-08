@@ -90,6 +90,7 @@ static const HelpEntry kHelpEntries[] = {
     {"debugTest", "Phase 4: Utility", "object", "{success, received}", "Echo an exact nested JSON payload"},
     {"testNoSerial", "Phase 4: Utility", "[]", "{success, message, serial_safe}", "Verify RPC execution without device-side serial logging"},
     {"testRpConcurrency", "Phase 4: Utility", "[]", "{success, supported, backend, core1Ready, core1Done, recursiveMutexReady, generation, expected, actual}", "Exercise mutex and semaphore synchronization across both RP physical cores"},
+    {"testRpPioContention", "Phase 4: Utility", "[]", "{success, numPios, pin, baselineFreeSms, control:{proxyValid, freeDuring, claimedOne, freeAfter, released}, contention:{starvedSms, freeAfterStarve, proxyValid, claimsIntact, noTheft, survivedShow, freeAfter}, noLeak}", "FastLED#1471 repro: claim every PIO state machine the way Adafruit TinyUSB does, then build a clockless controller and verify FastLED declines cleanly instead of stealing a state machine from the other library."},
     {"getPins", "Phase 5: Pin Configuration", "[]", "{txPin, rxPin, defaults: {txPin, rxPin}, platform}", "Query current and default pin configuration"},
     {"setTxPin", "Phase 5: Pin Configuration", "[pin]", "{success, txPin, previousTxPin, testCases}", "Set TX pin (regenerates test cases)"},
     {"setRxPin", "Phase 5: Pin Configuration", "[pin]", "{success, rxPin, previousRxPin, rxChannelRecreated}", "Set RX pin (recreates RX channel)"},

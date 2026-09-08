@@ -273,6 +273,52 @@ public:
 #endif // FASTLED_RP2040_CLOCKLESS_PIO
     }
 
+    /// Return every resource init() claimed.
+    ///
+    /// Without this the PIO state machine, its program space, the DMA channel
+    /// and the pin claim were held for the life of the process, so a sketch
+    /// that adds and drops controllers walked itself into the very "no free
+    /// PIO state machine" exhaustion reported in FastLED#1471. The stale
+    /// `dma_chan_waits` entry was worse than a leak: the shared DMA ISR would
+    /// keep dereferencing the `mWait` of a destroyed controller.
+    virtual ~ClocklessController() FL_NO_EXCEPT {
+#if FASTLED_RP2040_CLOCKLESS_PIO
+        auto& resources = RpPioDmaResourceManager::instance();
+
+        if (dma_channel != -1) {
+            // A transfer in flight would otherwise keep writing into a state
+            // machine that is about to belong to someone else.
+            if (dma_channel_is_busy(dma_channel)) {
+                dma_channel_wait_for_finish_blocking(dma_channel);
+            }
+            dma_channel_set_irq0_enabled(dma_channel, false);
+            // Clear before releasing: the handler is shared and stays
+            // installed, so a live entry here outlives this object.
+            dma_chan_waits[dma_channel] = nullptr;
+            resources.releaseDmaChannel(dma_channel);
+            dma_channel = -1;
+        }
+
+        if (mPio != nullptr && mSm >= 0) {
+            pio_sm_set_enabled(mPio, mSm, false);
+            if (mPioOffset >= 0) {
+                remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
+                mPioOffset = -1;
+            }
+            resources.releasePioStateMachine(mPio, mSm);
+            resources.releasePins(DATA_PIN, 1);
+            mPio = nullptr;
+            mSm = -1;
+        }
+
+        if (dma_buf != nullptr) {
+            fl::free(dma_buf);
+            dma_buf = nullptr;
+            dma_buf_size = 0;
+        }
+#endif
+    }
+
     virtual u16 getMaxRefreshRate() const { return 400; }
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
