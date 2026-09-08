@@ -55,6 +55,12 @@ constexpr int kDefaultPinA = 2;
 constexpr int kDefaultPinB = 4;
 constexpr int kDefaultLeds = 256;
 constexpr int kDefaultIterations = 8;
+// Two CRGB buffers come out of the RPC arguments. 2 * 2000 * 3 B is 12 KB,
+// comfortable on an RP2350 and far beyond any useful test size.
+constexpr int kMaxLeds = 2000;
+// Each iteration is a full show() plus a bounded wait, so this keeps the probe
+// well inside AutoResearch's 5 s loop watchdog.
+constexpr int kMaxIterations = 256;
 // AutoResearch's loop watchdog is 5 s; leave room for the JSON response.
 constexpr uint32_t kShowTimeoutMs = 2000;
 
@@ -155,8 +161,19 @@ fl::json runRpPioParallelResourceTest(const fl::json& args) {
         num_leds = read_int("numLeds", num_leds);
         iterations = read_int("iterations", iterations);
     }
-    if (num_leds < 1) num_leds = 1;
-    if (iterations < 1) iterations = 1;
+    // Upper bounds matter more than the lower ones here: both LED buffers are
+    // allocated from this RPC's arguments, and two unbounded CRGB vectors will
+    // exhaust an RP2350's RAM long before anything reports a problem. Reject
+    // rather than clamp, so a caller asking for something impossible learns
+    // that instead of silently measuring a different run.
+    if (num_leds < 1 || num_leds > kMaxLeds || iterations < 1 ||
+        iterations > kMaxIterations) {
+        response.set("success", false);
+        response.set("error", "InvalidArgs");
+        response.set("maxNumLeds", static_cast<int64_t>(kMaxLeds));
+        response.set("maxIterations", static_cast<int64_t>(kMaxIterations));
+        return response;
+    }
 
     response.set("pinA", static_cast<int64_t>(pin_a));
     response.set("pinB", static_cast<int64_t>(pin_b));
