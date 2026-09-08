@@ -442,6 +442,10 @@ async def run_net_loopback_autoresearch(
 # to ~30 s before calling it a failure; a healthy join still returns on the
 # first or second poll, so this costs nothing when things are working.
 kJoinPollAttempts = 60
+# Reserve enough of the run deadline for the post-failure wifiStatus report and
+# the teardown pings. Polling to the very last second loses the diagnostics
+# this change exists to produce.
+kJoinReserveSeconds = 20.0
 
 
 async def run_net_peer_autoresearch(
@@ -549,6 +553,12 @@ async def run_net_peer_autoresearch(
             wifi_status: dict[str, Any] = {}
             join_started = time.monotonic()
             for _ in range(kJoinPollAttempts):
+                # Stop polling once the whole-run deadline is close enough that
+                # continuing would starve the remaining cycles -- and, more
+                # importantly, would consume the budget the failure
+                # diagnostics below need in order to report at all.
+                if deadline - time.monotonic() < kJoinReserveSeconds:
+                    break
                 wifi_status = await rpc_data(primary, "wifiStatus")
                 candidate_ip = wifi_status.get("ip")
                 if wifi_status.get("connected") and isinstance(candidate_ip, str):
