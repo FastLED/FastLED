@@ -3684,6 +3684,23 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
     print("   Rates: 1 MHz, 8 MHz, 24 MHz; byte-exact MISO capture + wire-idle")
     print("=" * 60)
     print()
+    # FastLED#4207: a second RpcBench on a port this process already holds
+    # connects without error and then answers nothing -- every call returns
+    # None. The child would fail its schema probe and report it as
+    # "deployed firmware schema does not contain rpSpiLoopback" against a
+    # board that does expose the method. This phase is terminal for
+    # --rp-spi-loopback (the dispatcher returns our result directly), so
+    # release the harness's interface before handing the port over.
+    if ctx.serial_iface is not None:
+        try:
+            await ctx.serial_iface.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001 - teardown must not mask the test
+            print(f"   (warning: releasing harness serial interface: {exc})")
+        ctx.serial_iface = None
+
     cmd = [
         "uv",
         "run",
@@ -3719,6 +3736,24 @@ async def _run_rp_spi_public_api_tests(ctx: RunContext) -> int:
     print(
         f"{chip_name} SPI1 public API loopback: GPIO11 MOSI -> GPIO8 MISO, GPIO10 SCK"
     )
+
+    # FastLED#4207, same as the loopback phase above: the child opens its own
+    # RpcBench on this port, and a second client on a port we already hold
+    # connects fine and then answers nothing. Confirmed on an RP2350W --
+    # without this the child reported
+    # "FAIL — rpSpiPublicApiLoopback dispatch result: None" while the harness's
+    # own schema fetch in the same run succeeded. This phase is terminal, so
+    # release the interface before handing the port over.
+    if ctx.serial_iface is not None:
+        try:
+            await ctx.serial_iface.close()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001 - teardown must not mask the test
+            print(f"   (warning: releasing harness serial interface: {exc})")
+        ctx.serial_iface = None
+
     result = RunningProcess.run(
         [
             "uv",
