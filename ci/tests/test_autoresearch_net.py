@@ -8,9 +8,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from ci.autoresearch.net import run_net_peer_autoresearch
+from ci.autoresearch.net import (
+    _summarize_client_tests,
+    run_net_peer_autoresearch,
+)
 from ci.autoresearch.ota import _settle_link, run_ota_peer_autoresearch
-from ci.rpc_client import RpcTimeoutError
+from ci.rpc_client import RpcError, RpcTimeoutError
 
 
 def _response(data: dict[str, Any]) -> MagicMock:
@@ -36,7 +39,9 @@ def test_ota_peer_reports_missing_firmware(
     assert "RP2350W firmware is missing: None" in capsys.readouterr().out
 
 
-def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
+def test_net_peer_runs_ten_device_only_reconnect_cycles(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     """The peer path uses RPC/fbuild serial only, never a host WiFi manager."""
     primary = MagicMock()
     peer = MagicMock()
@@ -130,6 +135,20 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
     assert "ping" in peer_methods
     primary.close.assert_awaited_once()
     peer.close.assert_awaited_once()
+
+    # The point of the summariser is auditable output. Asserting only that the
+    # run returns 0 would pass even if it printed nothing, which is the gap
+    # this change exists to close -- so assert what a reader would actually
+    # have to read off the log.
+    out = capsys.readouterr().out
+    for label in ("RP2350W -> ESP32-C6", "ESP32-C6 -> RP2350W"):
+        assert f"{label}: tests_passed=12 tests_failed=0" in out, label
+        assert (
+            f"{label} payload: test='POST /echo 4096-byte FNV-1a' "
+            "bytes=4096 passed=True"
+        ) in out, label
+    # Ten cycles x two directions: twenty payload rows, not one.
+    assert out.count("payload: test='POST /echo 4096-byte FNV-1a'") == 20
 
 
 def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
@@ -271,9 +290,6 @@ def test_summarize_client_tests_rejects_incomplete_reports() -> None:
     `tests_passed=None` for a truncated response would read as weak evidence
     rather than a broken report, so each missing piece raises instead.
     """
-    from ci.autoresearch.net import _summarize_client_tests
-    from ci.rpc_client import RpcError
-
     complete = {
         "tests_passed": 12,
         "tests_failed": 0,
