@@ -59,6 +59,11 @@ fl::json stopNet();
 /// ESP32 uses its native HTTP server task; Arduino-Pico uses this poll hook.
 void pollNetServer();
 
+/// Why the RP peer server last abandoned a request (FastLED#3899 diagnostics).
+/// A 408 tells the peer that time ran out but not which budget expired, nor
+/// how much of the request had arrived.
+fl::json netServerStats();
+
 /// @brief Get current network autoresearch state.
 /// @return Reference to the global net state
 AutoResearchNetState& getNetState();

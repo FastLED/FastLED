@@ -446,10 +446,15 @@ kListenRetryDelayS = 30.0
 kListenReserveSeconds = 15.0
 
 # CYW43 association is not instant, and a re-join after stopNet has been
-# observed to take longer than the original 10 s budget allowed. Poll for up
-# to ~30 s before calling it a failure; a healthy join still returns on the
-# first or second poll, so this costs nothing when things are working.
-kJoinPollAttempts = 60
+# observed to take longer than the original 10 s budget allowed.
+#
+# `connectSta()` does not retry, so a transient association failure is
+# terminal until the join is re-issued -- no amount of extra polling recovers
+# a radio whose status() is stuck at FAILED. So poll ~15 s per attempt and
+# re-issue the join a few times, which subsumes the single 60-poll sweep this
+# replaces.
+kJoinAttempts = 4
+kJoinPollsPerAttempt = 30
 # Reserve enough of the run deadline for the post-failure wifiStatus report and
 # the teardown pings. Polling to the very last second loses the diagnostics
 # this change exists to produce.
@@ -647,45 +652,49 @@ async def run_net_peer_autoresearch(
             if not connect.get("success"):
                 raise RpcError(f"RP2350W wifiConnect failed: {connect}")
 
+            # connectSta() issues a single WiFi.beginNoBlock() and never
+            # retries (src/platforms/arm/rp/wifi_rp.cpp.hpp), so one transient
+            # CYW43 association failure leaves status()=FAILED for good. Re-issue
+            # the join rather than failing the cycle on a single attempt.
             rp_ip: str | None = None
             wifi_status: dict[str, Any] = {}
             join_started = time.monotonic()
-            polls = 0
-            for _ in range(kJoinPollAttempts):
-                # Stop polling once the whole-run deadline is close enough that
-                # continuing would starve the remaining cycles -- and, more
-                # importantly, would consume the budget the failure
-                # diagnostics below need in order to report at all.
-                if deadline - time.monotonic() < kJoinReserveSeconds:
+            attempts = 0
+            for attempt in range(kJoinAttempts):
+                attempts = attempt + 1
+                if attempt > 0:
+                    print(
+                        f"  RP2350W association reported "
+                        f"{wifi_status.get('status')!r}; re-issuing join "
+                        f"({attempts}/{kJoinAttempts})"
+                    )
+                    reconnect = await rpc_data(
+                        primary, "wifiConnect", {"ssid": ssid, "password": password}
+                    )
+                    if not reconnect.get("success"):
+                        raise RpcError(f"RP2350W wifiConnect failed: {reconnect}")
+                for _ in range(kJoinPollsPerAttempt):
+                    wifi_status = await rpc_data(primary, "wifiStatus")
+                    candidate_ip = wifi_status.get("ip")
+                    if wifi_status.get("connected") and isinstance(candidate_ip, str):
+                        rp_ip = candidate_ip
+                        break
+                    if str(wifi_status.get("status")) == "FAILED":
+                        break  # terminal for this attempt; re-issue the join
+                    await asyncio.sleep(min(0.5, rpc_timeout()))
+                if rp_ip:
                     break
-                polls += 1
-                wifi_status = await rpc_data(primary, "wifiStatus")
-                candidate_ip = wifi_status.get("ip")
-                if wifi_status.get("connected") and isinstance(candidate_ip, str):
-                    rp_ip = candidate_ip
-                    break
-                await asyncio.sleep(min(0.5, rpc_timeout()))
             join_elapsed = time.monotonic() - join_started
             if not rp_ip:
-                # Report what the radio actually said. Without this the failure
-                # is indistinguishable between "still associating", "auth
-                # rejected" and "associated but no DHCP lease", which are three
-                # different problems with three different fixes.
-                # Report the polls actually made. Quoting the configured
-                # maximum would overstate the evidence whenever the deadline
-                # reserve cut the loop short, which is exactly the case a
-                # reader needs to distinguish from a full unsuccessful sweep.
-                cut_short = (
-                    " (stopped early to reserve deadline for this report)"
-                    if polls < kJoinPollAttempts
-                    else ""
-                )
                 raise RpcTimeoutError(
                     "RP2350W did not join the ESP32-C6 AP after "
-                    f"{join_elapsed:.1f}s across {polls} wifiStatus "
-                    f"poll(s){cut_short}; last wifiStatus={wifi_status!r}"
+                    f"{join_elapsed:.1f}s across {attempts} attempt(s); "
+                    f"last wifiStatus={wifi_status!r}"
                 )
-            print(f"  RP2350W joined in {join_elapsed:.1f}s -> {rp_ip}")
+            print(
+                f"  RP2350W joined in {join_elapsed:.1f}s "
+                f"(attempt {attempts}) -> {rp_ip}"
+            )
 
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")
@@ -750,7 +759,18 @@ async def run_net_peer_autoresearch(
                 max_wait=30.0,
             )
             if not c6_to_rp.get("success"):
-                raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")
+                # The RP is the server for this direction, so ask it why it
+                # gave up. A 408 alone does not say which budget expired or
+                # how much of the request had arrived.
+                server_stats: Any = None
+                try:
+                    server_stats = await rpc_data(primary, "netServerStats")
+                except (RpcError, RpcTimeoutError) as exc:  # noqa: BLE001
+                    server_stats = f"<unavailable: {exc}>"
+                raise RpcError(
+                    f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}; "
+                    f"RP server stats: {server_stats!r}"
+                )
             _summarize_client_tests("ESP32-C6 -> RP2350W", c6_to_rp)
 
             stop_result = await rpc_data(primary, "stopNet")
