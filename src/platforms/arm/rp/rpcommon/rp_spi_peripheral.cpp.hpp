@@ -163,9 +163,16 @@ void RpSpiPeripheral::deinitialize() FL_NO_EXCEPT {
     if (mTxDmaChannel >= 0) resources.releaseDmaChannel(mTxDmaChannel);
     if (mRxDmaChannel >= 0) resources.releaseDmaChannel(mRxDmaChannel);
     if (mOwnsPins) {
-        resources.releasePins(static_cast<u8>(mMosiPin), 1);
-        resources.releasePins(static_cast<u8>(mMisoPin), 1);
-        resources.releasePins(static_cast<u8>(mSckPin), 1);
+        // initialize() muxed these to GPIO_FUNC_SPI. Releasing them in the
+        // ledger alone leaves the pads driven by the PL022, so a later driver
+        // on the same net meets an output it cannot see in the ledger.
+        for (const u8 pin : {static_cast<u8>(mMosiPin),
+                             static_cast<u8>(mMisoPin),
+                             static_cast<u8>(mSckPin)}) {
+            gpio_set_function(static_cast<uint>(pin), GPIO_FUNC_SIO);
+            gpio_set_dir(static_cast<uint>(pin), GPIO_IN);
+            resources.releasePins(pin, 1);
+        }
     }
     if (mOwnsSpi) resources.releaseSpi(static_cast<u8>(mSpiIndex));
     mTxDmaChannel = -1;

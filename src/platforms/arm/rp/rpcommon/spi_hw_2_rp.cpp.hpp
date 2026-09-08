@@ -535,6 +535,15 @@ void SPIDualRP2040::cleanup() {
             RpPioDmaResourceManager::instance().releaseDmaChannel(mDMAChannel);
             mDMAChannel = -1;
         }
+        // pio_gpio_init() muxed these to the PIO; return them to hi-Z so
+        // the ledger release matches the hardware state.
+        for (u8 offset = 0; offset < 2; ++offset) {
+            const uint pin = static_cast<uint>(mData0Pin) + offset;
+            gpio_set_function(pin, GPIO_FUNC_SIO);
+            gpio_set_dir(pin, GPIO_IN);
+        }
+        gpio_set_function(static_cast<uint>(mClockPin), GPIO_FUNC_SIO);
+        gpio_set_dir(static_cast<uint>(mClockPin), GPIO_IN);
         RpPioDmaResourceManager::instance().releasePins(mData0Pin, 2);
         RpPioDmaResourceManager::instance().releasePins(mClockPin, 1);
 
