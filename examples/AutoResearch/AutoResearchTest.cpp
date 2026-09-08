@@ -485,8 +485,15 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         // high and low phase, so using that whole buffer here would request
         // several MiB on a Pico and leave DMA with an invalid destination.
         constexpr size_t kPioPhasesPerDataByte = 16;
+        // The guard must cover the headroom multiplier too: checking only
+        // against kPioPhasesPerDataByte would let an oversized byte count
+        // wrap during the *2 below and produce a small `requested` that
+        // sails past the clamp into RpPioRxDevice::begin().
+        constexpr size_t kPioPhaseHeadroomNumerator = 2;
+        constexpr size_t kPioPhasesPerDataByteWithHeadroom =
+            kPioPhasesPerDataByte * kPioPhaseHeadroomNumerator;
         if (expected_data_bytes >
-            (static_cast<size_t>(-1) - 1u) / kPioPhasesPerDataByte) {
+            (static_cast<size_t>(-1) - 1u) / kPioPhasesPerDataByteWithHeadroom) {
             FL_ERROR("[CAPTURE] PIO edge-capacity overflow");
             return 0;
         }
@@ -496,9 +503,8 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         // land in one entry. Ask for headroom, then clamp to the static pool
         // so the request can never exceed the FixedVector backing it:
         // over-requesting authorises appendDuration() to write past the end.
-        constexpr size_t kPioPhaseHeadroomNumerator = 2;
         size_t requested =
-            expected_data_bytes * kPioPhasesPerDataByte * kPioPhaseHeadroomNumerator + 1u;
+            expected_data_bytes * kPioPhasesPerDataByteWithHeadroom + 1u;
         if (requested > fl::kRpPioRxEdgeCapacity) {
             requested = fl::kRpPioRxEdgeCapacity;
         }

@@ -3010,3 +3010,42 @@ class TestRunTestsOrSpecialMode:
             mock_rpc_cls.assert_not_called()
         assert rc == 0
         mock_discovery.close.assert_called_once()
+
+    def test_legacy_rejects_chipsets_without_a_legacy_template(
+        self, fake_project_dir: Path
+    ) -> None:
+        """--legacy silently ignores timing_name, so guard the combination.
+
+        The legacy path resolves timing from a LegacyClocklessChipset template.
+        A chipset with no template (ucs7604, ws2811-400) would run as WS2812B
+        and report a pass for timing that was never applied.
+        """
+        for chipset in ("ucs7604", "ws2811-400"):
+            args = _make_args(
+                legacy=True,
+                chipset=chipset,
+                flex_io=True,
+                parlio=False,
+                project_dir=fake_project_dir,
+            )
+            assert _parse_args_and_build_commands(args) == 1, chipset
+
+    def test_non_legacy_still_accepts_those_chipsets(
+        self, fake_project_dir: Path
+    ) -> None:
+        """The guard must not block them outside legacy mode."""
+        args = _make_args(
+            legacy=False,
+            chipset="ws2811-400",
+            flex_io=True,
+            parlio=False,
+            environment_positional="teensy40",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
