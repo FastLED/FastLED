@@ -117,16 +117,27 @@ def main() -> int:
             # Run standalone (`uv run python -m ci.autoresearch.
             # test_rp_spi_loopback --port ...`) until that is addressed.
             schema = bench.call("rpc.discover", timeout=30.0)
-            # `call_flat` collapses a timeout or transport error to None, so a
-            # failed discover is not evidence about the firmware. Reporting it
-            # as a missing method sends the reader hunting for a build-config
-            # problem that does not exist.
+            # RpcBench.call() has three distinct outcomes and they mean very
+            # different things. Collapsing them sends the reader hunting for
+            # the wrong problem, which is what this diagnostic exists to stop.
+            if schema is METHOD_NOT_FOUND:
+                print(
+                    "FAIL — the firmware does not bind rpc.discover. This is a "
+                    "build/firmware gap, not a wiring or transport problem."
+                )
+                return 1
+            if schema is None:
+                print(
+                    "FAIL — rpc.discover timed out or the transport failed. "
+                    "This says nothing about whether rpSpiLoopback is present; "
+                    "it is a host/transport failure, not a firmware gap."
+                )
+                return 1
             if not isinstance(schema, dict):
                 print(
-                    "FAIL — rpc.discover did not return a schema object "
-                    f"(got {type(schema).__name__}); cannot tell whether "
-                    "rpSpiLoopback is present. This is a host/transport "
-                    "failure, not a firmware gap."
+                    "FAIL — rpc.discover returned a malformed schema "
+                    f"(got {type(schema).__name__}, expected an object); "
+                    "cannot tell whether rpSpiLoopback is present."
                 )
                 return 1
             methods = schema.get("schema", [])

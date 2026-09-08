@@ -3010,3 +3010,19 @@ class TestRunTestsOrSpecialMode:
             mock_rpc_cls.assert_not_called()
         assert rc == 0
         mock_discovery.close.assert_called_once()
+
+
+def test_spi_family_predicate_covers_every_platform_spelling() -> None:
+    """The two-frame SPI default must not skip RP's concrete block names.
+
+    RP registers "SPI0"/"SPI1" rather than the portable "SPI", so keying the
+    frame default off the bare literal silently gave RP SPI one frame and
+    dropped the #2254/#2288 second-frame degradation check.
+    """
+    from ci.autoresearch.phases import _is_spi_family_driver
+
+    for name in ("SPI", "SPI_UNIFIED", "SPI0", "SPI1"):
+        assert _is_spi_family_driver(name), name
+
+    for name in ("PARLIO", "RMT", "UART", "UART0", "LCD_SPI", "I2S_SPI", "SPIX", ""):
+        assert not _is_spi_family_driver(name), name
