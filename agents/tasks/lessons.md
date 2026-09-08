@@ -161,3 +161,36 @@
   left `dma_chan_waits[]` pointing at a destroyed `mWait` for the shared ISR.
   When testing resource arbitration, always include a control leg that claims
   and then releases; the starved leg alone cannot see a leak.
+- Read the command output before writing the sentence that summarises it. Three
+  times in one session I asserted a verification result I had not looked at: I
+  quoted `_EXIT=` values that were measuring `tail` rather than the command
+  (`cmd | tail; echo $?` reports the tail), and twice wrote "`bash test --cpp`
+  is clean"/"still fails" from the previous run's behaviour rather than the run
+  just executed — once in each direction. None changed a conclusion, because
+  the logs were read afterwards, but each put a false claim in a PR that then
+  needed a correction comment. Capture the result, read it, then write.
+- A test that asserts only an exit code can pass for a completely unrelated
+  reason. My `--legacy` chipset-rejection test returned 1 from the
+  Teensy/`--use-root-platformio-ini` check and never reached the guard it was
+  written for; my `--net-peer` summariser test checked call counts and would
+  have passed with the summariser deleted. Assert on the *evidence* — the
+  message text, the printed rows — and prove the assertion discriminates by
+  temporarily disabling the code under test.
+- An exhaustive check is only as good as its input space. `cycles_from_ns()`
+  was verified against a 64-bit oracle across 16 clock rates and still shipped
+  a bug for clocks that are not whole kHz, because all 16 rates were multiples
+  of 1000 and the truncation had nothing to truncate. The same PR's earlier
+  overflow bug survived a Python equivalence sweep because bignums never
+  overflow. When a check passes, ask what shape of input it structurally
+  cannot contain.
+- `git pull --rebase` is not a safe refresh for a branch that carries a merge.
+  Rebasing #4214 linearised it and silently dropped the #4215 merge commit
+  along with two files; only a `FileNotFoundError` on the next edit revealed
+  it. Reset to the remote to recover. For stacked or merge-carrying branches,
+  merge master in or leave the branch alone.
+- Eliminating the obvious candidate does not make the next one proven. I
+  reported "transient PCB exhaustion" because `SOF_REUSEADDR` ruled out
+  TIME_WAIT, and named `-Os` as the cause of a 12x slowdown because alignment
+  and `FL_IRAM` were refuted — both wrong, the second demonstrably so once the
+  disassembly was read. State what the evidence supports and name the
+  unexplained remainder.
