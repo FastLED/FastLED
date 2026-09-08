@@ -437,6 +437,13 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+# CYW43 association is not instant, and a re-join after stopNet has been
+# observed to take longer than the original 10 s budget allowed. Poll for up
+# to ~30 s before calling it a failure; a healthy join still returns on the
+# first or second poll, so this costs nothing when things are working.
+kJoinPollAttempts = 60
+
+
 async def run_net_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -539,15 +546,27 @@ async def run_net_peer_autoresearch(
                 raise RpcError(f"RP2350W wifiConnect failed: {connect}")
 
             rp_ip: str | None = None
-            for _ in range(20):
+            wifi_status: dict[str, Any] = {}
+            join_started = time.monotonic()
+            for _ in range(kJoinPollAttempts):
                 wifi_status = await rpc_data(primary, "wifiStatus")
                 candidate_ip = wifi_status.get("ip")
                 if wifi_status.get("connected") and isinstance(candidate_ip, str):
                     rp_ip = candidate_ip
                     break
                 await asyncio.sleep(min(0.5, rpc_timeout()))
+            join_elapsed = time.monotonic() - join_started
             if not rp_ip:
-                raise RpcTimeoutError("RP2350W did not join the ESP32-C6 AP")
+                # Report what the radio actually said. Without this the failure
+                # is indistinguishable between "still associating", "auth
+                # rejected" and "associated but no DHCP lease", which are three
+                # different problems with three different fixes.
+                raise RpcTimeoutError(
+                    "RP2350W did not join the ESP32-C6 AP after "
+                    f"{join_elapsed:.1f}s ({kJoinPollAttempts} polls); "
+                    f"last wifiStatus={wifi_status!r}"
+                )
+            print(f"  RP2350W joined in {join_elapsed:.1f}s -> {rp_ip}")
 
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")
