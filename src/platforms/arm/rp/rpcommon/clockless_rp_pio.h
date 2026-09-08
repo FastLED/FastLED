@@ -195,7 +195,10 @@ public:
             return;
         }
 
-        // Store PIO, state machine, and offset for later use
+        // Store PIO, state machine, and offset for later use. Note the
+        // rollback paths below must remove the program themselves: they clear
+        // mPio, so the destructor's cleanup can no longer see it, and PIO
+        // instruction memory would leak on every failed init.
         mPio = pio;
         mSm = sm;
         mPioOffset = offset;
@@ -204,9 +207,11 @@ public:
             FL_WARN_F("[RP PIO] no free DMA channel for pin %d; "
                       "output disabled on this pin.",
                       int(DATA_PIN));
+            remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
             resources.releasePioStateMachine(mPio, mSm);
             mPio = nullptr;
             mSm = -1;
+            mPioOffset = -1;
             return;
         }
 
@@ -215,10 +220,12 @@ public:
                       "output disabled on this pin.",
                       int(DATA_PIN));
             resources.releaseDmaChannel(dma_channel);
+            remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
             resources.releasePioStateMachine(mPio, mSm);
             dma_channel = -1;
             mPio = nullptr;
             mSm = -1;
+            mPioOffset = -1;
             return;
         }
 
