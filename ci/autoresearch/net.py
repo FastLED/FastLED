@@ -437,6 +437,13 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+# WiFiServer::begin() sets SOF_REUSEADDR and recreates its PCB per call, so a
+# listen failure is most likely tcp_new() returning NULL on an exhausted lwIP
+# PCB pool. Wait past TIME_WAIT before retrying so recovery distinguishes
+# transient exhaustion from a genuine leak.
+kListenRetryDelayS = 30.0
+
+
 async def run_net_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -552,7 +559,32 @@ async def run_net_peer_autoresearch(
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")
             if not rp_server.get("success") or not isinstance(rp_port, int):
-                raise RpcError(f"RP2350W startNetServer failed: {rp_server}")
+                # WiFiServer::begin() closes and recreates its PCB each call
+                # and sets SOF_REUSEADDR, so a bind blocked by TIME_WAIT is
+                # ruled out -- the likely failure is tcp_new() returning NULL
+                # with the lwIP PCB pool exhausted by accumulated connections
+                # (~24 per cycle). That is time-limited rather than permanent,
+                # so wait past TIME_WAIT and retry once: recovery discriminates
+                # transient exhaustion from a genuine leak.
+                print(
+                    f"  startNetServer failed at cycle {cycle}: {rp_server}; "
+                    f"waiting {kListenRetryDelayS:.0f}s for lwIP PCBs to drain "
+                    "and retrying once"
+                )
+                await asyncio.sleep(kListenRetryDelayS)
+                rp_server = await rpc_data(primary, "startNetServer")
+                rp_port = rp_server.get("port")
+                if not rp_server.get("success") or not isinstance(rp_port, int):
+                    raise RpcError(
+                        f"RP2350W startNetServer failed at cycle {cycle}, and "
+                        f"again after a {kListenRetryDelayS:.0f}s drain: "
+                        f"{rp_server}. Persisting past TIME_WAIT points at a "
+                        "PCB leak rather than transient exhaustion."
+                    )
+                print(
+                    f"  startNetServer recovered after the drain -> "
+                    f"transient resource exhaustion, not a leak"
+                )
 
             rp_to_c6 = await rpc_data(
                 primary,
