@@ -769,9 +769,6 @@ namespace {
 // A stalled peer is one that has sent nothing for this long. Kept at the
 // old flat budget so a truly dead connection is reaped just as quickly.
 constexpr uint32_t kRpPeerStallMs = 2000;
-// A gap longer than this between service calls means loop() was busy
-// elsewhere, not that the peer stopped sending.
-constexpr int32_t kRpPeerServiceGapMs = 100;
 // Absolute ceiling for one request, so a peer that dribbles a byte at a time
 // cannot occupy the single-client server forever.
 constexpr uint32_t kRpPeerMaxRequestMs = 10000;
@@ -791,11 +788,9 @@ struct RpPeerState {
     // total elapsed time: a 4096-byte POST body arrives across several TCP
     // segments and legitimately outruns a fixed budget on CYW43 SoftAP.
     uint32_t last_progress_ms = 0;
-    // When pollNetServer() was last given a chance to run. loop() only calls
     // it after draining the RPC queue, so a blocking handler can starve it
     // for seconds. Without this the stall timer charges that gap to the peer
     // and answers 408 to a connection that never went quiet.
-    uint32_t last_service_ms = 0;
 };
 
 RpPeerState& rpPeerState() {
@@ -810,7 +805,6 @@ void resetRpPeerRequest(RpPeerState& state) {
     state.response_complete = false;
     state.request_started_ms = 0;
     state.last_progress_ms = 0;
-    state.last_service_ms = 0;
     state.request[0] = '\0';
     state.body[0] = '\0';
 }
@@ -1285,7 +1279,6 @@ void pollNetServer() {
         resetRpPeerRequest(state);
         state.request_started_ms = millis();
         state.last_progress_ms = state.request_started_ms;
-        state.last_service_ms = state.request_started_ms;
     }
     if (!state.client) {
         return;
@@ -1303,20 +1296,6 @@ void pollNetServer() {
     // Answering 408 instead of closing mutely means a real timeout is
     // reported as one rather than as a transport error.
     const uint32_t now_ms = millis();
-    // Credit an unserviced interval to the *stall* watermark only: the peer
-    // cannot be judged silent over a window nobody was reading. The absolute
-    // budget is deliberately not credited -- advancing it on every poll gap
-    // would push the ceiling forward indefinitely, so a peer that never sends
-    // anything could hold this single-client server for good, which is the
-    // exact case that ceiling exists to bound.
-    if (state.last_service_ms != 0) {
-        const int32_t service_gap =
-            static_cast<int32_t>(now_ms - state.last_service_ms);
-        if (service_gap > kRpPeerServiceGapMs) {
-            state.last_progress_ms += static_cast<uint32_t>(service_gap);
-        }
-    }
-    state.last_service_ms = now_ms;
     const bool stalled =
         static_cast<int32_t>(now_ms - state.last_progress_ms) >= kRpPeerStallMs;
     const bool over_budget =
