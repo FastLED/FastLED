@@ -1303,14 +1303,17 @@ void pollNetServer() {
     // Answering 408 instead of closing mutely means a real timeout is
     // reported as one rather than as a transport error.
     const uint32_t now_ms = millis();
-    // Credit back any interval in which this function was not called at all:
-    // the peer cannot be judged silent over a window nobody was reading.
+    // Credit an unserviced interval to the *stall* watermark only: the peer
+    // cannot be judged silent over a window nobody was reading. The absolute
+    // budget is deliberately not credited -- advancing it on every poll gap
+    // would push the ceiling forward indefinitely, so a peer that never sends
+    // anything could hold this single-client server for good, which is the
+    // exact case that ceiling exists to bound.
     if (state.last_service_ms != 0) {
         const int32_t service_gap =
             static_cast<int32_t>(now_ms - state.last_service_ms);
         if (service_gap > kRpPeerServiceGapMs) {
             state.last_progress_ms += static_cast<uint32_t>(service_gap);
-            state.request_started_ms += static_cast<uint32_t>(service_gap);
         }
     }
     state.last_service_ms = now_ms;
