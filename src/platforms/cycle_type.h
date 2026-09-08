@@ -46,7 +46,13 @@ typedef fl::i64 cycle_t;
 /// @param hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
 constexpr u32 cycles_from_ns(u32 ns, u32 hz) FL_NO_EXCEPT {
-    return (ns <= 4000u && hz <= 1000000000u)
+    // hz % 1000 matters: the fast path folds hz/1000u, and truncating that
+    // division under-counts for a clock that is not a whole number of kHz.
+    // cycles_from_ns(8, 125000001) yields 1 instead of 2 without this guard --
+    // an under-delay, which for LED timing is a protocol violation rather than
+    // a rounding nicety. Every realistic MCU clock is a multiple of 1000, so
+    // the fast path still applies in practice.
+    return (ns <= 4000u && hz <= 1000000000u && (hz % 1000u) == 0u)
         ? ((ns * (hz / 1000u)) + 999999u) / 1000000u
         : static_cast<u32>(((fl::u64)ns * (fl::u64)hz + 999999999ULL)
                            / 1000000000ULL);

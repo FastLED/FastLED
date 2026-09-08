@@ -70,4 +70,22 @@ FL_TEST_CASE("cycles_from_ns rounds up and is usable in a constant expression") 
                      "must fold at compile time for delayNanoseconds<NS>()");
 }
 
+FL_TEST_CASE("cycles_from_ns is exact for clocks that are not whole kHz") {
+    // The fast path folds hz/1000u. Truncating that division under-counts for
+    // a clock which is not a multiple of 1000, and an under-delay is a
+    // protocol violation rather than a rounding nicety. These rates are
+    // deliberately off-by-a-few-Hz; the original exhaustive sweep used only
+    // whole-kHz clocks and so could not see this.
+    FL_CHECK_EQ(cycles_from_ns(8u, 125000001u), 2u);
+    FL_CHECK_EQ(cycles_from_ns(1000u, 150000003u), 151u);
+
+    for (u32 hz = 1000001u; hz < 400000000u; hz += 7919u) {
+        for (u32 ns : {0u, 1u, 8u, 200u, 400u, 800u, 1250u, 2500u, 4000u}) {
+            const u32 exact = static_cast<u32>(
+                ((fl::u64)ns * (fl::u64)hz + 999999999ULL) / 1000000000ULL);
+            FL_CHECK_EQ(cycles_from_ns(ns, hz), exact);
+        }
+    }
+}
+
 }  // FL_TEST_FILE
