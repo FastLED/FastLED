@@ -765,6 +765,9 @@ async def run_net_peer_autoresearch(
                 server_stats: Any = None
                 try:
                     server_stats = await rpc_data(primary, "netServerStats")
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
                 except (RpcError, RpcTimeoutError) as exc:  # noqa: BLE001
                     server_stats = f"<unavailable: {exc}>"
                 raise RpcError(
