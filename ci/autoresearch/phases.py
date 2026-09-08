@@ -541,6 +541,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         )
         return 1
 
+    # `--all` replaces the selection wholesale, so an explicit --bitbang
+    # alongside it used to be silently dropped. Append rather than fold
+    # BIT_BANG into the --all sets themselves: those lists are curated to the
+    # platform's real transmit engines (see
+    # test_all_drivers_teensy4_only_real_teensy_drivers), and BIT_BANG is the
+    # universal software fallback rather than a platform driver. Folding it in
+    # would also make every --all run fail on RP while #4203 is open.
     if args.all and is_teensy4:
         drivers = [
             "OBJECT_FLED",
@@ -596,6 +603,12 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "FLEX_IO", final_environment, args.rp_pio_index
                     )
                 )
+
+    # An explicit --bitbang must survive --all, which replaces the selection
+    # wholesale. Appended here rather than folded into the --all sets: see the
+    # note above those lists.
+    if args.bitbang and "BIT_BANG" not in drivers:
+        drivers.append("BIT_BANG")
 
     parallel_mode = args.parallel
     if args.legacy and parallel_mode:

@@ -157,6 +157,7 @@ def _make_args(**overrides) -> Args:
         rp_spi_index=0,
         rp_spi_public_api=False,
         rp_spi_chipset="apa102",
+        bitbang=False,
         rp_uart_index=0,
         rp_pio_index=1,
         rp_pio_both=False,
@@ -3010,3 +3011,29 @@ class TestRunTestsOrSpecialMode:
             mock_rpc_cls.assert_not_called()
         assert rc == 0
         mock_discovery.close.assert_called_once()
+
+    def test_all_plus_bitbang_keeps_the_explicit_driver(
+        self, fake_project_dir: Path
+    ) -> None:
+        """`--all --bitbang` must not silently drop the explicit request.
+
+        The args.all branch replaces the driver selection wholesale, so an
+        explicitly requested BIT_BANG used to vanish. It is appended rather
+        than folded into the curated --all sets, which name each platform's
+        real transmit engines.
+        """
+        args = _make_args(
+            all=True,
+            bitbang=True,
+            parlio=False,
+            environment_positional="teensy40",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["OBJECT_FLED", "FLEX_IO", "BIT_BANG"]
