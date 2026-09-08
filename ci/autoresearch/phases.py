@@ -2133,6 +2133,24 @@ def _is_valid_rp_pio_contention_result(result: Any) -> bool:
     )
 
 
+def _is_valid_rp_pio_parallel_result(result: Any) -> bool:
+    """Return whether PIO0+PIO1 met #3899's resource criterion.
+
+    The acceptance criterion names three failure modes -- resource collision,
+    stale state machine, DMA ownership leak -- and runParallelTest checks for
+    none of them. These four flags are the direct evidence for each.
+    """
+    if not isinstance(result, dict):
+        return False
+    return (
+        result.get("success") is True
+        and result.get("collisionFree") is True
+        and result.get("showsCompleted") is True
+        and result.get("noResidueBetweenFrames") is True
+        and result.get("noLeak") is True
+    )
+
+
 async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
     """Validate the pin-free JSON-RPC transport and core system surface."""
     upload_port = ctx.upload_port
@@ -2181,6 +2199,7 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
         if rp_environment is not None:
             required_methods.add("testRpConcurrency")
             required_methods.add("testRpPioContention")
+            required_methods.add("testRpPioParallelResources")
 
         discovered = await call("rpc.discover")
         discovered_methods = _rpc_manifest_method_names(discovered)
@@ -2277,6 +2296,12 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
                     f"RP PIO contention validation failed (#1471): {contention!r}"
                 )
 
+            parallel = await call("testRpPioParallelResources")
+            if not _is_valid_rp_pio_parallel_result(parallel):
+                raise RpcError(
+                    f"RP PIO0+PIO1 resource validation failed (#3899): {parallel!r}"
+                )
+
         missing_method_returned = False
         try:
             await client.send(
@@ -2300,7 +2325,7 @@ async def _run_rpc_smoke_tests(ctx: RunContext) -> int:
 
         validated = "discovery, help, ping, payload, status, drivers, testNoSerial"
         if rp_environment is not None:
-            validated += ", RP concurrency, RP PIO contention"
+            validated += ", RP concurrency, RP PIO contention, RP PIO0+PIO1 resources"
         print(f"RESULT: RPC smoke PASS ({validated}, error handling)")
         return 0
     except (RpcCrashError, RpcTimeoutError, RpcError, OSError) as exc:
