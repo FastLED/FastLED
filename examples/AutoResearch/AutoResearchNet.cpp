@@ -862,6 +862,11 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("test", test_name);
 
     WiFiClient client;
+    // Start the exchange clock before connect(): a slow or unreachable peer
+    // spends that time inside connect(), and a deadline armed afterwards
+    // cannot bound it.
+    const uint32_t exchange_started_ms = millis();
+    uint32_t last_progress_ms = exchange_started_ms;
     if (!client.connect(host_ip, port)) {
         result.set("passed", false);
         result.set("error", "TCP connect failed");
@@ -888,8 +893,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // read. Measure a stall instead, refreshed by every byte that arrives,
     // and keep an absolute ceiling so a dead peer is still abandoned. Same
     // correction as #4219 made on the server side of this file.
-    uint32_t last_progress_ms = millis();
-    const uint32_t hard_deadline_ms = last_progress_ms + kRpHttpClientMaxMs;
+    const uint32_t hard_deadline_ms = exchange_started_ms + kRpHttpClientMaxMs;
     const auto expired = [&]() -> bool {
         const uint32_t now = millis();
         return static_cast<int32_t>(now - last_progress_ms) >= kRpHttpClientStallMs ||
@@ -1050,6 +1054,11 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     result.set("expected_hash", static_cast<int64_t>(expected_hash));
 
     WiFiClient client;
+    // Same as runRpHttpRequestTest: the clock has to start before connect(),
+    // since an unreachable peer spends that time inside connect() and a
+    // deadline armed afterwards cannot bound it.
+    const uint32_t echo_started_ms = millis();
+    uint32_t echo_progress_ms = echo_started_ms;
     if (!client.connect(host_ip, port)) {
         result.set("passed", false);
         result.set("error", "TCP connect failed");
@@ -1065,8 +1074,8 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     // Stall-based, for the same reason as runRpHttpRequestTest above: a flat
     // budget for a 4 KiB round trip fails a peer that is merely slow rather
     // than stuck, and reports it as a hash mismatch against zero bytes.
-    uint32_t echo_progress_ms = millis();
-    const uint32_t echo_hard_deadline_ms = echo_progress_ms + kRpHttpClientMaxMs;
+    const uint32_t echo_hard_deadline_ms =
+        echo_started_ms + kRpHttpClientMaxMs;
     const auto echo_expired = [&]() -> bool {
         const uint32_t now = millis();
         return static_cast<int32_t>(now - echo_progress_ms) >= kRpHttpClientStallMs ||
@@ -1081,6 +1090,10 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     size_t received_bytes = 0;
     while (!echo_expired() && (client.connected() || client.available())) {
         while (client.available()) {
+            // A peer streaming without pause would otherwise keep this inner
+            // loop running past the hard deadline, because the outer check
+            // is only reached when available() goes false.
+            if (echo_expired()) break;
             const int value = client.read();
             if (value < 0) {
                 break;
