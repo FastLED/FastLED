@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
+#include "AutoResearchPlatform.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
@@ -226,17 +227,15 @@ void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
         defaults.set("rxPin", static_cast<int64_t>(mState->default_pin_rx));
         response.set("defaults", defaults);
 
-        #if defined(FL_IS_ESP_32S3)
-            response.set("platform", "ESP32-S3");
-        #elif defined(FL_IS_ESP_32S2)
-            response.set("platform", "ESP32-S2");
-        #elif defined(FL_IS_ESP_32C6)
-            response.set("platform", "ESP32-C6");
-        #elif defined(FL_IS_ESP_32C3)
-            response.set("platform", "ESP32-C3");
-        #else
-            response.set("platform", "unknown");
-        #endif
+        // Use the shared chipName() so this agrees with `status`. The
+        // hand-rolled chain here only knew four ESP32 variants and reported
+        // "unknown" for every other target, so an RP2350W answered
+        //   getPins -> platform "unknown"
+        //   status  -> platform "Raspberry Pi Pico 2 W (RP2350)"
+        // on the same firmware (FastLED#3899, whose closeout requires exact
+        // recorded identities). chipName() covers stub, the ESP32 family,
+        // Teensy 4.x and both RP2350 variants.
+        response.set("platform", autoresearch::chipName());
 
         return response;
     });
