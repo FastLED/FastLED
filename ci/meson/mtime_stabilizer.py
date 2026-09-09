@@ -193,7 +193,12 @@ def restore_executable_bits(build_dir: Path, verbose: bool = False) -> int:
         Number of files made executable (0 if all were already correct).
     """
     restored = 0
-    for directory in ("tests", "examples"):
+    # tests/profile is a separate spawn target: _resolve_test_command() will
+    # select build_dir/tests/profile/<name>, and the scan below is not
+    # recursive, so omitting it left cache-restored profile binaries at 0644
+    # to fail with PermissionError -- the exact defect this function exists
+    # to prevent, one directory over. See FastLED#4168.
+    for directory in ("tests", "tests/profile", "examples"):
         target_dir = build_dir / directory
         # Path.is_dir() reports False for a directory it cannot stat, which
         # would silently skip every binary inside it. Distinguish "absent"

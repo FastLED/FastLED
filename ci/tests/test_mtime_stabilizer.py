@@ -133,3 +133,19 @@ def test_unreadable_binary_raises_instead_of_being_skipped(tmp_path: Path) -> No
             restore_executable_bits(tmp_path)
     finally:
         os.chmod(binary, 0o644)  # let tmp_path cleanup succeed
+
+
+def test_restore_executable_bits_covers_profile_tests(tmp_path: Path) -> None:
+    """tests/profile is a spawn target too, and the scan is not recursive.
+
+    _resolve_test_command() can select build_dir/tests/profile/<name>. A
+    cache-restored profile binary left at 0644 fails with PermissionError
+    exactly like one in tests/ -- the same defect, one directory over.
+    """
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "profile").mkdir()
+    (tmp_path / "examples").mkdir()
+    profile_binary = _elf(tmp_path / "tests" / "profile" / "profile_hot", mode=0o644)
+
+    assert restore_executable_bits(tmp_path) == 1
+    assert profile_binary.stat().st_mode & 0o111
