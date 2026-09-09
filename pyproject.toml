@@ -517,6 +517,33 @@ autoImportCompletions = false
 indexing = false
 functionSignatureDisplay = "compact"
 
+[tool.uv]
+# The platforms a resolution must actually be installable on.
+#
+# Without this, uv resolves to the newest version of every dependency and only
+# discovers a missing wheel at install time. That took CI down on 2026-09-09:
+# `ty` published v0.0.80 and CI resolved to it mid-upload, when the x86_64
+# Linux wheel had not landed yet, so every job on ubuntu died with
+#
+#     error: Distribution `ty==0.0.80` can't be installed because it doesn't
+#     have a source distribution or wheel for the current platform
+#     hint: You're on Linux (`manylinux_2_39_x86_64`), but `ty` (v0.0.80) only
+#     has wheels for: manylinux_2_17_aarch64, armv7l, ppc64le, i686, macosx...
+#
+# `uv.lock` is gitignored here, so every run resolves fresh and every run was
+# exposed. Declaring the environments makes resolution *backtrack* to a
+# version that has wheels for all of them instead of failing at install, so a
+# partial upload of somebody's newest release is no longer a repo-wide outage.
+#
+# These are the four the project actually runs on: CI's ubuntu, macos and
+# windows runners, and Apple silicon locally.
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "sys_platform == 'win32' and platform_machine == 'AMD64'",
+]
+
 [tool.pytest.ini_options]
 markers = [
     "full: marks tests as requiring the full test suite (deselected during quick Python-only runs)",
