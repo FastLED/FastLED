@@ -547,7 +547,15 @@ async def _connect_peer_with_retry(
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
-        except (RpcError, RpcTimeoutError, OSError) as exc:
+        except Exception as exc:  # noqa: BLE001
+            # Deliberately broad. Observed on the bench: attempts 1-2 failed
+            # mute (RpcTimeoutError), and the third reconnect failed with
+            # "attach failed: open_port(...) exceeded 3s" from the serial
+            # layer -- a different type entirely, which escaped a narrow
+            # (RpcError, RpcTimeoutError, OSError) list and propagated raw,
+            # so this helper's own diagnostic never printed. Every failure to
+            # bring the peer up is the same fault class here, and the last
+            # error is re-raised verbatim once the attempts are spent.
             failure = exc
 
         if failure is None:
@@ -559,7 +567,7 @@ async def _connect_peer_with_retry(
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
                 raise
-            except (RpcError, RpcTimeoutError, OSError) as exc:
+            except Exception as exc:  # noqa: BLE001
                 failure = exc
 
         if failure is None:
@@ -578,7 +586,14 @@ async def _connect_peer_with_retry(
             await peer.close()
         # Also outside any suppression: if the budget went while we were
         # failing, stop rather than sleep past the deadline.
-        await asyncio.sleep(min(2.0, remaining_timeout()))
+        #
+        # Backs off progressively. A flat 2 s was measured to be too short:
+        # the peer went from "opens but stays mute" on attempts 1-2 to
+        # "will not open at all" by attempt 3, i.e. reconnecting quickly made
+        # the port worse rather than better. Give the CDC time to finish
+        # re-enumerating instead of hammering it.
+        backoff = min(2.0 * attempt, 8.0)
+        await asyncio.sleep(min(backoff, remaining_timeout()))
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "
         f"connect attempts; last error: {last_error}"

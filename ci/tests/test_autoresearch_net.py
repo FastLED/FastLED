@@ -521,3 +521,57 @@ def test_connect_peer_reads_the_ping_budget_after_connect() -> None:
     assert peer.connect.await_args.kwargs["boot_wait"] == 3.0
     # ...and the ping by what is actually left afterwards, not by 10.0.
     assert peer.send.await_args.kwargs["timeout"] == 0.5
+
+
+def test_connect_peer_retries_a_port_that_will_not_open() -> None:
+    """A port that cannot be opened is the same fault class as a mute one.
+
+    Observed on the bench: attempts 1-2 failed mute with RpcTimeoutError, and
+    the third reconnect raised "attach failed: open_port(...) exceeded 3s"
+    from the serial layer -- a different exception type, which escaped a
+    narrow catch list and propagated raw, so this helper's own diagnostic
+    never printed and the caller saw a bare serial error instead.
+    """
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+    peer.connect = AsyncMock(
+        side_effect=[
+            RuntimeError("attach failed: open_port(/dev/ttyACM2) exceeded 3s"),
+            None,
+        ]
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM2", lambda: 30.0)
+        )
+
+    assert peer.connect.await_count == 2
+
+
+def test_connect_peer_reports_a_serial_error_in_its_own_message() -> None:
+    """Exhausting the attempts must surface this helper's diagnostic.
+
+    Previously a non-RpcError type escaped entirely, so the run reported the
+    raw serial error with no port, attempt count, or context.
+    """
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+    peer.connect = AsyncMock(
+        side_effect=RuntimeError("attach failed: open_port exceeded 3s")
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        with pytest.raises(RpcTimeoutError) as excinfo:
+            asyncio.run(
+                _connect_peer_with_retry(
+                    peer, "ESP32-C6", "/dev/ttyACM2", lambda: 30.0, attempts=2
+                )
+            )
+
+    message = str(excinfo.value)
+    assert "/dev/ttyACM2" in message
+    assert "2 connect attempts" in message
+    assert "attach failed" in message
