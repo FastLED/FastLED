@@ -905,8 +905,18 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         return false;
     };
 
+    // Whether a full status line actually arrived. Discarding this made every
+    // no-response failure report "Unexpected HTTP status" with an empty
+    // status_line -- the peer had answered nothing at all, which is a
+    // different fault from answering with the wrong code, and the one that
+    // actually occurs on this link. See FastLED#3899.
     char status_line[64];
-    read_line(status_line, sizeof(status_line));
+    const bool status_line_complete = read_line(status_line, sizeof(status_line));
+    const bool status_line_empty = status_line[0] == '\0';
+    // Captured before the body loop and the stop() below can change it. With
+    // no status line, this is what separates "the peer closed without
+    // answering" from "the peer held the connection open and never answered".
+    const bool peer_open_after_status = client.connected();
 
     // Consume headers, capturing Content-Length. Every response this client
     // talks to sends one along with `Connection: close`; stopping on the
@@ -988,7 +998,17 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("body_read", static_cast<int32_t>(body_read));
     result.set("passed", passed && content_ok && body_complete);
     if (!passed) {
-        result.set("error", "Unexpected HTTP status");
+        // Distinguish "no answer" from "wrong answer": an empty status line
+        // means the request went out and nothing came back within the
+        // deadline, so the status code is not the thing that failed.
+        if (!status_line_complete && status_line_empty) {
+            result.set("error", "No HTTP response: request sent, nothing read");
+            result.set("peer_still_open", peer_open_after_status);
+        } else if (!status_line_complete) {
+            result.set("error", "Truncated HTTP status line");
+        } else {
+            result.set("error", "Unexpected HTTP status");
+        }
     } else if (!body_complete) {
         result.set("error", "Truncated response body");
     } else if (!content_ok) {
