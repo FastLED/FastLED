@@ -90,6 +90,22 @@ ParlioRawTestState& parlioRawTestState() {
 fl::json autoResearchDeviceJson(const fl::string& name) {
     if (name == "RMT") return fl::deviceJson<fl::Bus::RMT>();
     if (name == "SPI" || name == "SPI_UNIFIED") return fl::deviceJson<fl::Bus::SPI>();
+    // RP registers its two fixed PL022 blocks under the concrete names
+    // "SPI0"/"SPI1". Without these they fell through to the generic tail
+    // below, which hardcodes which=0 and echoes the driver name into
+    // bus_name/vendor_name/device_name -- so `drivers` reported SPI1 with
+    // which=0 and no real bus metadata, unlike UART0/UART1 and PIO0/1/2.
+    // RP-only. SAMD21 (spi_hw_manager_samd21.cpp.hpp:38-39) and nRF52
+    // (init_channel_driver_nrf52.cpp.hpp:49) also register drivers called
+    // "SPI0"/"SPI1", but DeviceInfoResolver<Bus::SPI, 0|1> is specialized
+    // only in the RP branch of bus_info.h. Routing those platforms here
+    // would hand them the unspecialized no-op resolver and report
+    // is_noop=true / available=false -- the very regression this mapping
+    // was added to fix, just moved to a different chip.
+#if defined(FL_IS_RP)
+    if (name == "SPI0") return fl::deviceJson<fl::Bus::SPI, 0>();
+    if (name == "SPI1") return fl::deviceJson<fl::Bus::SPI, 1>();
+#endif
     if (name == "UART" || name == "LPUART" || name == "UART0") {
         return fl::deviceJson<fl::Bus::UART, 0>();
     }
