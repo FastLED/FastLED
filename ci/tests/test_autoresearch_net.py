@@ -488,3 +488,36 @@ def test_connect_peer_propagates_an_expired_budget() -> None:
     assert peer.send.await_count == 0
     assert "did not answer" not in captured.getvalue()
     assert "reconnecting" not in captured.getvalue()
+
+
+def test_connect_peer_reads_the_ping_budget_after_connect() -> None:
+    """The ping budget must be read after connect(), not before it.
+
+    connect() can consume most of the remaining budget itself, so a ping
+    timeout computed beforehand is stale and can outlive the caller's
+    deadline -- the exact thing the clamping exists to prevent. The budget
+    here shrinks *because* connect ran, so a reading taken before it differs
+    from one taken after.
+    """
+    budget = {"left": 10.0}
+
+    def _remaining() -> float:
+        return budget["left"]
+
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+
+    async def _connect_that_spends_the_budget(**_kwargs: object) -> None:
+        budget["left"] = 0.5
+
+    peer.connect = AsyncMock(side_effect=_connect_that_spends_the_budget)
+
+    asyncio.run(
+        _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", _remaining)
+    )
+
+    # boot_wait is bounded by the pre-connect budget...
+    assert peer.connect.await_args.kwargs["boot_wait"] == 3.0
+    # ...and the ping by what is actually left afterwards, not by 10.0.
+    assert peer.send.await_args.kwargs["timeout"] == 0.5

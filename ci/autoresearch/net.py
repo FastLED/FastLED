@@ -530,36 +530,55 @@ async def _connect_peer_with_retry(
     """
     last_error: Exception | None = None
     for attempt in range(1, attempts + 1):
-        # Budget checks sit outside the try on purpose. `remaining_timeout`
-        # signals expiry by raising RpcTimeoutError, which is the same type a
-        # mute endpoint raises -- catching it here would retry a run that has
-        # already run out of time, and report it as an unresponsive board.
+        # Every remaining_timeout() call sits outside a try on purpose. It
+        # signals expiry by raising RpcTimeoutError, the same type a mute
+        # endpoint raises; caught here it would retry a run that has already
+        # run out of time and report it as an unresponsive board.
+        #
+        # Each budget is also read immediately before the call it bounds, not
+        # once per attempt. connect() can itself consume most of the budget,
+        # so a ping timeout computed before it would be stale and could
+        # outlive the caller's deadline.
+        failure: Exception | None = None
+
         boot_wait = min(3.0, remaining_timeout())
-        ping_timeout = min(10.0, remaining_timeout())
         try:
             await peer.connect(boot_wait=boot_wait, drain_boot=True)
-            # Prove the endpoint answers before returning. connect() only
-            # opens the port; a stale CDC endpoint opens fine and stays mute.
-            await peer.send("ping", {}, timeout=ping_timeout)
-            if attempt > 1:
-                print(f"  {label} answered on connect attempt {attempt}/{attempts}")
-            return
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
         except (RpcError, RpcTimeoutError, OSError) as exc:
-            last_error = exc
-            if attempt == attempts:
-                break
-            print(
-                f"  {label} did not answer on {port} "
-                f"(attempt {attempt}/{attempts}: {exc}); reconnecting"
-            )
-            with contextlib.suppress(Exception):
-                await peer.close()
-            # Also outside any suppression: if the budget went while we were
-            # failing, stop rather than sleep past the deadline.
-            await asyncio.sleep(min(2.0, remaining_timeout()))
+            failure = exc
+
+        if failure is None:
+            ping_timeout = min(10.0, remaining_timeout())
+            try:
+                # Prove the endpoint answers. connect() only opens the port;
+                # a stale CDC endpoint opens fine and stays mute.
+                await peer.send("ping", {}, timeout=ping_timeout)
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except (RpcError, RpcTimeoutError, OSError) as exc:
+                failure = exc
+
+        if failure is None:
+            if attempt > 1:
+                print(f"  {label} answered on connect attempt {attempt}/{attempts}")
+            return
+
+        last_error = failure
+        if attempt == attempts:
+            break
+        print(
+            f"  {label} did not answer on {port} "
+            f"(attempt {attempt}/{attempts}: {failure}); reconnecting"
+        )
+        with contextlib.suppress(Exception):
+            await peer.close()
+        # Also outside any suppression: if the budget went while we were
+        # failing, stop rather than sleep past the deadline.
+        await asyncio.sleep(min(2.0, remaining_timeout()))
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "
         f"connect attempts; last error: {last_error}"
