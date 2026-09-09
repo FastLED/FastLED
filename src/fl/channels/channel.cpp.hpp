@@ -369,11 +369,6 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
     }
 
-    // Derive the pipeline once, here, rather than per frame: it inverts
-    // matrices and bisects a lightness bound. A binding that does not
-    // describe a usable pipeline leaves the channel on the legacy path
-    // rather than failing -- an unbound channel is the ordinary case, not an
-    // error.
     const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
 
     // Derive the pipeline once, here, rather than per frame: it inverts
