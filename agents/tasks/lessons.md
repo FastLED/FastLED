@@ -202,8 +202,10 @@
   settle delay (1 join -> 4), a raised WiFi join budget (2 master failures vs
   3 clean branch runs), and client-side HTTP deadlines (master 0/2 vs branch
   3/3, with master failing on the exact symptom the fix addressed). Reverting
-  only the change in question, on the same branch, refuted all three — the
-  runs passed anyway. The same technique caught a genuine regression I had
+  only the change in question, on the same branch, produced evidence against
+  all three — the runs passed anyway. Two runs per arm is not proof of a
+  negative on a link this variable; it is enough to stop crediting the change,
+  not enough to rule it out. The same technique caught a genuine regression I had
   introduced (a server-side service-gap credit produced 408s that master never
   showed, across three formulations), so it discriminates in both directions.
   This link's behaviour varies over hours; two or three runs per arm cannot
