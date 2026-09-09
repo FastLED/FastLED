@@ -21,6 +21,8 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ci.util.serial_interface import SerialInterface
 
 # WiFi AP credentials (must match firmware constants)
@@ -502,7 +504,11 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
 
 
 async def _connect_peer_with_retry(
-    peer: RpcClient, label: str, port: str, attempts: int = 3
+    peer: RpcClient,
+    label: str,
+    port: str,
+    remaining_timeout: "Callable[[], float]",
+    attempts: int = 3,
 ) -> None:
     """Connect the companion board, retrying a silent first RPC.
 
@@ -516,14 +522,25 @@ async def _connect_peer_with_retry(
     A fixed `boot_wait` cannot cover this, because the wait is over before the
     endpoint is replaced. Reconnecting is what recovers it. Each retry is
     reported so the need for one stays visible instead of being smoothed away.
+
+    Every wait is clamped by `remaining_timeout`, the run's own budget helper.
+    Unclamped, three mute attempts would spend ~43 s of boot waits, pings and
+    back-offs before any later call noticed the deadline had passed, so a
+    recovery mechanism would end up consuming the run it exists to save.
     """
     last_error: Exception | None = None
     for attempt in range(1, attempts + 1):
+        # Budget checks sit outside the try on purpose. `remaining_timeout`
+        # signals expiry by raising RpcTimeoutError, which is the same type a
+        # mute endpoint raises -- catching it here would retry a run that has
+        # already run out of time, and report it as an unresponsive board.
+        boot_wait = min(3.0, remaining_timeout())
+        ping_timeout = min(10.0, remaining_timeout())
         try:
-            await peer.connect(boot_wait=3.0, drain_boot=True)
+            await peer.connect(boot_wait=boot_wait, drain_boot=True)
             # Prove the endpoint answers before returning. connect() only
             # opens the port; a stale CDC endpoint opens fine and stays mute.
-            await peer.send("ping", {}, timeout=10.0)
+            await peer.send("ping", {}, timeout=ping_timeout)
             if attempt > 1:
                 print(f"  {label} answered on connect attempt {attempt}/{attempts}")
             return
@@ -540,7 +557,9 @@ async def _connect_peer_with_retry(
             )
             with contextlib.suppress(Exception):
                 await peer.close()
-            await asyncio.sleep(2.0)
+            # Also outside any suppression: if the budget went while we were
+            # failing, stop rather than sleep past the deadline.
+            await asyncio.sleep(min(2.0, remaining_timeout()))
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "
         f"connect attempts; last error: {last_error}"
@@ -661,7 +680,9 @@ async def run_net_peer_autoresearch(
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
-        await _connect_peer_with_retry(peer, "ESP32-C6", peer_upload_port)
+        await _connect_peer_with_retry(
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout
+        )
 
         primary_status = await rpc_data(primary, "status")
         if "rp2350" not in str(primary_status.get("platform", "")).lower():

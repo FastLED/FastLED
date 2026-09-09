@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import io
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -386,7 +388,9 @@ def test_connect_peer_retries_a_mute_endpoint() -> None:
     )
 
     with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
-        asyncio.run(_connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1"))
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0)
+        )
 
     assert peer.connect.await_count == 2
     assert peer.send.await_count == 2
@@ -402,7 +406,9 @@ def test_connect_peer_gives_up_and_names_the_port() -> None:
     with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
         with pytest.raises(RpcTimeoutError) as excinfo:
             asyncio.run(
-                _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", attempts=2)
+                _connect_peer_with_retry(
+                    peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0, attempts=2
+                )
             )
 
     message = str(excinfo.value)
@@ -419,7 +425,66 @@ def test_connect_peer_does_not_retry_a_healthy_board() -> None:
     peer.close = AsyncMock()
     peer.send = AsyncMock(return_value=MagicMock())
 
-    asyncio.run(_connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1"))
+    asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0)
+        )
 
     assert peer.connect.await_count == 1
     assert peer.close.await_count == 0
+
+
+def test_connect_peer_clamps_waits_to_the_run_budget() -> None:
+    """Retry waits must not outlive the run's own deadline.
+
+    Unclamped, three mute attempts spend ~43s of boot waits, pings and
+    back-offs before any later call notices the deadline passed -- a recovery
+    mechanism consuming the run it exists to save.
+    """
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(
+        side_effect=[RpcTimeoutError("mute"), MagicMock()]
+    )
+    sleeps: list[float] = []
+
+    async def _record_sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+
+    # Only 1.5s of budget left: every wait must be clamped below its default.
+    with patch("ci.autoresearch.net.asyncio.sleep", new=_record_sleep):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 1.5)
+        )
+
+    assert peer.connect.await_args_list[0].kwargs["boot_wait"] == 1.5
+    assert peer.send.await_args_list[0].kwargs["timeout"] == 1.5
+    assert sleeps == [1.5]
+
+
+def test_connect_peer_propagates_an_expired_budget() -> None:
+    """A budget helper that raises must abort the retry loop, not be swallowed."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+
+    def _expired() -> float:
+        raise RpcTimeoutError("--net-peer deadline expired")
+
+    captured = io.StringIO()
+    with contextlib.redirect_stdout(captured):
+        with pytest.raises(RpcTimeoutError, match="deadline expired"):
+            asyncio.run(
+                _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", _expired)
+            )
+
+    # The point of the test: an expired budget must not be *reported* as an
+    # unresponsive board. Checking the budget inside the try block still
+    # aborts (the back-off re-raises), but first prints
+    # "ESP32-C6 did not answer ... reconnecting" -- blaming the peer for the
+    # caller running out of time.
+    assert peer.connect.await_count == 0
+    assert peer.send.await_count == 0
+    assert "did not answer" not in captured.getvalue()
+    assert "reconnecting" not in captured.getvalue()
