@@ -143,6 +143,21 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     CMinWait<WAIT_TIME> mWait;
 #endif
 public:
+#if FASTLED_RP2040_CLOCKLESS_PIO
+    // init() drives the pad output early so the blocking fallback can use it.
+    // When acquisition fails and no fallback is compiled in, nothing will ever
+    // write the pin again, so leaving it driving contradicts the "output
+    // disabled on this pin" warning and holds the strip at whatever level the
+    // pad happens to sit at. With FASTLED_RP2040_CLOCKLESS_M0_FALLBACK on,
+    // showRGBBlocking() still bit-bangs this pin, so it must stay an output.
+    static void releaseDataPinOnInitFailure() FL_NO_EXCEPT {
+#if !FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
+        gpio_set_function(DATA_PIN, GPIO_FUNC_SIO);
+        gpio_set_dir(DATA_PIN, GPIO_IN);
+#endif
+    }
+#endif
+
     virtual void init() FL_NO_EXCEPT {
 #if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel != -1) return; // maybe init was called twice somehow? not sure if possible
@@ -192,6 +207,7 @@ public:
                       "another library holds them all. Set "
                       "FASTLED_RP2040_CLOCKLESS_PIO 0 to bit-bang instead.",
                       int(DATA_PIN));
+            releaseDataPinOnInitFailure();
             return;
         }
 
@@ -212,6 +228,7 @@ public:
             mPio = nullptr;
             mSm = -1;
             mPioOffset = -1;
+            releaseDataPinOnInitFailure();
             return;
         }
 
@@ -226,6 +243,7 @@ public:
             mPio = nullptr;
             mSm = -1;
             mPioOffset = -1;
+            releaseDataPinOnInitFailure();
             return;
         }
 

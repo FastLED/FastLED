@@ -693,7 +693,6 @@ async def run_net_autoresearch(
         print("  No current WiFi connection detected")
 
     client: RpcClient | None = None
-    host_server: _HostHttpServer | None = None
 
     try:
         # Connect to device via RPC
@@ -715,9 +714,8 @@ async def run_net_autoresearch(
         print(f"\n  {Fore.RED}Network autoresearch error: {e}{Style.RESET_ALL}")
         return 1
     finally:
-        # Cleanup
-        if host_server:
-            host_server.stop()
+        # Cleanup. The HTTP server in client mode is owned and stopped by
+        # _run_net_client_autoresearch itself; nothing to stop here.
         if client:
             # Send stopNet to clean up device resources
             try:

@@ -2133,6 +2133,7 @@ def _is_valid_rp_pio_contention_result(result: Any) -> bool:
     if not isinstance(control, dict) or not isinstance(contention, dict):
         return False
     starved = contention.get("starvedSms")
+    free_after = contention.get("freeAfterStarve")
     return (
         result.get("success") is True
         and result.get("noLeak") is True
@@ -2142,7 +2143,9 @@ def _is_valid_rp_pio_contention_result(result: Any) -> bool:
         and isinstance(starved, int)
         and not isinstance(starved, bool)
         and starved > 0
-        and contention.get("freeAfterStarve") == 0
+        and isinstance(free_after, int)
+        and not isinstance(free_after, bool)
+        and free_after == 0
         and contention.get("claimsIntact") is True
         and contention.get("noTheft") is True
         and contention.get("survivedShow") is True

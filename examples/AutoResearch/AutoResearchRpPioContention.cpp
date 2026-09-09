@@ -121,13 +121,16 @@ fl::json runRpPioContentionTest() {
     // Without this leg a "FastLED claimed nothing" result under starvation
     // would be indistinguishable from the driver being compiled out.
     fl::json control = fl::json::object();
+    bool control_proxy_valid = false;
+    bool control_claimed_one = false;
     {
         LegacyClocklessProxy proxy(kContentionPin, leds, kContentionLeds);
         const int free_during = countFreeStateMachines();
-        control.set("proxyValid", proxy.valid());
+        control_proxy_valid = proxy.valid();
+        control_claimed_one = free_during == baseline_free - 1;
+        control.set("proxyValid", control_proxy_valid);
         control.set("freeDuring", static_cast<int64_t>(free_during));
-        control.set("claimedOne",
-                    free_during == baseline_free - 1);
+        control.set("claimedOne", control_claimed_one);
         FastLED.show();
     }
     const int control_free_after = countFreeStateMachines();
@@ -167,7 +170,13 @@ fl::json runRpPioContentionTest() {
     // A failed acquisition must not strand the partial claims it made.
     const bool no_leak = contention_free_after == baseline_free;
     response.set("noLeak", no_leak);
-    response.set("success", no_theft && survived_show && no_leak &&
+    // The control leg is part of the verdict, not just a reported field: if
+    // the clockless backend is compiled out, the control claims nothing and
+    // every contention assertion below holds vacuously. Without these terms a
+    // driver that does not exist reports the same success as one that
+    // correctly declines.
+    response.set("success", control_proxy_valid && control_claimed_one &&
+                               no_theft && survived_show && no_leak &&
                                control_free_after == baseline_free);
     return response;
 }
