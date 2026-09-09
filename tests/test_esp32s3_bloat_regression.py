@@ -33,6 +33,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from typeguard import typechecked
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 BASELINE_FILE = PROJECT_ROOT / "tests" / "data" / "esp32s3_bloat_baseline.txt"
@@ -50,6 +52,7 @@ def read_baseline() -> int:
     return int(raw)
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class FlashSymbol:
     """One sized symbol from the bloat report."""
@@ -73,7 +76,10 @@ def largest_flash_symbols(report: dict[str, Any], count: int) -> list[FlashSymbo
         if entry.get("region") != "flash":
             continue
         size = entry.get("size")
-        if not isinstance(size, int) or size <= 0:
+        # `isinstance(True, int)` is true in Python, so a JSON `true` would
+        # otherwise be accepted as a one-byte symbol and could displace a real
+        # entry from the table.
+        if isinstance(size, bool) or not isinstance(size, int) or size <= 0:
             continue
         name = entry.get("demangled") or entry.get("mangled") or "(anonymous)"
         sized.append(
