@@ -66,6 +66,7 @@ public:
         ChannelConfig rebound(config);
 #if FL_COLOR_PROFILE_RUNTIME
         rebound.options.clearColorProfile();
+        installColorPipelineHooks();
         rebound.options.mColorProfile.mStaticProfile = &Profile;
         rebound.options.mColorProfile.mRequested = true;
 #else

@@ -7,6 +7,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
+#include "fl/channels/pipeline_binding.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/stl/scope_exit.h"
@@ -29,6 +30,10 @@ EmitterProfile rgbDevice() {
     p.native_code_depth = 8;
     return p;
 }
+
+// At namespace scope, not inside the test: a function-local static has no
+// linkage, and C++11 will not take one as a template reference argument.
+const EmitterProfile kStaticProfile = rgbDevice();
 
 StreamingPipelineQ16 makePipeline() {
     StreamingPipelineQ16 pipeline;
@@ -66,6 +71,16 @@ class ByteCapturingMockEngine : public IChannelDriver {
 
   private:
     fl::string mName;
+};
+
+/// The smallest concrete `CLEDController`, so `bindStaticEmitterProfile`
+/// can be called on a real one.
+class StubController : public CLEDController {
+  public:
+    StubController(CRGB* leds, int count) { setLeds(leds, count); }
+    void showColor(const CRGB&, int, fl::u8) FL_NO_EXCEPT override {}
+    void show(const CRGB*, int, fl::u8) FL_NO_EXCEPT override {}
+    void init() FL_NO_EXCEPT override {}
 };
 
 }  // namespace
@@ -291,6 +306,79 @@ FL_TEST_CASE("A bound colour profile reaches the encoded bytes") {
         difference += delta < 0 ? -delta : delta;
     }
     FL_CHECK_GT(difference, 16);
+}
+#endif
+
+#if FL_COLOR_PROFILE_RUNTIME
+FL_TEST_CASE("Every static binding path installs the pipeline seam") {
+    // Regression. Four call sites bind a colour profile and only one of them
+    // is `setColorProfile`: `Channel::create<Profile>`,
+    // `ChannelOptions::withColorProfile<Profile>` and
+    // `CLEDController::bindStaticEmitterProfile` set `mStaticProfile`
+    // directly. The seam that keeps the pipeline linker-elidable installs
+    // its hooks from the binding call, so a path that forgets to install
+    // leaves that channel silently on the legacy path -- the exact
+    // "settable but inert" bug this change exists to fix, reintroduced by
+    // the fix.
+    //
+    // The hooks are one process-wide struct, so a sibling test that binds a
+    // profile would install them and make a naive assertion here vacuous.
+    // Each leg therefore clears them first; that is what makes this a test
+    // of the binding path rather than of the test order.
+    const ColorPipelineHooks kCleared = {nullptr, nullptr, nullptr, nullptr};
+    auto restore = fl::make_scope_exit([]() { installColorPipelineHooks(); });
+
+    {
+        colorPipelineHooks() = kCleared;
+        ChannelOptions options =
+            ChannelOptions::withColorProfile<kStaticProfile>();
+        FL_REQUIRE(options.hasColorProfile());
+        // `REQUIRE`, not `CHECK`: the pipeline build below dereferences it.
+        FL_REQUIRE(colorPipelineHooks().build != nullptr);
+        FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
+        FL_CHECK(colorPipelineHooks().destroyIterator != nullptr);
+        FL_CHECK(colorPipelineHooks().setFlux != nullptr);
+
+        // And the binding really yields a pipeline, so the hooks being
+        // installed is not the whole of the claim.
+        StreamingPipelineQ16 pipeline;
+        FL_CHECK(colorPipelineHooks().build(options.mColorProfile, &pipeline));
+    }
+
+    {
+        colorPipelineHooks() = kCleared;
+        auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+        CRGB leds[2] = {};
+        ChannelOptions options;
+        ChannelConfig config(2101, timing, fl::span<CRGB>(leds, 2), RGB,
+                             options);
+        auto channel = Channel::create<kStaticProfile>(config);
+        FL_REQUIRE(channel != nullptr);
+        auto cleanup =
+            fl::make_scope_exit([&]() { channel->removeFromDrawList(); });
+        FL_CHECK(colorPipelineHooks().build != nullptr);
+        FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
+    }
+
+    {
+        colorPipelineHooks() = kCleared;
+        CRGB leds[2] = {};
+        StubController controller(leds, 2);
+        controller.bindStaticEmitterProfile(&kStaticProfile);
+        FL_REQUIRE(controller.emitterProfile() == &kStaticProfile);
+        FL_CHECK(colorPipelineHooks().build != nullptr);
+        FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
+    }
+
+    // Unbinding must not install: a null profile means the legacy path, and
+    // paying for the pipeline there is the regression the seam prevents.
+    {
+        colorPipelineHooks() = kCleared;
+        CRGB leds[2] = {};
+        StubController controller(leds, 2);
+        controller.bindStaticEmitterProfile(nullptr);
+        FL_CHECK(colorPipelineHooks().build == nullptr);
+    }
 }
 #endif
 

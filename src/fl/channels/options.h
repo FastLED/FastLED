@@ -15,6 +15,14 @@
 
 namespace fl {
 
+// Declared rather than included. Every path that binds a profile has to
+// install these -- there are four, and three of them do not go through
+// setColorProfile: Channel::create<Profile>,
+// ChannelOptions::withColorProfile<Profile> and
+// CLEDController::bindStaticEmitterProfile all set mStaticProfile directly.
+// Missing one leaves that channel silently on the legacy path, which is the
+// exact bug this whole change exists to fix.
+//
 // Declared rather than included. `pipeline_binding.h` pulls the whole gfx
 // pipeline in behind it, and reaching those headers from here puts them
 // ahead of whatever brings `EmitterProfile` into scope unqualified --
@@ -211,6 +219,7 @@ struct ChannelOptions {
     static ChannelOptions withColorProfile() FL_NO_EXCEPT {
         ChannelOptions options;
 #if FL_COLOR_PROFILE_RUNTIME
+        installColorPipelineHooks();
         options.mColorProfile.mStaticProfile = &Profile;
         options.mColorProfile.mRequested = true;
 #endif
