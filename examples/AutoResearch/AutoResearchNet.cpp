@@ -866,7 +866,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     }
 
     const uint32_t request_started_ms = millis();
-    const uint32_t deadline_ms = request_started_ms + 2000;
+    // EXPERIMENT (not for merge): the 2 s budget is what ends every stall
+    // seen so far -- elapsed_ms came back as exactly 2000 with the socket
+    // still open. 10 s says whether the peer is merely slow (the response
+    // lands late) or drops the response entirely (it never lands). Only
+    // failing requests pay this; healthy ones return in single-digit ms.
+    const uint32_t deadline_ms = request_started_ms + 10000;
     while (!client.available() && client.connected() &&
            static_cast<int32_t>(millis() - deadline_ms) < 0) {
         FastLED.watchdog().feed();
@@ -1013,6 +1018,10 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("body_read", static_cast<int32_t>(body_read));
     const bool failed = !(passed && content_ok && body_complete);
     result.set("passed", !failed);
+    // EXPERIMENT: recorded for passes too, so the latency distribution of
+    // healthy requests is visible and a near-miss just under the old 2 s
+    // budget cannot hide inside a "pass".
+    result.set("elapsed_ms", static_cast<int32_t>(elapsed_ms));
     if (failed) {
         // Recorded for every failure mode, not just one: a truncated body is
         // the mode actually seen on this link, and without these two fields
