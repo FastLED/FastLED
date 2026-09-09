@@ -315,3 +315,21 @@
   asserted the host validator treated a refusal as a refusal -- so a later
   loosening would have turned a rejected request into evidence. Pattern-
   matching "I already did that" would have missed the half that was real.
+- A throwaway bench branch can inherit an upstream that points at a real PR.
+  `bench/join-retry` was created from a PR branch and kept tracking
+  `origin/diag/rp-net-server-stats`; it then accumulated 17 commits of
+  bench-only merges of three other branches. A bare `git push` in that
+  worktree -- and this session ran `git push` in worktrees constantly --
+  would have pushed all of it onto an approved PR. Nothing was lost, but only
+  because the push never happened. Create bench branches from `origin/master`
+  with no upstream, or `git branch --unset-upstream` immediately, and never
+  let an experiment branch track the branch it was forked from.
+- Count distinct events over a defined set before publishing a number. Three
+  times this session I published totals that were wrong: quoted from memory
+  once, and twice computed from a glob that swept in ~290 log files from
+  earlier sessions while double-counting failures that each log records twice
+  (once in the run summary, once in the diagnostic capture). Every correction
+  was in the direction of overstating the evidence. The habit that works is
+  to restrict the file set explicitly, count the distinct failing rows rather
+  than message occurrences, and re-derive the number at publish time instead
+  of carrying it forward in prose.
