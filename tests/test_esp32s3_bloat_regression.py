@@ -29,7 +29,9 @@ import argparse
 import json
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -46,6 +48,78 @@ def read_baseline() -> int:
         )
         sys.exit(2)
     return int(raw)
+
+
+@dataclass(frozen=True, slots=True)
+class FlashSymbol:
+    """One sized symbol from the bloat report."""
+
+    size: int
+    name: str
+    archive: str
+    object_file: str
+
+
+def largest_flash_symbols(report: dict[str, Any], count: int) -> list[FlashSymbol]:
+    """The `count` biggest flash symbols in the report, largest first."""
+
+    raw = report.get("symbols")
+    if not isinstance(raw, list):
+        return []
+    sized: list[FlashSymbol] = []
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("region") != "flash":
+            continue
+        size = entry.get("size")
+        if not isinstance(size, int) or size <= 0:
+            continue
+        name = entry.get("demangled") or entry.get("mangled") or "(anonymous)"
+        sized.append(
+            FlashSymbol(
+                size=size,
+                name=str(name),
+                archive=str(entry.get("archive") or "(none)"),
+                object_file=str(entry.get("object") or "(none)"),
+            )
+        )
+    sized.sort(key=lambda symbol: symbol.size, reverse=True)
+    return sized[:count]
+
+
+def print_largest_symbols(report: dict[str, Any], count: int) -> None:
+    """Print the biggest flash symbols this build produced.
+
+    The gate has `report.json` in hand on the runner that built it, and used
+    to tell the reader to reproduce the build locally instead -- which means
+    an ESP32 toolchain and a three-minute compile to see data CI already had
+    (#4165). Printing it turns "go and reproduce this" into "here is where
+    the bytes went".
+    """
+
+    symbols = largest_flash_symbols(report, count)
+    if not symbols:
+        print(
+            "esp32s3-bloat-regression: report.json carried no sized flash "
+            "symbols, so there is no table to show.",
+            file=sys.stderr,
+        )
+        return
+    print(
+        f"esp32s3-bloat-regression: {len(symbols)} largest flash symbols in "
+        "this build:",
+        file=sys.stderr,
+    )
+    print(f"    {'BYTES':>9}  {'ARCHIVE':<22} SYMBOL", file=sys.stderr)
+    for symbol in symbols:
+        name = symbol.name
+        if len(name) > 88:
+            name = name[:85] + "..."
+        print(
+            f"    {symbol.size:>9,}  {symbol.archive[:22]:<22} {name}",
+            file=sys.stderr,
+        )
 
 
 def run_bloat(skip_build: bool) -> None:
@@ -114,15 +188,13 @@ def main() -> int:
     print(
         "esp32s3-bloat-regression: if the regression is intentional, update "
         f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} in the same PR. "
-        "Otherwise inspect the top-N table:",
+        "Otherwise, this is where the flash went:",
         file=sys.stderr,
     )
+    print_largest_symbols(data, 25)
     print(
-        "    bash bloat esp32s3 --top 25",
-        file=sys.stderr,
-    )
-    print(
-        "Then diff against the previous build with "
+        "esp32s3-bloat-regression: to compare against another build, run "
+        "`bash bloat esp32s3 --top 25` locally and diff with "
         ".claude/symbolaudit/diff.py (see agents/docs/binary-size-analysis.md).",
         file=sys.stderr,
     )
