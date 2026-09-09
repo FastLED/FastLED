@@ -44,8 +44,15 @@ XYMap XYMap::constructWithLookUpTable(u16 width, u16 height,
                                       u16 offset) {
     XYMap out(width, height, kLookUpTable);
     out.mLookUpTable = fl::make_shared<LUT16>(width * height);
-    fl::memcpy(out.mLookUpTable->getDataMutable(), lookUpTable,
-                width * height * sizeof(u16));
+    // A null table means "allocate it, I will fill it" -- which is what
+    // `fromXMap` below asks for, and it used to `memcpy` from nullptr and
+    // segfault every caller of `Channel::setScreenMap(const XMap&)`
+    // (#4201). `LUT16` zeroes its storage, so the unfilled case is an
+    // identity-free map rather than garbage.
+    if (lookUpTable != nullptr) {
+        fl::memcpy(out.mLookUpTable->getDataMutable(), lookUpTable,
+                   width * height * sizeof(u16));
+    }
     out.mOffset = offset;
     return out;
 }
@@ -62,8 +69,9 @@ XYMap XYMap::fromXMap(const XMap& xmap) {
     // This treats the 1D strip as a 2D grid with height 1
     u16 length = xmap.getLength();
 
-    // Create a user function that dispatches to the XMap
-    // Since we can't capture xmap directly, we create a LUT and use that
+    // Null rather than a table: the LUT is allocated here and filled just
+    // below, which is what the null case in `constructWithLookUpTable`
+    // exists for.
     auto out = XYMap::constructWithLookUpTable(length, 1, nullptr);
     fl::shared_ptr<LUT16> lut = fl::make_shared<LUT16>(length);
     u16* data = lut->getDataMutable();

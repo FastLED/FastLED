@@ -47,9 +47,10 @@ class TestColorReferenceCorpus(unittest.TestCase):
         self.assertEqual(serialized, serialize_color_reference_corpus(second))
         decoded = json.loads(serialized)
         self.assertEqual(decoded["schema_version"], CORPUS_SCHEMA_VERSION)
-        # 3 RGB encodings × 4 emitter layouts × 16 input regimes: low-code,
-        # neutral, and saturated vectors are independently represented.
-        self.assertGreaterEqual(len(decoded["vectors"]), 192)
+        # 3 RGB encodings × 5 emitter layouts × 19 input regimes: low-code,
+        # neutral, off-neutral and saturated vectors are independently
+        # represented.
+        self.assertGreaterEqual(len(decoded["vectors"]), 285)
         self.assertEqual(
             [vector["id"] for vector in decoded["vectors"]],
             sorted(vector["id"] for vector in decoded["vectors"]),
@@ -59,12 +60,14 @@ class TestColorReferenceCorpus(unittest.TestCase):
             {
                 "low_code",
                 "neutral_axis",
+                "off_neutral_tint",
                 "saturated_boundary",
                 "display_p3",
                 "bt2020",
                 "rgb",
                 "rgbw",
                 "rgbww",
+                "rgbww_two_white",
                 "non_d65_white",
             },
         )
@@ -88,7 +91,8 @@ class TestColorReferenceCorpus(unittest.TestCase):
                 vector["source_profile"], {"srgb_bt709", "display_p3", "bt2020"}
             )
             self.assertIn(
-                vector["device_profile"], {"rgb", "rgbw", "rgbww", "non_d65_white"}
+                vector["device_profile"],
+                {"rgb", "rgbw", "rgbww", "rgbww_two_white", "non_d65_white"},
             )
             for value in vector["stages"].values():
                 self.assertTrue(all(math.isfinite(component) for component in value))

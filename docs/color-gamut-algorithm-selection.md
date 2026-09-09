@@ -470,12 +470,27 @@ iterative solver in the A3/B11 sense, but it is roughly forty times the work
 of the one-white case, and the closed form above makes it unnecessary
 per-pixel.
 
-What is still missing is corpus coverage. All 48 `rgbww` vectors are reachable
-with one white or none, so the golden corpus cannot distinguish a correct
-two-white allocation from the reduction it replaces; the sweeps above stand in
-for that, measured against the reference's own enumeration rather than against
-its recorded output. Corpus vectors bright enough to need both whites would
-close the gap.
+Corpus coverage was the last gap and is now closed. All 48 `rgbww` vectors are
+reachable with one white or none — every emitter on that device has unit
+capacity, which makes the strip five times brighter than the white it renders,
+so no target the corpus can express needs a second white. A device profile
+`rgbww_two_white` fixes that: its primaries split luminance the way sRGB does
+and its two whites carry 0.35 each, for 1.6 at full drive, so the strip can
+only just exceed its own rendering white.
+
+Thirteen of its 57 vectors light both whites, and they cover the shapes that
+matter:
+
+- six saturate **both** whites at a total of exactly 2.0 — the corner of the
+  feasible totals, and what an allocation assuming those totals start at zero
+  calls out of gamut;
+- others saturate the cool white with the warm one part-way;
+- and the `off_neutral_tint` vectors do the reverse, saturating the *warm*
+  white first. An allocation that always fills the first white first
+  reproduces every other vector and fails those.
+
+`allocate_two_white` reproduces the reference's recorded drives on all 57 to
+within 10⁻⁹, which is the check that could not be written before.
 
 ## Not covered
 

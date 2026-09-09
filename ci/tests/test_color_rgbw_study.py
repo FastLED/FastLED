@@ -406,8 +406,9 @@ class TestTwoWhitesAreAlsoClosedForm(unittest.TestCase):
         self: "TestTwoWhitesAreAlsoClosedForm",
     ) -> None:
         # The corpus is the P5 reference's own output, so this is the
-        # strongest available check -- and the reason the sweeps above exist
-        # is that the corpus does not reach the cases they cover.
+        # strongest available check. Every one of these is reachable with one
+        # white or none; `TestTwoWhiteCorpusVectors` covers the ones that are
+        # not.
         vectors = corpus_vectors("rgbww")
         self.assertGreater(len(vectors), 0)
         for vector in vectors:
@@ -418,6 +419,103 @@ class TestTwoWhitesAreAlsoClosedForm(unittest.TestCase):
             assert closed is not None
             reference_total = vector.emitter_light[3] + vector.emitter_light[4]
             self.assertLess(abs(closed.total - reference_total), 1e-9)
+
+
+class TestTwoWhiteCorpusVectors(unittest.TestCase):
+    """The corpus now reaches targets that need both whites (#4198).
+
+    Every `rgbww` vector is reachable with one white or none, so agreement
+    over that device says nothing about the two-white case -- the same gap
+    that let the "run the one-white form twice" reduction look correct while
+    being wrong on 85% of random targets. `rgbww_two_white` scales its
+    emitters so the strip can only just exceed its own rendering white, and
+    bright neutrals then need both.
+    """
+
+    def setUp(self: "TestTwoWhiteCorpusVectors") -> None:
+        columns = [
+            emitter_column(0.6400, 0.3300, 0.22),
+            emitter_column(0.3000, 0.6000, 0.60),
+            emitter_column(0.1500, 0.0600, 0.08),
+        ]
+        self.inverse = _invert_3x3(rgb_matrix(columns))
+        self.first = emitter_column(0.3127, 0.3290, 0.35)
+        self.second = emitter_column(0.3457, 0.3585, 0.35)
+
+    def test_the_corpus_lights_both_whites(
+        self: "TestTwoWhiteCorpusVectors",
+    ) -> None:
+        vectors = corpus_vectors("rgbww_two_white")
+        self.assertGreaterEqual(len(vectors), 50)
+        both: list[CorpusVector] = []
+        for vector in vectors:
+            if vector.emitter_light[3] > 1e-9 and vector.emitter_light[4] > 1e-9:
+                both.append(vector)
+        self.assertGreaterEqual(len(both), 12)
+
+        # Both saturated: the corner of the feasible totals, and the case an
+        # allocation that assumes those totals start at zero gets wrong.
+        saturated: list[CorpusVector] = []
+        for vector in both:
+            if (
+                vector.emitter_light[3] > 1.0 - 1e-9
+                and vector.emitter_light[4] > 1.0 - 1e-9
+            ):
+                saturated.append(vector)
+        self.assertGreaterEqual(len(saturated), 6)
+
+        # And both orderings, so an allocation that always fills the first
+        # white first cannot pass by luck.
+        self.assertTrue(
+            any(
+                vector.emitter_light[3] > 1.0 - 1e-9
+                and vector.emitter_light[4] < 1.0 - 1e-9
+                for vector in both
+            )
+        )
+        self.assertTrue(
+            any(
+                vector.emitter_light[4] > 1.0 - 1e-9
+                and vector.emitter_light[3] < 1.0 - 1e-9
+                for vector in both
+            )
+        )
+
+    def test_the_closed_form_reproduces_them(
+        self: "TestTwoWhiteCorpusVectors",
+    ) -> None:
+        # Against the reference's recorded output this time, not against the
+        # enumeration -- the check #4198 said could not be written until the
+        # corpus reached these targets.
+        for vector in corpus_vectors("rgbww_two_white"):
+            closed = allocate_two_white(
+                self.inverse, vector.target, self.first, self.second
+            )
+            self.assertIsNotNone(closed, msg=f"refused {vector.target}")
+            assert closed is not None
+            self.assertLess(abs(closed.first - vector.emitter_light[3]), 1e-9)
+            self.assertLess(abs(closed.second - vector.emitter_light[4]), 1e-9)
+
+    def test_one_white_alone_cannot_reach_the_bright_ones(
+        self: "TestTwoWhiteCorpusVectors",
+    ) -> None:
+        # The premise, confirmed rather than asserted: where the reference
+        # lights both whites past a total of one, the better single white
+        # falls short.
+        checked = 0
+        for vector in corpus_vectors("rgbww_two_white"):
+            total = vector.emitter_light[3] + vector.emitter_light[4]
+            if total <= 1.0 + 1e-9:
+                continue
+            single = best_single_white(
+                self.inverse, vector.target, self.first, self.second
+            )
+            self.assertTrue(
+                single is None or single < total - 1e-6,
+                msg=f"one white reached {single} of {total}",
+            )
+            checked += 1
+        self.assertGreaterEqual(checked, 6)
 
 
 if __name__ == "__main__":
