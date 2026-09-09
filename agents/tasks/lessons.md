@@ -298,3 +298,20 @@
   would have reported a wedged board and halted the loop for nothing. Scan
   the whole vendor family and wait for re-enumeration before calling a board
   lost.
+- BOOTSEL is a transient even when a deploy is killed mid-flight. Twice now a
+  campaign died during flashing and left the RP2350W showing `2e8a:000f
+  RP2350 Boot` with no application device on the bus -- the wedge signature,
+  and the second time the deploy had genuinely been interrupted rather than
+  merely observed at the wrong moment. Both times the board re-enumerated as
+  `2e8a:f00f` within a few seconds on its own, because the bootrom is what
+  runs there and nothing had corrupted it. Wait and re-scan the whole vendor
+  family before declaring a board lost; an interrupted flash is not the same
+  as a bricked one. See [[tty-path-is-not-an-identity]].
+- Verify a stale review finding instead of dismissing it. Two PRs sat on
+  `CHANGES_REQUESTED` whose comments all predated the fixes, and the obvious
+  move was to reply "already addressed" and move on. Checking each against
+  the code found one that was only half-stale: the requested bounds existed,
+  but the same comment also asked for oversized-request coverage, and nothing
+  asserted the host validator treated a refusal as a refusal -- so a later
+  loosening would have turned a rejected request into evidence. Pattern-
+  matching "I already did that" would have missed the half that was real.
