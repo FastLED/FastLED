@@ -437,6 +437,41 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+def _describe_failed_client_tests(data: dict[str, Any]) -> str:
+    """Name the sub-tests that failed, and why, in one line.
+
+    runNetClientTest returns a 12-entry `results` array. Raising it verbatim
+    put the single failing row in the middle of eleven passing ones, on one
+    unwrapped line -- when `GET /leds` came back with no response at all, the
+    interesting row was the hardest part of the message to find. Lead with
+    the diagnosis; the caller still appends the full payload.
+    """
+    results = data.get("results")
+    if not isinstance(results, list):
+        return "response carried no 'results' array"
+    failures: list[str] = []
+    for entry in results:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("passed") is True:
+            continue
+        name = entry.get("test", "<unnamed test>")
+        why = entry.get("error", "no error reported")
+        # status_line is the field that distinguishes "answered wrongly" from
+        # "did not answer", so it is worth naming even when empty.
+        detail = (
+            f"status_line={entry.get('status_line')!r} "
+            f"body_read={entry.get('body_read')} "
+            f"content_length={entry.get('content_length')}"
+        )
+        failures.append(f"{name}: {why} ({detail})")
+    if not failures:
+        return "no sub-test reported a failure"
+    return f"{len(failures)} of {len(results)} sub-tests failed -- " + "; ".join(
+        failures
+    )
+
+
 def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
     """Print the sub-test tally so the payload leg is visible, not inferred.
 
@@ -612,7 +647,11 @@ async def run_net_peer_autoresearch(
                 max_wait=30.0,
             )
             if not rp_to_c6.get("success"):
-                raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
+                raise RpcError(
+                    f"RP2350W -> ESP32-C6 HTTP failed: "
+                    f"{_describe_failed_client_tests(rp_to_c6)}; "
+                    f"full result: {rp_to_c6}"
+                )
             _summarize_client_tests("RP2350W -> ESP32-C6", rp_to_c6)
             c6_to_rp = await rpc_data(
                 peer,

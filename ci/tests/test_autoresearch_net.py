@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from ci.autoresearch.net import (
+    _describe_failed_client_tests,
     _summarize_client_tests,
     run_net_peer_autoresearch,
 )
@@ -311,3 +312,47 @@ def test_summarize_client_tests_rejects_incomplete_reports() -> None:
     # Booleans are not acceptable integers for a tally.
     with pytest.raises(RpcError, match="payload leg"):
         _summarize_client_tests("boolish", {**complete, "tests_passed": True})
+
+
+def test_describe_failed_client_tests_names_the_no_response_row() -> None:
+    """The failing row must be named, not buried in eleven passing ones.
+
+    This is the payload captured on the bench: RP2350W -> ESP32-C6, cycle 10,
+    where only `GET /leds` came back with nothing at all. Raising the raw
+    dict put that row in the middle of one unwrapped line.
+    """
+    data: dict[str, Any] = {
+        "success": False,
+        "tests_passed": 11,
+        "tests_failed": 1,
+        "results": [
+            {"test": "GET /ping", "passed": True, "body_read": 4},
+            {
+                "test": "GET /leds",
+                "passed": False,
+                "error": "No HTTP response: request sent, nothing read",
+                "status_line": "",
+                "body_read": 0,
+                "content_length": -1,
+            },
+            {"test": "POST /echo 4096-byte FNV-1a", "passed": True, "bytes": 4096},
+        ],
+    }
+
+    described = _describe_failed_client_tests(data)
+
+    assert "1 of 3 sub-tests failed" in described
+    assert "GET /leds" in described
+    assert "No HTTP response" in described
+    # The field that separates "answered wrongly" from "did not answer".
+    assert "status_line=''" in described
+    # Passing rows must not be listed.
+    assert "GET /ping" not in described
+
+
+def test_describe_failed_client_tests_handles_a_malformed_report() -> None:
+    """A report with no results array must say so, not raise."""
+    assert "no 'results' array" in _describe_failed_client_tests({"success": False})
+    assert "no sub-test reported a failure" == _describe_failed_client_tests(
+        {"results": [{"test": "GET /ping", "passed": True}]}
+    )
