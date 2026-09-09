@@ -164,7 +164,9 @@
 - Read the command output before writing the sentence that summarises it. Three
   times in one session I asserted a verification result I had not looked at: I
   quoted `_EXIT=` values that were measuring `tail` rather than the command
-  (`cmd | tail; echo $?` reports the tail), and twice wrote "`bash test --cpp`
+  (without `pipefail`, `cmd | tail; echo $?` reports the tail's status, not the
+  command's; shells with `set -o pipefail` report the pipeline's, so the
+  reading depends on shell configuration), and twice wrote "`bash test --cpp`
   is clean"/"still fails" from the previous run's behaviour rather than the run
   just executed — once in each direction. None changed a conclusion, because
   the logs were read afterwards, but each put a false claim in a PR that then
