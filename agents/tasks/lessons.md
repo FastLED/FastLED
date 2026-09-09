@@ -210,3 +210,11 @@
   showed, across three formulations), so it discriminates in both directions.
   This link's behaviour varies over hours; two or three runs per arm cannot
   see through that.
+- After resolving a conflict in a test file, check the **collection** count, not
+  the pass count. Resolving a merge in `test_autoresearch_phases.py` left two
+  tests nested inside another test function, where pytest never collects them.
+  The suite reported `180 passed` before and after the fix — the missing tests
+  were absent from the count rather than failing, so the green run and the
+  plausible number hid it. `pytest --collect-only -q` showed 178 vs 180, and
+  grepping the collected names showed 0 vs 2. A pass count cannot distinguish
+  "passing" from "not present"; a collection count can.
