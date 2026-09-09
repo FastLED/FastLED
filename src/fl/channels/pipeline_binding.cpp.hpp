@@ -38,6 +38,11 @@ PixelIterator* makeColorPipelineIterator(
     return new (iterator_storage) PixelIterator(source, rgbw, rgbww);
 }
 
+void setColorPipelineFlux(StreamingPipelineQ16* pipeline,
+                          u8 brightness) FL_NO_EXCEPT {
+    setPipelineFluxQ16(pipeline, FluxScalar::fromBrightness(brightness));
+}
+
 void destroyColorPipelineIterator(void* source_storage,
                                   void* iterator_storage) FL_NO_EXCEPT {
     static_cast<PixelIterator*>(iterator_storage)->~PixelIterator();
@@ -51,7 +56,7 @@ ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
     // Not a function-local static with a non-trivial constructor: this is a
     // zero-initialized aggregate, so there is no guard variable and no
     // Teensy 3.x `__cxa_guard` conflict.
-    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr};
+    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr};
     return hooks;
 }
 
@@ -60,6 +65,7 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.build = &buildPipelineForBinding;
     hooks.makeIterator = &makeColorPipelineIterator;
     hooks.destroyIterator = &destroyColorPipelineIterator;
+    hooks.setFlux = &setColorPipelineFlux;
 }
 
 }  // namespace fl

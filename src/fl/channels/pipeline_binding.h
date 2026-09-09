@@ -74,6 +74,14 @@ struct ColorPipelineHooks {
 
     /// Destroys what `makeIterator` built. Null until installed.
     void (*destroyIterator)(void* source_storage, void* iterator_storage);
+
+    /// Sets the frame's amplitude on a pipeline. Null until installed.
+    ///
+    /// Here rather than called directly for the same reason as the rest:
+    /// `setPipelineFluxQ16` and `FluxScalar::fromBrightness` are pipeline
+    /// functions, and naming either from `Channel` keeps their translation
+    /// units -- and what they pull in -- alive in every build.
+    void (*setFlux)(StreamingPipelineQ16*, u8 brightness);
 };
 
 /// The installed hooks. Both pointers are null in a program that never binds

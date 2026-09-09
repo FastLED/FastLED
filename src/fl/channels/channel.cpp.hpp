@@ -633,10 +633,10 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // it -- and reading it rather than `ColorAdjustment::brightness` keeps
     // this working when FASTLED_HD_COLOR_MIXING is off, where that field
     // does not exist.
-    if (mPipeline) {
-        setPipelineFluxQ16(&mPipeline.value(),
-                           FluxScalar::fromBrightness(
-                               pixels.mColorAdjustment.premixed.r));
+    const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
+    if (mPipeline && flux_hooks.setFlux != nullptr) {
+        flux_hooks.setFlux(&mPipeline.value(),
+                           pixels.mColorAdjustment.premixed.r);
     }
     const StreamingPipelineQ16* pipeline = mPipeline ? &mPipeline.value() : nullptr;
 #else
