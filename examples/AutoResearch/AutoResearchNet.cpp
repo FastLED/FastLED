@@ -839,13 +839,31 @@ void writeHttpErrorResponse(WiFiClient& client, const char* status,
     client.print(body);
 }
 
-// A peer that has sent nothing for this long is stalled. Matches the old
-// flat budget, so a genuinely dead peer is abandoned just as quickly.
-constexpr uint32_t kRpHttpClientStallMs = 2000;
+// A peer that has sent nothing for this long is stalled.
+//
+// This has to exceed the peer's own budget for producing a response, or the
+// client abandons work the server is still legitimately doing. The ESP peer
+// does not answer from its network task: handle_esp_request() queues the
+// request to the sketch's main loop (ServerAsyncRunner, pumped by
+// task::Executor) and blocks up to 5000 ms waiting for it, so nothing is
+// written at all until that completes. There are no early bytes to refresh a
+// stall timer, which is why a 2000 ms value behaved exactly like the flat
+// deadline it replaced for this failure.
+//
+// Measured on the RP2350W <-> ESP32-C6 bench: 4 hard failures in 241 cycles,
+// every one with the socket still open, zero bytes read, and elapsed of
+// exactly the client budget. With a larger budget, 215 cycles produced none,
+// and five requests took 2706, 2734, 2961, 3108 and 3586 ms and completed
+// correctly -- each of which the old value would have failed. The maximum,
+// 3586 ms, sits under the peer's own 5000 ms ceiling, as the mechanism
+// predicts. See FastLED#3899.
+constexpr uint32_t kRpHttpClientStallMs = 6000;
 // Ceiling for one exchange, so a peer dribbling a byte at a time cannot hold
-// the loop past AutoResearch's 5 s watchdog. The loop feeds the WDT while
+// the loop past AutoResearch's watchdog. The loop feeds the WDT while
 // waiting, but bounding it keeps a wedged peer from stalling the sketch.
-constexpr uint32_t kRpHttpClientMaxMs = 4000;
+// Matches kRpPeerMaxRequestMs so both sides of the fixture agree on how long
+// one request may take, rather than the client being the stricter of the two.
+constexpr uint32_t kRpHttpClientMaxMs = kRpPeerMaxRequestMs;
 
 fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
                           const char* method, const char* path,
