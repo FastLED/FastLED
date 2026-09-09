@@ -904,6 +904,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // line -- harmless when everything was drained into one buffer, fatal once
     // the headers have to be parsed. Returns false only if the deadline
     // expires with the line unfinished. See FastLED#4173.
+    //
+    // Bytes consumed by the most recent call, including the '\r' that is
+    // stripped from `out`. An empty `out` on its own cannot separate "the
+    // peer sent nothing" from "the peer sent only '\r' and then stalled or
+    // closed", and those are different faults.
+    size_t last_line_bytes_read = 0;
     auto read_line = [&](char* out, size_t out_size) -> bool {
         size_t used = 0;
         while (!expired()) {
@@ -932,8 +938,18 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         return false;
     };
 
+    // Whether a full status line actually arrived. Discarding this made every
+    // no-response failure report "Unexpected HTTP status" with an empty
+    // status_line -- the peer had answered nothing at all, which is a
+    // different fault from answering with the wrong code, and the one that
+    // actually occurs on this link. See FastLED#3899.
     char status_line[64];
-    read_line(status_line, sizeof(status_line));
+    const bool status_line_complete = read_line(status_line, sizeof(status_line));
+    const bool status_bytes_seen = last_line_bytes_read > 0;
+    // Captured before the body loop and the stop() below can change it. With
+    // no status line, this is what separates "the peer closed without
+    // answering" from "the peer held the connection open and never answered".
+    const bool peer_open_after_status = client.connected();
 
     // Consume headers, capturing Content-Length. Every response this client
     // talks to sends one along with `Connection: close`; stopping on the
@@ -987,6 +1003,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         FastLED.watchdog().feed();
         delay(1);
     }
+    // Captured before stop(), which would make connected() false regardless.
+    // With a short body this separates "the peer closed early" from "the peer
+    // held the connection and stopped sending", and elapsed_ms says whether
+    // the 2 s deadline is what ended the read.
+    const bool peer_open_after_body = client.connected();
+    const uint32_t elapsed_ms = millis() - exchange_started_ms;
     client.stop();
     response[response_length] = '\0';
 
@@ -1014,9 +1036,28 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("status_line", status_line);
     result.set("content_length", static_cast<int32_t>(content_length));
     result.set("body_read", static_cast<int32_t>(body_read));
-    result.set("passed", passed && content_ok && body_complete);
+    const bool failed = !(passed && content_ok && body_complete);
+    result.set("passed", !failed);
+    if (failed) {
+        // Recorded for every failure mode, not just one: a truncated body is
+        // the mode actually seen on this link, and without these two fields
+        // it cannot say whether the peer closed early or simply stopped
+        // sending until the deadline expired.
+        result.set("peer_open_after_status", peer_open_after_status);
+        result.set("peer_open_after_body", peer_open_after_body);
+        result.set("elapsed_ms", static_cast<int32_t>(elapsed_ms));
+    }
     if (!passed) {
-        result.set("error", "Unexpected HTTP status");
+        // Distinguish "no answer" from "wrong answer": an empty status line
+        // means the request went out and nothing came back within the
+        // deadline, so the status code is not the thing that failed.
+        if (!status_line_complete && !status_bytes_seen) {
+            result.set("error", "No HTTP response: request sent, nothing read");
+        } else if (!status_line_complete) {
+            result.set("error", "Truncated HTTP status line");
+        } else {
+            result.set("error", "Unexpected HTTP status");
+        }
     } else if (!body_complete) {
         result.set("error", "Truncated response body");
     } else if (!content_ok) {
