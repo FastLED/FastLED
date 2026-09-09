@@ -243,3 +243,15 @@
   device work pins the tree: do concurrent branch work in a `git worktree`,
   and have the loop assert its own branch before each run so a stray checkout
   aborts the campaign instead of quietly changing what it measures.
+- Parallel worktrees are not free, and the thing they kill is the unattended
+  run. Three `git worktree`s, each with its own `.build` tree and its own
+  `fbuild-daemon`, plus a device campaign and a platform compile, drove the
+  host out of memory; the harness killed the campaign mid-run. Nothing was
+  wedged and both boards re-enumerated healthy, but an hour of unattended
+  collection was lost, and the kill looked at first glance like a test
+  failure rather than an environmental one. Worktrees are the right answer to
+  the shared-tree hazard above, so the fix is not to stop using them: retire
+  each one as soon as its work is pushed, kill the daemon that belongs to it,
+  and have long unattended loops check free memory before each iteration and
+  stop cleanly rather than be killed part-way. Read the exit reason before
+  concluding anything about the code. See [[shared-tree-hazard]].
