@@ -85,3 +85,79 @@
   Callgrind budget were both reporting a real host regression, and a
   re-baseline would have recorded it as the new normal. Read the callgrind
   deltas in the artifact before rewriting the file.
+- A harness `PASS` means what the harness checked, not what its name implies.
+  `runParallelTest` skips RX loopback validation for the RP `PIO0`+`PIO1` pair
+  (`AutoResearchRemoteRunParallelTest.cpp:308`, `is_rp_pio_pair`), so its PASS
+  proves channel creation and a clean shared `show()` — not byte-correct output.
+  It was quoted as "decisive loopback evidence" on #3899 and had to be retracted.
+  Read what a green result asserts before citing it as evidence for a checklist
+  item.
+- On a HIL bench, most "device faults" are host-side. Four in one session on
+  RP2350W: a 20 ms RPC timeout that read as a hung board (`--timeout` is a
+  whole-run deadline for `--net-peer`, not a per-phase one); `deployed firmware
+  schema does not contain rpSpiLoopback` on a board that exposes it (a failed
+  `rpc.discover` collapsed to `None`); `zero_capture` on SPI that was an
+  unfitted jumper; and `serial driver may be wedged` that was a dead fbuild
+  daemon. Check the transport and the harness before concluding anything about
+  silicon.
+- A second `RpcBench` on a port another client already holds connects without
+  error and is then inert — every call returns `None`, while the first client
+  keeps working (FastLED#4207). Because the failure is silent, callers read the
+  `None` as a statement about the device. Any code spawning a device script
+  against a port the harness still holds must release it first.
+- When an error path swallows its own signal, stop reasoning and instrument.
+  Four successive hypotheses for one `None` (short timeout, `call_flat` frame
+  shape, payload size, then the real cause) were each refuted by the next run,
+  because `call_flat` collapses every exception to `None`. A twenty-line
+  two-client repro settled it immediately and was available the whole time.
+- Verify a fix landed on the hardware you think you flashed. A failed build
+  followed by a successful RPC answers from resident firmware, so "after"
+  numbers can be byte-identical to "before" and look like a null result. Check
+  for a field only the new build emits.
+- Exhaustive equivalence checks written in Python cannot see C overflow. A
+  32-bit fast path for `cycles_from_ns` compared equal to the 64-bit oracle
+  across every sampled input while silently overflowing `u32` above 215 MHz;
+  only a separate explicit overflow counter caught it. Assert the width bound,
+  not just the values.
+- Peer-network autoresearch reflashes the fixture as well as the DUT. The
+  RP2350W has a watchdog/bootloader escape armed (#4167/#4172); the ESP32-C6
+  has none. A wedged C6 CDC gives `EBUSY` with no holding process, and every
+  recovery handle (usbfs, `authorized`, `unbind`, `remove`) is root-only — so
+  an unattended bench has no way back. Assess the fixture's recovery path, not
+  just the DUT's, before running `--net-peer --ota`.
+- Building the non-W `rp2350` target changes the board's USB product string, so
+  `/dev/serial/by-id` renames from `..._Pico_2W_<serial>` to `..._Pico_2_<serial>`.
+  Anything addressing the board by the old by-id path silently stops resolving
+  and presents as a missing board. The serial is stable across both variants,
+  which is why fbuild's `SER=<serial>` selector is the robust way to address it.
+- A single artifact is not a sample when the property depends on cache-hit
+  status. I cleared the "missing exec bit" hypothesis (#4205) after checking
+  `tests/runner` alone and finding it executable — it had simply been freshly
+  linked rather than served from cache that run. A later survey found 4 of 4
+  ELF executables in the build dir lacking `+x`. Enumerate the whole class
+  before ruling out a permissions or attribute defect.
+- Finding a real bug in the right subsystem is not the same as finding the
+  cause. `mtime_stabilizer.py` genuinely matched 0 of 383 outputs on Linux
+  (it globbed only `*.dll`), and fixing it was correct — but the #4212 stale
+  failures recurred, because the stabilizer compares outputs against *input
+  file* mtimes while the #3011 guard compares against *build start*. Different
+  comparison, so satisfying one says nothing about the other. Re-run and
+  confirm the symptom actually clears before claiming causation.
+- When a build system reports an opaque wrapper error, force the underlying
+  exception out before theorising. `ERROR: Unhandled python OSError ... return
+  code 13` named neither the file nor the errno; `MESON_FORCE_BACKTRACE=1`
+  turned it into `PermissionError: [Errno 13] Permission denied: <path>` in
+  one step. The "13" was the errno, not an exit code — the message actively
+  misdirects.
+- Check what a manifest actually is before calling it truncated. `help`
+  returning 36 of `rpc.discover`'s 72 methods looked like a response-size cap;
+  it is a hand-maintained `kHelpEntries[]` table in
+  `AutoResearchRemotePinMethods.cpp`. A new RPC method must be added there too
+  or `--rpc-smoke` fails on it.
+- On RP, `ClocklessController` acquires PIO/DMA/pin resources in `init()` and
+  every `release*` call in `clockless_rp_pio.h` is an error-path rollback.
+  Before #4214 there was no destructor, so successful controllers leaked their
+  state machine, program space, DMA channel, pin claim, and `dma_buf` — and
+  left `dma_chan_waits[]` pointing at a destroyed `mWait` for the shared ISR.
+  When testing resource arbitration, always include a control leg that claims
+  and then releases; the starved leg alone cannot see a leak.
