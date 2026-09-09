@@ -65,12 +65,56 @@ inline void xyY_to_XYZ(float x, float y, float Y, float out[3]) FL_NO_EXCEPT {
     out[2] = (1.0f - x - y) * Y * inv_y;
 }
 
+/// How small a determinant may be, *relative to the matrix's own scale*,
+/// before the inverse is rounding noise.
+///
+/// The guard here used to be an absolute `1e-20`, which for the matrices
+/// this is actually given -- columns of CIE XYZ built from chromaticities,
+/// so entries of order 1 -- is about thirteen orders of magnitude too tight
+/// to ever fire (#4194). Primaries with red and green *identical*, which is
+/// as singular as a matrix gets, compute a determinant of about -1.1e-7 at
+/// -O3 rather than the exact zero the mathematics says, because the compiler
+/// reassociates and the cancellation is not exact. `1e-20` accepted that and
+/// returned an inverse scaled by 1/det ~ -9.1e6: pure noise.
+///
+/// Measured, as |det| over the product of the column norms:
+///
+///     sRGB/BT.709      0.57      Display P3   0.68      BT.2020   0.81
+///     red == green     1.7e-9    (the case above, in float32 at -O3)
+///
+/// 1e-6 sits between them with about five orders of margin either side, and
+/// it is not a tuned number: it is roughly ten times float32's epsilon
+/// (1.19e-7), which is where a determinant stops being distinguishable from
+/// the cancellation that produced it.
+///
+/// Deliberately *not* tight enough to reject merely ill-conditioned
+/// primaries. Two chromaticities differing by 1e-4 give a relative
+/// determinant of 5.3e-5 -- resolvable in float32, just poorly. Rejecting
+/// those is a different policy question and is not made here silently.
+constexpr float kRelativeSingularityQ = 1e-6f;
+
 inline bool invert3x3(const float in[3][3], float out[3][3]) FL_NO_EXCEPT {
     const float a = in[0][0], b = in[0][1], c = in[0][2];
     const float d = in[1][0], e = in[1][1], f = in[1][2];
     const float g = in[2][0], h = in[2][1], i = in[2][2];
     const float det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-    if (fl::fabs(det) < 1e-20f) {
+
+    // Scale the test by the matrix's own magnitude, via the product of its
+    // column norms. For a well-conditioned matrix that product is close to
+    // |det|; for a singular one it stays finite while |det| collapses, which
+    // is exactly the ratio an absolute threshold cannot see.
+    const float col0 = fl::sqrt(a * a + d * d + g * g);
+    const float col1 = fl::sqrt(b * b + e * e + h * h);
+    const float col2 = fl::sqrt(c * c + f * f + i * i);
+    const float scale = col0 * col1 * col2;
+
+    // One negated `>`, which covers three cases at once and is why there is
+    // no separate zero or NaN check: a zero column forces `scale` to zero and
+    // the determinant with it, so the comparison is `0 > 0` and fails; a NaN
+    // anywhere -- matrix, determinant or norms -- makes every comparison
+    // false, so the negation rejects. An explicit `scale > 0` clause was
+    // written here first and mutation testing showed it could not fire.
+    if (!(fl::fabs(det) > kRelativeSingularityQ * scale)) {
         return false;
     }
     const float inv_det = 1.0f / det;
