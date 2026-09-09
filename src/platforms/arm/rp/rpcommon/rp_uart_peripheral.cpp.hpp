@@ -164,6 +164,10 @@ void RpUartPeripheral::deinitialize() FL_NO_EXCEPT {
     }
     if (mOwnsPin) {
         gpio_set_outover(static_cast<uint>(mTxPin), GPIO_OVERRIDE_NORMAL);
+        // The override was undone above but the pin was still muxed to the
+        // UART by initialize(); return it to hi-Z so the release is real.
+        gpio_set_function(static_cast<uint>(mTxPin), GPIO_FUNC_SIO);
+        gpio_set_dir(static_cast<uint>(mTxPin), GPIO_IN);
         resources.releasePins(static_cast<u8>(mTxPin), 1);
     }
     if (mOwnsUart) {
