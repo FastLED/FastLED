@@ -124,8 +124,6 @@ def test_unreadable_binary_raises_instead_of_being_skipped(tmp_path: Path) -> No
     this module repairs, and the run then dies later on a PermissionError
     with no connection to the cause.
     """
-    from ci.meson.mtime_stabilizer import restore_executable_bits
-
     (tmp_path / "tests").mkdir()
     (tmp_path / "examples").mkdir()
     binary = _elf(tmp_path / "tests" / "runner", mode=0o000)  # unreadable
