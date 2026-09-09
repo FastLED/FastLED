@@ -98,14 +98,34 @@ def _is_teensy4_environment(final_environment: str | None) -> bool:
     )
 
 
+def _is_spi_family_driver(driver: str) -> bool:
+    """Whether a driver name denotes an SPI transmitter on any platform.
+
+    Platforms spell this differently: the portable "SPI", Teensy's
+    "SPI_UNIFIED", and RP's concrete per-block "SPI0"/"SPI1". Anything
+    keying off the bare literal silently skips the RP names, which is how
+    the two-frame SPI default stopped applying there.
+    """
+    if driver in ("SPI", "SPI_UNIFIED"):
+        return True
+    return driver.startswith("SPI") and driver[3:].isdigit()
+
+
 def _driver_name_for_environment(
     driver: str,
     final_environment: str | None,
     rp_pio_index: int = 1,
     rp_uart_index: int = 0,
+    rp_spi_index: int = 0,
 ) -> str:
     if driver == "SPI" and _is_teensy4_environment(final_environment):
         return "SPI_UNIFIED"
+    if driver == "SPI" and _active_rp2xxx_environment(final_environment) is not None:
+        # RP registers its two fixed PL022 blocks as concrete "SPI0"/"SPI1"
+        # engines; the portable "SPI" bus name is not a runtime driver here, so
+        # sending it fails with `UnknownDriver: Driver 'SPI' not available`.
+        # Same shape as the FLEX_IO and UART cases below.
+        return f"SPI{rp_spi_index}"
     if (
         driver == "FLEX_IO"
         and _active_rp2xxx_environment(final_environment) is not None
@@ -158,6 +178,9 @@ def _normalize_deferred_driver_names(ctx: RunContext) -> None:
     args = ctx.args
     if _active_rp2xxx_environment(environment) is not None:
         _replace_driver_selection(ctx, "UART", [f"UART{args.rp_uart_index}"])
+        # --all appends the portable "SPI", which is not a runtime driver on
+        # RP; without this it reaches the device as UnknownDriver.
+        _replace_driver_selection(ctx, "SPI", [f"SPI{args.rp_spi_index}"])
         pio_names = (
             ["PIO0", "PIO1"]
             if args.rp_pio_both and args.flex_io
@@ -571,7 +594,13 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.rmt:
             drivers.append("RMT")
         if args.spi:
-            drivers.append(_driver_name_for_environment("SPI", final_environment))
+            drivers.append(
+                _driver_name_for_environment(
+                    "SPI",
+                    final_environment,
+                    rp_spi_index=args.rp_spi_index,
+                )
+            )
         if args.uart:
             drivers.append(
                 _driver_name_for_environment(
@@ -1082,7 +1111,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     # others -> 1. User can override with --frames N.
                     if args.frames is not None:
                         frame_count = args.frames
-                    elif driver == "SPI":
+                    elif _is_spi_family_driver(driver):
                         frame_count = 2
                     else:
                         frame_count = 1
