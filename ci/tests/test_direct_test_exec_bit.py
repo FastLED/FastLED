@@ -27,6 +27,26 @@ from ci.meson.sequential_runner import DirectTestContext, run_direct_test
 
 
 @typechecked
+def _stub_profile_tree(root: Path) -> Path:
+    """A profile test: its own executable under `tests/profile`, no runner.
+
+    `_resolve_test_command` prefers this shape and spawns the binary
+    directly, and the restore does not recurse into subdirectories -- so a
+    scan that names only `tests` walks straight past it.
+    """
+    real_exe = shutil.which("sh")
+    if real_exe is None:
+        pytest.skip("no system shell to stand in for the test runner")
+
+    profile = root / "tests" / "profile"
+    profile.mkdir(parents=True)
+    executable = profile / "stub_case"
+    shutil.copyfile(real_exe, executable)
+    executable.chmod(0o644)
+    return executable
+
+
+@typechecked
 def _stub_build_tree(root: Path) -> Path:
     """A build directory shaped like the one `run_direct_test` looks at.
 
@@ -96,3 +116,16 @@ def test_an_already_executable_runner_is_left_alone(tmp_path: Path) -> None:
 
     assert result.success
     assert stat.S_IMODE(runner.stat().st_mode) == 0o700
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX mode bits")
+@typechecked
+def test_a_profile_test_executable_is_restored_too(tmp_path: Path) -> None:
+    build_dir = tmp_path / "build"
+    executable = _stub_profile_tree(build_dir)
+    assert not executable.stat().st_mode & stat.S_IXUSR
+
+    result = run_direct_test(_context(tmp_path, build_dir))
+
+    assert result.success, "run_direct_test could not spawn a profile executable"
+    assert executable.stat().st_mode & stat.S_IXUSR
