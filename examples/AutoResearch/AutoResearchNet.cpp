@@ -788,6 +788,9 @@ struct RpPeerState {
     // total elapsed time: a 4096-byte POST body arrives across several TCP
     // segments and legitimately outruns a fixed budget on CYW43 SoftAP.
     uint32_t last_progress_ms = 0;
+    // it after draining the RPC queue, so a blocking handler can starve it
+    // for seconds. Without this the stall timer charges that gap to the peer
+    // and answers 408 to a connection that never went quiet.
 };
 
 RpPeerState& rpPeerState() {
@@ -836,6 +839,14 @@ void writeHttpErrorResponse(WiFiClient& client, const char* status,
     client.print(body);
 }
 
+// A peer that has sent nothing for this long is stalled. Matches the old
+// flat budget, so a genuinely dead peer is abandoned just as quickly.
+constexpr uint32_t kRpHttpClientStallMs = 2000;
+// Ceiling for one exchange, so a peer dribbling a byte at a time cannot hold
+// the loop past AutoResearch's 5 s watchdog. The loop feeds the WDT while
+// waiting, but bounding it keeps a wedged peer from stalling the sketch.
+constexpr uint32_t kRpHttpClientMaxMs = 4000;
+
 fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
                           const char* method, const char* path,
                           const char* request_body, const char* test_name,
@@ -845,6 +856,11 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("test", test_name);
 
     WiFiClient client;
+    // Start the exchange clock before connect(): a slow or unreachable peer
+    // spends that time inside connect(), and a deadline armed afterwards
+    // cannot bound it.
+    const uint32_t exchange_started_ms = millis();
+    uint32_t last_progress_ms = exchange_started_ms;
     if (!client.connect(host_ip, port)) {
         result.set("passed", false);
         result.set("error", "TCP connect failed");
@@ -865,9 +881,19 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         client.print(request_body);
     }
 
-    const uint32_t deadline_ms = millis() + 2000;
-    while (!client.available() && client.connected() &&
-           static_cast<int32_t>(millis() - deadline_ms) < 0) {
+    // One flat deadline for the whole exchange -- first-byte wait, status
+    // line, headers and body -- meant a peer that was merely slow to start
+    // failed the request outright, with an empty status line and zero bytes
+    // read. Measure a stall instead, refreshed by every byte that arrives,
+    // and keep an absolute ceiling so a dead peer is still abandoned. Same
+    // correction as #4219 made on the server side of this file.
+    const uint32_t hard_deadline_ms = exchange_started_ms + kRpHttpClientMaxMs;
+    const auto expired = [&]() -> bool {
+        const uint32_t now = millis();
+        return static_cast<int32_t>(now - last_progress_ms) >= kRpHttpClientStallMs ||
+               static_cast<int32_t>(now - hard_deadline_ms) >= 0;
+    };
+    while (!client.available() && client.connected() && !expired()) {
         FastLED.watchdog().feed();
         delay(1);
     }
@@ -880,7 +906,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // expires with the line unfinished. See FastLED#4173.
     auto read_line = [&](char* out, size_t out_size) -> bool {
         size_t used = 0;
-        while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+        while (!expired()) {
             if (!client.available()) {
                 if (!client.connected()) {
                     break;
@@ -893,6 +919,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
             if (ch < 0) {
                 break;
             }
+            last_progress_ms = millis();
             if (ch == '\n') {
                 out[used] = '\0';
                 return true;
@@ -936,7 +963,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     char response[256] = {};
     size_t response_length = 0;
     long body_read = 0;
-    while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
+    while (!expired()) {
         if (content_length >= 0 && body_read >= content_length) {
             break;  // complete
         }
@@ -945,6 +972,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
             if (ch < 0) {
                 break;
             }
+            last_progress_ms = millis();
             ++body_read;
             // Keep draining past the buffer so the socket is not abandoned
             // mid-response; only the first 256 bytes are recorded.
@@ -1020,6 +1048,11 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     result.set("expected_hash", static_cast<int64_t>(expected_hash));
 
     WiFiClient client;
+    // Same as runRpHttpRequestTest: the clock has to start before connect(),
+    // since an unreachable peer spends that time inside connect() and a
+    // deadline armed afterwards cannot bound it.
+    const uint32_t echo_started_ms = millis();
+    uint32_t echo_progress_ms = echo_started_ms;
     if (!client.connect(host_ip, port)) {
         result.set("passed", false);
         result.set("error", "TCP connect failed");
@@ -1032,7 +1065,16 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     client.print("\r\nConnection: close\r\n\r\n");
     client.write(reinterpret_cast<const uint8_t*>(payload.data()), payload.size());
 
-    const uint32_t deadline_ms = millis() + 4000;
+    // Stall-based, for the same reason as runRpHttpRequestTest above: a flat
+    // budget for a 4 KiB round trip fails a peer that is merely slow rather
+    // than stuck, and reports it as a hash mismatch against zero bytes.
+    const uint32_t echo_hard_deadline_ms =
+        echo_started_ms + kRpHttpClientMaxMs;
+    const auto echo_expired = [&]() -> bool {
+        const uint32_t now = millis();
+        return static_cast<int32_t>(now - echo_progress_ms) >= kRpHttpClientStallMs ||
+               static_cast<int32_t>(now - echo_hard_deadline_ms) >= 0;
+    };
     char status_line[64] = {};
     size_t status_length = 0;
     bool status_done = false;
@@ -1040,13 +1082,17 @@ fl::json runRpHttpPayloadEchoTest(const char* host_ip, uint16_t port) {
     uint8_t header_match = 0;
     uint32_t received_hash = 2166136261u;
     size_t received_bytes = 0;
-    while (static_cast<int32_t>(millis() - deadline_ms) < 0 &&
-           (client.connected() || client.available())) {
+    while (!echo_expired() && (client.connected() || client.available())) {
         while (client.available()) {
+            // A peer streaming without pause would otherwise keep this inner
+            // loop running past the hard deadline, because the outer check
+            // is only reached when available() goes false.
+            if (echo_expired()) break;
             const int value = client.read();
             if (value < 0) {
                 break;
             }
+            echo_progress_ms = millis();
             const char ch = static_cast<char>(value);
             if (!status_done) {
                 if (ch == '\n') {
