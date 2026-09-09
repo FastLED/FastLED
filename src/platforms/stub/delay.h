@@ -20,7 +20,7 @@
 constexpr fl::u32 cycles_from_ns_stub(fl::u32 ns, fl::u32 cpu_hz) FL_NO_EXCEPT {
   // Round up: cycles = ceil(ns * cpu_hz / 1e9)
   // = (ns * cpu_hz + 999'999'999) / 1'000'000'000
-  return ((fl::u64)ns * (fl::u64)cpu_hz + 999999999UL) / 1000000000UL;
+  return fl::cycles_from_ns(ns, cpu_hz);
 }
 
 namespace fl {

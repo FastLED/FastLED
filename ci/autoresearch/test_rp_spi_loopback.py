@@ -108,15 +108,56 @@ def main() -> int:
     print(f"  SCK: GPIO{sck_pin} (output only)")
     try:
         with RpcBench(args.port) as bench:
-            schema = bench.call_flat("rpc.discover", args=[])
-            methods = schema.get("schema", []) if isinstance(schema, dict) else []
+            # rpc.discover is a built-in, not one of the positional-C++-param
+            # methods call_flat() exists for, so call() is the right API here.
+            # Note this is NOT what makes the discover succeed: when this
+            # script runs under `bash autoresearch`, the harness already holds
+            # an RpcBench on the same port and the second connection's
+            # responses do not come back, so discover returns None either way.
+            # Run standalone (`uv run python -m ci.autoresearch.
+            # test_rp_spi_loopback --port ...`) until that is addressed.
+            schema = bench.call("rpc.discover", timeout=30.0)
+            # RpcBench.call() has three distinct outcomes and they mean very
+            # different things. Collapsing them sends the reader hunting for
+            # the wrong problem, which is what this diagnostic exists to stop.
+            if schema is METHOD_NOT_FOUND:
+                print(
+                    "FAIL — the firmware does not bind rpc.discover. This is a "
+                    "build/firmware gap, not a wiring or transport problem."
+                )
+                return 1
+            if schema is None:
+                print(
+                    "FAIL — rpc.discover timed out or the transport failed. "
+                    "This says nothing about whether rpSpiLoopback is present; "
+                    "it is a host/transport failure, not a firmware gap."
+                )
+                return 1
+            if not isinstance(schema, dict):
+                print(
+                    "FAIL — rpc.discover returned a malformed schema "
+                    f"(got {type(schema).__name__}, expected an object); "
+                    "cannot tell whether rpSpiLoopback is present."
+                )
+                return 1
+            methods = schema.get("schema", [])
             method_names = {
                 entry[0]
                 for entry in methods
                 if isinstance(entry, list) and entry and isinstance(entry[0], str)
             }
+            if not method_names:
+                print(
+                    "FAIL — rpc.discover returned a schema with no parseable "
+                    f"method names (keys: {sorted(schema)}); the response shape "
+                    "may have changed."
+                )
+                return 1
             if "rpSpiLoopback" not in method_names:
-                print("FAIL — deployed firmware schema does not contain rpSpiLoopback")
+                print(
+                    "FAIL — deployed firmware schema does not contain "
+                    f"rpSpiLoopback ({len(method_names)} methods discovered)"
+                )
                 return 1
             passed = all(
                 run_case(bench, args.spi_index, mosi_pin, miso_pin, sck_pin, clock_hz)
