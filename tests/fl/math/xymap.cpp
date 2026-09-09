@@ -3,6 +3,7 @@
 
 #include "fl/math/xymap.h"
 #include "fl/math/screenmap.h"
+#include "fl/math/xmap.h"
 #include "test.h"
 
 using namespace fl;
@@ -287,6 +288,35 @@ FL_TEST_CASE("XYMap addressing with GBR color order (another permutation)") {
     FL_CHECK_EQ(output[0].r, 1);
     FL_CHECK_EQ(output[1].r, 4);
     FL_CHECK_EQ(output[5].r, 10);
+}
+
+
+FL_TEST_CASE("[#4201] XYMap::fromXMap builds its own lookup table") {
+    // Regression. `fromXMap` asks `constructWithLookUpTable` to allocate the
+    // table and passes `nullptr` for the contents, meaning "I will fill it".
+    // The helper copied from that pointer unconditionally, so this crashed in
+    // `memcpy` -- taking every caller of `Channel::setScreenMap(const XMap&)`
+    // with it. The dormant `tests/fl/channels/channel.cpp` was the only thing
+    // exercising that path, so nothing caught it.
+    fl::XMap reverse = fl::XMap(4, true);
+    fl::XYMap mapped = fl::XYMap::fromXMap(reverse);
+
+    FL_CHECK_EQ(mapped.getWidth(), 4);
+    FL_CHECK_EQ(mapped.getHeight(), 1);
+    // Reverse addressing: physical 0 reads source 3, and so on.
+    for (fl::u16 i = 0; i < 4; ++i) {
+        FL_CHECK_EQ(mapped.mapToIndex(i, 0), reverse.mapToIndex(i));
+    }
+}
+
+FL_TEST_CASE("[#4201] constructWithLookUpTable copies a table when given one") {
+    // The other half of the same guard: a real table must still be copied,
+    // so the null case cannot be implemented by ignoring the argument.
+    const fl::u16 table[4] = {3, 2, 1, 0};
+    fl::XYMap mapped = fl::XYMap::constructWithLookUpTable(4, 1, table);
+    for (fl::u16 i = 0; i < 4; ++i) {
+        FL_CHECK_EQ(mapped.mapToIndex(i, 0), table[i]);
+    }
 }
 
 }  // FL_TEST_FILE
