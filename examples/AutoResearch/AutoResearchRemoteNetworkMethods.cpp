@@ -241,6 +241,11 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
 
     // Register "runNetLoopback" - Self-contained loopback test (no WiFi needed)
     // Starts HTTP server on localhost, client GETs 127.0.0.1 endpoints
+    remote.bind("netServerStats", [](const fl::json& args) -> fl::json {
+        (void)args;
+        return netServerStats();
+    });
+
     remote.bind("runNetLoopback", [](const fl::json& args) -> fl::json {
         return runNetLoopback();
     });

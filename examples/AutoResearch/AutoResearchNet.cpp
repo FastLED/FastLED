@@ -639,6 +639,13 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     return response;
 }
 
+fl::json netServerStats() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "netServerStats is RP-only");
+    return response;
+}
+
 fl::json runNetLoopback() {
     fl::json response = fl::json::object();
     int tests_passed = 0;
@@ -784,6 +791,17 @@ struct RpPeerState {
     bool headers_complete = false;
     bool response_complete = false;
     uint32_t request_started_ms = 0;
+    // Why the last request was abandoned, for netServerStats. A 408 tells the
+    // peer that time ran out but not which budget ran out, nor how much of
+    // the request had arrived -- which is the difference between a slow peer,
+    // a request the server never completes, and a starved poll loop.
+    uint32_t timeout_count = 0;
+    bool last_timeout_was_stall = false;
+    size_t last_timeout_body_length = 0;
+    size_t last_timeout_expected_body = 0;
+    uint32_t last_timeout_elapsed_ms = 0;
+    bool last_timeout_headers_complete = false;
+    char last_timeout_request[64] = {};
     // Progress watermark. The request deadline must measure a *stall*, not
     // total elapsed time: a 4096-byte POST body arrives across several TCP
     // segments and legitimately outruns a fixed budget on CYW43 SoftAP.
@@ -1302,6 +1320,23 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     return response;
 }
 
+fl::json netServerStats() {
+    RpPeerState& state = rpPeerState();
+    fl::json response = fl::json::object();
+    response.set("success", true);
+    response.set("timeoutCount", static_cast<int64_t>(state.timeout_count));
+    response.set("lastTimeoutWasStall", state.last_timeout_was_stall);
+    response.set("lastTimeoutBodyLength",
+                 static_cast<int64_t>(state.last_timeout_body_length));
+    response.set("lastTimeoutExpectedBody",
+                 static_cast<int64_t>(state.last_timeout_expected_body));
+    response.set("lastTimeoutElapsedMs",
+                 static_cast<int64_t>(state.last_timeout_elapsed_ms));
+    response.set("lastTimeoutHeadersComplete", state.last_timeout_headers_complete);
+    response.set("lastTimeoutRequest", state.last_timeout_request);
+    return response;
+}
+
 fl::json runNetLoopback() {
     fl::json response = fl::json::object();
     response.set("success", false);
@@ -1361,6 +1396,18 @@ void pollNetServer() {
         static_cast<int32_t>(now_ms - state.request_started_ms) >= kRpPeerMaxRequestMs;
     if (stalled || over_budget) {
         if (!state.response_complete) {
+            ++state.timeout_count;
+            state.last_timeout_was_stall = stalled;
+            state.last_timeout_body_length = state.body_length;
+            state.last_timeout_expected_body = state.expected_body_length;
+            state.last_timeout_elapsed_ms = now_ms - state.request_started_ms;
+            state.last_timeout_headers_complete = state.headers_complete;
+            fl::size copy_len = state.request_length;
+            if (copy_len >= sizeof(state.last_timeout_request)) {
+                copy_len = sizeof(state.last_timeout_request) - 1;
+            }
+            fl::memcpy(state.last_timeout_request, state.request, copy_len);
+            state.last_timeout_request[copy_len] = '\0';
             writeHttpErrorResponse(*state.client, "408 Request Timeout", "");
         }
         state.client->stop();
@@ -1505,6 +1552,13 @@ void pollNetServer() {
 }
 
 #else  // !FL_IS_ESP32 && !FL_IS_RP2350
+
+fl::json netServerStats() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "netServerStats is RP-only");
+    return response;
+}
 
 // ============================================================================
 // Stub Implementation for Non-ESP32 Platforms
