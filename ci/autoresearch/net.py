@@ -660,6 +660,8 @@ async def run_net_peer_autoresearch(
             wifi_status: dict[str, Any] = {}
             join_started = time.monotonic()
             attempts = 0
+            polls = 0
+            cut_short = False
             for attempt in range(kJoinAttempts):
                 attempts = attempt + 1
                 if attempt > 0:
@@ -674,7 +676,25 @@ async def run_net_peer_autoresearch(
                     if not reconnect.get("success"):
                         raise RpcError(f"RP2350W wifiConnect failed: {reconnect}")
                 for _ in range(kJoinPollsPerAttempt):
-                    wifi_status = await rpc_data(primary, "wifiStatus")
+                    # Stop polling once the whole-run deadline is close enough
+                    # that continuing would starve the remaining cycles -- and,
+                    # more importantly, would consume the budget the failure
+                    # diagnostics below need in order to report at all.
+                    poll_budget = (
+                        deadline - time.monotonic() - kJoinReserveSeconds
+                    )
+                    if poll_budget <= 0:
+                        cut_short = True
+                        break
+                    polls += 1
+                    # Clamp the poll itself to the budget, not just the check
+                    # before it. Checking first and then letting the RPC wait
+                    # its own 15 s can land the next check inside the reserve
+                    # -- and if that RPC times out, the run dies before the
+                    # join-failure report this reserve exists to protect.
+                    wifi_status = await rpc_data(
+                        primary, "wifiStatus", max_wait=min(15.0, poll_budget)
+                    )
                     candidate_ip = wifi_status.get("ip")
                     if wifi_status.get("connected") and isinstance(candidate_ip, str):
                         rp_ip = candidate_ip
@@ -686,9 +706,20 @@ async def run_net_peer_autoresearch(
                     break
             join_elapsed = time.monotonic() - join_started
             if not rp_ip:
+                # Report the polls actually made, not the configured maximum:
+                # quoting the maximum would overstate the evidence whenever
+                # the deadline reserve cut the sweep short, which is exactly
+                # the case a reader needs to tell apart from a full
+                # unsuccessful one.
+                stopped_early = (
+                    " (stopped early to reserve deadline for this report)"
+                    if cut_short
+                    else ""
+                )
                 raise RpcTimeoutError(
                     "RP2350W did not join the ESP32-C6 AP after "
-                    f"{join_elapsed:.1f}s across {attempts} attempt(s); "
+                    f"{join_elapsed:.1f}s across {attempts} attempt(s) and "
+                    f"{polls} wifiStatus poll(s){stopped_early}; "
                     f"last wifiStatus={wifi_status!r}"
                 )
             print(
