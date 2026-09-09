@@ -680,9 +680,7 @@ async def run_net_peer_autoresearch(
                     # that continuing would starve the remaining cycles -- and,
                     # more importantly, would consume the budget the failure
                     # diagnostics below need in order to report at all.
-                    poll_budget = (
-                        deadline - time.monotonic() - kJoinReserveSeconds
-                    )
+                    poll_budget = deadline - time.monotonic() - kJoinReserveSeconds
                     if poll_budget <= 0:
                         cut_short = True
                         break
