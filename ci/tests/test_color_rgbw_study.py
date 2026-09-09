@@ -15,7 +15,9 @@ from pathlib import Path
 
 from ci.color_reference import Xyz, _invert_3x3, _matvec
 from ci.color_rgbw_study import (
+    ENUMERATION_TOLERANCE,
     allocate_one_white,
+    allocate_two_white,
     best_single_white,
     emitter_column,
     most_white_two,
@@ -212,6 +214,168 @@ class TestTwoWhitesNeedMoreThanOne(unittest.TestCase):
         self.assertGreater(mixing_wins, checked // 2)
         # And the shortfall reaches a full emitter's worth of light.
         self.assertGreater(worst_gap, 0.9)
+
+
+@dataclass(frozen=True, slots=True)
+class SweepTally:
+    """What one comparison sweep found."""
+
+    solved: int
+    disagreed: int
+    boundary: int
+    rejected_by_both: int
+    worst_total_delta: float
+
+
+class TestTwoWhitesAreAlsoClosedForm(unittest.TestCase):
+    """The closed form must match the enumeration it replaces (#4198).
+
+    Nothing is skipped here. The first attempt at this allocation reported
+    "0 disagreements over 10,285 targets" while its harness had quietly
+    dropped roughly 30,000 of 40,000 -- and the dropped ones were precisely
+    the bright targets it could not handle. So every sample is classified by
+    both methods and any disagreement about *feasibility* is counted as
+    loudly as a disagreement about the answer.
+    """
+
+    def setUp(self: "TestTwoWhitesAreAlsoClosedForm") -> None:
+        self.inverse = _invert_3x3(rgb_matrix(RGB_COLUMNS))
+        self.columns = [*RGB_COLUMNS, D65_WHITE_COLUMN, D50_WHITE_COLUMN]
+
+    def _target(self: "TestTwoWhitesAreAlsoClosedForm", drives: list[float]) -> Xyz:
+        return tuple(
+            sum(self.columns[e][i] * drives[e] for e in range(5)) for i in range(3)
+        )
+
+    def _worst_violation(
+        self: "TestTwoWhitesAreAlsoClosedForm", target: Xyz, levels: "object"
+    ) -> float:
+        """How far outside [0, 1] the drives implied by `levels` reach."""
+
+        at_zero = _matvec(self.inverse, target)
+        from_first = _matvec(self.inverse, D65_WHITE_COLUMN)
+        from_second = _matvec(self.inverse, D50_WHITE_COLUMN)
+        first = levels.first  # type: ignore[attr-defined]
+        second = levels.second  # type: ignore[attr-defined]
+        worst = 0.0
+        for value in (
+            first,
+            second,
+            *(
+                at_zero[i] - first * from_first[i] - second * from_second[i]
+                for i in range(3)
+            ),
+        ):
+            worst = max(worst, -value, value - 1.0)
+        return worst
+
+    def _sweep(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+        make_drives: "object",
+        count: int,
+    ) -> SweepTally:
+        """Compare both methods over `count` targets, returning the tallies.
+
+        A "boundary" is a target the two classify differently *and* whose
+        answer sits within the enumeration's own constraint tolerance of the
+        hull. Those are not agreement, and they are not swept under the rug
+        either: they are counted and asserted to stay rare, because the two
+        methods draw the hull's edge with different arithmetic and a target
+        landing exactly on it can fall either side. Anything further out is a
+        real disagreement.
+        """
+
+        random.seed(4198)
+        solved = disagreed = boundary = rejected_by_both = 0
+        worst = 0.0
+        for _ in range(count):
+            target = self._target(make_drives())  # type: ignore[operator]
+            closed = allocate_two_white(
+                self.inverse, target, D65_WHITE_COLUMN, D50_WHITE_COLUMN
+            )
+            exact = most_white_two(
+                self.inverse, target, D65_WHITE_COLUMN, D50_WHITE_COLUMN
+            )
+            if closed is None and exact is None:
+                rejected_by_both += 1
+                continue
+            if (closed is None) != (exact is None):
+                answered = closed if closed is not None else exact
+                if self._worst_violation(target, answered) <= ENUMERATION_TOLERANCE:
+                    boundary += 1
+                else:
+                    disagreed += 1
+                continue
+            assert closed is not None and exact is not None
+            solved += 1
+            worst = max(worst, abs(closed.total - exact.total))
+        return SweepTally(solved, disagreed, boundary, rejected_by_both, worst)
+
+    def test_it_matches_the_enumeration_on_reachable_targets(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+    ) -> None:
+        tally = self._sweep(lambda: [random.random() for _ in range(5)], 8000)
+        self.assertEqual(tally.disagreed, 0)
+        self.assertEqual(tally.boundary, 0)
+        # Sampling drives rather than XYZ makes every target reachable by
+        # construction, so a rejection from either side is a defect and this
+        # count is the whole sample.
+        self.assertEqual(tally.solved, 8000)
+        self.assertLess(tally.worst_total_delta, 1e-9)
+
+    def test_it_matches_on_targets_needing_both_whites(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+    ) -> None:
+        # The half the first attempt failed: totals whose feasible interval
+        # does not start at zero.
+        tally = self._sweep(
+            lambda: [
+                random.random() * 0.2,
+                random.random() * 0.2,
+                random.random() * 0.2,
+                0.8 + random.random() * 0.2,
+                0.8 + random.random() * 0.2,
+            ],
+            4000,
+        )
+        self.assertEqual(tally.disagreed, 0)
+        self.assertEqual(tally.boundary, 0)
+        self.assertEqual(tally.solved, 4000)
+        self.assertLess(tally.worst_total_delta, 1e-9)
+
+    def test_it_agrees_about_targets_outside_the_hull(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+    ) -> None:
+        # Half again as much light as every emitter at full drive can make.
+        # Some of these land inside the hull and some do not; both methods
+        # must say the same thing about each.
+        tally = self._sweep(lambda: [random.random() * 1.35 for _ in range(5)], 4000)
+        self.assertEqual(tally.disagreed, 0)
+        self.assertGreater(tally.rejected_by_both, 0)
+        self.assertGreater(tally.solved, 0)
+        self.assertLess(tally.worst_total_delta, 1e-9)
+        # Measured at 1 in 4000, and recorded rather than tolerated silently:
+        # these are targets lying on the hull to within 1e-7, which the
+        # enumeration's per-constraint slack admits and the closed form's
+        # exact interval does not.
+        self.assertLessEqual(tally.boundary, 4)
+
+    def test_it_reproduces_the_reference_where_the_corpus_reaches(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+    ) -> None:
+        # The corpus is the P5 reference's own output, so this is the
+        # strongest available check -- and the reason the sweeps above exist
+        # is that the corpus does not reach the cases they cover.
+        vectors = corpus_vectors("rgbww")
+        self.assertGreater(len(vectors), 0)
+        for vector in vectors:
+            closed = allocate_two_white(
+                self.inverse, vector.target, D65_WHITE_COLUMN, D50_WHITE_COLUMN
+            )
+            self.assertIsNotNone(closed)
+            assert closed is not None
+            reference_total = vector.emitter_light[3] + vector.emitter_light[4]
+            self.assertLess(abs(closed.total - reference_total), 1e-9)
 
 
 if __name__ == "__main__":
