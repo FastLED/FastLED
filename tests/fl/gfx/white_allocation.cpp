@@ -974,4 +974,97 @@ FL_TEST_CASE("Two-white RGB-preferred finds the smallest total on equal whites")
     }
 }
 
+
+namespace {
+
+/// The corpus's `rgbww_two_white` device: primaries split the way sRGB
+/// splits luminance, scaled so the strip only just exceeds its own rendering
+/// white, and two whites at 0.35 each.
+///
+/// The other corpus devices give every emitter unit capacity, which makes
+/// them five times brighter than the white they render -- so no corpus
+/// target ever needs more than one white emitter, and the two-white
+/// allocation had nothing recorded to be right or wrong against (#4198).
+EmitterProfile dimRgbDevice() {
+    EmitterProfile p = {};
+    p.xy_r[0] = 0.6400f; p.xy_r[1] = 0.3300f;
+    p.xy_g[0] = 0.3000f; p.xy_g[1] = 0.6000f;
+    p.xy_b[0] = 0.1500f; p.xy_b[1] = 0.0600f;
+    p.lum_r = 0.22f; p.lum_g = 0.60f; p.lum_b = 0.08f;
+    p.native_code_depth = 8;
+    return p;
+}
+
+/// The same device's white columns at full drive, in s16.16.
+constexpr i32 kDimCoolWhite[3] = {21801, 22938, 24980};
+constexpr i32 kDimWarmWhite[3] = {22119, 22938, 18926};
+
+struct TwoWhiteVector {
+    i32 xyz[3];
+    i32 drives[5];
+};
+
+/// From `ci/golden/color-reference-v1.json`, the `srgb_bt709` /
+/// `rgbww_two_white` vectors: the five that light both whites, plus three
+/// from the dark floor.
+///
+/// Vectors 08 and 09 saturate both whites -- the corner of the feasible
+/// totals, and what an allocation assuming those totals start at zero calls
+/// out of gamut. 10 saturates the cool white with the warm one part-way; 11
+/// is the other way round, which is what an allocation that always fills the
+/// first white first would fail.
+const TwoWhiteVector kTwoWhiteVectors[] = {
+    {{  54277,  57106,  62192}, {  6943, 14053, 15894, 65536, 65536}},
+    {{  62289,  65536,  71372}, { 15091, 24101, 23501, 65536, 65536}},
+    {{  35977,  37852,  41223}, {     0,  3035,  5202, 65536, 36222}},
+    {{  49197,  49639,  35289}, { 24352, 13314,     0, 38159, 65536}},
+    {{  26197,  46162,  13339}, {     0, 65536,     0, 12353,  7191}},
+    {{     19,     20,     22}, {     0,     0,     0,    57,     0}},
+    {{      8,      4,      0}, {    19,     0,     0,     0,     0}},
+    {{      7,     14,      2}, {     0,    24,     0,     0,     0}},
+};
+
+}  // namespace
+
+FL_TEST_CASE("Two-white allocation reproduces the reference corpus") {
+    // The check #4198 said could not be written until the corpus reached
+    // targets needing both whites. It reaches them now, so this compares
+    // against the reference's own recorded drives rather than against an
+    // oracle rewritten in the test.
+    TwoWhiteAllocationQ16 allocation;
+    FL_REQUIRE(buildTwoWhiteAllocationQ16(dimRgbDevice(), kDimCoolWhite,
+                                          kDimWarmWhite,
+                                          WhiteAllocationPolicy::WhitePreferred,
+                                          &allocation));
+
+    const int count =
+        static_cast<int>(sizeof(kTwoWhiteVectors) / sizeof(TwoWhiteVector));
+    int both_whites = 0;
+    for (int v = 0; v < count; ++v) {
+        i32 drives[5];
+        FL_REQUIRE(allocateTwoWhiteDrivesQ16(allocation, kTwoWhiteVectors[v].xyz,
+                                             drives));
+        for (int i = 0; i < 5; ++i) {
+            // 256 raw units is one code at 8-bit output, the same tolerance
+            // the one-white vectors carry: the reference inverts in float64
+            // and this quantizes the matrix first, so bit-exactness is not
+            // the claim.
+            FL_CHECK_LT(
+                fl::fabsf(toFloat(drives[i] - kTwoWhiteVectors[v].drives[i])),
+                256.0f / 65536.0f);
+        }
+        // Counted from the *reference* drives, not the returned ones: at
+        // the dark floor the fixed-point path can put a raw unit or two on
+        // the second white where the reference puts none, which is well
+        // inside the tolerance above and says nothing about coverage.
+        if (kTwoWhiteVectors[v].drives[3] > 0 &&
+            kTwoWhiteVectors[v].drives[4] > 0) {
+            ++both_whites;
+        }
+    }
+    // Five of the eight genuinely need both, so the set cannot pass by only
+    // covering the one-white cases.
+    FL_CHECK_EQ(both_whites, 5);
+}
+
 }  // FL_TEST_FILE
