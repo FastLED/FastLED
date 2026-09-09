@@ -201,6 +201,11 @@ FL_TEST_CASE("Gamut map preserves hue while compressing chroma") {
         FL_REQUIRE_GT(bx * bx + by * by, 1e-6f);
         // The mapper's drift, and the measurement's own, on the same scale.
         // The second bound is what makes the first meaningful.
+        // Same direction, not merely the same line. An anti-parallel chroma
+        // vector -- hue rotated 180 degrees -- makes the cross product
+        // vanish exactly as a correct mapping does, so the drift check below
+        // cannot see it on its own.
+        FL_CHECK_GT(ax * bx + ay * by, 0.0f);
         FL_CHECK_LT(cross / scale, 0.005f);
         FL_REQUIRE_GT(control_scale, 1e-6f);
         FL_CHECK_LT(fl::fabsf(ax * cy - ay * cx) / control_scale, 0.001f);
@@ -1140,20 +1145,44 @@ void reproduceRgbw(const float (&drives)[4], float (&out)[3]) {
     }
 }
 
-/// |cross(a, b)| / (|a| * |b|) for two OKLab chroma vectors: zero when they
-/// share a hue line, and relative so the tolerance means the same thing at
-/// any chroma.
+/// How far the mapped chroma has left the target's hue *ray*: 0 on it, 1 for
+/// anything the caller should treat as a failure.
+///
+/// The obvious form -- |cross(a, b)| / (|a| * |b|) -- is not enough on its
+/// own, and reports perfect agreement for two things that are catastrophic:
+/// a mapped chroma of zero (every colour collapsed to grey) and an
+/// anti-parallel one (hue rotated 180 degrees). Both make the cross product
+/// vanish. So those return 1 rather than 0, which is far outside any
+/// tolerance a caller would set, and the metric means what its callers
+/// assert about it.
 float hueDivergence(const i32 (&lab_a)[3], const i32 (&lab_b)[3]) {
     const float ax = toFloat(lab_a[1]);
     const float ay = toFloat(lab_a[2]);
     const float bx = toFloat(lab_b[1]);
     const float by = toFloat(lab_b[2]);
-    const float cross = fl::fabsf(ax * by - ay * bx);
-    const float scale = fl::sqrtf((ax * ax + ay * ay) * (bx * bx + by * by));
-    if (scale < 1e-6f) {
-        return 0.0f;
+    const float target_chroma = ax * ax + ay * ay;
+    const float mapped_chroma = bx * bx + by * by;
+    // Nothing to preserve, or nothing left of it.
+    if (target_chroma < 1e-6f || mapped_chroma < 1e-6f) {
+        return 1.0f;
     }
-    return cross / scale;
+    // Opposite direction: the cross product is zero here too.
+    if (ax * bx + ay * by <= 0.0f) {
+        return 1.0f;
+    }
+    const float cross = fl::fabsf(ax * by - ay * bx);
+    return cross / fl::sqrtf(target_chroma * mapped_chroma);
+}
+
+/// Whether the mapped chroma is no larger than the target's, within the
+/// slack the s16.16 round trip needs. Compression is the objective;
+/// expansion would be a different colour, not a mapped one.
+bool chromaDidNotGrow(const i32 (&lab_a)[3], const i32 (&lab_b)[3]) {
+    const float ax = toFloat(lab_a[1]);
+    const float ay = toFloat(lab_a[2]);
+    const float bx = toFloat(lab_b[1]);
+    const float by = toFloat(lab_b[2]);
+    return (bx * bx + by * by) <= (ax * ax + ay * ay) * 1.02f + 1e-6f;
 }
 
 }  // namespace
@@ -1279,6 +1308,7 @@ FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
         xyzToOklabQ16(xyz, target_lab);
         xyzToOklabQ16(mapped_xyz, mapped_lab);
         FL_CHECK_LT(hueDivergence(target_lab, mapped_lab), 0.02f);
+        FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
         if (!in_gamut) {
             ++compressed;
         }
