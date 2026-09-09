@@ -21,7 +21,7 @@ namespace fl {
 constexpr u32 cycles_from_ns_esp32(u32 ns, u32 hz) FL_NO_EXCEPT {
   // Round up: cycles = ceil(ns * hz / 1e9)
   // Using: (ns * hz + 999'999'999) / 1'000'000'000
-  return ((u64)ns * (u64)hz + 999999999UL) / 1000000000UL;
+  return cycles_from_ns(ns, hz);
 }
 
 /// Forward declaration for runtime frequency query

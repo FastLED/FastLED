@@ -18,6 +18,7 @@ class Args:
     rmt: bool
     spi: bool
     uart: bool
+    bitbang: bool
     lcd: bool
     lcd_spi: bool
     lcd_rgb: bool
@@ -294,6 +295,16 @@ See Also:
             "--uart",
             action="store_true",
             help="Test only UART driver (LPC845: UART DMA clockless RX-DMA loopback)",
+        )
+        driver_group.add_argument(
+            "--bitbang",
+            action="store_true",
+            help=(
+                "Test only the portable GPIO bit-bang driver (Bus::BIT_BANG). "
+                "This is AUTO's last-resort fallback on every platform, so it "
+                "is the one driver that must keep working when the hardware "
+                "engines are all claimed."
+            ),
         )
         driver_group.add_argument(
             "--rp-uart-index",
@@ -890,6 +901,7 @@ See Also:
             rmt=parsed.rmt,
             spi=parsed.spi,
             uart=parsed.uart,
+            bitbang=parsed.bitbang,
             lcd=parsed.lcd,
             lcd_spi=parsed.lcd_spi,
             lcd_rgb=parsed.lcd_rgb,
