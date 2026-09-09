@@ -447,21 +447,21 @@ class TestTwoWhiteCorpusVectors(unittest.TestCase):
     ) -> None:
         vectors = corpus_vectors("rgbww_two_white")
         self.assertGreaterEqual(len(vectors), 50)
-        both = [
-            vector
-            for vector in vectors
-            if vector.emitter_light[3] > 1e-9 and vector.emitter_light[4] > 1e-9
-        ]
+        both: list[CorpusVector] = []
+        for vector in vectors:
+            if vector.emitter_light[3] > 1e-9 and vector.emitter_light[4] > 1e-9:
+                both.append(vector)
         self.assertGreaterEqual(len(both), 12)
 
         # Both saturated: the corner of the feasible totals, and the case an
         # allocation that assumes those totals start at zero gets wrong.
-        saturated = [
-            vector
-            for vector in both
-            if vector.emitter_light[3] > 1.0 - 1e-9
-            and vector.emitter_light[4] > 1.0 - 1e-9
-        ]
+        saturated: list[CorpusVector] = []
+        for vector in both:
+            if (
+                vector.emitter_light[3] > 1.0 - 1e-9
+                and vector.emitter_light[4] > 1.0 - 1e-9
+            ):
+                saturated.append(vector)
         self.assertGreaterEqual(len(saturated), 6)
 
         # And both orderings, so an allocation that always fills the first
