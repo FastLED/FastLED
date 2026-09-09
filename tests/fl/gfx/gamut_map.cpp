@@ -792,4 +792,242 @@ FL_TEST_CASE("Gamut map rejects a degenerate profile") {
     FL_CHECK_FALSE(buildGamutMapQ16(rgbDevice(), nullptr));
 }
 
+
+// ---------------------------------------------------------------------------
+// Two white emitters (P7, #4041)
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// The corpus's warm white: D50 at unit luminance, in s16.16.
+constexpr i32 kWhiteD50Map[3] = {63196, 65536, 54074};
+
+/// XYZ of a five-emitter drive vector on the cool/warm device.
+void reproduceRgbww(const float (&drives)[5], float (&out)[3]) {
+    const EmitterProfile profile = rgbDevice();
+    float columns[5][3];
+    colorimetric_response::xyY_to_XYZ(profile.xy_r[0], profile.xy_r[1],
+                                      profile.lum_r, columns[0]);
+    colorimetric_response::xyY_to_XYZ(profile.xy_g[0], profile.xy_g[1],
+                                      profile.lum_g, columns[1]);
+    colorimetric_response::xyY_to_XYZ(profile.xy_b[0], profile.xy_b[1],
+                                      profile.lum_b, columns[2]);
+    for (int i = 0; i < 3; ++i) {
+        columns[3][i] = toFloat(kWhiteD65[i]);
+        columns[4][i] = toFloat(kWhiteD50Map[i]);
+    }
+    for (int i = 0; i < 3; ++i) {
+        out[i] = 0.0f;
+        for (int e = 0; e < 5; ++e) {
+            out[i] += columns[e][i] * drives[e];
+        }
+    }
+}
+
+}  // namespace
+
+FL_TEST_CASE("RGBWW mapper leaves alone what the one-white hull wrongly rejects") {
+    // The reason this variant exists, and the same argument the RGBW variant
+    // makes one emitter down: testing a two-white device against the
+    // one-white hull under-reports what it can produce, and every
+    // under-reported target gets compressed despite being reachable exactly.
+    //
+    // Measured here rather than asserted: targets are drawn from inside the
+    // device's own five-emitter zonotope, so every one is reachable by
+    // construction, and the count is how many the one-white allocation
+    // refuses.
+    GamutMapRgbwwQ16 rgbww;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &rgbww));
+    WhiteAllocationQ16 one_white;
+    FL_REQUIRE(buildWhiteAllocationQ16(rgbDevice(), kWhiteD65,
+                                       WhiteAllocationPolicy::WhitePreferred,
+                                       &one_white));
+
+    int reachable = 0;
+    int refused_by_one_white = 0;
+    // A deterministic sweep of the zonotope rather than a random one, so the
+    // number this reports is the same on every machine.
+    for (int r = 0; r <= 3; ++r) {
+        for (int g = 0; g <= 3; ++g) {
+            for (int b = 0; b <= 3; ++b) {
+                for (int w1 = 0; w1 <= 3; ++w1) {
+                    for (int w2 = 0; w2 <= 3; ++w2) {
+                        const float sample[5] = {
+                            static_cast<float>(r) / 3.0f,
+                            static_cast<float>(g) / 3.0f,
+                            static_cast<float>(b) / 3.0f,
+                            static_cast<float>(w1) / 3.0f,
+                            static_cast<float>(w2) / 3.0f};
+                        float xyz_f[3];
+                        reproduceRgbww(sample, xyz_f);
+                        const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]),
+                                            q16(xyz_f[2])};
+
+                        i32 five[5];
+                        FL_REQUIRE(allocateTwoWhiteDrivesQ16(rgbww.allocation,
+                                                             xyz, five));
+                        ++reachable;
+
+                        i32 four[4];
+                        if (!allocateEmitterDrivesQ16(one_white, xyz, four)) {
+                            ++refused_by_one_white;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    FL_CHECK_EQ(reachable, 1024);
+    // Not a rare corner. If this ever drops to zero the test has stopped
+    // measuring anything and the variant has stopped being justified.
+    FL_CHECK_GT(refused_by_one_white, 100);
+}
+
+FL_TEST_CASE("RGBWW mapper returns an in-gamut target untouched") {
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    const float samples[][5] = {
+        {0.20f, 0.40f, 0.60f, 0.30f, 0.10f},
+        {0.10f, 0.90f, 0.20f, 0.70f, 0.60f},
+        {0.05f, 0.05f, 0.05f, 0.90f, 0.90f},
+    };
+    for (const auto& sample : samples) {
+        float xyz_f[3];
+        reproduceRgbww(sample, xyz_f);
+        const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+
+        i32 drives[5];
+        mapAndAllocateRgbwwQ16(map, xyz, drives);
+
+        float as_float[5];
+        for (int i = 0; i < 5; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float reproduced[3];
+        reproduceRgbww(as_float, reproduced);
+        for (int i = 0; i < 3; ++i) {
+            FL_CHECK_LT(fl::fabsf(reproduced[i] - xyz_f[i]), 0.01f);
+        }
+    }
+}
+
+FL_TEST_CASE("RGBWW mapper always returns drives inside [0, 1]") {
+    // Including for targets far outside the hull, which is the case the
+    // halving search and its fallback exist for.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    int exercised = 0;
+    for (int step = 0; step <= 20; ++step) {
+        const float t = static_cast<float>(step) / 20.0f;
+        // A saturated ramp pushed well past anything the device can make.
+        const float xyz_f[3] = {6.0f * t + 0.05f, 1.5f * t + 0.02f,
+                                9.0f * (1.0f - t) + 0.05f};
+        const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+        i32 drives[5];
+        mapAndAllocateRgbwwQ16(map, xyz, drives);
+        for (int i = 0; i < 5; ++i) {
+            FL_CHECK_GE(drives[i], 0);
+            FL_CHECK_LE(drives[i], kFullDrive);
+        }
+        ++exercised;
+    }
+    FL_CHECK_EQ(exercised, 21);
+}
+
+FL_TEST_CASE("RGBWW mapper moves smoothly enough to animate") {
+    // P7's continuity criterion, for the two-white hull. A ramp that crosses
+    // out of the gamut must not jump: neighbouring inputs one step apart
+    // have to land within a bounded distance of each other, or an animation
+    // walking through the boundary shows a visible seam.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    const int kSteps = 240;
+    float previous[3] = {0.0f, 0.0f, 0.0f};
+    float worst_jump = 0.0f;
+    for (int step = 0; step <= kSteps; ++step) {
+        const float t = static_cast<float>(step) / static_cast<float>(kSteps);
+        // Sweeps from deep inside the hull to well outside it.
+        const float xyz_f[3] = {0.2f + 4.0f * t, 0.3f + 3.0f * t,
+                                0.4f + 5.0f * t};
+        const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+        i32 drives[5];
+        mapAndAllocateRgbwwQ16(map, xyz, drives);
+
+        float as_float[5];
+        for (int i = 0; i < 5; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float produced[3];
+        reproduceRgbww(as_float, produced);
+
+        if (step > 0) {
+            for (int i = 0; i < 3; ++i) {
+                const float jump = fl::fabsf(produced[i] - previous[i]);
+                if (jump > worst_jump) {
+                    worst_jump = jump;
+                }
+            }
+        }
+        for (int i = 0; i < 3; ++i) {
+            previous[i] = produced[i];
+        }
+    }
+    // The input moves about 0.05 per step in Y. A mapper that stepped
+    // discontinuously at the hull boundary would show a jump many times
+    // that; this bounds it at one input step's worth.
+    FL_CHECK_LT(worst_jump, 0.05f);
+}
+
+FL_TEST_CASE("RGBWW lightness bound is the brightest neutral it can reach") {
+    // Two whites buy more neutral headroom than one, and the bound has to
+    // find it -- and still be attainable, which the bisection is for.
+    GamutMapRgbwwQ16 two;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &two));
+    GamutMapRgbwQ16 one;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::WhitePreferred,
+                                    &one));
+    FL_CHECK_GT(two.max_neutral_lightness, one.max_neutral_lightness);
+
+    // Attainable, not merely optimistic: the neutral at the stored bound
+    // must actually allocate.
+    const i32 neutral_lab[3] = {two.max_neutral_lightness, 0, 0};
+    i32 neutral_xyz[3];
+    oklabToXyzQ16(neutral_lab, neutral_xyz);
+    i32 drives[5];
+    FL_CHECK(allocateTwoWhiteDrivesQ16(two.allocation, neutral_xyz, drives));
+
+    // And a hair above it is not, so the bound is tight rather than timid.
+    const i32 above_lab[3] = {two.max_neutral_lightness + 2000, 0, 0};
+    i32 above_xyz[3];
+    oklabToXyzQ16(above_lab, above_xyz);
+    i32 above_drives[5];
+    FL_CHECK_FALSE(allocateTwoWhiteDrivesQ16(two.allocation, above_xyz,
+                                             above_drives));
+}
+
+FL_TEST_CASE("RGBWW mapper rejects a degenerate profile") {
+    EmitterProfile broken = rgbDevice();
+    broken.xy_g[0] = broken.xy_r[0];
+    broken.xy_g[1] = broken.xy_r[1];
+    GamutMapRgbwwQ16 map;
+    FL_CHECK_FALSE(buildGamutMapRgbwwQ16(broken, kWhiteD65, kWhiteD50Map,
+                                         WhiteAllocationPolicy::WhitePreferred,
+                                         &map));
+}
+
 }  // FL_TEST_FILE

@@ -410,6 +410,25 @@ produced an optimal edge. Two whites of the *same* colour are the exception,
 and there the reference's own tie-break — lexicographically smallest drives —
 is the end the closed form takes anyway.
 
+### The mapper has to target the two-white hull too
+
+The same argument as one emitter down. Testing a two-white device against the
+*one-white* hull under-reports what it can produce, and every under-reported
+target gets compressed despite being reachable exactly.
+
+Measured on the corpus's cool/warm device, over a deterministic 4⁵ sweep of
+its own five-emitter zonotope — so every target is reachable by construction:
+**418 of 1024, 41%**, are refused by the one-white allocation. That is the
+same magnitude as the 43% the RGB-only solve refuses on a four-emitter device.
+
+So `mapAndAllocateRgbwwQ16` runs the same eight halvings as the other two
+paths and takes every feasibility decision through the two-white allocation.
+Its lightness bound is derived the same way, and the second white is worth
+having there: the brightest reachable D65 neutral goes from **87 723** to
+**98 293** in OKLab L (s16.16). Dropping the second white's column from the
+relaxation drops it to 87 424, below the one-white bound, which is what pins
+that term in the test suite.
+
 `allocateTwoWhiteDrivesQ16` is the s16.16 implementation. It costs up to 25
 divisions per pixel against the one-white path's six, which is recorded
 rather than optimized away: cross-multiplying the pairwise comparisons would

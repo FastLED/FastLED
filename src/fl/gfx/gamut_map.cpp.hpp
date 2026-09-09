@@ -110,6 +110,17 @@ struct RgbwFeasible {
     }
 };
 
+/// Feasibility against the device's real hull when it has two white
+/// emitters.
+struct RgbwwFeasible {
+    const TwoWhiteAllocationQ16& allocation;
+
+    bool operator()(const i32 (&xyz)[3]) const FL_NO_EXCEPT {
+        i32 drives[5];
+        return allocateTwoWhiteDrivesQ16(allocation, xyz, drives);
+    }
+};
+
 /// Largest chroma factor the hull accepts, by a fixed count of halvings.
 ///
 /// Shared by both mappers so the search cannot drift between them; only the
@@ -357,6 +368,143 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
         drives[1] = 0;
         drives[2] = 0;
         drives[3] = 0;
+    }
+}
+
+
+bool buildGamutMapRgbwwQ16(const EmitterProfile& profile,
+                           const i32 (&white1_xyz)[3],
+                           const i32 (&white2_xyz)[3],
+                           WhiteAllocationPolicy policy,
+                           GamutMapRgbwwQ16* out) FL_NO_EXCEPT {
+    if (out == nullptr) {
+        return false;
+    }
+    if (!buildTwoWhiteAllocationQ16(profile, white1_xyz, white2_xyz, policy,
+                                    &out->allocation)) {
+        return false;
+    }
+
+    i32 neutral_drives[3];
+    solveRgbDrivesQ16(out->allocation.rgb_solve, kGamutD65Q16, neutral_drives);
+    for (int i = 0; i < 3; ++i) {
+        // As in the other two builds: every drive, not just the largest.
+        if (neutral_drives[i] <= 0) {
+            return false;
+        }
+    }
+
+    // The three-emitter bound, reached with both whites off, and always
+    // attainable.
+    i32 largest_neutral_drive = neutral_drives[0];
+    for (int i = 1; i < 3; ++i) {
+        if (neutral_drives[i] > largest_neutral_drive) {
+            largest_neutral_drive = neutral_drives[i];
+        }
+    }
+    i64 reachable = (static_cast<i64>(kGamutFullDrive) << 16) /
+                    static_cast<i64>(largest_neutral_drive);
+
+    // The one-white relaxation with a second white added. Along the D65 ray
+    // the RGB drives are `s*d0 - w1*dW1 - w2*dW2`, so the upper limit on
+    // drive i is loosest with each white at full when its column is positive
+    // and off when it is not -- hence a `max(.., 0)` term per white.
+    // Dropping the lower limits, and letting each channel choose its own
+    // whites, are both relaxations, so this is an upper bound.
+    //
+    // `per_white1` is not stored: the allocation keeps the second column and
+    // the difference, because that is all the per-pixel path needs. It is
+    // recovered here rather than widening the struct for a bind-time sum.
+    i64 optimistic = static_cast<i64>(kOklabQ16MaxMagnitude);
+    for (int i = 0; i < 3; ++i) {
+        const i32 per_white2 = out->allocation.per_white2[i];
+        const i32 per_white1 = out->allocation.difference[i] + per_white2;
+        i64 numerator = static_cast<i64>(kGamutFullDrive);
+        if (per_white1 > 0) {
+            numerator += static_cast<i64>(per_white1);
+        }
+        if (per_white2 > 0) {
+            numerator += static_cast<i64>(per_white2);
+        }
+        const i64 candidate =
+            (numerator << 16) / static_cast<i64>(neutral_drives[i]);
+        if (candidate < optimistic) {
+            optimistic = candidate;
+        }
+    }
+
+    // Bisected against the attainable bound rather than trusted, for exactly
+    // the reason spelled out on the one-white path: the relaxation enforces
+    // only the upper limits, and full white can push a different channel
+    // negative. Once per profile, never per pixel (A3/B11).
+    if (optimistic > reachable) {
+        i64 low = reachable;
+        i64 high = optimistic;
+        for (int step = 0; step < 24; ++step) {
+            const i64 middle = (low + high) / 2;
+            const i32 trial_scale = static_cast<i32>(middle);
+            const i32 trial[3] = {
+                scaleGamutQ16(kGamutD65Q16[0], trial_scale),
+                scaleGamutQ16(kGamutD65Q16[1], trial_scale),
+                scaleGamutQ16(kGamutD65Q16[2], trial_scale),
+            };
+            i32 trial_drives[5];
+            if (allocateTwoWhiteDrivesQ16(out->allocation, trial, trial_drives)) {
+                low = middle;
+            } else {
+                high = middle;
+            }
+        }
+        reachable = low;
+    }
+
+    const i32 scale = static_cast<i32>(reachable);
+    const i32 brightest_neutral[3] = {
+        scaleGamutQ16(kGamutD65Q16[0], scale),
+        scaleGamutQ16(kGamutD65Q16[1], scale),
+        scaleGamutQ16(kGamutD65Q16[2], scale),
+    };
+    i32 lab[3];
+    xyzToOklabQ16(brightest_neutral, lab);
+    out->max_neutral_lightness = lab[0];
+    return true;
+}
+
+void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
+                            i32 (&drives)[5]) FL_NO_EXCEPT {
+    if (allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives)) {
+        // Already inside the device's hull, which with two whites is larger
+        // again than the one-white one.
+        return;
+    }
+
+    i32 lab[3];
+    xyzToOklabQ16(xyz, lab);
+    i32 lightness = lab[0];
+    if (lightness > map.max_neutral_lightness) {
+        lightness = map.max_neutral_lightness;
+    }
+    if (lightness < 0) {
+        lightness = 0;
+    }
+
+    const i32 factor =
+        largestFeasibleChroma(lab, lightness, RgbwwFeasible{map.allocation});
+    i32 mapped_xyz[3];
+    chromaCandidateXyz(lab, lightness, factor, mapped_xyz);
+    if (allocateTwoWhiteDrivesQ16(map.allocation, mapped_xyz, drives)) {
+        return;
+    }
+    // Same last resort as the other paths: the accepted candidate can fall a
+    // few ULP outside on the final re-solve, and the neutral at this
+    // lightness is guaranteed reachable by the bound above.
+    const i32 neutral_lab[3] = {lightness, 0, 0};
+    i32 neutral_xyz[3];
+    oklabToXyzQ16(neutral_lab, neutral_xyz);
+    if (!allocateTwoWhiteDrivesQ16(map.allocation, neutral_xyz, drives)) {
+        for (int i = 0; i < 5; ++i) {
+            drives[i] = 0;
+        }
     }
 }
 
