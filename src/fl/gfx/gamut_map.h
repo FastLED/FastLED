@@ -105,6 +105,48 @@ bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
 void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
                            i32 (&drives)[4]) FL_NO_EXCEPT;
 
+/// The same mapper for a device with two white emitters.
+///
+/// Two whites enlarge the reachable set again, and the one-white mapper
+/// under-reports it for the same reason the three-emitter one under-reports
+/// a device with one white: it tests feasibility against a hull the device
+/// is bigger than. `tests/fl/gfx/gamut_map.cpp` measures how much on the
+/// corpus's cool/warm device.
+struct GamutMapRgbwwQ16 {
+    TwoWhiteAllocationQ16 allocation;
+
+    /// OKLab lightness of the brightest D65 neutral this device can reach.
+    ///
+    /// Derived the same way as the one-white bound and for the same reason:
+    /// the relaxation that ignores the lower limits on the RGB drives is an
+    /// upper bound but not attainable, so it is bisected against the
+    /// always-reachable three-emitter bound rather than trusted. Once per
+    /// profile, never per pixel.
+    i32 max_neutral_lightness;
+};
+
+/// Derive the mapper for a three-primary profile plus two white emitters.
+///
+/// `white1_xyz` / `white2_xyz` are each white's XYZ at full drive, in
+/// s16.16. `policy` is C3's per-profile choice of which end of the feasible
+/// *total* to take; as with one white it changes the drives, never which
+/// targets are reachable.
+bool buildGamutMapRgbwwQ16(const EmitterProfile& profile,
+                           const i32 (&white1_xyz)[3],
+                           const i32 (&white2_xyz)[3],
+                           WhiteAllocationPolicy policy,
+                           GamutMapRgbwwQ16* out) FL_NO_EXCEPT;
+
+/// One pixel: XYZ in s16.16 to five in-gamut drives -- red, green, blue,
+/// white1, white2.
+///
+/// Same shape as the other two paths: one forward OKLab transform, one
+/// lightness comparison, then eight halvings, with every feasibility test
+/// going through the two-white allocation so the hull is the device's real
+/// one.
+void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
+                            i32 (&drives)[5]) FL_NO_EXCEPT;
+
 /// Derive the mapper for a three-emitter profile.
 ///
 /// False on the same degenerate profiles `buildRgbSolveMatrixQ16` rejects,
