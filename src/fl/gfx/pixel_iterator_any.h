@@ -61,6 +61,49 @@ class PixelIteratorAny {
         mXyMap = xymap;
     }
 
+    /// @brief Copy: the iterator must be re-aimed, not copied.
+    ///
+    /// This class is self-referential -- `mPixelIterator` is a type-erased
+    /// `PixelIterator` holding a `void*` into `mAnyController`, a member of
+    /// the same object. The compiler-generated copy carried that pointer
+    /// across unchanged, so the copy's iterator kept reading the *source*
+    /// object's controller. Where the source was a temporary, as in
+    /// `ReorderingPixelIteratorAny`'s addressing branch, that was a read of
+    /// dead stack on every addressed frame (#4201).
+    PixelIteratorAny(const PixelIteratorAny& other) FL_NO_EXCEPT
+        : mAnyController(other.mAnyController), mRgbw(other.mRgbw),
+          mRgbww(other.mRgbww), mXyMap(other.mXyMap) {
+        bindIterator();
+    }
+
+    PixelIteratorAny(PixelIteratorAny&& other) FL_NO_EXCEPT
+        : mAnyController(fl::move(other.mAnyController)), mRgbw(other.mRgbw),
+          mRgbww(other.mRgbww), mXyMap(fl::move(other.mXyMap)) {
+        bindIterator();
+    }
+
+    PixelIteratorAny& operator=(const PixelIteratorAny& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            mAnyController = other.mAnyController;
+            mRgbw = other.mRgbw;
+            mRgbww = other.mRgbww;
+            mXyMap = other.mXyMap;
+            bindIterator();
+        }
+        return *this;
+    }
+
+    PixelIteratorAny& operator=(PixelIteratorAny&& other) FL_NO_EXCEPT {
+        if (this != &other) {
+            mAnyController = fl::move(other.mAnyController);
+            mRgbw = other.mRgbw;
+            mRgbww = other.mRgbww;
+            mXyMap = fl::move(other.mXyMap);
+            bindIterator();
+        }
+        return *this;
+    }
+
     /// @brief Initialize the adapter with color order conversion
     void init(PixelController<RGB> &controller, EOrder newOrder) {
         // Step 1: Create the appropriate PixelController variant based on color order
@@ -85,7 +128,17 @@ class PixelIteratorAny {
             break;
         }
 
-        // Step 2: Use visitor pattern to construct PixelIterator with correct pointer type
+        // Step 2: aim the type-erased iterator at whichever alternative
+        // `mAnyController` now holds.
+        bindIterator();
+    }
+
+  private:
+    /// @brief Point `mPixelIterator` at this object's own controller.
+    ///
+    /// Every path that changes `mAnyController` has to end here, because the
+    /// iterator holds a raw pointer into it and nothing else fixes that up.
+    void bindIterator() {
         // Note: fl::Optional::emplace takes a constructed object, not constructor args
         struct PixelIteratorInitVisitor {
             PixelIteratorInitVisitor(Rgbw rgbw, Rgbww rgbww)
@@ -120,7 +173,6 @@ class PixelIteratorAny {
         mAnyController.visit(visitor);
     }
 
-  private:
     fl::variant<PixelController<RGB>, PixelController<RBG>,
                 PixelController<GRB>, PixelController<GBR>,
                 PixelController<BRG>, PixelController<BGR>>
