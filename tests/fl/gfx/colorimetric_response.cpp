@@ -412,3 +412,25 @@ FL_TEST_CASE("[#4194] invert3x3 scales with the matrix, not against a constant")
         FL_CHECK(fl::colorimetric_response::invert3x3(scaled, inverse));
     }
 }
+
+FL_TEST_CASE("[#4194] invert3x3 accepts a finite matrix of wildly mixed scale") {
+    // Review finding. A first version compared |det| against the product of
+    // the column 2-norms, which needs `a * a` -- and that overflows float32
+    // for entries past about 1.8e19. This matrix has determinant exactly 1
+    // and an inverse every entry of which is representable, but squaring
+    // would send its first column norm to infinity and reject it. The old
+    // absolute guard did not have that failure mode, so introducing it would
+    // have been a regression.
+    const float mixed[3][3] = {
+        {1e20f, 0.0f, 0.0f},
+        {0.0f, 1e-20f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+    };
+    float inverse[3][3];
+    FL_REQUIRE(fl::colorimetric_response::invert3x3(mixed, inverse));
+
+    // And the inverse is the real one, not merely a `true`.
+    FL_CHECK_LT(fl::fabsf(inverse[0][0] - 1e-20f), 1e-26f);
+    FL_CHECK_LT(fl::fabsf(inverse[1][1] - 1e20f), 1e14f);
+    FL_CHECK_LT(fl::fabsf(inverse[2][2] - 1.0f), 1e-6f);
+}
