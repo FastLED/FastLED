@@ -865,7 +865,8 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         client.print(request_body);
     }
 
-    const uint32_t deadline_ms = millis() + 2000;
+    const uint32_t request_started_ms = millis();
+    const uint32_t deadline_ms = request_started_ms + 2000;
     while (!client.available() && client.connected() &&
            static_cast<int32_t>(millis() - deadline_ms) < 0) {
         FastLED.watchdog().feed();
@@ -977,6 +978,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         FastLED.watchdog().feed();
         delay(1);
     }
+    // Captured before stop(), which would make connected() false regardless.
+    // With a short body this separates "the peer closed early" from "the peer
+    // held the connection and stopped sending", and elapsed_ms says whether
+    // the 2 s deadline is what ended the read.
+    const bool peer_open_after_body = client.connected();
+    const uint32_t elapsed_ms = millis() - request_started_ms;
     client.stop();
     response[response_length] = '\0';
 
@@ -1004,14 +1011,23 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("status_line", status_line);
     result.set("content_length", static_cast<int32_t>(content_length));
     result.set("body_read", static_cast<int32_t>(body_read));
-    result.set("passed", passed && content_ok && body_complete);
+    const bool failed = !(passed && content_ok && body_complete);
+    result.set("passed", !failed);
+    if (failed) {
+        // Recorded for every failure mode, not just one: a truncated body is
+        // the mode actually seen on this link, and without these two fields
+        // it cannot say whether the peer closed early or simply stopped
+        // sending until the deadline expired.
+        result.set("peer_open_after_status", peer_open_after_status);
+        result.set("peer_open_after_body", peer_open_after_body);
+        result.set("elapsed_ms", static_cast<int32_t>(elapsed_ms));
+    }
     if (!passed) {
         // Distinguish "no answer" from "wrong answer": an empty status line
         // means the request went out and nothing came back within the
         // deadline, so the status code is not the thing that failed.
         if (!status_line_complete && !status_bytes_seen) {
             result.set("error", "No HTTP response: request sent, nothing read");
-            result.set("peer_still_open", peer_open_after_status);
         } else if (!status_line_complete) {
             result.set("error", "Truncated HTTP status line");
         } else {
