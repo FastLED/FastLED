@@ -76,9 +76,10 @@ jobs:
       #
       # 3 keeps the gate at ~22 minutes, less than half the 45-minute bound in
       # build_template.yml even as the sweep grows, while cutting runner
-      # consumption by roughly a third. Serial fits too, at 35 minutes, but
-      # leaves only 10 minutes of headroom on a set of examples that only
-      # gets bigger.
+      # consumption 22.9% (80.3 -> 61.9). Serial is cheaper still at 35.0 --
+      # 56% off -- but leaves only 10 minutes of headroom on a set of
+      # examples that only gets bigger, and #3791's lesson was that a gate
+      # quietly running long is how a defect hides.
       matrix:
         shard_index: [0, 1, 2]
     uses: ./.github/workflows/build_template.yml
