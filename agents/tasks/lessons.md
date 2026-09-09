@@ -169,7 +169,7 @@
   reading depends on shell configuration), and twice wrote "`bash test --cpp`
   is clean"/"still fails" from the previous run's behaviour rather than the run
   just executed — once in each direction. None changed a conclusion, because
-  the logs were read afterwards, but each put a false claim in a PR that then
+  the logs were read afterward, but each put a false claim in a PR that then
   needed a correction comment. Capture the result, read it, then write.
 - A test that asserts only an exit code can pass for a completely unrelated
   reason. My `--legacy` chipset-rejection test returned 1 from the
@@ -232,3 +232,14 @@
   same rules that admitted it"* — and I reproduced it by hand while
   investigating it. Before positing a new defect to explain a residual,
   suspect the approximation you introduced to look for it.
+- A long hardware campaign and a `git checkout` share one working tree. I
+  started a five-run `--net-peer` campaign on the branch carrying the
+  `netServerStats` probe, then checked out a different branch in the same
+  repository to resolve an unrelated PR conflict. The first run had already
+  died on the conflict markers still in `ci/autoresearch/net.py`; the
+  remaining runs would have built and deployed firmware from a branch that
+  does not contain the probe the campaign existed to exercise. Nothing was
+  wedged, but the evidence would have been silently worthless. Background
+  device work pins the tree: do concurrent branch work in a `git worktree`,
+  and have the loop assert its own branch before each run so a stray checkout
+  aborts the campaign instead of quietly changing what it measures.
