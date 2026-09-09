@@ -448,6 +448,57 @@ kJoinPollAttempts = 60
 kJoinReserveSeconds = 20.0
 
 
+def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
+    """Print the sub-test tally so the payload leg is visible, not inferred.
+
+    runNetClientTest only surfaces a single `success` boolean, but that boolean
+    is `passed == 12` over a fixed battery that includes the 4096-byte FNV-1a
+    POST /echo round trip. #3899 asks for decisive evidence of >=4 KiB payloads
+    in both directions, so print the tally and the payload row rather than
+    leaving it to be deduced from the exit status.
+
+    A missing field is treated as a failure rather than printed as None: the
+    point of this function is to make the payload leg auditable, and a report
+    that cannot substantiate it is not evidence of a pass.
+    """
+    for field in ("tests_passed", "tests_failed"):
+        value = data.get(field)
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise RpcError(
+                f"{label}: runNetClientTest response is missing an integer "
+                f"{field!r}; cannot substantiate the payload leg: {data!r}"
+            )
+    results = data.get("results")
+    if not isinstance(results, list):
+        raise RpcError(
+            f"{label}: runNetClientTest response has no 'results' array; "
+            f"cannot substantiate the payload leg: {data!r}"
+        )
+    print(
+        f"  {label}: tests_passed={data['tests_passed']} "
+        f"tests_failed={data['tests_failed']}"
+    )
+    payload_rows = [
+        entry
+        for entry in results
+        if isinstance(entry, dict)
+        and (
+            "echo" in str(entry.get("test", "")).lower()
+            or "byte" in str(entry.get("test", "")).lower()
+        )
+    ]
+    if not payload_rows:
+        raise RpcError(
+            f"{label}: no payload echo row in runNetClientTest results; "
+            f"the >=4 KiB leg did not run: {results!r}"
+        )
+    for entry in payload_rows:
+        print(
+            f"    {label} payload: test={entry.get('test')!r} "
+            f"bytes={entry.get('bytes')} passed={entry.get('passed')}"
+        )
+
+
 async def run_net_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -602,6 +653,7 @@ async def run_net_peer_autoresearch(
             )
             if not rp_to_c6.get("success"):
                 raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
+            _summarize_client_tests("RP2350W -> ESP32-C6", rp_to_c6)
             c6_to_rp = await rpc_data(
                 peer,
                 "runNetClientTest",
@@ -610,6 +662,7 @@ async def run_net_peer_autoresearch(
             )
             if not c6_to_rp.get("success"):
                 raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")
+            _summarize_client_tests("ESP32-C6 -> RP2350W", c6_to_rp)
 
             stop_result = await rpc_data(primary, "stopNet")
             if not stop_result.get("success"):
