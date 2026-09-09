@@ -842,6 +842,21 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print(f"\u274c Error: {flag} requires --legacy")
         return 1
 
+    # The legacy path resolves timing from a LegacyClocklessChipset template
+    # and ignores timing_name entirely (AutoResearchRemoteRunSingleTest.cpp),
+    # so a chipset with no legacy template silently runs as WS2812B rather
+    # than failing. Reject the combination instead of reporting a pass for
+    # timing that was never applied.
+    legacy_capable_chipsets = {"ws2812", "ws2814", "ws2818"}
+    if args.legacy and args.chipset not in legacy_capable_chipsets:
+        print(
+            f"\u274c Error: --chipset {args.chipset} has no legacy template, so "
+            "--legacy would silently fall back to WS2812B timing. Use "
+            f"--chipset {args.chipset} without --legacy, or pick one of: "
+            + ", ".join(sorted(legacy_capable_chipsets))
+        )
+        return 1
+
     explicit_legacy_chipsets = {
         "ws2814": "WS2814",
         "ws2818": "WS2818",
@@ -1005,6 +1020,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         "ws2814": "WS2814",
         "ws2818": "WS2818",
         "ucs7604": "UCS7604-800KHZ",
+        "ws2811-400": "WS2811-400KHZ",
     }
     timing_name = chipset_timing_map.get(args.chipset, "WS2812B-V5")
 

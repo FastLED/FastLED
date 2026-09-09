@@ -789,14 +789,16 @@ See Also:
         # Chipset selection
         parser.add_argument(
             "--chipset",
-            choices=["ws2812", "ws2814", "ws2818", "ucs7604"],
+            choices=["ws2812", "ws2814", "ws2818", "ucs7604", "ws2811-400"],
             default="ws2812",
             help=(
                 "Chipset to use for autoresearch (default: ws2812). "
                 "ws2814 requires --legacy and exercises automatic RGBW output; "
                 "ws2818 requires --legacy and exercises its RGB backup-input "
                 "chipset timing; "
-                "ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding."
+                "ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding; "
+                "ws2811-400 uses 400 kHz (2500 ns) timing, which is the only "
+                "geometry the RP PL011 can reach over UART."
             ),
         )
 

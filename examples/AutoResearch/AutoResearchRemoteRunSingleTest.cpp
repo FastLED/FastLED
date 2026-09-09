@@ -823,6 +823,15 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     } else if (timing_name == "UCS7604-800KHZ") {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
         resolved_encoder = fl::encoder_for<fl::TIMING_UCS7604_800KHZ>();
+    } else if (timing_name == "WS2811-400KHZ") {
+        // 2500 ns period. The RP PL011 tops out at clk_peri/16 = 3.0 Mbaud,
+        // below the >=3.2 Mbaud that WS2812's 1250 ns needs at the coarsest
+        // (4 pulses/bit) UART geometry -- so 800 kHz parts cannot be driven
+        // over UART there at all. At 2500 ns the requirement drops to
+        // 1.6 Mbaud, which fits, and exercises the backend on RP for the
+        // first time. See FastLED#3899.
+        resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_WS2811_400KHZ>();
     } else if (timing_name == "SK6812") {
         // SK6812 exercises the UART wave8-frame geometry (its T0H/T1H
         // are exact multiples of period/4 — FastLED#3572 follow-up).

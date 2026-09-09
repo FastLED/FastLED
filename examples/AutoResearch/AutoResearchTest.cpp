@@ -13,6 +13,13 @@
 #if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
 
 #include "AutoResearchTest.h"
+
+#include "platforms/arm/rp/is_rp.h"
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+// kRpPioRxEdgeCapacity bounds the static DMA/edge pool the RP PIO RX device
+// writes into; the capture request must never exceed it.
+#include "platforms/arm/rp/rpcommon/rx_pio_channel.h"  // IWYU pragma: keep
+#endif
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 #include "fl/stl/atomic.h"
 #include "fl/stl/isr.h"
@@ -478,12 +485,30 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         // high and low phase, so using that whole buffer here would request
         // several MiB on a Pico and leave DMA with an invalid destination.
         constexpr size_t kPioPhasesPerDataByte = 16;
+        // The guard must cover the headroom multiplier too: checking only
+        // against kPioPhasesPerDataByte would let an oversized byte count
+        // wrap during the *2 below and produce a small `requested` that
+        // sails past the clamp into RpPioRxDevice::begin().
+        constexpr size_t kPioPhaseHeadroomNumerator = 2;
+        constexpr size_t kPioPhasesPerDataByteWithHeadroom =
+            kPioPhasesPerDataByte * kPioPhaseHeadroomNumerator;
         if (expected_data_bytes >
-            (static_cast<size_t>(-1) - 1u) / kPioPhasesPerDataByte) {
+            (static_cast<size_t>(-1) - 1u) / kPioPhasesPerDataByteWithHeadroom) {
             FL_ERROR("[CAPTURE] PIO edge-capacity overflow");
             return 0;
         }
-        rx_config.edge_capacity = expected_data_bytes * kPioPhasesPerDataByte + 1u;
+        // 16 phases per byte is a *clean* frame: 8 bits x (high + low). Slower
+        // chipsets exceed it -- a 400 kHz capture overflows and is discarded
+        // (RxWaitResult::BUFFER_OVERFLOW), because long runs do not always
+        // land in one entry. Ask for headroom, then clamp to the static pool
+        // so the request can never exceed the FixedVector backing it:
+        // over-requesting authorises appendDuration() to write past the end.
+        size_t requested =
+            expected_data_bytes * kPioPhasesPerDataByteWithHeadroom + 1u;
+        if (requested > fl::kRpPioRxEdgeCapacity) {
+            requested = fl::kRpPioRxEdgeCapacity;
+        }
+        rx_config.edge_capacity = requested;
     }
 #endif
 
