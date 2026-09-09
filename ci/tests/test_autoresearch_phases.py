@@ -26,6 +26,7 @@ from ci.autoresearch.phases import (
     RP2XXX_ENVIRONMENTS,
     _build_environment_for_mode,
     _is_valid_rp_concurrency_result,
+    _is_valid_rp_pio_parallel_result,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -3166,3 +3167,34 @@ def test_spi_family_predicate_covers_every_platform_spelling() -> None:
 
     for name in ("PARLIO", "RMT", "UART", "UART0", "LCD_SPI", "I2S_SPI", "SPIX", ""):
         assert not _is_spi_family_driver(name), name
+
+
+def test_parallel_validator_rejects_an_oversized_request_error() -> None:
+    """An InvalidArgs refusal is a refusal, not a pass.
+
+    runRpPioParallelResources bounds numLeds and iterations and answers
+    oversized requests with success=False and error="InvalidArgs" rather than
+    allocating. The host validator must not be loosened into treating that
+    error envelope as a result -- a rejected request has proven nothing about
+    PIO0+PIO1 resource behaviour.
+    """
+    refusal = {
+        "success": False,
+        "error": "InvalidArgs",
+        "maxNumLeds": 2000,
+        "maxIterations": 256,
+    }
+    assert not _is_valid_rp_pio_parallel_result(refusal)
+
+    # And the same envelope carrying the resource flags must still fail: the
+    # flags are meaningless when the request was never run.
+    refusal_with_flags = dict(refusal)
+    refusal_with_flags.update(
+        {
+            "collisionFree": True,
+            "showsCompleted": True,
+            "noResidueBetweenFrames": True,
+            "noLeak": True,
+        }
+    )
+    assert not _is_valid_rp_pio_parallel_result(refusal_with_flags)
