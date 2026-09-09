@@ -6,7 +6,7 @@
 #include "fl/system/pin.h"
 #include "test.h"
 #include "fl/system/pins.h"
-#include "fl/test/fltest.h"
+#include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
