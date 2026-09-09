@@ -178,6 +178,27 @@ UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
 
 } // anonymous namespace
 
+ChipsetTiming uartWireTiming(const ChipsetTimingConfig& timing,
+                             u32 max_baud_rate) FL_NO_EXCEPT {
+    const Wave10Lut lut = buildWave10LutForMaxBaud(timing, max_baud_rate);
+    if (lut.pulses_per_bit == 0) {
+        return ChipsetTiming{0, 0, 0, timing.reset_us, "uart_infeasible"};
+    }
+    // Re-run the fit at the geometry the LUT settled on. With P fixed the
+    // result is independent of max_baud_rate (that argument only gates
+    // feasibility), so this reproduces exactly the pulse counts encoded.
+    const UartWaveFit fit = fitUartWave(timing, lut.pulses_per_bit, max_baud_rate);
+    if (!fit.ok) {
+        return ChipsetTiming{0, 0, 0, timing.reset_us, "uart_infeasible"};
+    }
+    const u32 period_ns = timing.total_period_ns();
+    const u32 pulse_width_ns = period_ns / lut.pulses_per_bit;
+    const u32 t0h = fit.pulses_0 * pulse_width_ns;
+    const u32 t1h = fit.pulses_1 * pulse_width_ns;
+    return ChipsetTiming{t0h, t1h - t0h, period_ns - t1h, timing.reset_us,
+                         "uart_wire"};
+}
+
 Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT {
     return buildWave10LutForMaxBaud(timing, kMaxUartBaudRate);
 }

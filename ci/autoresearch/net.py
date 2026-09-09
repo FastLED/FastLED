@@ -445,6 +445,16 @@ kListenRetryDelayS = 30.0
 # Keep enough of the deadline to report the outcome of the retry.
 kListenReserveSeconds = 15.0
 
+# CYW43 association is not instant, and a re-join after stopNet has been
+# observed to take longer than the original 10 s budget allowed. Poll for up
+# to ~30 s before calling it a failure; a healthy join still returns on the
+# first or second poll, so this costs nothing when things are working.
+kJoinPollAttempts = 60
+# Reserve enough of the run deadline for the post-failure wifiStatus report and
+# the teardown pings. Polling to the very last second loses the diagnostics
+# this change exists to produce.
+kJoinReserveSeconds = 20.0
+
 
 def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
     """Print the sub-test tally so the payload leg is visible, not inferred.
@@ -599,15 +609,44 @@ async def run_net_peer_autoresearch(
                 raise RpcError(f"RP2350W wifiConnect failed: {connect}")
 
             rp_ip: str | None = None
-            for _ in range(20):
+            wifi_status: dict[str, Any] = {}
+            join_started = time.monotonic()
+            polls = 0
+            for _ in range(kJoinPollAttempts):
+                # Stop polling once the whole-run deadline is close enough that
+                # continuing would starve the remaining cycles -- and, more
+                # importantly, would consume the budget the failure
+                # diagnostics below need in order to report at all.
+                if deadline - time.monotonic() < kJoinReserveSeconds:
+                    break
+                polls += 1
                 wifi_status = await rpc_data(primary, "wifiStatus")
                 candidate_ip = wifi_status.get("ip")
                 if wifi_status.get("connected") and isinstance(candidate_ip, str):
                     rp_ip = candidate_ip
                     break
                 await asyncio.sleep(min(0.5, rpc_timeout()))
+            join_elapsed = time.monotonic() - join_started
             if not rp_ip:
-                raise RpcTimeoutError("RP2350W did not join the ESP32-C6 AP")
+                # Report what the radio actually said. Without this the failure
+                # is indistinguishable between "still associating", "auth
+                # rejected" and "associated but no DHCP lease", which are three
+                # different problems with three different fixes.
+                # Report the polls actually made. Quoting the configured
+                # maximum would overstate the evidence whenever the deadline
+                # reserve cut the loop short, which is exactly the case a
+                # reader needs to distinguish from a full unsuccessful sweep.
+                cut_short = (
+                    " (stopped early to reserve deadline for this report)"
+                    if polls < kJoinPollAttempts
+                    else ""
+                )
+                raise RpcTimeoutError(
+                    "RP2350W did not join the ESP32-C6 AP after "
+                    f"{join_elapsed:.1f}s across {polls} wifiStatus "
+                    f"poll(s){cut_short}; last wifiStatus={wifi_status!r}"
+                )
+            print(f"  RP2350W joined in {join_elapsed:.1f}s -> {rp_ip}")
 
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")

@@ -122,6 +122,22 @@ Wave10Lut buildWave10Lut(const ChipsetTimingConfig& timing) FL_NO_EXCEPT;
 Wave10Lut buildWave10LutForMaxBaud(const ChipsetTimingConfig& timing,
                                    u32 max_baud_rate) FL_NO_EXCEPT;
 
+/// @brief The wire timing the UART encoder actually produces for a chipset.
+///
+/// The encoder quantises T0H/T1H onto a grid of `period / pulses_per_bit`, so
+/// what appears on the wire is not the chipset's nominal timing. A receiver
+/// decoding a UART-encoded frame has to classify against the quantised values,
+/// not the datasheet ones -- otherwise it is matching a waveform nobody sent.
+///
+/// Derived through the same fitUartWave() rules that built the LUT, so the
+/// decode windows cannot drift from the encoding.
+///
+/// @param timing Chipset timing configuration
+/// @param max_baud_rate Backend baud ceiling (selects the frame geometry)
+/// @return Quantised wire timing, or a zeroed ChipsetTiming if infeasible
+ChipsetTiming uartWireTiming(const ChipsetTimingConfig& timing,
+                             u32 max_baud_rate) FL_NO_EXCEPT;
+
 /// @brief Check if a chipset timing can be accurately represented by UART
 ///
 /// Validates that:
