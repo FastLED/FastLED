@@ -766,6 +766,13 @@ void pollNetServer() {}
 
 namespace {
 
+// A stalled peer is one that has sent nothing for this long. Kept at the
+// old flat budget so a truly dead connection is reaped just as quickly.
+constexpr uint32_t kRpPeerStallMs = 2000;
+// Absolute ceiling for one request, so a peer that dribbles a byte at a time
+// cannot occupy the single-client server forever.
+constexpr uint32_t kRpPeerMaxRequestMs = 10000;
+
 struct RpPeerState {
     fl::unique_ptr<WiFiServer> server;
     fl::unique_ptr<WiFiClient> client;
@@ -777,6 +784,10 @@ struct RpPeerState {
     bool headers_complete = false;
     bool response_complete = false;
     uint32_t request_started_ms = 0;
+    // Progress watermark. The request deadline must measure a *stall*, not
+    // total elapsed time: a 4096-byte POST body arrives across several TCP
+    // segments and legitimately outruns a fixed budget on CYW43 SoftAP.
+    uint32_t last_progress_ms = 0;
 };
 
 RpPeerState& rpPeerState() {
@@ -790,6 +801,7 @@ void resetRpPeerRequest(RpPeerState& state) {
     state.headers_complete = false;
     state.response_complete = false;
     state.request_started_ms = 0;
+    state.last_progress_ms = 0;
     state.request[0] = '\0';
     state.body[0] = '\0';
 }
@@ -1220,6 +1232,7 @@ void pollNetServer() {
         state.client = fl::make_unique<WiFiClient>(state.server->accept());
         resetRpPeerRequest(state);
         state.request_started_ms = millis();
+        state.last_progress_ms = state.request_started_ms;
     }
     if (!state.client) {
         return;
@@ -1229,7 +1242,22 @@ void pollNetServer() {
         resetRpPeerRequest(state);
         return;
     }
-    if (static_cast<int32_t>(millis() - state.request_started_ms) >= 2000) {
+    // Drop only a genuinely stalled peer, and cap the whole exchange so a
+    // slow-loris cannot hold the single-client server open indefinitely.
+    // Previously this was a flat 2 s from accept, which silently killed
+    // in-progress 4 KiB POST bodies mid-transfer and left the client with
+    // status_code=-1 and zero bytes -- the server-side twin of #4173/#4196.
+    // Answering 408 instead of closing mutely means a real timeout is
+    // reported as one rather than as a transport error.
+    const uint32_t now_ms = millis();
+    const bool stalled =
+        static_cast<int32_t>(now_ms - state.last_progress_ms) >= kRpPeerStallMs;
+    const bool over_budget =
+        static_cast<int32_t>(now_ms - state.request_started_ms) >= kRpPeerMaxRequestMs;
+    if (stalled || over_budget) {
+        if (!state.response_complete) {
+            writeHttpErrorResponse(*state.client, "408 Request Timeout", "");
+        }
         state.client->stop();
         state.client.reset();
         resetRpPeerRequest(state);
@@ -1247,6 +1275,7 @@ void pollNetServer() {
         }
         state.request[state.request_length++] = static_cast<char>(ch);
         state.request[state.request_length] = '\0';
+        state.last_progress_ms = millis();
         if (state.request_length >= 4 &&
             fl::strncmp(state.request + state.request_length - 4, "\r\n\r\n", 4) == 0) {
             state.headers_complete = true;
@@ -1304,8 +1333,12 @@ void pollNetServer() {
             break;
         }
         state.body[state.body_length++] = static_cast<char>(ch);
+        state.last_progress_ms = millis();
     }
     if (is_post && state.body_length < state.expected_body_length) {
+        // Partial body: come back on a later poll. The stall timer above is
+        // what bounds this, and it has just been refreshed by the bytes we
+        // did consume, so a steadily-arriving 4 KiB body is never dropped.
         return;
     }
     state.body[state.body_length] = '\0';
