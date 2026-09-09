@@ -268,6 +268,18 @@ bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
     i64 reachable = (static_cast<i64>(kGamutFullDrive) << 16) /
                     static_cast<i64>(largest_neutral_drive);
 
+    // Clamped for the same reason the three-emitter build clamps it, and to
+    // the same place: `buildRgbSolveMatrixQ16` accepts emitter luminances up
+    // to 1e6, so a profile bright enough to reach D65 on one or two raw
+    // units of drive puts `2^32 / largest` at or past i32's range -- exactly
+    // 2^31 at largest == 2. `optimistic` starts at `kOklabQ16MaxMagnitude`,
+    // so for such a profile the bisection below is skipped and the narrowing
+    // is reached directly. 64.0 is where the OKLab transform's domain ends,
+    // so nothing downstream can tell the difference.
+    if (reachable > kOklabQ16MaxMagnitude) {
+        reachable = kOklabQ16MaxMagnitude;
+    }
+
     // An upper bound on what the white emitter can add. Along the D65 ray
     // the RGB drives are s * d0 - w * dW, so the *upper* limit on drive i is
     // loosest at w = 1 when dW_i is positive and at w = 0 when it is
@@ -404,6 +416,18 @@ bool buildGamutMapRgbwwQ16(const EmitterProfile& profile,
     }
     i64 reachable = (static_cast<i64>(kGamutFullDrive) << 16) /
                     static_cast<i64>(largest_neutral_drive);
+
+    // Clamped for the same reason the three-emitter build clamps it, and to
+    // the same place: `buildRgbSolveMatrixQ16` accepts emitter luminances up
+    // to 1e6, so a profile bright enough to reach D65 on one or two raw
+    // units of drive puts `2^32 / largest` at or past i32's range -- exactly
+    // 2^31 at largest == 2. `optimistic` starts at `kOklabQ16MaxMagnitude`,
+    // so for such a profile the bisection below is skipped and the narrowing
+    // is reached directly. 64.0 is where the OKLab transform's domain ends,
+    // so nothing downstream can tell the difference.
+    if (reachable > kOklabQ16MaxMagnitude) {
+        reachable = kOklabQ16MaxMagnitude;
+    }
 
     // The one-white relaxation with a second white added. Along the D65 ray
     // the RGB drives are `s*d0 - w1*dW1 - w2*dW2`, so the upper limit on

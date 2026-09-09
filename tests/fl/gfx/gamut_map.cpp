@@ -932,15 +932,29 @@ FL_TEST_CASE("RGBWW mapper always returns drives inside [0, 1]") {
         const float xyz_f[3] = {6.0f * t + 0.05f, 1.5f * t + 0.02f,
                                 9.0f * (1.0f - t) + 0.05f};
         const i32 xyz[3] = {q16(xyz_f[0]), q16(xyz_f[1]), q16(xyz_f[2])};
+
+        // Count only the targets that actually reach the halving search.
+        // Incrementing on every iteration would have made the assertion
+        // below restate the loop bound: it could not fail, and if the hull
+        // ever grew to contain all of these the compression path would go
+        // untested in silence.
+        i32 probe[5];
+        const bool needs_compression =
+            !allocateTwoWhiteDrivesQ16(map.allocation, xyz, probe);
+
         i32 drives[5];
         mapAndAllocateRgbwwQ16(map, xyz, drives);
         for (int i = 0; i < 5; ++i) {
             FL_CHECK_GE(drives[i], 0);
             FL_CHECK_LE(drives[i], kFullDrive);
         }
-        ++exercised;
+        if (needs_compression) {
+            ++exercised;
+        }
     }
-    FL_CHECK_EQ(exercised, 21);
+    // Most of this ramp is outside the hull; the assertion is that it is
+    // genuinely being compressed, not that the loop ran.
+    FL_CHECK_GT(exercised, 10);
 }
 
 FL_TEST_CASE("RGBWW mapper moves smoothly enough to animate") {
@@ -1028,6 +1042,55 @@ FL_TEST_CASE("RGBWW mapper rejects a degenerate profile") {
     FL_CHECK_FALSE(buildGamutMapRgbwwQ16(broken, kWhiteD65, kWhiteD50Map,
                                          WhiteAllocationPolicy::WhitePreferred,
                                          &map));
+}
+
+
+FL_TEST_CASE("White-emitter builds survive a profile bright enough to overflow") {
+    // The three-emitter build clamps `2^32 / largest_neutral_drive` before
+    // narrowing it, because `EmitterProfile` accepts luminances up to 1e6 and
+    // a profile reaching D65 on one or two raw units of drive puts that at
+    // 2^31. Both white builds compute the same quantity, and neither clamped
+    // it: `optimistic` starts at `kOklabQ16MaxMagnitude`, so for such a
+    // profile the bisection is skipped and the unclamped value is narrowed
+    // directly -- implementation-defined, and the stored bound meaningless.
+    //
+    // Same fixture as the three-emitter case, for the same reason: a uniform
+    // huge luminance does not reach the overflow, because every drive rounds
+    // to zero and the neutral check rejects the profile first.
+    EmitterProfile blazing = rgbDevice();
+    blazing.lum_r = 6966.4768f;
+    blazing.lum_g = 23435.6736f;
+    blazing.lum_b = 2365.8496f;
+
+    // Pin that the fixture really does reach the overflow case.
+    EmitterSolveMatrixQ16 probe;
+    FL_REQUIRE(buildRgbSolveMatrixQ16(blazing, &probe));
+    i32 neutral[3];
+    const i32 d65[3] = {62289, 65536, 71372};
+    solveRgbDrivesQ16(probe, d65, neutral);
+    i32 largest = 0;
+    for (int i = 0; i < 3; ++i) {
+        FL_REQUIRE_GT(neutral[i], 0);
+        if (neutral[i] > largest) {
+            largest = neutral[i];
+        }
+    }
+    FL_REQUIRE_LE(largest, 2);
+
+    GamutMapRgbwQ16 one;
+    if (buildGamutMapRgbwQ16(blazing, kWhiteD65,
+                             WhiteAllocationPolicy::WhitePreferred, &one)) {
+        // A sane, positive bound rather than a narrowed 2^31.
+        FL_CHECK_GT(one.max_neutral_lightness, 0);
+        FL_CHECK_LE(one.max_neutral_lightness, kOklabQ16MaxMagnitude);
+    }
+
+    GamutMapRgbwwQ16 two;
+    if (buildGamutMapRgbwwQ16(blazing, kWhiteD65, kWhiteD50Map,
+                              WhiteAllocationPolicy::WhitePreferred, &two)) {
+        FL_CHECK_GT(two.max_neutral_lightness, 0);
+        FL_CHECK_LE(two.max_neutral_lightness, kOklabQ16MaxMagnitude);
+    }
 }
 
 }  // FL_TEST_FILE
