@@ -201,6 +201,11 @@ FL_TEST_CASE("Gamut map preserves hue while compressing chroma") {
         FL_REQUIRE_GT(bx * bx + by * by, 1e-6f);
         // The mapper's drift, and the measurement's own, on the same scale.
         // The second bound is what makes the first meaningful.
+        // Same direction, not merely the same line. An anti-parallel chroma
+        // vector -- hue rotated 180 degrees -- makes the cross product
+        // vanish exactly as a correct mapping does, so the drift check below
+        // cannot see it on its own.
+        FL_CHECK_GT(ax * bx + ay * by, 0.0f);
         FL_CHECK_LT(cross / scale, 0.005f);
         FL_REQUIRE_GT(control_scale, 1e-6f);
         FL_CHECK_LT(fl::fabsf(ax * cy - ay * cx) / control_scale, 0.001f);
@@ -1102,6 +1107,213 @@ FL_TEST_CASE("White-emitter builds survive a profile bright enough to overflow")
     }
 
     FL_CHECK_GT(built, 0);
+}
+
+
+// ---------------------------------------------------------------------------
+// P7's acceptance criterion, on the white-emitter paths (#4041)
+// ---------------------------------------------------------------------------
+//
+// "In-gamut vectors preserve chromaticity; neutral ramps remain neutral;
+// out-of-gamut mapping is continuous and meets the hue/luminance objective."
+//
+// The three-emitter path has carried all four of those since it was written.
+// The white paths -- which are what this phase is actually *for* -- had only
+// some of them: RGBW had no continuity, hue or neutral-ramp coverage at all,
+// and RGBWW had no neutral-ramp or hue coverage. These close that.
+
+namespace {
+
+/// XYZ of four drives on the `rgbDevice()` + D65 white device.
+void reproduceRgbw(const float (&drives)[4], float (&out)[3]) {
+    const EmitterProfile profile = rgbDevice();
+    float columns[4][3];
+    colorimetric_response::xyY_to_XYZ(profile.xy_r[0], profile.xy_r[1],
+                                      profile.lum_r, columns[0]);
+    colorimetric_response::xyY_to_XYZ(profile.xy_g[0], profile.xy_g[1],
+                                      profile.lum_g, columns[1]);
+    colorimetric_response::xyY_to_XYZ(profile.xy_b[0], profile.xy_b[1],
+                                      profile.lum_b, columns[2]);
+    for (int i = 0; i < 3; ++i) {
+        columns[3][i] = toFloat(kWhiteD65[i]);
+    }
+    for (int i = 0; i < 3; ++i) {
+        out[i] = 0.0f;
+        for (int e = 0; e < 4; ++e) {
+            out[i] += columns[e][i] * drives[e];
+        }
+    }
+}
+
+/// How far the mapped chroma has left the target's hue *ray*: 0 on it, 1 for
+/// anything the caller should treat as a failure.
+///
+/// The obvious form -- |cross(a, b)| / (|a| * |b|) -- is not enough on its
+/// own, and reports perfect agreement for two things that are catastrophic:
+/// a mapped chroma of zero (every colour collapsed to grey) and an
+/// anti-parallel one (hue rotated 180 degrees). Both make the cross product
+/// vanish. So those return 1 rather than 0, which is far outside any
+/// tolerance a caller would set, and the metric means what its callers
+/// assert about it.
+float hueDivergence(const i32 (&lab_a)[3], const i32 (&lab_b)[3]) {
+    const float ax = toFloat(lab_a[1]);
+    const float ay = toFloat(lab_a[2]);
+    const float bx = toFloat(lab_b[1]);
+    const float by = toFloat(lab_b[2]);
+    const float target_chroma = ax * ax + ay * ay;
+    const float mapped_chroma = bx * bx + by * by;
+    // Nothing to preserve, or nothing left of it.
+    if (target_chroma < 1e-6f || mapped_chroma < 1e-6f) {
+        return 1.0f;
+    }
+    // Opposite direction: the cross product is zero here too.
+    if (ax * bx + ay * by <= 0.0f) {
+        return 1.0f;
+    }
+    const float cross = fl::fabsf(ax * by - ay * bx);
+    return cross / fl::sqrtf(target_chroma * mapped_chroma);
+}
+
+/// Whether the mapped chroma is no larger than the target's, within the
+/// slack the s16.16 round trip needs. Compression is the objective;
+/// expansion would be a different colour, not a mapped one.
+bool chromaDidNotGrow(const i32 (&lab_a)[3], const i32 (&lab_b)[3]) {
+    const float ax = toFloat(lab_a[1]);
+    const float ay = toFloat(lab_a[2]);
+    const float bx = toFloat(lab_b[1]);
+    const float by = toFloat(lab_b[2]);
+    return (bx * bx + by * by) <= (ax * ax + ay * ay) * 1.02f + 1e-6f;
+}
+
+}  // namespace
+
+FL_TEST_CASE("RGBW mapper leaves a neutral ramp neutral") {
+    // A mapper that compressed slightly even inside the hull would pass the
+    // continuity check while quietly desaturating everything. The white
+    // emitter makes this the interesting case: on a neutral the allocation
+    // hands almost the whole ramp to it.
+    GamutMapRgbwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                    WhiteAllocationPolicy::WhitePreferred,
+                                    &map));
+
+    int exercised = 0;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 40.0f;
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, luminance, xyz);
+
+        i32 plain[4];
+        if (!allocateEmitterDrivesQ16(map.allocation, xyz, plain)) {
+            continue;  // Above the hull; the bound test covers that end.
+        }
+        ++exercised;
+
+        i32 drives[4];
+        mapAndAllocateRgbwQ16(map, xyz, drives);
+        for (int i = 0; i < 4; ++i) {
+            FL_CHECK_EQ(drives[i], plain[i]);
+        }
+
+        // And the light those drives make is still D65. Comparing drives
+        // against the plain allocation cannot show that -- they are equal by
+        // assertion -- so this reconstructs the chromaticity.
+        float as_float[4];
+        for (int i = 0; i < 4; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float produced[3];
+        reproduceRgbw(as_float, produced);
+        const float sum = produced[0] + produced[1] + produced[2];
+        FL_REQUIRE_GT(sum, 1e-4f);
+        FL_CHECK_LT(fl::fabsf(produced[0] / sum - 0.3127f), 0.002f);
+        FL_CHECK_LT(fl::fabsf(produced[1] / sum - 0.3290f), 0.002f);
+    }
+    FL_CHECK_GT(exercised, 20);
+}
+
+FL_TEST_CASE("RGBWW mapper leaves a neutral ramp neutral") {
+    // Same claim on the five-emitter hull, where a neutral is split across
+    // two whites and the primaries at once -- more ways to drift.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    int exercised = 0;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 40.0f;
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, luminance, xyz);
+
+        i32 plain[5];
+        if (!allocateTwoWhiteDrivesQ16(map.allocation, xyz, plain)) {
+            continue;
+        }
+        ++exercised;
+
+        i32 drives[5];
+        mapAndAllocateRgbwwQ16(map, xyz, drives);
+        for (int i = 0; i < 5; ++i) {
+            FL_CHECK_EQ(drives[i], plain[i]);
+        }
+
+        float as_float[5];
+        for (int i = 0; i < 5; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float produced[3];
+        reproduceRgbww(as_float, produced);
+        const float sum = produced[0] + produced[1] + produced[2];
+        FL_REQUIRE_GT(sum, 1e-4f);
+        FL_CHECK_LT(fl::fabsf(produced[0] / sum - 0.3127f), 0.002f);
+        FL_CHECK_LT(fl::fabsf(produced[1] / sum - 0.3290f), 0.002f);
+    }
+    FL_CHECK_GT(exercised, 20);
+}
+
+FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
+    // The last corner of the criterion: the hue objective on the five-emitter
+    // hull.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    const float kChroma[][2] = {
+        {0.70f, 0.28f}, {0.18f, 0.72f}, {0.10f, 0.03f},
+        {0.55f, 0.42f}, {0.08f, 0.55f},
+    };
+    int compressed = 0;
+    for (const auto& c : kChroma) {
+        i32 xyz[3];
+        xyzAt(c[0], c[1], 0.5f, xyz);
+
+        i32 probe[5];
+        const bool in_gamut = allocateTwoWhiteDrivesQ16(map.allocation, xyz, probe);
+
+        i32 drives[5];
+        mapAndAllocateRgbwwQ16(map, xyz, drives);
+        float as_float[5];
+        for (int i = 0; i < 5; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float produced[3];
+        reproduceRgbww(as_float, produced);
+        const i32 mapped_xyz[3] = {q16(produced[0]), q16(produced[1]),
+                                   q16(produced[2])};
+
+        i32 target_lab[3];
+        i32 mapped_lab[3];
+        xyzToOklabQ16(xyz, target_lab);
+        xyzToOklabQ16(mapped_xyz, mapped_lab);
+        FL_CHECK_LT(hueDivergence(target_lab, mapped_lab), 0.02f);
+        FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
+        if (!in_gamut) {
+            ++compressed;
+        }
+    }
+    FL_CHECK_GT(compressed, 0);
 }
 
 }  // FL_TEST_FILE
