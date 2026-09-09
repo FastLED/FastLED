@@ -20,7 +20,11 @@ from typing import TYPE_CHECKING, Any
 import httpx
 from colorama import Fore, Style
 
-from ci.autoresearch.net import _connect_peer_with_retry, create_wifi_manager
+from ci.autoresearch.net import (
+    _connect_peer_with_retry,
+    create_wifi_manager,
+    kPeerConnectAttempts,
+)
 from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -165,7 +169,7 @@ async def run_ota_peer_autoresearch(
         # mid-re-enumeration here. Four of the captured `No response with ID 1`
         # failures came from this path. See FastLED#3899.
         await _connect_peer_with_retry(
-            peer, "ESP32-C6", peer_upload_port, rpc_timeout
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout, kPeerConnectAttempts
         )
 
         # Settle both links before the first real call. The peer flash runs
@@ -331,7 +335,7 @@ async def run_ota_autoresearch(
             return min(20.0, left)
 
         await _connect_peer_with_retry(
-            client, "device", upload_port, ota_remaining
+            client, "device", upload_port, ota_remaining, kPeerConnectAttempts
         )
         print(f"  {Fore.GREEN}Connected to device{Style.RESET_ALL}")
 

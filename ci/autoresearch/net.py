@@ -448,6 +448,11 @@ kListenRetryDelayS = 30.0
 # Keep enough of the deadline to report the outcome of the retry.
 kListenReserveSeconds = 15.0
 
+# How many times to reopen the companion board's serial RPC before giving up.
+# Three covers the observed USB-JTAG CDC re-enumeration window without letting
+# a genuinely dead board stall the run.
+kPeerConnectAttempts = 3
+
 # CYW43 association is not instant, and a re-join after stopNet has been
 # observed to take longer than the original 10 s budget allowed.
 #
@@ -508,7 +513,7 @@ async def _connect_peer_with_retry(
     label: str,
     port: str,
     remaining_timeout: "Callable[[], float]",
-    attempts: int = 3,
+    attempts: int,
 ) -> None:
     """Connect the companion board, retrying a silent first RPC.
 
@@ -715,7 +720,7 @@ async def run_net_peer_autoresearch(
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
         await _connect_peer_with_retry(
-            peer, "ESP32-C6", peer_upload_port, rpc_timeout
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout, kPeerConnectAttempts
         )
 
         primary_status = await rpc_data(primary, "status")
