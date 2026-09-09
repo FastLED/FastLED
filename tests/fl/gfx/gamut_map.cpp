@@ -1077,9 +1077,17 @@ FL_TEST_CASE("White-emitter builds survive a profile bright enough to overflow")
     }
     FL_REQUIRE_LE(largest, 2);
 
+    // Both bound checks are conditional, because a build is allowed to
+    // reject this profile outright. Counting them is what stops the test
+    // passing while asserting nothing at all: if both builds ever started
+    // refusing the fixture, the clamp regression coverage would vanish in
+    // silence -- the same vacuity the `exercised` counter above had.
+    int built = 0;
+
     GamutMapRgbwQ16 one;
     if (buildGamutMapRgbwQ16(blazing, kWhiteD65,
                              WhiteAllocationPolicy::WhitePreferred, &one)) {
+        ++built;
         // A sane, positive bound rather than a narrowed 2^31.
         FL_CHECK_GT(one.max_neutral_lightness, 0);
         FL_CHECK_LE(one.max_neutral_lightness, kOklabQ16MaxMagnitude);
@@ -1088,9 +1096,12 @@ FL_TEST_CASE("White-emitter builds survive a profile bright enough to overflow")
     GamutMapRgbwwQ16 two;
     if (buildGamutMapRgbwwQ16(blazing, kWhiteD65, kWhiteD50Map,
                               WhiteAllocationPolicy::WhitePreferred, &two)) {
+        ++built;
         FL_CHECK_GT(two.max_neutral_lightness, 0);
         FL_CHECK_LE(two.max_neutral_lightness, kOklabQ16MaxMagnitude);
     }
+
+    FL_CHECK_GT(built, 0);
 }
 
 }  // FL_TEST_FILE
