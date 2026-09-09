@@ -450,8 +450,12 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
     if not isinstance(results, list):
         return "response carried no 'results' array"
     failures: list[str] = []
-    for entry in results:
+    for index, entry in enumerate(results):
         if not isinstance(entry, dict):
+            # A row that is not a dict cannot be shown to have passed, and
+            # skipping it would let a malformed report read as "nothing
+            # failed" -- the same silent skip this helper exists to remove.
+            failures.append(f"result[{index}] is not an object: {entry!r}")
             continue
         if entry.get("passed") is True:
             continue

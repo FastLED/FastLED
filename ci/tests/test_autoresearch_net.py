@@ -356,3 +356,13 @@ def test_describe_failed_client_tests_handles_a_malformed_report() -> None:
     assert "no sub-test reported a failure" == _describe_failed_client_tests(
         {"results": [{"test": "GET /ping", "passed": True}]}
     )
+
+
+def test_describe_failed_client_tests_reports_a_malformed_row() -> None:
+    """A non-dict row must be reported, not skipped into a false all-clear."""
+    described = _describe_failed_client_tests(
+        {"results": [{"test": "GET /ping", "passed": True}, "not-a-dict"]}
+    )
+    assert "1 of 2 sub-tests failed" in described
+    assert "result[1] is not an object" in described
+    assert "not-a-dict" in described
