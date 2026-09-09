@@ -437,6 +437,14 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+# WiFiServer::begin() sets SOF_REUSEADDR and recreates its PCB per call, so a
+# listen failure is most likely tcp_new() returning NULL on an exhausted lwIP
+# PCB pool. Wait past TIME_WAIT before retrying so recovery distinguishes
+# transient exhaustion from a genuine leak.
+kListenRetryDelayS = 30.0
+# Keep enough of the deadline to report the outcome of the retry.
+kListenReserveSeconds = 15.0
+
 # CYW43 association is not instant, and a re-join after stopNet has been
 # observed to take longer than the original 10 s budget allowed. Poll for up
 # to ~30 s before calling it a failure; a healthy join still returns on the
@@ -643,7 +651,45 @@ async def run_net_peer_autoresearch(
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")
             if not rp_server.get("success") or not isinstance(rp_port, int):
-                raise RpcError(f"RP2350W startNetServer failed: {rp_server}")
+                # WiFiServer::begin() closes and recreates its PCB each call
+                # and sets SOF_REUSEADDR, so a bind blocked by TIME_WAIT is
+                # ruled out. tcp_new() returning NULL on an exhausted lwIP PCB
+                # pool is the leading candidate (~24 connections per cycle),
+                # but begin() reports only a bool, so nothing here can confirm
+                # which resource ran out. Retrying after a wait distinguishes
+                # transient from persistent, which is all it can honestly
+                # claim; naming the resource needs a firmware-side error code.
+                # Cap the drain against the caller's deadline: waiting the
+                # full interval past it would trade a diagnostic for a
+                # timeout, and there would be nothing left to report with.
+                remaining = deadline - time.monotonic()
+                drain_s = min(kListenRetryDelayS, remaining - kListenReserveSeconds)
+                if drain_s <= 0:
+                    raise RpcError(
+                        f"RP2350W startNetServer failed at cycle {cycle}: "
+                        f"{rp_server}. Not enough of the run deadline remains "
+                        "to test whether it recovers."
+                    )
+                print(
+                    f"  startNetServer failed at cycle {cycle}: {rp_server}; "
+                    f"waiting {drain_s:.0f}s and retrying once to see whether "
+                    "the condition is transient"
+                )
+                await asyncio.sleep(drain_s)
+                rp_server = await rpc_data(primary, "startNetServer")
+                rp_port = rp_server.get("port")
+                if not rp_server.get("success") or not isinstance(rp_port, int):
+                    raise RpcError(
+                        f"RP2350W startNetServer failed at cycle {cycle}, and "
+                        f"again after a {drain_s:.0f}s wait: {rp_server}. The "
+                        "condition is persistent rather than transient; the "
+                        "specific resource is not identified here."
+                    )
+                print(
+                    "  startNetServer recovered after the wait -> the condition "
+                    "is transient. Which resource was exhausted is not "
+                    "established by recovery alone."
+                )
 
             rp_to_c6 = await rpc_data(
                 primary,
