@@ -547,8 +547,18 @@ async def _connect_peer_with_retry(
         failure: Exception | None = None
 
         boot_wait = min(3.0, remaining_timeout())
+        # Bound the whole open, not just the boot wait. The serial layer
+        # self-bounds the port open at about 3 s -- that is where
+        # "open_port(...) exceeded 3s" comes from -- but it knows nothing of
+        # this caller's deadline, so with under 3 s left the attach alone can
+        # outlive it before the ping and back-off checks get to look. Six is
+        # the natural ceiling: three for the open, three for the boot wait.
+        open_budget = min(6.0, remaining_timeout())
         try:
-            await peer.connect(boot_wait=boot_wait, drain_boot=True)
+            await asyncio.wait_for(
+                peer.connect(boot_wait=boot_wait, drain_boot=True),
+                timeout=open_budget,
+            )
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
@@ -581,14 +591,17 @@ async def _connect_peer_with_retry(
             return
 
         last_error = failure
+        # Close on every failure, including the last. `wait_for` cancels the
+        # open mid-flight, so skipping this on the final attempt would hand
+        # the caller a half-opened transport along with the exception.
+        with contextlib.suppress(Exception):
+            await peer.close()
         if attempt == attempts:
             break
         print(
             f"  {label} did not answer on {port} "
             f"(attempt {attempt}/{attempts}: {failure}); reconnecting"
         )
-        with contextlib.suppress(Exception):
-            await peer.close()
         # Also outside any suppression: if the budget went while we were
         # failing, stop rather than sleep past the deadline.
         #

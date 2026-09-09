@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import io
+import time
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -573,3 +574,33 @@ def test_connect_peer_reports_a_serial_error_in_its_own_message() -> None:
     assert "/dev/ttyACM2" in message
     assert "2 connect attempts" in message
     assert "attach failed" in message
+
+
+def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
+    """A hung port open must not outlive the caller's deadline.
+
+    `boot_wait` was bounded by the remaining budget, but the transport open
+    itself was not: the serial layer self-bounds at about 3 s and knows
+    nothing of this caller's deadline, so with under 3 s left the attach
+    alone could overrun before the ping and back-off checks ran.
+    """
+    peer = MagicMock()
+
+    async def _never_opens(**_kwargs: Any) -> None:
+        await asyncio.sleep(30.0)
+
+    peer.connect = AsyncMock(side_effect=_never_opens)
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+
+    started = time.monotonic()
+    with pytest.raises(RpcTimeoutError):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 0.25, 2)
+        )
+    elapsed = time.monotonic() - started
+
+    # Two attempts of a 30 s hang would be a minute; the budget caps each.
+    assert elapsed < 5.0, f"took {elapsed:.1f}s"
+    # And the half-opened transport is closed every time, final attempt too.
+    assert peer.close.await_count == 2
