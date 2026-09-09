@@ -467,6 +467,21 @@ def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
         f"  {label}: tests_passed={data['tests_passed']} "
         f"tests_failed={data['tests_failed']}"
     )
+    # EXPERIMENT (not for merge): surface slow-but-passing requests. The
+    # summariser prints only tallies, so a request that took 4 s under the
+    # raised deadline -- and would have failed under the old 2 s one -- is
+    # invisible in a "pass". That near-miss is the whole point of the run.
+    slow = []
+    for entry in results:
+        if not isinstance(entry, dict):
+            continue
+        ms = entry.get("elapsed_ms")
+        if isinstance(ms, int) and not isinstance(ms, bool) and ms >= 500:
+            slow.append((ms, entry.get("test")))
+    if slow:
+        slow.sort(reverse=True)
+        rendered = ", ".join(f"{name}={ms}ms" for ms, name in slow[:5])
+        print(f"    {label} SLOW (>=500ms): {rendered}")
     payload_rows = [
         entry
         for entry in results
