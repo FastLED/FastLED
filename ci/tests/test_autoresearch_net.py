@@ -8,9 +8,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from ci.autoresearch.net import run_net_peer_autoresearch
+from ci.autoresearch.net import (
+    _summarize_client_tests,
+    run_net_peer_autoresearch,
+)
 from ci.autoresearch.ota import _settle_link, run_ota_peer_autoresearch
-from ci.rpc_client import RpcTimeoutError
+from ci.rpc_client import RpcError, RpcTimeoutError
 
 
 def _response(data: dict[str, Any]) -> MagicMock:
@@ -36,7 +39,9 @@ def test_ota_peer_reports_missing_firmware(
     assert "RP2350W firmware is missing: None" in capsys.readouterr().out
 
 
-def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
+def test_net_peer_runs_ten_device_only_reconnect_cycles(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     """The peer path uses RPC/fbuild serial only, never a host WiFi manager."""
     primary = MagicMock()
     peer = MagicMock()
@@ -57,7 +62,18 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
             "wifiConnect": {"success": True},
             "wifiStatus": {"connected": True, "ip": "192.168.4.2"},
             "startNetServer": {"success": True, "port": 80},
-            "runNetClientTest": {"success": True},
+            "runNetClientTest": {
+                "success": True,
+                "tests_passed": 12,
+                "tests_failed": 0,
+                "results": [
+                    {
+                        "test": "POST /echo 4096-byte FNV-1a",
+                        "bytes": 4096,
+                        "passed": True,
+                    }
+                ],
+            },
             "stopNet": {"success": True},
             "ping": {"success": True},
         }
@@ -76,7 +92,18 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
                 "ip": "192.168.4.1",
                 "port": 80,
             },
-            "runNetClientTest": {"success": True},
+            "runNetClientTest": {
+                "success": True,
+                "tests_passed": 12,
+                "tests_failed": 0,
+                "results": [
+                    {
+                        "test": "POST /echo 4096-byte FNV-1a",
+                        "bytes": 4096,
+                        "passed": True,
+                    }
+                ],
+            },
             "stopNet": {"success": True},
             "ping": {"success": True},
         }
@@ -108,6 +135,20 @@ def test_net_peer_runs_ten_device_only_reconnect_cycles() -> None:
     assert "ping" in peer_methods
     primary.close.assert_awaited_once()
     peer.close.assert_awaited_once()
+
+    # The point of the summariser is auditable output. Asserting only that the
+    # run returns 0 would pass even if it printed nothing, which is the gap
+    # this change exists to close -- so assert what a reader would actually
+    # have to read off the log.
+    out = capsys.readouterr().out
+    for label in ("RP2350W -> ESP32-C6", "ESP32-C6 -> RP2350W"):
+        assert f"{label}: tests_passed=12 tests_failed=0" in out, label
+        assert (
+            f"{label} payload: test='POST /echo 4096-byte FNV-1a' "
+            "bytes=4096 passed=True"
+        ) in out, label
+    # Ten cycles x two directions: twenty payload rows, not one.
+    assert out.count("payload: test='POST /echo 4096-byte FNV-1a'") == 20
 
 
 def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
@@ -240,3 +281,33 @@ def test_settle_link_returns_once_the_board_answers() -> None:
     )
     asyncio.run(_settle_link(client, "peer (COM9)", lambda: 30.0))
     assert client.send.await_count == 2
+
+
+def test_summarize_client_tests_rejects_incomplete_reports() -> None:
+    """A report that cannot substantiate the payload leg is not a pass.
+
+    #3899 wants decisive evidence of the >=4 KiB exchange. Printing
+    `tests_passed=None` for a truncated response would read as weak evidence
+    rather than a broken report, so each missing piece raises instead.
+    """
+    complete = {
+        "tests_passed": 12,
+        "tests_failed": 0,
+        "results": [
+            {"test": "POST /echo 4096-byte FNV-1a", "bytes": 4096, "passed": True}
+        ],
+    }
+    _summarize_client_tests("ok", complete)  # does not raise
+
+    for missing in ("tests_passed", "tests_failed", "results"):
+        broken = {key: value for key, value in complete.items() if key != missing}
+        with pytest.raises(RpcError, match="payload leg"):
+            _summarize_client_tests("broken", broken)
+
+    # Present but empty: the battery ran without the echo row.
+    with pytest.raises(RpcError, match="did not run"):
+        _summarize_client_tests("no-echo", {**complete, "results": []})
+
+    # Booleans are not acceptable integers for a tally.
+    with pytest.raises(RpcError, match="payload leg"):
+        _summarize_client_tests("boolish", {**complete, "tests_passed": True})
