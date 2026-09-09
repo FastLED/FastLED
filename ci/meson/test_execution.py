@@ -10,6 +10,7 @@ from typing import Optional, cast
 from running_process import RunningProcess
 
 from ci.meson.compiler import get_meson_executable
+from ci.meson.mtime_stabilizer import restore_executable_bits
 from ci.meson.output import (
     print_banner,
     print_error,
@@ -111,6 +112,13 @@ def run_meson_test(
     Returns:
         MesonTestResult with success status, duration, and test counts
     """
+    # Restore executable bits immediately before spawning the runner, not only
+    # after a compile. A fully-cached build skips stream_compile_only()
+    # entirely, so artifacts that zccache restored without the bit on an
+    # earlier run would otherwise reach the runner and fail it with an opaque
+    # PermissionError (FastLED#4205).
+    restore_executable_bits(build_dir)
+
     cmd = [
         get_meson_executable(),
         "test",

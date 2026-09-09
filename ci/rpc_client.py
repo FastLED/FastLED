@@ -80,8 +80,26 @@ class RpcTimeoutError(TimeoutError):
     pass
 
 
-class RpcError(Exception):
-    """RPC operation failed."""
+class RpcError(RuntimeError):
+    """RPC operation failed.
+
+    Deliberately a `RuntimeError` rather than a bare `Exception`, so that
+    `send` can normalize transport failures into it without breaking the
+    callers that report those failures by catching `RuntimeError` (#4191).
+
+    `PyserialMonitor.write` raises `RuntimeError("Serial write error: ...")`,
+    and `send` used to let it straight through -- past its own documented
+    contract of `RpcTimeoutError` or `RpcError`, so every caller handling
+    `(RpcError, RpcTimeoutError)` missed a failed write. Normalizing it is
+    only safe because this widening keeps the existing `except RuntimeError`
+    handlers working; the four that RPC errors can actually reach
+    (`ci/autoresearch/gpio.py`, `ci/autoresearch/decode.py`) all report a
+    transport failure and return, which is exactly what an `RpcError`
+    arriving there should do -- today it escapes them as a traceback.
+
+    `RpcTimeoutError` sets the precedent in this file by subclassing the
+    builtin `TimeoutError`.
+    """
 
     def __init__(
         self,
@@ -392,7 +410,11 @@ class RpcClient:
 
         Raises:
             RpcTimeoutError: If no response within timeout
-            RpcError: If not connected
+            RpcError: If not connected, or if the serial transport failed.
+                Transport failures arrive as `RuntimeError` from
+                `PyserialMonitor.write` and are normalized here, so this
+                contract holds rather than leaking the transport's own type
+                (#4191).
         """
         if not self.is_connected:
             raise RpcError("Not connected")
@@ -439,6 +461,16 @@ class RpcClient:
             except RpcTimeoutError as e:
                 last_error = e
                 continue
+            except RpcError:
+                # Already this contract's currency; retrying a transport that
+                # reported a definite failure is not the same as retrying a
+                # timeout, so it propagates.
+                raise
+            except RuntimeError as e:
+                # `PyserialMonitor.write` reports a failed write this way.
+                # Letting it through would break `send`'s contract and every
+                # caller that handles `(RpcError, RpcTimeoutError)` (#4191).
+                raise RpcError(f"{function}: {e}") from e
 
         raise last_error or RpcTimeoutError(
             f"No response after {retries} attempts (total timeout: {effective_timeout}s)"

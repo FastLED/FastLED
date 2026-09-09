@@ -249,14 +249,14 @@ def test_settle_link_retries_a_failed_serial_write() -> None:
     """A failed write must be retried, and must name the board when it isn't.
 
     `PyserialMonitor.write` converts `serial.SerialException` into
-    `RuntimeError("Serial write error: ...")`, and `RpcClient.send` only
-    retries `RpcTimeoutError` -- so a write failure arrives here as a bare
-    `RuntimeError`. Before this was caught, it escaped the retry entirely and
+    `RuntimeError("Serial write error: ...")`. `RpcClient.send` normalizes
+    that into `RpcError` (#4191), so it is what a caller sees and what this
+    mocks. Before the retry caught it, a write failure escaped entirely and
     surfaced as a transport error naming neither the board nor the call,
     which is the failure #3956 exists to fix.
     """
     client = MagicMock()
-    client.send = AsyncMock(side_effect=RuntimeError("Serial write error: boom"))
+    client.send = AsyncMock(side_effect=RpcError("Serial write error: boom"))
 
     with pytest.raises(RpcTimeoutError) as caught:
         asyncio.run(_settle_link(client, "primary (COM18)", lambda: 30.0))
@@ -275,7 +275,8 @@ def test_settle_link_returns_once_the_board_answers() -> None:
     client = MagicMock()
     client.send = AsyncMock(
         side_effect=[
-            RuntimeError("Serial write error: boom"),
+            # What `send` raises for a failed write since #4191.
+            RpcError("Serial write error: boom"),
             _response({"success": True}),
         ]
     )

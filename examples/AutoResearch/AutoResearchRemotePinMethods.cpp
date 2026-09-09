@@ -85,6 +85,7 @@ static const HelpEntry kHelpEntries[] = {
     {"runAll", "Phase 3: Selective Execution", "[]", "{success, totalCases, passedCases, skippedCases, results}", "Run full test matrix with JSON results"},
     {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},
+    {"perfProbeBitBangCost", "Phase 2: Performance", "[{iterations, ns, pin}]", "{success, nop_us_per_iter, delay_us_per_iter, delay_hz_us_per_iter, write_byte_us_per_iter, clock_query_us, predicted_bit_overhead_us}", "Attribute the BIT_BANG per-bit overhead across delay vs pin-write calls (FastLED#4203)"},
     {"reset", "Phase 4: Utility", "[]", "{success, message, testCasesCleared}", "Reset test state without device reboot"},
     {"halt", "Phase 4: Utility", "[]", "{success, message}", "Trigger sketch halt"},
     {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, lastResetCause, lastResetWasWatchdog, frameCounter}", "Health check with timestamp and reset evidence"},
