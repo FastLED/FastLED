@@ -368,9 +368,7 @@ simplifies to it later.
 Not the reduction above, and not a search. Write the total `s = w₁ + w₂` and
 substitute `w₂ = s − w₁`: the RGB drives become
 
-```
-(d₀ − s·dW₂) − w₁·(dW₁ − dW₂)
-```
+    (d₀ − s·dW₂) − w₁·(dW₁ − dW₂)
 
 which is the one-white shape with a shifted target and a difference column.
 At any fixed total the feasible `w₁` is again an interval, bounded by five

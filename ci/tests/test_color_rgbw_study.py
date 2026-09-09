@@ -343,6 +343,48 @@ class TestTwoWhitesAreAlsoClosedForm(unittest.TestCase):
         self.assertEqual(tally.solved, 4000)
         self.assertLess(tally.worst_total_delta, 1e-9)
 
+    def test_it_agrees_when_the_two_whites_are_the_same_colour(
+        self: "TestTwoWhitesAreAlsoClosedForm",
+    ) -> None:
+        """The branch where the split moves no RGB drive at all.
+
+        Two strings of the same white LED is an ordinary device, and it is
+        the only shape that reaches the zero-difference branch: the split
+        cannot move any drive, so those constraints fall on the *total*
+        instead. An earlier revision encoded them as constant `w1` bounds --
+        dimensionally wrong, a total is not a split -- and disagreed with the
+        enumeration on 2206 of 3000 targets, by as much as 1.87 in total
+        white. Every other device in this file has a non-zero difference in
+        all three channels, so nothing else here goes near it.
+        """
+
+        random.seed(4198)
+        columns = [*RGB_COLUMNS, D65_WHITE_COLUMN, D65_WHITE_COLUMN]
+        solved = disagreed = 0
+        worst = 0.0
+        for _ in range(3000):
+            drives = [random.random() for _ in range(5)]
+            target = tuple(
+                sum(columns[e][i] * drives[e] for e in range(5)) for i in range(3)
+            )
+            closed = allocate_two_white(
+                self.inverse, target, D65_WHITE_COLUMN, D65_WHITE_COLUMN
+            )
+            exact = most_white_two(
+                self.inverse, target, D65_WHITE_COLUMN, D65_WHITE_COLUMN
+            )
+            if (closed is None) != (exact is None):
+                disagreed += 1
+                continue
+            if closed is None:
+                continue
+            assert exact is not None
+            solved += 1
+            worst = max(worst, abs(closed.total - exact.total))
+        self.assertEqual(disagreed, 0)
+        self.assertEqual(solved, 3000)
+        self.assertLess(worst, 1e-9)
+
     def test_it_agrees_about_targets_outside_the_hull(
         self: "TestTwoWhitesAreAlsoClosedForm",
     ) -> None:

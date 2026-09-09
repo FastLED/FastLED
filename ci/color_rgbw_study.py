@@ -214,10 +214,25 @@ def best_single_white(
     return best
 
 
+@dataclass(frozen=True, slots=True)
+class _SplitBounds:
+    """The constraints on a two-white allocation, in terms of the total.
+
+    `lowers` and `uppers` bound `w1` as `(constant, slope)` pairs meaning
+    `constant + slope*s`. `low_total` and `high_total` bound the total
+    directly, which is where the drives the split cannot move end up.
+    """
+
+    lowers: list[tuple[float, float]]  # noqa: DCT002
+    uppers: list[tuple[float, float]]  # noqa: DCT002
+    low_total: float
+    high_total: float
+
+
 def _split_bounds(
     inverse: Matrix3, target: Xyz, first: Xyz, second: Xyz
-) -> tuple[list[tuple[float, float]], list[tuple[float, float]]] | None:
-    """Bounds on `w1` as functions of the total, as `(constant, slope)` pairs.
+) -> _SplitBounds | None:
+    """Bounds on `w1` as functions of the total, plus bounds on the total.
 
     Substituting `w2 = s - w1` leaves the RGB drives as
     `(d0 - s*from_second) - w1*(from_first - from_second)`, which is the
@@ -225,7 +240,17 @@ def _split_bounds(
     and each of the four bounds from `w1` and `w2` being drives themselves,
     is one bound on `w1` that is affine in `s`.
 
-    None when a drive that the split cannot move is already out of range.
+    A drive whose difference column is zero is the exception: the split
+    cannot move it at all, so its constraint is on the total alone and comes
+    back in `low_total` / `high_total`. An earlier revision encoded those as
+    constant `w1` bounds instead, which is dimensionally wrong -- the value
+    is a total, not a split -- and made this disagree with `most_white_two`
+    on 2206 of 3000 targets for a device whose two whites are the same
+    colour. The shipped C++ never had that bug; this is the model catching
+    up with it.
+
+    None when a drive that neither the split nor the total can rescue is
+    already out of range.
     """
 
     at_zero = _matvec(inverse, target)
@@ -233,27 +258,29 @@ def _split_bounds(
     from_second = _matvec(inverse, second)
     lowers: list[tuple[float, float]] = [(0.0, 0.0), (-1.0, 1.0)]
     uppers: list[tuple[float, float]] = [(1.0, 0.0), (0.0, 1.0)]
+    low_total = 0.0
+    high_total = 2.0
     for index in range(3):
         difference = from_first[index] - from_second[index]
         if abs(difference) <= DRIVE_TOLERANCE:
-            # The split cannot move this drive; the bound falls on the total,
-            # which the caller sees as a degenerate pair.
+            # The split cannot move this drive at all, so the constraint is
+            # on the total: `at_zero - s*from_second` must stay in [0, 1].
             constant = at_zero[index]
             slope = -from_second[index]
             if abs(slope) <= DRIVE_TOLERANCE:
                 if not -DRIVE_TOLERANCE <= constant <= 1.0 + DRIVE_TOLERANCE:
                     return None
                 continue
-            # Expressed as a pair of coincident w1 bounds, so the pairwise
-            # sweep below picks the same totals up without a special case.
-            at_dark = (constant / slope, 0.0)
-            at_full = ((constant - 1.0) / slope, 0.0)
+            # `constant + slope*s` in [0, 1]; dividing by a negative slope
+            # swaps which end is which.
+            first_bound = -constant / slope
+            second_bound = (1.0 - constant) / slope
             if slope > 0:
-                uppers.append((at_dark[0], 0.0))
-                lowers.append((at_full[0], 0.0))
+                low_total = max(low_total, first_bound)
+                high_total = min(high_total, second_bound)
             else:
-                uppers.append((at_full[0], 0.0))
-                lowers.append((at_dark[0], 0.0))
+                low_total = max(low_total, second_bound)
+                high_total = min(high_total, first_bound)
             continue
         at_dark = (at_zero[index] / difference, -from_second[index] / difference)
         at_full = (
@@ -266,7 +293,7 @@ def _split_bounds(
         else:
             uppers.append(at_full)
             lowers.append(at_dark)
-    return lowers, uppers
+    return _SplitBounds(lowers, uppers, low_total, high_total)
 
 
 def allocate_two_white(
@@ -292,10 +319,11 @@ def allocate_two_white(
     bounds = _split_bounds(inverse, target, first, second)
     if bounds is None:
         return None
-    lowers, uppers = bounds
+    lowers = bounds.lowers
+    uppers = bounds.uppers
 
-    low_total = 0.0
-    high_total = 2.0
+    low_total = bounds.low_total
+    high_total = bounds.high_total
     for constant_low, slope_low in lowers:
         for constant_high, slope_high in uppers:
             slope = slope_low - slope_high
