@@ -307,3 +307,130 @@ FL_TEST_CASE("EmitterProfile is trivially constructible and zero-initialized") {
     FL_CHECK_CLOSE(p.lum_g, 0.0f, 1e-9f);
     FL_CHECK_CLOSE(p.input_xy_w[1], 0.0f, 1e-9f);
 }
+
+FL_TEST_CASE("[#4194] invert3x3 rejects a singular primary matrix") {
+    // The guard used to be an absolute `1e-20`, which for columns of CIE XYZ
+    // built from chromaticities -- entries of order 1 -- is about thirteen
+    // orders of magnitude too tight to ever fire.
+    //
+    // Red and green identical is as singular as a matrix gets. Its
+    // determinant is mathematically zero and computes as roughly -1.1e-7 at
+    // -O3, because the compiler reassociates and the cancellation is not
+    // exact. The old guard accepted that and returned an inverse scaled by
+    // 1/det, which is pure rounding noise.
+    float red[3];
+    float green[3];
+    float blue[3];
+    fl::colorimetric_response::xyY_to_XYZ(0.6400f, 0.3300f, 1.0f, red);
+    fl::colorimetric_response::xyY_to_XYZ(0.6400f, 0.3300f, 1.0f, green);
+    fl::colorimetric_response::xyY_to_XYZ(0.1500f, 0.0600f, 1.0f, blue);
+
+    const float singular[3][3] = {
+        {red[0], green[0], blue[0]},
+        {red[1], green[1], blue[1]},
+        {red[2], green[2], blue[2]},
+    };
+    float inverse[3][3];
+    FL_CHECK_FALSE(fl::colorimetric_response::invert3x3(singular, inverse));
+}
+
+FL_TEST_CASE("[#4194] invert3x3 still inverts every real primary set") {
+    // The other half. A relative test is only worth having if it leaves the
+    // matrices this is actually given alone -- their relative determinants
+    // are 0.57 to 0.81, five orders above the threshold.
+    struct Primaries {
+        float rx, ry, gx, gy, bx, by;
+    };
+    const Primaries kSpaces[] = {
+        {0.6400f, 0.3300f, 0.3000f, 0.6000f, 0.1500f, 0.0600f},  // sRGB/BT.709
+        {0.6800f, 0.3200f, 0.2650f, 0.6900f, 0.1500f, 0.0600f},  // Display P3
+        {0.7080f, 0.2920f, 0.1700f, 0.7970f, 0.1310f, 0.0460f},  // BT.2020
+    };
+    for (const auto& space : kSpaces) {
+        float red[3];
+        float green[3];
+        float blue[3];
+        fl::colorimetric_response::xyY_to_XYZ(space.rx, space.ry, 1.0f, red);
+        fl::colorimetric_response::xyY_to_XYZ(space.gx, space.gy, 1.0f, green);
+        fl::colorimetric_response::xyY_to_XYZ(space.bx, space.by, 1.0f, blue);
+        const float matrix[3][3] = {
+            {red[0], green[0], blue[0]},
+            {red[1], green[1], blue[1]},
+            {red[2], green[2], blue[2]},
+        };
+        float inverse[3][3];
+        FL_REQUIRE(fl::colorimetric_response::invert3x3(matrix, inverse));
+
+        // And it is a real inverse, not merely a `true`: M * M^-1 == I.
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                float sum = 0.0f;
+                for (int k = 0; k < 3; ++k) {
+                    sum += matrix[row][k] * inverse[k][col];
+                }
+                const float want = (row == col) ? 1.0f : 0.0f;
+                FL_CHECK_LT(fl::fabsf(sum - want), 1e-4f);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("[#4194] invert3x3 rejects a zero column") {
+    // A zero column makes the scale zero. The old absolute guard would have
+    // accepted such a matrix whenever its determinant rounded to something
+    // above 1e-20; this rejects it for the right reason.
+    const float zero_column[3][3] = {
+        {1.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f},
+    };
+    float inverse[3][3];
+    FL_CHECK_FALSE(fl::colorimetric_response::invert3x3(zero_column, inverse));
+}
+
+FL_TEST_CASE("[#4194] invert3x3 scales with the matrix, not against a constant") {
+    // The point of a *relative* test: the same well-conditioned matrix must
+    // be accepted whether its entries are tiny or enormous. An absolute
+    // threshold gets that wrong at one end or the other -- this matrix scaled
+    // down by 1e-6 has a determinant near 1e-18, which the old 1e-20 guard
+    // accepted only by luck, and one more factor of ten would have failed it
+    // despite being perfectly invertible.
+    const float base[3][3] = {
+        {1.939394f, 0.500000f, 2.500000f},
+        {1.000000f, 1.000000f, 1.000000f},
+        {0.090909f, 0.166667f, 13.166667f},
+    };
+    const float kScales[] = {1e-6f, 1e-3f, 1.0f, 1e3f, 1e6f};
+    for (float factor : kScales) {
+        float scaled[3][3];
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                scaled[row][col] = base[row][col] * factor;
+            }
+        }
+        float inverse[3][3];
+        FL_CHECK(fl::colorimetric_response::invert3x3(scaled, inverse));
+    }
+}
+
+FL_TEST_CASE("[#4194] invert3x3 accepts a finite matrix of wildly mixed scale") {
+    // Review finding. A first version compared |det| against the product of
+    // the column 2-norms, which needs `a * a` -- and that overflows float32
+    // for entries past about 1.8e19. This matrix has determinant exactly 1
+    // and an inverse every entry of which is representable, but squaring
+    // would send its first column norm to infinity and reject it. The old
+    // absolute guard did not have that failure mode, so introducing it would
+    // have been a regression.
+    const float mixed[3][3] = {
+        {1e20f, 0.0f, 0.0f},
+        {0.0f, 1e-20f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+    };
+    float inverse[3][3];
+    FL_REQUIRE(fl::colorimetric_response::invert3x3(mixed, inverse));
+
+    // And the inverse is the real one, not merely a `true`.
+    FL_CHECK_LT(fl::fabsf(inverse[0][0] - 1e-20f), 1e-26f);
+    FL_CHECK_LT(fl::fabsf(inverse[1][1] - 1e20f), 1e14f);
+    FL_CHECK_LT(fl::fabsf(inverse[2][2] - 1.0f), 1e-6f);
+}

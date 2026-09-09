@@ -65,14 +65,90 @@ inline void xyY_to_XYZ(float x, float y, float Y, float out[3]) FL_NO_EXCEPT {
     out[2] = (1.0f - x - y) * Y * inv_y;
 }
 
+namespace detail {
+
+/// How small a determinant may be, *relative to the matrix's own scale*,
+/// before the inverse is rounding noise.
+///
+/// Implementation policy for `invert3x3`, not API: it is in `detail` because
+/// nothing outside that function should depend on the number.
+///
+/// The guard used to be an absolute `1e-20`, which for the matrices this is
+/// actually given -- columns of CIE XYZ built from chromaticities, so entries
+/// of order 1 -- is about thirteen orders of magnitude too tight to ever fire
+/// (#4194). Primaries with red and green *identical*, which is as singular as
+/// a matrix gets, compute a determinant of about -1.1e-7 at -O3 rather than
+/// the exact zero the mathematics says, because the compiler reassociates and
+/// the cancellation is not exact. `1e-20` accepted that and returned an
+/// inverse scaled by 1/det ~ -9.1e6: pure noise.
+///
+/// Measured as the determinant of the matrix with each column divided by its
+/// largest entry, so the number is scale-free:
+///
+///     sRGB/BT.709 0.74    Display P3 0.82    BT.2020 0.91    Bradford 1.13
+///     red == green            ~1e-8 (that case, in float32 at -O3)
+///
+/// 1e-6 is roughly ten times float32's epsilon (1.19e-7), which for entries
+/// normalized to order 1 is exactly where a determinant stops being
+/// distinguishable from the cancellation that produced it.
+///
+/// Deliberately *not* tight enough to reject merely ill-conditioned
+/// primaries. Two chromaticities differing by 1e-4 normalize to 6.8e-5 --
+/// resolvable in float32, just poorly. Rejecting those is a different policy
+/// question and is not made here silently.
+constexpr float kRelativeSingularity = 1e-6f;
+
+/// Largest absolute entry of a column, which is its infinity norm.
+inline float columnScale(float a, float b, float c) FL_NO_EXCEPT {
+    const float x = fl::fabs(a);
+    const float y = fl::fabs(b);
+    const float z = fl::fabs(c);
+    float largest = x > y ? x : y;
+    if (z > largest) {
+        largest = z;
+    }
+    return largest;
+}
+
+}  // namespace detail
+
 inline bool invert3x3(const float in[3][3], float out[3][3]) FL_NO_EXCEPT {
     const float a = in[0][0], b = in[0][1], c = in[0][2];
     const float d = in[1][0], e = in[1][1], f = in[1][2];
     const float g = in[2][0], h = in[2][1], i = in[2][2];
     const float det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-    if (fl::fabs(det) < 1e-20f) {
+
+    // Scale the test by the matrix's own magnitude, because an absolute
+    // threshold cannot see the ratio that actually decides invertibility.
+    //
+    // Each column is divided by its largest entry and the determinant of
+    // *that* matrix is what gets tested. The obvious alternative -- compare
+    // |det| against the product of the column 2-norms -- needs `a * a`, which
+    // overflows float32 for entries past about 1.8e19: `diag(1e20, 1e-20, 1)`
+    // has determinant 1 and a perfectly representable inverse, and squaring
+    // would send its first column norm to infinity and reject it. Dividing
+    // first cannot overflow, and it costs three divisions instead of three
+    // square roots.
+    const float scale_a = detail::columnScale(a, d, g);
+    const float scale_b = detail::columnScale(b, e, h);
+    const float scale_c = detail::columnScale(c, f, i);
+
+    // One negated `>`, which covers three cases at once and is why there is
+    // no separate zero or NaN check: a zero column makes its scale zero, so
+    // the division below yields infinity or NaN and the comparison fails; a
+    // NaN anywhere makes every comparison false, so the negation rejects. An
+    // explicit `scale > 0` clause was written here first, and mutation
+    // testing showed it could not fire.
+    const float an = a / scale_a, dn = d / scale_a, gn = g / scale_a;
+    const float bn = b / scale_b, en = e / scale_b, hn = h / scale_b;
+    const float cn = c / scale_c, fn = f / scale_c, in_ = i / scale_c;
+    const float det_normalized = an * (en * in_ - fn * hn) -
+                                 bn * (dn * in_ - fn * gn) +
+                                 cn * (dn * hn - en * gn);
+    if (!(fl::fabs(det_normalized) > detail::kRelativeSingularity)) {
         return false;
     }
+
     const float inv_det = 1.0f / det;
     out[0][0] = (e * i - f * h) * inv_det;
     out[0][1] = (c * h - b * i) * inv_det;
