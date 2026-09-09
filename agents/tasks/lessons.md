@@ -218,3 +218,17 @@
   plausible number hid it. `pytest --collect-only -q` showed 178 vs 180, and
   grepping the collected names showed 0 vs 2. A pass count cannot distinguish
   "passing" from "not present"; a collection count can.
+- Do not reimplement production logic to investigate a bug caused by
+  reimplemented production logic. The AutoResearch UART decoder hardcoded one
+  chipset's quantised wire timing, so 400 kHz frames decoded every symbol
+  wrongly. To test the fix I derived the timing *by hand*, got 1 of 40 LEDs
+  still wrong, called the remainder a "missing final byte" capture defect, and
+  spent an iteration hunting it. There was no such defect: my derivation had
+  omitted the minimum-symbol-separation bump that `fitUartWave()` applies
+  (`kMinSymbolSeparationNs`), so the decode windows were subtly wrong and
+  clipped one LED. Calling the real function decoded the frame completely. The
+  encoder's own comment had named the hazard — *"Shared by buildWave10Lut()
+  and canRepresentTiming() so the LUT that gets built is always judged by the
+  same rules that admitted it"* — and I reproduced it by hand while
+  investigating it. Before positing a new defect to explain a residual,
+  suspect the approximation you introduced to look for it.
