@@ -1008,7 +1008,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // held the connection and stopped sending", and elapsed_ms says whether
     // the 2 s deadline is what ended the read.
     const bool peer_open_after_body = client.connected();
-    const uint32_t elapsed_ms = millis() - request_started_ms;
+    const uint32_t elapsed_ms = millis() - exchange_started_ms;
     client.stop();
     response[response_length] = '\0';
 
