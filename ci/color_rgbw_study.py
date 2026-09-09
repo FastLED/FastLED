@@ -72,10 +72,17 @@ DRIVE_TOLERANCE = 1e-9
 ENUMERATION_TOLERANCE = 1e-7
 
 
-def emitter_column(x: float, y: float) -> Xyz:
-    """An emitter's XYZ at unit luminance, from its chromaticity."""
+def emitter_column(x: float, y: float, capacity: float = 1.0) -> Xyz:
+    """An emitter's XYZ at full drive, from its chromaticity and capacity.
 
-    return (x / y, 1.0, (1.0 - x - y) / y)
+    `capacity` is the emitter's luminance as a fraction of the rendering
+    white, the same normalization `DeviceProfile` uses. It defaults to one
+    because most of the devices here give every emitter unit capacity; a
+    device whose emitters are individually too dim to render a bright neutral
+    is exactly the one that needs both white emitters.
+    """
+
+    return (x / y * capacity, capacity, (1.0 - x - y) / y * capacity)
 
 
 def rgb_matrix(columns: list[Xyz]) -> Matrix3:

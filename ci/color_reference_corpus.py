@@ -35,12 +35,14 @@ _GOLDEN_PATH = Path(__file__).with_name("golden") / "color-reference-v1.json"
 _COVERAGE = (
     "low_code",
     "neutral_axis",
+    "off_neutral_tint",
     "saturated_boundary",
     "display_p3",
     "bt2020",
     "rgb",
     "rgbw",
     "rgbww",
+    "rgbww_two_white",
     "non_d65_white",
 )
 _INDEPENDENT_ANCHORS = {
@@ -155,6 +157,30 @@ def _device_profiles() -> dict[str, DeviceProfile]:
             ),
             _D65,
         ),
+        # Emitters scaled so the strip can just exceed its own rendering
+        # white, rather than each emitter reaching it alone.
+        #
+        # The other device profiles give every emitter unit capacity, which
+        # makes the strip five times brighter than the white it renders --
+        # so no target the corpus can express ever needs more than one white
+        # emitter, and all 48 `rgbww` vectors are reachable with one white or
+        # none. That left the two-white allocation with nothing in the corpus
+        # to be right or wrong against (#4198).
+        #
+        # This one splits the primaries the way sRGB splits luminance and
+        # gives each white 0.35, for 1.6 at full drive. Bright neutrals then
+        # need both whites, which is the case the reference and the embedded
+        # path have to agree on.
+        "rgbww_two_white": DeviceProfile(
+            (
+                Emitter("red", Chromaticity(0.6400, 0.3300), 0.22, False),
+                Emitter("green", Chromaticity(0.3000, 0.6000), 0.60, False),
+                Emitter("blue", Chromaticity(0.1500, 0.0600), 0.08, False),
+                Emitter("cool", Chromaticity(0.3127, 0.3290), 0.35, True),
+                Emitter("warm", d50, 0.35, True),
+            ),
+            _D65,
+        ),
         "non_d65_white": DeviceProfile(rgb + (Emitter("white", d50, 1.0, True),), d50),
     }
 
@@ -170,6 +196,21 @@ def _scenario_inputs() -> tuple[tuple[str, tuple[int, int, int]], ...]:
         ("neutral_axis", (128, 128, 128)),
         ("neutral_axis", (16, 16, 16)),
         ("neutral_axis", (240, 240, 240)),
+        # Full white was simply missing, which is a coverage gap on its own
+        # terms. It is also the target that saturates both white emitters on
+        # `rgbww_two_white`, so it is the corner the two-white allocation is
+        # most likely to get wrong.
+        ("neutral_axis", (255, 255, 255)),
+        # Bright but not full: on `rgbww_two_white` the first white saturates
+        # and the second lands part-way, so the total is strictly inside its
+        # feasible interval rather than at either end.
+        ("neutral_axis", (200, 200, 200)),
+        # A warm tint, and the reason it is here is the ordering: on
+        # `rgbww_two_white` this saturates the *warm* white with the cool one
+        # partial, the opposite of every other vector. An allocation that
+        # always fills the first white first reproduces every case above and
+        # fails this one.
+        ("off_neutral_tint", (255, 220, 180)),
         ("saturated_boundary", (255, 0, 0)),
         ("saturated_boundary", (0, 255, 0)),
         ("saturated_boundary", (0, 0, 255)),
@@ -241,9 +282,7 @@ def build_color_reference_corpus() -> dict[str, Any]:
             else None
         )
         for device_name, device in devices.items():
-            device_scenario = (
-                device_name if device_name != "non_d65_white" else "non_d65_white"
-            )
+            device_scenario = device_name
             for index, (base_scenario, encoded) in enumerate(_scenario_inputs()):
                 scenario = source_scenario or device_scenario or base_scenario
                 vector = _vector(
