@@ -14,6 +14,10 @@
 
 #include "AutoResearchTest.h"
 
+// uartWireTiming(): the decoder must classify against the quantised wire
+// timing the encoder produced, not the chipset's nominal values.
+#include "fl/channels/uart_wave_encoder.h"
+
 #include "platforms/arm/rp/is_rp.h"
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 // kRpPioRxEdgeCapacity bounds the static DMA/edge pool the RP PIO RX device
@@ -700,19 +704,32 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     if (is_uart_driver) {
         AR_FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
         // UART timing at 4 Mbps: T0H=250ns, T1H-T0H=500ns, T0L=1000ns
-        fl::ChipsetTiming uart_timing{
-            250,   // T1 = T0H (1 UART bit = 250ns)
-            500,   // T2 = T1H - T0H (3 bits - 1 bit = 2 bits = 500ns)
-            500,   // T3 = T1L (2 UART bits = 500ns, stop + next start)
-            50,    // reset_us (WS2812 minimum)
-            "UART_4Mbps"
-        };
+        // Derive the wire timing instead of hardcoding one chipset's. The
+        // encoder quantises T0H/T1H onto a period/P grid, so the decoder has
+        // to classify against what was actually sent. The old constants
+        // described WS2812 at a nominal 1250 ns; at 400 kHz they misclassify
+        // every symbol (40/40 LEDs wrong, measured on RP2350W).
+        //
+        // kMaxUartBaudRate rather than the backend's own ceiling: the latter
+        // is not reachable portably from here, and the geometry only depends
+        // on the ceiling through a feasibility gate. Where UART transmits at
+        // all, both geometries clear the backend ceiling too, so the choice
+        // matches. A backend whose ceiling excluded P=5 while the default
+        // admitted it would disagree -- worth revisiting if such a case
+        // appears.
+        fl::ChipsetTiming uart_timing =
+            fl::uartWireTiming(timing, fl::kMaxUartBaudRate);
+        if (uart_timing.T1 == 0 && uart_timing.T2 == 0) {
+            AR_FL_WARN("[CAPTURE] UART: no feasible wave geometry for this "
+                       "chipset; cannot derive decode timing");
+            return 0;
+        }
         // Use wider tolerance (250ns) for UART because the UART clock and RMT
         // sample clock are asynchronous, and GPIO matrix adds ~10-20ns jitter
         auto rx_timing = fl::make4PhaseTiming(uart_timing, 250);
         rx_timing.gap_tolerance_ns = 100000; // 100µs for UART inter-frame gaps
 
-        AR_FL_WARN("[CAPTURE] UART RX timing: T0H=" << uart_timing.T1
+        AR_FL_WARN("[CAPTURE] UART RX timing (derived): T0H=" << uart_timing.T1
                 << " T1H=" << (uart_timing.T1 + uart_timing.T2)
                 << " T0L=" << (uart_timing.T2 + uart_timing.T3)
                 << " T1L=" << uart_timing.T3);
