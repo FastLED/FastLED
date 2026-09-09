@@ -11,10 +11,11 @@ three free emitters and pinning the rest to 0 or 1, solved and filtered.
 That is bounded but not small, and A3/B11 forbid anything resembling a
 search on the per-pixel path.
 
-This harness asks whether the enumeration is necessary. For one white
-emitter it is not -- see `allocate_one_white`. For two it is; the reduction
-that looks like it should work is measured failing here rather than left for
-someone to try.
+This harness asks whether the enumeration is necessary. It is not, for one
+white emitter (`allocate_one_white`) or for two (`allocate_two_white`). The
+reduction that looks like it should work for two -- run the one-white form
+per white and keep the better answer -- is measured failing here rather than
+left for someone to try.
 """
 
 from __future__ import annotations
@@ -22,9 +23,12 @@ from __future__ import annotations
 import itertools
 from dataclasses import dataclass
 
+from typeguard import typechecked
+
 from ci.color_reference import Matrix3, Xyz, _matvec
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class WhiteLevelRange:
     """The white drives that keep every RGB drive inside [0, 1]."""
@@ -33,6 +37,7 @@ class WhiteLevelRange:
     highest: float
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class WhitePreferredDrives:
     """One device's drives under the C3 white-preferred policy."""
@@ -43,6 +48,7 @@ class WhitePreferredDrives:
     white: float
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class TwoWhiteLevels:
     """Drives for a pair of white emitters."""
@@ -58,6 +64,12 @@ class TwoWhiteLevels:
 # Slack on the drive bounds. The allocation is compared against a float64
 # reference, so this only has to absorb float64 rounding.
 DRIVE_TOLERANCE = 1e-9
+
+# The slack `most_white_two` allows on each of its constraints, exported so
+# the comparison against it can tell a real disagreement from a target that
+# sits on the device hull's boundary and is accepted by one method's
+# tolerance and refused by the other's.
+ENUMERATION_TOLERANCE = 1e-7
 
 
 def emitter_column(x: float, y: float) -> Xyz:
@@ -169,7 +181,9 @@ def most_white_two(
     )
 
     def inside(w1: float, w2: float) -> bool:
-        return all(a * w1 + b * w2 <= c + 1e-7 for a, b, c in constraints)
+        return all(
+            a * w1 + b * w2 <= c + ENUMERATION_TOLERANCE for a, b, c in constraints
+        )
 
     best: TwoWhiteLevels | None = None
     for (a1, b1, c1), (a2, b2, c2) in itertools.combinations(constraints, 2):
@@ -203,3 +217,152 @@ def best_single_white(
         if best is None or span.highest > best:
             best = span.highest
     return best
+
+
+@typechecked
+@dataclass(frozen=True, slots=True)
+class _SplitBounds:
+    """The constraints on a two-white allocation, in terms of the total.
+
+    `lowers` and `uppers` bound `w1` as `(constant, slope)` pairs meaning
+    `constant + slope*s`. `low_total` and `high_total` bound the total
+    directly, which is where the drives the split cannot move end up.
+    """
+
+    lowers: list[tuple[float, float]]  # noqa: DCT002
+    uppers: list[tuple[float, float]]  # noqa: DCT002
+    low_total: float
+    high_total: float
+
+
+def _split_bounds(
+    inverse: Matrix3, target: Xyz, first: Xyz, second: Xyz
+) -> _SplitBounds | None:
+    """Bounds on `w1` as functions of the total, plus bounds on the total.
+
+    Substituting `w2 = s - w1` leaves the RGB drives as
+    `(d0 - s*from_second) - w1*(from_first - from_second)`, which is the
+    one-white shape with a shifted target. So each of the six drive bounds,
+    and each of the four bounds from `w1` and `w2` being drives themselves,
+    is one bound on `w1` that is affine in `s`.
+
+    A drive whose difference column is zero is the exception: the split
+    cannot move it at all, so its constraint is on the total alone and comes
+    back in `low_total` / `high_total`. An earlier revision encoded those as
+    constant `w1` bounds instead, which is dimensionally wrong -- the value
+    is a total, not a split -- and made this disagree with `most_white_two`
+    on 2206 of 3000 targets for a device whose two whites are the same
+    colour. The shipped C++ never had that bug; this is the model catching
+    up with it.
+
+    None when a drive that neither the split nor the total can rescue is
+    already out of range.
+    """
+
+    at_zero = _matvec(inverse, target)
+    from_first = _matvec(inverse, first)
+    from_second = _matvec(inverse, second)
+    lowers: list[tuple[float, float]] = [(0.0, 0.0), (-1.0, 1.0)]
+    uppers: list[tuple[float, float]] = [(1.0, 0.0), (0.0, 1.0)]
+    low_total = 0.0
+    high_total = 2.0
+    for index in range(3):
+        difference = from_first[index] - from_second[index]
+        if abs(difference) <= DRIVE_TOLERANCE:
+            # The split cannot move this drive at all, so the constraint is
+            # on the total: `at_zero - s*from_second` must stay in [0, 1].
+            constant = at_zero[index]
+            slope = -from_second[index]
+            if abs(slope) <= DRIVE_TOLERANCE:
+                if not -DRIVE_TOLERANCE <= constant <= 1.0 + DRIVE_TOLERANCE:
+                    return None
+                continue
+            # `constant + slope*s` in [0, 1]; dividing by a negative slope
+            # swaps which end is which.
+            first_bound = -constant / slope
+            second_bound = (1.0 - constant) / slope
+            if slope > 0:
+                low_total = max(low_total, first_bound)
+                high_total = min(high_total, second_bound)
+            else:
+                low_total = max(low_total, second_bound)
+                high_total = min(high_total, first_bound)
+            continue
+        at_dark = (at_zero[index] / difference, -from_second[index] / difference)
+        at_full = (
+            (at_zero[index] - 1.0) / difference,
+            -from_second[index] / difference,
+        )
+        if difference > 0:
+            uppers.append(at_dark)
+            lowers.append(at_full)
+        else:
+            uppers.append(at_full)
+            lowers.append(at_dark)
+    return _SplitBounds(lowers, uppers, low_total, high_total)
+
+
+def allocate_two_white(
+    inverse: Matrix3, target: Xyz, first: Xyz, second: Xyz
+) -> TwoWhiteLevels | None:
+    """Largest total white for two white emitters, in closed form.
+
+    The same answer `most_white_two` reaches by enumerating vertices, without
+    the enumeration -- which is what makes it legal on the per-pixel path
+    under A3/B11.
+
+    Some `w1` exists at a total exactly when every lower bound sits under
+    every upper bound there. Each of those bounds is affine in the total, so
+    each pair is one linear inequality in it, and intersecting them gives the
+    feasible totals directly.
+
+    The interval has to be *found*, not assumed to start at zero: a bright
+    target is unreachable with the primaries alone, so its feasible totals
+    begin above zero and anything searching upward from zero calls it
+    unreachable (#4198).
+    """
+
+    bounds = _split_bounds(inverse, target, first, second)
+    if bounds is None:
+        return None
+    lowers = bounds.lowers
+    uppers = bounds.uppers
+
+    low_total = bounds.low_total
+    high_total = bounds.high_total
+    for constant_low, slope_low in lowers:
+        for constant_high, slope_high in uppers:
+            slope = slope_low - slope_high
+            constant = constant_high - constant_low
+            if abs(slope) <= DRIVE_TOLERANCE:
+                if constant < -DRIVE_TOLERANCE:
+                    return None
+                continue
+            bound = constant / slope
+            if slope > 0:
+                high_total = min(high_total, bound)
+            else:
+                low_total = max(low_total, bound)
+    if low_total > high_total + DRIVE_TOLERANCE:
+        return None
+
+    total = high_total
+    split_low = max(constant + slope * total for constant, slope in lowers)
+    split_high = min(constant + slope * total for constant, slope in uppers)
+    if split_low > split_high + DRIVE_TOLERANCE:
+        return None
+
+    # The low end, and there is nothing to choose. The reference settles the
+    # split by minimizing the sum of squares of the RGB drives, and an
+    # earlier revision did that here -- affine in w1, so a quadratic with a
+    # closed-form minimum. Measurement removed it: at the extreme total the
+    # feasible split is a single point, so no rule has any freedom to
+    # exercise. `split_high - split_low` measured 0.0 over 4000 random
+    # targets on the corpus's cool/warm device and over 951 on a device built
+    # to make one drive's constraint parallel to `w1 + w2`, which is the
+    # shape that could have produced an optimal edge.
+    #
+    # Where the split really is free -- two whites of the same colour, so no
+    # RGB drive moves with it -- the reference's tie-break falls through to
+    # the lexicographically smallest drives, which is this end.
+    return TwoWhiteLevels(split_low, total - split_low)

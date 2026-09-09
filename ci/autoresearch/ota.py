@@ -79,24 +79,18 @@ async def _settle_link(
             # KBI002: this repo requires the handler notify the main thread.
             handle_keyboard_interrupt(ki)
             raise
-        except (RpcError, RpcTimeoutError, RuntimeError) as exc:
-            # RuntimeError is here because a failed *write* arrives as one:
-            # `PyserialMonitor.write` converts `serial.SerialException` into
-            # `RuntimeError("Serial write error: ...")`, and `RpcClient.send`
-            # only retries `RpcTimeoutError`, so it comes straight out. Left
-            # uncaught it defeats the point of this helper twice over -- no
+        except (RpcError, RpcTimeoutError) as exc:
+            # `RuntimeError` used to be in this tuple, because a failed
+            # *write* arrived as one: `PyserialMonitor.write` converts
+            # `serial.SerialException` into `RuntimeError("Serial write
+            # error: ...")` and `RpcClient.send` let it straight through.
+            # Uncaught it defeated the point of this helper twice over -- no
             # retry, and a bare transport error naming neither the board nor
             # the call, which is exactly the failure #3956 was about.
             #
-            # Normalizing that at the `RpcClient.send` boundary would be the
-            # better home for it, and is not this change's to make: 31
-            # modules use RpcClient, and some of them (ci/autoresearch/
-            # decode.py) rely on a bare `except RuntimeError` to report
-            # transport failures cleanly. Filed separately.
-            #
-            # The cost of the wider catch is that a genuine bug retries twice
-            # before surfacing. It still surfaces: the raised error carries
-            # the original text.
+            # `send` normalizes it into `RpcError` now (#4191), which is the
+            # right home for it, so the workaround is gone and this tuple is
+            # back to the contract `send` documents.
             last = exc
             print(f"  {label} did not answer ping (attempt {attempt}/3): {exc}")
             # No backoff after the final attempt -- it would just delay the

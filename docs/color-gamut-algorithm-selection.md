@@ -363,6 +363,59 @@ polygon; `most_white_two` solves it by exact vertex enumeration, and the
 regression test keeps the cheap reduction pinned as *failing* so nobody
 simplifies to it later.
 
+### Two whites also have a closed form
+
+Not the reduction above, and not a search. Write the total `s = w₁ + w₂` and
+substitute `w₂ = s − w₁`: the RGB drives become
+
+    (d₀ − s·dW₂) − w₁·(dW₁ − dW₂)
+
+which is the one-white shape with a shifted target and a difference column.
+At any fixed total the feasible `w₁` is again an interval, bounded by five
+lower and five upper bounds — three from the RGB drives, and two more because
+`w₁` and `w₂ = s − w₁` are drives in their own right. Every one of those
+bounds is **affine in `s`**, so "some `w₁` exists at this total" is exactly
+the conjunction of the pairwise inequalities `lowerₖ(s) ≤ upperⱼ(s)`, each
+linear in `s`. Intersecting the 25 of them gives the feasible totals directly.
+
+The interval has to be *found*, not assumed to start at zero, and that is
+where the first attempt went wrong (#4198). A bright target is unreachable
+with the primaries alone, so its feasible totals begin above zero and a
+bisection seeded at zero reports it out of gamut. That attempt's validation
+hid the failure: the harness skipped every target its method could not answer
+and reported "0 disagreements over 10 285" while silently dropping roughly
+30 000 of 40 000 — including precisely the bright ones.
+
+Measured against `most_white_two`, nothing skipped:
+
+| targets | how drawn | solved by both | disagreements |
+|---|---|---:|---:|
+| 8 000 | uniform drives | 8 000 | 0 |
+| 4 000 | both whites near full | 4 000 | 0 |
+| 4 000 | drives to 1.35, so many are out of hull | 2 862 | 0 |
+
+Worst difference in total white, 2.2 × 10⁻¹⁵. One target in 4 000 lands on
+the hull to within 10⁻⁷ and is admitted by the enumeration's per-constraint
+slack while the closed form's exact interval refuses it; that is counted
+separately rather than folded into agreement.
+
+**At the extreme total the split is not free.** The reference settles a free
+split by minimizing the sum of squares of the RGB drives, and an earlier
+revision of the embedded path did the same — one division, since the drives
+are affine in `w₁`. Measurement removed it: the feasible split at the extreme
+total is a single point. Width measured 0.0 over 4 000 targets on the
+cool/warm device, and over 951 on a device constructed so one drive's
+constraint is parallel to `w₁ + w₂`, which is the shape that could have
+produced an optimal edge. Two whites of the *same* colour are the exception,
+and there the reference's own tie-break — lexicographically smallest drives —
+is the end the closed form takes anyway.
+
+`allocateTwoWhiteDrivesQ16` is the s16.16 implementation. It costs up to 25
+divisions per pixel against the one-white path's six, which is recorded
+rather than optimized away: cross-multiplying the pairwise comparisons would
+leave one division and a great many i64 multiplies, and nobody has measured
+which wins on an 8-bit target.
+
 ### The mapper has to target the real hull
 
 A white emitter enlarges the reachable set, so testing a target against the
@@ -406,19 +459,23 @@ D65, exactly the one unit that emitter contributes.
 
 ### What this leaves
 
-`rgbw` and `non_d65_white` are settled and ready to implement. `rgbww` needs
-either the 2D enumeration above — or a closed form nobody has found yet. It
-also needs corpus vectors bright enough to tell the two apart before any of it
-can be trusted.
+`rgbw`, `non_d65_white` and `rgbww` are all settled and implemented.
 
-The enumeration is bounded but not cheap. `most_white_two` builds ten
-constraints — six from the RGB drive bounds, four from the box on the two
+The enumeration stays where it belongs, as the oracle. `most_white_two` builds
+ten constraints — six from the RGB drive bounds, four from the box on the two
 white drives — and intersects every unordered pair: 45 of them, of which five
 are structurally parallel, leaving **40** candidate intersections to test for
 feasibility. That is a constant known at compile time, so it is not an
 iterative solver in the A3/B11 sense, but it is roughly forty times the work
-of the one-white case and would want its own cost measurement before going
+of the one-white case, and the closed form above makes it unnecessary
 per-pixel.
+
+What is still missing is corpus coverage. All 48 `rgbww` vectors are reachable
+with one white or none, so the golden corpus cannot distinguish a correct
+two-white allocation from the reduction it replaces; the sweeps above stand in
+for that, measured against the reference's own enumeration rather than against
+its recorded output. Corpus vectors bright enough to need both whites would
+close the gap.
 
 ## Not covered
 

@@ -22,12 +22,12 @@
 // rounding. The derivation never assumed the white sat on the neutral axis,
 // which is what the second device checks.
 //
-// This covers exactly one white emitter. Two are a different problem:
-// maximizing w1 + w2 is a linear program over a polygon, and the obvious
-// reduction -- run this twice and keep the better answer -- agrees with the
-// reference on every corpus vector while being wrong on 85% of random
-// reachable targets, because a single emitter's drive is capped at 1. See
-// the same document.
+// Two whites are a different problem, solved by
+// `allocateTwoWhiteDrivesQ16` further down: maximizing w1 + w2 is a linear
+// program over a polygon, and the obvious reduction -- run this twice and
+// keep the better answer -- agrees with the reference on every corpus vector
+// while being wrong on 85% of random reachable targets, because a single
+// emitter's drive is capped at 1. See the same document.
 
 #include "fl/gfx/device_solve.h"
 #include "fl/stl/int.h"
@@ -103,5 +103,91 @@ bool buildWhiteAllocationQ16(const EmitterProfile& profile,
 bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
                               const i32 (&xyz)[3],
                               i32 (&drives)[4]) FL_NO_EXCEPT;
+
+/// Everything the two-white allocation needs, derived once when a profile
+/// binds (C3, #4198).
+struct TwoWhiteAllocationQ16 {
+    /// Inverse RGB emitter matrix.
+    EmitterSolveMatrixQ16 rgb_solve;
+
+    /// `M^-1 . w2`: the RGB drives one unit of the second white replaces.
+    i32 per_white2[3];
+
+    /// `M^-1 . w1 - M^-1 . w2`, the difference column.
+    ///
+    /// Held rather than recomputed because it is the coefficient of the
+    /// split variable in every bound, and the per-pixel path reads it eight
+    /// times. The first white's own column is not kept: it only ever
+    /// appears through this difference.
+    i32 difference[3];
+
+    /// Which end of the feasible total this profile takes.
+    WhiteAllocationPolicy policy;
+};
+
+/// Derive the allocation for three primaries plus two white emitters.
+///
+/// `white1_xyz` / `white2_xyz` are each white's XYZ at full drive, in
+/// s16.16, the same working domain the rest of the pipeline carries.
+///
+/// False on the profiles `buildRgbSolveMatrixQ16` rejects, and when either
+/// white lands so far outside what the primaries express that the per-pixel
+/// bounds would overflow their accumulators -- see `kTwoWhiteMaxColumn` in
+/// the implementation, which a real white emitter is nowhere near.
+bool buildTwoWhiteAllocationQ16(const EmitterProfile& profile,
+                                const i32 (&white1_xyz)[3],
+                                const i32 (&white2_xyz)[3],
+                                WhiteAllocationPolicy policy,
+                                TwoWhiteAllocationQ16* out) FL_NO_EXCEPT;
+
+/// One pixel: XYZ in s16.16 to five drives -- red, green, blue, white1,
+/// white2 -- at whichever end of the feasible total the profile's policy
+/// names.
+///
+/// The method, and why it is not a search. Writing the total `s = w1 + w2`
+/// and substituting `w2 = s - w1` leaves the RGB drives as
+///
+///     (d0 - s * per_white2) - w1 * difference
+///
+/// which is the one-white shape with a shifted target. So at any fixed total
+/// the feasible `w1` is again an interval, bounded by five lower and five
+/// upper bounds: three from the RGB drives, and two more because `w1` and
+/// `w2 = s - w1` are each a drive in their own right. Every one of those
+/// bounds is *affine in s*, so "some `w1` exists at this total" is exactly
+/// the conjunction of the pairwise inequalities `lower_k(s) <= upper_j(s)`,
+/// each linear in `s` and each solvable for one `s` bound. Intersecting them
+/// gives the feasible totals in closed form -- no bisection, no vertex
+/// enumeration, no per-pixel iteration (A3/B11).
+///
+/// That the interval has to be *found* rather than assumed is the whole
+/// point. Achievable totals form `[s_lo, s_hi]`, which need not start at
+/// zero: a bright target is unreachable with the primaries alone, so a
+/// bisection seeded at zero has no feasible starting point and reports such
+/// targets unreachable. The first attempt at this made exactly that
+/// assumption (#4198).
+///
+/// At the chosen total the split is *not* free, which is measurement rather
+/// than assumption. The reference settles a free split by minimizing the sum
+/// of squares of the RGB drives, and an earlier revision did the same here;
+/// the feasible splits at the extreme total turn out to be a single point,
+/// so there was nothing for the rule to choose. Width measured 0.0 over 4000
+/// random targets on the corpus's cool/warm device and 951 on a device built
+/// to make one drive's constraint parallel to `w1 + w2` -- the shape that
+/// could have produced an optimal edge. Two whites of the same colour are
+/// the exception, and there the reference's own tie-break is the end this
+/// takes.
+///
+/// False when no total keeps every drive in range, which means the target is
+/// outside the device hull -- the gamut mapper's job, not this one's.
+/// `drives` is not written in that case.
+///
+/// Cost note, recorded rather than optimized away on a guess: up to 25
+/// s16.16 divisions per pixel against the one-white path's six. Whether
+/// cross-multiplying the pairwise comparisons -- which would leave one
+/// division and a great many i64 multiplies -- wins on an 8-bit target is
+/// unmeasured, so the straightforward version is what ships.
+bool allocateTwoWhiteDrivesQ16(const TwoWhiteAllocationQ16& allocation,
+                               const i32 (&xyz)[3],
+                               i32 (&drives)[5]) FL_NO_EXCEPT;
 
 }  // namespace fl
