@@ -11,7 +11,6 @@
 #include "fl/stl/atomic.h"
 #include "fl/log/log.h"
 #include "fl/channels/options.h"
-#include "fl/channels/color_managed_source.h"
 #include "fl/channels/pipeline_binding.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
@@ -61,8 +60,16 @@ class ReorderingPixelIteratorAny {
     // Present only when a colour profile is bound. The managed source keeps
     // a reference to the controller it wraps, so it has to outlive the
     // iterator built over it -- both live here, for the frame.
-    fl::optional<ColorManagedPixelSource> mManagedSource;
-    fl::Optional<PixelIterator> mManagedIterator;
+    //
+    // Raw storage rather than the types themselves, because naming them here
+    // is what made the whole colour pipeline reachable from `show()` and cost
+    // every sketch ~3.5 KB of flash. `colorPipelineHooks()` builds into this,
+    // and only `setColorProfile` installs those hooks -- so a program that
+    // never binds a profile never references the pipeline and the linker
+    // drops it.
+    FL_ALIGNAS(8) unsigned char mManagedSourceStorage[kColorPipelineSourceStorage];
+    FL_ALIGNAS(8) unsigned char mManagedIteratorStorage[kColorPipelineIteratorStorage];
+    PixelIterator* mManagedIterator = nullptr;
 #endif
 
   public:
@@ -120,16 +127,32 @@ class ReorderingPixelIteratorAny {
         }
 
 #if FL_COLOR_PROFILE_RUNTIME
-        if (pipeline != nullptr) {
+        const ColorPipelineHooks& hooks = colorPipelineHooks();
+        if (pipeline != nullptr && hooks.makeIterator != nullptr) {
             // Colour-managed: build the iterator over a streaming source
             // instead of over the order-variant controller. The source
             // applies the colour order itself, so it wraps the RGB-ordered
             // controller -- whichever of the two that is after addressing.
             PixelController<RGB, 1, 0xFFFFFFFF>& base =
                 mAddressedController ? mAddressedController.value() : pixels;
-            mManagedSource.emplace(base, rgbOrder, *pipeline);
-            mManagedIterator.emplace(
-                PixelIterator(&mManagedSource.value(), rgbw, rgbww));
+            mManagedIterator = hooks.makeIterator(
+                mManagedSourceStorage, mManagedIteratorStorage, base, rgbOrder,
+                *pipeline, rgbw, rgbww);
+        }
+#endif
+    }
+
+    ~ReorderingPixelIteratorAny() FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        // Placement-new'd into our own storage, so the teardown goes back
+        // through the hooks too -- this file must not name the types.
+        if (mManagedIterator != nullptr) {
+            const ColorPipelineHooks& hooks = colorPipelineHooks();
+            if (hooks.destroyIterator != nullptr) {
+                hooks.destroyIterator(mManagedSourceStorage,
+                                      mManagedIteratorStorage);
+            }
+            mManagedIterator = nullptr;
         }
 #endif
     }
@@ -141,8 +164,8 @@ class ReorderingPixelIteratorAny {
     /// is why the encoders need no branch of their own.
     PixelIterator& get() FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
-        if (mManagedIterator.has_value()) {
-            return mManagedIterator.value();
+        if (mManagedIterator != nullptr) {
+            return *mManagedIterator;
         }
 #endif
         return mPixelIterator.get();
@@ -359,9 +382,13 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     // rather than failing -- an unbound channel is the ordinary case, not an
     // error.
     mPipeline.reset();
-    if (!rejectedNow) {
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    if (!rejectedNow && hooks.build != nullptr) {
+        // Through the hook, not by name. Calling `buildPipelineForBinding`
+        // directly from here is what kept the entire pipeline alive in every
+        // build; the pointer is null until `setColorProfile` installs it.
         StreamingPipelineQ16 pipeline;
-        if (buildPipelineForBinding(mSettings.mColorProfile, &pipeline)) {
+        if (hooks.build(mSettings.mColorProfile, &pipeline)) {
             mPipeline = pipeline;
         }
     }

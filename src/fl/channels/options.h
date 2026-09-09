@@ -15,6 +15,15 @@
 
 namespace fl {
 
+// Declared rather than included. `pipeline_binding.h` pulls the whole gfx
+// pipeline in behind it, and reaching those headers from here puts them
+// ahead of whatever brings `EmitterProfile` into scope unqualified --
+// `device_solve.h`, `gamut_map.h` and `white_allocation.h` all stop
+// compiling. One declaration is all this file needs, and keeping it to one
+// also keeps `options.h` cheap for every translation unit that includes it.
+void installColorPipelineHooks() FL_NO_EXCEPT;
+
+
 #ifndef FL_COLOR_PROFILE_RUNTIME
 #define FL_COLOR_PROFILE_RUNTIME (!FL_PLATFORM_HAS_TINY_MEMORY)
 #endif
@@ -117,6 +126,12 @@ struct ChannelOptions {
                 ColorProfileEvent{-1, {}, ColorProfileWarning::LegacyClearedByProfile});
             mWarnedLegacyCleared = true;
         }
+        // The one call that makes the colour pipeline reachable. Everything
+        // downstream goes through function pointers these install, so a
+        // program that never gets here never references the pipeline and the
+        // linker drops it -- about 3.5 KB of flash for sketches that do not
+        // ask for colour management.
+        installColorPipelineHooks();
         mColorProfile.mStorage = fl::make_shared<ColorProfileStorage>(profile);
         mColorProfile.mSource = source;
         mColorProfile.mGamut = gamut;
