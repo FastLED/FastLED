@@ -25,7 +25,10 @@ from ci.meson.link_retry import (
     is_link_permission_denied_error,
     kill_stale_runner_processes,
 )
-from ci.meson.mtime_stabilizer import stabilize_dll_mtimes
+from ci.meson.mtime_stabilizer import (
+    restore_executable_bits,
+    stabilize_dll_mtimes,
+)
 from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.zccache_retry import (
@@ -639,6 +642,9 @@ def stream_compile_only(
     # Touch stale outputs to break the loop (~5ms, saves ~1-2s per build).
     if not compilation_failed:
         stabilize_dll_mtimes(build_dir, verbose=verbose)
+        # Same cache-restore defect, different attribute: cached link results
+        # come back without the executable bit (FastLED#4205).
+        restore_executable_bits(build_dir, verbose=verbose)
 
     return CompileOnlyResult(
         success=not compilation_failed,
