@@ -20,6 +20,7 @@ from running_process import RunningProcess
 from ci.meson.build_timer import BuildTimer
 from ci.meson.cache_utils import save_test_result_state
 from ci.meson.compile import CompileResult, _is_compilation_error, compile_meson
+from ci.meson.mtime_stabilizer import restore_executable_bits
 from ci.meson.output import print_banner, print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.runner_helpers import _apply_phase_timing, _write_failure_log
@@ -464,6 +465,14 @@ def run_direct_test(ctx: DirectTestContext) -> MesonTestResult:
             num_tests_passed=0,
             num_tests_failed=0,
         )
+
+    # After resolution, not before: `_resolve_test_command` may relink the
+    # runner, and a link zccache serves from its cache comes back without the
+    # executable bit (FastLED#4205). `test_execution.py` restores it on the
+    # `meson test` path; this is the other way a test binary gets spawned, and
+    # it had no such call -- so a single named test died on
+    # `Permission denied (os error 13)` with nothing pointing at the mode.
+    restore_executable_bits(ctx.build_dir)
 
     print_banner("Test", "▶️", verbose=ctx.verbose)
     print(f"Running: {ctx.meson_test_name}")
