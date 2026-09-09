@@ -478,4 +478,44 @@ FL_TEST_CASE("Wave10 - computeBaudRate") {
     }
 }
 
+FL_TEST_CASE("uartWireTiming reproduces the timing actually put on the wire") {
+    // WS2812B-V5 is T1=225, T2=355, T3=645 -- a 1225 ns period, not the round
+    // 1250 ns the AutoResearch decoder's hardcoded {250, 500, 500} assumes.
+    // Deriving therefore yields {245, 490, 490}: within 10 ns of the constants,
+    // and far inside the +/-250 ns classification tolerance, but NOT identical.
+    // Asserted exactly so a future timing change cannot silently drift.
+    const auto ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+    const fl::ChipsetTiming ws2812_wire =
+        fl::uartWireTiming(ws2812, fl::kMaxUartBaudRate);
+    FL_CHECK_EQ(ws2812_wire.T1, 245u);
+    FL_CHECK_EQ(ws2812_wire.T2, 490u);
+    FL_CHECK_EQ(ws2812_wire.T3, 490u);
+    // The property that makes replacing the constants safe: every symbol stays
+    // well inside the decoder's tolerance of the value it replaces.
+    FL_CHECK(ws2812_wire.T1 + 250u > 250u && ws2812_wire.T1 < 250u + 250u);
+    FL_CHECK(ws2812_wire.T2 + 250u > 500u && ws2812_wire.T2 < 500u + 250u);
+
+    // WS2811 at 400 kHz: the quantised wire timing differs sharply from the
+    // datasheet values (T0H 500, T1H 1200), which is why decoding a 400 kHz
+    // frame against the WS2812 constants classifies every symbol wrongly.
+    const auto ws2811 = fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+    const fl::ChipsetTiming ws2811_wire =
+        fl::uartWireTiming(ws2811, fl::kMaxUartBaudRate);
+    FL_CHECK_NE(ws2811_wire.T1, ws2812_wire.T1);
+    // T0H and T1H must land on the pulse grid: period 2500 / P.
+    const u32 period = ws2811.total_period_ns();
+    const u32 t1h = ws2811_wire.T1 + ws2811_wire.T2;
+    FL_CHECK_EQ(ws2811_wire.T1 + ws2811_wire.T2 + ws2811_wire.T3, period);
+    FL_CHECK((t1h % (period / 5u) == 0u) || (t1h % (period / 4u) == 0u));
+}
+
+FL_TEST_CASE("uartWireTiming reports infeasible timing rather than guessing") {
+    // A baud ceiling below anything the chipset needs leaves no geometry.
+    const auto ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+    const fl::ChipsetTiming wire = fl::uartWireTiming(ws2812, 1000u);
+    FL_CHECK_EQ(wire.T1, 0u);
+    FL_CHECK_EQ(wire.T2, 0u);
+    FL_CHECK_EQ(wire.T3, 0u);
+}
+
 } // FL_TEST_FILE
