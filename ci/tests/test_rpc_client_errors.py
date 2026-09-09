@@ -11,22 +11,24 @@ from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
 
 
 class _ErrorSerial:
-    async def connect(self) -> None:
+    async def connect(self: "_ErrorSerial") -> None:
         pass
 
-    async def close(self) -> None:
+    async def close(self: "_ErrorSerial") -> None:
         pass
 
-    async def write(self, data: str) -> None:
+    async def write(self: "_ErrorSerial", data: str) -> None:
         assert '"id":1' in data
 
-    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+    async def read_lines(self: "_ErrorSerial", timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
         yield (
             'REMOTE: {"jsonrpc":"2.0","id":1,'
             '"error":{"code":-32601,"message":"Method not found: missing"}}'
         )
 
-    async def reset_device(self, board: str | None) -> bool:  # pragma: no cover
+    async def reset_device(
+        self: "_ErrorSerial", board: str | None
+    ) -> bool:  # pragma: no cover
         return True
 
 
@@ -47,40 +49,46 @@ def test_json_rpc_error_is_not_masked_as_timeout() -> None:
 class _WriteFailsSerial:
     """A transport whose write fails the way `PyserialMonitor.write` does."""
 
-    async def connect(self) -> None:
+    async def connect(self: "_WriteFailsSerial") -> None:
         pass
 
-    async def close(self) -> None:
+    async def close(self: "_WriteFailsSerial") -> None:
         pass
 
-    async def write(self, data: str) -> None:  # noqa: ARG002
+    async def write(self: "_WriteFailsSerial", data: str) -> None:  # noqa: ARG002
         raise RuntimeError("Serial write error: [Errno 5] Input/output error")
 
-    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+    async def read_lines(
+        self: "_WriteFailsSerial", timeout: float
+    ) -> AsyncIterator[str]:  # noqa: ARG002
         return
         yield ""  # pragma: no cover - makes this an async generator
 
-    async def reset_device(self, board: str | None) -> bool:  # pragma: no cover
+    async def reset_device(
+        self: "_WriteFailsSerial", board: str | None
+    ) -> bool:  # pragma: no cover
         return True
 
 
 class _CrashSerial:
     """A transport whose response is a device crash, not a write failure."""
 
-    async def connect(self) -> None:
+    async def connect(self: "_CrashSerial") -> None:
         pass
 
-    async def close(self) -> None:
+    async def close(self: "_CrashSerial") -> None:
         pass
 
-    async def write(self, data: str) -> None:
+    async def write(self: "_CrashSerial", data: str) -> None:
         pass
 
-    async def read_lines(self, timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+    async def read_lines(self: "_CrashSerial", timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
         raise RpcCrashError("device crashed", ["#0 boom"])
         yield ""  # pragma: no cover - makes this an async generator
 
-    async def reset_device(self, board: str | None) -> bool:  # pragma: no cover
+    async def reset_device(
+        self: "_CrashSerial", board: str | None
+    ) -> bool:  # pragma: no cover
         return True
 
 
