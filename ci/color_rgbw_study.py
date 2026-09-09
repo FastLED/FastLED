@@ -23,9 +23,12 @@ from __future__ import annotations
 import itertools
 from dataclasses import dataclass
 
+from typeguard import typechecked
+
 from ci.color_reference import Matrix3, Xyz, _matvec
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class WhiteLevelRange:
     """The white drives that keep every RGB drive inside [0, 1]."""
@@ -34,6 +37,7 @@ class WhiteLevelRange:
     highest: float
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class WhitePreferredDrives:
     """One device's drives under the C3 white-preferred policy."""
@@ -44,6 +48,7 @@ class WhitePreferredDrives:
     white: float
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class TwoWhiteLevels:
     """Drives for a pair of white emitters."""
@@ -214,6 +219,7 @@ def best_single_white(
     return best
 
 
+@typechecked
 @dataclass(frozen=True, slots=True)
 class _SplitBounds:
     """The constraints on a two-white allocation, in terms of the total.
