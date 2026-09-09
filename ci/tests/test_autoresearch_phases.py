@@ -9,6 +9,8 @@ Tests the refactored phase decomposition:
 """
 
 import asyncio
+import contextlib
+import io
 import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -3026,3 +3028,55 @@ def test_spi_family_predicate_covers_every_platform_spelling() -> None:
 
     for name in ("PARLIO", "RMT", "UART", "UART0", "LCD_SPI", "I2S_SPI", "SPIX", ""):
         assert not _is_spi_family_driver(name), name
+
+    def test_legacy_rejects_chipsets_without_a_legacy_template(
+        self, fake_project_dir: Path
+    ) -> None:
+        """--legacy silently ignores timing_name, so guard the combination.
+
+        The legacy path resolves timing from a LegacyClocklessChipset template.
+        A chipset with no template (ucs7604, ws2811-400) would run as WS2812B
+        and report a pass for timing that was never applied.
+        """
+        for chipset in ("ucs7604", "ws2811-400"):
+            args = _make_args(
+                legacy=True,
+                chipset=chipset,
+                flex_io=True,
+                parlio=False,
+                environment_positional="teensy40",
+                project_dir=fake_project_dir,
+                use_root_platformio_ini=False,
+            )
+            with patch(
+                "ci.autoresearch.staging.synthesise_autoresearch_project",
+                return_value=fake_project_dir,
+            ):
+                buffer = io.StringIO()
+                with contextlib.redirect_stdout(buffer):
+                    result = _parse_args_and_build_commands(args)
+            assert result == 1, chipset
+            # Assert on the reason, not just the code. Without this the test
+            # passed on the unrelated --use-root-platformio-ini rejection and
+            # never reached the guard it was written for.
+            assert "has no legacy template" in buffer.getvalue(), chipset
+
+    def test_non_legacy_still_accepts_those_chipsets(
+        self, fake_project_dir: Path
+    ) -> None:
+        """The guard must not block them outside legacy mode."""
+        args = _make_args(
+            legacy=False,
+            chipset="ws2811-400",
+            flex_io=True,
+            parlio=False,
+            environment_positional="teensy40",
+            project_dir=fake_project_dir,
+            use_root_platformio_ini=False,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
