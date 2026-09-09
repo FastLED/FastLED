@@ -5,6 +5,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 """
 
 import asyncio
+import contextlib
 import os
 import platform as platform_mod
 import subprocess
@@ -500,6 +501,52 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
     )
 
 
+async def _connect_peer_with_retry(
+    peer: RpcClient, label: str, port: str, attempts: int = 3
+) -> None:
+    """Connect the companion board, retrying a silent first RPC.
+
+    The most frequent failure on this fixture is not a network fault at all:
+    `No response with ID 1 within 15.0s` while attaching to the ESP32-C6,
+    before any cycle runs. Across the captured logs it is always the C6 and
+    never the RP2350W, which points at the C6's USB-JTAG CDC re-enumerating
+    after the post-flash reset -- the port path is unchanged, so a connect
+    that lands inside that window attaches to an endpoint that never answers.
+
+    A fixed `boot_wait` cannot cover this, because the wait is over before the
+    endpoint is replaced. Reconnecting is what recovers it. Each retry is
+    reported so the need for one stays visible instead of being smoothed away.
+    """
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            await peer.connect(boot_wait=3.0, drain_boot=True)
+            # Prove the endpoint answers before returning. connect() only
+            # opens the port; a stale CDC endpoint opens fine and stays mute.
+            await peer.send("ping", {}, timeout=10.0)
+            if attempt > 1:
+                print(f"  {label} answered on connect attempt {attempt}/{attempts}")
+            return
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except (RpcError, RpcTimeoutError, OSError) as exc:
+            last_error = exc
+            if attempt == attempts:
+                break
+            print(
+                f"  {label} did not answer on {port} "
+                f"(attempt {attempt}/{attempts}: {exc}); reconnecting"
+            )
+            with contextlib.suppress(Exception):
+                await peer.close()
+            await asyncio.sleep(2.0)
+    raise RpcTimeoutError(
+        f"{label} did not answer its serial RPC on {port} after {attempts} "
+        f"connect attempts; last error: {last_error}"
+    )
+
+
 def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
     """Print the sub-test tally so the payload leg is visible, not inferred.
 
@@ -614,7 +661,7 @@ async def run_net_peer_autoresearch(
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
-        await peer.connect(boot_wait=3.0, drain_boot=True)
+        await _connect_peer_with_retry(peer, "ESP32-C6", peer_upload_port)
 
         primary_status = await rpc_data(primary, "status")
         if "rp2350" not in str(primary_status.get("platform", "")).lower():

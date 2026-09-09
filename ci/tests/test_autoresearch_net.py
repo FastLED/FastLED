@@ -10,6 +10,7 @@ import pytest
 
 from ci.autoresearch.net import (
     _describe_failed_client_tests,
+    _connect_peer_with_retry,
     _summarize_client_tests,
     run_net_peer_autoresearch,
 )
@@ -367,3 +368,58 @@ def test_describe_failed_client_tests_reports_a_malformed_row() -> None:
     assert "1 of 2 sub-tests failed" in described
     assert "result[1] is not an object" in described
     assert "not-a-dict" in described
+
+
+def test_connect_peer_retries_a_mute_endpoint() -> None:
+    """A first connect that opens but never answers must be retried.
+
+    This is the captured bench failure: `No response with ID 1 within 15.0s`
+    while attaching to the ESP32-C6, with connect() itself succeeding. A
+    stale CDC endpoint opens fine and stays mute, so only the follow-up ping
+    detects it.
+    """
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(
+        side_effect=[RpcTimeoutError("No response with ID 1 within 15.0s"), MagicMock()]
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(_connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1"))
+
+    assert peer.connect.await_count == 2
+    assert peer.send.await_count == 2
+
+
+def test_connect_peer_gives_up_and_names_the_port() -> None:
+    """Exhausting the retries must fail loudly, naming port and cause."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(side_effect=RpcTimeoutError("still mute"))
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        with pytest.raises(RpcTimeoutError) as excinfo:
+            asyncio.run(
+                _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", attempts=2)
+            )
+
+    message = str(excinfo.value)
+    assert "/dev/ttyACM1" in message
+    assert "2 connect attempts" in message
+    assert "still mute" in message
+    assert peer.connect.await_count == 2
+
+
+def test_connect_peer_does_not_retry_a_healthy_board() -> None:
+    """A board that answers first time must not be reconnected."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+
+    asyncio.run(_connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1"))
+
+    assert peer.connect.await_count == 1
+    assert peer.close.await_count == 0
