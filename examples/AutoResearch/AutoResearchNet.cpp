@@ -865,7 +865,23 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         client.print(request_body);
     }
 
-    const uint32_t deadline_ms = millis() + 2000;
+    const uint32_t request_started_ms = millis();
+    // The peer's HTTP server does not answer from its network task. On ESP it
+    // queues the request to the sketch's main loop (ServerAsyncRunner, pumped
+    // by task::Executor) and blocks up to 5000 ms waiting for it -- see
+    // handle_esp_request() in fl/stl/asio/http/server.cpp.hpp. So response
+    // latency is bounded by the peer's loop cadence, not by transmission.
+    //
+    // A 2000 ms budget here was shorter than the 5000 ms the server allows
+    // itself, so the client abandoned requests the server was still
+    // legitimately serving. Measured on the RP2350W <-> ESP32-C6 bench: five
+    // requests took 2706-3586 ms and completed correctly once the budget
+    // allowed it, and the same fixture produced four hard failures in 241
+    // cycles at 2000 ms versus zero in 215 cycles at the larger budget.
+    //
+    // Matches kRpPeerMaxRequestMs, so both sides of the fixture agree on how
+    // long a request may take. See FastLED#3899.
+    const uint32_t deadline_ms = request_started_ms + kRpPeerMaxRequestMs;
     while (!client.available() && client.connected() &&
            static_cast<int32_t>(millis() - deadline_ms) < 0) {
         FastLED.watchdog().feed();
