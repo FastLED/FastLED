@@ -878,8 +878,15 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // line -- harmless when everything was drained into one buffer, fatal once
     // the headers have to be parsed. Returns false only if the deadline
     // expires with the line unfinished. See FastLED#4173.
+    //
+    // Bytes consumed by the most recent call, including the '\r' that is
+    // stripped from `out`. An empty `out` on its own cannot separate "the
+    // peer sent nothing" from "the peer sent only '\r' and then stalled or
+    // closed", and those are different faults.
+    size_t last_line_bytes_read = 0;
     auto read_line = [&](char* out, size_t out_size) -> bool {
         size_t used = 0;
+        last_line_bytes_read = 0;
         while (static_cast<int32_t>(millis() - deadline_ms) < 0) {
             if (!client.available()) {
                 if (!client.connected()) {
@@ -893,6 +900,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
             if (ch < 0) {
                 break;
             }
+            ++last_line_bytes_read;
             if (ch == '\n') {
                 out[used] = '\0';
                 return true;
@@ -912,7 +920,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // actually occurs on this link. See FastLED#3899.
     char status_line[64];
     const bool status_line_complete = read_line(status_line, sizeof(status_line));
-    const bool status_line_empty = status_line[0] == '\0';
+    const bool status_bytes_seen = last_line_bytes_read > 0;
     // Captured before the body loop and the stop() below can change it. With
     // no status line, this is what separates "the peer closed without
     // answering" from "the peer held the connection open and never answered".
@@ -1001,7 +1009,7 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         // Distinguish "no answer" from "wrong answer": an empty status line
         // means the request went out and nothing came back within the
         // deadline, so the status code is not the thing that failed.
-        if (!status_line_complete && status_line_empty) {
+        if (!status_line_complete && !status_bytes_seen) {
             result.set("error", "No HTTP response: request sent, nothing read");
             result.set("peer_still_open", peer_open_after_status);
         } else if (!status_line_complete) {
