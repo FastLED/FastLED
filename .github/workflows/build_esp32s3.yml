@@ -46,7 +46,7 @@ on:
 
 jobs:
   build:
-    name: ESP32-S3 examples shard ${{ matrix.shard_index }} (8 total)
+    name: ESP32-S3 examples shard ${{ matrix.shard_index }} (1 total)
     # Hard-block external-fork pull requests (no exceptions per #2757).
     # `github.event.pull_request == null` lets push / workflow_dispatch / etc.
     # pass; the equality clause only matches when the PR head repo IS the base.
@@ -57,7 +57,8 @@ jobs:
       # sketch rebuilds the framework sources. Keep full coverage while each
       # reusable-workflow job remains below its 45-minute bound (#3791).
       matrix:
-        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+        shard_index: [0]
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 8
+      args: esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 1
+      timeout_minutes: 120

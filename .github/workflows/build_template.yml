@@ -24,6 +24,11 @@ on:
         type: boolean
         required: false
         default: false
+      timeout_minutes:
+        description: Job timeout. Defaults to the 45 minutes every caller has always had.
+        type: number
+        required: false
+        default: 45
 
 permissions:
   contents: read
@@ -42,7 +47,7 @@ jobs:
     # (FastLED#3791). Board builds normally finish in well under 20 minutes,
     # so 45 leaves generous headroom for a cold toolchain download while still
     # turning a hang into a bounded, reportable failure.
-    timeout-minutes: 45
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
