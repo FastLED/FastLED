@@ -255,3 +255,25 @@
   and have long unattended loops check free memory before each iteration and
   stop cleanly rather than be killed part-way. Read the exit reason before
   concluding anything about the code. See [[shared-tree-hazard]].
+- A tty node path is not a device identity, and the failure it produces lies.
+  Four unattended runs died on `Could not open /dev/ttyACM2, the port is busy
+  or doesn't exist`, which reads like a wedged board. Nothing was wedged: the
+  ESP32-C6 had re-enumerated and the kernel gave it `/dev/ttyACM1` instead.
+  I had hardcoded both node paths because `--net-peer` requires them and
+  neither `bash autoresearch` nor `fbuild deploy` accepts a USB serial, and
+  they had been stable for 241 cycles before they were not. The benign
+  outcome is a failed deploy; the dangerous one is two boards swapping
+  numbers, which turns a hardcoded path into flashing the wrong board and
+  breaks the deploy-isolation property #3832 requires. Resolve the USB serial
+  to a node immediately before each use and abort cleanly when the serial is
+  absent, rather than deploying to whoever inherited the path. Identity comes
+  from something stable, never from enumeration order -- the same rule the
+  USB VID/PID registry exists to enforce. See [[worktree-memory-exhaustion]].
+- When a whole campaign inverts -- 1-in-6 runs failing became 5-in-6 -- suspect
+  the harness before the device. I had just raised an HTTP deadline and was
+  ready to read the result as "the peer got worse under the longer budget".
+  It was the renumbering above: run 1 was real, runs 3-6 never reached a
+  single network cycle because the deploy could not open a port. A result that
+  large and that sudden is nearly always the measurement, not the thing
+  measured; check how many cycles actually executed before interpreting a
+  rate.
