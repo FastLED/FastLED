@@ -277,3 +277,24 @@
   large and that sudden is nearly always the measurement, not the thing
   measured; check how many cycles actually executed before interpreting a
   rate.
+- A dual-device campaign builds *two* firmware images, and pre-building only
+  one leaves the spike in place. Three unattended campaigns were killed for
+  host memory, every one during run 1 of a freshly created worktree. I had
+  pre-compiled the RP image each time and concluded the builds were cached;
+  `--net-peer` also builds the ESP32-C6 peer image, which took 2m18s from
+  cold and was the actual spike. Later runs in every campaign were fine
+  because run 1 had warmed the cache. Two consequences: pre-build every
+  target a run will touch, not just the one under test; and stop creating a
+  worktree per experiment, because each new one pays for two full toolchain
+  builds when only a few lines differ -- reuse one bench worktree and change
+  what is merged into it. Note a memory guard that samples before each run
+  cannot see a spike that happens inside a run; smaller batches limit the
+  loss instead. See [[worktree-memory-exhaustion]].
+- A board missing from the USB bus is not necessarily wedged. Immediately
+  after a killed campaign the RP2350W was absent entirely -- the wedge
+  signature -- and it was in BOOTSEL as `2e8a:000f RP2350 Boot`, the normal
+  transient while fbuild flashes it, returning as `2e8a:f00f` within about
+  four seconds. Checking only for the application VID/PID and stopping there
+  would have reported a wedged board and halted the loop for nothing. Scan
+  the whole vendor family and wait for re-enumeration before calling a board
+  lost.
