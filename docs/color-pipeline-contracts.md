@@ -231,6 +231,46 @@ but cannot prove ideal-light accuracy. Publish luminance normalization,
 relative-error denominators, black-floor treatment, and the exact corpus.
 Do not silently exclude difficult vectors to satisfy the issue's budgets.
 
+#### The black floor, stated
+
+The paragraph above requires a black-floor treatment to be published. This is
+it, measured rather than chosen.
+
+**A reference drive below one s16.16 unit is outside the budget's scope.** One
+unit is `1/65536` = `1.5259e-05` in normalized emitter flux. Below that the
+fixed-point path can only answer zero or a whole unit where the reference asks
+for a fraction of one, and CIELAB's kappa branch turns that into a whole unit
+of L*.
+
+The floor is the arithmetic's resolution and **not** a luminance threshold,
+which is the part worth being exact about because the obvious form does not
+work. Measured on the P5 corpus's `rgb` device, `bt2020-rgb-02` misses at
+Y = 5.4e-04 while `srgb_bt709-rgb-00` passes at Y = 3.0e-04 -- a *darker*
+vector inside the budget and a brighter one outside it. What separates them is
+that the first has a sub-ULP drive and the second does not.
+
+Its effect on A1, over all 57 vectors the corpus holds for that device:
+
+| | worst dE2000 |
+|---|---:|
+| every vector | 1.3055, at `bt2020-rgb-03` -- source code (0,0,1) in BT.2020, whose reference drives are (0, 5.242e-05, **1.447e-05**) |
+| vectors with no sub-ULP drive (49 of 57) | **0.3951** |
+
+So A1's 0.5 is met everywhere the arithmetic can represent the target, and the
+two vectors above it are unreachable by any fixed-point implementation of this
+width rather than by this one. Eight of the 57 carry a sub-ULP drive.
+
+Both figures are asserted in `tests/fl/gfx/pipeline.cpp`, so neither the
+floored result nor the unfloored miss can drift while the other passes. This
+does not silently exclude difficult vectors: the excluded set is defined by a
+property of the arithmetic, counted, and the unfloored number is published
+beside the floored one.
+
+What this floor does **not** settle is the *unsupported low-light region* the
+same paragraph asks for -- that is a statement about what a device is allowed
+to render, and it needs P8's dithering answer, since a sub-ULP average drive is
+reachable over a cycle even though it is not reachable in one frame.
+
 Dither accuracy is based on time-weighted emitted XYZ over a declared cadence
 and observation window, followed by perceptual error calculation. It is not
 an unweighted mean of frame codes or frame Delta E values. State advances on
