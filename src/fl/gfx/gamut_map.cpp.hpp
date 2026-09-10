@@ -144,6 +144,85 @@ i32 largestFeasibleChroma(const i32 (&lab)[3], i32 lightness,
     return low;
 }
 
+/// The feasible chroma interval at the target's *own* lightness, as factors of
+/// the target's chroma.
+///
+/// Above the brightest neutral the interval is still one run -- that much is
+/// measured, on this device and on the wide ones -- but it no longer contains
+/// zero (#4245). `largestFeasibleChroma` cannot find it: its bracket assumes a
+/// feasible low end, and starting infeasible it walks down to zero, which is
+/// the clamp this exists to avoid.
+///
+/// So the seed comes first, by a linear scan, and only then are the two edges
+/// bisected. Returns false when no probe lands inside, which is the caller's
+/// signal to keep the shipped clamp-then-bisect path -- the reason this is
+/// never worse than what it replaces.
+template <typename Feasible>
+bool feasibleChromaInterval(const i32 (&lab)[3], i32 lightness,
+                            Feasible feasible, i32* out_low,
+                            i32* out_high) FL_NO_EXCEPT {
+    i32 seed = 0;
+    bool found = false;
+    for (int probe = 1; probe <= kGamutMapProbes; ++probe) {
+        const i32 factor = static_cast<i32>(
+            (static_cast<i64>(kGamutProbeCeilingQ16) * probe) / kGamutMapProbes);
+        i32 candidate_xyz[3];
+        chromaCandidateXyz(lab, lightness, factor, candidate_xyz);
+        if (feasible(candidate_xyz)) {
+            seed = factor;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return false;
+    }
+
+    // Lower edge: the smallest feasible factor. `high` is feasible throughout,
+    // `low` is not, which is the mirror of the usual invariant.
+    i32 low = 0;
+    i32 high = seed;
+    for (int step = 0; step < kGamutMapHalvings; ++step) {
+        const i32 factor = low + ((high - low) >> 1);
+        i32 candidate_xyz[3];
+        chromaCandidateXyz(lab, lightness, factor, candidate_xyz);
+        if (feasible(candidate_xyz)) {
+            high = factor;
+        } else {
+            low = factor;
+        }
+    }
+    *out_low = high;
+
+    // Upper edge: the largest feasible factor, the usual invariant again.
+    low = seed;
+    high = kGamutProbeCeilingQ16;
+    for (int step = 0; step < kGamutMapHalvings; ++step) {
+        const i32 factor = low + ((high - low) >> 1);
+        i32 candidate_xyz[3];
+        chromaCandidateXyz(lab, lightness, factor, candidate_xyz);
+        if (feasible(candidate_xyz)) {
+            low = factor;
+        } else {
+            high = factor;
+        }
+    }
+    *out_high = low;
+    return true;
+}
+
+/// The target's chroma clamped into `[low, high]`, in factor space.
+i32 clampChromaFactor(i32 low, i32 high) FL_NO_EXCEPT {
+    i32 factor = kGamutFullDrive;
+    if (factor < low) {
+        factor = low;
+    }
+    if (factor > high) {
+        factor = high;
+    }
+    return factor;
+}
+
 }  // namespace
 
 bool buildGamutMapQ16(const EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT {
@@ -217,15 +296,37 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
     i32 lab[3];
     xyzToOklabQ16(xyz, lab);
 
-    // Lightness first. Reducing chroma cannot bring an over-bright target
-    // back into the hull -- at zero chroma it is still outside -- so without
-    // this the halvings below converge on an infeasible answer.
     i32 lightness = lab[0];
-    if (lightness > map.max_neutral_lightness) {
-        lightness = map.max_neutral_lightness;
-    }
     if (lightness < 0) {
         lightness = 0;
+    }
+
+    // Above the brightest neutral, try keeping the lightness (#4245). The
+    // feasible chroma there is an interval that does not contain zero, so it
+    // has to be located before either edge can be bisected; when it is found,
+    // clamping the target's chroma into it holds the requested lightness
+    // instead of discarding up to 29.7% of what the hull reaches.
+    if (lightness > map.max_neutral_lightness) {
+        i32 low_edge = 0;
+        i32 high_edge = 0;
+        if (feasibleChromaInterval(lab, lightness, RgbFeasible{map.solve},
+                                   &low_edge, &high_edge)) {
+            i32 candidate_xyz[3];
+            chromaCandidateXyz(lab, lightness, clampChromaFactor(low_edge, high_edge),
+                               candidate_xyz);
+            i32 candidate[3];
+            solveRgbDrivesQ16(map.solve, candidate_xyz, candidate);
+            if (gamutDrivesAreInRange(candidate, kGamutFeasibilitySlack)) {
+                for (int i = 0; i < 3; ++i) {
+                    drives[i] = candidate[i];
+                }
+                clampGamutDrives(drives);
+                return;
+            }
+        }
+        // No seed, or the accepted candidate fell outside on the re-solve.
+        // Fall through to the clamp, which is what shipped before this.
+        lightness = map.max_neutral_lightness;
     }
 
     // Then chroma, by scaling (a, b) toward zero.
@@ -355,11 +456,26 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
     i32 lab[3];
     xyzToOklabQ16(xyz, lab);
     i32 lightness = lab[0];
-    if (lightness > map.max_neutral_lightness) {
-        lightness = map.max_neutral_lightness;
-    }
     if (lightness < 0) {
         lightness = 0;
+    }
+
+    // Same above-cap interval clamp as the RGB path (#4245). The white
+    // emitter moves the cap but does not change the shape: above it the
+    // feasible chroma still misses zero.
+    if (lightness > map.max_neutral_lightness) {
+        i32 low_edge = 0;
+        i32 high_edge = 0;
+        if (feasibleChromaInterval(lab, lightness, RgbwFeasible{map.allocation},
+                                   &low_edge, &high_edge)) {
+            i32 candidate_xyz[3];
+            chromaCandidateXyz(lab, lightness, clampChromaFactor(low_edge, high_edge),
+                               candidate_xyz);
+            if (allocateEmitterDrivesQ16(map.allocation, candidate_xyz, drives)) {
+                return;
+            }
+        }
+        lightness = map.max_neutral_lightness;
     }
 
     const i32 factor =
@@ -505,11 +621,24 @@ void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
     i32 lab[3];
     xyzToOklabQ16(xyz, lab);
     i32 lightness = lab[0];
-    if (lightness > map.max_neutral_lightness) {
-        lightness = map.max_neutral_lightness;
-    }
     if (lightness < 0) {
         lightness = 0;
+    }
+
+    // And again for two whites (#4245).
+    if (lightness > map.max_neutral_lightness) {
+        i32 low_edge = 0;
+        i32 high_edge = 0;
+        if (feasibleChromaInterval(lab, lightness, RgbwwFeasible{map.allocation},
+                                   &low_edge, &high_edge)) {
+            i32 candidate_xyz[3];
+            chromaCandidateXyz(lab, lightness, clampChromaFactor(low_edge, high_edge),
+                               candidate_xyz);
+            if (allocateTwoWhiteDrivesQ16(map.allocation, candidate_xyz, drives)) {
+                return;
+            }
+        }
+        lightness = map.max_neutral_lightness;
     }
 
     const i32 factor =

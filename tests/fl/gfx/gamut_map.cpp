@@ -1316,4 +1316,201 @@ FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
     FL_CHECK_GT(compressed, 0);
 }
 
+// ---------------------------------------------------------------------------
+// Above the brightest neutral (#4245)
+//
+// The clamp to `max_neutral_lightness` throws away lightness the hull can
+// reach off the neutral axis -- up to 29.7% of the headroom on this device.
+// `ci/color_lightness_headroom_study.py` established why the obvious repairs
+// fail and what works: above the cap the feasible chroma is still one
+// interval, it simply stops containing zero, so a seed has to be found before
+// either edge can be bisected. These check the embedded mapper against the
+// numbers that study published.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Re-render mapped drives through the emitters and read back OKLab.
+///
+/// Re-rendered rather than assumed: the point of the change is what the
+/// device actually emits, and a mapper that reported a lightness it did not
+/// produce would pass a test built on its own arithmetic.
+void emittedLab(const i32 (&drives)[3], i32 (&out_lab)[3]) {
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    float xyz[3] = {0.0f, 0.0f, 0.0f};
+    for (int e = 0; e < 3; ++e) {
+        float emitter[3];
+        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                          emitter);
+        for (int i = 0; i < 3; ++i) {
+            xyz[i] += toFloat(drives[e]) * emitter[i];
+        }
+    }
+    const i32 emitted[3] = {q16(xyz[0]), q16(xyz[1]), q16(xyz[2])};
+    xyzToOklabQ16(emitted, out_lab);
+}
+
+float chromaOf(const i32 (&lab)[3]) {
+    const float a = toFloat(lab[1]);
+    const float b = toFloat(lab[2]);
+    return fl::sqrtf(a * a + b * b);
+}
+
+}  // namespace
+
+FL_TEST_CASE("Above the cap the mapper keeps the lightness it was asked for") {
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+
+    // Hue 300 degrees at chroma 0.30, at two lightnesses above the cap. The
+    // study reports 1.2860 / 0.3081 and 1.3978 / 0.4431 for these against the
+    // shipped 1.1182 for both.
+    struct Case {
+        float lightness;
+        float expect_chroma;
+    };
+    const Case cases[] = {{1.286f, 0.3081f}, {1.398f, 0.4431f}};
+    for (const auto& c : cases) {
+        const i32 lab[3] = {q16(c.lightness), q16(0.15f), q16(-0.2598076f)};
+        i32 xyz[3];
+        oklabToXyzQ16(lab, xyz);
+        i32 drives[3];
+        mapAndSolveDrivesQ16(map, xyz, drives);
+
+        for (int i = 0; i < 3; ++i) {
+            FL_CHECK_GE(drives[i], 0);
+            FL_CHECK_LE(drives[i], kFullDrive);
+        }
+
+        i32 emitted[3];
+        emittedLab(drives, emitted);
+        // The requested lightness, not the cap.
+        FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - c.lightness), 0.01f);
+        FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+        FL_CHECK_LT(fl::fabsf(chromaOf(emitted) - c.expect_chroma), 0.01f);
+    }
+}
+
+FL_TEST_CASE("The lower edge is not optional above the cap") {
+    // At lightness 1.398 on hue 300 the feasible chroma is about
+    // [0.4432, 0.6000] -- it starts *above* the requested 0.30. Clamping to
+    // the upper edge alone would be a search that never looks below the seed,
+    // and clamping to the request would return something infeasible: the
+    // answer has to move chroma *up* into the interval.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    const float requested_chroma = 0.30f;
+    const i32 lab[3] = {q16(1.398f), q16(0.15f), q16(-0.2598076f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[3];
+    mapAndSolveDrivesQ16(map, xyz, drives);
+
+    i32 emitted[3];
+    emittedLab(drives, emitted);
+    FL_CHECK_GT(chromaOf(emitted), requested_chroma * 1.3f);
+
+    // Hue is still exact -- raising chroma along the same ray is what makes
+    // that true, and is why this is not simply "return any feasible colour".
+    const float ax = toFloat(lab[1]), ay = toFloat(lab[2]);
+    const float bx = toFloat(emitted[1]), by = toFloat(emitted[2]);
+    const float scale = fl::sqrtf((ax * ax + ay * ay) * (bx * bx + by * by));
+    FL_REQUIRE_GT(scale, 1e-4f);
+    FL_CHECK_GT(ax * bx + ay * by, 0.0f);
+    FL_CHECK_LT(fl::fabsf(ax * by - ay * bx) / scale, 0.005f);
+}
+
+FL_TEST_CASE("It falls back to the clamp when no chroma is feasible there") {
+    // Lightness 1.398 on hue 120 has no feasible chroma at all -- the study
+    // records `(none)` for that row. The interval search finds no seed and the
+    // shipped clamp-then-bisect answers instead, which is what makes this
+    // never worse than what it replaces.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    const i32 lab[3] = {q16(1.398f), q16(-0.25f), q16(0.4330127f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[3];
+    mapAndSolveDrivesQ16(map, xyz, drives);
+
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+    i32 emitted[3];
+    emittedLab(drives, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) -
+                          toFloat(map.max_neutral_lightness)),
+                0.01f);
+}
+
+FL_TEST_CASE("An over-bright neutral still clamps, because it has no chroma") {
+    // The regression this could most easily cause. A neutral has no chroma to
+    // scale, so scaling it by any factor leaves it neutral and infeasible; the
+    // probes find no seed and the lightness clamp still runs. Without this the
+    // change could quietly turn every over-bright grey into a saturated
+    // colour and the existing neutral test would not see it, since it checks
+    // ratios rather than chroma.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    for (float luminance : {2.0f, 5.0f, 30.0f}) {
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, luminance, xyz);
+        i32 drives[3];
+        mapAndSolveDrivesQ16(map, xyz, drives);
+        i32 emitted[3];
+        emittedLab(drives, emitted);
+        FL_CHECK_LT(chromaOf(emitted), 0.01f);
+        FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) -
+                              toFloat(map.max_neutral_lightness)),
+                    0.01f);
+    }
+}
+
+FL_TEST_CASE("RGBW keeps the lightness above its own, higher cap") {
+    // The white emitter moves the cap; it does not change the shape of the
+    // problem, so the same interval clamp has to run there too.
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
+    const float cap = toFloat(rgbw.max_neutral_lightness);
+
+    // Just above the RGBW cap, on the hue that has headroom there.
+    const i32 lab[3] = {q16(cap + 0.06f), q16(0.15f), q16(-0.2598076f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[4];
+    mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    // Re-render through the four emitters, white included.
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    float out[3] = {0.0f, 0.0f, 0.0f};
+    for (int e = 0; e < 3; ++e) {
+        float emitter[3];
+        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                          emitter);
+        for (int i = 0; i < 3; ++i) {
+            out[i] += toFloat(drives[e]) * emitter[i];
+        }
+    }
+    for (int i = 0; i < 3; ++i) {
+        out[i] += toFloat(drives[3]) * toFloat(kWhiteD65[i]);
+    }
+    const i32 emitted_xyz[3] = {q16(out[0]), q16(out[1]), q16(out[2])};
+    i32 emitted[3];
+    xyzToOklabQ16(emitted_xyz, emitted);
+
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.02f);
+}
+
 }  // FL_TEST_FILE
