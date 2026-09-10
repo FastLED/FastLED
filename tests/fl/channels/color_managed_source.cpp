@@ -327,6 +327,108 @@ FL_TEST_CASE("A bound colour profile reaches the encoded bytes") {
     }
     FL_CHECK_GT(difference, 16);
 }
+
+FL_TEST_CASE("two channels keep their own profiles") {
+    // FastLED#4156 R9 asks how "distinct runtime profiles remain associated
+    // with multiple channels", and names two channels as required evidence.
+    // The case above compares a bound channel against an unbound one, which
+    // cannot see a profile leaking from one binding into another.
+    //
+    // Two bindings that differ only in the device, driven in the same
+    // `show()`, and each checked against the pipeline built from *its own*
+    // device.
+    const int NUM_LEDS = 2;
+    CRGB wide_leds[NUM_LEDS] = {CRGB(200, 40, 10), CRGB(10, 180, 90)};
+    CRGB narrow_leds[NUM_LEDS] = {CRGB(200, 40, 10), CRGB(10, 180, 90)};
+
+    // Same primaries, different blue. Enough to move the solve without
+    // changing anything else about the two bindings.
+    EmitterProfile wide_device = rgbDevice();
+    EmitterProfile narrow_device = rgbDevice();
+    narrow_device.xy_b[0] = 0.2200f;
+    narrow_device.xy_b[1] = 0.1600f;
+
+    auto mockEngine = fl::make_shared<ByteCapturingMockEngine>();
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(2011, mockEngine);
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+
+    ChannelOptions wide_options;
+    FL_REQUIRE(wide_options.setColorProfile(wide_device, SourceProfile::bt2020(),
+                                            GamutPolicy::ChromaCompress));
+    ChannelConfig wide_config(3, timing, fl::span<CRGB>(wide_leds, NUM_LEDS), RGB,
+                              wide_options);
+    auto wide = Channel::create(wide_config);
+    FL_REQUIRE(wide != nullptr);
+
+    ChannelOptions narrow_options;
+    FL_REQUIRE(narrow_options.setColorProfile(narrow_device,
+                                              SourceProfile::bt2020(),
+                                              GamutPolicy::ChromaCompress));
+    ChannelConfig narrow_config(4, timing,
+                                fl::span<CRGB>(narrow_leds, NUM_LEDS), RGB,
+                                narrow_options);
+    auto narrow = Channel::create(narrow_config);
+    FL_REQUIRE(narrow != nullptr);
+
+    auto cleanup = fl::make_scope_exit([&]() {
+        wide->removeFromDrawList();
+        narrow->removeFromDrawList();
+        manager.removeDriver(mockEngine);
+    });
+
+    FastLED.add(wide);
+    FastLED.add(narrow);
+    mockEngine->mCapturedChannels.clear();
+    FastLED.show();
+
+    FL_REQUIRE(mockEngine->mCapturedChannels.size() >= 2);
+    const auto& wide_bytes = mockEngine->mCapturedChannels[0]->getData();
+    const auto& narrow_bytes = mockEngine->mCapturedChannels[1]->getData();
+    FL_REQUIRE(wide_bytes.size() >= static_cast<fl::size>(NUM_LEDS * 3));
+    FL_REQUIRE(narrow_bytes.size() >= static_cast<fl::size>(NUM_LEDS * 3));
+
+    // Each against a pipeline built from its own device. A profile leaking
+    // between bindings shows up here as one channel matching the other's
+    // expectation.
+    const EmitterProfile devices[2] = {wide_device, narrow_device};
+    const fl::u8* captured[2] = {wide_bytes.data(), narrow_bytes.data()};
+    for (int which = 0; which < 2; ++which) {
+        StreamingPipelineQ16 expected;
+        FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::bt2020(),
+                                             devices[which],
+                                             GamutPolicy::ChromaCompress,
+                                             &expected));
+        setPipelineFluxQ16(&expected, FluxScalar::fromBrightness(255));
+        for (int led = 0; led < NUM_LEDS; ++led) {
+            const CRGB& source_pixel = wide_leds[led];
+            i32 drives[3];
+            processPixelQ16(expected, source_pixel.r, source_pixel.g,
+                            source_pixel.b, drives);
+            for (int index = 0; index < 3; ++index) {
+                const i32 drive = drives[index];
+                const int want =
+                    drive <= 0 ? 0
+                               : (drive >= 65536
+                                      ? 255
+                                      : static_cast<int>((drive * 255 + 32768) >> 16));
+                FL_CHECK_EQ(static_cast<int>(captured[which][led * 3 + index]),
+                            want);
+            }
+        }
+    }
+
+    // Vacuity guard, and the reason the two devices differ at all: if the
+    // profiles produced the same bytes, every check above would hold with
+    // both channels sharing one binding.
+    int difference = 0;
+    for (int i = 0; i < NUM_LEDS * 3; ++i) {
+        const int delta =
+            static_cast<int>(wide_bytes[i]) - static_cast<int>(narrow_bytes[i]);
+        difference += delta < 0 ? -delta : delta;
+    }
+    FL_CHECK_GT(difference, 8);
+}
 #endif
 
 #if FL_COLOR_PROFILE_RUNTIME

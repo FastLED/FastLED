@@ -111,6 +111,70 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
     FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(257));
 }
 
+FL_TEST_CASE("Rebinding replaces the profile and releases the first") {
+    // FastLED#4156 R9 names "profile/lut lifetime and rebind tests" as
+    // required evidence, and asks what happens to cache invalidation when a
+    // binding is replaced. Nothing here covered the second bind.
+    ChannelOptions options;
+
+    EmitterProfile first = kFixtureProfile;
+    const fl::u16 first_response[] = {0, 257, 65535};
+    first.response_lut_r = first_response;
+    first.response_lut_g = first_response;
+    first.response_lut_b = first_response;
+    first.response_lut_size = 3;
+    FL_REQUIRE(options.setColorProfile(first, SourceProfile::linearSrgb()));
+    const EmitterProfile* first_storage = options.emitterProfile();
+    FL_REQUIRE(first_storage != nullptr);
+    FL_CHECK_EQ(first_storage->response_lut_size, fl::u16(3));
+
+    EmitterProfile second = kFixtureProfile;
+    second.xy_b[0] = 0.2200f;
+    second.xy_b[1] = 0.1600f;
+    const fl::u16 second_response[] = {0, 1000, 20000, 65535};
+    second.response_lut_r = second_response;
+    second.response_lut_g = second_response;
+    second.response_lut_b = second_response;
+    second.response_lut_size = 4;
+    FL_REQUIRE(options.setColorProfile(second, SourceProfile::bt2020()));
+
+    // The second binding is what the channel now sees -- not a merge of the
+    // two, and not the first still holding on.
+    const EmitterProfile* second_storage = options.emitterProfile();
+    FL_REQUIRE(second_storage != nullptr);
+    FL_CHECK_EQ(second_storage->response_lut_size, fl::u16(4));
+    FL_CHECK_EQ(second_storage->response_lut_r[1], fl::u16(1000));
+    FL_CHECK_LT(second_storage->xy_b[0] - 0.2200f, 1e-6f);
+    FL_CHECK_GT(second_storage->xy_b[0] - 0.2200f, -1e-6f);
+
+    // And the caller's arrays can go away, as they can for the first bind.
+    second.response_lut_r = nullptr;
+    second.response_lut_size = 0;
+    FL_CHECK_EQ(options.emitterProfile()->response_lut_size, fl::u16(4));
+    FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(1000));
+
+    // Vacuity guard: if the two profiles were indistinguishable, every check
+    // above would hold with the rebind having done nothing at all.
+    FL_CHECK_NE(first.response_lut_size, fl::u16(4));
+}
+
+FL_TEST_CASE("Clearing a binding releases it and leaves nothing bound") {
+    // The other half of the lifetime question: a binding that is dropped
+    // rather than replaced.
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile,
+                                       SourceProfile::linearSrgb()));
+    FL_REQUIRE(options.emitterProfile() != nullptr);
+
+    options.clearColorProfile();
+    FL_CHECK(options.emitterProfile() == nullptr);
+
+    // And it can be bound again afterwards, so clearing is not terminal.
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile,
+                                       SourceProfile::linearSrgb()));
+    FL_CHECK(options.emitterProfile() != nullptr);
+}
+
 // Pins the P2/P6 boundary. A successfully bound profile is *configured*, not
 // *managed*: P2 only binds, and isColorManaged() stays false until P6
 // installs the streaming transform in the output path (channel.h:174). The
