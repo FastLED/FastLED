@@ -13,6 +13,7 @@
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
 #include "fl/stl/align.h"  // IWYU pragma: keep
+#include "platforms/shared/simd_lane4.h"  // IWYU pragma: keep
 
 #if defined(FL_IS_ESP_32C2) || defined(FL_IS_ESP_32C3) || \
     defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || \
@@ -174,33 +175,33 @@ FASTLED_FORCE_INLINE FL_IRAM void store_u8_16(u8* ptr, simd_u8x16 vec) FL_NO_EXC
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4(const u32* ptr) FL_NO_EXCEPT {
     simd_u32x4 result;
     // RVV-ready: This loop can be replaced with vle32.v
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = ptr[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4(u32* ptr, simd_u32x4 vec) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vse32.v
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         ptr[i] = vec.data[i];
-    }
+    );
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 load_f32_4(const float* ptr) FL_NO_EXCEPT {
     simd_f32x4 result;
     // RVV-ready: This loop can be replaced with vle32.v
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = ptr[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM void store_f32_4(float* ptr, simd_f32x4 vec) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vse32.v
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         ptr[i] = vec.data[i];
-    }
+    );
 }
 
 //==============================================================================
@@ -229,9 +230,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 scale_u8_16(simd_u8x16 vec, u8 scale) FL
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set1_u32_4(u32 value) FL_NO_EXCEPT {
     simd_u32x4 result;
     // RVV-ready: This loop can be replaced with vmv.v.x
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = value;
-    }
+    );
     return result;
 }
 
@@ -353,72 +354,72 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 max_u8_16(simd_u8x16 a, simd_u8x16 b) FL
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 set1_f32_4(float value) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vmv.v.x
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = value;
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 add_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfadd.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] + b.data[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 sub_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfsub.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] - b.data[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 mul_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfmul.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] * b.data[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 div_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfdiv.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] / b.data[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 sqrt_f32_4(simd_f32x4 vec) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfsqrt.v
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = fl::sqrtf(vec.data[i]);
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 min_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfmin.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = (a.data[i] < b.data[i]) ? a.data[i] : b.data[i];
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vfmax.vv
     simd_f32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = (a.data[i] > b.data[i]) ? a.data[i] : b.data[i];
-    }
+    );
     return result;
 }
 
@@ -432,9 +433,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) FL
     pie_xor_128(a.data, b.data, result.data);
 #else
     // RVV-ready: This loop can be replaced with vxor.vv
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] ^ b.data[i];
-    }
+    );
 #endif
     return result;
 }
@@ -442,22 +443,22 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) FL
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 add_i32_4(simd_u32x4 a, simd_u32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vadd.vv
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 a_i = static_cast<i32>(a.data[i]);
         i32 b_i = static_cast<i32>(b.data[i]);
         result.data[i] = static_cast<u32>(a_i + b_i);
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vsub.vv
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 a_i = static_cast<i32>(a.data[i]);
         i32 b_i = static_cast<i32>(b.data[i]);
         result.data[i] = static_cast<u32>(a_i - b_i);
-    }
+    );
     return result;
 }
 
@@ -467,21 +468,21 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) 
 #if __riscv_xlen == 32
     // RV32: Use mul+mulh inline asm to avoid 64-bit widening multiply.
     // Extracts bits [47:16] of each 64-bit product for Q16.16 fixed-point.
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 lo, hi;
         asm("mul  %0, %2, %3\n\t"
             "mulh %1, %2, %3"
             : "=&r"(lo), "=&r"(hi)
             : "r"(a.data[i]), "r"(b.data[i]));
         result.data[i] = (static_cast<u32>(lo) >> 16) | (static_cast<u32>(hi) << 16);
-    }
+    );
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 a_i = static_cast<i32>(a.data[i]);
         i32 b_i = static_cast<i32>(b.data[i]);
         i64 prod = static_cast<i64>(a_i) * static_cast<i64>(b_i);
         result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 16));
-    }
+    );
 #endif
     return result;
 }
@@ -489,9 +490,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) FL_NO_EXCEPT {
     // RVV-ready: This loop can be replaced with vsrl.vx
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = vec.data[i] >> shift;
-    }
+    );
     return result;
 }
 
@@ -501,9 +502,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) FL
     pie_and_128(a.data, b.data, result.data);
 #else
     // RVV-ready: This loop can be replaced with vand.vv
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] & b.data[i];
-    }
+    );
 #endif
     return result;
 }
@@ -514,9 +515,9 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4_aligned(const u32* ptr) FL_NO
 #if FL_RISCV_HAS_PIE
     pie_copy_128(p, result.data);
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = p[i];
-    }
+    );
 #endif
     return result;
 }
@@ -526,9 +527,9 @@ FASTLED_FORCE_INLINE FL_IRAM void store_u32_4_aligned(u32* ptr, simd_u32x4 vec) 
 #if FL_RISCV_HAS_PIE
     pie_copy_128(vec.data, p);
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         p[i] = vec.data[i];
-    }
+    );
 #endif
 }
 
@@ -546,27 +547,27 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 or_u32_4(simd_u32x4 a, simd_u32x4 b) FL_
 #if FL_RISCV_HAS_PIE
     pie_or_128(a.data, b.data, result.data);
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = a.data[i] | b.data[i];
-    }
+    );
 #endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sll_u32_4(simd_u32x4 vec, int shift) FL_NO_EXCEPT {
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         result.data[i] = vec.data[i] << shift;
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sra_i32_4(simd_u32x4 vec, int shift) FL_NO_EXCEPT {
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 signed_val = static_cast<i32>(vec.data[i]);
         result.data[i] = static_cast<u32>(signed_val >> shift);
-    }
+    );
     return result;
 }
 
@@ -574,19 +575,19 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_u32_4(simd_u32x4 a, simd_u32x4 b) 
     simd_u32x4 result;
 #if __riscv_xlen == 32
     // RV32: Use mul+mulhu inline asm to avoid 64-bit widening multiply.
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         u32 lo, hi;
         asm("mul   %0, %2, %3\n\t"
             "mulhu %1, %2, %3"
             : "=&r"(lo), "=&r"(hi)
             : "r"(a.data[i]), "r"(b.data[i]));
         result.data[i] = (lo >> 16) | (hi << 16);
-    }
+    );
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         u64 prod = static_cast<u64>(a.data[i]) * static_cast<u64>(b.data[i]);
         result.data[i] = static_cast<u32>(prod >> 16);
-    }
+    );
 #endif
     return result;
 }
@@ -599,41 +600,41 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi32_i32_4(simd_u32x4 a, simd_u32x4 b
     simd_u32x4 result;
 #if __riscv_xlen == 32
     // RV32: >> 32 means we only need the high word — single mulh instruction.
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 hi;
         asm("mulh %0, %1, %2"
             : "=r"(hi)
             : "r"(a.data[i]), "r"(b.data[i]));
         result.data[i] = static_cast<u32>(hi);
-    }
+    );
 #else
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 ai = static_cast<i32>(a.data[i]);
         i32 bi = static_cast<i32>(b.data[i]);
         i64 prod = static_cast<i64>(ai) * static_cast<i64>(bi);
         result.data[i] = static_cast<u32>(static_cast<i32>(prod >> 32));
-    }
+    );
 #endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 min_i32_4(simd_u32x4 a, simd_u32x4 b) FL_NO_EXCEPT {
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 ai = static_cast<i32>(a.data[i]);
         i32 bi = static_cast<i32>(b.data[i]);
         result.data[i] = static_cast<u32>(ai < bi ? ai : bi);
-    }
+    );
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 max_i32_4(simd_u32x4 a, simd_u32x4 b) FL_NO_EXCEPT {
     simd_u32x4 result;
-    for (int i = 0; i < 4; ++i) {
+    FL_SIMD_LANE4(
         i32 ai = static_cast<i32>(a.data[i]);
         i32 bi = static_cast<i32>(b.data[i]);
         result.data[i] = static_cast<u32>(ai > bi ? ai : bi);
-    }
+    );
     return result;
 }
 

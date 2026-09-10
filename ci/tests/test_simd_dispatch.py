@@ -95,6 +95,42 @@ def _select(defines: list[str]) -> tuple[str, str]:
     return selected, fallback
 
 
+@typechecked
+def _arm_cross_compiler() -> str | None:
+    """An `arm-none-eabi-gcc`, if this machine has one."""
+
+    found = shutil.which("arm-none-eabi-gcc")
+    if found is not None:
+        return found
+    # PlatformIO and fbuild both keep one under the user's cache.
+    for root in (Path.home() / ".platformio" / "packages", Path.home() / ".fbuild"):
+        if not root.is_dir():
+            continue
+        for candidate in root.rglob("bin/arm-none-eabi-gcc"):
+            return str(candidate)
+    return None
+
+
+@typechecked
+def _predefined(compiler: str, flags: list[str], macro: str) -> str:
+    """`macro`'s value in `compiler`'s predefined set under `flags`, or ""."""
+
+    completed = subprocess.run(  # noqa: SRC001
+        [compiler, *flags, "-dM", "-E", "-x", "c", "-"],
+        input="",
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    for line in completed.stdout.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[0] == "#define" and parts[1] == macro:
+            return parts[2]
+    return ""
+
+
 class TestSimdDispatch(unittest.TestCase):
     """One case per target family the chain claims to cover."""
 
@@ -112,6 +148,47 @@ class TestSimdDispatch(unittest.TestCase):
         """Teensy 3.x/4.x, SAMD51, nRF52: DSP extension, no NEON."""
 
         backend, fallback = _select(["-D__ARM_FEATURE_DSP=1"])
+        self.assertEqual(backend, "platforms/arm/teensy/simd_arm_dsp.hpp")
+        self.assertEqual(fallback, "0")
+
+    def test_cortex_m33_with_the_dsp_extension_takes_the_dsp_backend(self) -> None:
+        """RP2350, and why FastLED#4216 was filed against the wrong file.
+
+        That issue reported a 15x slowdown in the packed `s16x16x4` type on an
+        RP2350W and attributed it to `simd_noop.hpp`, on the reasoning that
+        "RP2350 is Cortex-M33 without `__ARM_FEATURE_DSP`". The Cortex-M33
+        does not have to carry the DSP extension, but the RP2350's does, and
+        the Arduino-Pico core compiles for it: its `rp2350` branch passes
+        `-mcpu=cortex-m33 -march=armv8-m.main+fp+dsp`, and GCC then defines
+        `__ARM_FEATURE_DSP` to 1. So the arm below claims the target and
+        `simd_noop.hpp` is never reached.
+
+        Two of that issue's experiments -- dropping `FL_ALIGNAS(16)`, and
+        unrolling the trip-4 lane loops -- were made in `simd_noop.hpp` and
+        measured no change, which was then read as evidence against both
+        ideas. Neither edit was in the build. The unroll in particular works:
+        it is what `FL_SIMD_LANE4` now does.
+
+        The arm this lands on is written for "Cortex-M4 / M4F / M7", which is
+        where the misreading starts; ARMv8-M parts reach it too.
+        """
+
+        compiler = _arm_cross_compiler()
+        if compiler is None:
+            raise unittest.SkipTest("no arm-none-eabi-gcc on this machine")
+
+        # Verbatim from the Arduino-Pico core's `rp2350` branch,
+        # framework-arduinopico/tools/platformio-build.py.
+        rp2350_flags = [
+            "-mcpu=cortex-m33",
+            "-mthumb",
+            "-march=armv8-m.main+fp+dsp",
+            "-mfloat-abi=softfp",
+        ]
+        dsp = _predefined(compiler, rp2350_flags, "__ARM_FEATURE_DSP")
+        self.assertEqual(dsp, "1", "an RP2350 build defines __ARM_FEATURE_DSP")
+
+        backend, fallback = _select([f"-D__ARM_FEATURE_DSP={dsp}"])
         self.assertEqual(backend, "platforms/arm/teensy/simd_arm_dsp.hpp")
         self.assertEqual(fallback, "0")
 
