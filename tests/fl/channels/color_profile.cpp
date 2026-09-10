@@ -111,6 +111,56 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
     FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(257));
 }
 
+FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {
+    // FastLED#4156 R7 asks for "target-white overrides" that "preserve the
+    // selected neutral axis". `setTargetWhite` exists, validates its input,
+    // stores it, and is carried through `Channel` -- three cases below
+    // already check that plumbing. None of them asks the question R7 does,
+    // which is whether it reaches the rendering path.
+    //
+    // It does not. Outside these accessors nothing in `src/` reads it, and
+    // the gamut mapper's neutral is `kGamutD65Q16`, a compile-time constant
+    // no override can move. So the setter is settable and inert, which is
+    // where `setColorProfile` was before P6 wired it.
+    //
+    // Recorded rather than left to be discovered, because a setter that
+    // returns true is a promise. When someone wires it, this case fails, and
+    // what to re-measure is "a neutral request stays neutral whatever the
+    // device white is" in `tests/fl/gfx/gamut_map.cpp` -- which holds today
+    // with the mapping white fixed at D65.
+    ChannelOptions options;
+    FL_CHECK_FALSE(options.hasTargetWhite());
+
+    // A warm white, well away from D65.
+    FL_REQUIRE(options.setTargetWhite(Chromaticity(0.4476f, 0.4074f)));
+    FL_CHECK(options.hasTargetWhite());
+    FL_CHECK_CLOSE(options.targetWhite().x, 0.4476f, 0.0001f);
+
+    // Validated rather than taken on trust, which is the half that works.
+    FL_CHECK_FALSE(options.setTargetWhite(Chromaticity(1.5f, 0.5f)));
+
+    // The inert half: a profile bound alongside a target white is the same
+    // profile as one bound without, because there is nothing for the
+    // override to change.
+    ChannelOptions with_white;
+    FL_REQUIRE(with_white.setTargetWhite(Chromaticity(0.4476f, 0.4074f)));
+    FL_REQUIRE(with_white.setColorProfile(kFixtureProfile,
+                                          SourceProfile::linearSrgb()));
+    ChannelOptions without_white;
+    FL_REQUIRE(without_white.setColorProfile(kFixtureProfile,
+                                             SourceProfile::linearSrgb()));
+
+    const EmitterProfile* bound_with = with_white.emitterProfile();
+    const EmitterProfile* bound_without = without_white.emitterProfile();
+    FL_REQUIRE(bound_with != nullptr);
+    FL_REQUIRE(bound_without != nullptr);
+    for (int i = 0; i < 2; ++i) {
+        FL_CHECK_EQ(bound_with->xy_r[i], bound_without->xy_r[i]);
+        FL_CHECK_EQ(bound_with->xy_b[i], bound_without->xy_b[i]);
+    }
+    FL_CHECK_EQ(bound_with->lum_g, bound_without->lum_g);
+}
+
 FL_TEST_CASE("Rebinding replaces the profile and releases the first") {
     // FastLED#4156 R9 names "profile/lut lifetime and rebind tests" as
     // required evidence, and asks what happens to cache invalidation when a

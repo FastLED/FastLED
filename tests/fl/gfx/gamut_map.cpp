@@ -1657,6 +1657,89 @@ FL_TEST_CASE("the two-white allocator never clamps a drive the solve put out of 
     FL_CHECK_GT(worst, 0.0f);
 }
 
+FL_TEST_CASE("a neutral request stays neutral whatever the device white is") {
+    // FastLED#4156 R7 says standard Oklab assumes D65 with white Y = 1, and
+    // that "feeding arbitrary warm/profile-white XYZ directly into those
+    // matrices does not make the target neutral axis zero-chroma".
+    //
+    // Measured, that failure does not arise here -- because the mapper never
+    // feeds it profile white. `kGamutD65Q16` is a compile-time D65, and the
+    // brightest-neutral walk, the neutral cap and the chroma ray are all
+    // anchored to it. A D65 target goes in and comes back D65 regardless of
+    // where the device's own white sits.
+    //
+    // Worst OKLab chroma over a twenty-step neutral ramp, by device blue:
+    //
+    //   (0.150, 0.060)  D65-ish   6.5e-05
+    //   (0.180, 0.100)  warm-ish  6.3e-05
+    //   (0.220, 0.160)  warmer    6.5e-05
+    //
+    // Flat across the three, which is what a mapping space independent of
+    // the device white looks like; the figures are Q16 rounding.
+    //
+    // The ramp runs past the device's brightest neutral on purpose. Inside
+    // the hull the mapper hands a neutral straight back and this would be
+    // measuring the solve -- moving `kGamutD65Q16` to a warm white then
+    // changes nothing, which is how the first version of this case passed
+    // that mutation. Above the cap the walk-down runs and the mapping white
+    // is load-bearing: the same mutation now takes the chroma to 0.02.
+    struct DeviceBlue {
+        float x;
+        float y;
+    };
+    const DeviceBlue kBlues[] = {{0.1500f, 0.0600f},
+                                 {0.1800f, 0.1000f},
+                                 {0.2200f, 0.1600f}};
+    int measured = 0;
+    for (const auto& blue : kBlues) {
+        EmitterProfile device = rgbDevice();
+        device.xy_b[0] = blue.x;
+        device.xy_b[1] = blue.y;
+        GamutMapQ16 map;
+        FL_REQUIRE(buildGamutMapQ16(device, &map));
+
+        // Up to 2.0, well past the brightest neutral the device can make,
+        // so the cap and the walk-down actually run. Staying inside the hull
+        // would let the mapper pass the target through untouched, and then
+        // this would be measuring the solve rather than the mapping space.
+        for (int step = 1; step <= 20; ++step) {
+            i32 xyz[3];
+            xyzAt(0.3127f, 0.3290f, static_cast<float>(step) / 10.0f, xyz);
+            i32 drives[3];
+            mapAndSolveDrivesQ16(map, xyz, drives);
+
+            float as_float[3];
+            for (int i = 0; i < 3; ++i) {
+                as_float[i] = toFloat(drives[i]);
+            }
+            float columns[3][3];
+            colorimetric_response::xyY_to_XYZ(device.xy_r[0], device.xy_r[1],
+                                              device.lum_r, columns[0]);
+            colorimetric_response::xyY_to_XYZ(device.xy_g[0], device.xy_g[1],
+                                              device.lum_g, columns[1]);
+            colorimetric_response::xyY_to_XYZ(device.xy_b[0], device.xy_b[1],
+                                              device.lum_b, columns[2]);
+            float produced[3];
+            for (int axis = 0; axis < 3; ++axis) {
+                produced[axis] = columns[0][axis] * as_float[0] +
+                                 columns[1][axis] * as_float[1] +
+                                 columns[2][axis] * as_float[2];
+            }
+            const i32 produced_q16[3] = {q16(produced[0]), q16(produced[1]),
+                                         q16(produced[2])};
+            i32 lab[3];
+            xyzToOklabQ16(produced_q16, lab);
+            const float a = toFloat(lab[1]);
+            const float b = toFloat(lab[2]);
+            FL_CHECK_LT(fl::sqrtf(a * a + b * b), 1.0e-04f);
+            ++measured;
+        }
+    }
+    // Vacuity guard: a build that refused every device would satisfy the
+    // loop body by never entering it.
+    FL_CHECK_EQ(measured, 60);
+}
+
 FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
     // The last corner of the criterion: the hue objective on the five-emitter
     // hull.
