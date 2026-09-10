@@ -620,6 +620,84 @@ here: the clamp is what makes the chroma bisection valid at all (see
 "Lightness must be clamped before chroma"), and removing it without replacing
 the search inverts the bisection's invariant.
 
+## The clamp gives up more than it needs to (#4245)
+
+"Lightness must be clamped before chroma" above is correct about why a chroma
+bisection fails on an over-bright target, and the conclusion drawn from it --
+that lightness must therefore be spent first -- is too strong. What was
+missing is the shape of the feasible set, which is now measured.
+
+Harness: `ci/color_lightness_headroom_study.py`. Regression test:
+`ci/tests/test_color_lightness_headroom.py`.
+
+### The feasible chroma is still one interval; it just stops containing zero
+
+Sampled along fixed-lightness, fixed-hue rays on the three-emitter device
+(neutral cap L = 1.118228):
+
+| L | hue 30 | hue 120 | hue 300 |
+| --- | --- | --- | --- |
+| 1.0623 (below cap) | [0.0000, 0.4215] | [0.0000, 0.1913] | [0.0000, 0.5670] |
+| 1.1741 (above) | **[0.0795, 0.3195]** | (none) | **[0.1275, 0.6000]** |
+| 1.2860 (above) | **[0.2070, 0.2310]** | (none) | **[0.3082, 0.6000]** |
+| 1.3978 (above) | (none) | (none) | **[0.4432, 0.6000]** |
+
+Connected throughout -- so a search is possible -- and above the cap simply
+not anchored at zero. That is the whole of it. A bisection bracketed at
+`[0, C]` has an infeasible low end from its first step, its invariant is
+inverted, and it walks down to zero, which is also infeasible there. The
+clamp is what stops that, not a shortcut.
+
+The headroom being given up is large: brightest reachable L is **1.450614**
+at hue 300, C 0.50, against a neutral cap of 1.118228 -- **29.7% above the
+cap**, on the same device the rest of this document measures.
+
+### Finding both edges keeps the lightness
+
+Probe for a feasible chroma, then bisect each edge. Measured against the
+shipped path on over-bright targets:
+
+| target | shipped L, C | interval clamp L, C | dL |
+| --- | --- | --- | --- |
+| L 1.174, hue 30, C 0.50 | 1.1182, 0.3672 | 1.1741, 0.3196 | +0.056 |
+| L 1.286, hue 300, C 0.30 | 1.1182, 0.2988 | **1.2860, 0.3081** | +0.168 |
+| L 1.398, hue 300, C 0.30 | 1.1182, 0.2988 | **1.3978, 0.4431** | +0.280 |
+| L 1.398, hue 120, C 0.50 | 1.1182, 0.0000 | 1.1182, 0.0000 | 0.000 |
+
+**Never worse** across the sweep -- it falls back to the shipped path when no
+chroma is feasible at that lightness, which is the last row. Hue is preserved
+exactly, and every result is feasible.
+
+Cost is `probes + 2 x halvings`. Those are parameters in the harness, because
+sweeping them is what a study is for; what A3/B11 need is that the cost is
+bounded by a count rather than by a convergence criterion, so an
+implementation fixes both and the loop count is known at compile time. An
+earlier revision of this section called the parameters themselves
+compile-time constants, which they are not.
+
+The lower edge is not optional: clamping to the upper edge alone produces
+*infeasible* output on exactly the targets this is meant to fix, which the
+test suite pins.
+
+### Two shapes that do not work, recorded so they are not re-attempted
+
+**Compressing chroma at the target's own lightness.** The same inverted
+bisection described above. Measured converging to zero.
+
+**A line search from the neutral-at-cap toward the target.** Attractive
+because hue is exactly preserved along it -- `(a, b)` scales linearly, so the
+direction is constant. It fails for a different reason: the anchor sits *on*
+the hull boundary, so the segment leaves immediately, the largest feasible
+step is tiny, and chroma collapses. Measured worse than the shipped path on
+most targets.
+
+### What this does not do
+
+It is a host-side result. The embedded mapper still clamps, and converting it
+means a probe loop and a second bisection in `gamut_map.cpp.hpp` for three
+device topologies, plus the s16.16 accuracy work. This measures the shape,
+fixes the algorithm choice, and leaves that.
+
 ## Not covered
 
 The composition is scored against the reference objective and against itself,
