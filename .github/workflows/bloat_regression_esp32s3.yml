@@ -88,7 +88,16 @@ jobs:
         id: previous_baseline
         run: |
           set -euo pipefail
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          # For a pull request the comparison point is the merge base, not
+          # the target-branch tip: `base.sha` moves whenever master advances,
+          # so comparing against a newer tip would read someone else's change
+          # to the baseline as this PR's. A push has no merge to take, so its
+          # comparison point is the previous commit.
+          if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
+            base="$(git merge-base "${{ github.event.pull_request.head.sha }}" "${{ github.event.pull_request.base.sha }}" || true)"
+          else
+            base="${{ github.event.before }}"
+          fi
           out="$RUNNER_TEMP/previous_baseline.txt"
           if [ -n "$base" ] && git cat-file -e "$base:tests/data/esp32s3_bloat_baseline.txt" 2>/dev/null; then
             git show "$base:tests/data/esp32s3_bloat_baseline.txt" > "$out"
