@@ -52,6 +52,7 @@ from ci.color_fixed_inverse_study import (
     to_q16,
     xyz_to_lab,
 )
+from ci.color_reference import Matrix3, Xyz
 
 
 kQ16One = 1 << 16
@@ -73,30 +74,127 @@ class ProfileError:
     coefficient_ulps: int
 
 
+# Per-emitter luminances to price alongside the unit case.
+#
+# `EmitterProfile` carries `lum_r`, `lum_g` and `lum_b` and does not require
+# them to be 1. The first version of this study fixed them at unity, which
+# left the question it exists to answer only half priced: quantising a
+# luminance is a second perturbation, and it lands on the same columns the
+# divisor sensitivity already stresses.
 @typechecked
-def emitter_matrix_q16(primaries: Primaries) -> list[list[int]] | None:
+@dataclass(frozen=True, slots=True)
+class EmitterLuminances:
+    """`EmitterProfile`'s `lum_r`, `lum_g` and `lum_b`, with a name."""
+
+    label: str
+    red: float
+    green: float
+    blue: float
+
+    def per_emitter(self) -> list[float]:
+        """The three, in the column order the emitter matrix uses."""
+
+        return [self.red, self.green, self.blue]
+
+
+kUnitLuminance = EmitterLuminances(label="unit", red=1.0, green=1.0, blue=1.0)
+
+kLuminanceSets: tuple[EmitterLuminances, ...] = (
+    kUnitLuminance,
+    # A warm-white part: green carries most of the flux, blue least.
+    EmitterLuminances(label="typical", red=1.0, green=0.8, blue=0.4),
+    # Deliberately lopsided, to find where the derivation stops holding.
+    EmitterLuminances(label="lopsided", red=0.25, green=1.0, blue=0.1),
+    EmitterLuminances(label="dim-blue", red=1.0, green=1.0, blue=0.05),
+)
+
+
+@typechecked
+def emitter_matrix_q16(
+    primaries: Primaries, luminances: EmitterLuminances
+) -> list[list[int]] | None:
     """The emitter columns built entirely in Q16, from Q16 chromaticities.
 
     Mirrors `xyY_to_XYZ`'s operation order -- divide by `y`, then scale --
-    because that order is what decides where a fixed-point path rounds. Unit
-    luminance per emitter, as `EmitterProfile`'s defaults carry.
+    because that order is what decides where a fixed-point path rounds.
 
-    Returns None when a `y` quantises to zero, which is the degenerate case
-    the shipped `isUsableSolveChromaticity` already refuses.
+    Returns None when a `y` or a luminance quantises to zero, which is the
+    degenerate case the shipped `isUsableSolveChromaticity` and
+    `isUsableLuminance` already refuse.
     """
 
     columns: list[list[int]] = []
-    for x_float, y_float in primaries:
+    for (x_float, y_float), luminance_float in zip(primaries, luminances.per_emitter()):
         x = to_q16(x_float)
         y = to_q16(y_float)
-        if y <= 0:
+        luminance = to_q16(luminance_float)
+        if y <= 0 or luminance <= 0:
             return None
         # z = 1 - x - y, in Q16, from the *quantised* x and y rather than
         # from the floats: a fixed-point profile has no float to go back to.
         z = kQ16One - x - y
-        # X = x / y and Z = z / y at unit Y, both in Q16.
+        # X = Y*x/y and Z = Y*z/y, divided first and scaled second.
+        #
+        # This deliberately does *not* mirror the shipped order. `xyY_to_XYZ`
+        # is `out[0] = x * Y * inv_y`, which C++ groups left to right, so the
+        # float path scales before it divides. In fixed point that is the
+        # worse arrangement: `x * Y` in Q16 discards low bits before the
+        # divide can use them.
+        #
+        # Measured against the float32 baseline, worst coefficient ULP over
+        # the corpus and the luminance sets:
+        #
+        #   srgb/dim-blue        11 divide-first    18 scale-first
+        #   bt2020/lopsided       5                 10
+        #   display_p3/dim-blue  10                 18
+        #   narrow/dim-blue    2899               7363
+        #
+        # Better in 8 of the 16 combinations and tied in 7 -- the unit sets,
+        # where the two are the same expression. It loses one, `narrow` with
+        # typical luminances, by 21 ULP. What decides it is the extreme.
+        #
+        # And it costs nothing in colour either way: both orders give the
+        # same 0.1085 worst dE2000, because the binding case is unit
+        # luminance where the two are identical.
+        #
+        # Stated at this length because the first version of this comment
+        # claimed the opposite, that divide-first *was* the shipped order.
+        # It is not; keeping it is an accuracy argument, not a fidelity one.
         columns.append(
-            [rounded_div(x * kQ16One, y), kQ16One, rounded_div(z * kQ16One, y)]
+            [
+                rounded_div(rounded_div(x * kQ16One, y) * luminance, kQ16One),
+                luminance,
+                rounded_div(rounded_div(z * kQ16One, y) * luminance, kQ16One),
+            ]
+        )
+    return [
+        [columns[0][0], columns[1][0], columns[2][0]],
+        [columns[0][1], columns[1][1], columns[2][1]],
+        [columns[0][2], columns[1][2], columns[2][2]],
+    ]
+
+
+@typechecked
+def emitter_matrix_f32_lum(
+    primaries: Primaries, luminances: EmitterLuminances
+) -> list[list[float]]:
+    """`emitter_matrix_f32` with per-emitter luminance, the shipped order.
+
+    Scale then divide, because `xyY_to_XYZ` is `x * Y * inv_y` and C++ groups
+    that left to right. This is the baseline, so it has to be what ships even
+    where that is the less accurate arrangement -- the candidate is the one
+    allowed to be better, and `emitter_matrix_q16` says why it is.
+    """
+
+    columns: list[list[float]] = []
+    for (x, y), luminance in zip(primaries, luminances.per_emitter()):
+        inv_y = f32(1.0 / f32(y))
+        columns.append(
+            [
+                f32(f32(f32(x) * f32(luminance)) * inv_y),
+                f32(luminance),
+                f32(f32(f32(1.0 - f32(x) - f32(y)) * f32(luminance)) * inv_y),
+            ]
         )
     return [
         [columns[0][0], columns[1][0], columns[2][0]],
@@ -107,7 +205,10 @@ def emitter_matrix_q16(primaries: Primaries) -> list[list[int]] | None:
 
 @typechecked
 def compare_profile_quantization(
-    name: str, primaries: Primaries, steps: int
+    name: str,
+    primaries: Primaries,
+    steps: int,
+    luminances: EmitterLuminances = kUnitLuminance,
 ) -> ProfileError:
     """Worst dE2000, drive error and coefficient ULPs for one device.
 
@@ -117,13 +218,13 @@ def compare_profile_quantization(
     reaches float again.
     """
 
-    forward_f32 = emitter_matrix_f32(primaries)
+    forward_f32 = emitter_matrix_f32_lum(primaries, luminances)
     inverse_f32 = invert3x3_f32(forward_f32)
     if inverse_f32 is None:
         raise ValueError(f"{name}: float32 inverse reported singular")
     shipped = quantize_rows(inverse_f32)
 
-    forward_q16 = emitter_matrix_q16(primaries)
+    forward_q16 = emitter_matrix_q16(primaries, luminances)
     if forward_q16 is None:
         raise ValueError(f"{name}: a chromaticity quantised to an unusable y")
     proposed = invert3x3_q16(forward_q16)
@@ -140,7 +241,18 @@ def compare_profile_quantization(
     # Rendering stays float64: it stands in for the device, and modelling it
     # at either candidate's precision would credit one of them with the
     # emulator's rounding.
-    forward = emitter_matrix(primaries)
+    # Rendering in float64, and with the same luminances -- otherwise the two
+    # candidates would be scored against a device neither was built for.
+    # Each column is one emitter, so scaling a column scales that emitter.
+    unit = emitter_matrix(primaries)
+    red, green, blue = luminances.per_emitter()
+
+    def scaled(row: Xyz) -> Xyz:
+        return (row[0] * red, row[1] * green, row[2] * blue)
+
+    forward = Matrix3(
+        row0=scaled(unit.row0), row1=scaled(unit.row1), row2=scaled(unit.row2)
+    )
 
     worst_delta_e = 0.0
     worst_drive_error = 0.0
@@ -203,22 +315,29 @@ def main(argv: list[str]) -> int:
     print("Baseline: the shipped float32 forward + float32 inverse.")
     print()
     print(
-        f"{'primaries':<14}{'chroma q16 err':>16}{'coef ULP':>10}"
+        f"{'primaries':<14}{'luminances':<11}{'chroma q16 err':>16}{'coef ULP':>10}"
         f"{'drive err':>12}{'worst dE2000':>14}"
     )
 
     worst_overall = 0.0
+    worst_where = ""
     for name, primaries in corpus_primaries():
-        measured = compare_profile_quantization(name, primaries, args.steps)
         residual = quantization_residual(primaries)
-        print(
-            f"{name:<14}{residual:>16.2e}{measured.coefficient_ulps:>10d}"
-            f"{measured.drive_error:>12.2e}{measured.delta_e:>14.4f}"
-        )
-        if measured.delta_e > worst_overall:
-            worst_overall = measured.delta_e
+        for luminances in kLuminanceSets:
+            measured = compare_profile_quantization(
+                name, primaries, args.steps, luminances
+            )
+            print(
+                f"{name:<14}{luminances.label:<11}{residual:>16.2e}"
+                f"{measured.coefficient_ulps:>10d}"
+                f"{measured.drive_error:>12.2e}{measured.delta_e:>14.4f}"
+            )
+            if measured.delta_e > worst_overall:
+                worst_overall = measured.delta_e
+                worst_where = f"{name}/{luminances.label}"
 
     print()
+    print(f"worst case: {worst_where}")
     # A1 allows 0.5 dE2000 end to end, and the gamut mapper already spends
     # about 0.15 of it, so a derivation change has roughly 0.35 to work in.
     print(f"worst across the corpus: {worst_overall:.4f} dE2000 (A1 budget 0.5)")
