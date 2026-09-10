@@ -427,8 +427,12 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     // Emits the v2 screenmap shape (issue ledmapper#143):
     //   { "version": 2,
     //     "groups": { "<name>": { "color": "#hex" } },
-    //     "segments": [ { "id": "<name>", "pin": "pin1", "group": "<name>",
+    //     "segments": [ { "id": "<name>", "group": "<name>",
     //                     "x": [...], "y": [...], "diameter": ... } ] }
+    //
+    // `pin` is part of the v2 shape but is not emitted here -- see the note
+    // at the segment object below. Writing the example value from a comment
+    // as data is how it came to be there.
     // Bilingual readers (`ScreenMap::ParseJson`, ledmapper) accept both v1
     // and v2, so any existing on-disk v1 JSON keeps loading. v1 emission
     // is no longer supported.
@@ -471,7 +475,23 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
 
         fl::json segmentObj = fl::json::object();
         segmentObj.set("id", fl::json(fl::string(name)));
-        segmentObj.set("pin", fl::json(fl::string("pin1")));
+        // No `pin`. The v2 shape carries one and the parser above drops it --
+        // it is wiring metadata with nowhere to live on this side -- so there
+        // is nothing here to write. What used to be written was the literal
+        // `"pin1"` from the shape example in the comment above, copied into
+        // the emitter as data.
+        //
+        // That is worse than omitting it, because it is wrong rather than
+        // absent. A three-segment file wired to pin1/pin2/pin3 came back with
+        // all three on pin1, and a numeric `"pin": 7` came back as the string
+        // `"pin1"`. A consumer reading that mis-wires a strip and has no way
+        // to tell; a consumer reading a missing optional key can see that it
+        // is missing.
+        //
+        // Carrying the value through instead is FastLED #3322, which needs
+        // somewhere on `ScreenMap` to put it and a decision about the
+        // `<int|str>` union. Until then this loses the field visibly rather
+        // than rewriting it silently.
         segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);

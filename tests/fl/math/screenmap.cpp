@@ -314,4 +314,55 @@ FL_TEST_CASE("ScreenMap v2 JSON parsing — EL geometry remains shape-native") {
 
 FL_TEST_FILE(FL_FILEPATH) {
 
-} // FL_TEST_FILE
+
+FL_TEST_CASE("ScreenMap v2 emission does not invent a pin") {
+    // `toJson` used to write the literal `"pin1"` into every segment -- the
+    // example value from the shape comment above the emitter, copied in as
+    // data. The parser drops `pin` (it is wiring metadata with nowhere to
+    // live on this side), so the round trip did not preserve the field, it
+    // *rewrote* it: a file wired to pin1/pin2/pin3 came back with all three
+    // on pin1, and a numeric `"pin": 7` came back as the string `"pin1"`.
+    //
+    // Wrong is worse than absent here. A consumer reading a rewritten pin
+    // mis-wires a strip with no way to tell; a consumer reading a missing
+    // optional key can see it is missing. Carrying the value through is
+    // #3322, which needs a place to store it and a decision about the
+    // `<int|str>` union.
+    const char *kThreePins = R"({
+      "version": 2,
+      "segments": [
+        { "id": "a", "pin": "pin1", "x": [0, 1], "y": [0, 1] },
+        { "id": "b", "pin": "pin2", "x": [0, 1], "y": [0, 1] },
+        { "id": "c", "pin": 7,      "x": [0, 1], "y": [0, 1] }
+      ]
+    })";
+    fl::flat_map<fl::string, ScreenMap> maps;
+    fl::string err;
+    FL_REQUIRE(ScreenMap::ParseJson(kThreePins, &maps, &err));
+    FL_REQUIRE_EQ(maps.size(), fl::size(3));
+
+    fl::string out;
+    ScreenMap::toJsonStr(maps, &out);
+
+    // Not one pin, and not three: none. Checking the count rather than the
+    // absence of "pin1" specifically, so re-introducing a different constant
+    // fails this too.
+    int pins = 0;
+    const fl::string needle("\"pin\"");
+    fl::size at = out.find(needle);
+    while (at != fl::string::npos) {
+        ++pins;
+        at = out.find(needle, at + needle.size());
+    }
+    FL_CHECK_EQ(pins, 0);
+
+    // And the geometry still round-trips, so this removed a field rather
+    // than the emitter's output.
+    fl::flat_map<fl::string, ScreenMap> again;
+    FL_REQUIRE(ScreenMap::ParseJson(out.c_str(), &again, &err));
+    FL_CHECK_EQ(again.size(), fl::size(3));
+    FL_CHECK_EQ(again["b"].getLength(), fl::u32(2));
+    FL_CHECK(again["b"][1].x == 1.0f);
+}
+
+}
