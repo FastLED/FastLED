@@ -853,13 +853,11 @@ FL_TEST_CASE("[#4326] binding a profile clears the caller's gamma") {
     }
 }
 
-FL_TEST_CASE("[#4326] a bound profile does not yet make the channel colour-managed") {
-    // Recorded because it bounds what the cases above can be read to mean.
-    // The profile binds and is owned, but P6 rendering is not active, so
-    // there is no device solve on this path today and therefore no "second
-    // gamma after the solve" to observe. Whether the 2.8 that
-    // `mGamma.value_or(2.8f)` falls back to should also go away is a question
-    // for when this flips to true.
+FL_TEST_CASE("[#4326] the encode path takes a bound profile") {
+    // Recorded because it bounds what the cases above can be read to mean:
+    // the profile binds and is owned by the channel that encodes here.
+    // Whether the 2.8 that `mGamma.value_or(2.8f)` falls back to should give
+    // way to identity once the device solve runs is #4326's remaining half.
     auto& mgr = ChannelManager::instance();
     mgr.clearAllDrivers();
     mgr.addDriver(9100, fl::make_shared<CapturingDriver>());
@@ -873,7 +871,11 @@ FL_TEST_CASE("[#4326] a bound profile does not yet make the channel colour-manag
 
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->hasColorProfile());
-    FL_CHECK_FALSE(channel->isColorManaged());
+    // Deliberately no isColorManaged() assertion here. That accessor was a
+    // hardcoded constant when this file was written, and #4328/#4329 give it
+    // real semantics plus the guard that stops it collapsing into
+    // hasColorProfile(). Pinning its old value here would only have made
+    // whichever of the two landed second fail.
 }
 
 }  // FL_TEST_FILE
