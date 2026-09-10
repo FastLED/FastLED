@@ -363,6 +363,36 @@
   minutes left. Anchor a completion pattern on text only the result can
   produce (`AUTORESEARCH PASSED`, `autoresearch failed`), and check what the
   first hundred lines of the log already contain before trusting a match.
+- On a machine with no swap, a "low memory" alarm can mean a full page cache
+  rather than exhaustion -- read `MemFree` and `MemAvailable` separately
+  before acting on it. Three long device runs were killed for low memory
+  while a 20-minute sampler I had running showed `MemAvailable` never
+  dropping below 77 GB of 131 GB. The real reading was `MemFree: 1.4 GB`
+  against `Cached: 59.6 GB` with `SwapTotal: 0`: build I/O had filled the
+  page cache, so anything thresholding on `MemFree` saw 1.4 GB while
+  `MemAvailable`, which counts reclaimable cache, correctly reported 80 GB.
+  This corrects my earlier conclusion that daemon growth was the cause.
+  Killing `fbuild-daemon` and `zccache-daemon` appeared to fix it once
+  because it briefly returned pages to `MemFree`, then stopped working,
+  because the daemons were never it -- `fbuild-daemon` was back at 5.26 GB
+  within ten minutes and the run died anyway. Page cache is reclaimable and
+  cannot be dropped from userspace without root, so the honest responses are
+  to retry, shorten the exposed run, or fix the threshold -- not to reap
+  processes and call it fixed.
+- Do not hunt a deterministic cause for an intermittent failure until you have
+  established it is deterministic. `No response with ID 1 within 20.0s` failed
+  two peer-OTA runs in a row, which I took as proof it was not flaky, and I
+  then produced four wrong causes in sequence -- a first-boot filesystem
+  format, a 2 MB filesystem slowing boot, a short `boot_wait`, and a stale
+  CDC on the primary. Each was built on a two-sample correlation with my own
+  most recent change. The next run passed the same point untouched: it is a
+  race on the companion's USB-CDC re-enumeration, which
+  `_connect_peer_with_retry`'s docstring had already recorded across four
+  prior captures, naming the C6 and saying a fixed `boot_wait` cannot cover
+  it. Two consecutive failures of a race are unremarkable. Read the existing
+  docstrings on the failing path before forming a theory, and prefer adding
+  attribution over adding a hypothesis when the error names neither the
+  component nor the operation.
 - `git fetch` before starting work, not before pushing. I root-caused the
   `s16x16x4` 15x penalty in #4216 (rolled 4-lane loops defeating
   scalar-replacement), fixed it, and measured it on hardware -- and only when

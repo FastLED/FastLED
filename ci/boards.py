@@ -1232,7 +1232,32 @@ RPI_PICO2_W = Board(
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico/releases/download/5.7.0/rp2040-5.7.0.zip",
     framework="arduino",
     board_build_core="earlephilhower",
-    board_build_filesystem_size="0.5m",
+    # Sized by the OTA image, not by filesystem need. Arduino-Pico stages an
+    # incoming OTA firmware *into the filesystem region* -- Updater.cpp:101
+    # rejects with UPDATE_ERROR_SPACE when `&_FS_start + size > &_FS_end`,
+    # and Updater.cpp:121 sets `updateStartAddress = &_FS_start`. So the
+    # region has to be at least as large as the whole image, not merely large
+    # enough for whatever the sketch stores.
+    #
+    # At the 0.5m this used to carry, the peer OTA flow reached the RP and
+    # died there with `Update error: ERROR[4]: Not Enough Space`: the image is
+    # 1,030,348 B against a 524,288 B region. Nothing in the log said so --
+    # the C6 reported `servedRequests: 0`, and the reason only surfaced once
+    # `rpOtaUpdateStatus` existed to carry it back.
+    #
+    # Only the sizes rpipico2w declares in boards.txt are selectable -- 0,
+    # 64K, 128K, 256K, 512K, 1M, 2M, 3M -- because fbuild matches this string
+    # against `menu.flash.<flash>_<fs>` and takes the geometry from the
+    # matching entry. A value that matches nothing does not fail: it yields
+    # fs_start == fs_end, and the build dies much later and much less
+    # obviously in PicoOTA.cpp with `the comparison reduces to (0 > 130048)`.
+    # 1.5m is such a value; do not "split the difference" here.
+    #
+    # 2m over 1m: 1M is 1,048,576 B against a 1,030,348 B image, an 18 KB
+    # margin that the next commit to this sketch would erase. 2m keeps ~2x
+    # headroom and still leaves 2,097,152 B for a sketch using 1,030,348.
+    # See FastLED#3956.
+    board_build_filesystem_size="2m",
     # Arduino-Pico's default IPv4 profile excludes BTstack. Enable the Pico W
     # BLE-capable archive so FastLED's RP2350W transport can link.
     board_build_options={"ipbtstack": "ipv4btcble"},

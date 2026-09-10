@@ -220,13 +220,32 @@ async def run_ota_peer_autoresearch(
         method: str,
         params: str | list[Any] | dict[str, Any] | None,
     ) -> dict[str, Any]:
-        response = await client.send(
-            method,
-            {} if params is None else params,
-            timeout=rpc_timeout(),
-        )
+        # Name the board and the call. `RpcClient.send` reports only
+        # `No response with ID 1 within 20.0s`, which identifies neither which
+        # of the two links went silent nor what was asked of it. This flow
+        # alternates between two boards, so that message is not a small
+        # inconvenience: it sent me after the wrong board repeatedly, and the
+        # existing `_settle_link` / `_connect_peer_with_retry` helpers both
+        # label their failures precisely because of it. See FastLED#3899.
+        which = "RP2350W" if client is primary else "ESP32-C6"
+        port = upload_port if client is primary else peer_upload_port
+        try:
+            response = await client.send(
+                method,
+                {} if params is None else params,
+                timeout=rpc_timeout(),
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except (RpcError, RpcTimeoutError) as exc:
+            raise RpcTimeoutError(
+                f"{which} ({port}) did not answer {method!r}: {exc}"
+            ) from exc
         if not isinstance(response.data, dict):
-            raise RuntimeError(f"{method} returned a non-object response")
+            raise RuntimeError(
+                f"{which} ({port}) returned a non-object response to {method!r}"
+            )
         return response.data
 
     try:
@@ -242,7 +261,15 @@ async def run_ota_peer_autoresearch(
         # locked in the daemon; reclaim before either client connects.
         # See FastLED/fbuild#1429.
         _reclaim_stale_port_locks([upload_port, peer_upload_port])
-        await primary.connect(boot_wait=3.0, drain_boot=True)
+        try:
+            await primary.connect(boot_wait=3.0, drain_boot=True)
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise RpcTimeoutError(
+                f"RP2350W ({upload_port}) failed to attach: {exc}"
+            ) from exc
         # The peer flashes last, so its USB-CDC is the one most likely to be
         # mid-re-enumeration here. Four of the captured `No response with ID 1`
         # failures came from this path. See FastLED#3899.
