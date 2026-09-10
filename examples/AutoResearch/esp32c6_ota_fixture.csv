@@ -1,7 +1,23 @@
 # The C6 fixture needs room for both AutoResearch and one RP2350W update
 # image.  This is selected only for `--net-peer --ota`; ordinary C6 builds
 # retain the framework's huge_app.csv layout.
+#
+# Sizes are measured, not guessed.  The AutoResearch image for esp32c6 is
+# ~2.71 MB and the RP2350W update image ~1.01 MB, against 4 MB of flash with
+# 64 KB gone to the bootloader/partition table and nvs.  That leaves ~386 KB
+# of slack in total, so both slots are deliberately sized just above their
+# payloads rather than generously.
+#
+# The previous app0 of 0x290000 (2.56 MB) was SMALLER than the image it had
+# to hold: the flash wrote 2,708,032 bytes at 0x10000, overrunning app0 by
+# 20.6 KB into spiffs.  esptool does not police partition bounds, so the
+# flash reported success and the board then came up with no working
+# application -- the port opened and nothing answered.  See FastLED#3956.
+#
+# ci/tests/test_ota_fixture_partitions.py asserts both slots still clear
+# their payloads, so a growing image fails the test instead of silently
+# corrupting the flash layout again.
 # Name, Type, SubType, Offset, Size, Flags
 nvs, data, nvs, 0x9000, 0x5000,
-app0, app, factory, 0x10000, 0x290000,
-spiffs, data, spiffs, 0x2a0000, 0x160000,
+app0, app, factory, 0x10000, 0x2C0000,
+spiffs, data, spiffs, 0x2d0000, 0x130000,
