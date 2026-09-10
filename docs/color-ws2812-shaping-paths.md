@@ -129,6 +129,37 @@ device normalisation instead of the path, and produces numbers that look
 alarming and mean nothing. The test pins the correct form — substituting equal
 drives fails it.
 
+## The ceiling for a static strategy is above what the pipeline reaches
+
+Before comparing shaping functions it is worth knowing what the best possible
+static answer is, because every candidate sits under it. The output is one of
+256^3 code triples and the best is whichever lands nearest the target, so that
+bound is computable rather than a matter of taste.
+
+I expected round-to-nearest to *be* that bound -- that the 0.0605 above was
+the lattice rather than the rule. It is not.
+
+`quantize_u8` rounds each drive independently, minimising error in **drive**
+space. The three drives carry very different perceptual weight, so the nearest
+drive triple is not the nearest colour. Searching a +/-2 neighbourhood in
+OKLab over 40 neutral luminances from 1% to 40%:
+
+| | |
+| --- | --- |
+| rounding was optimal | **13 of 40** |
+| worst shortfall | **0.0115** OKLab distance |
+| neutral chroma the same sweep reports | 0.0605 |
+
+So roughly a fifth of the neutral-axis error is the rounding *rule*, not the
+lattice, and it is recoverable by a static choice.
+
+Two things this does not say. A 125-candidate search does not belong on the
+per-pixel path -- it plainly does not, and nothing here proposes it. And it
+does not name a cheap rule that captures the gain; finding one is work this
+has not done. What it establishes is that the remaining candidates are being
+compared against a floor that is lower than it needs to be, which is worth
+knowing before spending effort ranking them.
+
 ## What this leaves for section 5
 
 Two of the five candidates are gone, and the remaining comparison is between
