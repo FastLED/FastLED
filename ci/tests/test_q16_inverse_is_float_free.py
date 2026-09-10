@@ -80,12 +80,22 @@ def _arm_tools() -> ArmTools | None:
 
 @typechecked
 def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
-    """Every function in the object, keyed by symbol."""
+    """Every function in the object, keyed by symbol, with relocations.
+
+    `-r` matters. In an unlinked object a call to an undefined symbol
+    disassembles as `bl 0 <name>`, and objdump resolves that `0` against the
+    symbol table -- so when a *defined* function happens to sit at address
+    zero, every unrelocated call in the object appears to go to it. Walking
+    those printed names had `signedCbrtQ16` calling
+    `isUsableSolveChromaticity`: a cube root calling a chromaticity
+    validator, which is what gave it away. The relocation records say where
+    the calls really go.
+    """
 
     # `subprocess.run` and not `RunningProcess.run`: the latter merges stderr
     # into stdout, which would put objdump's warnings into what this parses.
     completed = subprocess.run(  # noqa: SRC001
-        [objdump, "-d", "--no-show-raw-insn", str(obj)],
+        [objdump, "-d", "-r", "--no-show-raw-insn", str(obj)],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -108,6 +118,33 @@ def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
 
 
 @typechecked
+def _callees(body: list[str]) -> set[str]:
+    """Who this function actually calls.
+
+    Two forms, and only two. A relocation record names the real target of a
+    call to an undefined symbol; a resolved local call carries a non-zero
+    address. A `bl 0 <name>` with no relocation beside it is neither -- that
+    is the unrelocated case, and the name objdump prints for it is whatever
+    happens to sit at address zero. Following those printed names had this
+    walk believing `signedCbrtQ16` called `isUsableSolveChromaticity`: a cube
+    root calling a chromaticity validator, which is what gave it away.
+    """
+
+    out: set[str] = set()
+    for line in body:
+        relocation = re.search(r"R_ARM_\w+\s+([A-Za-z_][A-Za-z0-9_.]*)", line)
+        if relocation:
+            out.add(relocation.group(1))
+            continue
+        call = re.search(
+            r"\bbl(?:\.w)?\s+([0-9a-f]+) <([A-Za-z_][A-Za-z0-9_.]*)>", line
+        )
+        if call and int(call.group(1), 16) != 0:
+            out.add(call.group(2))
+    return out
+
+
+@typechecked
 def _reachable_helpers(objdump: str, obj: Path, symbol: str) -> set[str]:
     """Soft-float helpers reachable from `symbol`, following calls.
 
@@ -127,12 +164,10 @@ def _reachable_helpers(objdump: str, obj: Path, symbol: str) -> set[str]:
         if name in seen:
             continue
         seen.add(name)
-        text = "\n".join(bodies.get(name, []))
-        found |= set(kFloatHelper.findall(text))
-        for callee in re.findall(
-            r"<([A-Za-z_][A-Za-z0-9_.]*)(?:\+0x[0-9a-f]+)?>", text
-        ):
-            if callee in bodies and callee != name:
+        for callee in _callees(bodies.get(name, [])):
+            if kFloatHelper.match(callee):
+                found.add(callee)
+            elif callee in bodies and callee != name:
                 pending.append(callee)
     return found
 
@@ -169,6 +204,116 @@ def _helpers_called(objdump: str, obj: Path, symbol: str) -> set[str]:
     if not body:
         raise AssertionError(f"{symbol} not found in {obj.name}")
     return set(kFloatHelper.findall("\n".join(body)))
+
+
+kPerPixelSymbol = "_ZN2fl15processPixelQ16ERKNS_20StreamingPipelineQ16EhhhRA3_l"
+kBindSymbol = (
+    "_ZN2fl25buildStreamingPipelineQ16ERKNS_13SourceProfileERKNS_"
+    "21colorimetric_response14EmitterProfileENS_11GamutPolicyEPNS_"
+    "20StreamingPipelineQ16E"
+)
+
+kPipelineSource = """
+#include "fl/gfx/device_solve.cpp.hpp"
+#include "fl/gfx/flux_scalar.cpp.hpp"
+#include "fl/gfx/gamut_map.cpp.hpp"
+#include "fl/gfx/oklab_q16.cpp.hpp"
+#include "fl/gfx/pipeline.cpp.hpp"
+#include "fl/gfx/source_xyz.cpp.hpp"
+#include "fl/gfx/transfer.cpp.hpp"
+#include "fl/gfx/white_allocation.cpp.hpp"
+"""
+
+
+@pytest.fixture(scope="module")
+@typechecked
+def compiled_pipeline(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> tuple[ArmTools, Path]:
+    """The whole streaming pipeline in one object, so calls can be followed.
+
+    Every stage `processPixelQ16` reaches lives in a different translation
+    unit, and reachability cannot cross an object boundary. Compiling them
+    together is what makes the walk complete.
+    """
+
+    tools = _arm_tools()
+    if tools is None:
+        pytest.skip("no arm-none-eabi cross compiler on this machine")
+
+    tmp_path = tmp_path_factory.mktemp("pipeline_float_free")
+    source = tmp_path / "pipeline_tu.cpp"
+    source.write_text(kPipelineSource, encoding="utf-8")
+    obj = tmp_path / "pipeline_tu.o"
+    subprocess.run(  # noqa: SRC001
+        [
+            tools.compiler,
+            "-c",
+            str(source),
+            "-o",
+            str(obj),
+            "-I",
+            str(PROJECT_ROOT / "src"),
+            "-mcpu=cortex-m0plus",
+            "-march=armv6-m",
+            "-mthumb",
+            "-Os",
+            "-std=gnu++17",
+            "-ffreestanding",
+            "-fno-exceptions",
+            "-fno-rtti",
+            "-DARDUINO_ARCH_RP2040",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
+    )
+    return tools, obj
+
+
+@typechecked
+def test_the_per_pixel_path_reaches_no_float_runtime(
+    compiled_pipeline: tuple[ArmTools, Path],
+) -> None:
+    """P9's criterion, at the place it actually matters (FastLED#4043).
+
+    The phase asks for a tier with no float symbols linked. `processPixelQ16`
+    is the per-pixel path -- decode, source matrix, gamut map, device solve,
+    flux -- and it runs for every pixel of every frame.
+
+    It reaches none. Measured across the 19 functions the walk visits.
+    """
+
+    tools, obj = compiled_pipeline
+    helpers = _reachable_helpers(tools.objdump, obj, kPerPixelSymbol)
+    assert helpers == set(), (
+        f"the per-pixel path reaches the float runtime: {sorted(helpers)}"
+    )
+
+
+@typechecked
+def test_the_bind_path_is_where_the_float_still_is(
+    compiled_pipeline: tuple[ArmTools, Path],
+) -> None:
+    """Control for the case above, and a statement of what remains.
+
+    If the walk reported nothing for both, it would prove the traversal
+    stopped rather than that the pipeline is clean. `buildStreamingPipelineQ16`
+    is in the same object and derives its matrices in float, so it must show
+    the helpers the per-pixel path does not.
+
+    That float is confined to bind time is P9 item 2's remaining work rather
+    than a defect here -- `buildRgbSolveMatrixFromQ16` is the float-free
+    counterpart, and nothing routes to it yet.
+    """
+
+    tools, obj = compiled_pipeline
+    helpers = _reachable_helpers(tools.objdump, obj, kBindSymbol)
+    assert len(helpers) >= 8, (
+        f"expected the bind path to reach the soft-float runtime, found {sorted(helpers)}"
+    )
 
 
 @pytest.fixture(scope="module")

@@ -4,6 +4,8 @@
 /// base definitions used by led controllers for writing out led data
 
 #include "color.h"
+#include "fl/channels/color_profile.h"  // IWYU pragma: keep  (EmitterProfile)
+#include "pixel_controller.h"  // IWYU pragma: keep  (ColorAdjustment)
 
 #include "fl/stl/compiler_control.h"
 #include "dither_mode.h"

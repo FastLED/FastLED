@@ -45,6 +45,16 @@ kSelfContainedHeaders = [
     "fl/gfx/white_allocation.h",
     "fl/gfx/gamut_map.h",
     "fl/gfx/colorimetric_response.h",
+    "fl/gfx/pipeline.h",
+    "fl/gfx/oklab_q16.h",
+    # The channels layer reaches the same type through its own
+    # `fl/channels/color_profile.h`, so these are fixed by including that
+    # rather than by qualifying.
+    "fl/channels/color_profile.h",
+    "fl/channels/color_managed_source.h",
+    "fl/channels/cled_controller.h",
+    "fl/channels/options.h",
+    "fl/channels/channel.h",
 ]
 
 

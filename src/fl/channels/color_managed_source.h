@@ -20,6 +20,7 @@
 // decided at bind time.
 
 #include "fl/gfx/pipeline.h"
+#include "fl/channels/color_profile.h"  // IWYU pragma: keep  (EmitterProfile)
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/gfx/eorder.h"
