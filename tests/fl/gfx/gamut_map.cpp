@@ -1357,6 +1357,51 @@ FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
     // target 0.210, so the hue angle is well determined.
 }
 
+FL_TEST_CASE("the per-channel slack only ever narrows the allowance") {
+    // Scaling by the column peak divides, so a *dim* emitter -- whose column
+    // is small -- wants a larger slack, not a smaller one. Unbounded, that
+    // reinstates the defect this is meant to remove: measured at a luminance
+    // of 1e-4, the three channels came out at 330000, 640000 and 48608 raw
+    // units, and 640000 is nearly ten in drive space. A check of
+    // `drive > 65536 + 640000` accepts anything at all and clamps it.
+    //
+    // So the scaling only narrows. 64 is the ceiling and the column decides
+    // how far below it each channel sits.
+    const float kLuminances[] = {1.0f, 0.5f, 0.01f, 0.001f, 0.0001f};
+    int dimmer_than_unit_seen = 0;
+    for (float luminance : kLuminances) {
+        EmitterProfile profile = rgbDevice();
+        profile.lum_r = luminance;
+        profile.lum_g = luminance;
+        profile.lum_b = luminance;
+        GamutMapRgbwQ16 map;
+        if (!buildGamutMapRgbwQ16(profile, kWhiteD65,
+                                  WhiteAllocationPolicy::WhitePreferred, &map)) {
+            // Dim enough that the solve matrix itself is refused, which is
+            // the guard in front of this one.
+            continue;
+        }
+        if (luminance < 1.0f) {
+            ++dimmer_than_unit_seen;
+        }
+        for (int channel = 0; channel < 3; ++channel) {
+            FL_CHECK_LE(map.allocation.slack[channel], 64);
+            FL_CHECK_GE(map.allocation.slack[channel], 1);
+        }
+    }
+    // Vacuity guard: if every dim profile were refused before reaching the
+    // slack, the bound above would hold over the unit case alone -- which is
+    // the case that never wanted to grow.
+    FL_CHECK_GT(dimmer_than_unit_seen, 2);
+
+    // And the unit profile is unaffected by the ceiling: green sits exactly
+    // at it, so the measurements the other cases pin are unchanged.
+    GamutMapRgbwQ16 unit;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &unit));
+    FL_CHECK_EQ(unit.allocation.slack[1], 64);
+}
+
 FL_TEST_CASE("a drive the solve puts out of range is refused, not clamped") {
     // This case used to record the opposite. It measured an in-gamut target
     // at (0.55, 0.41) whose blue drive the solve put at -62 raw, showed that

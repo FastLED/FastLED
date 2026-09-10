@@ -90,7 +90,7 @@ struct WhiteAllocationQ16 {
 ///
 /// False on the profiles `buildRgbSolveMatrixQ16` rejects, and on a white
 /// emitter the RGB primaries cannot express at all.
-bool buildWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                              const i32 (&white_xyz)[3],
                              WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT;
@@ -144,7 +144,7 @@ struct TwoWhiteAllocationQ16 {
 /// white lands so far outside what the primaries express that the per-pixel
 /// bounds would overflow their accumulators -- see `kTwoWhiteMaxColumn` in
 /// the implementation, which a real white emitter is nowhere near.
-bool buildTwoWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                                 const i32 (&white1_xyz)[3],
                                 const i32 (&white2_xyz)[3],
                                 WhiteAllocationPolicy policy,

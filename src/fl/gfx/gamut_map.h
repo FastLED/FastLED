@@ -91,7 +91,7 @@ struct GamutMapRgbwQ16 {
 /// `policy` is C3's per-profile choice of which end of the feasible white
 /// interval to take; it changes the drives, never which targets are
 /// reachable, so the hull this maps onto is the same either way.
-bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
+bool buildGamutMapRgbwQ16(const colorimetric_response::EmitterProfile& profile,
                           const i32 (&white_xyz)[3],
                           WhiteAllocationPolicy policy,
                           GamutMapRgbwQ16* out) FL_NO_EXCEPT;
@@ -131,7 +131,7 @@ struct GamutMapRgbwwQ16 {
 /// s16.16. `policy` is C3's per-profile choice of which end of the feasible
 /// *total* to take; as with one white it changes the drives, never which
 /// targets are reachable.
-bool buildGamutMapRgbwwQ16(const EmitterProfile& profile,
+bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
                            const i32 (&white1_xyz)[3],
                            const i32 (&white2_xyz)[3],
                            WhiteAllocationPolicy policy,
@@ -151,7 +151,7 @@ void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
 ///
 /// False on the same degenerate profiles `buildRgbSolveMatrixQ16` rejects,
 /// and on a profile that cannot reach any neutral at all.
-bool buildGamutMapQ16(const EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT;
+bool buildGamutMapQ16(const colorimetric_response::EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT;
 
 /// One pixel: XYZ in s16.16 to in-gamut emitter drives in s16.16.
 ///

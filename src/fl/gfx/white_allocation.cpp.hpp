@@ -86,7 +86,7 @@ i32 scaleWhiteQ16(i32 value, i32 factor) FL_NO_EXCEPT {
 
 }  // namespace
 
-bool buildWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                              const i32 (&white_xyz)[3],
                              WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT {
@@ -131,6 +131,22 @@ bool buildWhiteAllocationQ16(const EmitterProfile& profile,
             // would reject the rounding this exists to tolerate.
             if (scaled < 1.0f) {
                 scaled = 1.0f;
+            }
+            // And never larger than the allowance it is scaling. Dim
+            // emitters have small columns, so the division wants to *grow*
+            // the slack -- at a luminance of 1e-4 it reaches 640,000 raw
+            // units, nearly ten in drive space, which accepts any drive at
+            // all and clamps it. That is the defect this function exists to
+            // remove, reinstated an order of magnitude worse.
+            //
+            // The tolerance is for rounding in the solve, which is a few raw
+            // units whatever the emitter's brightness. So this only ever
+            // narrows: 64 stays the ceiling and the column decides how far
+            // below it each channel sits. For the corpus device nothing is
+            // clipped -- green is already at 64 and the others below it --
+            // so the measurements above are unaffected.
+            if (scaled > static_cast<float>(kWhiteSlackAtUnitColumn)) {
+                scaled = static_cast<float>(kWhiteSlackAtUnitColumn);
             }
             out->slack[channel] = static_cast<i32>(scaled + 0.5f);
         }
@@ -327,7 +343,7 @@ bool narrowTotalForPair(const SplitBound& lower, const SplitBound& upper, i64* l
 
 }  // namespace
 
-bool buildTwoWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                                 const i32 (&white1_xyz)[3],
                                 const i32 (&white2_xyz)[3],
                                 WhiteAllocationPolicy policy,
