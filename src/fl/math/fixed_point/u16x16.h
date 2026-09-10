@@ -4,6 +4,7 @@
 // All operations are integer-only in the hot path.
 
 #include "fl/stl/stdint.h"
+#include "fl/math/fixed_point/wide_divide.h"
 #include "fl/math/fixed_point/isqrt.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point/traits.h"
@@ -81,8 +82,16 @@ class u16x16 {
 #endif
 
     constexpr FASTLED_FORCE_INLINE u16x16 operator/(u16x16 b) const FL_NO_EXCEPT {
+#if FL_FIXED_POINT_NARROW_DIVIDE
+        // See `s16x16::operator/`. FastLED#4307 measured this one at 33x the
+        // cost of `s8x8`; the signed twin pays more again for the sign
+        // handling `__aeabi_ldivmod` layers on top.
+        return from_raw(divide64By32(mValue >> (32 - FRAC_BITS),
+                                     mValue << FRAC_BITS, b.mValue));
+#else
         return from_raw(static_cast<u32>(
             (static_cast<u64>(mValue) * (static_cast<u64>(1) << FRAC_BITS)) / b.mValue));
+#endif
     }
 
     constexpr FASTLED_FORCE_INLINE u16x16 operator+(u16x16 b) const FL_NO_EXCEPT {
