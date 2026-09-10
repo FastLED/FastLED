@@ -341,3 +341,12 @@
   laying out both sides in a comment leaves the decision where it belongs and
   keeps the evidence attached to it. Overwriting would have looked like a
   merge conflict resolution rather than the disagreement it actually was.
+- The exit-status trap has a producing side, not just a reading side, and
+  writing down the reading side did not stop it. After recording that
+  `cmd | tail; echo $?` reports the wrong status, I hit the same shape three
+  more times by *generating* a wrong status: a script whose last statement is
+  `[ $rc -ne 0 ] && echo ...` exits 1 when the run succeeded, so a passing
+  regression check was reported as a failure twice, and `git push; echo
+  pushed` announced a rejected push once. End a script with
+  `if [ $rc -ne 0 ]; then ...; fi`, or an explicit `exit 0`, so its status
+  describes the work rather than the last test evaluated.
