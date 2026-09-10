@@ -14,6 +14,7 @@
 #include "fl/stl/int.h"           // fl::u32, fl::u8
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 #include "fl/stl/singleton.h"    // fl::Singleton
+#include "fl/gfx/rgbw.h"     // fl::Rgbw, fl::rgb_2_rgbw
 // POWER MANAGEMENT
 
 /// @name Power Usage Values
@@ -41,6 +42,23 @@ static constexpr float kPowerScalingExponentEpsilon = 0.0001f;
 /// Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)
 static PowerModelRGB& gPowerModel() {
     return fl::Singleton<PowerModelRGB>::instance();
+}
+
+/// The white emitter's draw, when the caller declared one.
+///
+/// Kept beside the RGB model rather than inside it because it applies to a
+/// controller only when that controller is in RGBW mode -- the same model
+/// serves plain RGB strips on the same sketch, and they have no white diode
+/// to charge for.
+///
+/// Zero means "not declared". That reading is available because zero is not
+/// a draw any emitter has, so it cannot collide with a real declaration.
+struct WhiteEmitterPower {
+    fl::u8 mW;
+};
+
+static WhiteEmitterPower& gWhiteEmitterPower() {
+    return fl::Singleton<WhiteEmitterPower>::instance();
 }
 
 #if SKETCH_HAS_LARGE_MEMORY
@@ -184,6 +202,70 @@ fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds ) //
     return calculate_unscaled_power_mW(fl::span<const CRGB>(ledbuffer, numLeds));
 }
 
+// Four emitters, using the conversion the encoder will actually run.
+//
+// The three-emitter overload reads the source triple the sketch wrote. For an
+// RGBW controller that triple is an input to `rgb_2_rgbw`, not a description
+// of the drives, and the two disagree by more than rounding: at full white on
+// the shipped default model the source triple reads 249 while the strip draws
+// 348 under `kRGBWMaxBrightness` and 99 under `kRGBWExactColors`. #4156 R3.
+//
+// Scales are passed as 255 because this is the demand at full brightness --
+// the caller scales the result. That is exact for `kRGBWExactColors` and
+// `kRGBWMaxBrightness`, whose conversions commute with the scale to within
+// 0.4% over the measured cases. It is not exact for `kRGBWBoostedWhite`,
+// which reallocates between emitters as the scale drops: demand there runs up
+// to 12.1% above the linear projection at low brightness. Charging four
+// emitters instead of three is the larger correction by far, and the residual
+// is stated rather than hidden -- closing it needs demand evaluated per
+// candidate brightness, which is a pixel walk per step of the limiter's
+// search.
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw) {
+    const fl::u8 white_mW = gWhiteEmitterPower().mW;
+    // `!rgbw.active()` is a fast path, not a different answer: the only
+    // inactive mode is `kRGBWInvalid`, which `rgb_2_rgbw` dispatches to
+    // null-white -- RGB passed through with w = 0 -- so the loop below would
+    // return the same total. Removing the test changes nothing observable
+    // and costs one conversion per pixel on every plain RGB controller in
+    // the sketch, which the estimator walks once per frame.
+    //
+    // The `white_mW == 0` half *is* behavioural: with no declared white
+    // there is nothing to charge the fourth diode at.
+    if (!rgbw.active() || white_mW == 0) {
+        if (rgbw.active()) {
+            FL_WARN_F_ONCE("power: controller is in RGBW mode but the power model "
+                         "declares no white emitter, so the budget covers three "
+                         "of its four diodes. Call "
+                         "FastLED.setPowerModel(PowerModelRGBW(...)) to fix it.");
+        }
+        return calculate_unscaled_power_mW(leds);
+    }
+
+    fl::u32 red32 = 0, green32 = 0, blue32 = 0, white32 = 0;
+    for (fl::size i = 0; i < leds.size(); i++) {
+        fl::u8 r = 0, g = 0, b = 0, w = 0;
+        fl::rgb_2_rgbw(rgbw, leds[i].r, leds[i].g, leds[i].b, 255, 255, 255,
+                       &r, &g, &b, &w);
+        red32   += map_power_value(r);
+        green32 += map_power_value(g);
+        blue32  += map_power_value(b);
+        white32 += map_power_value(w);
+    }
+
+    red32   *= gPowerModel().red_mW;
+    green32 *= gPowerModel().green_mW;
+    blue32  *= gPowerModel().blue_mW;
+    white32 *= white_mW;
+
+    red32   >>= 8;
+    green32 >>= 8;
+    blue32  >>= 8;
+    white32 >>= 8;
+
+    return red32 + green32 + blue32 + white32 +
+           (gPowerModel().dark_mW * leds.size());
+}
+
 
 // The part of the estimate a brightness scalar cannot touch: every controller
 // IC draws its quiescent current whether or not an emitter is lit, and the MCU
@@ -281,8 +363,8 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
     CLEDController *pCur = CLEDController::head();
 	while(pCur) {
         const fl::u32 count = pCur->size();
-        const fl::u32 unscaled_mW =
-            calculate_unscaled_power_mW(fl::span<const CRGB>(pCur->leds(), count));
+        const fl::u32 unscaled_mW = calculate_unscaled_power_mW(
+            fl::span<const CRGB>(pCur->leds(), count), pCur->getRgbw());
         const fl::u32 dark_mW = fixed_power_mW(count);
         fixed_mW += dark_mW;
         controllable_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
@@ -345,7 +427,10 @@ void set_max_power_indicator_LED( fl::u8 pinNumber)
     gMaxPowerIndicatorLEDPinNumber = pinNumber;
 }
 
-void set_power_model(const PowerModelRGB& model) {
+// The RGB half of installing a model. Split out because the white emitter's
+// lifetime is not the same as the RGB model's: declaring an RGB model retracts
+// a white declaration, but changing the exponent must not.
+static void apply_rgb_power_model(const PowerModelRGB& model) {
     gPowerModel() = model;
 #if SKETCH_HAS_LARGE_MEMORY
     rebuild_power_scaling_tables(model.exponent);
@@ -356,10 +441,30 @@ void set_power_model(const PowerModelRGB& model) {
 #endif
 }
 
+void set_power_model(const PowerModelRGB& model) {
+    apply_rgb_power_model(model);
+    // An RGB model describes a strip with three emitters. Leaving a white
+    // declaration from an earlier RGBW model standing would charge this one
+    // for a diode the caller just said it does not have.
+    gWhiteEmitterPower().mW = 0;
+}
+
+void set_power_model(const PowerModelRGBW& model) {
+    apply_rgb_power_model(model.toRGB());
+    gWhiteEmitterPower().mW = model.white_mW;
+}
+
+fl::u8 get_white_emitter_mW() {
+    return gWhiteEmitterPower().mW;
+}
+
 void set_power_scaling_exponent(float exponent) {
     PowerModelRGB model = gPowerModel();
     model.exponent = exponent;
-    set_power_model(model);
+    // Not `set_power_model`: the exponent is a property of the response
+    // curve, and changing it is not a statement about how many emitters the
+    // strip has.
+    apply_rgb_power_model(model);
 }
 
 float get_power_scaling_exponent() {
