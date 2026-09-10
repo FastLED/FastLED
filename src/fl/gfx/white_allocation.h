@@ -69,6 +69,16 @@ struct WhiteAllocationQ16 {
     /// matrix multiply. It does not depend on the pixel.
     i32 per_white[3];
 
+    /// Per-channel drive slack, in s16.16 raw units.
+    ///
+    /// The allowance a drive may fall outside [0, 1] and still be treated as
+    /// reachable. It is per channel because its *cost* is per channel: one
+    /// drive unit of an emitter is that emitter's XYZ column, and a saturated
+    /// blue primary carries a column an order of magnitude larger than a
+    /// green one. A single number in drive space therefore buys a different
+    /// amount of colour error on each channel. FastLED#4303.
+    i32 slack[3];
+
     /// Which end of the interval this profile takes.
     WhiteAllocationPolicy policy;
 };
