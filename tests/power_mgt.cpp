@@ -774,19 +774,30 @@ fl::EmitterProfile pipelineDevice() {
 
 /// Demand from a solved drive triple, in the same Q16-scaled units as
 /// `estimatedFromSourceCodes` below so the two are comparable.
-long drivenDemandQ16(const fl::i32 (&drives)[3], const PowerModelRGB& model) {
-    return static_cast<long>(drives[0]) * model.red_mW +
-           static_cast<long>(drives[1]) * model.green_mW +
-           static_cast<long>(drives[2]) * model.blue_mW;
+fl::i64 drivenDemandQ16(const fl::i32 (&drives)[3], const PowerModelRGB& model) {
+    return static_cast<fl::i64>(drives[0]) * model.red_mW +
+           static_cast<fl::i64>(drives[1]) * model.green_mW +
+           static_cast<fl::i64>(drives[2]) * model.blue_mW;
 }
 
 /// What `calculate_unscaled_power_mW` charges, per pixel, before the dark
 /// current: the source code read straight off the CRGB array.
-long estimatedFromSourceCodes(fl::u8 r, fl::u8 g, fl::u8 b,
-                              const PowerModelRGB& model) {
-    return (static_cast<long>(r) * model.red_mW +
-            static_cast<long>(g) * model.green_mW +
-            static_cast<long>(b) * model.blue_mW) * 65536 / 255;
+///
+/// The `>> 8` is the estimator's own, and is per channel and truncating --
+/// `power_mgt.cpp.hpp` weights each channel by its emitter cost and then
+/// shifts, so a full red code against an 80 mW emitter is charged 79 mW, not
+/// 80. Dividing the weighted sum by 255 instead would model an estimator
+/// about 0.4% more generous than the real one, which is the wrong direction
+/// for a test whose subject is whether the real one ever charges too little.
+///
+/// `map_power_value` is identity here: its LUT is only non-identity once a
+/// power-scaling exponent is set, and these cases run the default model.
+fl::i64 estimatedFromSourceCodes(fl::u8 r, fl::u8 g, fl::u8 b,
+                                 const PowerModelRGB& model) {
+    const fl::i64 red = (static_cast<fl::i64>(r) * model.red_mW) >> 8;
+    const fl::i64 green = (static_cast<fl::i64>(g) * model.green_mW) >> 8;
+    const fl::i64 blue = (static_cast<fl::i64>(b) * model.blue_mW) >> 8;
+    return (red + green + blue) * 65536;
 }
 
 } // namespace
@@ -825,8 +836,8 @@ FL_TEST_CASE("R3 - the limiter never under-charges a managed channel") {
                     processPixelQ16(pipeline, static_cast<fl::u8>(r),
                                     static_cast<fl::u8>(g),
                                     static_cast<fl::u8>(b), drives);
-                    const long driven = drivenDemandQ16(drives, model);
-                    const long estimated = estimatedFromSourceCodes(
+                    const fl::i64 driven = drivenDemandQ16(drives, model);
+                    const fl::i64 estimated = estimatedFromSourceCodes(
                         static_cast<fl::u8>(r), static_cast<fl::u8>(g),
                         static_cast<fl::u8>(b), model);
                     ++samples;
@@ -846,7 +857,7 @@ FL_TEST_CASE("R3 - the limiter never under-charges a managed channel") {
     FL_CHECK_EQ(under_estimates, 0);
 }
 
-FL_TEST_CASE("R3 - and conservatism costs between 1.4x and 162x of the budget") {
+FL_TEST_CASE("R3 - and conservatism costs between 1.37x and 129x of the budget") {
     // The other half of the answer, and the reason the prepass is still
     // worth building. Safe is not the same as usable: every one of these is
     // headroom a managed strip under a power cap gives up.
@@ -855,8 +866,8 @@ FL_TEST_CASE("R3 - and conservatism costs between 1.4x and 162x of the budget") 
     const fl::SourceProfile kSources[] = {fl::SourceProfile::srgbBt709(),
                                           fl::SourceProfile::displayP3(),
                                           fl::SourceProfile::bt2020()};
-    long worst_ratio_milli = 0;
-    long least_ratio_milli = 1000000;
+    fl::i64 worst_ratio_milli = 0;
+    fl::i64 least_ratio_milli = 1000000;
     for (const auto& source : kSources) {
         fl::StreamingPipelineQ16 pipeline;
         FL_REQUIRE(buildStreamingPipelineQ16(source, pipelineDevice(),
@@ -869,14 +880,14 @@ FL_TEST_CASE("R3 - and conservatism costs between 1.4x and 162x of the budget") 
                     processPixelQ16(pipeline, static_cast<fl::u8>(r),
                                     static_cast<fl::u8>(g),
                                     static_cast<fl::u8>(b), drives);
-                    const long driven = drivenDemandQ16(drives, model);
+                    const fl::i64 driven = drivenDemandQ16(drives, model);
                     if (driven <= 0) {
                         continue;  // nothing to take a ratio against
                     }
-                    const long estimated = estimatedFromSourceCodes(
+                    const fl::i64 estimated = estimatedFromSourceCodes(
                         static_cast<fl::u8>(r), static_cast<fl::u8>(g),
                         static_cast<fl::u8>(b), model);
-                    const long ratio_milli = estimated * 1000 / driven;
+                    const fl::i64 ratio_milli = estimated * 1000 / driven;
                     if (ratio_milli > worst_ratio_milli) {
                         worst_ratio_milli = ratio_milli;
                     }
@@ -888,8 +899,8 @@ FL_TEST_CASE("R3 - and conservatism costs between 1.4x and 162x of the budget") 
         }
     }
 
-    // Measured: least 1.398x, worst 161.817x. Even at its most accurate the
-    // estimate is 40% high, and at its worst a strip is charged 162 times
+    // Measured: least 1.372x, worst 129.453x. Even at its most accurate the
+    // estimate is 37% high, and at its worst a strip is charged 129 times
     // what it draws.
     //
     // Bounded rather than pinned, because these are the *current* figures and
