@@ -133,16 +133,33 @@ def emitter_matrix_q16(
         # z = 1 - x - y, in Q16, from the *quantised* x and y rather than
         # from the floats: a fixed-point profile has no float to go back to.
         z = kQ16One - x - y
-        # X = Y*x/y and Z = Y*z/y. Divide first and scale second, matching
-        # `xyY_to_XYZ`, so this models the shipped path rather than a
-        # rearrangement of it.
+        # X = Y*x/y and Z = Y*z/y, divided first and scaled second.
         #
-        # The order is visible but small: scaling first instead moves 30 of
-        # the corpus's 144 coefficients, by at most 10 raw units (1.5e-04 of
-        # a unit), and moves no dE2000 in this study enough to matter.
-        # Recorded so nobody reads the choice as load-bearing for the budget
-        # -- it is load-bearing for *fidelity to the shipped code*, which is
-        # a different claim.
+        # This deliberately does *not* mirror the shipped order. `xyY_to_XYZ`
+        # is `out[0] = x * Y * inv_y`, which C++ groups left to right, so the
+        # float path scales before it divides. In fixed point that is the
+        # worse arrangement: `x * Y` in Q16 discards low bits before the
+        # divide can use them.
+        #
+        # Measured against the float32 baseline, worst coefficient ULP over
+        # the corpus and the luminance sets:
+        #
+        #   srgb/dim-blue        11 divide-first    18 scale-first
+        #   bt2020/lopsided       5                 10
+        #   display_p3/dim-blue  10                 18
+        #   narrow/dim-blue    2899               7363
+        #
+        # Better in 8 of the 16 combinations and tied in 7 -- the unit sets,
+        # where the two are the same expression. It loses one, `narrow` with
+        # typical luminances, by 21 ULP. What decides it is the extreme.
+        #
+        # And it costs nothing in colour either way: both orders give the
+        # same 0.1085 worst dE2000, because the binding case is unit
+        # luminance where the two are identical.
+        #
+        # Stated at this length because the first version of this comment
+        # claimed the opposite, that divide-first *was* the shipped order.
+        # It is not; keeping it is an accuracy argument, not a fidelity one.
         columns.append(
             [
                 rounded_div(rounded_div(x * kQ16One, y) * luminance, kQ16One),
@@ -161,7 +178,13 @@ def emitter_matrix_q16(
 def emitter_matrix_f32_lum(
     primaries: Primaries, luminances: EmitterLuminances
 ) -> list[list[float]]:
-    """`emitter_matrix_f32` with per-emitter luminance, the shipped order."""
+    """`emitter_matrix_f32` with per-emitter luminance, the shipped order.
+
+    Scale then divide, because `xyY_to_XYZ` is `x * Y * inv_y` and C++ groups
+    that left to right. This is the baseline, so it has to be what ships even
+    where that is the less accurate arrangement -- the candidate is the one
+    allowed to be better, and `emitter_matrix_q16` says why it is.
+    """
 
     columns: list[list[float]] = []
     for (x, y), luminance in zip(primaries, luminances.per_emitter()):

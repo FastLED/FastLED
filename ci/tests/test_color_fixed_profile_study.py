@@ -17,7 +17,10 @@ from ci.color_fixed_inverse_study import (
     Primaries,
     corpus_primaries,
     emitter_matrix_f32,
+    f32,
     from_q16,
+    invert3x3_f32,
+    invert3x3_q16,
     quantize_rows,
     rounded_div,
     to_q16,
@@ -25,6 +28,7 @@ from ci.color_fixed_inverse_study import (
 from ci.color_fixed_profile_study import (
     EmitterLuminances,
     compare_profile_quantization,
+    emitter_matrix_f32_lum,
     emitter_matrix_q16,
     kLuminanceSets,
     kQ16One,
@@ -164,18 +168,72 @@ class TestQuantizedProfileStudy(unittest.TestCase):
         self.assertGreater(narrow.coefficient_ulps, 100 * bt2020.coefficient_ulps)
         self.assertLess(narrow.delta_e, bt2020.delta_e)
 
-    def test_the_divide_then_scale_order_is_visible_but_not_decisive(self) -> None:
-        """Both halves of a claim the comment in `emitter_matrix_q16` makes.
+    def test_the_float_baseline_keeps_the_shipped_grouping(self) -> None:
+        """The baseline models `xyY_to_XYZ`, not the candidate.
 
-        It divides by `y` and then scales by the luminance, matching
-        `xyY_to_XYZ`. Writing that as "reversing it would stop modelling the
-        shipped path" invited the reading that the order carries the budget,
-        and it does not -- reversing it passed every other case here.
+        `colorimetric_response::xyY_to_XYZ` is:
 
-        So this pins what is actually true: the order is visible at the
-        coefficient level (30 of 144 cells move, by up to 10 raw units) and
-        is not visible in the colour figure. Fidelity to the shipped code is
-        the reason to keep it, not accuracy.
+            const float inv_y = 1.0f / y;
+            out[0] = x * Y * inv_y;
+
+        which C++ groups left to right, so it scales before it divides.
+        `emitter_matrix_f32_lum` has to reproduce that even though it is the
+        less accurate arrangement -- it is the thing being measured against,
+        and a baseline that quietly adopted the candidate's better order
+        would understate what quantising the profile costs.
+
+        Review proposed exactly that change, reading the candidate's order as
+        the shipped one. It was the wrong way round, and nothing here caught
+        it: the swap passed every other case in this file. This is that gap.
+        """
+
+        for _name, primaries in corpus_primaries():
+            for luminances in kLuminanceSets:
+                baseline = emitter_matrix_f32_lum(primaries, luminances)
+                scale = luminances.per_emitter()
+                for column, ((x, y), luminance) in enumerate(zip(primaries, scale)):
+                    inv_y = f32(1.0 / f32(y))
+                    # The shipped grouping, spelled out.
+                    shipped_x = f32(f32(f32(x) * f32(luminance)) * inv_y)
+                    self.assertEqual(baseline[0][column], shipped_x)
+                    z = f32(1.0 - f32(x) - f32(y))
+                    shipped_z = f32(f32(z * f32(luminance)) * inv_y)
+                    self.assertEqual(baseline[2][column], shipped_z)
+
+    def test_the_two_float_groupings_are_distinguishable(self) -> None:
+        """Vacuity guard for the case above.
+
+        If float32 rounded both groupings identically, that case would hold
+        no matter which the baseline used, and the swap it exists to catch
+        would slip through anyway.
+        """
+
+        differing = 0
+        for _name, primaries in corpus_primaries():
+            for luminances in kLuminanceSets:
+                for (x, y), luminance in zip(primaries, luminances.per_emitter()):
+                    inv_y = f32(1.0 / f32(y))
+                    scale_then_divide = f32(f32(f32(x) * f32(luminance)) * inv_y)
+                    divide_then_scale = f32(f32(f32(x) * inv_y) * f32(luminance))
+                    if scale_then_divide != divide_then_scale:
+                        differing += 1
+        self.assertGreater(differing, 0)
+
+    def test_the_divide_then_scale_order_is_the_more_accurate_one(self) -> None:
+        """Why `emitter_matrix_q16` diverges from the shipped operation order.
+
+        `xyY_to_XYZ` is `out[0] = x * Y * inv_y`, which C++ groups left to
+        right, so the float path scales before it divides. The Q16 candidate
+        divides first, which is the opposite -- and is deliberate, because in
+        fixed point `x * Y` throws away low bits the divide would have used.
+
+        Twice this comment has said the reverse. It first claimed reversing
+        the order "would stop modelling the shipped path", and then that
+        divide-first *was* the shipped order. Review caught the second. So
+        this stops describing the order and measures it, against the float32
+        baseline both are trying to reproduce -- including the one case where
+        divide-first comes off worse, which a third telling would probably
+        have left out.
         """
 
         def scale_first(
@@ -198,26 +256,54 @@ class TestQuantizedProfileStudy(unittest.TestCase):
                 )
             return [[columns[0][k], columns[1][k], columns[2][k]] for k in range(3)]
 
-        moved = 0
-        worst = 0
+        differed = 0
+        divide_first_worse = 0
+        worst_divide_first = 0
+        worst_scale_first = 0
         for _name, primaries in corpus_primaries():
             for luminances in kLuminanceSets:
-                shipped_order = emitter_matrix_q16(primaries, luminances)
-                self.assertIsNotNone(shipped_order)
-                assert shipped_order is not None
-                other = scale_first(primaries, luminances)
-                for row in range(3):
-                    for col in range(3):
-                        difference = abs(shipped_order[row][col] - other[row][col])
-                        if difference:
-                            moved += 1
-                        worst = max(worst, difference)
+                baseline = quantize_rows(
+                    invert3x3_f32(emitter_matrix_f32_lum(primaries, luminances))
+                )
+                candidate = emitter_matrix_q16(primaries, luminances)
+                self.assertIsNotNone(candidate)
+                assert candidate is not None
+                inverses = {
+                    "divide": invert3x3_q16(candidate),
+                    "scale": invert3x3_q16(scale_first(primaries, luminances)),
+                }
+                errors = {}
+                for label, inverse in inverses.items():
+                    self.assertIsNotNone(inverse)
+                    assert inverse is not None
+                    errors[label] = max(
+                        abs(baseline[row][col] - inverse[row][col])
+                        for row in range(3)
+                        for col in range(3)
+                    )
+                if errors["divide"] != errors["scale"]:
+                    differed += 1
+                if errors["divide"] > errors["scale"]:
+                    divide_first_worse += 1
+                worst_divide_first = max(worst_divide_first, errors["divide"])
+                worst_scale_first = max(worst_scale_first, errors["scale"])
 
-        # Visible: the two orders are genuinely different arithmetic.
-        self.assertGreater(moved, 0)
-        # But small: an order that moved a coefficient by a large amount
-        # would deserve its own dE2000 measurement rather than this note.
-        self.assertLess(worst, 32)
+        # Vacuity guard: if the orders never diverged, everything below would
+        # be comparing a number with itself. They agree at unit luminance,
+        # where scaling by 1.0 makes them the same expression, so only the
+        # non-unit sets can separate them.
+        self.assertGreater(differed, 0)
+
+        # Better in 8 of the 16 combinations, tied in 7 -- the unit sets,
+        # where the two are the same expression -- and worse in exactly one:
+        # `narrow`/`typical`, 113 ULP against 92. So "never worse" is not the
+        # claim, and was the claim until this counted it.
+        self.assertEqual(divide_first_worse, 1)
+
+        # What carries the choice is the extreme, not the average: 2899 ULP
+        # against 7363 on `narrow` with a near-dark blue. The one case
+        # divide-first loses, it loses by 21 ULP.
+        self.assertLess(worst_divide_first * 2, worst_scale_first)
 
     def test_bt2020_is_the_worst_and_its_smallest_y_is_why(self) -> None:
         """The mechanism the study claims, checked rather than asserted.
