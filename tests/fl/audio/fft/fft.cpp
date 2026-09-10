@@ -863,6 +863,26 @@ FL_TEST_CASE("Binning adversarial - LOG_REBIN monotonicity sweep") {
 }
 
 FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
+    // Rising input frequency must never drive the CQ peak bin backwards.
+    //
+    // The sweep steps the analyser's own band centres rather than an
+    // arbitrary log grid, because CQ_OCTAVE does not respond everywhere in
+    // the range it declares. Measured over 200 log-spaced probe tones across
+    // 90-14080 Hz at 16 bands / 512 samples, 49 of them (24%) produce under
+    // 20 counts in *every* band, with two wide holes at the top: 7463-9621 Hz
+    // and 10923-13383 Hz. A tone inside a hole gives no detection at all --
+    // every band reads 0-7 counts -- so `findPeakBin` returns whichever band
+    // happens to hold the most noise, and comparing two such answers measures
+    // nothing.
+    //
+    // A 30-step grid put 2 of its 30 steps inside those holes, and the peak
+    // there was decided by margins of one count (16 versus 15 at 11502 Hz).
+    // That is why this used to be able to pass or fail on an unrelated change
+    // to `fl::exp`, which moves the grid by a few percent: FastLED#4288.
+    //
+    // The holes are a real deficiency and are tracked in FastLED#4301. This case
+    // is about ordering, so it asks the question where the analyser has an
+    // answer, and checks that it really does have one.
     const int bands = 16;
     const float fmin = fl::audio::fft::Args::DefaultMinFrequency();
     const float fmax = fl::audio::fft::Args::DefaultMaxFrequency();
@@ -870,17 +890,39 @@ FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
     fl::audio::fft::Args args(512, bands, fmin, fmax, 44100, fl::audio::fft::Mode::CQ_OCTAVE);
     fl::audio::fft::Impl fft(args);
 
-    const int numSteps = 30;
-    float logRatio = fl::logf(fmax / fmin);
+    // Same expression `_generate_center_freqs` uses, so these are the
+    // frequencies the kernels are actually built for.
+    const float logRatio = fl::logf(fmax / fmin);
     int prevPeak = -1;
     int violations = 0;
+    int weakDetections = 0;
 
-    for (int s = 0; s < numSteps; ++s) {
-        float freq = fmin * fl::expf(logRatio * static_cast<float>(s) /
-                                     static_cast<float>(numSteps - 1));
+    for (int b = 0; b < bands; ++b) {
+        float freq = fmin * fl::expf(logRatio * static_cast<float>(b) /
+                                     static_cast<float>(bands - 1));
         auto samples = makeAdversarialSine(freq);
         fl::audio::fft::Bins bins(bands);
         fft.run(samples, &bins);
+
+        // The vacuity guard. Without it this case would still "pass" if the
+        // analyser stopped responding altogether, by comparing noise -- which
+        // is exactly the failure mode the old grid had.
+        float top = 0.0f;
+        float second = 0.0f;
+        for (fl::size i = 0; i < bins.raw().size(); ++i) {
+            const float v = bins.raw()[i];
+            if (v > top) {
+                second = top;
+                top = v;
+            } else if (v > second) {
+                second = v;
+            }
+        }
+        if (top < 15.0f || top < second * 1.5f) {
+            FL_WARN("CQ weak detection at " << freq << " Hz: top " << top
+                         << ", runner-up " << second);
+            weakDetections++;
+        }
 
         int peak = findPeakBin(bins.raw());
         if (prevPeak >= 0 && peak < prevPeak) {
@@ -892,6 +934,9 @@ FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
         prevPeak = peak;
     }
     FL_CHECK_EQ(violations, 0);
+    // Every centre detects, and by a margin: measured top 19-2410 counts
+    // against runner-ups of 2-27, the tightest ratio being 1.58 at 177 Hz.
+    FL_CHECK_EQ(weakDetections, 0);
 }
 
 // --- 4. White noise energy uniformity (catches LOG_REBIN high-bin bias) ---
