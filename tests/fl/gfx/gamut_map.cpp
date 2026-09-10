@@ -1272,6 +1272,108 @@ FL_TEST_CASE("RGBWW mapper leaves a neutral ramp neutral") {
     FL_CHECK_GT(exercised, 20);
 }
 
+FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
+    // The hue objective on the four-emitter hull, which was the one corner
+    // of P7's criterion still covered on only one path.
+    //
+    // RGBW's hue was checked above the neutral cap ("RGBW keeps the
+    // lightness above its own, higher cap"), where the walk-down chooses the
+    // lightness. This is the other way out of the hull: a target inside the
+    // cap whose *chroma* the four emitters cannot reach, so the halving
+    // search compresses along the hue ray and nothing else may move.
+    //
+    // Those are different code paths -- one goes through
+    // `highestReachableLightness`, this one does not -- so covering one said
+    // nothing about the other.
+    GamutMapRgbwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+
+    const float kChroma[][2] = {
+        {0.70f, 0.28f}, {0.18f, 0.72f}, {0.10f, 0.03f},
+        {0.55f, 0.42f}, {0.08f, 0.55f},
+    };
+    int compressed = 0;
+    for (const auto& c : kChroma) {
+        i32 xyz[3];
+        xyzAt(c[0], c[1], 0.5f, xyz);
+
+        i32 probe[4];
+        const bool in_gamut = allocateEmitterDrivesQ16(map.allocation, xyz, probe);
+
+        i32 drives[4];
+        mapAndAllocateRgbwQ16(map, xyz, drives);
+        float as_float[4];
+        for (int i = 0; i < 4; ++i) {
+            as_float[i] = toFloat(drives[i]);
+        }
+        float produced[3];
+        reproduceRgbw(as_float, produced);
+        const i32 mapped_xyz[3] = {q16(produced[0]), q16(produced[1]),
+                                   q16(produced[2])};
+
+        i32 target_lab[3];
+        i32 mapped_lab[3];
+        xyzToOklabQ16(xyz, target_lab);
+        xyzToOklabQ16(mapped_xyz, mapped_lab);
+        // Bounded per target rather than by a single blanket tolerance,
+        // because the five do not behave alike and a bound loose enough for
+        // the worst would stop saying anything about the other four.
+        //
+        // Measured, in the same units `hueDivergence` returns (a sine, so
+        // 0.026 is about 1.5 degrees of OKLab hue):
+        //
+        //   (0.70, 0.28)   0.00018
+        //   (0.18, 0.72)   0.00174
+        //   (0.10, 0.03)   0.00025
+        //   (0.55, 0.42)   0.02610   <- the outlier
+        //   (0.08, 0.55)   0.00309
+        //
+        // RGBWW holds under 0.02 on the identical five, so this is a
+        // four-emitter property and not a corpus that is hard for everyone.
+        // Reported on FastLED#4041; see the note below the loop for what is
+        // and is not established about where it comes from.
+        const float divergence = hueDivergence(target_lab, mapped_lab);
+        if (fl::fabsf(c[0] - 0.55f) < 1e-6f && fl::fabsf(c[1] - 0.42f) < 1e-6f) {
+            FL_CHECK_LT(divergence, 0.030f);
+            // And it is genuinely worse than its neighbours: a fix that
+            // brought it into line should fail here and be looked at, not
+            // slide past a bound wide enough to cover it.
+            FL_CHECK_GT(divergence, 0.010f);
+        } else {
+            FL_CHECK_LT(divergence, 0.005f);
+        }
+        FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
+        if (!in_gamut) {
+            ++compressed;
+        }
+    }
+    // Vacuity guard, and not a formality: if every target here were already
+    // inside the four-emitter hull the mapper would return them untouched
+    // and the hue check would be asserting that a copy equals itself. The
+    // white emitter makes this hull larger than the RGB one, so a target set
+    // chosen for the three-emitter case can quietly stop compressing here.
+    //
+    // Measured: all five are outside it, so all five are mapped.
+    FL_CHECK_EQ(compressed, 5);
+
+    // What is *not* established, stated rather than left to be assumed.
+    //
+    // `chromaCandidateXyz` scales `a` and `b` by one factor, which preserves
+    // hue exactly, so the mapper's own candidate is on the ray by
+    // construction. The divergence above therefore arises after it -- in the
+    // four-emitter allocation, or in the quantisation between the two. Which
+    // of those was not determined: the obvious experiment is to compare an
+    // in-gamut target, where `mapAndAllocateRgbwQ16` returns the plain
+    // allocation and any divergence is the allocator's alone, and all five
+    // targets here are out of gamut so this corpus cannot run it.
+    //
+    // The outlier is not a low-chroma artefact, which was the first
+    // explanation worth ruling out: its mapped chroma is 0.198 against a
+    // target 0.210, so the hue angle is well determined.
+}
+
 FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
     // The last corner of the criterion: the hue objective on the five-emitter
     // hull.
