@@ -1538,6 +1538,13 @@ FL_TEST_CASE("RGBW keeps the lightness above its own, higher cap") {
     // what this path claims to do.
     FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
     FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+
+    // And on the hue it was asked for. Lightness alone would accept a colour
+    // of the right brightness on any ray at all, which is not what a
+    // hue-preserving mapper promises. `hueDivergence` returns 1.0 for a
+    // neutral result and for an anti-parallel one, so this bound catches a
+    // collapse to grey and a 180-degree rotation as well as a drift.
+    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
 }
 
 FL_TEST_CASE("RGBW falls back to its cap when no chroma is feasible there") {
@@ -1593,6 +1600,8 @@ FL_TEST_CASE("RGBWW keeps the lightness above its own cap") {
     emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
     FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
     FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+
+    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
 }
 
 FL_TEST_CASE("RGBWW falls back to its cap when no chroma is feasible there") {
