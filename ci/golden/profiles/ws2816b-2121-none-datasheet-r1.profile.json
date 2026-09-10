@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "ws2816b/2121/none/datasheet-r1",
+  "identity": {"part": "ws2816b", "package_variant": "2121", "w_channel_variant": "none", "report_id": "datasheet-r1"},
+  "provenance": {
+    "kind": "datasheet_derived",
+    "report_id": "datasheet-r1",
+    "source_documents": ["worldsemi/addressable-led/WS2816/datasheet.pdf"],
+    "source_urls": ["https://www.world-semi.com/web/userfiles/productfile/WS2816B_2121Datasheet_EN_V1.1.pdf"],
+    "payload_sha256": "4f6f09172b7b723abf0280b047417ba239a3755c6552aac1198fed074d44fa1d"
+  },
+  "photometric": {
+    "channels": [
+      {"name": "red", "runtime_admissible": false, "dominant_wavelength_nm_range": {"min": {"value": 620, "unit": "nm", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}, "max": {"value": 625, "unit": "nm", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}}, "luminous_intensity_mcd_range": {"min": {"value": 210, "unit": "mcd", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "typical": {"value": 285, "unit": "mcd", "qualifier": "typical", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "max": {"value": 360, "unit": "mcd", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}}},
+      {"name": "green", "runtime_admissible": false, "dominant_wavelength_nm_range": {"min": {"value": 522, "unit": "nm", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}, "max": {"value": 527, "unit": "nm", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}}, "luminous_intensity_mcd_range": {"min": {"value": 420, "unit": "mcd", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "typical": {"value": 530, "unit": "mcd", "qualifier": "typical", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "max": {"value": 720, "unit": "mcd", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}}},
+      {"name": "blue", "runtime_admissible": false, "dominant_wavelength_nm_range": {"min": {"value": 470, "unit": "nm", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}, "max": {"value": 475, "unit": "nm", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Wavelength"}}}, "luminous_intensity_mcd_range": {"min": {"value": 70, "unit": "mcd", "qualifier": "min", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "typical": {"value": 90, "unit": "mcd", "qualifier": "typical", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}, "max": {"value": 120, "unit": "mcd", "qualifier": "max", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Luminous intensity, VDD=5 V"}}}}
+    ],
+    "full_drive_white_chromaticity": {"x": {"value": 0.32, "qualifier": "typical", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Color Coordinate, combined white only"}}, "y": {"value": 0.33, "qualifier": "typical", "source": {"path": "worldsemi/addressable-led/WS2816/datasheet.pdf", "page": 4, "section": "LED Characteristics / Color Coordinate, combined white only"}}}
+  },
+  "electrical": {"channels": []},
+  "chip_encoding": {"native_code_depth": 16, "five_bit_semantics": "not_applicable"}
+}

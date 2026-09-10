@@ -434,3 +434,40 @@ FL_TEST_CASE("[#4194] invert3x3 accepts a finite matrix of wildly mixed scale") 
     FL_CHECK_LT(fl::fabsf(inverse[1][1] - 1e20f), 1e14f);
     FL_CHECK_LT(fl::fabsf(inverse[2][2] - 1.0f), 1e-6f);
 }
+
+// ============ Generated profile header (P3, #4037) ============
+//
+// The generator is only worth anything if what it emits compiles and carries
+// the artifact's numbers. Including the generated header here proves the
+// first, and the case below proves the second -- against values read out of
+// `ci/tests/fixtures/profiles/`, not out of the generator.
+//
+// `ci/tests/test_profile_generator.py` regenerates this header and fails on
+// drift, so the two halves cannot diverge.
+
+#include "tests/fl/gfx/colorimetric_response_profiles.hpp"
+
+FL_TEST_CASE("The generated profile header carries the artifact's numbers") {
+    using fl::generated_profiles::FIXTURE_RGB_NONE_SYNTHETIC_R1;
+    const auto& profile = FIXTURE_RGB_NONE_SYNTHETIC_R1;
+
+    FL_CHECK_LT(fl::fabsf(profile.xy_r[0] - 0.6915f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.xy_r[1] - 0.3083f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.xy_g[0] - 0.1700f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.xy_g[1] - 0.7969f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.xy_b[0] - 0.1355f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.xy_b[1] - 0.0399f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.lum_r - 0.2126f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.lum_g - 0.7152f), 1e-6f);
+    FL_CHECK_LT(fl::fabsf(profile.lum_b - 0.0722f), 1e-6f);
+
+    // The canonical ID rides on the profile (C8.1), so a binary can be traced
+    // back to the artifact it was generated from.
+    FL_CHECK(fl::string(profile.id) ==
+             fl::string("fixture/rgb/none/synthetic-r1"));
+
+    // And it is usable, not merely well-formed: the primaries must invert.
+    fl::colorimetric_response::RgbColorimetricCache cache;
+    FL_CHECK(fl::colorimetric_response::build_rgb_colorimetric_cache(profile,
+                                                                    &cache));
+}
