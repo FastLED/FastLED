@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "fixture/rgb/none/synthetic-r1",
+  "runtime_admissible": true,
+  "topology": "rgb",
+  "identity": {"part": "fixture", "package_variant": "rgb", "w_channel_variant": "none", "report_id": "synthetic-r1"},
+  "provenance": {"kind": "measured", "report_id": "synthetic-r1", "instrument": {"model": "FIXTURE", "serial": "0", "type": "spectroradiometer"}, "date": "2026-01-01", "source_documents": []},
+  "photometric": {"channels": [
+    {"name": "red", "runtime_admissible": true, "chromaticity": {"x": 0.6915, "y": 0.3083}, "relative_y": {"value": 0.2126, "qualifier": "measured"}},
+    {"name": "green", "runtime_admissible": true, "chromaticity": {"x": 0.1700, "y": 0.7969}, "relative_y": {"value": 0.7152, "qualifier": "measured"}},
+    {"name": "blue", "runtime_admissible": true, "chromaticity": {"x": 0.1355, "y": 0.0399}, "relative_y": {"value": 0.0722, "qualifier": "measured"}}
+  ]},
+  "electrical": {"channels": [
+    {"name": "red", "forward_voltage_v": {"value": 2.1, "unit": "V", "qualifier": "measured"}},
+    {"name": "green", "forward_voltage_v": {"value": 3.2, "unit": "V", "qualifier": "measured"}},
+    {"name": "blue", "forward_voltage_v": {"value": 3.2, "unit": "V", "qualifier": "measured"}}
+  ]},
+  "chip_encoding": {"native_code_depth": 8, "five_bit_semantics": "not_applicable"}
+}

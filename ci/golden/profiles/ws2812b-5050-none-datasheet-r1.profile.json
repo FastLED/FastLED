@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0", "profile_id": "ws2812b/5050/none/datasheet-r1",
+  "identity": {"part":"ws2812b","package_variant":"5050","w_channel_variant":"none","report_id":"datasheet-r1"},
+  "provenance": {"kind":"datasheet_derived","report_id":"datasheet-r1","source_documents":["worldsemi/addressable-led/WS2812B/datasheet.pdf"]},
+  "photometric": {"channels": [
+    {"name":"red","runtime_admissible":false,"dominant_wavelength_nm":{"value":622.5,"unit":"nm","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 620–625 range"}},"luminous_intensity_mcd":{"value":405,"unit":"mcd","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 390–420 range"}}},
+    {"name":"green","runtime_admissible":false,"dominant_wavelength_nm":{"value":523.5,"unit":"nm","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 522–525 range"}},"luminous_intensity_mcd":{"value":690,"unit":"mcd","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 660–720 range"}}},
+    {"name":"blue","runtime_admissible":false,"dominant_wavelength_nm":{"value":466,"unit":"nm","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 465–467 range"}},"luminous_intensity_mcd":{"value":190,"unit":"mcd","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 180–200 range"}}}
+  ]},
+  "electrical": {"channels": [
+    {"name":"red","forward_voltage_v":{"value":2.1,"unit":"V","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 2.0–2.2 range"}}},
+    {"name":"green","forward_voltage_v":{"value":3.2,"unit":"V","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 3.0–3.4 range"}}},
+    {"name":"blue","forward_voltage_v":{"value":3.2,"unit":"V","qualifier":"inferred","source":{"path":"worldsemi/addressable-led/WS2812B/datasheet.pdf","page":3,"section":"RGB IC characteristic parameter; midpoint of 3.0–3.4 range"}}}
+  ]},
+  "chip_encoding": {"native_code_depth":8,"five_bit_semantics":"not_applicable"}
+}
