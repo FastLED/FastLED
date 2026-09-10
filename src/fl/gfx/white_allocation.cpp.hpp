@@ -9,12 +9,37 @@ namespace {
 /// Full drive, as an s16.16 raw value.
 constexpr i32 kWhiteFullDrive = 65536;
 
-/// Slack on the drive bounds, in s16.16 raw units.
+/// Slack on the drive bounds, for an emitter whose XYZ column peaks at 1.
 ///
 /// The same reason the gamut mapper carries one: a colour the device
 /// reproduces exactly does not solve to exactly 0 or 1, and without slack
 /// the allocation would reject targets it can actually hit. 64 raw units is
 /// a quarter of one code at 8-bit output.
+///
+/// The qualifier is the point, and was missing. This is a *drive* allowance
+/// and it is paid in *colour*, at an exchange rate of one emitter column per
+/// drive unit. A green primary at unit luminance has a column peaking at 1,
+/// so 64 units there costs what the number suggests. The blue primary of the
+/// corpus device sits at xy = (0.15, 0.06), which puts its Z at 13.17 -- so
+/// the same 64 units bought thirteen times the colour error, and a target
+/// whose blue solved to -62 was reported reachable and answered 0.0125 off
+/// in Z, 26% of the target's own Z. FastLED#4303.
+///
+/// `buildWhiteAllocationQ16` divides this by each column's peak so the
+/// colour cost is the same on every channel. Measured over 291 in-gamut
+/// targets on the xy plane at Y = 0.5: worst OKLab hue divergence falls from
+/// 0.0197 to 0.0034 and nothing exceeds 0.005, at the cost of 8 targets that
+/// the gamut mapper now compresses instead of answering wrongly.
+constexpr i32 kWhiteSlackAtUnitColumn = 64;
+
+/// The same allowance, uniform, for the two-white (RGBWW) path.
+///
+/// Deliberately unchanged. The defect above was measured on the single-white
+/// allocation; RGBWW holds hue under 0.02 on the same five targets that gave
+/// RGBW its 0.026, so it is better behaved and may not have the same problem
+/// at all. Whether it does is unmeasured, and scaling its slack on a guess
+/// would be changing a shipped colour path without evidence. FastLED#4303
+/// carries it as follow-up.
 constexpr i32 kWhiteSlack = 64;
 
 /// `(numerator << 16) / denominator` as s16.16, kept in i64.
@@ -61,7 +86,7 @@ i32 scaleWhiteQ16(i32 value, i32 factor) FL_NO_EXCEPT {
 
 }  // namespace
 
-bool buildWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                              const i32 (&white_xyz)[3],
                              WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT {
@@ -73,6 +98,59 @@ bool buildWhiteAllocationQ16(const EmitterProfile& profile,
         return false;
     }
     solveRgbDrivesQ16(out->rgb_solve, white_xyz, out->per_white);
+
+    // Per-channel slack, so the allowance costs the same colour everywhere.
+    // Bind time, once per profile -- there is no per-pixel work here.
+    {
+        float columns[3][3];
+        colorimetric_response::xyY_to_XYZ(profile.xy_r[0], profile.xy_r[1],
+                                          profile.lum_r, columns[0]);
+        colorimetric_response::xyY_to_XYZ(profile.xy_g[0], profile.xy_g[1],
+                                          profile.lum_g, columns[1]);
+        colorimetric_response::xyY_to_XYZ(profile.xy_b[0], profile.xy_b[1],
+                                          profile.lum_b, columns[2]);
+        for (int channel = 0; channel < 3; ++channel) {
+            // The peak component, because that is what bounds the per-axis
+            // XYZ error a clamp of one drive unit can cause.
+            float peak = 0.0f;
+            for (int axis = 0; axis < 3; ++axis) {
+                const float magnitude = columns[channel][axis] < 0.0f
+                                            ? -columns[channel][axis]
+                                            : columns[channel][axis];
+                if (magnitude > peak) {
+                    peak = magnitude;
+                }
+            }
+            // A degenerate column would divide by zero; the solve build
+            // above has already refused those, so this is belt and braces.
+            if (!(peak > 0.0f)) {
+                peak = 1.0f;
+            }
+            float scaled = static_cast<float>(kWhiteSlackAtUnitColumn) / peak;
+            // Never zero: a column so large that the allowance rounds away
+            // would reject the rounding this exists to tolerate.
+            if (scaled < 1.0f) {
+                scaled = 1.0f;
+            }
+            // And never larger than the allowance it is scaling. Dim
+            // emitters have small columns, so the division wants to *grow*
+            // the slack -- at a luminance of 1e-4 it reaches 640,000 raw
+            // units, nearly ten in drive space, which accepts any drive at
+            // all and clamps it. That is the defect this function exists to
+            // remove, reinstated an order of magnitude worse.
+            //
+            // The tolerance is for rounding in the solve, which is a few raw
+            // units whatever the emitter's brightness. So this only ever
+            // narrows: 64 stays the ceiling and the column decides how far
+            // below it each channel sits. For the corpus device nothing is
+            // clipped -- green is already at 64 and the others below it --
+            // so the measurements above are unaffected.
+            if (scaled > static_cast<float>(kWhiteSlackAtUnitColumn)) {
+                scaled = static_cast<float>(kWhiteSlackAtUnitColumn);
+            }
+            out->slack[channel] = static_cast<i32>(scaled + 0.5f);
+        }
+    }
 
     // A white emitter the primaries cannot express at all leaves nothing for
     // the allocation to trade against, and every bound below would divide by
@@ -119,8 +197,8 @@ bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
             if (lower > low) {
                 low = lower;
             }
-        } else if (at_zero[i] < -kWhiteSlack ||
-                   at_zero[i] > kWhiteFullDrive + kWhiteSlack) {
+        } else if (at_zero[i] < -allocation.slack[i] ||
+                   at_zero[i] > kWhiteFullDrive + allocation.slack[i]) {
             // White cannot move this drive at all, and it is already out.
             return false;
         }
@@ -143,7 +221,8 @@ bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
     i32 rgb[3];
     for (int i = 0; i < 3; ++i) {
         const i32 drive = at_zero[i] - scaleWhiteQ16(allocation.per_white[i], level);
-        if (drive < -kWhiteSlack || drive > kWhiteFullDrive + kWhiteSlack) {
+        const i32 channel_slack = allocation.slack[i];
+        if (drive < -channel_slack || drive > kWhiteFullDrive + channel_slack) {
             return false;
         }
         rgb[i] = drive < 0 ? 0 : (drive > kWhiteFullDrive ? kWhiteFullDrive : drive);
@@ -264,7 +343,7 @@ bool narrowTotalForPair(const SplitBound& lower, const SplitBound& upper, i64* l
 
 }  // namespace
 
-bool buildTwoWhiteAllocationQ16(const EmitterProfile& profile,
+bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
                                 const i32 (&white1_xyz)[3],
                                 const i32 (&white2_xyz)[3],
                                 WhiteAllocationPolicy policy,

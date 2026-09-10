@@ -36,10 +36,15 @@ kSelfContainedHeaders = [
     "fl/math/fixed_point/s0x32x4.h",
     "fl/math/fixed_point/s16x16.h",
     "fl/math/fixed_point/s0x32.h",
-    # Same defect, different cause: `device_solve.h` spelled `EmitterProfile`
+    # Same defect, different cause: these spelled `EmitterProfile`
     # unqualified, which only resolves once some *other* header has pulled in
-    # the `using` from `fl/channels/color_profile.h`. FastLED#4043.
+    # the `using` from `fl/channels/color_profile.h`. FastLED#4043, and then
+    # the same thing again in its neighbour -- which is the argument for
+    # listing the whole group rather than adding them one incident at a time.
     "fl/gfx/device_solve.h",
+    "fl/gfx/white_allocation.h",
+    "fl/gfx/gamut_map.h",
+    "fl/gfx/colorimetric_response.h",
 ]
 
 

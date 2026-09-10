@@ -1317,54 +1317,18 @@ FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
         i32 mapped_lab[3];
         xyzToOklabQ16(xyz, target_lab);
         xyzToOklabQ16(mapped_xyz, mapped_lab);
-        // Bounded per target rather than by a single blanket tolerance,
-        // because the five do not behave alike and a bound loose enough for
-        // the worst would stop saying anything about the other four.
+        // One bound for all five now. It used to be split, because
+        // (0.55, 0.42) diverged by 0.026 -- an order of magnitude above its
+        // four neighbours -- and that outlier had its own bracket with a
+        // lower bound, so it could not vanish unremarked.
         //
-        // Measured, in the same units `hueDivergence` returns (a sine, so
-        // 0.026 is about 1.5 degrees of OKLab hue):
-        //
-        //   (0.70, 0.28)   0.00018
-        //   (0.18, 0.72)   0.00174
-        //   (0.10, 0.03)   0.00025
-        //   (0.55, 0.42)   0.02610   <- the outlier
-        //   (0.08, 0.55)   0.00309
-        //
-        // RGBWW holds under 0.02 on the identical five, so this is a
-        // four-emitter property and not a corpus that is hard for everyone.
-        // Reported on FastLED#4041; see the note below the loop for what is
-        // and is not established about where it comes from.
+        // It vanished, and this is the remark. #4304 traced it to
+        // `allocateEmitterDrivesQ16` clamping a blue drive the solve had put
+        // at -62, inside a slack sized in drive space; scaling that slack by
+        // each emitter's XYZ column (FastLED#4303) removed it. Measured
+        // across the five, worst divergence is now 0.0000.
         const float divergence = hueDivergence(target_lab, mapped_lab);
-        if (fl::fabsf(c[0] - 0.55f) < 1e-6f && fl::fabsf(c[1] - 0.42f) < 1e-6f) {
-            FL_CHECK_LT(divergence, 0.030f);
-            // Bounded from below as well, which is deliberate and is the
-            // same shape as the flash-bloat gate: that one fails on
-            // *unclaimed headroom* rather than congratulating you on it,
-            // because a ratchet with slack is not a ratchet.
-            //
-            // What makes it apply here is that 0.026 is unexplained. It is
-            // an order of magnitude above its four neighbours and above what
-            // RGBWW does on the same input, and nobody has established
-            // whether it comes from the allocation or the quantisation. If
-            // it quietly drops, something touched that path and the anomaly
-            // stopped being reproducible -- which is exactly when you want
-            // to be told rather than have the evidence absorbed.
-            //
-            // So this firing is not a defect, and the message says so,
-            // because a bound that fails on good news has to explain itself.
-            if (divergence <= 0.010f) {
-                FL_WARN_F("RGBW hue divergence at (0.55, 0.42) improved to %f "
-                          "from the 0.026 recorded here. That is good news, "
-                          "not a failure: find what changed, note it on "
-                          "FastLED#4041, and re-pin this bound. The point of "
-                          "the lower bound is that the anomaly cannot vanish "
-                          "unremarked.",
-                          static_cast<double>(divergence));
-            }
-            FL_CHECK_GT(divergence, 0.010f);
-        } else {
-            FL_CHECK_LT(divergence, 0.005f);
-        }
+        FL_CHECK_LT(divergence, 0.005f);
         FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
         if (!in_gamut) {
             ++compressed;
@@ -1393,101 +1357,119 @@ FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
     // target 0.210, so the hue angle is well determined.
 }
 
-FL_TEST_CASE("RGBW hue divergence is the allocation clamping a negative drive") {
-    // The experiment the case above says its corpus cannot run.
+FL_TEST_CASE("the per-channel slack only ever narrows the allowance") {
+    // Scaling by the column peak divides, so a *dim* emitter -- whose column
+    // is small -- wants a larger slack, not a smaller one. Unbounded, that
+    // reinstates the defect this is meant to remove: measured at a luminance
+    // of 1e-4, the three channels came out at 330000, 640000 and 48608 raw
+    // units, and 640000 is nearly ten in drive space. A check of
+    // `drive > 65536 + 640000` accepts anything at all and clamps it.
     //
-    // That one measured 0.026 of OKLab hue divergence on an out-of-gamut
-    // target and could not say whether the four-emitter allocation or the
-    // Q16 quantisation produced it, because every target it uses needs
-    // compressing first. An *in-gamut* target separates them:
-    // `mapAndAllocateRgbwQ16` returns the plain allocation untouched, so
-    // whatever divergence remains is the allocator's.
+    // So the scaling only narrows. 64 is the ceiling and the column decides
+    // how far below it each channel sits.
+    const float kLuminances[] = {1.0f, 0.5f, 0.01f, 0.001f, 0.0001f};
+    int dimmer_than_unit_seen = 0;
+    for (float luminance : kLuminances) {
+        EmitterProfile profile = rgbDevice();
+        profile.lum_r = luminance;
+        profile.lum_g = luminance;
+        profile.lum_b = luminance;
+        GamutMapRgbwQ16 map;
+        if (!buildGamutMapRgbwQ16(profile, kWhiteD65,
+                                  WhiteAllocationPolicy::WhitePreferred, &map)) {
+            // Dim enough that the solve matrix itself is refused, which is
+            // the guard in front of this one.
+            continue;
+        }
+        if (luminance < 1.0f) {
+            ++dimmer_than_unit_seen;
+        }
+        for (int channel = 0; channel < 3; ++channel) {
+            FL_CHECK_LE(map.allocation.slack[channel], 64);
+            FL_CHECK_GE(map.allocation.slack[channel], 1);
+        }
+    }
+    // Vacuity guard: if every dim profile were refused before reaching the
+    // slack, the bound above would hold over the unit case alone -- which is
+    // the case that never wanted to grow.
+    FL_CHECK_GT(dimmer_than_unit_seen, 2);
+
+    // And the unit profile is unaffected by the ceiling: green sits exactly
+    // at it, so the measurements the other cases pin are unchanged.
+    GamutMapRgbwQ16 unit;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &unit));
+    FL_CHECK_EQ(unit.allocation.slack[1], 64);
+}
+
+FL_TEST_CASE("a drive the solve puts out of range is refused, not clamped") {
+    // This case used to record the opposite. It measured an in-gamut target
+    // at (0.55, 0.41) whose blue drive the solve put at -62 raw, showed that
+    // `allocateEmitterDrivesQ16` accepted it as reachable and clamped it to
+    // zero, and priced the result at 0.026 of OKLab hue and 0.0158 of XYZ --
+    // 26% of the target's own Z, because this device's blue column carries a
+    // Z of 13.17 and 62 drive units of it is 0.0125.
+    //
+    // FastLED#4303 fixed the cause: the allowance was sized in drive space
+    // and paid in colour, so it is scaled by each emitter's column now. Blue
+    // gets 5 raw units where green gets 64. -62 is outside that, so the
+    // target is refused and the gamut mapper compresses it instead of the
+    // allocator answering it wrongly.
+    //
+    // The case is kept rather than deleted because the mechanism is what
+    // must not come back: a drive the solve put well out of range being
+    // clamped into range and reported as reachable.
     GamutMapRgbwQ16 map;
     FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
                                      WhiteAllocationPolicy::WhitePreferred,
                                      &map));
 
-    // (0.55, 0.41) at Y = 0.5, one step in y from the outlier above. The
-    // anomaly is not peculiar to targets outside the hull.
     i32 xyz[3];
     xyzAt(0.55f, 0.41f, 0.5f, xyz);
 
-    i32 allocated[4];
-    FL_REQUIRE(allocateEmitterDrivesQ16(map.allocation, xyz, allocated));
-
-    // What the solve actually asked for, before the allocator clamped it.
-    // Derived rather than written down, so this reports whatever the solve
-    // does today.
+    // Still what the solve asks for -- the fix changed the verdict, not the
+    // arithmetic. Derived rather than written down.
     i32 at_zero[3];
     solveRgbDrivesQ16(map.allocation.rgb_solve, xyz, at_zero);
-
-    // Blue solves *negative*. `allocateEmitterDrivesQ16` accepts a drive down
-    // to -64 raw as a rounding allowance and then clamps it into range, so
-    // this target is reported reachable and answered with a different colour.
     FL_CHECK_LT(at_zero[2], 0);
     FL_CHECK_GT(at_zero[2], -64);
-    FL_CHECK_EQ(allocated[2], 0);
 
+    // Outside blue's allowance, so refused.
+    FL_CHECK_LT(map.allocation.slack[2], -at_zero[2]);
+    i32 allocated[4];
+    FL_CHECK(!allocateEmitterDrivesQ16(map.allocation, xyz, allocated));
+
+    // And green's is unchanged, so this is a rescaling and not a blanket
+    // tightening -- a uniform slack of 5 would refuse targets nothing is
+    // wrong with.
+    FL_CHECK_EQ(map.allocation.slack[1], 64);
+    FL_CHECK_GT(map.allocation.slack[0], map.allocation.slack[2]);
+
+    // The mapper still answers the target, in gamut, with the hue intact.
+    i32 drives[4];
+    mapAndAllocateRgbwQ16(map, xyz, drives);
+    float as_float[4];
+    for (int i = 0; i < 4; ++i) {
+        as_float[i] = toFloat(drives[i]);
+    }
+    float produced[3];
+    reproduceRgbw(as_float, produced);
+    const i32 produced_q16[3] = {q16(produced[0]), q16(produced[1]),
+                                 q16(produced[2])};
     i32 target_lab[3];
+    i32 produced_lab[3];
     xyzToOklabQ16(xyz, target_lab);
-
-    // The clamp is worth 0.0125 in Z on this device, because the blue
-    // primary at xy = (0.15, 0.06) normalised to Y = 1 carries a Z column of
-    // 13.17 -- so one drive unit of blue is thirteen units of Z. `kWhiteSlack`
-    // is sized in drive space ("a quarter of one code at 8-bit output"),
-    // which is not the space its cost is paid in.
-    struct Reproduction {
-        float xyz_error;
-        float hue;
-    };
-    auto reproduce = [&](const i32 (&drives)[4]) {
-        float as_float[4];
-        for (int i = 0; i < 4; ++i) {
-            as_float[i] = toFloat(drives[i]);
-        }
-        float produced[3];
-        reproduceRgbw(as_float, produced);
-        const i32 produced_q16[3] = {q16(produced[0]), q16(produced[1]),
-                                     q16(produced[2])};
-        i32 produced_lab[3];
-        xyzToOklabQ16(produced_q16, produced_lab);
-        float error = 0.0f;
-        for (int i = 0; i < 3; ++i) {
-            error += fl::fabsf(produced[i] - toFloat(xyz[i]));
-        }
-        Reproduction out;
-        out.xyz_error = error;
-        out.hue = hueDivergence(target_lab, produced_lab);
-        return out;
-    };
-
-    const i32 unclamped[4] = {at_zero[0], at_zero[1], at_zero[2], allocated[3]};
-    const Reproduction honest = reproduce(unclamped);
-    const Reproduction clamped = reproduce(allocated);
-
-    // Measured: the solve is essentially exact -- 5.3e-05 of XYZ and no hue
-    // shift at all. So neither the matrix nor the Q16 quantisation is the
-    // source, which is what this case set out to determine.
-    FL_CHECK_LT(honest.xyz_error, 1.0e-04f);
-    FL_CHECK_LT(honest.hue, 1.0e-04f);
-
-    // And the clamp alone accounts for the whole anomaly: 0.0158 of XYZ and
-    // 0.026 of hue, the same 0.026 the case above records on its own target.
-    FL_CHECK_GT(clamped.xyz_error, 0.010f);
-    FL_CHECK_LT(clamped.xyz_error, 0.020f);
-    FL_CHECK_GT(clamped.hue, 0.020f);
-    FL_CHECK_LT(clamped.hue, 0.030f);
-
-    // Vacuity guard. If the two reproductions ever agree, the comparison
-    // above is asserting a number against itself and the case has stopped
-    // measuring anything.
-    FL_CHECK_GT(clamped.hue, honest.hue * 100.0f);
+    xyzToOklabQ16(produced_q16, produced_lab);
+    // Measured 0.0000, against the 0.026 this case was written to record.
+    FL_CHECK_LT(hueDivergence(target_lab, produced_lab), 0.005f);
 }
 
-FL_TEST_CASE("RGBW allocation hue divergence is confined to one region") {
-    // Extent, so the finding above is not read as either an isolated
-    // coincidence or a pervasive fault. Every in-gamut target on a coarse
-    // grid of the xy plane at Y = 0.5, which is 291 of them.
+FL_TEST_CASE("the allocator is accurate across the plane, not just at one point") {
+    // Extent. This measured the defect when there was one -- worst 0.0197 of
+    // OKLab hue at (0.56, 0.40), with 6 of 291 in-gamut targets above 0.005
+    // -- and measures its absence now.
+    //
+    // Every in-gamut target on a coarse grid of the xy plane at Y = 0.5.
     GamutMapRgbwQ16 map;
     FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
                                      WhiteAllocationPolicy::WhitePreferred,
@@ -1539,19 +1521,140 @@ FL_TEST_CASE("RGBW allocation hue divergence is confined to one region") {
 
     // Vacuity guard: a grid that found nothing in gamut would pass every
     // bound below by measuring an empty set.
-    FL_CHECK_EQ(in_gamut, 291);
-
-    // Measured: worst 0.0197 at (0.56, 0.40), median 6.9e-05, and only 6 of
-    // 291 above 0.005. So the allocator is accurate nearly everywhere and
-    // wrong in a small orange-yellow region -- which is where the blue drive
-    // solves just below zero, and is what the case above is about.
     //
-    // The grid steps 0.02 and so steps over (0.55, 0.41); the worst it can
-    // see is the 0.0197 neighbour rather than that target's 0.026.
-    FL_CHECK_GT(worst, 0.015f);
-    FL_CHECK_LT(worst, 0.025f);
-    FL_CHECK_EQ(above_005, 6);
-    FL_CHECK_EQ(above_010, 2);
+    // 283, down from 291 before FastLED#4303. Those 8 are the targets whose
+    // blue drive falls outside the rescaled allowance; they are not lost,
+    // the gamut mapper compresses them into the hull instead of the
+    // allocator answering them wrongly. Pinned so the cost of the fix is
+    // visible and cannot grow unnoticed.
+    FL_CHECK_EQ(in_gamut, 283);
+
+    // Measured: worst 0.0034, and nothing above 0.005 at all -- against
+    // 0.0197 with 6 above 0.005 and 2 above 0.010 before the fix. The
+    // orange-yellow region that used to be wrong is not wrong any more.
+    FL_CHECK_LT(worst, 0.005f);
+    FL_CHECK_EQ(above_005, 0);
+    FL_CHECK_EQ(above_010, 0);
+    // Bounded below, because a grid measuring nothing would also report
+    // zero: some divergence is expected from Q16 rounding alone.
+    FL_CHECK_GT(worst, 0.0f);
+}
+
+FL_TEST_CASE("the two-white allocator never clamps a drive the solve put out of range") {
+    // The question FastLED#4303 left open once the single-white path was
+    // fixed: does the two-white path have the same defect?
+    //
+    // No. The defect *is* accepting a target whose solve wants a drive
+    // outside [0, 1], clamping it, and reporting the target reachable. This
+    // allocator never accepts one, so its uniform slack -- which #4303 left
+    // alone -- never decides feasibility and cannot buy a colour error the
+    // way the single-white slack did.
+    //
+    // Why, measured rather than reasoned. The first explanation tried was
+    // that `kTwoWhiteBoundSlack` is half the final check's tolerance, so the
+    // bounds admit less than the check accepts. That is true and it is *not*
+    // the reason: making them equal changes nothing here.
+    //
+    // What actually holds it is margin. Raising the slack and re-measuring:
+    //
+    //   64 (shipped)  0 accepted with an out-of-range solve
+    //   128           0
+    //   256           0
+    //   512           0
+    //   1024          3
+    //   2048          5
+    //   4096          11
+    //
+    // So 64 sits a factor of eight below where this behaviour changes. It is
+    // a comfortable margin rather than a structural guarantee, which is the
+    // useful thing for anyone thinking of widening it.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                      WhiteAllocationPolicy::WhitePreferred,
+                                      &map));
+
+    int accepted = 0;
+    int accepted_wanting_out_of_range = 0;
+    int rejected_wanting_out_of_range = 0;
+    int wanting_out_of_range = 0;
+    float worst = 0.0f;
+    for (int xi = 4; xi <= 72; xi += 2) {
+        for (int yi = 4; yi <= 72; yi += 2) {
+            const float x = static_cast<float>(xi) * 0.01f;
+            const float y = static_cast<float>(yi) * 0.01f;
+            if (x + y >= 1.0f) {
+                continue;
+            }
+            i32 xyz[3];
+            xyzAt(x, y, 0.5f, xyz);
+
+            // What the RGB solve asks for before any white is chosen. This
+            // is the same matrix the single-white path uses, so "wants a
+            // drive out of range" means the same thing on both.
+            i32 at_zero[3];
+            solveRgbDrivesQ16(map.allocation.rgb_solve, xyz, at_zero);
+            bool wants_out = false;
+            for (int channel = 0; channel < 3; ++channel) {
+                if (at_zero[channel] < 0 || at_zero[channel] > 65536) {
+                    wants_out = true;
+                }
+            }
+            if (wants_out) {
+                ++wanting_out_of_range;
+            }
+
+            i32 drives[5];
+            if (!allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives)) {
+                if (wants_out) {
+                    ++rejected_wanting_out_of_range;
+                }
+                continue;
+            }
+            ++accepted;
+            if (wants_out) {
+                ++accepted_wanting_out_of_range;
+            }
+
+            float as_float[5];
+            for (int i = 0; i < 5; ++i) {
+                as_float[i] = toFloat(drives[i]);
+            }
+            float produced[3];
+            reproduceRgbww(as_float, produced);
+            const i32 produced_q16[3] = {q16(produced[0]), q16(produced[1]),
+                                         q16(produced[2])};
+            i32 target_lab[3];
+            i32 produced_lab[3];
+            xyzToOklabQ16(xyz, target_lab);
+            xyzToOklabQ16(produced_q16, produced_lab);
+            const float divergence = hueDivergence(target_lab, produced_lab);
+            if (divergence > worst) {
+                worst = divergence;
+            }
+        }
+    }
+
+    // The property.
+    FL_CHECK_EQ(accepted_wanting_out_of_range, 0);
+
+    // And the guard that makes it mean something. If no target on this grid
+    // ever wanted an out-of-range drive, the line above would hold over an
+    // empty set and this case would be reporting a property of the corpus
+    // rather than of the allocator. Measured: 670 targets want one, and all
+    // 670 are refused.
+    FL_CHECK_EQ(wanting_out_of_range, 670);
+    FL_CHECK_EQ(rejected_wanting_out_of_range, 670);
+
+    // 283 accepted, the same count the single-white path reaches after
+    // FastLED#4303 -- both are limited by the RGB hull here rather than by
+    // how many whites there are.
+    FL_CHECK_EQ(accepted, 283);
+
+    // Worst OKLab hue divergence 0.00096, against the single-white path's
+    // 0.0197 before that fix and 0.0034 after. Bounded below too: a run
+    // measuring nothing would also report zero.
+    FL_CHECK_LT(worst, 0.005f);
+    FL_CHECK_GT(worst, 0.0f);
 }
 
 FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {

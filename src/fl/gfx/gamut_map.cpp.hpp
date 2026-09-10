@@ -287,7 +287,7 @@ i32 clampChromaFactor(i32 low, i32 high) FL_NO_EXCEPT {
 
 }  // namespace
 
-bool buildGamutMapQ16(const EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT {
+bool buildGamutMapQ16(const colorimetric_response::EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
@@ -424,7 +424,7 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
     clampGamutDrives(drives);
 }
 
-bool buildGamutMapRgbwQ16(const EmitterProfile& profile,
+bool buildGamutMapRgbwQ16(const colorimetric_response::EmitterProfile& profile,
                           const i32 (&white_xyz)[3],
                           WhiteAllocationPolicy policy,
                           GamutMapRgbwQ16* out) FL_NO_EXCEPT {
@@ -605,7 +605,7 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
 }
 
 
-bool buildGamutMapRgbwwQ16(const EmitterProfile& profile,
+bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
                            const i32 (&white1_xyz)[3],
                            const i32 (&white2_xyz)[3],
                            WhiteAllocationPolicy policy,
