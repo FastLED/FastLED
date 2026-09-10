@@ -231,6 +231,16 @@ where the arithmetic happens: float32 carries a 24-bit mantissa that follows
 the magnitude, while Q16 with 64-bit intermediates carries a fixed 1/65536
 step and much more headroom around one. Neither dominates a priori.
 
+The baseline is modelled at the shipped derivation's own precision --
+float32 through `xyY_to_XYZ` and `invert3x3`, in the same operation order,
+quantised at the end. An earlier revision of this study inverted in float64
+and called that "the float path", which prices a derivation twice as precise
+as the one being replaced. It turned out not to change the verdict: the real
+primary sets score identically either way, and only the near-singular sweep
+moves (569 ULP against 575, 28 848 against 28 487). Recorded because the
+answer being the same is a result, not a reason the distinction did not
+matter.
+
 | primaries | worst coefficient error | worst dE2000 |
 | --- | ---: | ---: |
 | sRGB | 0 ULP | 0.0000 |
@@ -246,8 +256,8 @@ red-blue line until the matrix was nearly singular:
 | green collapsed | worst coefficient error | worst dE2000 |
 | --- | ---: | ---: |
 | 90% of the way | 6 ULP | 0.0421 |
-| 99% | 575 ULP | 0.0270 |
-| 99.9% | **28 487 ULP** | **0.0914** |
+| 99% | 569 ULP | 0.0091 |
+| 99.9% | **28 848 ULP** | **0.0654** |
 
 The coefficients lose four orders of magnitude of precision and *the colour
 error does not follow*. Those ULPs sit in directions a near-collinear device

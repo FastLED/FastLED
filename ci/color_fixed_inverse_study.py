@@ -37,6 +37,7 @@ Neither dominates a priori -- which is why this measures rather than argues.
 
 from __future__ import annotations
 
+import struct
 from dataclasses import dataclass
 from typing import TypeAlias
 
@@ -47,7 +48,6 @@ from ci.color_reference import (
     Matrix3,
     Rgb,
     Xyz,
-    _invert_3x3,
     _matvec,
     delta_e2000,
     xyz_to_lab,
@@ -91,6 +91,116 @@ def from_q16(value: int) -> float:
 
 def _rows(matrix: Matrix3) -> tuple[tuple[float, ...], ...]:
     return (matrix.row0, matrix.row1, matrix.row2)
+
+
+@typechecked
+def f32(value: float) -> float:
+    """Rounded to float32, the precision the shipped derivation actually has.
+
+    Python floats are float64, so a study written in them models a derivation
+    twice as precise as the one it is pricing. `buildRgbSolveMatrixQ16` builds
+    and inverts in `float`, and only then quantises -- so the baseline this
+    compares against has to be rounded at every step, not just at the end.
+    """
+
+    return struct.unpack("<f", struct.pack("<f", value))[0]
+
+
+@typechecked
+def emitter_matrix_f32(primaries: Primaries) -> list[list[float]]:
+    """The emitter columns, built the way `xyY_to_XYZ` builds them.
+
+    Same operation order as the shipped code -- `1/y` once, then two
+    multiplies -- because the order is what decides where float32 rounds.
+    """
+
+    columns: list[list[float]] = []
+    for x, y in primaries:
+        inv_y = f32(1.0 / f32(y))
+        columns.append(
+            [
+                f32(f32(f32(x) * 1.0) * inv_y),
+                1.0,
+                f32(f32(f32(1.0 - f32(x) - f32(y)) * 1.0) * inv_y),
+            ]
+        )
+    return [
+        [columns[0][0], columns[1][0], columns[2][0]],
+        [columns[0][1], columns[1][1], columns[2][1]],
+        [columns[0][2], columns[1][2], columns[2][2]],
+    ]
+
+
+@typechecked
+def invert3x3_f32(matrix: list[list[float]]) -> list[list[float]] | None:
+    """`colorimetric_response::invert3x3`, rounded to float32 at every step.
+
+    Mirrors the shipped body rather than the mathematics: cofactors, then one
+    reciprocal of the determinant, then nine multiplies. Computing `1/det`
+    once and multiplying is not the same as nine divisions in float32, and the
+    difference is exactly what this study is trying to see.
+    """
+
+    a, b, c = matrix[0]
+    d, e, f = matrix[1]
+    g, h, i = matrix[2]
+
+    def mul(left: float, right: float) -> float:
+        return f32(left * right)
+
+    def sub(left: float, right: float) -> float:
+        return f32(left - right)
+
+    def add(left: float, right: float) -> float:
+        return f32(left + right)
+
+    # a*(ei - fh) - b*(di - fg) + c*(dh - eg), associated left to right as
+    # the shipped expression is.
+    determinant = add(
+        sub(
+            mul(a, sub(mul(e, i), mul(f, h))),
+            mul(b, sub(mul(d, i), mul(f, g))),
+        ),
+        mul(c, sub(mul(d, h), mul(e, g))),
+    )
+    if determinant == 0.0:
+        return None
+
+    inv_det = f32(1.0 / determinant)
+    cof = [
+        [
+            sub(mul(e, i), mul(f, h)),
+            sub(mul(c, h), mul(b, i)),
+            sub(mul(b, f), mul(c, e)),
+        ],
+        [
+            sub(mul(f, g), mul(d, i)),
+            sub(mul(a, i), mul(c, g)),
+            sub(mul(c, d), mul(a, f)),
+        ],
+        [
+            sub(mul(d, h), mul(e, g)),
+            sub(mul(b, g), mul(a, h)),
+            sub(mul(a, e), mul(b, d)),
+        ],
+    ]
+    out: list[list[float]] = []
+    for row in range(3):
+        scaled: list[float] = []
+        for col in range(3):
+            scaled.append(mul(cof[row][col], inv_det))
+        out.append(scaled)
+    return out
+
+
+@typechecked
+def quantize_rows(rows: list[list[float]]) -> list[list[int]]:
+    """Every entry of a plain 3x3 rounded to s16.16."""
+
+    out: list[list[int]] = []
+    for row in rows:
+        out.append([to_q16(value) for value in row])
+    return out
 
 
 @typechecked
@@ -237,12 +347,26 @@ def compare_inverses(name: str, primaries: Primaries, steps: int) -> InverseErro
     values that produced it.
     """
 
-    forward = emitter_matrix(primaries)
-    float_inverse = _invert_3x3(forward)
-    shipped = quantize_matrix(float_inverse)
-    proposed = invert3x3_q16(quantize_matrix(forward))
+    # The baseline is the shipped derivation, modelled at its own precision:
+    # float32 throughout, quantised at the end. An earlier revision inverted
+    # in float64 and called it "the float path", which prices a derivation
+    # twice as precise as the one being replaced.
+    forward_f32 = emitter_matrix_f32(primaries)
+    inverse_f32 = invert3x3_f32(forward_f32)
+    if inverse_f32 is None:
+        raise ValueError(f"{name}: float32 inverse reported singular")
+    shipped = quantize_rows(inverse_f32)
+
+    # And the forward matrix the fixed-point path quantises is the same one
+    # the shipped path builds, so the two differ only in the inversion.
+    proposed = invert3x3_q16(quantize_rows(forward_f32))
     if proposed is None:
         raise ValueError(f"{name}: fixed-point inverse reported singular")
+
+    # Rendering stays in float64: it stands in for the physical device, and
+    # modelling it at float32 would attribute the emulator's rounding to one
+    # of the two candidates.
+    forward = emitter_matrix(primaries)
 
     worst_ulps = 0
     for row in range(3):
