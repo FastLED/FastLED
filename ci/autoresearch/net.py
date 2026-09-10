@@ -6,6 +6,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 
 import asyncio
 import contextlib
+import errno
 import os
 import platform as platform_mod
 import subprocess
@@ -512,14 +513,17 @@ def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
     """Name the process holding `port`, when the OS will say.
 
     `attach failed: open_port(...) exceeded 3s; serial driver may be wedged`
-    is what the serial layer reports for what is often an ordinary EBUSY:
-    another process still owns the fd. Measured on this bench, the holder was
-    fbuild-daemon retaining the companion's port after its own deploy -- a
-    plain os.open() returned [Errno 16] Device or resource busy, the board
-    stayed enumerated and healthy, and removing the holder made open()
-    succeed at once. The "wedged" wording sent that investigation into the
-    device and the USB stack before /proc showed a simple lock, so say who
-    has it. See FastLED/fbuild#1429.
+    is what the serial layer reports for what is actually an ordinary EBUSY.
+    Measured on this bench: a tty accepts multiple openers happily, and the
+    error appears only once some process sets TIOCEXCL and leaves it set --
+    setting it by hand reproduces the identical "Device or resource busy".
+    The board stays enumerated and healthy throughout, and the lock dies with
+    the holding process. See FastLED/fbuild#1429.
+
+    Only reports when the port is genuinely unopenable. Another process
+    merely *holding* an fd is harmless -- that was measured too, opening in
+    0.0 s alongside a live holder -- so naming a holder in that case would
+    accuse the wrong thing.
 
     Linux-only and best effort: returns "" when it cannot tell, and never
     raises. `proc_root` is a parameter so this can be tested against a real
@@ -528,6 +532,15 @@ def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
     node = port.rsplit("/", 1)[-1]
     if not node:
         return ""
+    # Establish that there is contention at all before blaming anyone.
+    try:
+        probe = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+    except OSError as exc:
+        if exc.errno != errno.EBUSY:
+            return ""
+    else:
+        os.close(probe)
+        return ""  # opens fine; whoever holds an fd is not the problem
     try:
         entries = os.listdir(proc_root)
     except OSError:
@@ -552,7 +565,10 @@ def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
                     name = handle.read().strip()
             except OSError:
                 name = "?"
-            return f"{port} is held by {name} (pid {entry})"
+            return (
+                f"{port} is locked against other openers by "
+                f"{name} (pid {entry}); the device itself is fine"
+            )
     return ""
 
 

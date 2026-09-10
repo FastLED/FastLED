@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+import termios
+import pty
+import fcntl
 from pathlib import Path
 import contextlib
 import io
@@ -609,28 +612,42 @@ def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
     assert peer.close.await_count == 2
 
 
-def test_describe_port_holder_names_the_process_holding_it(tmp_path: Path) -> None:
-    """A held port must be reported as contention, naming the holder.
+def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
+    """A port that opens is not contended, whoever else holds an fd.
 
-    "serial driver may be wedged" is what the serial layer reports for an
-    ordinary EBUSY. On this bench the holder was fbuild-daemon keeping the
-    companion's port after its own deploy, and that wording cost a long
-    detour through the device and the USB stack before /proc showed a plain
-    lock. See FastLED/fbuild#1429.
+    Measured on the bench: a tty accepts multiple openers, and another
+    process merely holding one is harmless. Naming that holder would accuse
+    the wrong thing. See FastLED/fbuild#1429.
     """
-    proc = tmp_path / "proc"
-    (proc / "4242" / "fd").mkdir(parents=True)
-    (proc / "4242" / "comm").write_text("fbuild-daemon\n", encoding="utf-8")
-    (proc / "4242" / "fd" / "7").symlink_to("/dev/ttyACM2")
+    master, slave = pty.openpty()
+    try:
+        node = os.ttyname(slave)
+        # A second handle is open on this pty right now, and it still opens.
+        assert _describe_port_holder(node) == ""
+    finally:
+        os.close(master)
+        os.close(slave)
 
-    described = _describe_port_holder("/dev/ttyACM2", proc_root=str(proc))
 
-    assert "held by fbuild-daemon" in described
-    assert "pid 4242" in described
+def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
+    """When TIOCEXCL is set, say who set it and that the device is fine.
+
+    Setting TIOCEXCL by hand reproduces the exact `Device or resource busy`
+    the serial layer reports as "serial driver may be wedged".
+    """
+    master, slave = pty.openpty()
+    try:
+        node = os.ttyname(slave)
+        fcntl.ioctl(slave, termios.TIOCEXCL)
+        described = _describe_port_holder(node)
+        assert "locked against other openers" in described
+        assert "the device itself is fine" in described
+        assert str(os.getpid()) in described
+    finally:
+        os.close(master)
+        os.close(slave)
 
 
-def test_describe_port_holder_is_silent_when_nothing_holds_it(tmp_path: Path) -> None:
-    """No holder must produce no claim, not a guess."""
-    proc = tmp_path / "proc"
-    (proc / "99" / "fd").mkdir(parents=True)
-    assert _describe_port_holder("/dev/ttyACM2", proc_root=str(proc)) == ""
+def test_describe_port_holder_is_silent_for_a_missing_port() -> None:
+    """An absent port is not contention; say nothing rather than guess."""
+    assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz") == ""
