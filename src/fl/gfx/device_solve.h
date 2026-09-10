@@ -32,12 +32,25 @@ struct EmitterSolveMatrixQ16 {
     i32 m[3][3];
 };
 
+/// Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats.
+///
+/// The float-free half of P9 item 2 (FastLED#4043). `buildRgbSolveMatrixQ16`
+/// still reaches this through `invert3x3`; a bind path that never touches
+/// float calls it directly.
+///
+/// False on a singular matrix, on a coefficient too large for s16.16, and on
+/// any input whose exact cofactors or determinant do not fit an i64. That
+/// last case is detected rather than bounded away: a deep-blue emitter at
+/// xy = (0.14, 0.03) already has a Z column near 28, so a fixed input limit
+/// generous enough to be safe would reject real parts.
+bool invert3x3Q16(const i32 (&in)[3][3], i32 (&out)[3][3]) FL_NO_EXCEPT;
+
 /// Invert the emitter matrix for a three-emitter profile.
 ///
 /// False when the emitter chromaticities are non-finite, degenerate, or
 /// collinear, any of which makes the matrix singular and the solve
 /// meaningless.
-bool buildRgbSolveMatrixQ16(const EmitterProfile& profile,
+bool buildRgbSolveMatrixQ16(const colorimetric_response::EmitterProfile& profile,
                             EmitterSolveMatrixQ16* out) FL_NO_EXCEPT;
 
 /// One pixel: XYZ in s16.16 to three emitter drives in s16.16.
