@@ -330,14 +330,7 @@ constexpr float kFloatDecimalLimit = 4.0e18f;
 // both infinities. 1e38 is inside the float range, so a finite value can
 // exceed it -- which is why the caller must handle large finites separately
 // rather than treating this as "printable".
-inline bool float_is_finite(float value) FL_NO_EXCEPT {
-    if (value != value) {
-        return false;
-    }
-    return value > -3.5e38f && value < 3.5e38f;
-}
-
-inline fl::string format_float(float value, int precision) FL_NO_EXCEPT;
+bool float_is_finite(float value) FL_NO_EXCEPT;
 
 // `d.ddde+NN` for a magnitude no integer accumulator can hold.
 //
@@ -348,42 +341,14 @@ inline fl::string format_float(float value, int precision) FL_NO_EXCEPT;
 // A number that is wrong without saying so is worse than one in a shape the
 // reader has to decode (FastLED #4156).
 //
-// Precondition: `value` is finite. The normalisation loop below divides while
-// the magnitude is at or above ten, which never terminates for an infinity --
+// Precondition: `value` is finite. The normalisation loop divides while the
+// magnitude is at or above ten, which never terminates for an infinity --
 // removing the caller's non-finite check hangs rather than mis-prints, which
 // is how that ordering was confirmed to be load-bearing.
-inline fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT {
-    const bool negative = value < 0.0f;
-    float magnitude = negative ? -value : value;
-    int exponent = 0;
-    while (magnitude >= 10.0f) {
-        magnitude /= 10.0f;
-        ++exponent;
-    }
-    while (magnitude > 0.0f && magnitude < 1.0f) {
-        magnitude *= 10.0f;
-        --exponent;
-    }
-
-    sstream stream;
-    if (negative) {
-        stream << "-";
-    }
-    // The mantissa is in [1, 10) now, so the ordinary path renders it.
-    stream << format_float(magnitude, precision);
-    stream << "e";
-    if (exponent < 0) {
-        stream << "-";
-        exponent = -exponent;
-    } else {
-        stream << "+";
-    }
-    if (exponent < 10) {
-        stream << "0";
-    }
-    stream << exponent;
-    return stream.str();
-}
+//
+// Defined in `stdio.cpp.hpp` rather than here: `src/**/*.h` carries
+// declarations, and these two need no template visibility.
+fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT;
 
 // Format floating point with specified precision
 inline fl::string format_float(float value, int precision) FL_NO_EXCEPT {

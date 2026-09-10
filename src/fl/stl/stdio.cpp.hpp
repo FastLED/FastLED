@@ -2,6 +2,47 @@
 
 namespace fl { namespace printf_detail {
 
+bool float_is_finite(float value) FL_NO_EXCEPT {
+    if (value != value) {
+        return false;
+    }
+    return value > -3.5e38f && value < 3.5e38f;
+}
+
+fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT {
+    const bool negative = value < 0.0f;
+    float magnitude = negative ? -value : value;
+    int exponent = 0;
+    while (magnitude >= 10.0f) {
+        magnitude /= 10.0f;
+        ++exponent;
+    }
+    while (magnitude > 0.0f && magnitude < 1.0f) {
+        magnitude *= 10.0f;
+        --exponent;
+    }
+
+    sstream stream;
+    if (negative) {
+        stream << "-";
+    }
+    // The mantissa is in [1, 10) now, so the ordinary path renders it.
+    stream << format_float(magnitude, precision);
+    stream << "e";
+    if (exponent < 0) {
+        stream << "-";
+        exponent = -exponent;
+    } else {
+        stream << "+";
+    }
+    if (exponent < 10) {
+        stream << "0";
+    }
+    stream << exponent;
+    return stream.str();
+}
+
+
 void format_arg(sstream& stream, const FormatSpec& spec, const fl::string& arg) FL_NO_EXCEPT {
     format_arg(stream, spec, arg.c_str());
 }
