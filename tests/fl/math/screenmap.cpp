@@ -315,6 +315,44 @@ FL_TEST_CASE("ScreenMap v2 JSON parsing — EL geometry remains shape-native") {
 FL_TEST_FILE(FL_FILEPATH) {
 
 
+FL_TEST_CASE("ScreenMap v2 emission omits an unset diameter") {
+    // `mDiameter` defaults to -1 as a sentinel meaning "unset", and the
+    // emitter wrote it out: every segment of a map with no diameter came back
+    // carrying `"diameter":-1.000`, which is not a physical size. The field's
+    // own comment asked for it to be skipped and had the sense inverted --
+    // "Only serialized if it's not > 0.0f" -- which is presumably how the
+    // writer came to do the opposite.
+    //
+    // Omitting round-trips identically, because both parser paths already
+    // read an absent key back as -1. That is what this checks: the value
+    // survives, the sentinel stops being published.
+    fl::flat_map<fl::string, ScreenMap> maps;
+    maps["unset"] = ScreenMap(2);           // no diameter given
+    ScreenMap sized(2, 2.5f);
+    maps["sized"] = sized;
+
+    fl::string out;
+    ScreenMap::toJsonStr(maps, &out);
+
+    // One diameter in the output, not two.
+    int diameters = 0;
+    const fl::string needle("\"diameter\"");
+    fl::size at = out.find(needle);
+    while (at != fl::string::npos) {
+        ++diameters;
+        at = out.find(needle, at + needle.size());
+    }
+    FL_CHECK_EQ(diameters, 1);
+    FL_CHECK(out.find(fl::string("-1")) == fl::string::npos);
+
+    // And the round trip is unchanged for both.
+    fl::flat_map<fl::string, ScreenMap> back;
+    fl::string err;
+    FL_REQUIRE(ScreenMap::ParseJson(out.c_str(), &back, &err));
+    FL_CHECK_EQ(back["sized"].getDiameter(), 2.5f);
+    FL_CHECK_EQ(back["unset"].getDiameter(), -1.0f);
+}
+
 FL_TEST_CASE("ScreenMap v2 emission does not invent a pin") {
     // `toJson` used to write the literal `"pin1"` into every segment -- the
     // example value from the shape comment above the emitter, copied in as

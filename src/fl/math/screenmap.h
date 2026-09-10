@@ -134,7 +134,9 @@ class ScreenMap {
   private:
     static const vec2f &empty() FL_NO_EXCEPT;
     u32 length = 0;
-    float mDiameter = -1.0f; // Only serialized if it's not > 0.0f.
+    // -1 is the sentinel for "unset", and is not serialized: a negative
+    // diameter is not a size, and the parser reads an absent key back as -1.
+    float mDiameter = -1.0f;
     LUTXYFLOATPtr mLookUpTable;
     XYMapPtr mSourceXYMap;  // Optional: source XYMap for encoding pipeline
     fl::vector<Shape> mShapes;

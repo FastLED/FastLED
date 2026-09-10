@@ -495,7 +495,19 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
         segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::json(diameter));
+        // Only when there is one. `mDiameter` defaults to -1 as a sentinel
+        // meaning "unset", and writing that out publishes an impossible
+        // physical size: no LED is -1 units across. The parser already reads
+        // an absent key back as -1 (both the v1 and v2 paths default it), so
+        // omitting round-trips to exactly the same value inside FastLED and
+        // stops a consumer from having to know the sentinel.
+        //
+        // The field's own comment in screenmap.h asked for this and had the
+        // sense inverted -- "Only serialized if it's not > 0.0f" -- which is
+        // presumably how the writer came to do the opposite.
+        if (diameter > 0.0f) {
+            segmentObj.set("diameter", fl::json(diameter));
+        }
         segmentsArr.push_back(segmentObj);
 
         idx++;
