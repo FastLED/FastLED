@@ -1574,7 +1574,13 @@ FL_TEST_CASE("RGBW walks down to what it can reach, not to its cap") {
 
     i32 emitted[3];
     emittedLabWide<4>(drives, kWhiteD65, kWhiteD65, emitted);
-    FL_CHECK_GE(toFloat(emitted[0]), cap - 0.02f);
+    // Materially above the cap, not merely at it. The old fallback dropped
+    // straight to the cap and would satisfy any `>= cap - epsilon` floor, so
+    // that form of the assertion held with the walk-down deleted. Measured
+    // here the walk-down clears the cap by 0.22; the 0.10 bound is half of
+    // that, far enough above the noise to be a real claim and far enough
+    // below the measurement not to pin the search's exact resolution.
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.10f);
     FL_CHECK_LT(toFloat(emitted[0]), requested);
 
     // And asking for more gives the same answer, which is what "walks down to
@@ -1643,7 +1649,10 @@ FL_TEST_CASE("RGBWW walks down to what it can reach, not to its cap") {
 
     i32 emitted[3];
     emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
-    FL_CHECK_GE(toFloat(emitted[0]), cap - 0.02f);
+    // Same bound, same reason, on the two-white path: measured 0.21 above
+    // the cap here, so `cap + 0.10f` separates the walk-down from the
+    // direct-to-cap fallback it replaced.
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.10f);
     FL_CHECK_LT(toFloat(emitted[0]), requested);
 
     const i32 higher[3] = {q16(requested + 0.20f), q16(0.05f), q16(-0.0866025f)};

@@ -1,1 +1,14 @@
-342177
+# 2026-09-10, PR #4283 (issue #4041): +1 B, 342177 -> 342178.
+#
+# The continuity fix adds highestReachableLightness to the gamut mappers,
+# which walk down to the highest reachable lightness instead of dropping to
+# the neutral cap. None of that code links into the NEOPIXEL Blink sketch
+# this gate builds: no gamut or colour-pipeline symbol appears anywhere in
+# the run's top-25 symbol table (largest entries are fl::ClocklessIdf5<...>
+# at 45,342 B, the libc printf family, and fl::Channel::showPixels at
+# 3,296 B). The byte is layout drift, not a feature cost.
+#
+# Attribution was checked rather than assumed: master's last three runs and
+# the concurrent PR #4282 all measure 342,177 B, so the byte arrived with
+# this branch.
+342178
