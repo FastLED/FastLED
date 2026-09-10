@@ -181,6 +181,73 @@ has not done. What it establishes is that the remaining candidates are being
 compared against a floor that is lower than it needs to be, which is worth
 knowing before spending effort ranking them.
 
+## The black floor is the source quantization, and it is hard
+
+#4156 R8 asks for the black floor, the luminance-error denominator and the
+unsupported low-light region to be defined rather than inferred from wider
+arithmetic, and gives the arithmetic that motivates it: an identity linear16
+input of `1/65535` is 0.0039 of an 8-bit code, so its nearest 8-bit output is
+zero -- 100% relative luminance error. Matching it by alternating codes 0 and 1
+needs one code-1 frame in 257, about 4.28 seconds at 60 Hz, which is not a
+cadence anything can display.
+
+Measured against the shipped path, the situation is simpler than that and
+worse. `PixelController::dither()` is
+
+```cpp
+return b ? fl::qadd8(b, pc.d[RO(SLOT)]) : 0;
+```
+
+so a source code of zero is excluded from dithering by construction. **Nothing
+below one source code is reachable at any brightness, any refresh rate, or any
+dither cycle length.** R8's 4.28-second cadence is not the obstacle; the
+obstacle is that the mechanism never runs on the value in question. The floor
+is the quantization of the source, not a dead zone above it: one code up, the
+cycle emits light.
+
+That answers the "unsupported low-light region" directly. For an identity
+mapping it is every source value that quantizes to 8-bit zero.
+
+### Above the floor, dithering does what it claims
+
+At 1/16 brightness a source code of 1 asks for 0.06 output codes, which no
+single frame can emit. The eight-frame cycle emits code 1 once and zero seven
+times, so the mean lands between two output codes. Sub-output-code precision
+is real.
+
+### And the lowest codes render brighter than they ask for
+
+The correction that turns `scale8`'s truncation into round-to-nearest is a
+constant addition of about half a dither quantum. At the bottom of the range
+that is a large fraction of the value itself. Summed over a full cycle, so
+these are time-averaged light and not single-frame rounding:
+
+| premixed | source code | emitted | exact | error |
+| --- | --- | --- | --- | --- |
+| 255 | 1 | 11 | 8 | **+37.5%** |
+| 255 | 2 | 19 | 16 | +18.8% |
+| 255 | 64 | -- | -- | under +2% |
+
+The last row is the point: the bias is a constant in absolute terms, so it
+disappears as a fraction almost immediately. It is only the bottom two or
+three codes that carry it.
+
+At `premixed = 255` it is not a trade at all. `scale8(i, 255)` is exact under
+`FASTLED_SCALE8_FIXED` -- `(i * 256) >> 8` is `i` -- so no fractional precision
+is lost there, there is nothing for a rounding correction to recover, and
+every code the dither adds is gain. `DISABLE_DITHER` makes that path exact.
+Note that `premixed` is brightness *times* colour correction, so the exact
+case is `UncorrectedColor` at full brightness rather than the common default.
+
+This is what R8 means by a quantized reference concealing optical error:
+against an 8-bit reference every one of these matches, and against the light
+they are asking for they do not. The denominator has to be emitted light.
+
+`tests/pixel_controller.cpp` carries all of it as measurements rather than
+prose. No change to the dither is proposed here -- R8 asks for the contract to
+be defined, and shifting the low-code rendering of every existing sketch is a
+decision, not a cleanup.
+
 ## What this leaves for section 5
 
 Two of the five candidates are gone, and the remaining comparison is between
