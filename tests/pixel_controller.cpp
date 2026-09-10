@@ -1,4 +1,5 @@
 #include "pixel_controller.h"
+#include "fl/math/math.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -211,12 +212,18 @@ FL_TEST_CASE("Dither - the cycle rate at the enable threshold is below the file'
     // The threshold `show()` actually applies, repeated here because it is a
     // literal there rather than a named constant.
     const int kDitherEnableFps = 100;
-    const int cycle_hz_at_threshold =
-        kDitherEnableFps / UPDATES_PER_FULL_DITHER_CYCLE;
-    FL_CHECK_EQ(cycle_hz_at_threshold, 12);  // 12.5, truncated
+
+    // In floating point, because the number is 12.5 and the point of this
+    // case is to record the cadence rather than a rounded stand-in for it.
+    // An integer division here reports 12, which is a different claim.
+    const float cycle_hz_at_threshold =
+        static_cast<float>(kDitherEnableFps) /
+        static_cast<float>(UPDATES_PER_FULL_DITHER_CYCLE);
+    FL_CHECK_LT(fl::fabsf(cycle_hz_at_threshold - 12.5f), 1e-6f);
 
     // Four times short, by the file's own floor.
-    FL_CHECK_LT(cycle_hz_at_threshold, MIN_ACCEPTABLE_DITHER_RATE_HZ);
+    FL_CHECK_LT(cycle_hz_at_threshold,
+                static_cast<float>(MIN_ACCEPTABLE_DITHER_RATE_HZ));
     FL_CHECK_EQ(MAX_LIKELY_UPDATE_RATE_HZ / kDitherEnableFps, 4);
 
     // And the refresh that would actually reach the floor is the one the

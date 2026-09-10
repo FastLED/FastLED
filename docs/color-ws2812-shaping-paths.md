@@ -250,8 +250,8 @@ decision, not a cleanup.
 
 ### And the cadence that decides how long a cycle may be is 4x out
 
-#4156 R8 asks for "cadence, observation window, and unsupported low-light
-region". The floor above answers the last one. This is the first, and the two
+Issue #4156 R8 asks for "cadence, observation window, and unsupported
+low-light region". The floor above answers the last one. This is the first, and the two
 constants that decide it disagree.
 
 The dither cycle length is *derived* from a cadence assumption, in
