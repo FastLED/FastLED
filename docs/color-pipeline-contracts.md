@@ -170,6 +170,51 @@ unmodeled internal PWM transients or replace electrical supply protection.
 Nonlinear electrical models require a bounded/conservative scalar solution;
 assuming watts proportional to XYZ Y is not supported.
 
+### The legacy estimator's emitter count
+
+"Aggregated with their respective electrical models" is not free wording. The
+legacy estimator walks the source `CRGB` array, which is what the sketch
+wrote, not what the strip is driven with. A controller in RGBW mode converts
+every pixel with `rgb_2_rgbw` before latching, and the resulting four drives
+are neither bounded by nor proportional to the source triple.
+
+Measured on 300 pixels of source white with the shipped default
+`PowerModelRGBW` (r90 g70 b90 w100 dark5), in milliwatts:
+
+| RGBW mode | source triple | four emitters | |
+|---|---|---|---|
+| `kRGBWMaxBrightness` | 76,205 | 106,086 | source triple is **28% under** |
+| `kRGBWBoostedWhite` | 76,205 | 81,470 | **6.5% under** |
+| `kRGBWExactColors` | 76,205 | 30,485 | **150% over** |
+
+The first two are budget under-spent against; the third is a strip dimmed for
+no reason. `set_power_model(const PowerModelRGBW&)` compounded it by routing
+through `toRGB()`, which dropped `white_mW`: the API accepted the figure and
+discarded it, so the fourth diode could not have been charged even in
+principle. The estimator now runs the same conversion the encoder will and
+charges all four emitters.
+
+Two boundaries this leaves in place, both deliberate:
+
+- **Demand is still projected linearly in brightness.** The estimator reports
+  demand at full brightness and the limiter scales it. That commutes with
+  `kRGBWExactColors` and `kRGBWMaxBrightness` to within 0.4% over the measured
+  cases, but not with `kRGBWBoostedWhite`, which reallocates between emitters
+  as the scale falls: demand there runs up to **12.1% above** the linear
+  projection at low brightness. Closing it means evaluating demand per
+  candidate brightness, which is a pixel walk per step of the limiter's
+  search. Charging four emitters instead of three is the larger correction by
+  a wide margin; the residual is recorded rather than folded into the claim.
+- **RGBWW still folds.** `PowerModelRGBWW::toRGB()` spreads its two white
+  emitters across R/G/B rather than dropping them, which over-estimates and
+  so cannot break a budget. A five-emitter accounting needs the RGBWW
+  allocation the way the RGBW path needs `rgb_2_rgbw`.
+
+A controller in RGBW mode under a model that declares no white emitter is
+diagnosed once rather than guessed at. There is no basis for a fourth
+emitter's draw in a three-emitter declaration, and inventing one is the shape
+of the defect this replaced.
+
 ### Fidelity accounting
 
 Report three distinct errors:

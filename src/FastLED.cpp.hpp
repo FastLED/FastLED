@@ -474,9 +474,12 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 	// The dark-current baseline is kept apart from the part brightness scales,
 	// because it is drawn at every brightness including zero (#4156 R4).
 	const fl::u32 dark_mW_per_led = get_power_model().dark_mW;
-	CLEDController::visitControllers([&](const CLEDController* /*controller*/, fl::span<const CRGB> leds) {
+	CLEDController::visitControllers([&](const CLEDController* controller, fl::span<const CRGB> leds) {
 		if (!leds.empty()) {
-			const fl::u32 unscaled_mW = calculate_unscaled_power_mW(leds);
+			// Through the controller's own RGBW setting, so an RGBW strip is
+			// charged for the diode it actually lights (#4156 R3).
+			const fl::u32 unscaled_mW =
+			    calculate_unscaled_power_mW(leds, controller->getRgbw());
 			const fl::u32 dark_mW = dark_mW_per_led * static_cast<fl::u32>(leds.size());
 			fixed_power_mW += dark_mW;
 			controllable_power_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;

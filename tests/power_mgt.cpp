@@ -433,4 +433,199 @@ FL_TEST_CASE("Power limiter - a budget over demand leaves brightness alone") {
                 200);
 }
 
+// ---------------------------------------------------------------------------
+// #4156 R3: the estimate must cover the emitters the strip actually lights.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// The four-emitter draw, computed the long way: run the same conversion the
+// encoder runs, then charge each diode at its declared rate. Deliberately not
+// the function under test -- if both were the same code the cases below would
+// only be asserting that a function equals itself.
+fl::u32 four_emitter_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw,
+                        const PowerModelRGBW& model) {
+    fl::u32 r32 = 0, g32 = 0, b32 = 0, w32 = 0;
+    for (fl::size i = 0; i < leds.size(); ++i) {
+        fl::u8 r = 0, g = 0, b = 0, w = 0;
+        fl::rgb_2_rgbw(rgbw, leds[i].r, leds[i].g, leds[i].b, 255, 255, 255,
+                       &r, &g, &b, &w);
+        r32 += r;
+        g32 += g;
+        b32 += b;
+        w32 += w;
+    }
+    return ((r32 * model.red_mW) >> 8) + ((g32 * model.green_mW) >> 8) +
+           ((b32 * model.blue_mW) >> 8) + ((w32 * model.white_mW) >> 8) +
+           static_cast<fl::u32>(model.dark_mW) * leds.size();
+}
+
+struct ScopedRgbwPowerModel {
+    explicit ScopedRgbwPowerModel(const PowerModelRGBW& model)
+        : previous_model(get_power_model()) {
+        set_power_model(model);
+    }
+    ~ScopedRgbwPowerModel() { set_power_model(previous_model); }
+    PowerModelRGB previous_model;
+};
+
+} // namespace
+
+FL_TEST_CASE("Power model - an RGBW declaration keeps its white emitter") {
+    // `set_power_model(PowerModelRGBW)` used to route through `toRGB()`,
+    // which drops `white_mW`. The API accepted the number and threw it away,
+    // so every RGBW budget was computed over three of four diodes.
+    ScopedRgbwPowerModel guard(PowerModelRGBW(90, 70, 90, 100, 5));
+    FL_CHECK_EQ(get_white_emitter_mW(), 100);
+    // And the RGB half still lands where it was declared.
+    FL_CHECK_EQ(get_power_model().red_mW, 90);
+    FL_CHECK_EQ(get_power_model().blue_mW, 90);
+
+    // Declaring an RGB model afterwards retracts the white emitter: three
+    // emitters is what an RGB model says the strip has.
+    set_power_model(PowerModelRGB(80, 55, 75, 5));
+    FL_CHECK_EQ(get_white_emitter_mW(), 0);
+}
+
+FL_TEST_CASE("Power model - changing the exponent does not retract the white emitter") {
+    // `set_power_scaling_exponent` reinstalls the RGB model to carry the new
+    // exponent. Routing that through the public RGB setter would clear the
+    // white declaration as a side effect of an unrelated call.
+    ScopedRgbwPowerModel guard(PowerModelRGBW(90, 70, 90, 100, 5));
+    set_power_scaling_exponent(1.0f);
+    FL_CHECK_EQ(get_white_emitter_mW(), 100);
+}
+
+FL_TEST_CASE("Power estimate - the source triple is not the RGBW strip's demand") {
+    // The measurement behind R3, at the size that makes it concrete. Source
+    // white on 300 SK6812-class pixels, the shipped default RGBW model.
+    ScopedRgbwPowerModel guard{PowerModelRGBW()};
+    const PowerModelRGBW model;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+    const fl::u32 source_triple_mW = calculate_unscaled_power_mW(span);
+
+    struct Case {
+        fl::RGBW_MODE mode;
+        bool source_triple_under_counts;
+    };
+    const Case cases[] = {
+        // Lights every diode at the source level: the largest draw of the
+        // four modes, and the one the source triple most under-states.
+        {fl::RGBW_MODE::kRGBWMaxBrightness, true},
+        // Adds white on top of a reduced RGB residual; still over the triple.
+        {fl::RGBW_MODE::kRGBWBoostedWhite, true},
+        // Moves the neutral into the white diode, so the strip draws far
+        // *less* than the triple. Wrong in the other direction: a strip
+        // dimmed against a budget it was never near.
+        {fl::RGBW_MODE::kRGBWExactColors, false},
+    };
+
+    for (const auto& c : cases) {
+        const fl::Rgbw rgbw(fl::kRGBWDefaultColorTemp, c.mode);
+        const fl::u32 truth = four_emitter_mW(span, rgbw, model);
+        const fl::u32 measured = calculate_unscaled_power_mW(span, rgbw);
+
+        // The estimate tracks the four-emitter truth, not the source triple.
+        // Within a milliwatt per LED of rounding across the two sum orders.
+        FL_CHECK_LE(measured > truth ? measured - truth : truth - measured,
+                    static_cast<fl::u32>(kCount));
+
+        // And the gap it closes is not a rounding-scale gap. Measured on
+        // these 300 pixels the smallest of the three is `kRGBWBoostedWhite`
+        // at 6.5% of the true draw; `kRGBWMaxBrightness` is 28% and
+        // `kRGBWExactColors` is 150%. A twentieth is under all three and far
+        // over anything the two sum orders could differ by.
+        const fl::u32 gap = source_triple_mW > truth ? source_triple_mW - truth
+                                                     : truth - source_triple_mW;
+        FL_CHECK_GT(gap, truth / 20);
+        FL_CHECK_EQ(truth > source_triple_mW, c.source_triple_under_counts);
+    }
+}
+
+FL_TEST_CASE("Power estimate - the white diode is charged only where there is one") {
+    // The same model must not inflate a plain RGB controller on the same
+    // sketch. An inactive Rgbw is the three-emitter answer exactly.
+    //
+    // Note what this does and does not pin. It pins the answer. It cannot
+    // distinguish the implementation's `!rgbw.active()` short-circuit from
+    // running the conversion anyway, because the inactive mode dispatches to
+    // null-white and returns the input unchanged -- deleting that branch
+    // leaves this case passing. The branch is there for the per-pixel cost,
+    // and is documented as such rather than as a guard.
+    ScopedRgbwPowerModel guard{PowerModelRGBW()};
+    const int kCount = 60;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(200, 140, 90);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+    FL_CHECK_EQ(calculate_unscaled_power_mW(span, fl::RgbwInvalid::value()),
+                calculate_unscaled_power_mW(span));
+}
+
+FL_TEST_CASE("Power estimate - an undeclared white emitter falls back, it does not guess") {
+    // With only an RGB model declared there is no white draw to charge. The
+    // estimate stays the three-emitter figure rather than inventing a number
+    // for the fourth diode, which is the state that produced R3 in the first
+    // place -- so the fallback is the documented behaviour, not silence.
+    ScopedDefaultPowerModel guard;
+    const int kCount = 60;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+    const fl::Rgbw rgbw(fl::kRGBWDefaultColorTemp,
+                        fl::RGBW_MODE::kRGBWMaxBrightness);
+    FL_CHECK_EQ(get_white_emitter_mW(), 0);
+    FL_CHECK_EQ(calculate_unscaled_power_mW(span, rgbw),
+                calculate_unscaled_power_mW(span));
+}
+
+FL_TEST_CASE("Power limiter - an RGBW budget is met by the emitters, not by three of them") {
+    // What the estimate is for. Under `kRGBWMaxBrightness` the strip draws
+    // more than its source triple says, so a budget set from the triple is
+    // exceeded. The limiter now answers against the four-emitter demand.
+    ScopedRgbwPowerModel guard{PowerModelRGBW()};
+    const PowerModelRGBW model;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+    const fl::Rgbw rgbw(fl::kRGBWDefaultColorTemp,
+                        fl::RGBW_MODE::kRGBWMaxBrightness);
+
+    const fl::u32 truth_mW = four_emitter_mW(span, rgbw, model);
+    const fl::u32 fixed_mW = static_cast<fl::u32>(model.dark_mW) * kCount;
+    const fl::u32 controllable_mW = truth_mW - fixed_mW;
+
+    // A budget between the two figures: the source triple says the strip
+    // fits inside it at full brightness, the four-emitter truth says it does
+    // not. That interval is exactly the region the old estimate got wrong,
+    // and it is non-empty only because the two disagree.
+    const fl::u32 source_triple_mW = calculate_unscaled_power_mW(span);
+    const fl::u32 budget_mW = (source_triple_mW + truth_mW) / 2;
+    const fl::u32 measured_mW = calculate_unscaled_power_mW(span, rgbw);
+    const fl::u32 measured_controllable =
+        measured_mW > fixed_mW ? measured_mW - fixed_mW : 0;
+
+    // The demand the limiter now works from is the true one.
+    FL_CHECK_LE(measured_controllable > controllable_mW
+                    ? measured_controllable - controllable_mW
+                    : controllable_mW - measured_controllable,
+                static_cast<fl::u32>(kCount));
+
+    // Whereas the three-emitter figure would have claimed the whole strip
+    // fits inside that budget at full brightness -- it does not.
+    FL_CHECK_LT(source_triple_mW, budget_mW);
+    FL_CHECK_GT(truth_mW, budget_mW);
+}
+
 } // FL_TEST_FILE
