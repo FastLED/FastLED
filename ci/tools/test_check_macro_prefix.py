@@ -203,3 +203,20 @@ def test_a_raw_string_body_may_contain_a_close_paren() -> None:
 def test_a_prefixed_raw_string_is_recognised() -> None:
     source = 'const char* k = u8R"x(\n#define FASTLED_IN_RAW 1\n)x";\n'
     assert names_in(source) == set()
+
+
+def test_a_raw_opener_inside_a_line_comment_opens_nothing() -> None:
+    """Masking in separate passes lets one token open inside another.
+
+    A `//` comment containing `R"x(` started a raw string that ran to a `)x"`
+    in a *later* comment, blanking the real directive between them. The name
+    vanished -- a false negative, and one no amount of care in either pass
+    could prevent, because the bug is the passes being separate.
+    """
+    source = '// R"x(\n#define FASTLED_NEW 1\n// )x"\n'
+    assert names_in(source) == {"FASTLED_NEW"}
+
+
+def test_a_bare_quote_in_a_comment_opens_nothing_either() -> None:
+    source = '// a quote " starts nothing\n#define FASTLED_ALSO 1\n'
+    assert names_in(source) == {"FASTLED_ALSO"}

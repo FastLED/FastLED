@@ -49,28 +49,33 @@ BASELINE_PATH = Path(__file__).resolve().parent / "macro_prefix_baseline.txt"
 PREPROCESSOR_RE = re.compile(r"^\s*#\s*(define|undef|if|ifdef|ifndef|elif)\b")
 NAME_RE = re.compile(r"FASTLED_[A-Za-z0-9_]+")
 
-# Raw strings first: `R"j(...)j"` must not be read as `R` followed by an
-# ordinary `"..."`, and its body may contain anything -- including a line that
-# looks exactly like a directive. The delimiter is captured and back-matched,
-# which is what makes `)` inside the body harmless.
+# Every lexical region that can hide a macro name, in one alternation so a
+# single left-to-right pass classifies them. That is the point rather than a
+# tidiness preference: masking in separate passes lets a token from one pass
+# open inside another. A `//` comment containing `R"x(` opened a raw string
+# that swallowed the real directive two lines later, and the name vanished.
 #
+# At any position only one of these can start -- `//`, `/*`, `"`, `'`, `R"`
+# all have distinct openers -- so alternation order does not decide
+# correctness here, only which branch reports the match.
+#
+# The raw-string delimiter is captured and back-matched, which is what makes
+# a bare `)` inside the body harmless.
+RAW_STRING = r'(?:u8|u|U|L)?R"([^()\\ \t\n]{0,16})\(.*?\)\1"'
+
+LEXICAL_REGION_RE = re.compile(
+    RAW_STRING
+    + r"|/\*.*?\*/"
+    + r"|//[^\n]*"
+    + r'|"(?:\\.|[^"\\\n])*"'
+    + r"|'(?:\\.|[^'\\\n])*'",
+    re.S,
+)
+
 # Limit worth stating: a backslash-newline inside a raw string is spliced by
 # the pass above, which C++ does not do. No such literal exists in this tree,
 # and chasing it would mean recognising raw strings before splicing -- a
 # tokeniser, for a case nobody writes.
-RAW_STRING = r'(?:u8|u|U|L)?R"([^()\\ \t\n]{0,16})\(.*?\)\1"'
-
-# String/char literals and block comments. Blanked after the splice, leaving
-# `//` comments intact, so that afterwards a `//` really is a line comment
-# rather than something inside a string. Length- and newline-preserving,
-# because the suppression lookup indexes by line.
-LITERAL_OR_BLOCK_RE = re.compile(
-    RAW_STRING + r"|/\*.*?\*/" + r'|"(?:\\.|[^"\\\n])*"' + r"|'(?:\\.|[^'\\\n])*'",
-    re.S,
-)
-
-# Line comments, blanked after suppressions have been read out of them.
-LINE_COMMENT_RE = re.compile(r"//[^\n]*")
 
 # Vendored code is not FastLED-owned and is not renamed to suit our standard.
 EXCLUDED_PREFIXES = ("third_party/",)
@@ -129,45 +134,45 @@ def _blank(match: "re.Match[str]") -> str:
 def names_in(text: str) -> set[str]:
     """Every `FASTLED_*` name this file defines or tests, minus suppressed ones.
 
-    The order is the substance, and it took two goes to get right:
+    Two steps, and the order between them is the substance:
 
     1. **Splice first, on the raw text.** Masking first destroys the very
        backslash the splice needs -- a string literal spanning a
        backslash-newline inside a continued directive is legal C, and blanking
        it left the continuation broken, so a name on the next physical line
-       was never seen as part of a directive. That is a false negative, the
-       direction that matters for a ratchet.
-    2. **Then mask literals and block comments**, in one alternation so a
-       `//` inside a string is not read as a comment and a `/*` inside a
-       string does not open one. Masking the whole document rather than each
-       line, because a block comment may span lines.
-    3. **Then read suppressions, only out of what is left of a `//`.** A
-       marker inside a string or a block comment is a way past the check
+       was never seen as part of a directive.
+    2. **Then one pass over the lexical regions.** Comments, strings and raw
+       strings are classified together, left to right, because doing them in
+       separate passes lets a token from one open inside another. Suppressions
+       are read out of that pass, from tokens that really are line comments --
+       a marker inside a string or a block comment is a way past the check
        rather than a use of it.
-    4. **Then blank the line comments** and scan.
 
-    Doing any two of these in the other order reopens one hole or another.
+    Every hole found here so far came from getting one of those two wrong.
     """
 
     spliced = _splice(text.split("\n"))
     document = "\n".join(line for line, _ in spliced)
-    masked = LITERAL_OR_BLOCK_RE.sub(_blank, document)
-    masked_lines = masked.split("\n")
 
     suppressed: set[int] = set()
-    for index, line in enumerate(masked_lines):
-        marker = line.find("//")
-        if marker != -1 and SUPPRESSION_RE.search(line[marker:]):
-            suppressed.add(index)
-            suppressed.add(index + 1)
+
+    def classify(match: "re.Match[str]") -> str:
+        token = match.group(0)
+        if token.startswith("//") and SUPPRESSION_RE.search(token):
+            line = document.count("\n", 0, match.start())
+            suppressed.add(line)
+            suppressed.add(line + 1)
+        return _blank(match)
+
+    masked = LEXICAL_REGION_RE.sub(classify, document)
 
     found: set[str] = set()
-    for index, line in enumerate(masked_lines):
+    for index, line in enumerate(masked.split("\n")):
         if PREPROCESSOR_RE.match(line) is None:
             continue
         if index in suppressed:
             continue
-        for name in NAME_RE.findall(LINE_COMMENT_RE.sub(" ", line)):
+        for name in NAME_RE.findall(line):
             found.add(name)
     return found
 
