@@ -6,12 +6,7 @@
 
 namespace fl {
 
-namespace {
-
-// Helper names carry an `adaptation` qualifier because .cpp.hpp files are
-// concatenated into one translation unit by the unity build, so an anonymous
-// namespace does not isolate them from a same-named helper in a sibling file
-// -- source_xyz.cpp.hpp defines its own quantizer.
+namespace detail {
 
 /// ICC linear Bradford cone-response matrix.
 const float kBradford[3][3] = {
@@ -38,6 +33,15 @@ const float kBradfordInverse[3][3] = {
     {0.432305276f, 0.518360257f, 0.049291227f},
     {-0.0085286675f, 0.0400428213f, 0.968486726f},
 };
+
+} // namespace detail
+
+namespace {
+
+// Helper names carry an `adaptation` qualifier because .cpp.hpp files are
+// concatenated into one translation unit by the unity build, so an anonymous
+// namespace does not isolate them from a same-named helper in a sibling file
+// -- source_xyz.cpp.hpp defines its own quantizer.
 
 /// True only for a real, usable chromaticity.
 ///
@@ -87,8 +91,9 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
 
     float source_cones[3];
     float destination_cones[3];
-    colorimetric_response::matvec3(kBradford, source_xyz, source_cones);
-    colorimetric_response::matvec3(kBradford, destination_xyz,
+    colorimetric_response::matvec3(detail::kBradford, source_xyz,
+                                   source_cones);
+    colorimetric_response::matvec3(detail::kBradford, destination_xyz,
                                    destination_cones);
 
     float scale[3];
@@ -112,7 +117,8 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
         for (int col = 0; col < 3; ++col) {
             float sum = 0.0f;
             for (int k = 0; k < 3; ++k) {
-                sum += kBradfordInverse[row][k] * scale[k] * kBradford[k][col];
+                sum += detail::kBradfordInverse[row][k] * scale[k] *
+                       detail::kBradford[k][col];
             }
             out->m[row][col] = quantizeAdaptationQ16(sum);
         }

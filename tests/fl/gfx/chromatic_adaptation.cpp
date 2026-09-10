@@ -32,47 +32,31 @@ float toFloat(i32 v) { return static_cast<float>(v) / 65536.0f; }
 // compile-time matrix on every profile bind was float work spent recomputing
 // a known answer (#4043).
 //
-// What this case checks is the *value*: that the numbers written into
-// `chromatic_adaptation.cpp.hpp` are what `invert3x3` produces from
-// `kBradford`, and that they really invert it. It cannot see the shipped
-// constant -- that lives in the implementation's own namespace, and this file
-// re-declares `kBradford` for the same reason -- so it does not by itself
-// catch an edit there.
-//
-// The cases below do. Mutating one digit of the shipped inverse fails
-// "Adapting a white to itself is the identity"; transposing it fails that and
-// two more. Worth stating rather than implying, because a test named after a
-// constant reads like it guards the constant.
-FL_TEST_CASE("The Bradford inverse written here really is the inverse") {
-    const float kBradford[3][3] = {
-        {0.8951f, 0.2664f, -0.1614f},
-        {-0.7502f, 1.7135f, 0.0367f},
-        {0.0389f, -0.0685f, 1.0296f},
-    };
+// This reads the shipped constants. An earlier revision compared the solver
+// against a copy of the numbers written into this file, which validates the
+// copy and says nothing about the implementation -- and the whole point of
+// precomputing is that nothing recomputes it, so a wrong digit there would
+// have had nothing checking it but the behaviour cases below.
+FL_TEST_CASE("The shipped Bradford inverse is the inverse of the shipped matrix") {
     float solved[3][3];
-    FL_REQUIRE(colorimetric_response::invert3x3(kBradford, solved));
+    FL_REQUIRE(colorimetric_response::invert3x3(fl::detail::kBradford, solved));
 
-    // The shipped constant, repeated here on purpose. Reading it out of the
-    // implementation would let a wrong value agree with itself.
-    const float kExpected[3][3] = {
-        {0.986992955f, -0.14705427f, 0.159962654f},
-        {0.432305276f, 0.518360257f, 0.049291227f},
-        {-0.0085286675f, 0.0400428213f, 0.968486726f},
-    };
     for (int row = 0; row < 3; ++row) {
         for (int col = 0; col < 3; ++col) {
-            FL_CHECK_LT(fl::fabsf(solved[row][col] - kExpected[row][col]),
-                        1e-6f);
+            FL_CHECK_LT(
+                fl::fabsf(solved[row][col] - fl::detail::kBradfordInverse[row][col]),
+                1e-6f);
         }
     }
 
-    // And it really is an inverse, which a matching pair of wrong numbers
-    // would not be.
+    // And independently of the solver: the product is the identity, which a
+    // pair of numbers that merely agree with each other would not be.
     for (int row = 0; row < 3; ++row) {
         for (int col = 0; col < 3; ++col) {
             float sum = 0.0f;
             for (int k = 0; k < 3; ++k) {
-                sum += kExpected[row][k] * kBradford[k][col];
+                sum += fl::detail::kBradfordInverse[row][k] *
+                       fl::detail::kBradford[k][col];
             }
             const float want = row == col ? 1.0f : 0.0f;
             FL_CHECK_LT(fl::fabsf(sum - want), 1e-5f);
