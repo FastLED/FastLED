@@ -580,6 +580,13 @@ FL_TEST_CASE("[#4321] the length check is not vacuous -- an odd count cannot be 
     }
 }
 
+#if FASTLED_HD_COLOR_MIXING
+// makeScaledBrightnessRange() only exists under HD colour mixing -- every
+// caller of it is inside that guard, so the adapter is compiled only there.
+// encoders.cpp includes this header unguarded, so this case has to carry the
+// same condition or a FASTLED_HD_COLOR_MIXING=0 test build stops compiling.
+// The cases above need no guard: their HD branches are selected at compile
+// time and the non-HD paths they fall back to still emit one LED per pixel.
 FL_TEST_CASE("[#4321] the brightness adapter does not move the shared cursor") {
     // Directly: draining the RGB adapter alone and with a brightness adapter
     // alive alongside must yield the same bytes. This is the property the
@@ -618,5 +625,6 @@ FL_TEST_CASE("[#4321] the brightness adapter does not move the shared cursor") {
         FL_CHECK_EQ((int)paired[i], (int)alone[i]);
     }
 }
+#endif  // FASTLED_HD_COLOR_MIXING
 
 } // namespace test_hd108
