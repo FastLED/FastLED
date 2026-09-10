@@ -489,7 +489,7 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     )
 
 
-def run_macro_prefix_check() -> CheckerResults:
+def run_macro_prefix_check(file_path: str | None = None) -> CheckerResults:
     """New `FASTLED_*` macro names, against the checked-in baseline.
 
     A plain text scan rather than an AST pass: the rule is about what a macro
@@ -508,7 +508,22 @@ def run_macro_prefix_check() -> CheckerResults:
     results = CheckerResults()
     found = scan(SOURCE_ROOT)
     baseline = load_baseline(BASELINE_PATH)
+
+    # Single-file mode still scans the tree -- the baseline is repo-wide, and
+    # a name is only "new" relative to all of it -- but reports just the
+    # selected file, so `bash lint <file>` behaves like the full run on the
+    # part the developer changed.
+    selected: str | None = None
+    if file_path is not None:
+        try:
+            selected = Path(file_path).resolve().relative_to(SOURCE_ROOT).as_posix()
+        except ValueError:
+            # Outside src/: nothing this checker owns can be attributed to it.
+            return results
+
     for name in sorted(set(found) - baseline):
+        if selected is not None and found[name] != selected:
+            continue
         results.add_violation(
             f"src/{found[name]}",
             1,
@@ -981,6 +996,10 @@ def main() -> int:
         array_param_results = run_array_param_ast_check(str(file_path))
         if array_param_results.has_violations():
             results["ArrayParamAstChecker"] = array_param_results
+
+        macro_prefix_results = run_macro_prefix_check(str(file_path))
+        if macro_prefix_results.has_violations():
+            results["MacroPrefixChecker"] = macro_prefix_results
 
         # Format and print results
         exit_code = format_and_print_results(results)

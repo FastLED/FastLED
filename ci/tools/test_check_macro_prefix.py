@@ -93,3 +93,49 @@ def test_the_baseline_round_trips(tmp_path: Path) -> None:
     path = tmp_path / "baseline.txt"
     path.write_text(render_baseline(names), encoding="utf-8")
     assert load_baseline(path) == set(names)
+
+
+def test_a_name_inside_a_string_is_not_a_use() -> None:
+    # `#define LABEL "FASTLED_NEW"` defines LABEL. Flagging the string would
+    # make the ratchet fire on data.
+    assert names_in('#define LABEL "FASTLED_NEW"\n') == set()
+
+
+def test_a_name_inside_a_comment_is_not_a_use() -> None:
+    assert names_in("#if 1 // FASTLED_NEW\n") == set()
+    assert names_in("#if 1 /* FASTLED_NEW */\n") == set()
+
+
+def test_a_directive_quoted_in_a_block_comment_is_not_a_directive() -> None:
+    assert names_in("/*\n#define FASTLED_DOCUMENTED 1\n*/\n") == set()
+
+
+def test_a_reference_split_across_a_line_continuation_is_found() -> None:
+    """The false *negative* — the direction that matters for a ratchet.
+
+    A physical-line scan misses this, because the continued line does not
+    start with `#`.
+    """
+    source = "#if defined( \\\n    FASTLED_CONTINUED)\n#endif\n"
+    assert names_in(source) == {"FASTLED_CONTINUED"}
+
+
+def test_stripping_comments_does_not_shift_the_suppression_lookup() -> None:
+    # Block-comment removal has to preserve line count, or the "suppression
+    # on the line above" rule starts pointing at the wrong line.
+    source = (
+        "/* a\n   multi-line\n   comment */\n"
+        "// fl-lint: macro-prefix-ok(external name)\n"
+        "#define FASTLED_AFTER_COMMENT 1\n"
+    )
+    assert names_in(source) == set()
+
+
+def test_a_missing_baseline_fails_loudly(tmp_path: Path) -> None:
+    # An empty fallback would report all ~490 historical names as new, which
+    # reads as a catastrophic regression and trains the reader to ignore it.
+    import pytest
+
+    with pytest.raises(FileNotFoundError) as caught:
+        load_baseline(tmp_path / "nope.txt")
+    assert "--update-baseline" in str(caught.value)

@@ -49,6 +49,17 @@ BASELINE_PATH = Path(__file__).resolve().parent / "macro_prefix_baseline.txt"
 PREPROCESSOR_RE = re.compile(r"^\s*#\s*(define|undef|if|ifdef|ifndef|elif)\b")
 NAME_RE = re.compile(r"FASTLED_[A-Za-z0-9_]+")
 
+# Block comments, stripped from the whole text before anything else so a
+# directive quoted inside one is not read as a real directive. Replaced by an
+# equal number of newlines so physical line numbers -- which the suppression
+# lookup depends on -- survive.
+BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.S)
+
+# Line comments and string/char literals, stripped per logical line. A name
+# inside either is a mention, not a use: `#define LABEL "FASTLED_NEW"`
+# defines LABEL, and `#if 1 // FASTLED_NEW` tests nothing.
+INLINE_NOISE_RE = re.compile(r"//[^\n]*|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'")
+
 # Vendored code is not FastLED-owned and is not renamed to suit our standard.
 EXCLUDED_PREFIXES = ("third_party/",)
 
@@ -69,19 +80,60 @@ def is_excluded(relative: str) -> bool:
 
 
 @typechecked
-def names_in(text: str) -> set[str]:
-    """Every `FASTLED_*` name this file defines or tests, minus suppressed ones."""
+def _splice(lines: list[str]) -> list[tuple[str, int]]:
+    """Join directives continued with a trailing backslash.
 
-    lines = text.split("\n")
+    A reference split across lines is still a reference:
+
+        #if defined( \\
+            FASTLED_NEW)
+
+    Scanning physical lines misses it, because the second line does not start
+    with `#`. That is a false *negative* -- a real macro slipping through --
+    which is the direction that matters for a ratchet.
+    """
+
+    spliced: list[tuple[str, int]] = []
+    index = 0
+    while index < len(lines):
+        start = index
+        buffer = lines[index]
+        while buffer.rstrip().endswith("\\") and index + 1 < len(lines):
+            buffer = buffer.rstrip()[:-1] + " " + lines[index + 1]
+            index += 1
+        spliced.append((buffer, start))
+        index += 1
+    return spliced
+
+
+@typechecked
+def names_in(text: str) -> set[str]:
+    """Every `FASTLED_*` name this file defines or tests, minus suppressed ones.
+
+    Suppressions are read from the raw text first, because stripping comments
+    would take the suppression comment with them.
+    """
+
+    raw_lines = text.split("\n")
+    suppressed: set[int] = set()
+    for index, line in enumerate(raw_lines):
+        if SUPPRESSION_RE.search(line):
+            suppressed.add(index)
+            suppressed.add(index + 1)
+
+    # Newline-preserving so the indices above still line up.
+    without_blocks = BLOCK_COMMENT_RE.sub(
+        lambda match: "\n" * match.group(0).count("\n"), text
+    )
+
     found: set[str] = set()
-    for index, line in enumerate(lines):
+    for line, first_physical_line in _splice(without_blocks.split("\n")):
         if PREPROCESSOR_RE.match(line) is None:
             continue
-        if SUPPRESSION_RE.search(line):
+        if first_physical_line in suppressed:
             continue
-        if index > 0 and SUPPRESSION_RE.search(lines[index - 1]):
-            continue
-        for name in NAME_RE.findall(line):
+        code = INLINE_NOISE_RE.sub(" ", line)
+        for name in NAME_RE.findall(code):
             found.add(name)
     return found
 
@@ -106,9 +158,19 @@ def scan(root: Path) -> dict[str, str]:
 
 @typechecked
 def load_baseline(path: Path) -> set[str]:
+    """The known names. A missing baseline is an error, not an empty set.
+
+    Returning empty would report all ~490 historical macros as new, which
+    reads as a catastrophic regression and trains the reader to ignore it.
+    `--update-baseline` bootstraps the file; it does not come through here.
+    """
+
     known: set[str] = set()
     if not path.is_file():
-        return known
+        raise FileNotFoundError(
+            f"macro-prefix baseline is missing: {path}. Regenerate it with "
+            "`uv run python ci/tools/check_macro_prefix.py --update-baseline`."
+        )
     for line in path.read_text(encoding="utf-8").split("\n"):
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
