@@ -25,6 +25,8 @@
 #include "AutoResearchHelpers.h"
 #include "AutoResearchPlatform.h"
 #include "AutoResearchRpConcurrency.h"
+#include "AutoResearchRpPioContention.h"
+#include "AutoResearchRpPioParallel.h"
 #include "AutoResearchEdgeProbe.h"
 #include "fl/wdt/watchdog.h"
 #include "fl/stl/sstream.h"
@@ -268,6 +270,23 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         (void)args;
         mRemote->sendAsyncResponse("testRpConcurrency",
                                    autoresearch::runRpConcurrencyTest());
+        return fl::json(nullptr);
+    }, fl::RpcMode::ASYNC);
+
+    // FastLED#1471: starve the PIO block the way TinyUSB does, then check
+    // that the clockless driver declines instead of stealing a state machine.
+    remote.bind("testRpPioContention", [this](const fl::json& args) -> fl::json {
+        (void)args;
+        mRemote->sendAsyncResponse("testRpPioContention",
+                                   autoresearch::runRpPioContentionTest());
+        return fl::json(nullptr);
+    }, fl::RpcMode::ASYNC);
+
+    // FastLED#3899: PIO0+PIO1 simultaneous operation, asserted at the resource
+    // level. runParallelTest only proves show() returned for this pair.
+    remote.bind("testRpPioParallelResources", [this](const fl::json& args) -> fl::json {
+        mRemote->sendAsyncResponse("testRpPioParallelResources",
+                                   autoresearch::runRpPioParallelResourceTest(args));
         return fl::json(nullptr);
     }, fl::RpcMode::ASYNC);
 
