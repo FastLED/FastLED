@@ -110,7 +110,8 @@ FL_TEST_CASE("encodeHD108() - single LED, max brightness") {
 
     verifyStartFrame(output);
 
-    // Verify header: brightness 255 -> 5-bit 31
+    // Header is 0xFF/0xFF whatever brightness is passed: HD108 gains are
+    // pinned at 31 and the argument is ignored.
     verifyHeaderBytes(output, 8);
 
     // Verify RGB data with gamma correction
@@ -127,7 +128,7 @@ FL_TEST_CASE("encodeHD108() - single LED, mid brightness") {
 
     FL_REQUIRE_EQ(output.size(), 20);
 
-    // Verify header: brightness 128 -> 5-bit 16
+    // Header unchanged at mid brightness -- the argument reaches nothing.
     verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 200, 100, 50);
@@ -141,7 +142,7 @@ FL_TEST_CASE("encodeHD108() - single LED, min brightness") {
 
     FL_REQUIRE_EQ(output.size(), 20);
 
-    // Verify header: brightness 1 -> 5-bit 1 (non-zero preservation)
+    // Header unchanged at minimum brightness too.
     verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 100, 50, 25);
@@ -184,7 +185,7 @@ FL_TEST_CASE("encodeHD108() - three LEDs, end frame size") {
 
     verifyStartFrame(output);
 
-    // Verify brightness 200 -> 5-bit 24 (200*31+127)/255 = 24.8
+    // Header unchanged; brightness 200 is passed and discarded.
     verifyHeaderBytes(output, 8);
 
     verifyEndFrame(output, 5);
@@ -326,7 +327,7 @@ FL_TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
 
     verifyStartFrame(output);
 
-    // Verify per-LED brightness 200 -> 5-bit 24
+    // Per-LED brightness is read and discarded; the header stays 0xFF/0xFF.
     verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 255, 128, 64);
@@ -350,15 +351,15 @@ FL_TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
 
     verifyStartFrame(output);
 
-    // LED 1: brightness 255 -> 31
+    // LED 1: header pinned regardless of its brightness
     verifyHeaderBytes(output, 8);
     verifyLEDData(output, 10, 255, 0, 0);
 
-    // LED 2: brightness 128 -> 16
+    // LED 2: same header, different brightness
     verifyHeaderBytes(output, 16);
     verifyLEDData(output, 18, 0, 255, 0);
 
-    // LED 3: brightness 64 -> 8
+    // LED 3: same header again
     verifyHeaderBytes(output, 24);
     verifyLEDData(output, 26, 0, 0, 255);
 
@@ -379,7 +380,7 @@ FL_TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
 
     FL_REQUIRE_EQ(output.size(), 37);
 
-    // All LEDs should have same header bytes (brightness 200 -> 24)
+    // All LEDs share the same header -- as they would for any brightness.
     verifyHeaderBytes(output, 8);
     verifyHeaderBytes(output, 16);
     verifyHeaderBytes(output, 24);
@@ -434,10 +435,10 @@ FL_TEST_CASE("encodeHD108_HD() - min/max brightness values") {
 
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
-    // LED 1: brightness 0 -> 0
+    // LED 1: brightness 0 still yields the pinned header
     verifyHeaderBytes(output, 8);
 
-    // LED 2: brightness 255 -> 31
+    // LED 2: and so does brightness 255
     verifyHeaderBytes(output, 16);
 }
 
