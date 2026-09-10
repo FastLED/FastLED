@@ -8,6 +8,10 @@
 #include "fl/math/sin32.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/align.h"
+// Pulled in at file scope, not through simd_ops.h below: that include sits
+// inside `namespace fl`, so reaching s0x32x4.h through it nests the whole
+// header -- and everything it includes -- one namespace too deep.
+#include "fl/math/fixed_point/s0x32x4.h"
 
 namespace fl {
 
