@@ -88,9 +88,10 @@ def test_the_huffman_stage_carries_dequant_for_both_minimp3_builds() -> None:
     source = (ROOT / "src" / "third_party" / "minimp3" / "minimp3.h").read_text(
         encoding="utf-8"
     )
-    definitions = [
-        line for line in source.splitlines() if "define MP3D_HUFF_TAB" in line
-    ]
+    definitions: list[str] = []
+    for line in source.splitlines():
+        if "define MP3D_HUFF_TAB" in line:
+            definitions.append(line)
     assert len(definitions) == 2, definitions
     fixed, float_ = definitions
     assert "mp3d_dequant" in fixed
