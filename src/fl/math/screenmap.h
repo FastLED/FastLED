@@ -136,6 +136,9 @@ class ScreenMap {
     u32 length = 0;
     // -1 is the sentinel for "unset", and is not serialized: a negative
     // diameter is not a size, and the parser reads an absent key back as -1.
+    // The constructors and `setDiameter` fold every non-positive value to
+    // it, so this holds either a real size or the sentinel and never a
+    // third thing a round trip would have to change.
     float mDiameter = -1.0f;
     LUTXYFLOATPtr mLookUpTable;
     XYMapPtr mSourceXYMap;  // Optional: source XYMap for encoding pipeline
