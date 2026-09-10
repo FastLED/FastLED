@@ -503,5 +503,8 @@ def test_the_codegen_flag_filter_keeps_the_scalar_define() -> None:
     # silently take the SIMD define with it, and the codegen baselines would
     # then be recorded against kernels the device never runs.
     dropped = ("-fno-discard-value-names", "-fno-inline", "-ffp-contract=off")
-    kept = [f for f in AUDIT._common_compile_flags("-Os") if f not in dropped]
+    kept: list[str] = []
+    for flag in AUDIT._common_compile_flags("-Os"):
+        if flag not in dropped:
+            kept.append(flag)
     assert "-DMINIMP3_NO_SIMD" in kept
