@@ -248,6 +248,47 @@ prose. No change to the dither is proposed here -- R8 asks for the contract to
 be defined, and shifting the low-code rendering of every existing sketch is a
 decision, not a cleanup.
 
+### And the cadence that decides how long a cycle may be is 4x out
+
+#4156 R8 asks for "cadence, observation window, and unsupported low-light
+region". The floor above answers the last one. This is the first, and the two
+constants that decide it disagree.
+
+The dither cycle length is *derived* from a cadence assumption, in
+`src/pixel_controller.h`:
+
+| | |
+| --- | ---: |
+| `MAX_LIKELY_UPDATE_RATE_HZ` | 400 |
+| `MIN_ACCEPTABLE_DITHER_RATE_HZ` | 50 |
+| `UPDATES_PER_FULL_DITHER_CYCLE` | 400 / 50 = **8** |
+
+Eight frames is the number that makes a 400 Hz refresh complete a cycle at
+50 Hz. That much is coherent.
+
+What *enables* dithering is not 400. `CFastLED::show()` and `showColor()` each
+carry `if (mNFPS < 100) { pCur->setDither(0); }` -- a bare literal, twice, with
+no reference to the constants above. **At 100 FPS an eight-frame cycle
+completes at 12.5 Hz**, a quarter of the file's own floor, and near the peak of
+human flicker sensitivity rather than above it.
+
+The guide in that file states two different 50 Hz conditions, and the code
+implements the weaker one:
+
+* *"At refresh rates above ~50Hz, human vision integrates these variations"* --
+  about the **refresh**;
+* *"8-frame cycle at 400Hz = 50Hz complete cycle"* -- about the **cycle**.
+
+What the eye integrates is the modulation, and the modulation is at the cycle
+rate. `tests/pixel_controller.cpp` records the arithmetic rather than asserting
+an intent: raising the threshold would disable dithering for most sketches,
+which is a decision rather than a cleanup, and the case fails if either number
+moves so that whoever moves it writes down why.
+
+Worth having before any *pipeline* dither is built, because that one modulates
+harder: reaching the bottom of the range means toggling the lowest codes, so
+the relative depth is largest exactly where the eye is most sensitive to it.
+
 ## Section 5: the two static candidates, scored
 
 The ceiling above is what makes this scoreable without settling the

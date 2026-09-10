@@ -168,4 +168,61 @@ FL_TEST_CASE("Dither - at full scale the correction has nothing to correct") {
     }
 }
 
+// ---------------------------------------------------------------------------
+// The cadence half of #4156 R8, which is also what P8's temporal dither waits
+// on (#4042).
+//
+// R8 asks for "cadence, observation window, and unsupported low-light region"
+// to be defined. #4269 answered the black floor. This is the cadence, and it
+// turns out the two numbers that decide it disagree with each other by 4x.
+// ---------------------------------------------------------------------------
+
+FL_TEST_CASE("Dither - the cycle rate at the enable threshold is below the file's own floor") {
+    // The cycle length is *derived* from a cadence assumption:
+    //
+    //   MAX_LIKELY_UPDATE_RATE_HZ     400
+    //   MIN_ACCEPTABLE_DITHER_RATE_HZ  50
+    //   UPDATES_PER_FULL_DITHER_CYCLE  400 / 50 = 8
+    //
+    // So eight frames is the number that makes a 400 Hz refresh complete a
+    // cycle at 50 Hz. That is coherent.
+    //
+    // What enables dithering is not 400. `CFastLED::show()` and `showColor()`
+    // each carry `if (mNFPS < 100) { pCur->setDither(0); }` -- a bare literal,
+    // twice, with no reference to the constants above. At 100 FPS an
+    // eight-frame cycle completes at 12.5 Hz, which is a quarter of the
+    // file's own MIN_ACCEPTABLE_DITHER_RATE_HZ and sits near the peak of human
+    // flicker sensitivity.
+    //
+    // The guide above states two different 50 Hz conditions and the code
+    // implements the weaker one: "at refresh rates above ~50Hz, human vision
+    // integrates these variations" is about the *refresh*, while "8-frame
+    // cycle at 400Hz = 50Hz complete cycle" is about the *cycle*. What the eye
+    // integrates is the modulation, which is at the cycle rate.
+    //
+    // This case records the arithmetic rather than asserting the intent.
+    // Raising the threshold would disable dithering for most sketches, which
+    // is a decision and not a cleanup -- so if either number moves, this fails
+    // and whoever moved it writes down why.
+    FL_CHECK_EQ(UPDATES_PER_FULL_DITHER_CYCLE, 8);
+    FL_CHECK_EQ(MIN_ACCEPTABLE_DITHER_RATE_HZ, 50);
+    FL_CHECK_EQ(MAX_LIKELY_UPDATE_RATE_HZ, 400);
+
+    // The threshold `show()` actually applies, repeated here because it is a
+    // literal there rather than a named constant.
+    const int kDitherEnableFps = 100;
+    const int cycle_hz_at_threshold =
+        kDitherEnableFps / UPDATES_PER_FULL_DITHER_CYCLE;
+    FL_CHECK_EQ(cycle_hz_at_threshold, 12);  // 12.5, truncated
+
+    // Four times short, by the file's own floor.
+    FL_CHECK_LT(cycle_hz_at_threshold, MIN_ACCEPTABLE_DITHER_RATE_HZ);
+    FL_CHECK_EQ(MAX_LIKELY_UPDATE_RATE_HZ / kDitherEnableFps, 4);
+
+    // And the refresh that would actually reach the floor is the one the
+    // cycle length was derived from.
+    FL_CHECK_EQ(MIN_ACCEPTABLE_DITHER_RATE_HZ * UPDATES_PER_FULL_DITHER_CYCLE,
+                MAX_LIKELY_UPDATE_RATE_HZ);
+}
+
 } // FL_TEST_FILE
