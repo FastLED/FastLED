@@ -581,7 +581,7 @@ FL_TEST_CASE("[#4321] the length check is not vacuous -- an odd count cannot be 
 }
 
 #if FASTLED_HD_COLOR_MIXING
-// makeScaledBrightnessRange() only exists under HD colour mixing -- every
+// makeScaledBrightness() only exists under HD colour mixing -- every
 // caller of it is inside that guard, so the adapter is compiled only there.
 // encoders.cpp includes this header unguarded, so this case has to carry the
 // same condition or a FASTLED_HD_COLOR_MIXING=0 test build stops compiling.
@@ -611,8 +611,7 @@ FL_TEST_CASE("[#4321] the brightness adapter does not move the shared cursor") {
                                     DISABLE_DITHER);
         fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
         auto range = fl::makeScaledPixelRangeRGB(&adapter.get());
-        auto bright = fl::makeScaledBrightnessRange(&adapter.get());
-        auto b = bright.first;
+        auto b = fl::makeScaledBrightness(&adapter.get());
         for (auto it = range.first; it != range.second; ++it, ++b) {
             paired.push_back((*it)[0]);
             (void)*b;
