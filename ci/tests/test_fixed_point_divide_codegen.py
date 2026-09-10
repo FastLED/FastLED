@@ -7,7 +7,14 @@ instruction for, so the compiler calls `__aeabi_ldivmod`.
 
 The runtime figures need the board. What can be checked here is the thing the
 issue identifies as the cause -- whether that call is emitted -- so this
-compiles both operators for two ARM cores and reads the disassembly.
+compiles both operators for several ARM configurations and reads the
+disassembly.
+
+**These cases skip in CI.** No workflow installs an `arm-none-eabi` toolchain,
+so what runs there is the skip, and the evidence is local. Making the
+toolchain a CI prerequisite is a change to the CI image rather than to this
+file, and failing hard instead of skipping would break every contributor
+machine without it. Tracked separately.
 
 The Cortex-M0+ case is not a second example, it is the gate's control. That
 core has no hardware divider, so the replacement would make two libgcc calls
@@ -50,6 +57,7 @@ extern "C" fl::u32 u_div(fl::u32 a, fl::u32 b) {
 """
 
 
+@typechecked
 @dataclass(frozen=True)
 class ArmTools:
     """A cross compiler and the objdump that goes with it."""
@@ -58,6 +66,7 @@ class ArmTools:
     objdump: str
 
 
+@typechecked
 @dataclass(frozen=True)
 class Emitted:
     """What one function's disassembly contains."""
@@ -86,10 +95,12 @@ def _arm_tools() -> ArmTools | None:
 
 
 @typechecked
-def _compile_for(tools: ArmTools, tmp_path: Path, cpu_flags: list[str]) -> Path:
+def _compile_for(
+    tools: ArmTools, tmp_path: Path, cpu_flags: list[str], standard: str = "gnu++17"
+) -> Path:
     source = tmp_path / "divide_probe.cpp"
     source.write_text(kProbeSource, encoding="utf-8")
-    obj = tmp_path / "divide_probe.o"
+    obj = tmp_path / f"divide_probe_{standard.replace('+', 'p')}.o"
     subprocess.run(  # noqa: SRC001
         [
             tools.compiler,
@@ -102,11 +113,7 @@ def _compile_for(tools: ArmTools, tmp_path: Path, cpu_flags: list[str]) -> Path:
             *cpu_flags,
             "-mthumb",
             "-Os",
-            # The standard the Arduino-Pico core passes. At C++11 the gate
-            # deliberately stays off, because the replacement cannot be
-            # `constexpr` under C++11's rule against local variables and
-            # `operator/` is.
-            "-std=gnu++17",
+            f"-std={standard}",
             "-ffreestanding",
             "-fno-exceptions",
             "-fno-rtti",
@@ -164,20 +171,49 @@ def tools() -> ArmTools:
 def test_cortex_m33_divides_in_hardware(tools: ArmTools, tmp_path: Path) -> None:
     """The core FastLED#4307 measured on."""
 
+    flags = ["-mcpu=cortex-m33", "-march=armv8-m.main+fp+dsp", "-mfloat-abi=softfp"]
+    # Both ends of the range the gate allows: C++14 is its minimum, and
+    # gnu++17 is what the Arduino-Pico core passes for the RP2350 the issue
+    # measured on. Checking only the latter would leave the minimum untested.
+    for standard in ("gnu++14", "gnu++17"):
+        obj = _compile_for(tools, tmp_path, flags, standard)
+        for symbol in (kSignedSymbol, kUnsignedSymbol):
+            emitted = _emitted(tools, obj, symbol)
+            assert emitted.wide_helpers == frozenset(), (
+                f"{symbol} at {standard} still calls {sorted(emitted.wide_helpers)}"
+            )
+            # Two, one per base-2^16 digit. Zero would mean the division moved
+            # somewhere this cannot see.
+            assert emitted.hardware_divides == 2, (
+                f"{symbol} at {standard} emitted {emitted.hardware_divides} "
+                "hardware divides"
+            )
+
+
+@typechecked
+def test_cpp11_keeps_the_wide_path(tools: ArmTools, tmp_path: Path) -> None:
+    """The gate's other boundary.
+
+    `operator/` is `constexpr`, and the replacement cannot be under C++11's
+    rule against local variables in a constexpr function -- the repo builds at
+    C++11 to match AVR. So a C++11 build for a core that *does* have a divider
+    still takes the wide path.
+
+    This is not hypothetical: combining `FL_CONSTEXPR14` with
+    `FASTLED_FORCE_INLINE` produced `inline inline` and broke the `clearcore`
+    platform build, which is exactly this configuration.
+    """
+
     obj = _compile_for(
         tools,
         tmp_path,
-        ["-mcpu=cortex-m33", "-march=armv8-m.main+fp+dsp", "-mfloat-abi=softfp"],
+        ["-mcpu=cortex-m4"],
+        "gnu++11",
     )
     for symbol in (kSignedSymbol, kUnsignedSymbol):
         emitted = _emitted(tools, obj, symbol)
-        assert emitted.wide_helpers == frozenset(), (
-            f"{symbol} still calls {sorted(emitted.wide_helpers)}"
-        )
-        # Two, one per base-2^16 digit. Zero would mean the division moved
-        # somewhere this cannot see.
-        assert emitted.hardware_divides == 2, (
-            f"{symbol} emitted {emitted.hardware_divides} hardware divides"
+        assert emitted.wide_helpers != frozenset(), (
+            f"{symbol} took the narrow path at C++11, where it cannot be constexpr"
         )
 
 

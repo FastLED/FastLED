@@ -205,6 +205,23 @@ FL_TEST_CASE("the narrow divide truncates toward zero, as C++ division does") {
     FL_CHECK_EQ(wideSignedDivide(-7, 3 * 65536), -2);
 }
 
+FL_TEST_CASE("the most negative quotient is produced without signed overflow") {
+    // INT32_MIN raw divided by one is INT32_MIN raw, which is -32768.0 and a
+    // perfectly representable s16.16 value. The narrow path takes magnitudes
+    // and reapplies the sign, and negating INT32_MIN as a signed int is
+    // undefined -- it *happened to give the right answer*, which is why the
+    // value comparisons above could not find it and UBSan could. It is
+    // negated in unsigned space now.
+    const i32 most_negative = -2147483647 - 1;
+    FL_CHECK_EQ((s16x16::from_raw(most_negative) / s16x16::from_raw(65536)).raw(),
+                most_negative);
+    FL_CHECK_EQ(wideSignedDivide(most_negative, 65536), most_negative);
+    // And the sign the other way, where the magnitude is the same but no
+    // negation happens.
+    FL_CHECK_EQ((s16x16::from_raw(most_negative) / s16x16::from_raw(-65536)).raw(),
+                wideSignedDivide(most_negative, -65536));
+}
+
 FL_TEST_CASE("divide64By32 saturates where the wide path is undefined") {
     // The one place the two paths differ, stated rather than left to be
     // found. A zero divisor and a quotient too wide for 32 bits are both

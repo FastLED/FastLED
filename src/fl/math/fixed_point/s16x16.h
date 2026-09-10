@@ -101,8 +101,12 @@ class s16x16 {
         const u32 magnitude = divide64By32(numerator >> (32 - FRAC_BITS),
                                            numerator << FRAC_BITS, denominator);
         const bool negative = (mValue < 0) != (b.mValue < 0);
-        return from_raw(negative ? -static_cast<i32>(magnitude)
-                                 : static_cast<i32>(magnitude));
+        // Negated in unsigned space. The quotient of INT32_MIN by one is
+        // INT32_MIN, which is a representable s16.16 value of -32768.0, and
+        // negating it as a signed int is undefined -- it happened to give the
+        // right answer, which is exactly why a value comparison could not
+        // find it and UBSan could.
+        return from_raw(static_cast<i32>(negative ? 0u - magnitude : magnitude));
 #else
         return from_raw(static_cast<i32>(
             (static_cast<i64>(mValue) * (static_cast<i64>(SCALE))) / b.mValue));

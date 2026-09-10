@@ -39,6 +39,13 @@
 /// SDIV/UDIV", so this asks the compiler rather than enumerating cores:
 /// Cortex-M3/M4/M7/M33 define it, Cortex-M0+ does not.
 ///
+/// Paired with `__arm__`, which is AArch32 only. AArch64 defines
+/// `__ARM_FEATURE_IDIV` too -- it has SDIV and UDIV -- but its divider is 64
+/// bits wide, so the wide path is already one instruction there and this
+/// would replace it with fifty. Every 64-bit ARM host and any Raspberry Pi
+/// running a 64-bit kernel is in that set, so the omission was not
+/// theoretical.
+///
 /// C++14 is required as well, because `operator/` is `constexpr` and the
 /// routine below cannot be under C++11's rule against local variables in a
 /// constexpr function -- the repo builds at C++11 to match AVR. A C++11 build
@@ -48,7 +55,8 @@
 #ifndef FL_FIXED_POINT_NARROW_DIVIDE
 #if __cplusplus < 201402L
 #define FL_FIXED_POINT_NARROW_DIVIDE 0
-#elif defined(__ARM_FEATURE_IDIV) && (__ARM_FEATURE_IDIV + 0) == 1
+#elif defined(__arm__) && defined(__ARM_FEATURE_IDIV) && \
+    (__ARM_FEATURE_IDIV + 0) == 1
 #define FL_FIXED_POINT_NARROW_DIVIDE 1
 #elif defined(__riscv_div) && defined(__riscv_xlen) && (__riscv_xlen + 0) == 32
 #define FL_FIXED_POINT_NARROW_DIVIDE 1
@@ -57,12 +65,25 @@
 #endif
 #endif
 
+/// `constexpr` where the language allows it, always force-inlined.
+///
+/// Spelled out rather than written as `FL_CONSTEXPR14 FASTLED_FORCE_INLINE`,
+/// because `FL_CONSTEXPR14` is `inline` under C++11 and `FASTLED_FORCE_INLINE`
+/// ends in `inline` too -- the pair expands to `inline inline`, which GCC
+/// rejects. That broke the `clearcore` platform build, and a case now pins
+/// the C++11 configuration it broke on.
+#if __cplusplus >= 201402L
+#define FL_FIXED_POINT_DIVIDE_INLINE constexpr FASTLED_FORCE_INLINE
+#else
+#define FL_FIXED_POINT_DIVIDE_INLINE FASTLED_FORCE_INLINE
+#endif
+
 namespace fl {
 
 namespace detail {
 
 /// Leading zeros of a non-zero 32-bit value; 32 for zero.
-FL_CONSTEXPR14 FASTLED_FORCE_INLINE int fixedPointLeadingZeros(u32 value) FL_NO_EXCEPT {
+FL_FIXED_POINT_DIVIDE_INLINE int fixedPointLeadingZeros(u32 value) FL_NO_EXCEPT {
 #if defined(__GNUC__) || defined(__clang__)
     // One CLZ instruction on every core this file's fast path is enabled for.
     return value == 0 ? 32 : __builtin_clz(value);
@@ -96,8 +117,8 @@ FL_CONSTEXPR14 FASTLED_FORCE_INLINE int fixedPointLeadingZeros(u32 value) FL_NO_
 /// definition would leave it compiled by no host and tested by nothing, which
 /// is how `simd_noop.hpp` went two rounds of tuning against a build that
 /// excluded it (FastLED#4216).
-FL_CONSTEXPR14 FASTLED_FORCE_INLINE u32 divide64By32(u32 hi, u32 lo,
-                                                     u32 divisor) FL_NO_EXCEPT {
+FL_FIXED_POINT_DIVIDE_INLINE u32 divide64By32(u32 hi, u32 lo,
+                                             u32 divisor) FL_NO_EXCEPT {
     constexpr u32 kBase = 65536u;
     if (divisor == 0u || hi >= divisor) {
         return 0xFFFFFFFFu;
