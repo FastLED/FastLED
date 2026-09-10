@@ -3,6 +3,8 @@
 
 #include "FastLED.h"
 #include "power_mgt.h"
+#include "fl/gfx/pipeline.h"
+#include "fl/gfx/colorimetric_response.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "hsv2rgb.h"
@@ -750,6 +752,153 @@ FL_TEST_CASE("Power model - a scoped guard puts back the white emitter it found"
     // And leave the process as the file found it: `outer` restores the RGB
     // model, and this retracts the white this case declared.
     set_power_model(PowerModelRGB());
+}
+
+// ---------------------------------------------------------------------------
+// #4156 R3: what the limiter can see of a managed channel's demand.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// The three-emitter device the colour-pipeline tests use: sRGB primaries at
+/// unit luminance each.
+fl::EmitterProfile pipelineDevice() {
+    fl::EmitterProfile p = {};
+    p.xy_r[0] = 0.6400f; p.xy_r[1] = 0.3300f;
+    p.xy_g[0] = 0.3000f; p.xy_g[1] = 0.6000f;
+    p.xy_b[0] = 0.1500f; p.xy_b[1] = 0.0600f;
+    p.lum_r = 1.0f; p.lum_g = 1.0f; p.lum_b = 1.0f;
+    p.native_code_depth = 8;
+    return p;
+}
+
+/// Demand from a solved drive triple, in the same Q16-scaled units as
+/// `estimatedFromSourceCodes` below so the two are comparable.
+long drivenDemandQ16(const fl::i32 (&drives)[3], const PowerModelRGB& model) {
+    return static_cast<long>(drives[0]) * model.red_mW +
+           static_cast<long>(drives[1]) * model.green_mW +
+           static_cast<long>(drives[2]) * model.blue_mW;
+}
+
+/// What `calculate_unscaled_power_mW` charges, per pixel, before the dark
+/// current: the source code read straight off the CRGB array.
+long estimatedFromSourceCodes(fl::u8 r, fl::u8 g, fl::u8 b,
+                              const PowerModelRGB& model) {
+    return (static_cast<long>(r) * model.red_mW +
+            static_cast<long>(g) * model.green_mW +
+            static_cast<long>(b) * model.blue_mW) * 65536 / 255;
+}
+
+} // namespace
+
+FL_TEST_CASE("R3 - the limiter never under-charges a managed channel") {
+    // The half of #4156 R3 that #4284 did not cover. That one fixed the RGBW
+    // allocation; this is the profile conversion.
+    //
+    // R3 says accurate demand depends on it, and offers two ways out:
+    // "specify two-pass streaming **or a demonstrably conservative
+    // estimator**". This measures which of those the code already has.
+    //
+    // The estimator reads the source CRGB. A channel with a profile bound
+    // emits `processPixelQ16`'s solved drives instead, and the two are not
+    // the same number: the decode linearises sRGB, so code 128 asks for
+    // 0.216 of full light rather than 0.502, and the solve then works in the
+    // device's own emitter scale.
+    //
+    // The direction is what decides whether the bound is safe.
+    ScopedDefaultPowerModel guard;
+    const PowerModelRGB model = get_power_model();
+    const fl::SourceProfile kSources[] = {fl::SourceProfile::srgbBt709(),
+                                          fl::SourceProfile::displayP3(),
+                                          fl::SourceProfile::bt2020()};
+    int under_estimates = 0;
+    int samples = 0;
+    for (const auto& source : kSources) {
+        fl::StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(source, pipelineDevice(),
+                                             fl::GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        for (int r = 0; r <= 255; r += 17) {
+            for (int g = 0; g <= 255; g += 17) {
+                for (int b = 0; b <= 255; b += 17) {
+                    fl::i32 drives[3];
+                    processPixelQ16(pipeline, static_cast<fl::u8>(r),
+                                    static_cast<fl::u8>(g),
+                                    static_cast<fl::u8>(b), drives);
+                    const long driven = drivenDemandQ16(drives, model);
+                    const long estimated = estimatedFromSourceCodes(
+                        static_cast<fl::u8>(r), static_cast<fl::u8>(g),
+                        static_cast<fl::u8>(b), model);
+                    ++samples;
+                    if (driven > estimated) {
+                        ++under_estimates;
+                    }
+                }
+            }
+        }
+    }
+
+    // 12,288 samples across three source profiles, and the estimate is never
+    // below the demand. So the electrical bound is not broken by the profile
+    // conversion: R3's "demonstrably conservative estimator" is what the code
+    // already has, in direction.
+    FL_CHECK_EQ(samples, 12288);
+    FL_CHECK_EQ(under_estimates, 0);
+}
+
+FL_TEST_CASE("R3 - and conservatism costs between 1.4x and 162x of the budget") {
+    // The other half of the answer, and the reason the prepass is still
+    // worth building. Safe is not the same as usable: every one of these is
+    // headroom a managed strip under a power cap gives up.
+    ScopedDefaultPowerModel guard;
+    const PowerModelRGB model = get_power_model();
+    const fl::SourceProfile kSources[] = {fl::SourceProfile::srgbBt709(),
+                                          fl::SourceProfile::displayP3(),
+                                          fl::SourceProfile::bt2020()};
+    long worst_ratio_milli = 0;
+    long least_ratio_milli = 1000000;
+    for (const auto& source : kSources) {
+        fl::StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(source, pipelineDevice(),
+                                             fl::GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        for (int r = 0; r <= 255; r += 17) {
+            for (int g = 0; g <= 255; g += 17) {
+                for (int b = 0; b <= 255; b += 17) {
+                    fl::i32 drives[3];
+                    processPixelQ16(pipeline, static_cast<fl::u8>(r),
+                                    static_cast<fl::u8>(g),
+                                    static_cast<fl::u8>(b), drives);
+                    const long driven = drivenDemandQ16(drives, model);
+                    if (driven <= 0) {
+                        continue;  // nothing to take a ratio against
+                    }
+                    const long estimated = estimatedFromSourceCodes(
+                        static_cast<fl::u8>(r), static_cast<fl::u8>(g),
+                        static_cast<fl::u8>(b), model);
+                    const long ratio_milli = estimated * 1000 / driven;
+                    if (ratio_milli > worst_ratio_milli) {
+                        worst_ratio_milli = ratio_milli;
+                    }
+                    if (ratio_milli < least_ratio_milli) {
+                        least_ratio_milli = ratio_milli;
+                    }
+                }
+            }
+        }
+    }
+
+    // Measured: least 1.398x, worst 161.817x. Even at its most accurate the
+    // estimate is 40% high, and at its worst a strip is charged 162 times
+    // what it draws.
+    //
+    // Bounded rather than pinned, because these are the *current* figures and
+    // the prepass R3 asks for should move them a long way. What must not
+    // happen is the least ratio dropping below 1.0 -- that is the case above,
+    // and it is the safety property.
+    FL_CHECK_GT(least_ratio_milli, 1000);   // never under, restated as a ratio
+    FL_CHECK_LT(least_ratio_milli, 1500);
+    FL_CHECK_GT(worst_ratio_milli, 100000); // two orders, not a rounding effect
 }
 
 } // FL_TEST_FILE
