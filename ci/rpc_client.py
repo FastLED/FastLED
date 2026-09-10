@@ -119,6 +119,22 @@ class RpcError(RuntimeError):
         super().__init__(display_message)
 
 
+class RpcTransportError(RpcError):
+    """The request never reached the device.
+
+    A subclass rather than a flag so the widening in `RpcError` above still
+    holds: every existing `except RpcError` and `except RuntimeError` handler
+    keeps catching this unchanged.
+
+    The distinction it restores matters to anyone asking "did the device
+    answer?". Normalizing a failed write into `RpcError` (#4191) made a
+    transport failure the same type as an error *reply*, and an error reply is
+    proof the link round-trips while a failed write is proof it does not.
+    `RpcBench`'s liveness probe reads exactly that difference, and without this
+    type it accepted a client whose every write failed (#4207).
+    """
+
+
 class RpcCrashError(RpcError):
     """Device crashed during RPC operation.
 
@@ -477,7 +493,10 @@ class RpcClient:
                 # `PyserialMonitor.write` reports a failed write this way.
                 # Letting it through would break `send`'s contract and every
                 # caller that handles `(RpcError, RpcTimeoutError)` (#4191).
-                raise RpcError(f"{function}: {e}") from e
+                # Typed so callers that need to tell "no reply" from "an error
+                # reply" still can -- normalizing lost that, and the liveness
+                # probe in `RpcBench` depends on it (#4207).
+                raise RpcTransportError(f"{function}: {e}") from e
 
         raise last_error or RpcTimeoutError(
             f"No response after {retries} attempts (total timeout: {effective_timeout}s)"

@@ -18,9 +18,15 @@ from __future__ import annotations
 import json
 import sys
 from argparse import ArgumentParser
+from contextlib import suppress
 from typing import Any
 
-from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
+from ci.rpc_client import (
+    RpcClient,
+    RpcError,
+    RpcTimeoutError,
+    RpcTransportError,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.serial_interface import create_serial_interface
 
@@ -28,6 +34,18 @@ from ci.util.serial_interface import create_serial_interface
 # Returned by RpcBench.call() when the device does not have the method
 # bound (e.g. a build without an optional feature's RPC).
 METHOD_NOT_FOUND = object()
+
+# How long the construction-time liveness probe waits for any reply.
+#
+# `connect()` has already spent its own boot wait by this point, so a device
+# that is going to answer answers quickly. This only has to be long enough to
+# cover one round trip on a slow link.
+LIVENESS_PROBE_SECONDS = 5.0
+
+# The method the probe calls. Its *result* is irrelevant -- see
+# `_verify_transport_round_trips` -- so a firmware that does not bind it is
+# still proven live by the error it sends back.
+LIVENESS_PROBE_METHOD = "ping"
 
 
 def _is_method_not_found(error: RpcError) -> bool:
@@ -58,6 +76,77 @@ class RpcBench:
         self._loop.run_until_complete(
             self._client.connect(boot_wait=3.0, drain_boot=True)
         )
+        self._verify_transport_round_trips(port)
+
+    def _verify_transport_round_trips(self, port: str) -> None:
+        """Refuse to hand back a client that connected but cannot talk.
+
+        A second attach to a port another client already holds *succeeds* --
+        `connect()` returns without raising -- and the resulting client is
+        then completely inert, every call timing out (#4207). Because
+        `call()` maps a timeout to `None`, that inert client is
+        indistinguishable from a device that answered nothing, and the `None`
+        propagates to callers as though it were a statement about the
+        firmware. That is how this first surfaced: "deployed firmware schema
+        does not contain rpSpiLoopback", reported against a board that
+        exposes the method.
+
+        So the contract is made explicit here: a client that reaches a caller
+        has round-tripped at least once, or construction raised.
+
+        Any reply counts, including an error. A firmware that does not bind
+        the probe method answers METHOD_NOT_FOUND, which proves the transport
+        just as well as a result would -- and probing for liveness must not
+        double as a firmware feature check, or this would start failing the
+        boards it is meant to protect.
+        """
+
+        probe_timeout = min(LIVENESS_PROBE_SECONDS, self._client.timeout)
+        try:
+            self._loop.run_until_complete(
+                self._client.send(
+                    LIVENESS_PROBE_METHOD, args=None, timeout=probe_timeout
+                )
+            )
+        except KeyboardInterrupt as interrupt:
+            # Same reasoning as the timeout path below: the constructor is
+            # about to unwind and the caller never gets an object to close.
+            # `handle_keyboard_interrupt` re-raises on the main thread and
+            # wakes it from a worker, per the repo's KBI002 rule -- so the
+            # cleanup has to happen first, while the loop is still alive.
+            with suppress(Exception):
+                self.close()
+            handle_keyboard_interrupt(interrupt)
+            raise
+        except (RpcTimeoutError, RpcTransportError):
+            # The constructor is about to raise, so the caller never gets an
+            # object to close -- tear down the client and its event loop here
+            # or both leak for the life of the process.
+            with suppress(Exception):
+                self.close()
+            raise RpcError(
+                f"Connected to {port} but it never answered a liveness probe "
+                f"({LIVENESS_PROBE_METHOD}, {probe_timeout:g}s), or the request "
+                "could not be written. The port opened "
+                "without error, so this is not a missing device or a wrong baud "
+                "rate.\n"
+                "The known cause is another client already attached to this port: "
+                "the second attach is accepted and the second client is inert "
+                "(#4207). Release the first connection before opening this one -- "
+                "in the harness that means dropping `ctx.serial_iface` before "
+                "spawning a device script against the same port -- or run this "
+                "script standalone.\n"
+                "Refusing rather than returning a client whose every call would "
+                "answer None, which reads to callers as a statement about the "
+                "firmware."
+            ) from None
+        except RpcError:
+            # An error reply is a reply, so the transport works. This is only
+            # sound because a failed *write* now raises `RpcTransportError`
+            # and is caught above: normalizing transport failures into
+            # `RpcError` (#4191) had made the two indistinguishable by type,
+            # and a client whose every write failed passed this gate.
+            return
 
     def call(
         self,
