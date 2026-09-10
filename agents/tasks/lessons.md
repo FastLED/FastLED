@@ -333,3 +333,27 @@
   to restrict the file set explicitly, count the distinct failing rows rather
   than message occurrences, and re-derive the number at publish time instead
   of carrying it forward in prose.
+- "Announced success" and "verified success" are different, and I conflated
+  them three times in one session, each in a new disguise: `cmd | tail; echo
+  $?` reported tail's status, a script ending in `[ $rc -ne 0 ] && ...`
+  returned 1 for a run that passed, and `git push; echo pushed` printed
+  "pushed" after a rejected non-fast-forward push -- I then told a PR the fix
+  was in when it was not. The shape is always the same: reading success from
+  something other than the operation itself. Capture the operation's own
+  status into a variable, check that variable, and for anything outward-facing
+  re-read the remote state before claiming it landed.
+- Do not rebuild a branch by hand when the remote already has your work.
+  After taking master's copy of a file wholesale and re-applying my changes on
+  top, my local branch had a parallel history for the same edits. A teammate's
+  commit to that branch then produced a 13-hunk merge, 10 of them in one test
+  file, all self-inflicted -- the remote already carried every change I was
+  "restoring". `git reset --hard origin/<branch>` followed by applying only
+  the genuinely new hunk turned it into one clean commit. Check what the
+  remote already has before reconstructing anything. See
+  [[bench-branch-upstream]].
+- Resolving a conflict by concatenating both sides is not a strategy. It works
+  for two independent additions and silently corrupts anything else: one
+  boundary here fell mid-expression and the "keep both" splice split a
+  function in half, producing a SyntaxError that only surfaced at import.
+  Read each hunk, decide whether it is additive or two implementations of the
+  same thing, and parse the file afterwards.
