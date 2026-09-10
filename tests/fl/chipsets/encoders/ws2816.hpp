@@ -22,6 +22,9 @@
 #include "fl/stl/array.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/pair.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/gfx/pixel_iterator_any.h"
+#include "pixel_controller.h"
 
 using namespace fl;
 
@@ -421,3 +424,101 @@ FL_TEST_CASE("encodeWS2816 - channel layout documentation") {
 }
 
 } // namespace test_ws2816
+
+
+//-----------------------------------------------------------------------------
+// #4323: the rgb16 adapter must yield the pixel, not the correction constant
+//
+// Everything else in this file drives packWS2816Pixel/encodeWS2816 with plain
+// fl::vector iterators, so nothing observed what a PixelIterator actually
+// hands them. Under FASTLED_HD_COLOR_MIXING the adapter called
+// loadRGBScaleAndBrightness() and treated its outputs as the pixel; those are
+// ColorAdjustment::color, a per-strip constant, so every LED came out the same
+// colour. WS2816 is the only user of this range.
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("[#4323] the rgb16 adapter yields each pixel, not one flat colour") {
+    fl::CRGB leds[3] = {fl::CRGB(255, 0, 0), fl::CRGB(0, 255, 0), fl::CRGB(0, 0, 255)};
+    PixelController<RGB> source(leds, 3, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+
+    fl::vector<fl::array<fl::u16, 3>> seen;
+    auto range = fl::makeScaledPixelRangeRGB16(&adapter.get());
+    for (auto it = range.first; it != range.second; ++it) {
+        seen.push_back(*it);
+    }
+
+    FL_CHECK_EQ((int)seen.size(), 3);
+    if (seen.size() == 3) {
+        // Red, green, blue -- each in its own channel and nowhere else. The
+        // bug returned (65535, 65535, 65535) three times, which is why the
+        // off-channels are checked and not just the on-channel.
+        FL_CHECK_EQ((int)seen[0][0], 65535);
+        FL_CHECK_EQ((int)seen[0][1], 0);
+        FL_CHECK_EQ((int)seen[0][2], 0);
+
+        FL_CHECK_EQ((int)seen[1][0], 0);
+        FL_CHECK_EQ((int)seen[1][1], 65535);
+        FL_CHECK_EQ((int)seen[1][2], 0);
+
+        FL_CHECK_EQ((int)seen[2][0], 0);
+        FL_CHECK_EQ((int)seen[2][1], 0);
+        FL_CHECK_EQ((int)seen[2][2], 65535);
+    }
+}
+
+FL_TEST_CASE("[#4323] brightness reaches the rgb16 adapter exactly once") {
+    // A vacuity guard on the case above: it uses noAdjustment(), where the
+    // correction constant (255,255,255) and a full-brightness white pixel are
+    // easy to confuse. Here brightness is 128, so a constant-returning adapter
+    // and a correct one differ in value, not just in position.
+    ColorAdjustment adj = ColorAdjustment::noAdjustment();
+    adj.brightness = 128;
+    adj.premixed = fl::CRGB(128, 128, 128);   // what PixelController computes
+    adj.color = fl::CRGB(255, 255, 255);
+
+    fl::CRGB leds[1] = {fl::CRGB(255, 0, 0)};
+    PixelController<RGB> source(leds, 1, adj, DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+
+    auto range = fl::makeScaledPixelRangeRGB16(&adapter.get());
+    const fl::array<fl::u16, 3> first = *range.first;
+
+    // 255 scaled by 128/255 is 128, mapped to 16 bits. Applied twice it would
+    // be 64 -> 16448; not at all, 65535.
+    FL_CHECK_EQ((int)first[0], (int)fl::map8_to_16(128));
+    FL_CHECK_EQ((int)first[1], 0);
+    FL_CHECK_EQ((int)first[2], 0);
+}
+
+FL_TEST_CASE("[#4323] a WS2816 frame carries three different LEDs to the wire") {
+    // End to end, the way WS2816Controller::showPixels does it: adapter into
+    // encodeWS2816. Three LEDs of the same colour would have satisfied any
+    // per-LED check, so the claim is that the encoded LEDs differ.
+    fl::CRGB leds[3] = {fl::CRGB(255, 0, 0), fl::CRGB(0, 255, 0), fl::CRGB(0, 0, 255)};
+    PixelController<RGB> source(leds, 3, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+
+    fl::vector<CRGB> out;
+    auto range = fl::makeScaledPixelRangeRGB16(&adapter.get());
+    encodeWS2816(range.first, range.second, fl::back_inserter(out));
+
+    // Two CRGBs per LED, three LEDs.
+    FL_CHECK_EQ((int)out.size(), 6);
+    if (out.size() == 6) {
+        // LED 0 is red: [R_hi, R_lo, G_hi] = [0xFF, 0xFF, 0x00].
+        FL_CHECK_EQ((int)out[0].r, 0xFF);
+        FL_CHECK_EQ((int)out[0].g, 0xFF);
+        FL_CHECK_EQ((int)out[0].b, 0x00);
+        // LED 1 is green, so its red bytes are zero where LED 0's were full.
+        FL_CHECK_EQ((int)out[2].r, 0x00);
+        FL_CHECK_EQ((int)out[2].g, 0x00);
+        FL_CHECK_EQ((int)out[2].b, 0xFF);
+        // And the three LEDs are not all the same pair, which is the whole
+        // failure this pins.
+        const bool all_equal = (out[0] == out[2]) && (out[0] == out[4]);
+        FL_CHECK_FALSE(all_equal);
+    }
+}

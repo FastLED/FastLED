@@ -507,30 +507,31 @@ inline void ScaledPixelIteratorRGB16::advance() FL_NO_EXCEPT {
     }
 
     if (mPixels->has(1)) {
-        // Get wire-ordered, color-corrected RGB bytes from PixelIterator (RGB reordering already applied)
+        // Wire-ordered, colour-corrected, brightness-scaled pixel bytes.
+        //
+        // This used to branch on FASTLED_HD_COLOR_MIXING and call
+        // loadRGBScaleAndBrightness() here, treating its three outputs as the
+        // pixel. They are not the pixel: that call returns
+        // ColorAdjustment::color -- the correction *scale* at full
+        // brightness, a per-strip constant -- for a caller that will apply it
+        // to a pixel itself. So every LED came out the same colour and the
+        // frame never reached the wire (#4323). WS2816, the only user of this
+        // range, showed one flat tint on every non-AVR build.
+        //
+        // loadAndScaleRGB() is the call that loads the pixel. It applies
+        // `premixed`, which already carries brightness, so there is no
+        // separate brightness step left to do. The old branch existed to
+        // defer brightness to 16-bit precision, but it was producing a
+        // constant rather than extra precision, so nothing is given up by
+        // dropping it. Doing that properly needs a primitive that loads the
+        // pixel scaled at full brightness, which PixelIterator does not
+        // expose today.
         u8 b0, b1, b2;
-        u8 brightness;
-
-        #if FASTLED_HD_COLOR_MIXING
-        // HD mode: RGB is color-corrected but NOT brightness-scaled
-        mPixels->loadRGBScaleAndBrightness(&b0, &b1, &b2, &brightness);
-        #else
-        // Standard mode: RGB is color-corrected AND brightness-scaled (premixed)
         mPixels->loadAndScaleRGB(&b0, &b1, &b2);
-        brightness = 255;  // No separate brightness scaling needed
-        #endif
 
-        // Map 8-bit → 16-bit RGB (color correction already applied)
-        u16 r16 = fl::map8_to_16(b0);
-        u16 g16 = fl::map8_to_16(b1);
-        u16 b16 = fl::map8_to_16(b2);
-
-        // Apply brightness scaling in HD mode (brightness not yet applied by loadRGBScaleAndBrightness)
-        if (brightness != 255) {
-            r16 = scale16by8(r16, brightness);
-            g16 = scale16by8(g16, brightness);
-            b16 = scale16by8(b16, brightness);
-        }
+        const u16 r16 = fl::map8_to_16(b0);
+        const u16 g16 = fl::map8_to_16(b1);
+        const u16 b16 = fl::map8_to_16(b2);
 
         mCurrent = array<u16, 3>{{r16, g16, b16}};  // Wire order 16-bit channels
         mPixels->stepDithering();
