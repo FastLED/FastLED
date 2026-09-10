@@ -10,6 +10,7 @@
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
+#include "fl/channels/options.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/gfx/fill.h"
 #include "fl/math/screenmap.h"
@@ -718,6 +719,169 @@ FL_TEST_CASE("[#2517] Re-enabling the driver resumes enqueue and re-arms the lat
     mgr.setDriverEnabled("RECOVERY_DRIVER", false);
     channel->showLeds(0);
     FL_CHECK_EQ(fakeDriver->enqueueCount, 2);
+}
+
+
+// ============ UCS7604 through the Channels encode path (#4326) ============
+// `tests/fl/chipsets/ucs7604.cpp` drives `testUCS7604Controller`, the legacy
+// `CLEDController` path. `fl::Channel`'s own `writeUCS7604` sits in an
+// anonymous namespace in `channel.cpp.hpp` and is reachable only through
+// `showPixels()`, so nothing observed what it puts on the wire.
+
+namespace {
+
+/// Records the encoded bytes of the last frame enqueued.
+class CapturingDriver : public IChannelDriver {
+public:
+    fl::vector<u8> last;
+    int frames = 0;
+
+    bool canHandle(const ChannelDataPtr& data) const override {
+        (void)data;
+        return true;
+    }
+    void enqueue(ChannelDataPtr channelData) override {
+        ++frames;
+        last.clear();
+        if (channelData) {
+            const auto& d = channelData->getData();
+            for (fl::size i = 0; i < d.size(); ++i) {
+                last.push_back(d[i]);
+            }
+        }
+    }
+    void show() override {}
+    DriverState poll() override { return DriverState::READY; }
+    fl::string getName() const override {
+        return fl::string::from_literal("UCS_CAPTURE");
+    }
+    Capabilities getCapabilities() const override { return Capabilities(true, true); }
+};
+
+constexpr EmitterProfile kProfile = EmitterProfile::rgb(
+    "fixture/ucs-4326",
+    Chromaticity(0.640f, 0.330f), Chromaticity(0.300f, 0.600f),
+    Chromaticity(0.150f, 0.060f), 1.0f, 1.0f, 1.0f);
+
+ClocklessChipset ucs16(int pin) {
+    auto timing = ChipsetTimingConfig(800, 450, 450, 50, "UCS7604");
+    return ClocklessChipset(pin, timing,
+                            ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
+}
+
+/// Encode one frame and hand back the bytes the driver saw.
+fl::vector<u8> encodeOnce(CRGB colour, bool bindProfile, float gamma, int pin) {
+    // Reset first: registrations leak across calls otherwise, and with several
+    // same-priority drivers alive the frame can land on one this call does not
+    // hold, which silently makes every comparison below meaningless.
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<CapturingDriver>();
+    mgr.addDriver(9100, driver);
+    // And take it back out on the way home. Leaving UCS_CAPTURE registered
+    // lets a later test select it, or trip a zero-driver precondition, in a
+    // way that depends on case order -- which is how the gamma assertion in
+    // this block first went wrong.
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    CRGB leds[1] = {colour};
+    ChannelOptions options;
+    // Dither off explicitly. With it on, a temporal step can carry 127 to 128
+    // and the gamma assertion below moves with the frame -- which is exactly
+    // what happened when these cases were first written in a file of their
+    // own and then moved next to neighbours that leave dithering enabled.
+    options.mDitherMode = DISABLE_DITHER;
+    options.mGamma = gamma;
+    if (bindProfile) {
+        // Note this also resets mGamma, mCorrection, mTemperature and
+        // mDitherMode -- see the gamma case below.
+        options.setColorProfile(kProfile, SourceProfile::linearSrgb());
+    }
+    ChannelConfig config(ucs16(pin), fl::span<CRGB>(leds, 1), RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    if (channel) {
+        channel->showLeds(255);
+    }
+    return driver->last;
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#4326] the Channels UCS7604 path encodes a frame at all") {
+    // The floor this file exists to lay down. `tests/fl/chipsets/ucs7604.cpp`
+    // drives the legacy CLEDController; `fl::Channel`'s writeUCS7604 lives in
+    // an anonymous namespace and is reachable only through showPixels(), so
+    // nothing observed it. If this stops producing bytes the cases below stop
+    // meaning anything.
+    fl::vector<u8> out = encodeOnce(CRGB(127, 0, 0), false, 2.8f, 11);
+    FL_REQUIRE_GT((int)out.size(), 0);
+
+    // 15-byte preamble, then RGB16 big-endian. Gamma 2.8 of 127 is the value
+    // the legacy path produces too, so this pins the whole chain rather than
+    // just "some bytes came out".
+    FL_REQUIRE_GT((int)out.size(), 16);
+    const int r16 = (out[15] << 8) | out[16];
+    FL_CHECK_EQ(r16, (int)fl::gamma_2_8(127));
+}
+
+FL_TEST_CASE("[#4326] gamma reaches the encoder when no profile is bound") {
+    // Legacy behaviour, and correct: an unmanaged channel is meant to be
+    // shaped by mGamma. This is also the positive control for the case below
+    // -- without it, "gamma does not vary the output once a profile binds"
+    // could be satisfied by an encoder that ignores gamma entirely.
+    fl::vector<u8> a = encodeOnce(CRGB(127, 0, 0), false, 2.8f, 12);
+    fl::vector<u8> b = encodeOnce(CRGB(127, 0, 0), false, 1.6f, 13);
+
+    FL_REQUIRE_GT((int)a.size(), 16);
+    FL_REQUIRE_EQ((int)a.size(), (int)b.size());
+    FL_CHECK_NE((int)((a[15] << 8) | a[16]), (int)((b[15] << 8) | b[16]));
+}
+
+FL_TEST_CASE("[#4326] binding a profile clears the caller's gamma") {
+    // ChannelOptions::setColorProfile() resets mGamma alongside mCorrection,
+    // mTemperature and mDitherMode (options.h). Pinned here because it is the
+    // half of the managed-mode exclusion policy that #4156 R9 asked for and
+    // it had no test: two channels that differ only in the gamma they asked
+    // for produce identical bytes once a profile is bound.
+    fl::vector<u8> a = encodeOnce(CRGB(127, 0, 0), true, 2.8f, 14);
+    fl::vector<u8> b = encodeOnce(CRGB(127, 0, 0), true, 1.6f, 15);
+
+    FL_REQUIRE_GT((int)a.size(), 0);
+    FL_REQUIRE_EQ((int)a.size(), (int)b.size());
+    for (fl::size i = 0; i < a.size(); ++i) {
+        FL_CHECK_EQ((int)a[i], (int)b[i]);
+    }
+}
+
+FL_TEST_CASE("[#4326] a bound profile reaches the encode path") {
+    // The name has to be earned: this encodes, rather than only checking that
+    // the channel owns a profile. What it pins is that the binding changes
+    // what goes on the wire -- the same pixel through the same encoder, bound
+    // and unbound, does not produce the same bytes.
+    //
+    // Whether the 2.8 that `mGamma.value_or(2.8f)` falls back to should give
+    // way to identity once the device solve runs is #4326's remaining half.
+    fl::vector<u8> bound = encodeOnce(CRGB(127, 0, 0), true, 2.8f, 16);
+    fl::vector<u8> unbound = encodeOnce(CRGB(127, 0, 0), false, 2.8f, 17);
+
+    FL_REQUIRE_GT((int)bound.size(), 16);
+    FL_REQUIRE_EQ((int)bound.size(), (int)unbound.size());
+
+    bool differs = false;
+    for (fl::size k = 0; k < bound.size(); ++k) {
+        if (bound[k] != unbound[k]) { differs = true; }
+    }
+    FL_CHECK(differs);
+
+    // And specifically in the payload rather than only in the preamble, so a
+    // difference in current-control bytes could not satisfy it.
+    FL_CHECK_NE((int)((bound[15] << 8) | bound[16]),
+                (int)((unbound[15] << 8) | unbound[16]));
+
+    // Deliberately no isColorManaged() assertion. That accessor was a
+    // hardcoded constant when this file was written; #4328/#4329 give it real
+    // semantics, and pinning its old value here would only have made
+    // whichever of the two landed second fail.
 }
 
 }  // FL_TEST_FILE
