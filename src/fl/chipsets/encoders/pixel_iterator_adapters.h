@@ -17,6 +17,7 @@
 #include "fl/stl/pair.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/noexcept.h"
+#include "crgb.h"  // FASTLED_HD_COLOR_MIXING
 
 namespace fl {
 
@@ -234,9 +235,19 @@ private:
     bool mHasValue;
 };
 
+#if FASTLED_HD_COLOR_MIXING
 /// @brief Input iterator adapter for PixelIterator yielding brightness values
 ///
-/// Extracts per-LED brightness values from PixelIterator for HD encoders.
+/// Yields the strip's brightness for the HD encoders, which pair it with a
+/// `ScaledPixelIteratorRGB` over the *same* `PixelIterator`.
+///
+/// It must never move that shared cursor. It used to: `advance()` ended with
+/// `stepDithering()` + `advanceData()` exactly as the RGB adapter's does, so
+/// with both stepped in lockstep by the encoder two source pixels were eaten
+/// per emitted LED and the strip came out half length, showing every other
+/// pixel (#4321). Under `FASTLED_HD_COLOR_MIXING` the value is a per-strip
+/// constant -- `ColorAdjustment::brightness` -- so there is nothing to walk
+/// for in the first place.
 class ScaledPixelIteratorBrightness {
 public:
     // Iterator traits
@@ -299,6 +310,7 @@ private:
     u8 mCurrent;             ///< Current brightness value (cached)
     bool mHasValue;          ///< true if current value is valid
 };
+#endif  // FASTLED_HD_COLOR_MIXING
 
 /// @brief Input iterator adapter for PixelIterator yielding 16-bit RGB pixel data
 ///
@@ -419,6 +431,7 @@ makeScaledPixelRangeRGBWW(PixelIterator* pixels) FL_NO_EXCEPT {
     );
 }
 
+#if FASTLED_HD_COLOR_MIXING
 /// @brief Create brightness input iterator range from PixelIterator
 /// @param pixels PixelIterator to wrap
 /// @return Pair of begin/end iterators
@@ -429,6 +442,7 @@ makeScaledBrightnessRange(PixelIterator* pixels) FL_NO_EXCEPT {
         detail::ScaledPixelIteratorBrightness()  // End sentinel
     );
 }
+#endif  // FASTLED_HD_COLOR_MIXING
 
 /// @brief Create 16-bit RGB input iterator range from PixelIterator
 /// @param pixels PixelIterator to wrap

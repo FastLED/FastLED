@@ -25,6 +25,8 @@
 #include "fl/stl/int.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/vector.h"
+#include "fl/gfx/pixel_iterator_any.h"
+#include "pixel_controller.h"
 
 namespace test_hd108 {
 
@@ -489,6 +491,132 @@ FL_TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
 
     // 64 should be much less than 128/2
     FL_CHECK_LT(v64, v128 / 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// #4321: the HD paths must consume every source pixel
+//
+// writeHD108/writeAPA102(hd)/writeSK9822(hd) each build a ScaledPixelIteratorRGB
+// and a ScaledPixelIteratorBrightness over the SAME PixelIterator. Both used to
+// end advance() with stepDithering()+advanceData(), and the encoders step them
+// in lockstep, so two source pixels were eaten per emitted LED: a four-pixel
+// strip came out as two LEDs showing pixels 0 and 2.
+//
+// These go through PixelIterator on purpose. The existing cases in this file
+// call the encoders directly with fl::vector iterators, where there is no
+// shared cursor to double-advance, which is why they all passed throughout.
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("[#4321] writeHD108 emits one LED per source pixel") {
+    fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                        fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+    PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+    fl::vector<fl::u8> out;
+    adapter.get().writeHD108(&out);
+
+    // 8 start + 8 per LED + (N/2 + 4) end.  N=4 -> 8 + 32 + 6.
+    FL_CHECK_EQ((int)out.size(), 46);
+
+    // Each LED carries its own pixel, in order -- not every other one. The
+    // halving bug left LED 1 showing pixel 2, so checking the red channel of
+    // every LED is what separates "all four present" from "two, doubled".
+    // Guarded rather than REQUIRE'd so a short buffer reports every case in
+    // this file instead of aborting the run at the first one.
+    const fl::u8 expected[4] = {10, 20, 30, 40};
+    for (int led = 0; led < 4 && out.size() >= 46u; ++led) {
+        const fl::size at = 8 + (fl::size)led * 8 + 2;  // past the 2 header bytes
+        const int r16 = (out[at] << 8) | out[at + 1];
+        FL_CHECK_EQ(r16, (int)fl::Gamma28LUT16::read(expected[led]));
+    }
+}
+
+FL_TEST_CASE("[#4321] writeAPA102 and writeSK9822 emit one LED per source pixel in HD mode") {
+    // 4 start bytes + 4 per LED + ((N/32)+1)*4 end.  N=4 -> 4 + 16 + 4.
+    FL_SUBCASE("APA102") {
+        fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                            fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        fl::vector<fl::u8> out;
+        adapter.get().writeAPA102(&out, true);
+        FL_CHECK_EQ((int)out.size(), 24);
+    }
+
+    FL_SUBCASE("SK9822") {
+        fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                            fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        fl::vector<fl::u8> out;
+        adapter.get().writeSK9822(&out, true);
+        FL_CHECK_EQ((int)out.size(), 24);
+    }
+}
+
+FL_TEST_CASE("[#4321] the length check is not vacuous -- an odd count cannot be halved cleanly") {
+    // A five-pixel strip is the guard: halving gives 3 LEDs (ceil), so a
+    // length assertion alone could be satisfied by an off-by-one fix that
+    // still dropped pixels. Checking the last LED carries the last pixel is
+    // what pins "every source pixel reached the wire".
+    fl::CRGB leds[5] = {fl::CRGB(11, 0, 0), fl::CRGB(22, 0, 0), fl::CRGB(33, 0, 0),
+                        fl::CRGB(44, 0, 0), fl::CRGB(55, 0, 0)};
+    PixelController<RGB> source(leds, 5, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+    fl::vector<fl::u8> out;
+    adapter.get().writeHD108(&out);
+
+    // 8 + 5*8 + (5/2 + 4) = 8 + 40 + 6 = 54
+    FL_CHECK_EQ((int)out.size(), 54);
+    const fl::size last = 8 + 4 * 8 + 2;
+    if (last + 1 < out.size()) {
+        const int r16 = (out[last] << 8) | out[last + 1];
+        FL_CHECK_EQ(r16, (int)fl::Gamma28LUT16::read(55));
+    }
+}
+
+FL_TEST_CASE("[#4321] the brightness adapter does not move the shared cursor") {
+    // Directly: draining the RGB adapter alone and with a brightness adapter
+    // alive alongside must yield the same bytes. This is the property the
+    // encoders rely on, stated without going through one.
+    fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                        fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+
+    fl::vector<fl::u8> alone;
+    {
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        auto range = fl::makeScaledPixelRangeRGB(&adapter.get());
+        for (auto it = range.first; it != range.second; ++it) {
+            alone.push_back((*it)[0]);
+        }
+    }
+
+    fl::vector<fl::u8> paired;
+    {
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        auto range = fl::makeScaledPixelRangeRGB(&adapter.get());
+        auto bright = fl::makeScaledBrightnessRange(&adapter.get());
+        auto b = bright.first;
+        for (auto it = range.first; it != range.second; ++it, ++b) {
+            paired.push_back((*it)[0]);
+            (void)*b;
+        }
+    }
+
+    FL_CHECK_EQ((int)alone.size(), 4);
+    FL_CHECK_EQ((int)paired.size(), (int)alone.size());
+    for (fl::size i = 0; i < alone.size() && i < paired.size(); ++i) {
+        FL_CHECK_EQ((int)paired[i], (int)alone[i]);
+    }
 }
 
 } // namespace test_hd108
