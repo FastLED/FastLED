@@ -22,6 +22,20 @@ fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT {
         --exponent;
     }
 
+    // Normalising put the mantissa in [1, 10), but *rounding* it to the
+    // requested precision can carry it back out: 9.999e18 at precision 2
+    // rounds to 10.00, and "10.00e+18" is not scientific notation. Checked
+    // before formatting rather than patched after, so there is one place
+    // where the exponent is decided.
+    float half_step = 0.5f;
+    for (int digit = 0; digit < precision; ++digit) {
+        half_step /= 10.0f;
+    }
+    if (magnitude >= 10.0f - half_step) {
+        magnitude /= 10.0f;
+        ++exponent;
+    }
+
     sstream stream;
     if (negative) {
         stream << "-";

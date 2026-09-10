@@ -237,4 +237,24 @@ FL_TEST_CASE("ftoa - the ordinary cases are untouched") {
     FL_CHECK_EQ(ftoaOf(0.0f, 0), fl::string("0"));
 }
 
+FL_TEST_CASE("ftoa - a mantissa that rounds to ten carries the exponent") {
+    // Normalising puts the mantissa in [1, 10), but rounding it to the
+    // requested precision can carry it back out. 9.999e18 at precision 2
+    // rounded to 10.00 and printed `10.00e+18`, which is not scientific
+    // notation and reads as a different number at a glance.
+    FL_CHECK_EQ(ftoaOf(9.999e18f, 2), fl::string("1.00e+19"));
+    FL_CHECK_EQ(ftoaOf(9.9999e30f, 2), fl::string("1.00e+31"));
+    FL_CHECK_EQ(ftoaOf(-9.999e18f, 2), fl::string("-1.00e+19"));
+
+    // The carry is precision-dependent, which is why the threshold is
+    // computed from the precision rather than fixed: 9.99e19 stays at 9.99
+    // with two digits and becomes 1.0e+20 with one.
+    FL_CHECK_EQ(ftoaOf(9.99e19f, 2), fl::string("9.99e+19"));
+    FL_CHECK_EQ(ftoaOf(9.99e19f, 1), fl::string("1.0e+20"));
+
+    // And a mantissa that was never near ten is left alone.
+    FL_CHECK_EQ(ftoaOf(1.0e19f, 2), fl::string("1.00e+19"));
+    FL_CHECK_EQ(ftoaOf(5.0e19f, 1), fl::string("5.0e+19"));
+}
+
 } // FL_TEST_FILE
