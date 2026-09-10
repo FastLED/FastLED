@@ -22,7 +22,7 @@ import pytest
 
 from ci.autoresearch import rpc_bench
 from ci.autoresearch.rpc_bench import RpcBench
-from ci.rpc_client import RpcError
+from ci.rpc_client import RpcError, RpcTransportError
 
 
 class _ScriptedSerial:
@@ -163,3 +163,60 @@ def test_a_failed_probe_does_not_leak_the_event_loop(
         RpcBench("FAKE_PORT", timeout=1.0)
     assert len(created) == 1
     assert created[0].closed is True
+
+
+class _UnwritableSerial(_ScriptedSerial):
+    """Opens fine, reads fine, and cannot write.
+
+    The shape that slipped through the first version of this gate: `send()`
+    normalises a failed write into `RpcError` (#4191), which the probe was
+    accepting as "an error reply is a reply".
+    """
+
+    async def write(self, data: str) -> None:
+        raise RuntimeError("Serial write error: device disappeared")
+
+
+def test_a_failed_write_is_not_mistaken_for_an_error_reply(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    created: list[_ScriptedSerial] = []
+
+    def _factory(port: str, *args: object, **kwargs: object) -> _ScriptedSerial:
+        iface = _UnwritableSerial(_ok)
+        created.append(iface)
+        return iface
+
+    monkeypatch.setattr(rpc_bench, "create_serial_interface", _factory)
+
+    with pytest.raises(RpcError) as caught:
+        RpcBench("FAKE_PORT", timeout=1.0)
+    # And it is refused as a transport failure, not swallowed as a reply.
+    assert "#4207" in str(caught.value)
+    assert created[0].closed is True
+
+
+def test_a_failed_write_raises_the_transport_subtype() -> None:
+    """The distinction the probe reads, pinned at its source.
+
+    Without a distinct type a failed write and an error *reply* are the same
+    class, and the probe cannot tell "the device answered with an error" --
+    which proves the link round-trips -- from "the request never left".
+    """
+    assert issubclass(RpcTransportError, RpcError)
+
+    from ci.rpc_client import RpcClient
+
+    async def _run() -> None:
+        client = RpcClient(
+            "FAKE_PORT", timeout=0.5, serial_interface=_UnwritableSerial(_ok)
+        )
+        await client.connect(boot_wait=0.0, drain_boot=False)
+        await client.send("ping", args=None, timeout=0.5)
+
+    loop = asyncio.new_event_loop()
+    try:
+        with pytest.raises(RpcTransportError):
+            loop.run_until_complete(_run())
+    finally:
+        loop.close()
