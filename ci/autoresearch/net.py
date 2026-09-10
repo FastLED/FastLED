@@ -533,8 +533,15 @@ def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
     if not node:
         return ""
     # Establish that there is contention at all before blaming anyone.
+    # O_NOCTTY/O_NONBLOCK are POSIX-only; this whole helper is a Linux
+    # best-effort diagnostic, so degrade to silence rather than raising on a
+    # platform that has neither.
+    noctty = getattr(os, "O_NOCTTY", 0)
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    if not noctty and not nonblock:
+        return ""
     try:
-        probe = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+        probe = os.open(port, os.O_RDWR | noctty | nonblock)
     except OSError as exc:
         if exc.errno != errno.EBUSY:
             return ""
