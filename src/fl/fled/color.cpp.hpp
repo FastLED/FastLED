@@ -56,7 +56,33 @@ bool isLinearRgb(fl::u8 pf) FL_NO_EXCEPT {
     return pf == static_cast<fl::u8>(PixelFormat::Rgb16Linear);
 }
 
+// True for a real, ordinary number: not NaN, not an infinity.
+//
+// `NaN != NaN` is the definition; the magnitude bound catches both
+// infinities without needing <cmath>, and 1e30 is far outside any
+// chromaticity while remaining exactly representable.
+bool isOrdinaryNumber(float v) FL_NO_EXCEPT {
+    if (v != v) return false;
+    return v > -1e30f && v < 1e30f;
+}
+
 // Reads one CIE xy pair: a 2-element array of numbers.
+//
+// Shape alone is not admission (FastLED#4156 R6). Two properties are checked
+// here because neither is a matter of taste:
+//
+//   * the values must be ordinary numbers -- a JSON `1e400` parses to an
+//     infinity, and an infinite coordinate is not a chromaticity;
+//   * `y` must be positive, since xyY -> XYZ divides by it. At y = 0 the
+//     conversion yields a zero column, and the profile is refused later as a
+//     singular matrix -- correct, but reported far from the field that
+//     caused it.
+//
+// Deliberately NOT checked: whether the pair lies inside the xy simplex.
+// Primaries outside it are imaginary, wide-gamut encodings legitimately use
+// them, and R6 asks for that to be an explicit decision rather than a
+// side effect of a range check. It has not been made, so nothing here
+// forecloses it.
 bool readXy(const fl::json& node, float* outX, float* outY) FL_NO_EXCEPT {
     if (!node.is_array()) return false;
     // Exactly two, not at least two: [0.64, 0.33, 1] would otherwise resolve
@@ -66,8 +92,12 @@ bool readXy(const fl::json& node, float* outX, float* outY) FL_NO_EXCEPT {
     auto x = node[static_cast<fl::size>(0)].as_float();
     auto y = node[static_cast<fl::size>(1)].as_float();
     if (!x || !y) return false;
-    *outX = static_cast<float>(*x);
-    *outY = static_cast<float>(*y);
+    const float fx = static_cast<float>(*x);
+    const float fy = static_cast<float>(*y);
+    if (!isOrdinaryNumber(fx) || !isOrdinaryNumber(fy)) return false;
+    if (fy <= 0.0f) return false;
+    *outX = fx;
+    *outY = fy;
     return true;
 }
 

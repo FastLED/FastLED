@@ -347,6 +347,46 @@ FL_TEST_CASE("FLED_COLOR - malformed custom primaries are rejected") {
                      kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
 }
 
+FL_TEST_CASE("FLED_COLOR - a zero y is not a chromaticity") {
+    // xyY -> XYZ divides by y. At zero the primary becomes a zero column and
+    // the profile is refused later as a singular matrix -- correct, but
+    // reported far from the field that caused it (#4156 R6).
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,0.0],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // Negative y likewise: below the axis is not a lower luminance, it is
+    // not a chromaticity at all.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,-0.33],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+}
+
+FL_TEST_CASE("FLED_COLOR - a non-finite coordinate is rejected") {
+    // A JSON literal well past float range parses to an infinity, and an
+    // infinite coordinate is not a chromaticity.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[1e400,0.33],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+}
+
+FL_TEST_CASE("FLED_COLOR - primaries outside the xy simplex still resolve") {
+    // Imaginary primaries. Wide-gamut encodings legitimately use them, and
+    // #4156 R6 asks for that to be an explicit decision rather than the side
+    // effect of a range check. No decision has been made, so the checks above
+    // must not foreclose one.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[1.2,0.4],\"green\":[-0.2,1.1],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Custom);
+}
+
 // ============================================================================
 // Diagnostics
 // ============================================================================
