@@ -20,10 +20,12 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
-#include "fl/test/fltest.h"
+#include "test.h"
 #include "platforms/stub/bus_traits.h"
 
 using namespace fl;
+
+FL_TEST_FILE(FL_FILEPATH) {
 
 // ============ Channel + Addressing Integration Tests ============
 // End-to-end byte capture tests for Channel API with XYMap addressing
@@ -88,7 +90,7 @@ FL_TEST_CASE("Serpentine 2x2 with APA102 encodes pixels in expected byte order")
     SpiChipsetConfig spiConfig{5, 6, encoder};
     ChannelOptions options;
 
-    ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), RGB, options);
+    ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), BGR, options);
     auto channel = Channel::create(config);
     FL_CHECK(channel != nullptr);
 
@@ -318,7 +320,7 @@ FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse orde
     SpiChipsetConfig spiConfig{5, 6, encoder};
     ChannelOptions options;
 
-    ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), RGB, options);
+    ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), BGR, options);
     auto channel = Channel::create(config);
     FL_CHECK(channel != nullptr);
 
@@ -691,3 +693,5 @@ FL_TEST_CASE("[#2517] Re-enabling the driver resumes enqueue and re-arms the lat
     channel->showLeds(0);
     FL_CHECK_EQ(fakeDriver->enqueueCount, 2);
 }
+
+}  // FL_TEST_FILE

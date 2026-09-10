@@ -237,6 +237,12 @@ void ChannelManager::clearAllDrivers() {
 
     // Clear all drivers (shared_ptr handles cleanup automatically)
     mDrivers.clear();
+
+    // Drop the exclusive-driver filter along with the registry it refers to.
+    // Leaving it set would name a driver that no longer exists, and
+    // addDriver() consults it -- so every driver registered afterwards would
+    // arrive silently disabled, with no diagnostic and nothing to clear it.
+    mExclusiveDriver.clear();
 }
 
 void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
