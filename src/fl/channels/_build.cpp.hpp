@@ -8,6 +8,7 @@
 #include "fl/channels/capabilities.cpp.hpp"
 #include "fl/channels/channel.cpp.hpp"
 #include "fl/channels/channel_events.cpp.hpp"
+#include "fl/channels/color_managed_source.cpp.hpp"
 #include "fl/channels/color_profile.cpp.hpp"
 #include "fl/channels/config.cpp.hpp"
 #include "fl/channels/data.cpp.hpp"

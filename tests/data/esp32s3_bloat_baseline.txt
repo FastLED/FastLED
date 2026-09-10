@@ -1,14 +1,23 @@
-# 2026-09-10, PR #4283 (issue #4041): +1 B, 342177 -> 342178.
+# 2026-09-10, PR #4200 (issue #4040, colour pipeline P6): +305 B,
+# 342178 -> 342483.
 #
-# The continuity fix adds highestReachableLightness to the gamut mappers,
-# which walk down to the highest reachable lightness instead of dropping to
-# the neutral cap. None of that code links into the NEOPIXEL Blink sketch
-# this gate builds: no gamut or colour-pipeline symbol appears anywhere in
-# the run's top-25 symbol table (largest entries are fl::ClocklessIdf5<...>
-# at 45,342 B, the libc printf family, and fl::Channel::showPixels at
-# 3,296 B). The byte is layout drift, not a feature cost.
+# This is the cost of being able to reach the colour pipeline at runtime.
+# The pipeline math itself is NOT in here: not one gamut, OKLab, transfer,
+# white-allocation or device-solve symbol appears anywhere in the run's
+# top-25 table, so --gc-sections still takes the ~3.5 KB of it out of a
+# Blink build that binds no profile. What is left is the dispatch code in
+# fl::Channel -- the reconcileColorProfile build block, the showPixels flux
+# call, and the iterator's branches. It cannot be elided, because it is the
+# code that decides whether to elide.
 #
-# Attribution was checked rather than assumed: master's last three runs and
-# the concurrent PR #4282 all measure 342,177 B, so the byte arrived with
-# this branch.
-342178
+# The cost was 429 B when this PR was last measured. Holding the pipeline
+# behind a pointer instead of inline in every Channel took it to 305 B, and
+# took the per-channel RAM from 88 B to 16 B at the same time.
+#
+# Why this is accepted rather than refused: FL_COLOR_PROFILE_RUNTIME is
+# !FL_PLATFORM_HAS_TINY_MEMORY, and every use of the pipeline sits inside
+# that guard -- the member, the whole of reconcileColorProfile, and the
+# showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
+# only ever spent where flash is not the binding constraint. On a target
+# that does compile it in, 305 B is 0.089% of the image.
+342483

@@ -177,6 +177,9 @@ public:
     void bindStaticEmitterProfile(const EmitterProfile* profile) FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         mSettings.clearColorProfile();
+        if (profile != nullptr) {
+            installColorPipelineHooks();
+        }
         mSettings.mColorProfile.mStaticProfile = profile;
         mSettings.mColorProfile.mRequested = profile != nullptr;
 #else
