@@ -91,6 +91,44 @@ def parse_baseline(text: str) -> int | None:
     return None
 
 
+@typechecked
+def comment_lines(text: str) -> tuple[str, ...]:
+    """The `#` lines of a baseline file, in order."""
+
+    found: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            found.append(stripped)
+    return tuple(found)
+
+
+@typechecked
+def raise_lacks_reason(previous_text: str, current_text: str) -> bool:
+    """True when the baseline moved UP and the file did not say why.
+
+    Documenting the requirement is not the same as having it. Without this a
+    PR could raise the number, match it, and pass -- which is the state the
+    docstring above was written to end, so leaving it unenforced would have
+    reproduced the original problem in a new place.
+
+    The comparison is against the *previous* comments rather than against
+    "has any comment", so a reason left over from an earlier raise cannot
+    stand in for this one. Comparing full lines rather than counting them
+    means an edit in place counts as well as an addition.
+    """
+
+    previous = parse_baseline(previous_text)
+    current = parse_baseline(current_text)
+    if previous is None or current is None:
+        # A malformed baseline is an infrastructure failure and is reported
+        # separately; calling it a missing reason would name the wrong fault.
+        return False
+    if current <= previous:
+        return False
+    return comment_lines(current_text) == comment_lines(previous_text)
+
+
 def read_baseline() -> int:
     value = parse_baseline(BASELINE_FILE.read_text(encoding="utf-8"))
     if value is None:
@@ -203,6 +241,15 @@ def main() -> int:
         help="Skip `--build`; assume the ELF + report.json already exist.",
     )
     parser.add_argument(
+        "--previous-baseline",
+        type=str,
+        default=None,
+        help=(
+            "Path to the baseline file as it stands on the merge base. When "
+            "given, a raise without a new `#` reason fails."
+        ),
+    )
+    parser.add_argument(
         "--baseline",
         type=int,
         default=None,
@@ -214,6 +261,26 @@ def main() -> int:
     args = parser.parse_args()
 
     baseline = args.baseline if args.baseline is not None else read_baseline()
+
+    if args.previous_baseline is not None:
+        previous_text = Path(args.previous_baseline).read_text(encoding="utf-8")
+        current_text = BASELINE_FILE.read_text(encoding="utf-8")
+        if raise_lacks_reason(previous_text, current_text):
+            print(
+                "esp32s3-bloat-regression: FAIL — the baseline was raised from "
+                f"{parse_baseline(previous_text)} to "
+                f"{parse_baseline(current_text)} with no reason recorded.",
+                file=sys.stderr,
+            )
+            print(
+                "esp32s3-bloat-regression: add a `#` comment to "
+                f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} saying "
+                "what bought the bytes. Going up is allowed; going up silently "
+                "is what makes the next reader unable to tell a decision from "
+                "a slip.",
+                file=sys.stderr,
+            )
+            return 1
 
     run_bloat(skip_build=args.no_build)
 

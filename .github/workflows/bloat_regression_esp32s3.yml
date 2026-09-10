@@ -70,6 +70,11 @@ jobs:
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The gate compares the baseline against its merge-base version, so
+          # a raise without a recorded reason can be caught. A shallow clone
+          # has no merge base to read.
+          fetch-depth: 0
 
       - name: Set up uv (Python toolchain)
         uses: astral-sh/setup-uv@v6
@@ -79,5 +84,28 @@ jobs:
       - name: Sync project dependencies
         run: uv sync
 
+      - name: Recover the baseline as it stands on the merge base
+        id: previous_baseline
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          out="$RUNNER_TEMP/previous_baseline.txt"
+          if [ -n "$base" ] && git cat-file -e "$base:tests/data/esp32s3_bloat_baseline.txt" 2>/dev/null; then
+            git show "$base:tests/data/esp32s3_bloat_baseline.txt" > "$out"
+            echo "path=$out" >> "$GITHUB_OUTPUT"
+          else
+            # No merge base to compare against (first commit, or a force push
+            # that dropped it). The reason check is skipped rather than
+            # guessed at; the size gate below still runs.
+            echo "path=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run ESP32-S3 bloat regression gate
-        run: uv run python tests/test_esp32s3_bloat_regression.py
+        run: |
+          set -euo pipefail
+          if [ -n "${{ steps.previous_baseline.outputs.path }}" ]; then
+            uv run python tests/test_esp32s3_bloat_regression.py \
+              --previous-baseline "${{ steps.previous_baseline.outputs.path }}"
+          else
+            uv run python tests/test_esp32s3_bloat_regression.py
+          fi
