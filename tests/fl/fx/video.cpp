@@ -508,6 +508,76 @@ FL_TEST_CASE("Video exposes typed RGB16 samples without CRGB conversion") {
     FL_CHECK_EQ(sample.mComponents[1], fl::u16(0x1201));
 }
 
+FL_TEST_CASE("An rgb16 file is admitted but cannot be drawn to a CRGB span") {
+    // FastLED#4156 R5's RED condition, and it does not fail the way R5
+    // describes.
+    //
+    // R5 reads: "Supporting a container enum does not preserve its low bits
+    // through that interface", with the evidence required being that
+    // "adjacent values such as 0x1200 and 0x1201 survive actual
+    // Video->Channel->native16 identity output". That anticipates a lossy
+    // route -- the low byte quietly dropped somewhere between the file and
+    // the strip.
+    //
+    // Measured, the route is not lossy. It is absent. The typed source view
+    // exists and is exact (the case above reads 0x1200 and 0x1201 back
+    // through `Video::readSample`), `begin()` admits the file, and then
+    // `draw()` -- the only path from a `Video` into a channel, since it
+    // takes `span<CRGB>` -- refuses the frame.
+    //
+    // So an rgb16 `.fled` does not render at all. That is arguably the
+    // better v1 behaviour, since silently truncating to eight bits would be
+    // worse, but nothing says so: `begin()` succeeding and `draw()`
+    // returning false looks the same from a sketch as a file that has run
+    // out of frames.
+    const uint8_t kRgb16[] = {
+        'F', 'L', 'E', 'D', 1, 0x05, 0, 0, 0, 0, 0, 0,
+        0x00, 0x12, 0x01, 0x12, 0x02, 0x12,
+    };
+    // Same shape, one pixel, format 0x00 -- the control that makes the
+    // refusal attributable to the format rather than to the fixture being
+    // one pixel long or the frame clock sitting at zero.
+    const uint8_t kRgb8[] = {
+        'F', 'L', 'E', 'D', 1, 0x00, 0, 0, 0, 0, 0, 0,
+        0x12, 0x34, 0x56,
+    };
+
+    FakeFilebufPtr rgb8Handle = fl::make_shared<FakeFilebuf>();
+    FL_REQUIRE_EQ(rgb8Handle->writeData(kRgb8, sizeof(kRgb8)), sizeof(kRgb8));
+    fl::Video rgb8Video(1, 30, 1);
+    FL_REQUIRE(rgb8Video.begin(rgb8Handle));
+    CRGB rgb8Leds[1] = {CRGB(0, 0, 0)};
+    FL_CHECK(rgb8Video.draw(0, fl::span<CRGB>(rgb8Leds, 1)));
+
+    FakeFilebufPtr rgb16Handle = fl::make_shared<FakeFilebuf>();
+    FL_REQUIRE_EQ(rgb16Handle->writeData(kRgb16, sizeof(kRgb16)),
+                  sizeof(kRgb16));
+    fl::Video rgb16Video(1, 30, 1);
+    // Admitted: the container is understood, and #4156 R1's work means an
+    // unsupported one would have been rejected here instead.
+    FL_REQUIRE(rgb16Video.begin(rgb16Handle));
+    CRGB rgb16Leds[1] = {CRGB(0, 0, 0)};
+    FL_CHECK_FALSE(rgb16Video.draw(0, fl::span<CRGB>(rgb16Leds, 1)));
+
+    // And the bits are still there at the source, so what is missing is the
+    // sink and not the decode. This is the half R5 assumed did not exist.
+    fl::video::PixelSample sample;
+    FL_REQUIRE(rgb16Video.readSample(&sample));
+    FL_CHECK_EQ(sample.mComponents[0], fl::u16(0x1200));
+    FL_CHECK_EQ(sample.mComponents[1], fl::u16(0x1201));
+    // Adjacent by one, and distinguishable -- which is exactly what R5 asks
+    // to survive to the strip, and what the CRGB draw path has no way to
+    // carry.
+    FL_CHECK_EQ(int(sample.mComponents[1] - sample.mComponents[0]), 1);
+
+    // Note for whoever builds the typed route: the `FL_CHECK_FALSE` above is
+    // a record of today, not a requirement. When a `Video` can reach a
+    // channel with sixteen bits intact, that line is what fails, and the
+    // right response is to replace this case with the identity test R5
+    // actually asks for -- 0x1200 and 0x1201 distinguishable in the native
+    // output -- rather than to loosen it.
+}
+
 FL_TEST_CASE("PixelStream defers fragmented stream classification without losing raw bytes") {
     fl::shared_ptr<NonSeekableFakeFilebuf> fled =
         fl::make_shared<NonSeekableFakeFilebuf>();
