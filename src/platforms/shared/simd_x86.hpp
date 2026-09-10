@@ -241,7 +241,19 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 sub_sat_u8_16(simd_u8x16 a, simd_u8x16 b
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NO_EXCEPT {
-    return _mm_avg_epu8(a, b);
+    // The API has two averages and they are not the same operation: this one
+    // truncates, `avg_round_u8_16` below rounds. `_mm_avg_epu8` computes
+    // `(a + b + 1) >> 1`, so returning it here answered the rounding one --
+    // this backend was the only one of six that did. NEON's `vhaddq_u8`,
+    // ARM-DSP's `uhadd8`, the Xtensa, RISC-V and scalar-fallback loops, and
+    // the non-SSE2 path *in this same file* all truncate.
+    //
+    // Subtracting the carry `_mm_avg_epu8` added recovers the truncating
+    // form: `(a + b) >> 1 == ((a + b + 1) >> 1) - ((a ^ b) & 1)`. The
+    // subtraction cannot underflow, since the rounded average is at least
+    // that carry bit.
+    const __m128i carry = _mm_and_si128(_mm_xor_si128(a, b), _mm_set1_epi8(1));
+    return _mm_sub_epi8(_mm_avg_epu8(a, b), carry);
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 avg_round_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NO_EXCEPT {
@@ -506,7 +518,19 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u16x8 widen_hi_u8_to_u16(simd_u8x16 vec) FL_NO
 
 // Pack two u16x8 vectors into u8x16 with unsigned saturation
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 narrow_u16_to_u8(simd_u16x8 lo, simd_u16x8 hi) FL_NO_EXCEPT {
-    return _mm_packus_epi16(lo, hi);
+    // `_mm_packus_epi16` reads its input as *signed* 16-bit, so a `u16` above
+    // 32767 saturates to 0 rather than to 255: 65280 narrowed to 0 here and
+    // to 255 on every other backend, and on the non-SSE2 path in this same
+    // file. The lanes are unsigned, and NEON's `vqmovn_u16`, ARM-DSP's
+    // `USAT16` and the scalar loops all clamp them as such.
+    //
+    // Clamping to 255 first makes the pack exact. `min(x, 255)` without
+    // SSE4.1's `_mm_min_epu16`: `_mm_subs_epu16(x, 255)` is `max(x - 255, 0)`,
+    // and `x` minus that is the minimum.
+    const __m128i limit = _mm_set1_epi16(255);
+    const __m128i lo_clamped = _mm_sub_epi16(lo, _mm_subs_epu16(lo, limit));
+    const __m128i hi_clamped = _mm_sub_epi16(hi, _mm_subs_epu16(hi, limit));
+    return _mm_packus_epi16(lo_clamped, hi_clamped);
 }
 
 // Element-wise addition of u16x8 vectors (wrapping)
@@ -559,6 +583,11 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u16x16 widen_hi_u8x32_to_u16(simd_u8x32 vec) F
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x32 narrow_u16x16_to_u8(simd_u16x16 lo, simd_u16x16 hi) FL_NO_EXCEPT {
+    // Unsigned clamp before the pack, for the reason given on the 128-bit
+    // `narrow_u16_to_u8` above: `packus` saturates on the *signed* reading.
+    const __m256i limit = _mm256_set1_epi16(255);
+    lo = _mm256_sub_epi16(lo, _mm256_subs_epu16(lo, limit));
+    hi = _mm256_sub_epi16(hi, _mm256_subs_epu16(hi, limit));
     __m256i packed = _mm256_packus_epi16(lo, hi);
     // packus interleaves within 128-bit lanes; permute to restore byte order
     return _mm256_permute4x64_epi64(packed, _MM_SHUFFLE(3,1,2,0));
