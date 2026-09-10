@@ -751,9 +751,20 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
     //
     // The measured answer, on 40 neutral luminances from 1% to 40%:
     // rounding is optimal on 13, and the worst shortfall is 0.0115 in OKLab
-    // distance -- against the 0.0605 of neutral chroma the same sweep
-    // reports, so roughly a fifth of that error is the rounding rule rather
-    // than the lattice.
+    // distance.
+    //
+    // Distance is not chroma, and the difference is not academic. This
+    // search minimises Euclidean OKLab distance, which includes lightness, so
+    // a candidate can get closer overall while sitting *further* off the
+    // neutral axis. Measured over the same sweep, chroma improves on 23,
+    // is unchanged on 13, and gets **worse on 4** -- the largest of those
+    // being 0.01076 -> 0.01230 while total distance improved. So "closer to
+    // the ideal neutral" and "less off-axis" are different claims and this
+    // measures the first.
+    //
+    // Where it matters most they agree: at the worst target -- 2% luminance,
+    // the one the neutral sweep reports at 0.0605 -- chroma drops to 0.0382,
+    // a 37% reduction.
     //
     // What this does NOT say is that a 125-candidate search belongs on the
     // per-pixel path; it plainly does not. It says the ceiling for a static
@@ -762,7 +773,10 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
     // sit below it.
     int examined = 0;
     int rounding_was_optimal = 0;
+    int chroma_got_worse = 0;
     float worst_shortfall = 0.0f;
+    float worst_rounded_chroma = 0.0f;
+    float chroma_at_worst = 0.0f;
     for (int step = 1; step <= 40; ++step) {
         const float luminance = static_cast<float>(step) / 100.0f;
         const Oklab ideal = idealNeutralLight(luminance);
@@ -770,6 +784,7 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
         const float rounded_distance = oklabDistance(lightOf(rounded), ideal);
 
         float best = rounded_distance;
+        float best_chroma = chromaOf(lightOf(rounded));
         for (int dr = -2; dr <= 2; ++dr) {
             for (int dg = -2; dg <= 2; ++dg) {
                 for (int db = -2; db <= 2; ++db) {
@@ -780,7 +795,12 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
                     if (r > 255 || g > 255 || b > 255) continue;
                     const CRGB candidate(static_cast<u8>(r), static_cast<u8>(g),
                                          static_cast<u8>(b));
-                    best = fl::min(best, oklabDistance(lightOf(candidate), ideal));
+                    const Oklab light = lightOf(candidate);
+                    const float distance = oklabDistance(light, ideal);
+                    if (distance < best) {
+                        best = distance;
+                        best_chroma = chromaOf(light);
+                    }
                 }
             }
         }
@@ -789,6 +809,15 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
             ++rounding_was_optimal;
         }
         worst_shortfall = fl::max(worst_shortfall, rounded_distance - best);
+
+        const float rounded_chroma = chromaOf(lightOf(rounded));
+        if (best_chroma > rounded_chroma + 1e-6f) {
+            ++chroma_got_worse;
+        }
+        if (rounded_chroma > worst_rounded_chroma) {
+            worst_rounded_chroma = rounded_chroma;
+            chroma_at_worst = best_chroma;
+        }
         // The search includes the rounded triple itself, so it can never
         // report worse. If it does, the search is broken rather than the
         // rounding being good.
@@ -803,6 +832,17 @@ FL_TEST_CASE("Per-channel rounding is not the best code a single frame can pick"
     FL_CHECK(rounding_was_optimal > 0);
     FL_CHECK(rounding_was_optimal < examined);
     FL_CHECK(worst_shortfall > 0.005f);
+
+    // Where the two objectives agree, pinned as a number rather than left as
+    // a ratio between quantities that are not the same thing.
+    FL_CHECK(worst_rounded_chroma > 0.05f);
+    FL_CHECK(chroma_at_worst < worst_rounded_chroma * 0.7f);
+
+    // And where they do not. A distance-optimal code can sit further off the
+    // neutral axis than the rounded one; asserting only the improvement above
+    // would let this read as "chroma always improves", which it does not.
+    FL_CHECK(chroma_got_worse > 0);
+    FL_CHECK(chroma_got_worse < examined);
 }
 
 FL_TEST_CASE("The search would find a better code if one existed") {
