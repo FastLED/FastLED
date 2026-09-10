@@ -1030,4 +1030,148 @@ FL_TEST_CASE("At the worst target it takes a third of the room there is") {
     FL_CHECK_LT(fraction, 0.45f);
 }
 
+// ---------------------------------------------------------------------------
+// The temporal ceiling (#4042 section 5)
+//
+// #4277 left one candidate: linear-light temporal dithering, described as
+// waiting on the frame cadence P6 wires up. The cadence is needed to *ship*
+// it. It is not needed to *score* it -- an N-frame cycle's time-averaged
+// light is arithmetic, and #4265's static ceiling is the same construction
+// with N = 1.
+//
+// Averaging is done in linear XYZ rather than in OKLab, because light
+// averages and perceptual coordinates do not. That is the modelling choice
+// this rests on, and it is the one the dither guide in `pixel_controller.h`
+// already assumes when it says the eye integrates the cycle above ~50 Hz.
+//
+// What is measured is a ceiling, like #4265's: the best an N-frame cycle
+// could do, not what any particular algorithm achieves.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Best chroma reachable by averaging an N-frame cycle's emitted light.
+///
+/// A cycle that spends `k` of its `N` frames one code higher averages to a
+/// drive of `base + k/N`, and the choice is per channel, so the reachable
+/// averages are a grid. `frames == 1` collapses that grid to the integer
+/// codes, which is what makes it a control rather than a second measurement.
+float bestTemporalChroma(float luminance, const Oklab& ideal, int frames) {
+    const RgbColorimetricCache cache = ws2812Cache();
+    const CRGB rounded = neutralCodes(luminance);
+    float best_distance = 1e9f;
+    float best_chroma = 0.0f;
+    for (int base_r = -1; base_r <= 1; ++base_r)
+    for (int step_r = 0; step_r <= frames; ++step_r)
+    for (int base_g = -1; base_g <= 1; ++base_g)
+    for (int step_g = 0; step_g <= frames; ++step_g)
+    for (int base_b = -1; base_b <= 1; ++base_b)
+    for (int step_b = 0; step_b <= frames; ++step_b) {
+        const float dr =
+            (rounded.r + base_r + static_cast<float>(step_r) / frames) / 255.0f;
+        const float dg =
+            (rounded.g + base_g + static_cast<float>(step_g) / frames) / 255.0f;
+        const float db =
+            (rounded.b + base_b + static_cast<float>(step_b) / frames) / 255.0f;
+        if (dr < 0.0f || dg < 0.0f || db < 0.0f) continue;
+        if (dr > 1.0f || dg > 1.0f || db > 1.0f) continue;
+
+        float xyz[3];
+        rgb_source_to_XYZ(cache, dr, dg, db, xyz);
+        const i32 q16[3] = {static_cast<i32>(xyz[0] * kQ16 + 0.5f),
+                            static_cast<i32>(xyz[1] * kQ16 + 0.5f),
+                            static_cast<i32>(xyz[2] * kQ16 + 0.5f)};
+        i32 lab[3];
+        xyzToOklabQ16(q16, lab);
+        const Oklab light{static_cast<float>(lab[0]) / kQ16,
+                          static_cast<float>(lab[1]) / kQ16,
+                          static_cast<float>(lab[2]) / kQ16};
+        const float distance = oklabDistance(light, ideal);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_chroma = chromaOf(light);
+        }
+    }
+    return best_chroma;
+}
+
+}  // namespace
+
+FL_TEST_CASE("Section 5 can be scored without the frame cadence") {
+    // The whole point. A cycle's average light is arithmetic; only shipping
+    // one needs P6.
+    //
+    // Worst case over the same 40 targets the static study uses:
+    //
+    //   per-channel rounding   0.0605
+    //   static ceiling         0.0466
+    //   temporal, 2 frames     0.0304
+    //   temporal, 4 frames     0.0109
+    //   temporal, 8 frames     0.0086
+    //
+    // The static worst is at a different target from the 2% one #4265 quotes,
+    // which is why it reads 0.0466 rather than 0.0382: at 1% luminance no
+    // single frame improves on rounding at all.
+    float worst_rounding = 0.0f;
+    float worst_temporal = 0.0f;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 100.0f;
+        const Oklab ideal = idealNeutralLight(luminance);
+        const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
+        const float temporal = bestTemporalChroma(luminance, ideal, 8);
+        if (rounded_chroma > worst_rounding) {
+            worst_rounding = rounded_chroma;
+        }
+        if (temporal > worst_temporal) {
+            worst_temporal = temporal;
+        }
+    }
+    FL_CHECK_LT(fl::fabsf(worst_rounding - 0.0605f), 0.001f);
+    FL_CHECK_LT(worst_temporal, 0.010f);
+    // An 86% reduction in the worst case, against a static ceiling that
+    // manages 23%.
+    FL_CHECK_LT(worst_temporal, worst_rounding * 0.2f);
+}
+
+FL_TEST_CASE("At the worst target the cycle closes what a frame cannot") {
+    // 2% luminance: rounding 0.0605, the best single frame 0.0382, and an
+    // eight-frame cycle 0.0016. Section 5's remaining candidate is not in the
+    // same class as the static ones -- it does not close the last third, it
+    // closes almost all of it.
+    const float luminance = 0.02f;
+    const Oklab ideal = idealNeutralLight(luminance);
+    const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
+    const float temporal = bestTemporalChroma(luminance, ideal, 8);
+
+    FL_CHECK_LT(fl::fabsf(rounded_chroma - 0.0605f), 0.001f);
+    FL_CHECK_LT(temporal, 0.003f);
+    FL_CHECK_LT(temporal, 0.0382f * 0.2f);
+}
+
+FL_TEST_CASE("A longer cycle never does worse, and one frame is the static case") {
+    // The reachable averages nest -- every k/2 is a k/4 is a k/8 -- so a
+    // longer cycle cannot lose. A search that violated that would be finding
+    // something other than the best average, which is the failure mode this
+    // construction is most exposed to.
+    //
+    // And at one frame the grid collapses to the integer codes, so the result
+    // must be an ordinary static answer rather than a sub-code one. Without
+    // this the whole measurement could be an artefact of the search.
+    const float luminance = 0.02f;
+    const Oklab ideal = idealNeutralLight(luminance);
+
+    const float one = bestTemporalChroma(luminance, ideal, 1);
+    const float two = bestTemporalChroma(luminance, ideal, 2);
+    const float four = bestTemporalChroma(luminance, ideal, 4);
+    const float eight = bestTemporalChroma(luminance, ideal, 8);
+
+    FL_CHECK_LE(two, one + 1e-6f);
+    FL_CHECK_LE(four, two + 1e-6f);
+    FL_CHECK_LE(eight, four + 1e-6f);
+
+    // One frame reaches no further than the static ceiling the ±2 search
+    // finds, and no better than it: the same mechanism, without the cycle.
+    FL_CHECK_GE(one, 0.0382f - 0.001f);
+}
+
 }  // namespace ws2812_shaping

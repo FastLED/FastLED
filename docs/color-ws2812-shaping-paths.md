@@ -293,12 +293,54 @@ single frame has.** Across the sweep it lands at or below the distance-optimal
 code's chroma at 36 of 40 targets; the four exceptions are the distance-versus-
 chroma disagreement recorded above, not a failure of the strategy.
 
+### And the remaining candidate, which does not need the cadence to be scored
+
+Linear-light temporal dithering was left as "waiting on the frame cadence P6
+wires up". The cadence is needed to *ship* it. It is not needed to *score* it:
+an N-frame cycle's time-averaged light is arithmetic, and the static ceiling
+above is the same construction with N = 1.
+
+A cycle that spends `k` of its `N` frames one code higher averages to a drive
+of `base + k/N`, per channel, so the reachable averages are a grid. Averaging
+is done in linear XYZ rather than in OKLab, because light averages and
+perceptual coordinates do not -- the same assumption the dither guide in
+`pixel_controller.h` makes when it says the eye integrates the cycle above
+~50 Hz.
+
+Worst case over the same 40 targets:
+
+| | worst chroma |
+| --- | ---: |
+| per-channel rounding | 0.0605 |
+| static ceiling | 0.0466 |
+| temporal, 2 frames | 0.0304 |
+| temporal, 4 frames | 0.0109 |
+| **temporal, 8 frames** | **0.0086** |
+
+The static worst sits at a different target from the 2% one quoted above,
+which is why it reads 0.0466 rather than 0.0382: at 1% luminance no single
+frame improves on rounding at all.
+
+At the 2% target specifically -- rounding 0.0605, best single frame 0.0382 --
+an eight-frame cycle reaches **0.0016**. The remaining candidate is not in the
+same class as the static ones: it does not close the last third, it closes
+almost all of it. Eight frames is also the cycle `BINARY_DITHER` already runs,
+so the cadence question is not a new one.
+
+Three things this does not say. It is a **ceiling**, like the static one -- the
+best an N-frame cycle could do, not what an algorithm achieves. It says
+nothing about flicker; a cycle that reaches the floor by toggling the bottom
+codes is exactly the trade #4156 R8 asks to have declared. And it assumes a
+pipeline dither that can choose sub-code average drives, which is a different
+mechanism from `BINARY_DITHER` -- that one is gated on a nonzero source and
+recovers precision lost in the brightness multiply, as the black-floor section
+above records.
+
 ### What that leaves
 
-Linear-light temporal dithering, which is the only remaining candidate that
-could close the other two thirds, and which is stateful and waits on the frame
-cadence P6 wires up. The static half of section 5 is answered: one candidate
-is out, one survives and is worth having, and neither reaches the ceiling.
+Building it. Section 5's comparison is answered: independent RGB gamma is out,
+value-only shaping survives and takes about a third, and temporal dithering is
+worth the state it costs.
 
 ## Not covered
 
