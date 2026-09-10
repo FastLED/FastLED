@@ -84,7 +84,19 @@ FL_TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - brightness scali
     // Verify scaling relationship
     FL_REQUIRE(power_full > power_half);
     FL_REQUIRE(power_half > power_zero);
-    FL_REQUIRE(power_zero == 0);
+
+    // Not zero. This asserted `power_zero == 0` and that was the defect in
+    // #4156 R4: every controller IC draws its quiescent current whether or not
+    // an emitter is lit, so brightness zero is a dark strip and 10 x dark_mW
+    // of draw, not an unpowered one. The estimate used to multiply that
+    // baseline by brightness along with the emitters, which is also why the
+    // limiter could hand back a brightness that went over budget.
+    // Controllers accumulate across cases in this file, so the baseline here
+    // covers at least this case's ten LEDs and possibly earlier ones.
+    const uint32_t baseline_mW = get_power_model().dark_mW * 10u;
+    FL_REQUIRE(baseline_mW > 0);
+    FL_REQUIRE(power_zero >= baseline_mW);
+    FL_REQUIRE(power_zero % get_power_model().dark_mW == 0);
 }
 
 // Test power estimation without power limiting
@@ -135,9 +147,15 @@ FL_TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - zero brightness"
     uint32_t with_limiter = FastLED.getEstimatedPowerInMilliWatts(true);
     uint32_t without_limiter = FastLED.getEstimatedPowerInMilliWatts(false);
 
-    // Both should be zero at zero brightness
-    FL_REQUIRE(with_limiter == 0);
-    FL_REQUIRE(without_limiter == 0);
+    // Both are the dark-current baseline at zero brightness, not zero: the
+    // strip is dark, not unpowered (#4156 R4). The limiter has nothing to do
+    // here either, since the baseline is well inside the 1000 mW budget.
+    // Controllers accumulate across cases in this file, so this is at least
+    // this case's ten LEDs of dark current.
+    const uint32_t baseline_mW = get_power_model().dark_mW * 10u;
+    FL_REQUIRE(baseline_mW > 0);
+    FL_REQUIRE(with_limiter >= baseline_mW);
+    FL_REQUIRE(without_limiter == with_limiter);
 }
 
 // Test power estimation - power limit high enough to not limit

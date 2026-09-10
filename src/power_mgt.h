@@ -259,7 +259,12 @@ fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds);
 /// @param leds span of LED data to check
 fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 
-/// Applies the configured power-scaling response to a total power value
+/// Applies the configured power-scaling response to a total power value.
+///
+/// Pass the *scalable* share only. `calculate_unscaled_power_mW()` includes the
+/// per-LED `dark_mW` baseline, which brightness does not reduce; scaling that
+/// with the emitters under-reports demand at low brightness (#4156 R4).
+///
 /// @param total_mW unscaled total power at full brightness
 /// @param brightness requested brightness in FastLED's 0-255 brightness space
 /// @returns estimated power after applying the configured brightness-to-power response
@@ -267,12 +272,29 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness);
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for a given set of LEDs.
+///
+/// What the budget bounds, stated rather than implied (#4156 R4):
+///
+/// - **The baseline is not scalable.** `PowerModel::dark_mW` is drawn per LED
+///   at every brightness including zero, so it is subtracted from the budget
+///   first and only the remainder is divided among the emitters. A budget at
+///   or below the baseline returns **0**: no brightness meets it, and a lit
+///   strip would be promising a bound that cannot be held at any setting.
+/// - **The bound is on the pre-dither frame.** Demand is computed from the
+///   `CRGB` values, and `BINARY_DITHER` adds its offset afterwards, inside the
+///   encoder. That offset is shared across the frame, so a dithered frame can
+///   exceed the budgeted demand by up to one native code per channel per
+///   pixel -- about 0.8 mW per LED on the default WS2812 model. The multi-frame
+///   mean is what the budget holds; a single latched frame can sit that much
+///   above it.
+///
 /// @param ledbuffer the LED data to check
 /// @param numLeds the number of LEDs in the data array
 /// @param target_brightness the brightness you'd ideally like to use
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
-/// but may be lower depending on the power limit.
+/// but may be lower depending on the power limit. Zero when the budget is at
+/// or below the unscalable baseline.
 fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW);
 
 /// @copybrief calculate_max_brightness_for_power_mW()
