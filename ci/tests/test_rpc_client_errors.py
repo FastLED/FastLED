@@ -6,6 +6,7 @@ import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
+from typeguard import typechecked
 
 from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
 
@@ -147,5 +148,75 @@ def test_a_crash_keeps_its_own_type_and_decoded_lines() -> None:
             await client.send("boom", {}, timeout=0.1)
         assert caught.value.decoded_lines == ["#0 boom"]
         await client.close()
+
+    asyncio.run(_run())
+
+
+class _CountingSerial:
+    """Records how many times it was opened and closed."""
+
+    def __init__(self: "_CountingSerial") -> None:
+        self.connects = 0
+        self.closes = 0
+
+    async def connect(self: "_CountingSerial") -> None:
+        self.connects += 1
+
+    async def close(self: "_CountingSerial") -> None:
+        self.closes += 1
+
+    async def write(self: "_CountingSerial", data: str) -> None:
+        pass
+
+    async def read_lines(self: "_CountingSerial", timeout: float) -> AsyncIterator[str]:  # noqa: ARG002
+        return
+        yield ""  # pragma: no cover - makes this an async generator
+
+    async def reset_device(
+        self: "_CountingSerial", board: str | None
+    ) -> bool:  # pragma: no cover
+        return True
+
+
+@typechecked
+def test_close_keeps_an_injected_serial_interface() -> None:
+    """A borrowed transport must survive close/reconnect (#4233).
+
+    `connect()` fabricates a default fbuild backend whenever `_serial` is
+    None, so a `close()` that drops an injected interface makes the next
+    `connect()` silently talk over a different transport. Every retry loop
+    closes and reconnects, so this is the common path, not a corner.
+    """
+
+    async def _run() -> None:
+        iface = _CountingSerial()
+        client = RpcClient("FAKE", serial_interface=iface)
+        await client.connect(boot_wait=0, drain_boot=False)
+        await client.close()
+        # Still the caller's interface, not a replacement.
+        assert client._serial is iface
+        await client.connect(boot_wait=0, drain_boot=False)
+        assert client._serial is iface
+        assert iface.connects == 2
+        assert iface.closes == 1
+        await client.close()
+
+    asyncio.run(_run())
+
+
+@typechecked
+def test_close_still_releases_an_owned_serial_interface() -> None:
+    """The other half: an interface the client made is still dropped.
+
+    Keeping it would leak a backend the client owns across a close, which is
+    the behaviour the ownership flag exists to distinguish.
+    """
+
+    async def _run() -> None:
+        client = RpcClient("FAKE", serial_interface=_CountingSerial())
+        client._owns_serial = True  # pretend connect() built it
+        await client.connect(boot_wait=0, drain_boot=False)
+        await client.close()
+        assert client._serial is None
 
     asyncio.run(_run())

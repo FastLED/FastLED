@@ -5,6 +5,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 """
 
 import asyncio
+import contextlib
 import os
 import platform as platform_mod
 import subprocess
@@ -20,6 +21,8 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ci.util.serial_interface import SerialInterface
 
 # WiFi AP credentials (must match firmware constants)
@@ -445,6 +448,11 @@ kListenRetryDelayS = 30.0
 # Keep enough of the deadline to report the outcome of the retry.
 kListenReserveSeconds = 15.0
 
+# How many times to reopen the companion board's serial RPC before giving up.
+# Three covers the observed USB-JTAG CDC re-enumeration window without letting
+# a genuinely dead board stall the run.
+kPeerConnectAttempts = 3
+
 # CYW43 association is not instant, and a re-join after stopNet has been
 # observed to take longer than the original 10 s budget allowed.
 #
@@ -497,6 +505,116 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
         return "no sub-test reported a failure"
     return f"{len(failures)} of {len(results)} sub-tests failed -- " + "; ".join(
         failures
+    )
+
+
+async def _connect_peer_with_retry(
+    peer: RpcClient,
+    label: str,
+    port: str,
+    remaining_timeout: "Callable[[], float]",
+    attempts: int,
+) -> None:
+    """Connect the companion board, retrying a silent first RPC.
+
+    The most frequent failure on this fixture is not a network fault at all:
+    `No response with ID 1 within 15.0s` while attaching to the ESP32-C6,
+    before any cycle runs. Across the captured logs it is always the C6 and
+    never the RP2350W, which points at the C6's USB-JTAG CDC re-enumerating
+    after the post-flash reset -- the port path is unchanged, so a connect
+    that lands inside that window attaches to an endpoint that never answers.
+
+    A fixed `boot_wait` cannot cover this, because the wait is over before the
+    endpoint is replaced. Reconnecting is what recovers it. Each retry is
+    reported so the need for one stays visible instead of being smoothed away.
+
+    Every wait is clamped by `remaining_timeout`, the run's own budget helper.
+    Unclamped, three mute attempts would spend ~43 s of boot waits, pings and
+    back-offs before any later call noticed the deadline had passed, so a
+    recovery mechanism would end up consuming the run it exists to save.
+    """
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        # Every remaining_timeout() call sits outside a try on purpose. It
+        # signals expiry by raising RpcTimeoutError, the same type a mute
+        # endpoint raises; caught here it would retry a run that has already
+        # run out of time and report it as an unresponsive board.
+        #
+        # Each budget is also read immediately before the call it bounds, not
+        # once per attempt. connect() can itself consume most of the budget,
+        # so a ping timeout computed before it would be stale and could
+        # outlive the caller's deadline.
+        failure: Exception | None = None
+
+        boot_wait = min(3.0, remaining_timeout())
+        # Bound the whole open, not just the boot wait. The serial layer
+        # self-bounds the port open at about 3 s -- that is where
+        # "open_port(...) exceeded 3s" comes from -- but it knows nothing of
+        # this caller's deadline, so with under 3 s left the attach alone can
+        # outlive it before the ping and back-off checks get to look. Six is
+        # the natural ceiling: three for the open, three for the boot wait.
+        open_budget = min(6.0, remaining_timeout())
+        try:
+            await asyncio.wait_for(
+                peer.connect(boot_wait=boot_wait, drain_boot=True),
+                timeout=open_budget,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001
+            # Deliberately broad. Observed on the bench: attempts 1-2 failed
+            # mute (RpcTimeoutError), and the third reconnect failed with
+            # "attach failed: open_port(...) exceeded 3s" from the serial
+            # layer -- a different type entirely, which escaped a narrow
+            # (RpcError, RpcTimeoutError, OSError) list and propagated raw,
+            # so this helper's own diagnostic never printed. Every failure to
+            # bring the peer up is the same fault class here, and the last
+            # error is re-raised verbatim once the attempts are spent.
+            failure = exc
+
+        if failure is None:
+            ping_timeout = min(10.0, remaining_timeout())
+            try:
+                # Prove the endpoint answers. connect() only opens the port;
+                # a stale CDC endpoint opens fine and stays mute.
+                await peer.send("ping", {}, timeout=ping_timeout)
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as exc:  # noqa: BLE001
+                failure = exc
+
+        if failure is None:
+            if attempt > 1:
+                print(f"  {label} answered on connect attempt {attempt}/{attempts}")
+            return
+
+        last_error = failure
+        # Close on every failure, including the last. `wait_for` cancels the
+        # open mid-flight, so skipping this on the final attempt would hand
+        # the caller a half-opened transport along with the exception.
+        with contextlib.suppress(Exception):
+            await peer.close()
+        if attempt == attempts:
+            break
+        print(
+            f"  {label} did not answer on {port} "
+            f"(attempt {attempt}/{attempts}: {failure}); reconnecting"
+        )
+        # Also outside any suppression: if the budget went while we were
+        # failing, stop rather than sleep past the deadline.
+        #
+        # Backs off progressively. A flat 2 s was measured to be too short:
+        # the peer went from "opens but stays mute" on attempts 1-2 to
+        # "will not open at all" by attempt 3, i.e. reconnecting quickly made
+        # the port worse rather than better. Give the CDC time to finish
+        # re-enumerating instead of hammering it.
+        backoff = min(2.0 * attempt, 8.0)
+        await asyncio.sleep(min(backoff, remaining_timeout()))
+    raise RpcTimeoutError(
+        f"{label} did not answer its serial RPC on {port} after {attempts} "
+        f"connect attempts; last error: {last_error}"
     )
 
 
@@ -614,7 +732,9 @@ async def run_net_peer_autoresearch(
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
-        await peer.connect(boot_wait=3.0, drain_boot=True)
+        await _connect_peer_with_retry(
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout, kPeerConnectAttempts
+        )
 
         primary_status = await rpc_data(primary, "status")
         if "rp2350" not in str(primary_status.get("platform", "")).lower():
