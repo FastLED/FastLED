@@ -28,8 +28,18 @@
     // arithmetic via UQADD8 / UQSUB8 / UADD16 / etc. See issue #2628.
     #include "platforms/arm/teensy/simd_arm_dsp.hpp"  // IWYU pragma: keep
 #elif defined(__ARM_NEON) || defined(__ARM_NEON__)
-    // ARM Advanced SIMD: AArch64 (Apple Silicon, Raspberry Pi 3/4/5 in
+    // ARM Advanced SIMD, on compilers that advertise it the GNU way:
+    // AArch64 under clang or gcc (Apple Silicon, Raspberry Pi 3/4/5 in
     // 64-bit, any ARMv8-A board) and ARMv7-A parts with NEON.
+    //
+    // Deliberately *not* MSVC ARM64, which advertises `_M_ARM64` instead and
+    // spells the header `arm64_neon.h`. That target keeps the scalar
+    // fallback, which is what it had before this arm existed, and the
+    // `_M_ARM64` branches already inside `simd_arm_neon.hpp` stay
+    // unreachable. Adding it is a one-line guard and a different header, but
+    // it would switch a whole backend on for a toolchain nothing here can
+    // compile for, let alone run -- so it is recorded and pinned by a case
+    // in `ci/tests/test_simd_dispatch.py` rather than guessed at.
     //
     // This backend has been in the tree since before the dispatch was
     // written and nothing selected it -- the only reference to the file

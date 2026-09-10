@@ -146,6 +146,26 @@ class TestSimdDispatch(unittest.TestCase):
         backend, _ = _select(["-D__ARM_NEON=1", "-D__ARM_FEATURE_DSP=1"])
         self.assertEqual(backend, "platforms/arm/teensy/simd_arm_dsp.hpp")
 
+    def test_msvc_arm64_is_not_covered_and_that_is_recorded(self) -> None:
+        """MSVC on ARM64 keeps the fallback, deliberately.
+
+        MSVC advertises `_M_ARM64` rather than `__ARM_NEON`, and spells the
+        NEON header `arm64_neon.h`. So the arm added for FastLED#4286 does
+        not catch it, and the `_M_ARM64` branches already inside
+        `simd_arm_neon.hpp` remain unreachable there.
+
+        That is the status quo rather than a regression -- the target took
+        the fallback before the arm existed too -- and switching a whole
+        backend on for a toolchain that nothing here can compile for, let
+        alone run, is not a thing to do on inference. Pinned so it reads as
+        a decision, and so that whoever adds MSVC ARM64 support has to
+        change this case on purpose.
+        """
+
+        backend, fallback = _select(["-D_M_ARM64=1"])
+        self.assertEqual(backend, "platforms/shared/simd_noop.hpp")
+        self.assertEqual(fallback, "1")
+
     def test_an_unmatched_target_takes_the_fallback_and_says_so(self) -> None:
         """AVR, ESP8266, Cortex-M0/M3, WASM."""
 
