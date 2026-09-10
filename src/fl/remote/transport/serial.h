@@ -164,11 +164,15 @@ createSerialRequestSource(const char* prefix = "") {
             // is exactly how a receive-buffer truncation presented in
             // FastLED#3956 -- 735 bytes transmitted, nothing returned, and
             // no layer saying anything.
-            if (view.size() >= kDroppedRequestWarnBytes) {
+            // Measure what arrived, not what survived normalisation: the
+            // view above has had its prefix stripped and whitespace trimmed,
+            // so a 64-byte line can fall under the threshold and stay silent,
+            // and the reported count would understate what was received.
+            if (line->size() >= kDroppedRequestWarnBytes) {
                 FL_WARN_F("[RPC] discarded a %u byte line that does not begin "
                           "with '{'; a request that arrived truncated looks "
                           "exactly like this",
-                          static_cast<unsigned>(view.size()));
+                          static_cast<unsigned>(line->size()));
             }
             return fl::nullopt;
         }
