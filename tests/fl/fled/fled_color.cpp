@@ -180,6 +180,24 @@ FL_TEST_CASE("FLED_COLOR - rgb16_linear defaults to a linear transfer") {
     FL_CHECK(c.transfer  == ColorTransfer::Linear);
     FL_CHECK(c.primaries == ColorPrimaries::Bt709);
     FL_CHECK(c.range     == ColorRange::Full);
+    // Inherited, not claimed. #4156 R10 read the forward-compatibility prose
+    // -- which used to call this format "meaningless without its declaration"
+    // -- as saying absence is unresolvable here. It is not: the format value
+    // has already pinned linear-light samples. What makes the two states
+    // distinguishable is this flag, so it is asserted rather than assumed.
+    FL_CHECK(c.declared == false);
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear refuses rather than falls back") {
+    // The half of "mandatory" that is real. On rgb8 an unrecognized name may
+    // resolve to the default tuple with a diagnostic, because the declaration
+    // is advisory there. The identical name on rgb16_linear is a refusal --
+    // and refusing is not the same as having no default, which is what the
+    // case above pins.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"nonesuch\"}}}",
+                     kRgb16Lin, &c) != ColorStatus::Ok);
+    FL_CHECK(resolve("{}", kRgb16Lin, &c) == ColorStatus::Ok);
 }
 
 FL_TEST_CASE("FLED_COLOR - rgb16_linear accepts only a linear transfer") {
