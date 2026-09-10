@@ -683,7 +683,11 @@ FL_TEST_CASE("colorBoost zeroes minor channels at low codes, moving hue a long w
     // sides -- so this is a real hue shift, not the ill-conditioning that
     // afflicts hue near the neutral axis.
     FL_CHECK(worst_hue > 100.0f);
-    FL_CHECK(scored > 300);
+    // Every sample, not most of them. The claim above is that the 143 deg is
+    // not near-axis ill-conditioning, and that rests on the whole population
+    // surviving the chroma screen -- a loose bound here would let a
+    // desaturation regression shrink the population instead of failing.
+    FL_CHECK_EQ(scored, static_cast<int>(darkHueSweep().size()));
 }
 
 FL_TEST_CASE("colorBoost luminance easing is a dimming curve, not an encoding") {
