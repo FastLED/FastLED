@@ -117,30 +117,46 @@ def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
     return bodies
 
 
+# Relocations that stand for a transfer of control. `R_ARM_ABS32` and its
+# relatives are data references -- this object carries nine of them, all
+# naming `.rodata` -- and counting those as calls invents edges. False edges
+# only *add* reachability, so they cannot make an absence claim pass wrongly,
+# but they can make the control below pass for the wrong reason.
+kControlRelocation = re.compile(
+    r"\bR_ARM_(?:THM_)?(?:CALL|JUMP24|JUMP19|JUMP11|JUMP8|PC24|PLT32)\b"
+    r"\s+([A-Za-z_][A-Za-z0-9_.]*)"
+)
+
+# A resolved local transfer: `bl`, or a plain `b` when the compiler turns a
+# call in tail position into a jump. Missing the branch form is the dangerous
+# direction -- a lost edge makes "reaches no float" pass by not looking.
+kResolvedTransfer = re.compile(
+    r"\bb(?:l)?(?:\.[nw])?\s+([0-9a-f]+) <([A-Za-z_][A-Za-z0-9_.]*)>"
+)
+
+
 @typechecked
 def _callees(body: list[str]) -> set[str]:
-    """Who this function actually calls.
+    """Who this function actually transfers control to.
 
-    Two forms, and only two. A relocation record names the real target of a
-    call to an undefined symbol; a resolved local call carries a non-zero
-    address. A `bl 0 <name>` with no relocation beside it is neither -- that
-    is the unrelocated case, and the name objdump prints for it is whatever
-    happens to sit at address zero. Following those printed names had this
-    walk believing `signedCbrtQ16` called `isUsableSolveChromaticity`: a cube
-    root calling a chromaticity validator, which is what gave it away.
+    Two forms, and only two. A control-flow relocation names the real target
+    of a call to an undefined symbol; a resolved local transfer carries a
+    non-zero address. A `bl 0 <name>` with no relocation beside it is neither
+    -- that is the unrelocated case, and the name objdump prints for it is
+    whatever happens to sit at address zero. Following those printed names had
+    this walk believing `signedCbrtQ16` called `isUsableSolveChromaticity`: a
+    cube root calling a chromaticity validator, which is what gave it away.
     """
 
     out: set[str] = set()
     for line in body:
-        relocation = re.search(r"R_ARM_\w+\s+([A-Za-z_][A-Za-z0-9_.]*)", line)
+        relocation = kControlRelocation.search(line)
         if relocation:
             out.add(relocation.group(1))
             continue
-        call = re.search(
-            r"\bbl(?:\.w)?\s+([0-9a-f]+) <([A-Za-z_][A-Za-z0-9_.]*)>", line
-        )
-        if call and int(call.group(1), 16) != 0:
-            out.add(call.group(2))
+        transfer = kResolvedTransfer.search(line)
+        if transfer and int(transfer.group(1), 16) != 0:
+            out.add(transfer.group(2))
     return out
 
 
@@ -225,11 +241,37 @@ kPipelineSource = """
 """
 
 
-@pytest.fixture(scope="module")
+@typechecked
+@dataclass(frozen=True)
+class CompiledPipeline:
+    """One build of the streaming pipeline, and the tools that read it."""
+
+    tools: ArmTools
+    obj: Path
+    core: str
+
+
+# Two cores, because they exercise different halves of the walk.
+#
+# Cortex-M0+ is ARMv6-M: soft float, and its limited branch range means the
+# compiler never turns a call in tail position into a jump -- measured, zero
+# such branches in this object.
+#
+# Cortex-M33 without an FPU is ARMv8-M: soft float *and* Thumb-2, where a
+# tail call does become `b.n`. That is what makes the branch handling in
+# `_callees` load-bearing rather than defensive; on the M0+ build alone it
+# would never be exercised.
+kFloatFreeTargets: tuple[tuple[str, ...], ...] = (
+    ("cortex-m0plus", "-march=armv6-m"),
+    ("cortex-m33+nofp", "-march=armv8-m.main+dsp"),
+)
+
+
+@pytest.fixture(scope="module", params=kFloatFreeTargets, ids=lambda t: t[0])
 @typechecked
 def compiled_pipeline(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> tuple[ArmTools, Path]:
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
+) -> CompiledPipeline:
     """The whole streaming pipeline in one object, so calls can be followed.
 
     Every stage `processPixelQ16` reaches lives in a different translation
@@ -241,7 +283,8 @@ def compiled_pipeline(
     if tools is None:
         pytest.skip("no arm-none-eabi cross compiler on this machine")
 
-    tmp_path = tmp_path_factory.mktemp("pipeline_float_free")
+    core, march = request.param
+    tmp_path = tmp_path_factory.mktemp(f"pipeline_{core.replace('+', '_')}")
     source = tmp_path / "pipeline_tu.cpp"
     source.write_text(kPipelineSource, encoding="utf-8")
     obj = tmp_path / "pipeline_tu.o"
@@ -254,8 +297,8 @@ def compiled_pipeline(
             str(obj),
             "-I",
             str(PROJECT_ROOT / "src"),
-            "-mcpu=cortex-m0plus",
-            "-march=armv6-m",
+            f"-mcpu={core}",
+            march,
             "-mthumb",
             "-Os",
             "-std=gnu++17",
@@ -270,12 +313,12 @@ def compiled_pipeline(
         errors="replace",
         check=True,
     )
-    return tools, obj
+    return CompiledPipeline(tools=tools, obj=obj, core=core)
 
 
 @typechecked
 def test_the_per_pixel_path_reaches_no_float_runtime(
-    compiled_pipeline: tuple[ArmTools, Path],
+    compiled_pipeline: CompiledPipeline,
 ) -> None:
     """P9's criterion, at the place it actually matters (FastLED#4043).
 
@@ -286,16 +329,18 @@ def test_the_per_pixel_path_reaches_no_float_runtime(
     It reaches none. Measured across the 19 functions the walk visits.
     """
 
-    tools, obj = compiled_pipeline
-    helpers = _reachable_helpers(tools.objdump, obj, kPerPixelSymbol)
+    helpers = _reachable_helpers(
+        compiled_pipeline.tools.objdump, compiled_pipeline.obj, kPerPixelSymbol
+    )
     assert helpers == set(), (
-        f"the per-pixel path reaches the float runtime: {sorted(helpers)}"
+        f"the per-pixel path reaches the float runtime on "
+        f"{compiled_pipeline.core}: {sorted(helpers)}"
     )
 
 
 @typechecked
 def test_the_bind_path_is_where_the_float_still_is(
-    compiled_pipeline: tuple[ArmTools, Path],
+    compiled_pipeline: CompiledPipeline,
 ) -> None:
     """Control for the case above, and a statement of what remains.
 
@@ -309,10 +354,12 @@ def test_the_bind_path_is_where_the_float_still_is(
     counterpart, and nothing routes to it yet.
     """
 
-    tools, obj = compiled_pipeline
-    helpers = _reachable_helpers(tools.objdump, obj, kBindSymbol)
+    helpers = _reachable_helpers(
+        compiled_pipeline.tools.objdump, compiled_pipeline.obj, kBindSymbol
+    )
     assert len(helpers) >= 8, (
-        f"expected the bind path to reach the soft-float runtime, found {sorted(helpers)}"
+        f"expected the bind path to reach the soft-float runtime on "
+        f"{compiled_pipeline.core}, found {sorted(helpers)}"
     )
 
 
