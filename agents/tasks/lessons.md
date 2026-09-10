@@ -325,6 +325,44 @@
   content, not state, and
   when commits are stranded rebuild them onto current master as a fresh PR
   rather than reopening the merged one.
+- The last line of a log and the code path that produced it can disagree, and
+  the code path wins. A peer OTA run ended with `C6 artifact server failed`,
+  and I read the tail as "the transfer never ran". Reading `ota.py` in order
+  showed the opposite: reaching that raise requires the whole
+  `writeOtaArtifact` chunk loop to have returned success and
+  `finishOtaArtifact` to have matched the SHA-256, because either one failing
+  raises earlier and differently. The transfer had in fact completed and
+  verified 1,030,348 bytes. An error message names where execution stopped,
+  which is also a statement that everything before it passed -- for a
+  sequential flow that is free evidence, and I nearly discarded it by reading
+  bottom-up. Before concluding a stage did not run, find the raise that would
+  have fired if it had failed.
+- When two runs of the same thing disagree, subtract before calling either
+  one flaky. Run 1 of a peer OTA transferred all 1,030,348 bytes; run 2 died
+  at byte 200,448. The fixture partition is 0x130000 (1,245,184 B) and
+  `finishOtaArtifact` deletes the previous artifact only after the new one
+  verifies, so run 2 needed room for two copies:
+  1,245,184 - 1,030,348 = 214,836 B of headroom against a failure at 200,448 B,
+  the difference being LittleFS block overhead. One cause explained both runs
+  exactly. Arithmetic that lands within a few percent is a root cause;
+  "probably flaky" is what I would have written without doing it.
+- A stale branch head is not evidence that nobody is working on it. I
+  diagnosed the seven red builds on #4311, posted the cause, then implemented
+  the fix anyway because the head had not moved in 21 minutes. It was another
+  session's active branch; they pushed the same fix while I was testing and my
+  push was rejected. My existing lesson said to fetch before starting, and I
+  did fetch -- the gap was treating "no commits for N minutes" as "abandoned".
+  On a branch this session does not own, the diagnosis comment is the whole
+  contribution; implementing on top of it is duplicated work with a merge
+  conflict attached. See [[fetch-before-starting-not-before-pushing]].
+- Grep patterns used as completion signals must not match the configuration
+  that announces the work. I polled a log for `TEST_COMPLETED` to detect the
+  end of a 20-minute run and got a hit within 30 seconds -- from the startup
+  banner `stop on 'TEST_COMPLETED_EXIT_(OK|ERROR)'`, which is the harness
+  printing what it will look for. I reported the run finished while it had 18
+  minutes left. Anchor a completion pattern on text only the result can
+  produce (`AUTORESEARCH PASSED`, `autoresearch failed`), and check what the
+  first hundred lines of the log already contain before trusting a match.
 - `git fetch` before starting work, not before pushing. I root-caused the
   `s16x16x4` 15x penalty in #4216 (rolled 4-lane loops defeating
   scalar-replacement), fixed it, and measured it on hardware -- and only when

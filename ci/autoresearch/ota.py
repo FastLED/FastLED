@@ -371,7 +371,19 @@ async def run_ota_peer_autoresearch(
         await rpc_data(primary, "ping", {})
         served = await rpc_data(peer, "otaArtifactStatus", {})
         if not served.get("success") or _served_request_count(served) < 1:
-            raise RuntimeError(f"C6 did not serve the RP2350W artifact: {served}")
+            # The RP fetches with the RPC link closed, so its own reason for
+            # failing never reaches the host live. Ask for it now that the
+            # link is back: without this the C6's `servedRequests: 0` is the
+            # whole report, and a fetch that failed looks exactly like one
+            # that never ran. See FastLED#3956.
+            try:
+                rp_update = await rpc_data(primary, "rpOtaUpdateStatus", {})
+            except (RpcTimeoutError, RuntimeError, OSError) as probe_error:
+                rp_update = {"probeFailed": str(probe_error)}
+            raise RuntimeError(
+                f"C6 did not serve the RP2350W artifact: {served}; "
+                f"RP2350W update state: {rp_update}"
+            )
         print(f"{Fore.GREEN}OTA PEER AUTORESEARCH PASSED{Style.RESET_ALL}")
         return 0
     except KeyboardInterrupt as ki:

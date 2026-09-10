@@ -28,6 +28,17 @@ struct RpOtaUpdateState {
     bool pending = false;
     char host[16] = {};
     uint16_t port = 0;
+    // Why the last attempt ended as it did. `pollOtaArtifactUpdate` runs from
+    // loop() long after the host has closed the RPC link -- the peer OTA flow
+    // closes it deliberately so the board can reboot into the new image -- so
+    // the FL_WARN it used to emit went to a serial port with nobody on the
+    // other end. A failed fetch was then indistinguishable from one that
+    // never ran: both left the C6 reporting `servedRequests: 0` and no reason
+    // anywhere. Keep the outcome here so the host can ask once it reconnects.
+    // See FastLED#3956.
+    bool attempted = false;
+    bool succeeded = false;
+    char last_error[96] = {};
 };
 
 RpOtaUpdateState& getRpOtaUpdateState() {
@@ -358,6 +369,34 @@ fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
         state.file.close();
     }
     LittleFS.remove("/rp2350.bin.part");
+    // Drop the previous artifact before staging the next one, not after.
+    //
+    // `finishOtaArtifact` replaces `/rp2350.bin` only once `.part` is
+    // complete and its SHA-256 checks out, which is the right order when
+    // there is room for both. There is not: the fixture's spiffs partition
+    // is 0x130000 (1,245,184 B) and the RP image is 1,030,348 B, so a second
+    // transfer needs 2,060,696 B of a 1,245,184 B filesystem. The first run
+    // on a blank filesystem transfers and verifies fine; every run after it
+    // dies partway with `Artifact write failed`, at byte 200,448 on this
+    // bench -- which is the 214,836 B of headroom left over, less LittleFS
+    // block overhead. See FastLED#3956.
+    //
+    // The cost is that a transfer which fails midway now leaves no artifact
+    // rather than the previous one. That trade is right here: the artifact
+    // is a test fixture the harness re-stages on every run, and the
+    // alternative is that the second and every subsequent run cannot stage
+    // at all.
+    LittleFS.remove("/rp2350.bin");
+    const size_t free_bytes = LittleFS.totalBytes() - LittleFS.usedBytes();
+    if (expected_size > free_bytes) {
+        // Fail here with the numbers rather than partway through the
+        // transfer with a bare "write failed" 20 minutes in.
+        response.set("success", false);
+        response.set("error", "Artifact exceeds free space on fixture filesystem");
+        response.set("freeBytes", static_cast<int64_t>(free_bytes));
+        response.set("neededBytes", static_cast<int64_t>(expected_size));
+        return response;
+    }
     state.file = LittleFS.open("/rp2350.bin.part", FILE_WRITE);
     if (!state.file) {
         response.set("success", false);
@@ -430,6 +469,16 @@ fl::json startOtaArtifactServer() {
     if (!state.server) {
         httpd_config_t config = HTTPD_DEFAULT_CONFIG();
         config.server_port = 8081;
+        // Distinct from the control socket the peer's main HTTP server is
+        // already holding. `HTTPD_DEFAULT_CONFIG()` hardcodes
+        // `.ctrl_port = ESP_HTTPD_DEF_CTRL_PORT` (32768), and
+        // `fl::asio::http::Server::start()` takes that default too, so the
+        // second `httpd_start` on the device binds a UDP port the first one
+        // owns and fails. `server_port` differing is not enough -- the
+        // conflict is on the control socket, not the listening socket.
+        // Reached only in the peer OTA flow, where `startNetServer` runs
+        // immediately before this. See FastLED#3956.
+        config.ctrl_port = 32769;
         if (httpd_start(&state.server, &config) != ESP_OK) {
             response.set("success", false);
             response.set("error", "Artifact HTTP server start failed");
@@ -581,9 +630,36 @@ void pollOtaArtifactUpdate(uint32_t watchdog_restore_ms) {
     wdt.begin(watchdog_restore_ms);
     wdt.feed();
 
+    state.attempted = true;
+    state.succeeded = (result == HTTP_UPDATE_OK);
+    // `auto`, not `fl::string`: HTTPUpdate hands back an `arduino::String`
+    // and there is no conversion. Naming it keeps the temporary alive for
+    // the c_str() read below.
+    auto reason = updater.getLastErrorString();
+    const char* reason_text = reason.c_str();
+    size_t copied = 0;
+    while (copied + 1 < sizeof(state.last_error) && reason_text[copied] != '\0') {
+        state.last_error[copied] = reason_text[copied];
+        ++copied;
+    }
+    state.last_error[copied] = '\0';
+
     if (result != HTTP_UPDATE_OK) {
         FL_WARN("[OTA] RP2350W artifact update failed: " << updater.getLastErrorString());
     }
+}
+
+fl::json rpOtaUpdateStatus() {
+    fl::json response = fl::json::object();
+    RpOtaUpdateState& state = getRpOtaUpdateState();
+    response.set("success", true);
+    response.set("attempted", state.attempted);
+    response.set("succeeded", state.succeeded);
+    response.set("pending", state.pending);
+    response.set("lastError", state.last_error);
+    response.set("host", state.host);
+    response.set("port", static_cast<int64_t>(state.port));
+    return response;
 }
 
 #else
@@ -596,6 +672,13 @@ fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
 }
 
 void pollOtaArtifactUpdate(uint32_t /*watchdog_restore_ms*/) {}
+
+fl::json rpOtaUpdateStatus() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "Artifact update only supported on RP2350W");
+    return response;
+}
 
 #endif
 
