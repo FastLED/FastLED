@@ -471,3 +471,37 @@ def test_trend_gate_checks_callgrind_function_share() -> None:
 def test_parse_args_accepts_explicit_argv() -> None:
     args = AUDIT.parse_args(["--operations"])
     assert args.operations
+
+
+def _load(name: str) -> object:
+    path = ROOT / "ci" / "codec_cpu" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"codec_cpu_{name}", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_every_cpu_audit_build_path_is_scalar() -> None:
+    # `-DMINIMP3_NO_SIMD` is what makes these numbers mean anything about a
+    # device: MP3D_HAVE_INT_SIMD needs SSE2 or NEON and no target FastLED
+    # ships to has either, so a SIMD-on host run measures kernels no board
+    # executes. Documented in agents/docs/mp3-decoder-performance.md under
+    # "Disable SIMD when tracing on the host", and nothing enforced it.
+    for optimization in ("-O0", "-O1", "-Os"):
+        assert "-DMINIMP3_NO_SIMD" in AUDIT._common_compile_flags(optimization)
+    for name in ("callgrind", "text_size"):
+        module = _load(name)
+        assert "-DMINIMP3_NO_SIMD" in module.FLAGS, name
+    assert "-DMINIMP3_NO_SIMD" in _load("text_size").HOST_FLAGS
+
+
+def test_the_codegen_flag_filter_keeps_the_scalar_define() -> None:
+    # run_codegen_audit() drops three flags from the shared list before
+    # cross-compiling. Widening that filter to a prefix or a substring would
+    # silently take the SIMD define with it, and the codegen baselines would
+    # then be recorded against kernels the device never runs.
+    dropped = ("-fno-discard-value-names", "-fno-inline", "-ffp-contract=off")
+    kept = [f for f in AUDIT._common_compile_flags("-Os") if f not in dropped]
+    assert "-DMINIMP3_NO_SIMD" in kept
