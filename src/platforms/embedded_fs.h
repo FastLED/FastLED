@@ -32,8 +32,14 @@
 // The browser VFS stands in for on-chip flash so a LittleFS sketch runs
 // unmodified in the web preview.
 #include "platforms/wasm/fs/embedded_fs_wasm.hpp"
+#elif defined(FL_IS_STUB) && defined(FASTLED_TESTING)
+// The host has no on-chip flash. It does have a directory, which is the
+// concept this API names, so a unit test can point at one and exercise the
+// real read path instead of only the null fallback (#4007 question 3). Null
+// until a test asks, so nothing that does not ask changes behaviour.
+#include "platforms/stub/fs/embedded_fs_stub.hpp"
 #else
-// No embedded storage on this platform (host/stub, AVR, Teensy, ARM).
+// No embedded storage on this platform (AVR, Teensy, ARM).
 // RP2040 also ships LittleFS and should gain a fragment here.
 #include "platforms/shared/embedded_fs_noop.hpp"
 #endif

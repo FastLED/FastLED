@@ -22,6 +22,21 @@ void setTestFileSystemRoot(const char *root_path) FL_NO_EXCEPT;
 /// The directory most recently passed to `setTestFileSystemRoot`.
 const char *getTestFileSystemRoot() FL_NO_EXCEPT;
 
+/// Point `fl::getEmbeddedFs()` at `root_path` on the host's real disk.
+///
+/// Separate from the SD root above on purpose: on a device those are two
+/// media, so a test that wrote to on-chip flash and read it back from a card
+/// would pass here and fail on hardware if they shared a directory
+/// (FastLED #4007).
+///
+/// Until this is called, `fl::getEmbeddedFs()` returns null on the host
+/// exactly as it does on a platform with no embedded storage, so the
+/// null-fallback contract stays testable.
+void setTestEmbeddedFileSystemRoot(const char *root_path) FL_NO_EXCEPT;
+
+/// The directory most recently passed to `setTestEmbeddedFileSystemRoot`.
+const char *getTestEmbeddedFileSystemRoot() FL_NO_EXCEPT;
+
 } // namespace fl
 
 #endif // FASTLED_TESTING
