@@ -331,13 +331,31 @@ FL_TEST_CASE("Q16 inverse refuses a determinant of exactly i64's minimum") {
     // its rounding helper do, is undefined behaviour.
     //
     // Constructed rather than found: 2^63 - 1 factors as
-    // 7 * 73 * 127 * 337 * 92737 * 649657, so one term can be made exactly
+    // 7^2 * 73 * 127 * 337 * 92737 * 649657, so one term can be made exactly
     // -(2^63 - 1) with i32 entries, and a second contributes the remaining
     // -1. Reported by review on FastLED#4305.
     i32 out[3][3];
     const i32 int64_min_determinant[3][3] = {
         {-92737, 64896, 1}, {0, 64897, 1}, {1, 0, 1532540863}};
     FL_CHECK(!invert3x3Q16(int64_min_determinant, out));
+
+    // The determinant really is the minimum, computed here the way
+    // `invert3x3Q16` computes it. Without this the case would still pass if
+    // the matrix stopped being the witness and started being refused for
+    // some unrelated reason -- review caught the factorisation above being
+    // wrong by a factor of 7, which is exactly the kind of drift that leaves
+    // a comment describing a matrix the test no longer contains.
+    const i32 (&m)[3][3] = int64_min_determinant;
+    const i64 cofactor0 = static_cast<i64>(m[1][1]) * static_cast<i64>(m[2][2]) -
+                          static_cast<i64>(m[1][2]) * static_cast<i64>(m[2][1]);
+    const i64 cofactor1 = static_cast<i64>(m[1][2]) * static_cast<i64>(m[2][0]) -
+                          static_cast<i64>(m[1][0]) * static_cast<i64>(m[2][2]);
+    const i64 cofactor2 = static_cast<i64>(m[1][0]) * static_cast<i64>(m[2][1]) -
+                          static_cast<i64>(m[1][1]) * static_cast<i64>(m[2][0]);
+    const i64 determinant = static_cast<i64>(m[0][0]) * cofactor0 +
+                            static_cast<i64>(m[0][1]) * cofactor1 +
+                            static_cast<i64>(m[0][2]) * cofactor2;
+    FL_CHECK_EQ(determinant, -9223372036854775807LL - 1);
 }
 
 FL_TEST_CASE("Q16 inverse rounds rather than truncates") {

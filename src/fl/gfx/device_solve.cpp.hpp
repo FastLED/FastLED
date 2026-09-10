@@ -70,7 +70,7 @@ bool productFitsI64(i64 a, i64 b) FL_NO_EXCEPT {
 ///
 /// It is reachable, not theoretical. A single term cannot be the minimum
 /// because `productFitsI64` rejects any product that large, but a sum can:
-/// 2^63 - 1 factors as 7 * 73 * 127 * 337 * 92737 * 649657, so one term can
+/// 2^63 - 1 factors as 7^2 * 73 * 127 * 337 * 92737 * 649657, so one term can
 /// be made exactly -(2^63 - 1) from i32 entries and a second can contribute
 /// the remaining -1. `tests/fl/gfx/device_solve.cpp` carries the matrix.
 bool sumFitsI64(i64 a, i64 b) FL_NO_EXCEPT {
