@@ -4,6 +4,7 @@
 // All operations are integer-only in the hot path.
 
 #include "fl/stl/stdint.h"
+#include "fl/math/fixed_point/wide_divide.h"
 #include "fl/math/sin32.h"
 #include "fl/math/fixed_point/icbrt.h"
 #include "fl/math/fixed_point/isqrt.h"
@@ -84,8 +85,32 @@ class s16x16 {
 #endif
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator/(s16x16 b) const FL_NO_EXCEPT {
+#if FL_FIXED_POINT_NARROW_DIVIDE
+        // Same value as the expression below, without the 64-bit divide that
+        // costs a libgcc call on a core whose divider is 32 bits wide.
+        // FastLED#4307 measured that call at 47x the cost of `s8x8`'s single
+        // `SDIV`, and 36x scalar float. Magnitudes go through the unsigned
+        // routine and the sign is reapplied, which also gives the
+        // truncate-toward-zero that C++ integer division specifies.
+        const u32 numerator = mValue < 0
+                                  ? static_cast<u32>(-static_cast<i64>(mValue))
+                                  : static_cast<u32>(mValue);
+        const u32 denominator =
+            b.mValue < 0 ? static_cast<u32>(-static_cast<i64>(b.mValue))
+                         : static_cast<u32>(b.mValue);
+        const u32 magnitude = divide64By32(numerator >> (32 - FRAC_BITS),
+                                           numerator << FRAC_BITS, denominator);
+        const bool negative = (mValue < 0) != (b.mValue < 0);
+        // Negated in unsigned space. The quotient of INT32_MIN by one is
+        // INT32_MIN, which is a representable s16.16 value of -32768.0, and
+        // negating it as a signed int is undefined -- it happened to give the
+        // right answer, which is exactly why a value comparison could not
+        // find it and UBSan could.
+        return from_raw(static_cast<i32>(negative ? 0u - magnitude : magnitude));
+#else
         return from_raw(static_cast<i32>(
             (static_cast<i64>(mValue) * (static_cast<i64>(SCALE))) / b.mValue));
+#endif
     }
 
     constexpr FASTLED_FORCE_INLINE s16x16 operator+(s16x16 b) const FL_NO_EXCEPT {
