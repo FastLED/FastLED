@@ -593,7 +593,12 @@ def _describe_port_holder(port: str, proc_root: str) -> str:
     callers, a fixture tree from tests -- so this can be tested against a real
     directory rather than by patching os.
     """
-    node = port.rsplit("/", 1)[-1]
+    # Through the symlink first. `/dev/serial/by-id/usb-...` is the stable
+    # name a bench config wants to use, but /proc/<pid>/fd/<n> links to the
+    # canonical `/dev/ttyACM0`, so matching on the configured basename finds
+    # no holder and the probe below reports EBUSY with nothing to blame --
+    # which is the diagnostic this helper exists to give.
+    node = os.path.realpath(port).rsplit("/", 1)[-1]
     if not node:
         return ""
     # Establish that there is contention at all before blaming anyone.

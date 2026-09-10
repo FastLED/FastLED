@@ -3,19 +3,22 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import importlib
+import io
 import os
 import sys
-from pathlib import Path
-from collections.abc import Callable
-from types import ModuleType
-import contextlib
-import io
 import time
+from collections.abc import Callable
+from pathlib import Path
+from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
 
 # pty and TIOCEXCL are POSIX-only. These two tests exercise the real serial
 # contention mechanism rather than emulating it, so they are resolved through
@@ -30,15 +33,17 @@ def _optional_module(module_name: str) -> "ModuleType | None":
     """
     try:
         return importlib.import_module(module_name)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        # Re-raising alone leaves the interrupt un-propagated to the main
+        # thread, which is what KBI002 is about; this is the repo's handler,
+        # used the same way in ci/tests/test_elf.py.
+        handle_keyboard_interrupt(ki)
         raise
     except ImportError:
         return None
 
 
-def _optional_callable(
-    module_name: str, attribute: str
-) -> "Callable[..., Any] | None":
+def _optional_callable(module_name: str, attribute: str) -> "Callable[..., Any] | None":
     module = _optional_module(module_name)
     if module is None:
         return None
@@ -66,10 +71,10 @@ requires_posix_tty = pytest.mark.skipif(
 
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
+    _describe_failed_client_tests,
     _describe_port_holder,
     _port_is_locked,
     _reclaim_stale_port_locks,
-    _describe_failed_client_tests,
     _summarize_client_tests,
     run_net_peer_autoresearch,
 )
@@ -707,13 +712,49 @@ def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
         os.close(slave)
 
 
+@requires_posix_tty
+def test_describe_port_holder_follows_a_by_id_symlink(tmp_path: Path) -> None:
+    """The stable name a bench config uses must still name the holder.
+
+    `/dev/serial/by-id/usb-...` is what a config pins, because `/dev/ttyACM*`
+    renumbers between plugs. But `/proc/<pid>/fd/<n>` links to the canonical
+    node, so matching on the configured basename finds nothing: the probe
+    still detects EBUSY and then reports it with no holder to name, which is
+    the whole diagnostic this helper exists to give.
+
+    A symlink standing in for the by-id path, since a pty cannot be given one
+    under /dev here.
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        alias = tmp_path / "usb-Raspberry_Pi_Pico_by-id-alias"
+        os.symlink(node, alias)
+        assert _ioctl is not None and _TIOCEXCL is not None
+        _ioctl(slave, _TIOCEXCL)
+
+        # Through the alias, not the node the fd table records.
+        described = _describe_port_holder(str(alias), "/proc")
+        assert "locked against other openers" in described
+        assert str(os.getpid()) in described
+        # And it reports the name the caller passed, not the resolved one --
+        # that is the name in their config and the one they can act on.
+        assert str(alias) in described
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
 def test_describe_port_holder_is_silent_for_a_missing_port() -> None:
     """An absent port is not contention; say nothing rather than guess."""
     assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz", "/proc") == ""
 
 
 @requires_posix_tty
-def test_reclaim_stale_port_locks_skips_healthy_ports(capsys) -> None:
+def test_reclaim_stale_port_locks_skips_healthy_ports(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     """A port that opens needs no restart, and must not trigger one.
 
     Restarting the daemon is disruptive; doing it on every run because a
