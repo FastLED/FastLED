@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import importlib
 import os
-import termios
-import pty
-import fcntl
+import sys
 from pathlib import Path
 import contextlib
 import io
@@ -15,6 +14,20 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# pty and TIOCEXCL are POSIX-only. These two tests exercise the real serial
+# contention mechanism rather than emulating it, so they are resolved through
+# getattr and skipped where the platform has no such thing. ty treats
+# possibly-missing-attribute as a hard error, so the lookups cannot be direct.
+_openpty = getattr(importlib.import_module("pty"), "openpty", None) if sys.platform != "win32" else None
+_ttyname = getattr(os, "ttyname", None)
+_ioctl = getattr(importlib.import_module("fcntl"), "ioctl", None) if sys.platform != "win32" else None
+_TIOCEXCL = getattr(importlib.import_module("termios"), "TIOCEXCL", None) if sys.platform != "win32" else None
+
+requires_posix_tty = pytest.mark.skipif(
+    not all((_openpty, _ttyname, _ioctl, _TIOCEXCL)),
+    reason="pty/TIOCEXCL are POSIX-only",
+)
 
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
@@ -523,9 +536,13 @@ def test_connect_peer_reads_the_ping_budget_after_connect() -> None:
     )
 
     # boot_wait is bounded by the pre-connect budget...
-    assert peer.connect.await_args.kwargs["boot_wait"] == 3.0
+    connect_call = peer.connect.await_args
+    assert connect_call is not None
+    assert connect_call.kwargs["boot_wait"] == 3.0
     # ...and the ping by what is actually left afterwards, not by 10.0.
-    assert peer.send.await_args.kwargs["timeout"] == 0.5
+    send_call = peer.send.await_args
+    assert send_call is not None
+    assert send_call.kwargs["timeout"] == 0.5
 
 
 def test_connect_peer_retries_a_port_that_will_not_open() -> None:
@@ -612,6 +629,7 @@ def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
     assert peer.close.await_count == 2
 
 
+@requires_posix_tty
 def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
     """A port that opens is not contended, whoever else holds an fd.
 
@@ -619,9 +637,10 @@ def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
     process merely holding one is harmless. Naming that holder would accuse
     the wrong thing. See FastLED/fbuild#1429.
     """
-    master, slave = pty.openpty()
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
     try:
-        node = os.ttyname(slave)
+        node = _ttyname(slave)
         # A second handle is open on this pty right now, and it still opens.
         assert _describe_port_holder(node) == ""
     finally:
@@ -629,16 +648,19 @@ def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
         os.close(slave)
 
 
+@requires_posix_tty
 def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
     """When TIOCEXCL is set, say who set it and that the device is fine.
 
     Setting TIOCEXCL by hand reproduces the exact `Device or resource busy`
     the serial layer reports as "serial driver may be wedged".
     """
-    master, slave = pty.openpty()
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
     try:
-        node = os.ttyname(slave)
-        fcntl.ioctl(slave, termios.TIOCEXCL)
+        node = _ttyname(slave)
+        assert _ioctl is not None and _TIOCEXCL is not None
+        _ioctl(slave, _TIOCEXCL)
         described = _describe_port_holder(node)
         assert "locked against other openers" in described
         assert "the device itself is fine" in described
