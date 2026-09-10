@@ -129,6 +129,58 @@ device normalisation instead of the path, and produces numbers that look
 alarming and mean nothing. The test pins the correct form — substituting equal
 drives fails it.
 
+## The ceiling for a static strategy is above what the pipeline reaches
+
+Before comparing shaping functions it is worth knowing what the best possible
+static answer is, because every candidate sits under it. The output is one of
+256^3 code triples and the best is whichever lands nearest the target, so that
+bound is computable rather than a matter of taste.
+
+I expected round-to-nearest to *be* that bound -- that the 0.0605 above was
+the lattice rather than the rule. It is not.
+
+`quantize_u8` rounds each drive independently, minimising error in **drive**
+space. The three drives carry very different perceptual weight, so the nearest
+drive triple is not the nearest colour. Searching a +/-2 neighbourhood in
+OKLab over 40 neutral luminances from 1% to 40%:
+
+| | |
+| --- | --- |
+| rounding was optimal | **13 of 40** |
+| worst shortfall | **0.0115** OKLab distance |
+
+### Distance is not chroma, and the two do not always agree
+
+The search minimises Euclidean OKLab distance, which includes lightness. A
+candidate can therefore land closer to the ideal neutral overall while sitting
+*further* off the neutral axis, so "closer" and "less off-axis" are different
+claims. An earlier revision of this section quoted the distance shortfall
+against the 0.0605 of neutral chroma as though they were the same quantity;
+they are not, and measuring chroma directly gives a better answer anyway.
+
+Over the same 40 targets, comparing the chroma of the distance-optimal code
+against the rounded one:
+
+| | |
+| --- | --- |
+| chroma improved | 23 |
+| unchanged | 13 |
+| **chroma got worse** | **4** |
+
+The largest of those four goes 0.01076 -> 0.01230 while total distance
+improved -- exactly the case the objectives coming apart predicts.
+
+Where it matters most they agree. At the worst target -- 2% luminance, the one
+the neutral sweep reports at **0.0605** -- the distance-optimal code measures
+**0.0382**, a 37% reduction in chroma.
+
+Two things this does not say. A 125-candidate search does not belong on the
+per-pixel path -- it plainly does not, and nothing here proposes it. And it
+does not name a cheap rule that captures the gain; finding one is work this
+has not done. What it establishes is that the remaining candidates are being
+compared against a floor that is lower than it needs to be, which is worth
+knowing before spending effort ranking them.
+
 ## What this leaves for section 5
 
 Two of the five candidates are gone, and the remaining comparison is between
