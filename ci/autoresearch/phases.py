@@ -4405,6 +4405,23 @@ def _validate_test_rpc_response(
 
 def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
     """Classify a failed test response using structured RPC evidence."""
+    # Checked before any capture evidence, because a driver that never
+    # transmitted makes that evidence meaningless. The RP UART backend
+    # refuses a chipset whose bit period needs a baud above its maximum and
+    # reports why in `rpUartLastError`; classifying that as `zero_capture`
+    # ("RX produced no raw edges or decodable bytes") states the consequence
+    # and buries the cause, so a declined capability reads as a wiring or
+    # capture fault. FastLED#3899 requires an unreachable path to be listed
+    # with the exact constraint, which is what the driver already supplied.
+    if data.get("rpUartStartAttempted") is False:
+        reason = data.get("rpUartLastError")
+        if isinstance(reason, str) and reason:
+            return ("driver_declined", reason)
+        return (
+            "driver_declined",
+            "the driver did not attempt transmission and gave no reason",
+        )
+
     patterns = data.get("patterns")
     if isinstance(patterns, list) and patterns:
         saw_pattern = False
