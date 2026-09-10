@@ -32,6 +32,8 @@ requires_posix_tty = pytest.mark.skipif(
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
     _describe_port_holder,
+    _port_is_locked,
+    _reclaim_stale_port_locks,
     _describe_failed_client_tests,
     _summarize_client_tests,
     run_net_peer_autoresearch,
@@ -673,3 +675,48 @@ def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
 def test_describe_port_holder_is_silent_for_a_missing_port() -> None:
     """An absent port is not contention; say nothing rather than guess."""
     assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz") == ""
+
+
+@requires_posix_tty
+def test_reclaim_stale_port_locks_skips_healthy_ports(capsys) -> None:
+    """A port that opens needs no restart, and must not trigger one.
+
+    Restarting the daemon is disruptive; doing it on every run because a
+    probe was sloppy would be worse than the failure it recovers.
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        assert _reclaim_stale_port_locks([node]) is False
+        assert "restarting" not in capsys.readouterr().out
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
+def test_reclaim_stale_port_locks_ignores_empty_ports() -> None:
+    """Missing ports are not locks; never restart on their account."""
+    assert _reclaim_stale_port_locks([]) is False
+    assert _reclaim_stale_port_locks([""]) is False
+
+
+@requires_posix_tty
+def test_port_is_locked_tracks_real_exclusivity() -> None:
+    """_port_is_locked must key on EBUSY, not on someone holding a handle."""
+    assert (
+        _openpty is not None
+        and _ttyname is not None
+        and _ioctl is not None
+        and _TIOCEXCL is not None
+    )
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        # A second handle is open right now, and the port is still not locked.
+        assert _port_is_locked(node) is False
+        _ioctl(slave, _TIOCEXCL)
+        assert _port_is_locked(node) is True
+    finally:
+        os.close(master)
+        os.close(slave)

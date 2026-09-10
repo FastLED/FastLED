@@ -509,6 +509,63 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
     )
 
 
+def _port_is_locked(port: str) -> bool:
+    """Whether `port` currently refuses a plain open with EBUSY.
+
+    Linux-only and best effort; False when the platform cannot say, so a
+    caller never acts on a guess.
+    """
+    noctty = getattr(os, "O_NOCTTY", 0)
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    if not noctty and not nonblock:
+        return False
+    try:
+        probe = os.open(port, os.O_RDWR | noctty | nonblock)
+    except OSError as exc:
+        return exc.errno == errno.EBUSY
+    os.close(probe)
+    return False
+
+
+def _reclaim_stale_port_locks(ports: "list[str]") -> bool:
+    """Reclaim ports the fbuild daemon still holds for a dead client.
+
+    `fbuild daemon locks` reports these directly -- the port stays [HELD]
+    with open=true, readers=0 and writer=none while the owning client is
+    annotated `(dead)`. The deploy that took the lock has exited by the time
+    a peer flow builds its serial interface, so the attach hits EBUSY and is
+    reported as `serial driver may be wedged`, which it is not. Restarting
+    the daemon drops the stale entry; the lock is daemon-held state, not
+    anything at the device. See FastLED/fbuild#1429.
+
+    Called before any client connects, so restarting cannot pull a live
+    session out from under one. Returns whether a restart was performed, and
+    says so on stdout: needing this is worth seeing, not smoothing away.
+    """
+    locked = [port for port in ports if port and _port_is_locked(port)]
+    if not locked:
+        return False
+    print(
+        f"  Port(s) {', '.join(locked)} held by the fbuild daemon for an exited "
+        f"client; restarting it to reclaim (FastLED/fbuild#1429)"
+    )
+    try:
+        from ci.util.fbuild_runner import Daemon
+
+        Daemon.stop()
+        Daemon.ensure_running()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as exc:  # noqa: BLE001
+        print(f"  Could not restart the fbuild daemon: {exc}")
+        return False
+    still = [port for port in locked if _port_is_locked(port)]
+    if still:
+        print(f"  Still held after restart: {', '.join(still)}")
+    return True
+
+
 def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
     """Name the process holding `port`, when the OS will say.
 
@@ -802,6 +859,11 @@ async def run_net_peer_autoresearch(
         peer = RpcClient(
             peer_upload_port, timeout=rpc_timeout(), serial_interface=peer_iface
         )
+        # Before either client connects: a deploy that has already exited can
+        # leave its port locked in the daemon, and the attach would then fail
+        # as "serial driver may be wedged". Safe here precisely because no
+        # session exists yet. See FastLED/fbuild#1429.
+        _reclaim_stale_port_locks([upload_port, peer_upload_port])
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
