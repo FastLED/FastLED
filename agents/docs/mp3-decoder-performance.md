@@ -196,20 +196,55 @@ the IMDCT -- and Helix spends 301,950,654 instructions in `Subband` plus
 192,621,420 in `PolyphaseStereo`, the same stage under different names. Any
 serious attempt starts there.
 
-Per-frame host medians (`uv run python ci/codec_cpu/audit.py --host`),
-minimp3-float:
+Per-frame host medians (`uv run python ci/codec_cpu/audit.py --host`), both
+builds, three consecutive runs agreeing to better than 1%:
 
-| stage | ns/frame |
-|---|---|
-| synthesis | 20,598 |
-| huffman | 7,373 |
-| imdct | 3,440 |
-| antialias | 962 |
-| scalefactors | 599 |
+| stage | float | fixed | fixed/float |
+|---|---|---|---|
+| synthesis | 19,602 | 25,466 | 1.30x |
+| huffman (+ dequant) | 7,336 | 9,127 | 1.24x |
+| imdct | 3,339 | 10,182 | **3.05x** |
+| antialias | 924 | 2,384 | 2.58x |
+| stereo | 406 | 1,124 | 2.77x |
+| scalefactors | 570 | 526 | 0.92x |
 
-The fixed build's huffman stage is notably worse than the float build's
-(12,134 vs 7,373 ns/frame) despite huffman being integer work in both, which is
-a concrete lead.
+Absolute numbers are host-relative and not comparable across machines; the
+ratio column is the part that travels.
+
+### The huffman stage is not the lead it looked like
+
+An earlier revision of this table recorded the fixed build's huffman at 12,134
+ns/frame, a 1.65x gap, and called it a concrete lead on the grounds that
+huffman is integer work in both builds. Both halves of that have since failed.
+
+**The number is stale.** Re-measured it is 9,127, and the ratio is 1.24x. The
+float side reproduces its old 7,373 to within 0.5% on the same host, which is
+what makes the fixed side's change believable rather than machine drift.
+`ecb3d0588d` trimmed the scratch clear between the two measurements.
+
+**And the premise was wrong.** The stage is not integer-only work. `audit.py`
+declares `dequant` fused into `huffman` for both minimp3 backends -- which is
+why the `dequant` row reads 0.0 ns -- because minimp3 dequantises inline as it
+decodes. The two builds differ there by construction:
+
+```c
+// fixed
+#define MP3D_HUFF_TAB(idx)  mp3d_dequant(one_m, one_e, g_pow43_mant[idx], \
+                                         g_pow43_exp[idx])
+// float
+#define MP3D_HUFF_TAB(idx)  (g_pow43[idx]*one)
+```
+
+One float multiply per coefficient against a mantissa/exponent dequant call.
+So a residual 1.24x on this stage is the arithmetic doing what it was changed
+to do, not an anomaly waiting to be explained.
+
+The Callgrind diff of `L3_huffman` that FastLED#4155 asked for would have shown
+this and nothing else, which is why it was not run.
+
+**Where the time actually goes** is the IMDCT at 3.05x, antialias at 2.58x and
+stereo at 2.77x -- all genuine DSP stages, all larger multiples than huffman
+ever was.
 
 ## Where the gap is: saturation, not DSP
 
