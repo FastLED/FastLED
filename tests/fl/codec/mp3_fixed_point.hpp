@@ -393,11 +393,22 @@ FL_TEST_CASE("minimp3 fixed-point SIMD is not slower than scalar") {
     //
     // What survives is a floor far outside any fleet variation: a vector path
     // twice as slow as the scalar one it replaces is a defect on any machine.
-    // It will not catch a subtle regression -- nothing measured here can,
-    // which is the finding -- and that job belongs to
-    // `ci/codec_cpu/audit.py`, which builds optimised and compares against
-    // recorded baselines rather than against the scalar path on whatever
-    // silicon it drew.
+    //
+    // It will not catch a subtle regression, and an earlier revision of this
+    // comment said that job belongs to `ci/codec_cpu/audit.py`. It does not.
+    // That audit passes `-DMINIMP3_NO_SIMD` on every build path it has, so it
+    // never compiles these kernels at all -- deliberately, because it exists
+    // to predict embedded cost and no target FastLED ships to has integer
+    // SIMD (`MP3D_HAVE_INT_SIMD` needs SSE2 or NEON; Xtensa, RISC-V and
+    // Cortex-M have neither). See "Disable SIMD when tracing on the host" in
+    // agents/docs/mp3-decoder-performance.md.
+    //
+    // So nothing gates the *speed* of the vector path, and after #4183 that is
+    // the deliberate state rather than an oversight: it runs only in host
+    // builds, and a heterogeneous fleet cannot resolve the ~2% effect anyway.
+    // What is gated exactly is its *correctness* -- the bit-identical case
+    // above compares every sample against the scalar kernels, and that holds
+    // on any machine because it compares outputs and not times.
     //
     // The ratio is still printed above on every run, so a shift in either
     // population stays visible.
@@ -407,9 +418,8 @@ FL_TEST_CASE("minimp3 fixed-point SIMD is not slower than scalar") {
     // far harder than scalar integer code by -O0 (every vector temporary
     // round-trips through the stack), so the ratio there measures the compiler
     // rather than the kernel: this same code measures 0.93x at -O0, against
-    // 0.90x-1.08x at -O3 depending on the runner. The gate that counts runs in
-    // ci/codec_cpu/audit.py, which builds optimised and compares against
-    // recorded baselines.
+    // 0.90x-1.08x at -O3 depending on the runner. Nothing else gates the
+    // vector path's speed either -- see the note above the floor.
     printf("[simd-perf] unoptimised build; ratio not enforced here\n");
 #endif
 }

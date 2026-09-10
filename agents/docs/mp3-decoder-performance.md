@@ -116,6 +116,26 @@ tripping anything.
 Helix, by contrast, *did* have full host baselines on all three CI hosts. They
 were deleted with the backend in `6990cdc3e4`.
 
+It does not cover the **integer SIMD kernels** either, and that one is easy to
+get wrong in the other direction. `_common_compile_flags()` passes
+`-DMINIMP3_NO_SIMD` on every build path the audit has, so `mp3d_synth_pair`'s
+SSE2/NEON form is never compiled here -- see "Disable SIMD when tracing on the
+host" below for why that is right. The consequence is worth stating plainly
+because a comment in `tests/fl/codec/mp3_fixed_point.hpp` used to claim the
+opposite: **nothing anywhere gates how fast the vector path is.** The
+wall-clock check in that file is a floor (`ratio >= 0.5`, #4183) after the
+0.95 threshold proved unable to separate a regression from which runner GitHub
+drew.
+
+That is a smaller loss than it sounds. `MP3D_HAVE_INT_SIMD` requires SSE2 or
+NEON, and no platform under `src/platforms/` is either -- Xtensa, RISC-V and
+Cortex-M all take the scalar path, and the WASM build passes no `-msimd128`.
+The vector kernels run in host unit tests and in native desktop builds, and
+nowhere that this document's numbers are about. Their *correctness* is gated
+exactly, by the bit-identical case in the same test file: it compares every
+decoded sample against the scalar kernels, which is a machine-independent
+comparison in a way a ratio of times is not.
+
 There is also no `codec_cpu_ledger.md`, despite
 `.github/workflows/mp3_cpu_audit.yml` path-filtering on it. It has never
 existed. Do not conclude "Helix was never profiled" from grepping it -- that
