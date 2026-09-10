@@ -325,3 +325,19 @@
   content, not state, and
   when commits are stranded rebuild them onto current master as a fresh PR
   rather than reopening the merged one.
+- Fetch before starting work on a review, not just before pushing it. I had
+  already written down "do not rebuild a branch by hand when the remote
+  already has your work" and then did the same thing one layer up: spent an
+  iteration implementing three review findings, and discovered on the
+  rejected push that a teammate had landed a commit addressing the same three
+  an hour earlier. The wasted work is the small cost; the real one is that I
+  had already posted "all three findings fixed" on the PR, which was false
+  the moment the push failed. A `git fetch && git log origin/<branch> -1`
+  before touching the code costs nothing and answers "is someone already on
+  this". See [[bench-branch-upstream]].
+- When a teammate's commit and yours disagree on a judgement call, reset to
+  theirs and make the argument in review. Their commit kept a value I had
+  been argued out of; my instinct was to push mine over it. Resetting and
+  laying out both sides in a comment leaves the decision where it belongs and
+  keeps the evidence attached to it. Overwriting would have looked like a
+  merge conflict resolution rather than the disagreement it actually was.
