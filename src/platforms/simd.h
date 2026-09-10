@@ -27,11 +27,37 @@
     // Apollo3, SAMD51, nRF52, STM32F4/F7, ...). Packed-byte and packed-half
     // arithmetic via UQADD8 / UQSUB8 / UADD16 / etc. See issue #2628.
     #include "platforms/arm/teensy/simd_arm_dsp.hpp"  // IWYU pragma: keep
+#elif defined(__ARM_NEON) || defined(__ARM_NEON__)
+    // ARM Advanced SIMD, on compilers that advertise it the GNU way:
+    // AArch64 under clang or gcc (Apple Silicon, Raspberry Pi 3/4/5 in
+    // 64-bit, any ARMv8-A board) and ARMv7-A parts with NEON.
+    //
+    // Deliberately *not* MSVC ARM64, which advertises `_M_ARM64` instead and
+    // spells the header `arm64_neon.h`. That target keeps the scalar
+    // fallback, which is what it had before this arm existed, and the
+    // `_M_ARM64` branches already inside `simd_arm_neon.hpp` stay
+    // unreachable. Adding it is a one-line guard and a different header, but
+    // it would switch a whole backend on for a toolchain nothing here can
+    // compile for, let alone run -- so it is recorded and pinned by a case
+    // in `ci/tests/test_simd_dispatch.py` rather than guessed at.
+    //
+    // This backend has been in the tree since before the dispatch was
+    // written and nothing selected it -- the only reference to the file
+    // outside itself was a comment -- so every ARMv8-A target ran the scalar
+    // fallback with a full 128-bit implementation sitting unused beside it.
+    // FastLED#4286.
+    //
+    // Placed *after* the DSP arm rather than before it, which is the smaller
+    // change: `__ARM_FEATURE_DSP` is a 32-bit-ARM macro that AArch64 does not
+    // define, so nothing that reaches this line today was taking the DSP
+    // path. A 32-bit ARMv7-A part can define both, and those keep the
+    // backend they already had; moving them to NEON would likely be an
+    // improvement but it is a separate change with its own targets to check.
+    #include "platforms/arm/simd_arm_neon.hpp"  // IWYU pragma: keep
 #else
     // No SIMD support - use scalar fallback
-    // Covers: AVR, ESP8266, ARM Cortex-M0/M0+/M3 (no DSP ext), WASM, ARMv8-A
-    // (there is a NEON backend in `platforms/arm/simd_arm_neon.hpp`, but no
-    // arm above selects it), and anything else unmatched.
+    // Covers: AVR, ESP8266, ARM Cortex-M0/M0+/M3 (no DSP ext, no NEON),
+    // WASM, and anything else unmatched.
     #include "platforms/shared/simd_noop.hpp"  // IWYU pragma: keep
     #define FL_SIMD_BACKEND_IS_FALLBACK 1
 #endif

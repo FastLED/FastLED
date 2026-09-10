@@ -135,13 +135,30 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
     int16x8_t diff_low = vreinterpretq_s16_u16(vsubl_u8(b_low, a_low));
     int16x8_t diff_high = vreinterpretq_s16_u16(vsubl_u8(b_high, a_high));
 
-    // Multiply by amount
-    int16x8_t scaled_low = vmulq_n_s16(diff_low, static_cast<i16>(amount));
-    int16x8_t scaled_high = vmulq_n_s16(diff_high, static_cast<i16>(amount));
-
-    // Shift right by 8 to divide by 256
-    scaled_low = vshrq_n_s16(scaled_low, 8);
-    scaled_high = vshrq_n_s16(scaled_high, 8);
+    // Multiply and shift, widening to 32 bits first.
+    //
+    // `vmulq_n_s16` here was a real bug, and the first thing macOS CI caught
+    // when this backend was finally dispatched to. `diff` spans -255..255
+    // and `amount` spans 0..255, so the product needs 17 signed bits: at
+    // a=0, b=255, amount=192 the true value is 48960, which wraps int16 to
+    // -16576, shifts to -65, and saturates to 0 where 191 was wanted. The
+    // 25% case in `tests/fl/math/simd.cpp` passed only because 255*64 fits.
+    //
+    // The scalar fallback has no such problem: `diff * amount` promotes to
+    // `int` there, so it never lost the bits in the first place.
+    //
+    // `vshrn_n_s32` keeps the arithmetic shift the fallback performs, which
+    // matters beyond overflow -- an arithmetic shift rounds toward negative
+    // infinity, so a diff of -1 at amount 1 gives -1 and not 0. Taking the
+    // absolute difference and negating afterwards would be cheaper and would
+    // disagree by one code on every darkening blend.
+    const i16 amount_s16 = static_cast<i16>(amount);
+    int16x8_t scaled_low = vcombine_s16(
+        vshrn_n_s32(vmull_n_s16(vget_low_s16(diff_low), amount_s16), 8),
+        vshrn_n_s32(vmull_n_s16(vget_high_s16(diff_low), amount_s16), 8));
+    int16x8_t scaled_high = vcombine_s16(
+        vshrn_n_s32(vmull_n_s16(vget_low_s16(diff_high), amount_s16), 8),
+        vshrn_n_s32(vmull_n_s16(vget_high_s16(diff_high), amount_s16), 8));
 
     // Widen a to 16-bit
     uint16x8_t a_low_16 = vmovl_u8(a_low);
