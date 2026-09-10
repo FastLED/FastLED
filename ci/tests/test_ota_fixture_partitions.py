@@ -13,6 +13,7 @@ import pytest
 
 from ci.autoresearch.staging import apply_ota_fixture_partitions
 
+
 # Measured on the bench, 2026-09-10. Both are what the flash log actually
 # wrote, not estimates: the C6 image at 0x10000 and the RP2350W update image
 # staged into spiffs. See FastLED#3956.
@@ -34,7 +35,9 @@ def _slots() -> dict[str, tuple[int, int]]:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        fields = [field.strip() for field in stripped.split(",")]
+        fields: list[str] = []
+        for field in stripped.split(","):
+            fields.append(field.strip())
         if len(fields) < 5:
             continue
         slots[fields[0]] = (int(fields[3], 0), int(fields[4], 0))
@@ -71,7 +74,9 @@ def test_partitions_do_not_overlap_or_exceed_the_flash() -> None:
     ordered = sorted(_slots().items(), key=lambda item: item[1][0])
     previous_end = 0
     for name, (offset, size) in ordered:
-        assert offset >= previous_end, f"{name} at 0x{offset:X} overlaps the slot before it"
+        assert offset >= previous_end, (
+            f"{name} at 0x{offset:X} overlaps the slot before it"
+        )
         previous_end = offset + size
     assert previous_end <= flash_bytes, (
         f"partitions end at 0x{previous_end:X}, past the {flash_bytes:#x} flash"
@@ -96,10 +101,50 @@ def test_partition_key_is_replaced_not_duplicated(tmp_path: Path) -> None:
     apply_ota_fixture_partitions(ini)
 
     text = ini.read_text(encoding="utf-8")
-    keys = [ln for ln in text.splitlines() if ln.startswith("board_build.partitions")]
+    keys: list[str] = []
+    for line in text.splitlines():
+        if line.startswith("board_build.partitions"):
+            keys.append(line)
     assert len(keys) == 1, f"expected exactly one key, got {keys}"
     assert keys[0].endswith("esp32c6_ota_fixture.csv")
     assert "huge_app.csv" not in text
+    assert "board = esp32c6" in text
+    assert "lib_archive = true" in text
+
+
+def test_a_file_that_already_has_two_keys_ends_with_one(tmp_path: Path) -> None:
+    """Replacing the first match and stopping leaves the defect in place.
+
+    The function exists because two `board_build.partitions` keys in one
+    section mean the ini parser chooses the table rather than us. A helper
+    that replaces one of them and leaves the other has not fixed that -- it
+    has moved it one layer down, and the file still names two tables.
+
+    Reachable without a generator bug: `huge_app.csv` plus a stale fixture
+    key from an earlier staging run in the same directory.
+    """
+    ini = tmp_path / "platformio.ini"
+    ini.write_text(
+        "[env:esp32c6]\n"
+        "board = esp32c6\n"
+        "board_build.partitions = huge_app.csv\n"
+        "lib_archive = true\n"
+        "board_build.partitions = src/sketch/stale_from_last_run.csv\n",
+        encoding="utf-8",
+    )
+
+    apply_ota_fixture_partitions(ini)
+
+    text = ini.read_text(encoding="utf-8")
+    keys: list[str] = []
+    for line in text.splitlines():
+        if line.startswith("board_build.partitions"):
+            keys.append(line)
+    assert len(keys) == 1, f"expected exactly one key, got {keys}"
+    assert keys[0].endswith("esp32c6_ota_fixture.csv")
+    assert "huge_app.csv" not in text
+    assert "stale_from_last_run.csv" not in text
+    # And nothing else was disturbed by the collapse.
     assert "board = esp32c6" in text
     assert "lib_archive = true" in text
 

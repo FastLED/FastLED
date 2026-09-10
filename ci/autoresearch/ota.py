@@ -126,6 +126,29 @@ async def _settle_link(
 # minutes.
 kOtaChunkBytes = 512
 
+# The largest request payload measured to be *answered*, in base64
+# characters. On an ESP32-C6, 428 characters answer in 0.33 s while 512 time
+# out with nothing stored and the next RPC answering instantly.
+#
+# 428 and not 512: the true ceiling is somewhere between the two and was
+# never bisected, so the only defensible constant is the largest size known
+# to work. Taking 512 as the limit would call a 384-byte chunk deliverable,
+# and 384 bytes is exactly 512 characters -- the size measured to time out.
+#
+# Written down rather than left in prose so the preflight below can check
+# against it. FastLED#3956 is the device-side fix.
+kOtaLargestAnsweredRequestCharacters = 428
+
+
+def ota_chunk_is_deliverable(chunk_bytes: int, character_limit: int) -> bool:
+    """Whether a full chunk survives base64 expansion into one request.
+
+    Base64 is four characters per three bytes, rounded up to a whole group.
+    """
+
+    encoded_characters = ((chunk_bytes + 2) // 3) * 4
+    return encoded_characters <= character_limit
+
 
 async def run_ota_peer_autoresearch(
     upload_port: str,
@@ -215,14 +238,32 @@ async def run_ota_peer_autoresearch(
         )
         if not begin.get("success"):
             raise RuntimeError(f"C6 refused OTA artifact: {begin}")
-        # 512 raw bytes base64-expand to 684 characters, and the device stops
-        # answering writeOtaArtifact above ~512 characters of payload: measured
-        # on an ESP32-C6, 428 characters answer in 0.33 s and 512 time out,
-        # with nothing stored and the next RPC answering instantly. So every
-        # artifact write failed and the transfer could never progress.
-        # 256 raw bytes -> 344 characters, comfortably inside the limit.
-        # The underlying request-size limit is tracked in FastLED#3956; this
-        # keeps the chunk under it rather than working around it silently.
+        # Fail here rather than at the first write, and say why.
+        #
+        # `kOtaChunkBytes` is 512, which base64-expands to 684 characters and
+        # is over the measured device limit -- so the first full write is not
+        # answered, and what that looks like from outside is a hang partway
+        # into an OTA rather than a refusal. An earlier revision of this
+        # comment described 256 as being what the loop sent, which the
+        # constant has not said for some time; a reader had two numbers to
+        # choose from and no way to tell which was live.
+        #
+        # 256 does transfer, verified end to end, but at ~318 ms per RPC and
+        # size-independent it needs 4,041 round trips for a 1,034,444-byte
+        # image -- about 21 minutes against a 12 minute run budget. So both
+        # candidate values fail today, one quickly and one slowly, and the
+        # real fix is device-side. FastLED#3956.
+        if not ota_chunk_is_deliverable(
+            kOtaChunkBytes, kOtaLargestAnsweredRequestCharacters
+        ):
+            raise RuntimeError(
+                f"OTA artifact transfer cannot run: a {kOtaChunkBytes}-byte "
+                f"chunk base64-expands past the measured "
+                f"{kOtaLargestAnsweredRequestCharacters}-character request limit, so "
+                f"writeOtaArtifact will not be answered. This is FastLED#3956 "
+                f"and is device-side; lowering the chunk to 256 transfers "
+                f"correctly but needs ~21 minutes against a 12 minute budget."
+            )
         for offset in range(0, len(artifact), kOtaChunkBytes):
             encoded = base64.b64encode(
                 artifact[offset : offset + kOtaChunkBytes]

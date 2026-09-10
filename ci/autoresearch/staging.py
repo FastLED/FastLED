@@ -46,16 +46,32 @@ def apply_ota_fixture_partitions(ini: "Path") -> None:
     """
     replacement = "board_build.partitions = src/sketch/esp32c6_ota_fixture.csv"
     lines = ini.read_text(encoding="utf-8").splitlines()
+
+    matches: list[int] = []
     for index, line in enumerate(lines):
         if line.split("=", 1)[0].strip() == "board_build.partitions":
-            lines[index] = replacement
-            break
-    else:
+            matches.append(index)
+
+    if not matches:
         raise RuntimeError(
             f"No board_build.partitions key to replace in {ini}; the generated "
             f"project layout has changed and the OTA fixture partition table "
             f"would not be applied"
         )
+
+    # Every match, not the first. Replacing one and leaving another is the
+    # same defect this function exists to fix, one layer down: the parser
+    # would still be choosing between two keys, and the choice would still
+    # not be ours. Applies whether the duplicate was already there or a
+    # future generator adds one.
+    for index in matches:
+        lines[index] = replacement
+    if len(matches) > 1:
+        # Collapse them, so the file states the table once. Kept in reverse
+        # so the earlier indices stay valid as they are removed.
+        for index in reversed(matches[1:]):
+            del lines[index]
+
     ini.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
