@@ -4,10 +4,34 @@ Asserts `bash bloat esp32s3 --build` produces a `report.json` whose
 `total_flash` is at most the pinned baseline in
 `tests/data/esp32s3_bloat_baseline.txt`.
 
-The baseline is a single integer (in bytes) that ratchets DOWN as each
-later Stage of #2886 lands measurable savings. The intent is that any
-PR which lands a saving lowers the file in the same change; any PR
-which regresses fails this gate at CI.
+THE BASELINE IS A RATCHET, AND IT MOVES IN BOTH DIRECTIONS
+
+An earlier revision of this docstring said the baseline "ratchets DOWN"
+and that "any PR which regresses fails this gate", while this script's
+own failure message says to update the baseline when a regression is
+intentional. Both cannot be the rule, and a contributor reading one and
+a reviewer reading the other is how #4200 stalled. The rule in practice
+is the second one -- #3944/#3945 took TM1812's measured +283 B into the
+baseline -- because no policy that forbids every flash-costing feature
+is a policy anyone runs.
+
+So, stated once:
+
+  * a build UNDER the baseline must re-pin it DOWN in the same PR. Not
+    doing so is what let 232 B of slack accumulate before #4200, which
+    then had to explain that the 197 B the gate printed was really 429 B
+    against current master. A ratchet with slack is not a ratchet, so
+    this gate now FAILS on unclaimed headroom rather than congratulating
+    you on it;
+  * a build OVER the baseline may re-pin it UP, in the same PR, with the
+    reason written into the baseline file as a `#` comment. An upward
+    move is a decision and should read like one in `git log`;
+  * either way the file ends the PR equal to what the PR builds.
+
+`kHeadroomTolerance` is the one piece of slack, and it is for build
+noise rather than for savings: master measured the same total on three
+consecutive runs, so the observed noise is zero, and this is well under
+the 232 B drift that made #4200 unreadable.
 
 USAGE
 
@@ -41,15 +65,42 @@ BASELINE_FILE = PROJECT_ROOT / "tests" / "data" / "esp32s3_bloat_baseline.txt"
 REPORT_JSON = PROJECT_ROOT / ".build" / "symbols" / "esp32s3" / "report.json"
 
 
+# Bytes of drift tolerated below the baseline before the gate calls it
+# unclaimed headroom. Build noise, not savings -- see the docstring.
+kHeadroomTolerance = 64
+
+
+@typechecked
+def parse_baseline(text: str) -> int | None:
+    """The pinned byte count, ignoring `#` comments and blank lines.
+
+    Comments exist so an upward move can carry its reason in the file that
+    records it. Returns None when the text holds no number, which the caller
+    reports rather than raising -- a malformed baseline is an infrastructure
+    failure, not a regression, and the two exit differently.
+    """
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        try:
+            return int(stripped)
+        except ValueError:
+            return None
+    return None
+
+
 def read_baseline() -> int:
-    raw = BASELINE_FILE.read_text(encoding="utf-8").strip()
-    if not raw:
+    value = parse_baseline(BASELINE_FILE.read_text(encoding="utf-8"))
+    if value is None:
         print(
-            f"esp32s3-bloat-regression: baseline file is empty: {BASELINE_FILE}",
+            f"esp32s3-bloat-regression: baseline file holds no byte count: "
+            f"{BASELINE_FILE}",
             file=sys.stderr,
         )
         sys.exit(2)
-    return int(raw)
+    return value
 
 
 @typechecked
@@ -179,9 +230,27 @@ def main() -> int:
 
     delta = total_flash - baseline
     if delta <= 0:
+        headroom = -delta
+        if headroom > kHeadroomTolerance:
+            print(
+                f"esp32s3-bloat-regression: FAIL — total_flash="
+                f"{total_flash:,} B is {headroom:,} B UNDER "
+                f"baseline={baseline:,} B.",
+                file=sys.stderr,
+            )
+            print(
+                "esp32s3-bloat-regression: a saving has to be claimed. Set "
+                f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} to "
+                f"{total_flash} in this PR. Left unclaimed, the slack hides "
+                "the next regression inside it -- which is exactly what "
+                "happened before #4200, where 232 B of stale headroom made a "
+                "429 B cost print as 197 B.",
+                file=sys.stderr,
+            )
+            return 1
         print(
             f"esp32s3-bloat-regression: PASS — total_flash={total_flash:,} B "
-            f"<= baseline={baseline:,} B (headroom={-delta:,} B).",
+            f"<= baseline={baseline:,} B (headroom={headroom:,} B).",
             flush=True,
         )
         return 0
@@ -192,9 +261,11 @@ def main() -> int:
         file=sys.stderr,
     )
     print(
-        "esp32s3-bloat-regression: if the regression is intentional, update "
-        f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} in the same PR. "
-        "Otherwise, this is where the flash went:",
+        "esp32s3-bloat-regression: if the cost is intentional, set "
+        f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} to "
+        f"{total_flash} in this PR and write the reason into that file as a "
+        "`#` comment -- an upward move is a decision and should read like one "
+        "in git log. Otherwise, this is where the flash went:",
         file=sys.stderr,
     )
     print_largest_symbols(data, 25)
