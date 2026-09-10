@@ -211,6 +211,57 @@ Widening lms makes the mapper *worse*, and widening XYZ -- which the whole
 P6 working domain would have to follow -- only improves it about fourfold.
 Neither buys anything the budget needs, so the simpler implementation ships.
 
+### And the bind-time inverse could be fixed point too (P9, #4043)
+
+The section above is about the per-pixel path, which is already integer end to
+end. The derivation that runs once per profile is not: `buildRgbSolveMatrixQ16`
+builds the emitter matrix in float, inverts it in float, and quantises the
+result to s16.16. #4043 calls converting that "the one that is genuinely
+blocked on nothing but effort", and gives the reason it is not small -- the
+profile stores floats and is P2's public type.
+
+That reasoning assumes the narrow question is already settled: **is a Q16
+inverse accurate enough to replace the float one at all?** If it is not, the
+profile conversion buys nothing, because the derivation would still have to
+reach float. It had not been measured. `ci/color_fixed_inverse_study.py`
+measures it.
+
+Both paths end in s16.16, so this is not about the output format. It is about
+where the arithmetic happens: float32 carries a 24-bit mantissa that follows
+the magnitude, while Q16 with 64-bit intermediates carries a fixed 1/65536
+step and much more headroom around one. Neither dominates a priori.
+
+| primaries | worst coefficient error | worst dE2000 |
+| --- | ---: | ---: |
+| sRGB | 0 ULP | 0.0000 |
+| BT.2020 | 1 ULP | 0.0057 |
+| Display P3 | 1 ULP | 0.0064 |
+
+Against A1's 0.5 budget, of which the shipped mapper already spends 0.15.
+
+**Where it gives out is the more interesting half.** Conditioning is what
+decides a fixed-point inverse's accuracy, so green was walked onto the
+red-blue line until the matrix was nearly singular:
+
+| green collapsed | worst coefficient error | worst dE2000 |
+| --- | ---: | ---: |
+| 90% of the way | 6 ULP | 0.0421 |
+| 99% | 575 ULP | 0.0270 |
+| 99.9% | **28 487 ULP** | **0.0914** |
+
+The coefficients lose four orders of magnitude of precision and *the colour
+error does not follow*. Those ULPs sit in directions a near-collinear device
+can barely produce, so they do not become visible error: even at the edge of
+singularity the two derivations stay an order of magnitude inside A1.
+
+So the answer is yes, and P9 item 2 is effort rather than an open question.
+
+Two things this does **not** say. It compares the two derivations against each
+other, not against float64 -- the shipped path is itself Q16-quantised, and
+"can this replace that" is the question being asked. And the sweep drives are
+in `[0, 1]`, so every target is in gamut by construction; an out-of-gamut
+target goes through the mapper above, which is measured separately.
+
 ## Is the feasible chroma ray actually connected? No.
 
 Bisection assumes it is. The reference does not, so the assumption was tested
