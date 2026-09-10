@@ -49,16 +49,17 @@ BASELINE_PATH = Path(__file__).resolve().parent / "macro_prefix_baseline.txt"
 PREPROCESSOR_RE = re.compile(r"^\s*#\s*(define|undef|if|ifdef|ifndef|elif)\b")
 NAME_RE = re.compile(r"FASTLED_[A-Za-z0-9_]+")
 
-# Block comments, stripped from the whole text before anything else so a
-# directive quoted inside one is not read as a real directive. Replaced by an
-# equal number of newlines so physical line numbers -- which the suppression
-# lookup depends on -- survive.
-BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.S)
+# String/char literals and block comments. Blanked first, leaving `//`
+# comments intact, so that afterwards a `//` really is a line comment rather
+# than something inside a string. Length- and newline-preserving, because the
+# suppression lookup indexes by physical line.
+LITERAL_OR_BLOCK_RE = re.compile(
+    r"/\*.*?\*/" r'|"(?:\\.|[^"\\\n])*"' r"|'(?:\\.|[^'\\\n])*'",
+    re.S,
+)
 
-# Line comments and string/char literals, stripped per logical line. A name
-# inside either is a mention, not a use: `#define LABEL "FASTLED_NEW"`
-# defines LABEL, and `#if 1 // FASTLED_NEW` tests nothing.
-INLINE_NOISE_RE = re.compile(r"//[^\n]*|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'")
+# Line comments, blanked after suppressions have been read out of them.
+LINE_COMMENT_RE = re.compile(r"//[^\n]*")
 
 # Vendored code is not FastLED-owned and is not renamed to suit our standard.
 EXCLUDED_PREFIXES = ("third_party/",)
@@ -107,33 +108,44 @@ def _splice(lines: list[str]) -> list[tuple[str, int]]:
 
 
 @typechecked
+def _blank(match: "re.Match[str]") -> str:
+    """Spaces, keeping newlines, so length and line numbers both survive."""
+
+    return "".join("\n" if ch == "\n" else " " for ch in match.group(0))
+
+
+@typechecked
 def names_in(text: str) -> set[str]:
     """Every `FASTLED_*` name this file defines or tests, minus suppressed ones.
 
-    Suppressions are read from the raw text first, because stripping comments
-    would take the suppression comment with them.
+    The order is the substance. Literals and block comments go first, so what
+    is left of a `//` really is a line comment; suppressions are then read
+    only out of those; and only then are the line comments themselves blanked
+    for the name scan.
+
+    Reading suppressions off the raw text instead lets a marker inside a
+    string or a block comment silence a real macro -- a hole in the
+    `// fl-lint: macro-prefix-ok(<reason>)` contract rather than a use of it.
     """
 
-    raw_lines = text.split("\n")
+    masked = LITERAL_OR_BLOCK_RE.sub(_blank, text)
+
     suppressed: set[int] = set()
-    for index, line in enumerate(raw_lines):
-        if SUPPRESSION_RE.search(line):
+    for index, line in enumerate(masked.split("\n")):
+        marker = line.find("//")
+        if marker != -1 and SUPPRESSION_RE.search(line[marker:]):
             suppressed.add(index)
             suppressed.add(index + 1)
 
-    # Newline-preserving so the indices above still line up.
-    without_blocks = BLOCK_COMMENT_RE.sub(
-        lambda match: "\n" * match.group(0).count("\n"), text
-    )
+    code_text = LINE_COMMENT_RE.sub(_blank, masked)
 
     found: set[str] = set()
-    for line, first_physical_line in _splice(without_blocks.split("\n")):
+    for line, first_physical_line in _splice(code_text.split("\n")):
         if PREPROCESSOR_RE.match(line) is None:
             continue
         if first_physical_line in suppressed:
             continue
-        code = INLINE_NOISE_RE.sub(" ", line)
-        for name in NAME_RE.findall(code):
+        for name in NAME_RE.findall(line):
             found.add(name)
     return found
 

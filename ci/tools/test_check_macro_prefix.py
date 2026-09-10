@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from ci.tools.check_macro_prefix import (
     is_excluded,
     load_baseline,
@@ -134,8 +136,29 @@ def test_stripping_comments_does_not_shift_the_suppression_lookup() -> None:
 def test_a_missing_baseline_fails_loudly(tmp_path: Path) -> None:
     # An empty fallback would report all ~490 historical names as new, which
     # reads as a catastrophic regression and trains the reader to ignore it.
-    import pytest
-
     with pytest.raises(FileNotFoundError) as caught:
         load_baseline(tmp_path / "nope.txt")
     assert "--update-baseline" in str(caught.value)
+
+
+def test_a_suppression_inside_a_string_does_not_silence_a_macro() -> None:
+    """The contract is `// fl-lint: ...`, and only that.
+
+    A marker in a string literal or a block comment reads as a suppression to
+    a raw-text search, which is a way past the check rather than a use of it.
+    """
+    in_string = (
+        'const char* s = "fl-lint: macro-prefix-ok(fake)";\n#define FASTLED_SNEAKY 1\n'
+    )
+    assert names_in(in_string) == {"FASTLED_SNEAKY"}
+
+    in_block = "/* fl-lint: macro-prefix-ok(fake) */\n#define FASTLED_SNEAKY 1\n"
+    assert names_in(in_block) == {"FASTLED_SNEAKY"}
+
+
+def test_a_genuine_line_comment_still_suppresses() -> None:
+    # Guards the fix above from becoming "nothing suppresses".
+    above = "// fl-lint: macro-prefix-ok(vendor name)\n#define FASTLED_OK 1\n"
+    assert names_in(above) == set()
+    same_line = "#define FASTLED_OK 1  // fl-lint: macro-prefix-ok(vendor name)\n"
+    assert names_in(same_line) == set()
