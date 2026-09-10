@@ -542,7 +542,10 @@ def _reclaim_stale_port_locks(ports: "list[str]") -> bool:
     session out from under one. Returns whether a restart was performed, and
     says so on stdout: needing this is worth seeing, not smoothing away.
     """
-    locked = [port for port in ports if port and _port_is_locked(port)]
+    locked: list[str] = []
+    for port in ports:
+        if port and _port_is_locked(port):
+            locked.append(port)
     if not locked:
         return False
     print(
@@ -560,13 +563,16 @@ def _reclaim_stale_port_locks(ports: "list[str]") -> bool:
     except Exception as exc:  # noqa: BLE001
         print(f"  Could not restart the fbuild daemon: {exc}")
         return False
-    still = [port for port in locked if _port_is_locked(port)]
+    still: list[str] = []
+    for port in locked:
+        if _port_is_locked(port):
+            still.append(port)
     if still:
         print(f"  Still held after restart: {', '.join(still)}")
     return True
 
 
-def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
+def _describe_port_holder(port: str, proc_root: str) -> str:
     """Name the process holding `port`, when the OS will say.
 
     `attach failed: open_port(...) exceeded 3s; serial driver may be wedged`
@@ -583,8 +589,9 @@ def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
     accuse the wrong thing.
 
     Linux-only and best effort: returns "" when it cannot tell, and never
-    raises. `proc_root` is a parameter so this can be tested against a real
-    directory tree instead of by patching os.
+    raises. `proc_root` is passed explicitly -- "/proc" from production
+    callers, a fixture tree from tests -- so this can be tested against a real
+    directory rather than by patching os.
     """
     node = port.rsplit("/", 1)[-1]
     if not node:
@@ -740,7 +747,7 @@ async def _connect_peer_with_retry(
         # re-enumerating instead of hammering it.
         backoff = min(2.0 * attempt, 8.0)
         await asyncio.sleep(min(backoff, remaining_timeout()))
-    holder = _describe_port_holder(port)
+    holder = _describe_port_holder(port, "/proc")
     contention = f"; {holder}" if holder else ""
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "

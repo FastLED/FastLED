@@ -7,6 +7,8 @@ import importlib
 import os
 import sys
 from pathlib import Path
+from collections.abc import Callable
+from types import ModuleType
 import contextlib
 import io
 import time
@@ -19,10 +21,43 @@ import pytest
 # contention mechanism rather than emulating it, so they are resolved through
 # getattr and skipped where the platform has no such thing. ty treats
 # possibly-missing-attribute as a hard error, so the lookups cannot be direct.
-_openpty = getattr(importlib.import_module("pty"), "openpty", None) if sys.platform != "win32" else None
-_ttyname = getattr(os, "ttyname", None)
-_ioctl = getattr(importlib.import_module("fcntl"), "ioctl", None) if sys.platform != "win32" else None
-_TIOCEXCL = getattr(importlib.import_module("termios"), "TIOCEXCL", None) if sys.platform != "win32" else None
+def _optional_module(module_name: str) -> "ModuleType | None":
+    """Import `module_name`, or None when the platform does not have it.
+
+    `sys.platform != "win32"` is not a POSIX capability check: a non-Windows
+    platform without `pty`/`fcntl`/`termios` would raise during collection,
+    before the skip marker below could apply.
+    """
+    try:
+        return importlib.import_module(module_name)
+    except KeyboardInterrupt:
+        raise
+    except ImportError:
+        return None
+
+
+def _optional_callable(
+    module_name: str, attribute: str
+) -> "Callable[..., Any] | None":
+    module = _optional_module(module_name)
+    if module is None:
+        return None
+    found = getattr(module, attribute, None)
+    return found if callable(found) else None
+
+
+def _optional_int(module_name: str, attribute: str) -> "int | None":
+    module = _optional_module(module_name)
+    if module is None:
+        return None
+    found = getattr(module, attribute, None)
+    return found if isinstance(found, int) else None
+
+
+_openpty = _optional_callable("pty", "openpty")
+_ttyname: "Callable[..., Any] | None" = getattr(os, "ttyname", None)
+_ioctl = _optional_callable("fcntl", "ioctl")
+_TIOCEXCL = _optional_int("termios", "TIOCEXCL")
 
 requires_posix_tty = pytest.mark.skipif(
     not all((_openpty, _ttyname, _ioctl, _TIOCEXCL)),
@@ -644,7 +679,7 @@ def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
     try:
         node = _ttyname(slave)
         # A second handle is open on this pty right now, and it still opens.
-        assert _describe_port_holder(node) == ""
+        assert _describe_port_holder(node, "/proc") == ""
     finally:
         os.close(master)
         os.close(slave)
@@ -663,7 +698,7 @@ def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
         node = _ttyname(slave)
         assert _ioctl is not None and _TIOCEXCL is not None
         _ioctl(slave, _TIOCEXCL)
-        described = _describe_port_holder(node)
+        described = _describe_port_holder(node, "/proc")
         assert "locked against other openers" in described
         assert "the device itself is fine" in described
         assert str(os.getpid()) in described
@@ -674,7 +709,7 @@ def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
 
 def test_describe_port_holder_is_silent_for_a_missing_port() -> None:
     """An absent port is not contention; say nothing rather than guess."""
-    assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz") == ""
+    assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz", "/proc") == ""
 
 
 @requires_posix_tty
