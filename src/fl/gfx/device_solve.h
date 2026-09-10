@@ -32,6 +32,43 @@ struct EmitterSolveMatrixQ16 {
     i32 m[3][3];
 };
 
+/// A three-emitter profile with every field in s16.16.
+///
+/// `EmitterProfile` stores floats, so a bind path that starts from it reaches
+/// float before it reaches anything else. This is the float-free input P9
+/// item 2 asks for (FastLED#4043), kept as its own type rather than as a
+/// change to `EmitterProfile` -- that one is consumed by the legacy RGBW
+/// stack too, and converting it is cross-cutting with P2.
+struct EmitterChromaticitiesQ16 {
+    /// CIE 1931 xy per emitter, s16.16, so 0.64 is 41943.
+    i32 xy_r[2];
+    i32 xy_g[2];
+    i32 xy_b[2];
+    /// Peak luminance per emitter relative to source white, s16.16.
+    i32 lum_r;
+    i32 lum_g;
+    i32 lum_b;
+};
+
+/// Build the inverse emitter matrix from a Q16 profile, without floats.
+///
+/// The float-free counterpart of `buildRgbSolveMatrixQ16`, and the second
+/// half of P9 item 2: that one converts float chromaticities through
+/// `xyY_to_XYZ` and `invert3x3` before quantising, so a target that never
+/// wants a float symbol cannot use it.
+///
+/// `ci/color_fixed_profile_study.py` prices what this costs against the float
+/// derivation: worst 0.1085 dE2000 on BT.2020, against A1's 0.5 and the ~0.35
+/// the derivation has once the gamut mapper's 0.15 is counted.
+///
+/// False on the same profiles `buildRgbSolveMatrixQ16` refuses -- a
+/// non-positive or degenerate chromaticity, a non-positive luminance, or a
+/// matrix the inverse cannot represent -- with one addition the float path
+/// has no equivalent of: a `y` small enough to quantise to zero, which would
+/// otherwise be divided by.
+bool buildRgbSolveMatrixFromQ16(const EmitterChromaticitiesQ16& profile,
+                                EmitterSolveMatrixQ16* out) FL_NO_EXCEPT;
+
 /// Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats.
 ///
 /// The float-free half of P9 item 2 (FastLED#4043). `buildRgbSolveMatrixQ16`

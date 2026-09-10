@@ -37,6 +37,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 kFloatHelper = re.compile(r"__aeabi_[fd][a-z0-9]*|__[a-z]+(?:sf|df)3")
 
 kQ16Symbol = "_ZN2fl12invert3x3Q16ERA3_A3_KlRA3_A3_l"
+kQ16BuildSymbol = (
+    "_ZN2fl26buildRgbSolveMatrixFromQ16ERKNS_"
+    "24EmitterChromaticitiesQ16EPNS_21EmitterSolveMatrixQ16E"
+)
 kFloatPathSymbol = (
     "_ZN2fl22buildRgbSolveMatrixQ16ERKNS_"
     "21colorimetric_response14EmitterProfileEPNS_21EmitterSolveMatrixQ16E"
@@ -72,6 +76,65 @@ def _arm_tools() -> ArmTools | None:
             if dump.exists():
                 return ArmTools(compiler=str(candidate), objdump=str(dump))
     return None
+
+
+@typechecked
+def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
+    """Every function in the object, keyed by symbol."""
+
+    # `subprocess.run` and not `RunningProcess.run`: the latter merges stderr
+    # into stdout, which would put objdump's warnings into what this parses.
+    completed = subprocess.run(  # noqa: SRC001
+        [objdump, "-d", "--no-show-raw-insn", str(obj)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
+    )
+    bodies: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in completed.stdout.splitlines():
+        header = re.match(r"^[0-9a-f]+ <(.+)>:$", line)
+        if header:
+            current = header.group(1)
+            bodies[current] = []
+            continue
+        if current is not None and line.strip():
+            bodies[current].append(line)
+        elif current is not None:
+            current = None
+    return bodies
+
+
+@typechecked
+def _reachable_helpers(objdump: str, obj: Path, symbol: str) -> set[str]:
+    """Soft-float helpers reachable from `symbol`, following calls.
+
+    Checking one body is not enough for a function that delegates:
+    `buildRgbSolveMatrixFromQ16` does its arithmetic in helpers, so a float
+    operation there would leave its own body clean.
+    """
+
+    bodies = _disassembly(objdump, obj)
+    if symbol not in bodies:
+        raise AssertionError(f"{symbol} not found in {obj.name}")
+    seen: set[str] = set()
+    pending = [symbol]
+    found: set[str] = set()
+    while pending:
+        name = pending.pop()
+        if name in seen:
+            continue
+        seen.add(name)
+        text = "\n".join(bodies.get(name, []))
+        found |= set(kFloatHelper.findall(text))
+        for callee in re.findall(
+            r"<([A-Za-z_][A-Za-z0-9_.]*)(?:\+0x[0-9a-f]+)?>", text
+        ):
+            if callee in bodies and callee != name:
+                pending.append(callee)
+    return found
 
 
 @typechecked
@@ -157,6 +220,44 @@ def test_q16_inverse_calls_no_float_runtime(
     helpers = _helpers_called(tools.objdump, obj, kQ16Symbol)
     assert helpers == set(), (
         f"invert3x3Q16 reaches the float runtime: {sorted(helpers)}"
+    )
+
+
+@typechecked
+def test_the_q16_build_reaches_no_float_runtime(
+    compiled: tuple[ArmTools, Path],
+) -> None:
+    """The other half of P9 item 2 (FastLED#4043).
+
+    `buildRgbSolveMatrixFromQ16` derives the emitter matrix from Q16
+    chromaticities and inverts it, so a float anywhere in that chain would
+    defeat the point of having it. It delegates, so this follows the calls
+    rather than reading one body.
+    """
+
+    tools, obj = compiled
+    helpers = _reachable_helpers(tools.objdump, obj, kQ16BuildSymbol)
+    assert helpers == set(), (
+        f"buildRgbSolveMatrixFromQ16 reaches the float runtime: {sorted(helpers)}"
+    )
+
+
+@typechecked
+def test_following_calls_is_what_makes_that_meaningful(
+    compiled: tuple[ArmTools, Path],
+) -> None:
+    """Control for the case above.
+
+    `buildRgbSolveMatrixQ16` is the float path and calls into
+    `colorimetric_response` helpers. Reachability has to find those; if it
+    reported nothing here, the clean result above would mean the traversal
+    stopped, not that the chain is clean.
+    """
+
+    tools, obj = compiled
+    helpers = _reachable_helpers(tools.objdump, obj, kFloatPathSymbol)
+    assert len(helpers) >= 8, (
+        f"expected the float path to reach the soft-float runtime, found {sorted(helpers)}"
     )
 
 
