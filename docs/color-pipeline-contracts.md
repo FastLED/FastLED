@@ -231,6 +231,65 @@ but cannot prove ideal-light accuracy. Publish luminance normalization,
 relative-error denominators, black-floor treatment, and the exact corpus.
 Do not silently exclude difficult vectors to satisfy the issue's budgets.
 
+#### The black floor, stated
+
+The paragraph above requires a black-floor treatment to be published. This is
+it, measured rather than chosen.
+
+**A reference drive below one s16.16 unit is outside the budget's scope.** One
+unit is `1/65536` = `1.5259e-05` in normalized emitter flux. Below that the
+fixed-point path can only answer zero or a whole unit where the reference asks
+for a fraction of one, and CIELAB's kappa branch turns that into a whole unit
+of L*.
+
+The floor is the arithmetic's resolution and **not** a luminance threshold,
+which is the part worth being exact about because the obvious form does not
+work. Measured on the P5 corpus's `rgb` device, `bt2020-rgb-02` misses at
+Y = 5.4e-04 while `srgb_bt709-rgb-00` passes at Y = 3.0e-04 -- a *darker*
+vector inside the budget and a brighter one outside it. What separates them is
+that the first has a sub-ULP drive and the second does not.
+
+Its effect on A1, over all 57 vectors the corpus holds for that device:
+
+| | worst dE2000 |
+|---|---:|
+| every vector | 1.3055, at `bt2020-rgb-03` -- source code (0,0,1) in BT.2020, whose reference drives are (0, 5.242e-05, **1.447e-05**) |
+| vectors with no sub-ULP drive (49 of 57) | **0.3951** |
+
+So A1's 0.5 is met everywhere the arithmetic can represent the target **in a
+single frame**, which is what these figures measure: `processPixelQ16` returns
+one `i32` triple per pixel and the corpus is compared frame by frame. The
+vectors above 0.5 are out of reach of a one-frame fixed-point answer of this
+width -- by any implementation of it, not just this one. They are not thereby
+unreachable altogether, because a cycle can average to a sub-ULP drive; see
+the note below on the unsupported low-light region, which is the same
+distinction from the other side. Eight of the 57 carry a sub-ULP drive.
+
+What `tests/fl/gfx/pipeline.cpp` asserts, stated exactly rather than as "both
+figures are pinned", which they are not:
+
+* the corpus size and the excluded count are pinned exactly -- `kVectorCount
+  == 57` and `below_floor == 8` -- so a shrunken corpus, or a floor that
+  swallowed it, cannot satisfy the bounds below;
+* the floored worst is bounded above twice, at A1's `0.5` and again at `0.45`,
+  so a regression that stays inside A1 still fails;
+* the unfloored worst is bounded above at `1.4`, so the low-light miss cannot
+  quietly grow while the floored bound keeps passing.
+
+Those are upper bounds and not equalities: a floored worst of 0.44 would pass.
+The measured values, 0.3951 and 1.3055, are recorded in the comments beside
+those assertions and here, and are what a change should be read against. The
+count of vectors above 0.5 is not asserted at all -- `below_floor` is.
+
+This does not silently exclude difficult vectors: the excluded set is defined
+by a property of the arithmetic, its size is asserted, and the unfloored
+number is published beside the floored one.
+
+What this floor does **not** settle is the *unsupported low-light region* the
+same paragraph asks for -- that is a statement about what a device is allowed
+to render, and it needs P8's dithering answer, since a sub-ULP average drive is
+reachable over a cycle even though it is not reachable in one frame.
+
 Dither accuracy is based on time-weighted emitted XYZ over a declared cadence
 and observation window, followed by perceptual error calculation. It is not
 an unweighted mean of frame codes or frame Delta E values. State advances on
