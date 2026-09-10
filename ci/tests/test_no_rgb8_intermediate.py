@@ -1,4 +1,4 @@
-"""B3: the streaming path must not round-trip through RGB8.
+"""B3: the pipeline's own stages must not round-trip through RGB8.
 
 P6 (#4040) asks for decode to be one semantic conversion -- an RGB8 code
 straight to linear light -- with no intermediate RGB8 linear buffer and no
@@ -10,6 +10,29 @@ missing requirement.
 
 So this asserts the shape instead. Companion to
 test_no_iterative_solver_per_pixel.py, which guards A3/B11 the same way.
+
+What it does NOT cover
+----------------------
+Only the eight stage files listed below, all under ``src/fl/gfx``. B3's
+claim is about the whole normative path and includes "single final
+quantization"; this file sees the pipeline's interior and stops at its
+edge.
+
+The handoff from the pipeline to a chipset encoder is outside that edge, and
+it is where the remaining round trip lives. ``ScaledPixelIteratorRGB``
+yields ``array<u8, 3>``, and ``writeHD108`` plus UCS7604's 16-bit modes are
+both fed by it -- so on those parts the wide output is quantized to 8 bits
+and then widened again by a gamma LUT, which is an intermediate
+quantization, not a final one. ``writeWS2816`` is the one that takes
+``makeScaledPixelRangeRGB16``. See FastLED#4326.
+
+For an 8-bit part an 8-bit handoff *is* the single final quantization, so
+the rule that would catch this is "a 16-bit encoder is fed the 16-bit
+adapter" rather than anything about the stage files. That check is not here
+because it would fail today on two of the three; it belongs with the fix.
+
+Quoting a green run of this file as evidence for B3 as a whole therefore
+over-claims. It evidences the interior.
 """
 
 from __future__ import annotations
