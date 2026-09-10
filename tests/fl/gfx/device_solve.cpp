@@ -371,4 +371,180 @@ FL_TEST_CASE("Q16 inverse rounds rather than truncates") {
     FL_CHECK_EQ(out[0][0], 43691);
 }
 
+namespace {
+
+/// The corpus `ci/color_fixed_profile_study.py` prices P9 item 2 against,
+/// with the chromaticities quantised to s16.16 and the inverse its
+/// `emitter_matrix_q16` + `invert3x3_q16` produce using Python's unbounded
+/// integers.
+///
+/// The reference is that study, not this implementation's own output: the
+/// point of the C++ is to reproduce a derivation that was measured at 0.1085
+/// dE2000 against the float path, and a table written from C++ could agree
+/// with a mistake.
+struct StudyProfile {
+    const char* name;
+    i32 xy_r[2];
+    i32 xy_g[2];
+    i32 xy_b[2];
+    i32 inverse[3][3];
+};
+
+const StudyProfile kStudyProfiles[] = {
+    {"srgb",
+     {41943, 21627}, {19661, 39322}, {9830, 3932},
+     {{45165, -21425, -6948}, {-45428, 87926, 1948}, {263, -965, 5000}}},
+    {"bt2020",
+     {46399, 19137}, {11141, 52232}, {8585, 3015},
+     {{29556, -6124, -4362}, {-29624, 71826, 700}, {69, -166, 3662}}},
+    {"display_p3",
+     {44564, 20972}, {17367, 45220}, {9830, 3932},
+     {{37419, -13977, -6043}, {-37605, 79908, 1071}, {186, -396, 4972}}},
+    {"narrow",
+     {41943, 21627}, {32768, 27525}, {28836, 26214},
+     {{92838, -118155, 40077}, {-136951, 299409, -371891},
+      {44113, -115718, 331814}}},
+};
+
+EmitterChromaticitiesQ16 unitLuminance(const StudyProfile& item) {
+    EmitterChromaticitiesQ16 profile = {};
+    for (int i = 0; i < 2; ++i) {
+        profile.xy_r[i] = item.xy_r[i];
+        profile.xy_g[i] = item.xy_g[i];
+        profile.xy_b[i] = item.xy_b[i];
+    }
+    profile.lum_r = 65536;
+    profile.lum_g = 65536;
+    profile.lum_b = 65536;
+    return profile;
+}
+
+}  // namespace
+
+FL_TEST_CASE("the float-free build reproduces the host study exactly") {
+    for (const auto& item : kStudyProfiles) {
+        EmitterSolveMatrixQ16 matrix = {};
+        FL_REQUIRE(buildRgbSolveMatrixFromQ16(unitLuminance(item), &matrix));
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                FL_CHECK_EQ(matrix.m[row][col], item.inverse[row][col]);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("the float-free build lands close to the float one") {
+    // The two derivations are not required to be identical -- the whole point
+    // of the study is that quantising the profile first costs something -- so
+    // this bounds the difference rather than pinning it away.
+    //
+    // Measured worst coefficient difference over the corpus: 38 raw units,
+    // which the study prices at 0.1085 dE2000 against A1's 0.5.
+    const float kFloatXy[][6] = {
+        {0.6400f, 0.3300f, 0.3000f, 0.6000f, 0.1500f, 0.0600f},
+        {0.7080f, 0.2920f, 0.1700f, 0.7970f, 0.1310f, 0.0460f},
+        {0.6800f, 0.3200f, 0.2650f, 0.6900f, 0.1500f, 0.0600f},
+    };
+    i32 worst = 0;
+    int compared = 0;
+    for (int index = 0; index < 3; ++index) {
+        const float* xy = kFloatXy[index];
+        colorimetric_response::EmitterProfile as_float = {};
+        as_float.xy_r[0] = xy[0]; as_float.xy_r[1] = xy[1];
+        as_float.xy_g[0] = xy[2]; as_float.xy_g[1] = xy[3];
+        as_float.xy_b[0] = xy[4]; as_float.xy_b[1] = xy[5];
+        as_float.lum_r = 1.0f; as_float.lum_g = 1.0f; as_float.lum_b = 1.0f;
+
+        EmitterSolveMatrixQ16 from_float = {};
+        FL_REQUIRE(buildRgbSolveMatrixQ16(as_float, &from_float));
+
+        EmitterChromaticitiesQ16 as_q16 = {};
+        as_q16.xy_r[0] = q16(xy[0]); as_q16.xy_r[1] = q16(xy[1]);
+        as_q16.xy_g[0] = q16(xy[2]); as_q16.xy_g[1] = q16(xy[3]);
+        as_q16.xy_b[0] = q16(xy[4]); as_q16.xy_b[1] = q16(xy[5]);
+        as_q16.lum_r = 65536; as_q16.lum_g = 65536; as_q16.lum_b = 65536;
+
+        EmitterSolveMatrixQ16 from_q16 = {};
+        FL_REQUIRE(buildRgbSolveMatrixFromQ16(as_q16, &from_q16));
+
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                i32 difference = from_float.m[row][col] - from_q16.m[row][col];
+                if (difference < 0) {
+                    difference = -difference;
+                }
+                if (difference > worst) {
+                    worst = difference;
+                }
+                ++compared;
+            }
+        }
+    }
+    FL_CHECK_EQ(compared, 27);
+    FL_CHECK_LT(worst, 64);
+    // Bounded below as well: if the two paths ever agreed exactly, one of
+    // them would have stopped being what it claims to be, and every bound
+    // above would be comparing a matrix with itself.
+    FL_CHECK_GT(worst, 0);
+}
+
+FL_TEST_CASE("the float-free build scales an emitter by its luminance") {
+    // Halving green's luminance halves its column, so the inverse's middle
+    // *row* -- the one that recovers green's drive -- doubles.
+    const StudyProfile& srgb = kStudyProfiles[0];
+    EmitterSolveMatrixQ16 unit = {};
+    FL_REQUIRE(buildRgbSolveMatrixFromQ16(unitLuminance(srgb), &unit));
+
+    EmitterChromaticitiesQ16 dim_green = unitLuminance(srgb);
+    dim_green.lum_g = 32768;
+    EmitterSolveMatrixQ16 dimmed = {};
+    FL_REQUIRE(buildRgbSolveMatrixFromQ16(dim_green, &dimmed));
+
+    for (int col = 0; col < 3; ++col) {
+        // Exactly double, within the rounding of one raw unit either way.
+        const i32 doubled = unit.m[1][col] * 2;
+        const i32 actual = dimmed.m[1][col];
+        FL_CHECK_LT(actual - doubled, 2);
+        FL_CHECK_GT(actual - doubled, -2);
+        // And the other rows do not move, because only green's column did.
+        FL_CHECK_LT(dimmed.m[0][col] - unit.m[0][col], 2);
+        FL_CHECK_GT(dimmed.m[0][col] - unit.m[0][col], -2);
+    }
+}
+
+FL_TEST_CASE("the float-free build refuses what the float one refuses") {
+    EmitterSolveMatrixQ16 matrix = {};
+    const StudyProfile& srgb = kStudyProfiles[0];
+
+    FL_CHECK(!buildRgbSolveMatrixFromQ16(unitLuminance(srgb), nullptr));
+
+    // A `y` below half a Q16 step quantises to zero. This is the failure the
+    // float path has no equivalent of -- it guards `y <= 1e-6f`, which is
+    // still representable as a float and is not representable here at all.
+    EmitterChromaticitiesQ16 zero_y = unitLuminance(srgb);
+    zero_y.xy_b[1] = 0;
+    FL_CHECK(!buildRgbSolveMatrixFromQ16(zero_y, &matrix));
+
+    // A non-positive luminance, which `isUsableLuminance` also refuses.
+    EmitterChromaticitiesQ16 dark = unitLuminance(srgb);
+    dark.lum_g = 0;
+    FL_CHECK(!buildRgbSolveMatrixFromQ16(dark, &matrix));
+
+    // Outside the CIE simplex: x + y > 1 makes z negative, which no physical
+    // emitter has.
+    EmitterChromaticitiesQ16 outside = unitLuminance(srgb);
+    outside.xy_r[0] = 52429;  // 0.8
+    outside.xy_r[1] = 52429;
+    FL_CHECK(!buildRgbSolveMatrixFromQ16(outside, &matrix));
+
+    // Three emitters at one chromaticity: singular, and refused by the
+    // inverse rather than by the column builder.
+    EmitterChromaticitiesQ16 collinear = unitLuminance(srgb);
+    for (int i = 0; i < 2; ++i) {
+        collinear.xy_g[i] = collinear.xy_r[i];
+        collinear.xy_b[i] = collinear.xy_r[i];
+    }
+    FL_CHECK(!buildRgbSolveMatrixFromQ16(collinear, &matrix));
+}
+
 }  // FL_TEST_FILE

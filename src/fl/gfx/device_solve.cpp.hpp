@@ -46,6 +46,9 @@ constexpr i32 kMaxCoefficient = 21845;  // floor(2^32 / 3) >> 16
 
 constexpr i64 kI64Max = 9223372036854775807LL;
 
+/// One, in s16.16.
+constexpr i64 kQ16One = 65536;
+
 /// Does `a * b` fit an i64?
 ///
 /// By division rather than by bounding the inputs, because the inputs cannot
@@ -150,6 +153,62 @@ i64 divideCoefficientQ16(i64 cofactor_q32, i64 determinant_q48) FL_NO_EXCEPT {
     return roundedDivI64(numerator, denominator);
 }
 
+/// Nearest integer of `numerator / denominator`, halves away from zero.
+///
+/// Truncating would bias every column toward zero and the bias does not
+/// cancel: the inverse is built from products of these.
+i64 roundedDivideQ16(i64 numerator, i64 denominator) FL_NO_EXCEPT {
+    if (denominator < 0) {
+        numerator = -numerator;
+        denominator = -denominator;
+    }
+    const i64 half = denominator / 2;
+    if (numerator >= 0) {
+        return (numerator + half) / denominator;
+    }
+    return -((-numerator + half) / denominator);
+}
+
+/// One emitter's XYZ column at its own luminance, all in s16.16.
+///
+/// `xyY_to_XYZ` is `x * Y * inv_y`, which C++ groups left to right and so
+/// scales before it divides. This divides first, deliberately: in fixed point
+/// `x * Y` discards low bits the divide would have used. Measured against the
+/// float derivation over the study's corpus and four luminance sets, the
+/// worst coefficient error is 2899 ULP dividing first against 7363 scaling
+/// first, and the colour figure is the same either way. See
+/// `ci/color_fixed_profile_study.py`.
+bool emitterColumnQ16(const i32 (&xy)[2], i32 luminance,
+                      i64 (&column)[3]) FL_NO_EXCEPT {
+    const i32 x = xy[0];
+    const i32 y = xy[1];
+    // The float guard rejects a `y` at or below 1e-6; in Q16 anything under
+    // half a step quantises to zero, and dividing by it is the failure the
+    // float path cannot have.
+    if (y <= 0 || luminance <= 0 || x <= 0) {
+        return false;
+    }
+    if (static_cast<i64>(x) + static_cast<i64>(y) > kQ16One) {
+        // Outside the CIE simplex, so z would be negative for a physical
+        // emitter -- the same rejection `isUsableSolveChromaticity` makes.
+        return false;
+    }
+    const i64 z = kQ16One - static_cast<i64>(x) - static_cast<i64>(y);
+    const i64 x_over_y = roundedDivideQ16(static_cast<i64>(x) * kQ16One, y);
+    const i64 z_over_y = roundedDivideQ16(z * kQ16One, y);
+    column[0] = roundedDivideQ16(x_over_y * luminance, kQ16One);
+    column[1] = luminance;
+    column[2] = roundedDivideQ16(z_over_y * luminance, kQ16One);
+    for (int i = 0; i < 3; ++i) {
+        // The inverse works in i32, so a column that does not fit is refused
+        // here rather than wrapped on the way in.
+        if (column[i] > 2147483647LL || column[i] < -2147483648LL) {
+            return false;
+        }
+    }
+    return true;
+}
+
 i32 dotSolveRowQ16(const i32 (&row)[3], const i32 (&v)[3]) FL_NO_EXCEPT {
     const i64 acc = static_cast<i64>(row[0]) * static_cast<i64>(v[0])
                   + static_cast<i64>(row[1]) * static_cast<i64>(v[1])
@@ -224,6 +283,33 @@ bool invert3x3Q16(const i32 (&in)[3][3], i32 (&out)[3][3]) FL_NO_EXCEPT {
         }
     }
     return true;
+}
+
+bool buildRgbSolveMatrixFromQ16(const EmitterChromaticitiesQ16& profile,
+                                EmitterSolveMatrixQ16* out) FL_NO_EXCEPT {
+    if (out == nullptr) {
+        return false;
+    }
+    i64 red[3];
+    i64 green[3];
+    i64 blue[3];
+    if (!emitterColumnQ16(profile.xy_r, profile.lum_r, red) ||
+        !emitterColumnQ16(profile.xy_g, profile.lum_g, green) ||
+        !emitterColumnQ16(profile.xy_b, profile.lum_b, blue)) {
+        return false;
+    }
+
+    // Columns are the emitters' XYZ contributions at full drive, the same
+    // arrangement `buildRgbSolveMatrixQ16` builds in float.
+    const i32 emitter[3][3] = {
+        {static_cast<i32>(red[0]), static_cast<i32>(green[0]),
+         static_cast<i32>(blue[0])},
+        {static_cast<i32>(red[1]), static_cast<i32>(green[1]),
+         static_cast<i32>(blue[1])},
+        {static_cast<i32>(red[2]), static_cast<i32>(green[2]),
+         static_cast<i32>(blue[2])},
+    };
+    return invert3x3Q16(emitter, out->m);
 }
 
 bool buildRgbSolveMatrixQ16(const colorimetric_response::EmitterProfile& profile,
