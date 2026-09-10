@@ -99,4 +99,143 @@ FL_TEST_CASE("Signed wide intermediates scale symmetrically") {
     FL_CHECK_EQ(drives[1], -20000);
 }
 
+namespace {
+
+/// A synthetic emitter response: light emitted for a given drive.
+///
+/// R2's counterexample exactly -- `F_R(d) = d` and `F_G(d) = d^2`, in s16.16.
+/// Two emitters whose code-to-light curves differ is the whole point; a
+/// device where they matched would show nothing.
+i32 emittedLightQ16(int channel, i32 drive) {
+    if (channel == 0) {
+        return drive;
+    }
+    const i64 squared = static_cast<i64>(drive) * static_cast<i64>(drive);
+    return static_cast<i32>((squared + 32768) >> 16);
+}
+
+/// A plain Q16 multiply, so the nonlinear control below can be built out of
+/// the same "scale, then scale again" shape the linear check uses.
+i32 scaleQ16(i32 value, i32 scalar_q16) {
+    const i64 product = static_cast<i64>(value) * static_cast<i64>(scalar_q16);
+    return static_cast<i32>((product + 32768) >> 16);
+}
+
+/// The drive that emits a given light, i.e. `F^-1`.
+i32 driveForLightQ16(int channel, i32 light) {
+    if (channel == 0) {
+        return light;
+    }
+    // Integer square root in Q16: sqrt(light) with the scale carried through.
+    i64 low = 0;
+    i64 high = 65536;
+    while (low < high) {
+        const i64 mid = (low + high + 1) / 2;
+        if (((mid * mid + 32768) >> 16) <= light) {
+            low = mid;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return static_cast<i32>(low);
+}
+
+}  // namespace
+
+FL_TEST_CASE("A shared scalar is only chromaticity-preserving on linear quantities") {
+    // FastLED#4156 R2. P2 permits a per-channel nonlinear code-to-light
+    // response; a shared brightness scalar preserves chromaticity only while
+    // the quantities it scales are linear light. This is that argument as
+    // arithmetic rather than prose, so whoever implements response
+    // compensation has the ordering constraint in a form that fails.
+    //
+    // Two emitters, F_R(d) = d and F_G(d) = d^2. An equal-light target at
+    // full output uses drives (1, 1).
+    const i32 kOne = 65536;
+    const FluxScalar quarter = FluxScalar::fromRawQ16(kOne / 4);
+
+    // Wrong order: scale the compensated drives.
+    i32 wrong[2] = {kOne, kOne};
+    applyFluxScalar(quarter, span<i32>(wrong, 2));
+    const i32 wrong_light[2] = {emittedLightQ16(0, wrong[0]),
+                                emittedLightQ16(1, wrong[1])};
+
+    // Right order: scale the light, then invert the response.
+    i32 light[2] = {emittedLightQ16(0, kOne), emittedLightQ16(1, kOne)};
+    applyFluxScalar(quarter, span<i32>(light, 2));
+    const i32 right_drives[2] = {driveForLightQ16(0, light[0]),
+                                 driveForLightQ16(1, light[1])};
+    const i32 right_light[2] = {emittedLightQ16(0, right_drives[0]),
+                                emittedLightQ16(1, right_drives[1])};
+
+    // The numbers R2 gives. Scaling drives lands on light (1/4, 1/16) --
+    // a four-to-one ratio where the target was one to one.
+    FL_CHECK_EQ(wrong[0], kOne / 4);
+    FL_CHECK_EQ(wrong[1], kOne / 4);
+    FL_CHECK_EQ(wrong_light[0], kOne / 4);
+    FL_CHECK_EQ(wrong_light[1], kOne / 16);
+
+    // Scaling light lands on drives (1/4, 1/2) and light (1/4, 1/4).
+    FL_CHECK_EQ(right_drives[0], kOne / 4);
+    FL_CHECK_EQ(right_drives[1], kOne / 2);
+    FL_CHECK_EQ(right_light[0], kOne / 4);
+    FL_CHECK_EQ(right_light[1], kOne / 4);
+
+    // Stated as the property rather than as four constants: the ratio the
+    // target asked for survives one order and not the other.
+    FL_CHECK_EQ(right_light[0], right_light[1]);
+    FL_CHECK_NE(wrong_light[0], wrong_light[1]);
+}
+
+FL_TEST_CASE("The shipped order scales linear drives, which is the safe one") {
+    // The other half, and the reason R2 is not a live defect. What
+    // `processPixelQ16` hands to `applyFluxScalar` is the device solve's
+    // output, and the emitter matrix it solves against is linear -- so the
+    // quantity being scaled is emitter light and the counterexample above
+    // cannot arise.
+    //
+    // A per-channel response would change that, and `EmitterProfile` already
+    // carries `response_lut_r/g/b`. Those are validated on bind and applied
+    // by nothing; `tests/fl/channels/color_profile.cpp` pins that. When they
+    // are applied, the case above says where.
+    //
+    // Linearity, checked directly: scaling by a half twice is scaling by a
+    // quarter once, which is only true of a linear quantity.
+    i32 twice[3] = {60000, 40000, 12345};
+    applyFluxScalar(FluxScalar::fromRawQ16(32768), span<i32>(twice, 3));
+    applyFluxScalar(FluxScalar::fromRawQ16(32768), span<i32>(twice, 3));
+
+    i32 once[3] = {60000, 40000, 12345};
+    applyFluxScalar(FluxScalar::fromRawQ16(16384), span<i32>(once, 3));
+
+    // The scaling has to have happened, or the agreement below is the
+    // agreement of two untouched values: a no-op `applyFluxScalar` would
+    // satisfy the +/-1 bound perfectly.
+    FL_CHECK_EQ(once[0], 15000);
+    FL_CHECK_EQ(twice[0], 15000);
+
+    for (int i = 0; i < 3; ++i) {
+        // Within one raw unit, which is the two roundings rather than a
+        // curve. A square-law stage would put these thousands apart.
+        const i32 difference = twice[i] - once[i];
+        FL_CHECK_LT(difference, 2);
+        FL_CHECK_GT(difference, -2);
+    }
+
+    // The same comparison under a nonlinear stage, so the bound above is
+    // shown to discriminate rather than to be satisfiable by anything. Same
+    // structure -- half applied twice against a quarter applied once -- with
+    // the square law standing in for the linear scale.
+    const i32 half = 32768;
+    const i32 quarter = 16384;
+    i32 nonlinear_twice = 60000;
+    nonlinear_twice = emittedLightQ16(1, scaleQ16(nonlinear_twice, half));
+    nonlinear_twice = emittedLightQ16(1, scaleQ16(nonlinear_twice, half));
+    const i32 nonlinear_once = emittedLightQ16(1, scaleQ16(60000, quarter));
+    // Not "different by a bit": the two orders separate by thousands of raw
+    // units, which is what the +/-1 bound above would have caught.
+    const i32 gap = nonlinear_once - nonlinear_twice;
+    FL_CHECK_GT(gap > 0 ? gap : -gap, 1000);
+}
+
 }  // FL_TEST_FILE
