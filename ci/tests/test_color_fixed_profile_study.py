@@ -66,12 +66,17 @@ class TestQuantizedProfileStudy(unittest.TestCase):
             if measured.delta_e > worst:
                 worst = measured.delta_e
         self.assertLess(worst, 0.35)
-        # And the measured value, so a regression that stays inside the
-        # budget still fails rather than sliding by.
-        self.assertLess(worst, 0.15)
-        # Not zero: that would mean the arms converged, which the case above
-        # checks structurally and this checks in the metric.
-        self.assertGreater(worst, 0.01)
+        # And a band around the measured 0.1085, tight enough that the
+        # figure the issue comment reports is the figure this checks. A
+        # single `assertLess(worst, 0.15)` admitted 0.149 -- materially worse
+        # than what was reported, and passing.
+        #
+        # The band is +/- 5%, which is far outside anything the arithmetic
+        # can drift by (both arms are deterministic integer paths over a
+        # fixed corpus and a fixed sweep) and far inside the 38% headroom to
+        # the budget. A change that moves this at all should say so.
+        self.assertGreater(worst, 0.1031)
+        self.assertLess(worst, 0.1139)
 
     def test_bt2020_is_the_worst_and_its_smallest_y_is_why(self) -> None:
         """The mechanism the study claims, checked rather than asserted.
