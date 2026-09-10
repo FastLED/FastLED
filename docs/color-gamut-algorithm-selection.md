@@ -221,10 +221,11 @@ evaluations.
 **No disconnected interval was found.** On every ray sampled, the feasible
 chroma was a single interval starting at zero.
 
-That is strong evidence for this device, not a proof, and it says nothing
-about the >=4-emitter case where the zonotope gains a redundant generator. A
-coarser sweep runs on every test invocation so the assumption cannot rot
-silently.
+That is strong evidence for this device, not a proof. The >=4-emitter case,
+where the zonotope gains a redundant generator, is swept separately in "Wide
+hulls" below -- another 7.5 million evaluations across the four white-emitter
+devices, also with no disconnected interval. A coarser sweep of both runs on
+every test invocation so the assumption cannot rot silently.
 
 ## Lightness must be clamped before chroma
 
@@ -257,6 +258,10 @@ embedded mapper relies on bisection, either:
 
 Recording this rather than leaving it implicit: the table above is evidence
 for the *objective*, and only provisional evidence for the *search*.
+
+Option 1 has since been taken as far as sampling can take it, for the wide
+hulls as well as this one -- see "Wide hulls" below. What none of it supplies
+is option 2, an analytic bound. The claim remains empirical.
 
 ## Is the mapping continuous enough to animate?
 
@@ -511,9 +516,115 @@ matter:
 `allocate_two_white` reproduces the reference's recorded drives on all 57 to
 within 10⁻⁹, which is the check that could not be written before.
 
+## Wide hulls: is the ray still connected, and does the composition hold?
+
+Two claims above are made for the three-emitter device and do not carry over
+by assumption. A white emitter adds a redundant generator to the zonotope,
+which changes what "feasible" even means: the preimage of a target stops being
+unique, so the question goes from "does the one solution land in the box" to
+"does *some* solution", which is the predicate `mapAndAllocateRgbwQ16` and
+`mapAndAllocateRgbwwQ16` actually consult.
+
+Harness: `ci/color_wide_hull_study.py`. Regression test:
+`ci/tests/test_color_wide_hull_study.py`.
+
+### The ray stays connected
+
+The same sweep as the three-emitter one -- lightness on a 40-step grid, hue
+every 3 degrees, 401 chroma steps per ray -- against each white-emitter device
+the corpus ships, using the *oracle* hull rather than the closed form. The
+steps are intervals, not points: both endpoints are evaluated, so a ray costs
+402 evaluations and not 401.
+That choice matters: a sweep built on `allocate_two_white` could only confirm
+that function's own idea of the hull, which is the assumption under test.
+
+| device | rays | evaluations | disconnected | not anchored at zero |
+| --- | --- | --- | --- | --- |
+| `rgbw` | 4 680 | 1 881 360 | 0 | 0 |
+| `non_d65_white` | 4 680 | 1 881 360 | 0 | 0 |
+| `rgbww` | 4 680 | 1 881 360 | 0 | 0 |
+| `rgbww_two_white` | 4 680 | 1 881 360 | 0 | 0 |
+
+**7.5 million evaluations, no disconnected interval, and every feasible ray
+reaches the neutral axis.** The second column is worth stating separately: an
+interval that is connected but floats off the axis would defeat the shipped
+search just as thoroughly, because it seeds its bracket at chroma zero.
+
+This is the same kind of evidence as the three-emitter result -- strong for
+these devices, not a proof. The interval detector is given a predicate with a
+hole punched in it and required to report two intervals, so the sweep cannot
+pass by never firing.
+
+### The composition holds, once both halves use the same hull
+
+Scored over roughly 28 000 out-of-gamut targets, mapped at the shipped eight
+halvings and then allocated, with the drives **re-rendered** rather than
+trusted -- which is what would catch an allocation reporting success while
+producing something else.
+
+| device | out-of-gamut | hue drift | dE2000, realized vs mapped | worst step | worst / mean |
+| --- | --- | --- | --- | --- | --- |
+| `rgbw` | 7 012 | 0.000000 deg | 8.6e-14 | 0.002871 | 12.5x |
+| `non_d65_white` | 7 012 | 0.000000 deg | 7.9e-14 | 0.003140 | 12.7x |
+| `rgbww` | 7 012 | 0.000000 deg | 7.9e-14 | 0.003441 | 10.1x |
+| `rgbww_two_white` | 7 441 | 0.000000 deg | 1.0e-13 | 0.011086 | 9.7x |
+
+Allocation adds nothing measurable: the realized colour matches what the
+mapper chose to float64 noise, and hue survives the second stage exactly. The
+worst/mean ratios sit *below* the three-emitter path's 42.8x, so the white
+emitter does not make the boundary step worse.
+
+`rgbww_two_white` reads 3.5x the others in absolute step only because its
+primaries carry 0.22/0.60/0.08 rather than unit capacity, so a given change in
+XYZ needs proportionally larger drives -- the blue emitter alone is 12x more
+sensitive. As a fraction of that device's own full drive it is in line.
+
+### The tolerance skew between the two hulls, measured
+
+Scoring this composition the obvious way -- oracle in front, closed form
+behind -- reports 56 failures on `rgbww` that neither method commits alone.
+They are not defects. `most_white_two` allows `ENUMERATION_TOLERANCE` (1e-7)
+and `allocate_two_white` allows `DRIVE_TOLERANCE` (1e-9), so a target sitting
+on the hull boundary is accepted by one and refused by the other. The worst
+case found is a target whose blue drive is **-7.6e-08** with the whites off:
+genuinely outside, by less than the oracle's slack.
+
+Recorded because it is the trap waiting for the next person to score these
+two stages together: the mapper and the allocation behind it have to consult
+the *same* predicate, which is what the embedded path does. With both on the
+closed form the count is 0 on every device.
+
+### Above the brightest neutral is not outside the hull (#4245)
+
+Constructing over-bright targets for these devices turned up a case worth
+recording on its own. The mappers clamp lightness to the brightest reachable
+*neutral*, and the hull reaches higher than that off the neutral axis:
+
+Two denominators are in play and they are not interchangeable, so both are
+given. *Headroom* is the gain relative to the neutral cap, which is what the
+clamp gives up as a fraction of what it keeps. *Share* is the same interval as
+a fraction of the whole reachable range.
+
+| device | brightest neutral | brightest reachable | at | headroom | share of reachable |
+| --- | --- | --- | --- | --- | --- |
+| `rgbw` | 1.338544 | 1.623559 | hue 300, C 0.48 | **+21.3%** | 17.6% |
+| `non_d65_white` | 1.333993 | 1.633584 | hue 300, C 0.50 | **+22.5%** | 18.3% |
+| `rgbww` | 1.499835 | 1.748872 | hue 300, C 0.46 | **+16.6%** | 14.2% |
+| `rgbww_two_white` | 1.152403 | 1.167419 | hue 0, C 0.02 | +1.3% | 1.3% |
+
+So a chromatic target just above the neutral cap can be exactly reachable and
+is compressed anyway. That is #4245, and these are the first numbers on it for
+wide hulls: on a four-emitter device the clamp gives up **22.5% on top of the
+neutral cap**, which is **18.3% of the reachable range**. It is not fixed
+here: the clamp is what makes the chroma bisection valid at all (see
+"Lightness must be clamped before chroma"), and removing it without replacing
+the search inverts the bisection's invariant.
+
 ## Not covered
 
-The interaction between the allocation policy and the gamut mapping. Both are
-characterized here in isolation; a target that is out of gamut *and* on a
-device with a white emitter goes through both, and that composition has not
-been scored.
+The composition is scored against the reference objective and against itself,
+not against measured hardware -- that is P10's gate.
+
+Ray connectivity above four emitters is measured on the four devices the
+corpus ships. A device whose whites are close enough to be near-parallel
+generators, or one with more than two whites, is outside what was swept.
