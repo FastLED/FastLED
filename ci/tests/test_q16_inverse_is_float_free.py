@@ -139,24 +139,45 @@ kResolvedTransfer = re.compile(
 def _callees(body: list[str]) -> set[str]:
     """Who this function actually transfers control to.
 
-    Two forms, and only two. A control-flow relocation names the real target
-    of a call to an undefined symbol; a resolved local transfer carries a
-    non-zero address. A `bl 0 <name>` with no relocation beside it is neither
-    -- that is the unrelocated case, and the name objdump prints for it is
-    whatever happens to sit at address zero. Following those printed names had
-    this walk believing `signedCbrtQ16` called `isUsableSolveChromaticity`: a
-    cube root calling a chromaticity validator, which is what gave it away.
+    A relocation record on the line *after* a transfer names its real target,
+    and supersedes the name objdump printed. Without one, the printed name is
+    correct and is used as it stands.
+
+    The pairing matters in both directions, and getting it wrong is how this
+    walk has been wrong twice.
+
+    Reading the printed name always: an unrelocated call disassembles as
+    `bl 0 <name>` and objdump resolves that `0` against the symbol table, so
+    every such call appears to go to whatever function sits at address zero.
+    That had `signedCbrtQ16` calling `isUsableSolveChromaticity` -- a cube
+    root calling a chromaticity validator, which is what gave it away.
+
+    Discarding every address-zero transfer instead: a function genuinely
+    placed at offset zero in its section is a legitimate target, and dropping
+    the edge loses a real call. Measured in this object, 254 of the 257
+    address-zero transfers carry a relocation and are the ambiguous kind,
+    and the remaining 3 are `buildRgbSolveMatrixQ16` calling
+    `isUsableSolveChromaticity` for real. Losing an edge is the dangerous
+    direction: it makes "reaches no float" pass by not looking.
     """
 
     out: set[str] = set()
+    pending_transfer: str | None = None
     for line in body:
         relocation = kControlRelocation.search(line)
         if relocation:
+            # Supersedes the transfer it belongs to, which is the line above.
             out.add(relocation.group(1))
+            pending_transfer = None
             continue
+        if pending_transfer is not None:
+            out.add(pending_transfer)
+            pending_transfer = None
         transfer = kResolvedTransfer.search(line)
-        if transfer and int(transfer.group(1), 16) != 0:
-            out.add(transfer.group(2))
+        if transfer:
+            pending_transfer = transfer.group(2)
+    if pending_transfer is not None:
+        out.add(pending_transfer)
     return out
 
 
@@ -261,13 +282,27 @@ class CompiledPipeline:
 # tail call does become `b.n`. That is what makes the branch handling in
 # `_callees` load-bearing rather than defensive; on the M0+ build alone it
 # would never be exercised.
-kFloatFreeTargets: tuple[tuple[str, ...], ...] = (
-    ("cortex-m0plus", "-march=armv6-m"),
-    ("cortex-m33+nofp", "-march=armv8-m.main+dsp"),
+@typechecked
+@dataclass(frozen=True)
+class FloatFreeTarget:
+    """One core to compile the pipeline for."""
+
+    core: str
+    march: str
+
+
+@typechecked
+def _target_id(target: FloatFreeTarget) -> str:
+    return target.core
+
+
+kFloatFreeTargets: tuple[FloatFreeTarget, ...] = (
+    FloatFreeTarget(core="cortex-m0plus", march="-march=armv6-m"),
+    FloatFreeTarget(core="cortex-m33+nofp", march="-march=armv8-m.main+dsp"),
 )
 
 
-@pytest.fixture(scope="module", params=kFloatFreeTargets, ids=lambda t: t[0])
+@pytest.fixture(scope="module", params=kFloatFreeTargets, ids=_target_id)
 @typechecked
 def compiled_pipeline(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
@@ -283,7 +318,8 @@ def compiled_pipeline(
     if tools is None:
         pytest.skip("no arm-none-eabi cross compiler on this machine")
 
-    core, march = request.param
+    target: FloatFreeTarget = request.param
+    core = target.core
     tmp_path = tmp_path_factory.mktemp(f"pipeline_{core.replace('+', '_')}")
     source = tmp_path / "pipeline_tu.cpp"
     source.write_text(kPipelineSource, encoding="utf-8")
@@ -298,7 +334,7 @@ def compiled_pipeline(
             "-I",
             str(PROJECT_ROOT / "src"),
             f"-mcpu={core}",
-            march,
+            target.march,
             "-mthumb",
             "-Os",
             "-std=gnu++17",
@@ -314,6 +350,65 @@ def compiled_pipeline(
         check=True,
     )
     return CompiledPipeline(tools=tools, obj=obj, core=core)
+
+
+@typechecked
+def test_the_callee_parser_pairs_relocations_with_their_transfer() -> None:
+    """`_callees` on disassembly written out by hand.
+
+    The walk has been wrong twice, in opposite directions, and both mistakes
+    survived every reachability case because they only changed which edges
+    existed -- not whether the walk ran. So the parser is tested on input
+    where the right answer is known by construction.
+    """
+
+    # An unrelocated call: the printed name is whatever sits at address zero,
+    # and the relocation on the next line is the real target.
+    relocated = [
+        "     a20:\tbl\t0 <_ZN2fl9decoyAtZeroEv>",
+        "\t\t\ta20: R_ARM_THM_CALL\t__aeabi_fadd",
+    ]
+    assert _callees(relocated) == {"__aeabi_fadd"}
+
+    # A genuine local call to a function at offset zero: no relocation, so
+    # the printed name stands. Discarding this is how a real edge gets lost.
+    at_zero = ["     78e:\tbl\t0 <_ZN2fl20isUsableChromaticityEv>"]
+    assert _callees(at_zero) == {"_ZN2fl20isUsableChromaticityEv"}
+
+    # A resolved local call, and a tail call emitted as a branch.
+    resolved = [
+        "     a7a:\tbl\t1ba <_ZN2fl9someLeafEv>",
+        "     18c:\tb.n\t16e <_ZN2fl9tailLeafEv>",
+    ]
+    assert _callees(resolved) == {"_ZN2fl9someLeafEv", "_ZN2fl9tailLeafEv"}
+
+    # A data relocation is not a call. Counting it invents an edge.
+    #
+    # Naming a *function* here on purpose: the nine `R_ARM_ABS32` records in
+    # the real object all name `.rodata`, which the symbol pattern rejects on
+    # the leading dot anyway -- so a case built from those would pass whether
+    # or not the relocation type is checked, and would say nothing. A
+    # function-pointer table entry is the shape that needs the type check.
+    data = [
+        "     1c0:\tldr\tr1, [pc, #8]",
+        "\t\t\t1c4: R_ARM_ABS32\t_ZN2fl11addressOnlyEv",
+    ]
+    assert _callees(data) == set()
+
+    # And the two forms interleaved, which is what a real body looks like --
+    # a relocation must attach to the transfer above it and not to the next
+    # one down.
+    mixed = [
+        "     100:\tbl\t0 <_ZN2fl9decoyAtZeroEv>",
+        "\t\t\t100: R_ARM_THM_CALL\t__aeabi_fmul",
+        "     104:\tbl\t0 <_ZN2fl9realAtZeroEv>",
+        "     108:\tbl\t200 <_ZN2fl9plainCallEv>",
+    ]
+    assert _callees(mixed) == {
+        "__aeabi_fmul",
+        "_ZN2fl9realAtZeroEv",
+        "_ZN2fl9plainCallEv",
+    }
 
 
 @typechecked
