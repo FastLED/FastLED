@@ -220,9 +220,21 @@ tuple, so old readers degrade to reduced fidelity, never to wrong data. That is
 why adding `video.color` is not a version bump.
 
 Payloads whose color semantics are **mandatory** rather than advisory gate on a
-new `pixel_format` value instead: `rgb16_linear` is meaningless without its
-declaration, and readers that predate it already reject unknown pixel formats.
-Mandatory-ness is a property of the payload format, not a version flag.
+new `pixel_format` value instead, and readers that predate one already reject
+unknown pixel formats. Mandatory-ness is a property of the payload format, not
+a version flag.
+
+"Mandatory" is about *unresolvable* declarations, not about *absent* ones, and
+the two are easy to run together. `rgb16_linear` carries a default tuple like
+the display-encoded formats do, so an absent `video.color` resolves — the
+format value has already pinned linear-light samples, and BT.709 primaries at
+full range are the rest of the historical reading. `declared` is false on that
+result, so a consumer can still tell an inherited tuple from an author's claim.
+What `rgb16_linear` may not do is *fall back*: where an unrecognized name on
+`rgb8` may resolve to the default tuple with a diagnostic, the same name on
+`rgb16_linear` is a refusal. An earlier revision of this section said the
+format was "meaningless without its declaration", which contradicts both the
+table above and `resolveVideoColor()` (FastLED #4156 R10).
 
 ## Frame Payload
 

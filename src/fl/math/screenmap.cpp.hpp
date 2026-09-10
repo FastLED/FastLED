@@ -26,6 +26,29 @@
 
 namespace fl {
 
+namespace {
+
+// Every value that reaches `mDiameter` from a caller passes through here.
+//
+// The class accepts any `float` -- three constructors and `setDiameter` all
+// take one unfiltered -- but only two kinds of value mean anything: a
+// positive size, and the -1 sentinel for "unset". A caller who stores 0.0f
+// or -2.0f has named a diameter no LED has. The emitter cannot publish
+// those (a consumer reading `"diameter": -2` learns nothing it can use) and
+// the parsers read an absent key back as -1, so before this normalization a
+// stored 0.0f came back from a round trip as -1.0f: silently different from
+// what was set, and different in a way `getDiameter()` did not show until
+// the file had been through JSON.
+//
+// Folding them to the sentinel at the boundary makes the two agree. A
+// non-positive diameter now reads back as -1 immediately, from the setter
+// onward, so the round trip is the identity on every value the class holds.
+float normalizedDiameter(float diameter) FL_NO_EXCEPT {
+    return diameter > 0.0f ? diameter : -1.0f;
+}
+
+}  // namespace
+
 // Default constructor and destructor - must be in .cpp for proper smart_ptr handling
 ScreenMap::ScreenMap() = default;
 ScreenMap::~ScreenMap() FL_NO_EXCEPT = default;
@@ -427,8 +450,12 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     // Emits the v2 screenmap shape (issue ledmapper#143):
     //   { "version": 2,
     //     "groups": { "<name>": { "color": "#hex" } },
-    //     "segments": [ { "id": "<name>", "pin": "pin1", "group": "<name>",
+    //     "segments": [ { "id": "<name>", "group": "<name>",
     //                     "x": [...], "y": [...], "diameter": ... } ] }
+    //
+    // `pin` is part of the v2 shape but is not emitted here -- see the note
+    // at the segment object below. Writing the example value from a comment
+    // as data is how it came to be there.
     // Bilingual readers (`ScreenMap::ParseJson`, ledmapper) accept both v1
     // and v2, so any existing on-disk v1 JSON keeps loading. v1 emission
     // is no longer supported.
@@ -471,11 +498,39 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
 
         fl::json segmentObj = fl::json::object();
         segmentObj.set("id", fl::json(fl::string(name)));
-        segmentObj.set("pin", fl::json(fl::string("pin1")));
+        // No `pin`. The v2 shape carries one and the parser above drops it --
+        // it is wiring metadata with nowhere to live on this side -- so there
+        // is nothing here to write. What used to be written was the literal
+        // `"pin1"` from the shape example in the comment above, copied into
+        // the emitter as data.
+        //
+        // That is worse than omitting it, because it is wrong rather than
+        // absent. A three-segment file wired to pin1/pin2/pin3 came back with
+        // all three on pin1, and a numeric `"pin": 7` came back as the string
+        // `"pin1"`. A consumer reading that mis-wires a strip and has no way
+        // to tell; a consumer reading a missing optional key can see that it
+        // is missing.
+        //
+        // Carrying the value through instead is FastLED #3322, which needs
+        // somewhere on `ScreenMap` to put it and a decision about the
+        // `<int|str>` union. Until then this loses the field visibly rather
+        // than rewriting it silently.
         segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
-        segmentObj.set("diameter", fl::json(diameter));
+        // Only when there is one. `mDiameter` defaults to -1 as a sentinel
+        // meaning "unset", and writing that out publishes an impossible
+        // physical size: no LED is -1 units across. The parser already reads
+        // an absent key back as -1 (both the v1 and v2 paths default it), so
+        // omitting round-trips to exactly the same value inside FastLED and
+        // stops a consumer from having to know the sentinel.
+        //
+        // The field's own comment in screenmap.h asked for this and had the
+        // sense inverted -- "Only serialized if it's not > 0.0f" -- which is
+        // presumably how the writer came to do the opposite.
+        if (diameter > 0.0f) {
+            segmentObj.set("diameter", fl::json(diameter));
+        }
         segmentsArr.push_back(segmentObj);
 
         idx++;
@@ -497,8 +552,8 @@ void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps,
     *jsonBuffer = doc.to_string();
 }
 
-ScreenMap::ScreenMap(u32 length, float mDiameter)
-    : length(length), mDiameter(mDiameter) {
+ScreenMap::ScreenMap(u32 length, float mDiameter) FL_NO_EXCEPT
+    : length(length), mDiameter(normalizedDiameter(mDiameter)) {
     if (length > 0) {
         mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
         LUTXYFLOAT &lut = *mLookUpTable.get();
@@ -509,8 +564,8 @@ ScreenMap::ScreenMap(u32 length, float mDiameter)
     }
 }
 
-ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter)
-    : length(length), mDiameter(diameter) {
+ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter) FL_NO_EXCEPT
+    : length(length), mDiameter(normalizedDiameter(diameter)) {
     mLookUpTable = fl::make_shared<LUTXYFLOAT>(length);
     LUTXYFLOAT &lut16xy = *mLookUpTable.get();
     vec2f *data = lut16xy.getDataMutable();
@@ -519,8 +574,8 @@ ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter)
     }
 }
 
-ScreenMap::ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func)
-    : length(count), mDiameter(diameter) {
+ScreenMap::ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func) FL_NO_EXCEPT
+    : length(count), mDiameter(normalizedDiameter(diameter)) {
     if (count > 0) {
         mLookUpTable = fl::make_shared<LUTXYFLOAT>(count);
         LUTXYFLOAT &lut = *mLookUpTable.get();
@@ -557,7 +612,9 @@ void ScreenMap::set(u16 index, const vec2f &p) {
     }
 }
 
-void ScreenMap::setDiameter(float diameter) { mDiameter = diameter; }
+void ScreenMap::setDiameter(float diameter) FL_NO_EXCEPT {
+    mDiameter = normalizedDiameter(diameter);
+}
 
 vec2f ScreenMap::mapToIndex(u32 x) const {
     if (x >= length || !mLookUpTable) {

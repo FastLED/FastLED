@@ -334,9 +334,16 @@ class TestColorGamutStudy(unittest.TestCase):
     ) -> None:
         """Bisection assumes the feasible chroma ray is connected.
 
-        The reference does not assume that, so the assumption is checked here
-        rather than asserted in prose. A coarse sweep on every run; the dense
-        1.9M-sample sweep behind the report's claim is recorded there.
+        That assumption is false, and `ci/tests/test_color_ray_roots.py`
+        carries the witness: a hue wedge about 0.14 degrees wide near 264
+        degrees where the feasible chroma is two intervals at every lightness.
+
+        This case is kept, unchanged, for what it now says instead. The wedge
+        contains no multiple of the 30 degrees walked here -- nor of the 3
+        degrees walked by the dense sweep behind the report -- so this passes,
+        and it passing is the point: a sampled grid reports connectivity on a
+        device that does not have it, and the failure is invisible from
+        inside the sample.
         """
 
         for lightness_step in range(1, 10):
@@ -357,8 +364,10 @@ class TestColorGamutStudy(unittest.TestCase):
                         with self.subTest(lightness=lightness, hue=hue_degrees):
                             self.assertFalse(
                                 seen_infeasible,
-                                "feasible chroma is disconnected here; "
-                                "bisection would discard the far interval",
+                                "feasible chroma is disconnected on this "
+                                "grid too; the known wedge near 264 degrees "
+                                "is off it, so this is a second case and "
+                                "test_color_ray_roots.py should gain it",
                             )
                     else:
                         seen_infeasible = True

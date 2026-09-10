@@ -129,12 +129,285 @@ device normalisation instead of the path, and produces numbers that look
 alarming and mean nothing. The test pins the correct form — substituting equal
 drives fails it.
 
-## What this leaves for section 5
+## The ceiling for a static strategy is above what the pipeline reaches
 
-Two of the five candidates are gone, and the remaining comparison is between
-independent RGB gamma, value-only shaping over the HSV16 path, and
-linear-light temporal dithering, with 0.0605 OKLab chroma at 2% luminance as
-the neutral-axis target to beat.
+Before comparing shaping functions it is worth knowing what the best possible
+static answer is, because every candidate sits under it. The output is one of
+256^3 code triples and the best is whichever lands nearest the target, so that
+bound is computable rather than a matter of taste.
+
+I expected round-to-nearest to *be* that bound -- that the 0.0605 above was
+the lattice rather than the rule. It is not.
+
+`quantize_u8` rounds each drive independently, minimising error in **drive**
+space. The three drives carry very different perceptual weight, so the nearest
+drive triple is not the nearest colour. Searching a +/-2 neighbourhood in
+OKLab over 40 neutral luminances from 1% to 40%:
+
+| | |
+| --- | --- |
+| rounding was optimal | **13 of 40** |
+| worst shortfall | **0.0115** OKLab distance |
+
+### Distance is not chroma, and the two do not always agree
+
+The search minimises Euclidean OKLab distance, which includes lightness. A
+candidate can therefore land closer to the ideal neutral overall while sitting
+*further* off the neutral axis, so "closer" and "less off-axis" are different
+claims. An earlier revision of this section quoted the distance shortfall
+against the 0.0605 of neutral chroma as though they were the same quantity;
+they are not, and measuring chroma directly gives a better answer anyway.
+
+Over the same 40 targets, comparing the chroma of the distance-optimal code
+against the rounded one:
+
+| | |
+| --- | --- |
+| chroma improved | 23 |
+| unchanged | 13 |
+| **chroma got worse** | **4** |
+
+The largest of those four goes 0.01076 -> 0.01230 while total distance
+improved -- exactly the case the objectives coming apart predicts.
+
+Where it matters most they agree. At the worst target -- 2% luminance, the one
+the neutral sweep reports at **0.0605** -- the distance-optimal code measures
+**0.0382**, a 37% reduction in chroma.
+
+Two things this does not say. A 125-candidate search does not belong on the
+per-pixel path -- it plainly does not, and nothing here proposes it. And it
+does not name a cheap rule that captures the gain; finding one is work this
+has not done. What it establishes is that the remaining candidates are being
+compared against a floor that is lower than it needs to be, which is worth
+knowing before spending effort ranking them.
+
+## The black floor is the source quantization, and it is hard
+
+Issue #4156 R8 asks for the black floor, the luminance-error denominator and
+the unsupported low-light region to be defined rather than inferred from wider
+arithmetic, and gives the arithmetic that motivates it: an identity linear16
+input of `1/65535` is 0.0039 of an 8-bit code, so its nearest 8-bit output is
+zero -- 100% relative luminance error. Matching it by alternating codes 0 and 1
+needs one code-1 frame in 257, about 4.28 seconds at 60 Hz, which is not a
+cadence anything can display.
+
+Measured against the shipped path, the situation is simpler than that and
+worse. `PixelController::dither()` is
+
+```cpp
+return b ? fl::qadd8(b, pc.d[RO(SLOT)]) : 0;
+```
+
+so a source code of zero is excluded from dithering by construction. **Nothing
+below one source code is reachable at any brightness, any refresh rate, or any
+dither cycle length.** R8's 4.28-second cadence is not the obstacle; the
+obstacle is that the mechanism never runs on the value in question. The floor
+is the quantization of the source, not a dead zone above it: one code up, the
+cycle emits light.
+
+That answers the "unsupported low-light region" directly. For an identity
+mapping it is every source value that quantizes to 8-bit zero.
+
+### Above the floor, dithering does what it claims
+
+At 1/16 brightness a source code of 1 asks for 0.06 output codes, which no
+single frame can emit. The eight-frame cycle emits code 1 once and zero seven
+times, so the mean lands between two output codes. Sub-output-code precision
+is real.
+
+### And the lowest codes render brighter than they ask for
+
+The correction that turns `scale8`'s truncation into round-to-nearest is a
+constant addition of about half a dither quantum. At the bottom of the range
+that is a large fraction of the value itself. Summed over a full cycle, so
+these are time-averaged light and not single-frame rounding:
+
+| premixed | source code | emitted | exact | error |
+| --- | --- | --- | --- | --- |
+| 255 | 1 | 11 | 8 | **+37.5%** |
+| 255 | 2 | 19 | 16 | +18.8% |
+| 255 | 64 | -- | -- | under +2% |
+
+The last row is the point: the bias is a constant in absolute terms, so it
+disappears as a fraction almost immediately. It is only the bottom two or
+three codes that carry it.
+
+At `premixed = 255` it is not a trade at all. `scale8(i, 255)` is exact under
+`FASTLED_SCALE8_FIXED` -- `(i * 256) >> 8` is `i` -- so no fractional precision
+is lost there, there is nothing for a rounding correction to recover, and
+every code the dither adds is gain. `DISABLE_DITHER` makes that path exact.
+Note that `premixed` is brightness *times* colour correction, so the exact
+case is `UncorrectedColor` at full brightness rather than the common default.
+
+This is what R8 means by a quantized reference concealing optical error:
+against an 8-bit reference every one of these matches, and against the light
+they are asking for they do not. The denominator has to be emitted light.
+
+`tests/pixel_controller.cpp` carries all of it as measurements rather than
+prose. No change to the dither is proposed here -- R8 asks for the contract to
+be defined, and shifting the low-code rendering of every existing sketch is a
+decision, not a cleanup.
+
+### And the cadence that decides how long a cycle may be is 4x out
+
+Issue #4156 R8 asks for "cadence, observation window, and unsupported
+low-light region". The floor above answers the last one. This is the first, and the two
+constants that decide it disagree.
+
+The dither cycle length is *derived* from a cadence assumption, in
+`src/pixel_controller.h`:
+
+| | |
+| --- | ---: |
+| `MAX_LIKELY_UPDATE_RATE_HZ` | 400 |
+| `MIN_ACCEPTABLE_DITHER_RATE_HZ` | 50 |
+| `UPDATES_PER_FULL_DITHER_CYCLE` | 400 / 50 = **8** |
+
+Eight frames is the number that makes a 400 Hz refresh complete a cycle at
+50 Hz. That much is coherent.
+
+What *enables* dithering is not 400. `CFastLED::show()` and `showColor()` each
+carry `if (mNFPS < 100) { pCur->setDither(0); }` -- a bare literal, twice, with
+no reference to the constants above. **At 100 FPS an eight-frame cycle
+completes at 12.5 Hz**, a quarter of the file's own floor, and near the peak of
+human flicker sensitivity rather than above it.
+
+The guide in that file states two different 50 Hz conditions, and the code
+implements the weaker one:
+
+* *"At refresh rates above ~50Hz, human vision integrates these variations"* --
+  about the **refresh**;
+* *"8-frame cycle at 400Hz = 50Hz complete cycle"* -- about the **cycle**.
+
+What the eye integrates is the modulation, and the modulation is at the cycle
+rate. `tests/pixel_controller.cpp` records the arithmetic rather than asserting
+an intent: raising the threshold would disable dithering for most sketches,
+which is a decision rather than a cleanup, and the case fails if either number
+moves so that whoever moves it writes down why.
+
+Worth having before any *pipeline* dither is built, because that one modulates
+harder: reaching the bottom of the range means toggling the lowest codes, so
+the relative depth is largest exactly where the eye is most sensitive to it.
+
+## Section 5: the two static candidates, scored
+
+The ceiling above is what makes this scoreable without settling the
+strategy-space question first. Whatever shape a strategy has, a single frame
+cannot beat the best code that frame can emit -- so both candidates are
+evaluated at their *best* rather than through a particular curve, and the
+numbers bound the family instead of one member.
+
+### Independent RGB gamma is out
+
+A per-channel transfer applied to the linear drive before quantization, which
+is the honest reading of the name. It is worse than plain rounding at **40 of
+40** targets, by at least 2.3x even where rounding does worst:
+
+| luminance | rounding | gamma 2.2 |
+| --- | ---: | ---: |
+| 2% | 0.0605 | 0.1417 |
+| 8% | 0.0247 | 0.1734 |
+| 14% | 0.0108 | 0.1930 |
+
+The reason is the one that removed `colorBoost`: a WS2812 drives its diodes
+with linear PWM, so nothing downstream decodes the curve, and the emitted
+light is the code rather than the drive the code came from. Gamma is a fine
+appearance control and is not a neutral re-encoding.
+
+### Value-only shaping over HSV16 survives, and takes about a third
+
+Hue and saturation come from the rounded code and only the value moves, so it
+is never worse than per-channel rounding -- **0 of 40** targets regress. Every
+16-bit value is searched, so this is the best any V-only shaping function
+could do.
+
+At the worst target, 2% luminance:
+
+| | chroma |
+| --- | ---: |
+| per-channel rounding | 0.0605 |
+| best value-only shaping | 0.0530 |
+| static ceiling (#4265) | 0.0382 |
+
+It closes 0.0075 of an available 0.0223 -- **about a third of the room a
+single frame has.** Across the sweep it lands at or below the distance-optimal
+code's chroma at 36 of 40 targets; the four exceptions are the distance-versus-
+chroma disagreement recorded above, not a failure of the strategy.
+
+### And the remaining candidate, which does not need the cadence to be scored
+
+Linear-light temporal dithering was left as "waiting on the frame cadence P6
+wires up". The cadence is needed to *ship* it. It is not needed to *score* it:
+an N-frame cycle's time-averaged light is arithmetic, and the static ceiling
+above is the same construction with N = 1.
+
+A cycle that spends `k` of its `N` frames one code higher averages to a drive
+of `base + k/N`, per channel, so the reachable averages are a grid. Averaging
+is done in linear XYZ rather than in OKLab, because light averages and
+perceptual coordinates do not -- the same assumption the dither guide in
+`pixel_controller.h` makes when it says the eye integrates the cycle above
+~50 Hz.
+
+**What is tabulated is the chroma of the *distance-optimal* cycle**, not the
+lowest chroma a cycle could reach. The distinction is the one recorded above
+under "Distance is not chroma": the search minimises OKLab distance to the
+ideal and the table reports that candidate's neutral-axis error. Minimising
+chroma directly would be meaningless here -- a cycle drives chroma to zero by
+going to black, so an unconstrained chroma minimum answers "emit nothing" at
+every target. What a strategy picks is the closest reproduction, and this is
+what that costs on the axis.
+
+Worst case over the same 40 targets, all searches over the same `[-2, 2]`
+window:
+
+| | worst chroma |
+| --- | ---: |
+| per-channel rounding | 0.0605 |
+| static ceiling | 0.0466 |
+| temporal, 2 frames | 0.0304 |
+| temporal, 4 frames | 0.0109 |
+| **temporal, 8 frames** | **0.0086** |
+
+The static worst sits at a different target from the 2% one quoted above,
+which is why it reads 0.0466 rather than 0.0382: at 1% luminance no single
+frame improves on rounding at all.
+
+At the 2% target, all three against the same baseline of per-channel rounding:
+
+| | chroma | reduction against rounding |
+| --- | ---: | ---: |
+| per-channel rounding | 0.0605 | -- |
+| best value-only shaping | 0.0530 | 12% |
+| distance-optimal single frame | 0.0382 | 37% |
+| **distance-optimal eight-frame cycle** | **0.0016** | **97%** |
+
+The section above framed this candidate as the one that "could close the other
+two thirds", meaning the part of the static ceiling's 37% that value-only
+shaping leaves behind. That framing understates it: the cycle is not competing
+for the remainder of a 37% budget, it removes 97% of the error outright.
+Eight frames is also the cycle `BINARY_DITHER` already runs, so the cadence
+question is not a new one.
+
+The one-frame row is a control rather than a second measurement: at `N = 1`
+the grid collapses to the integer codes over the same window the static search
+uses, so it must reproduce the static answer exactly. It does, to within a
+float ULP.
+
+Three things this does not say. It is a **ceiling**, like the static one -- what
+a distance-optimal N-frame cycle costs on the axis, not what an algorithm
+achieves. It says
+nothing about flicker; a cycle that reaches the floor by toggling the bottom
+codes is exactly the trade #4156 R8 asks to have declared. And it assumes a
+pipeline dither that can choose sub-code average drives, which is a different
+mechanism from `BINARY_DITHER` -- that one is gated on a nonzero source and
+recovers precision lost in the brightness multiply, as the black-floor section
+above records.
+
+### What that leaves
+
+Building it. Section 5's comparison is answered: independent RGB gamma is out,
+value-only shaping survives and takes about a third, and temporal dithering is
+worth the state it costs.
 
 ## Not covered
 

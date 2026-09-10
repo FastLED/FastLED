@@ -489,6 +489,54 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     )
 
 
+def run_macro_prefix_check(file_path: str | None = None) -> CheckerResults:
+    """New `FASTLED_*` macro names, against the checked-in baseline.
+
+    A plain text scan rather than an AST pass: the rule is about what a macro
+    is *called*, which the preprocessor lines carry directly. Cheap enough to
+    run unconditionally, so it does not join the clang-query consolidation
+    above.
+    """
+
+    from ci.tools.check_macro_prefix import (
+        BASELINE_PATH,
+        SOURCE_ROOT,
+        load_baseline,
+        scan,
+    )
+
+    results = CheckerResults()
+    found = scan(SOURCE_ROOT)
+    baseline = load_baseline(BASELINE_PATH)
+
+    # Single-file mode still scans the tree -- the baseline is repo-wide, and
+    # a name is only "new" relative to all of it -- but reports just the
+    # selected file, so `bash lint <file>` behaves like the full run on the
+    # part the developer changed.
+    selected: str | None = None
+    if file_path is not None:
+        try:
+            selected = Path(file_path).resolve().relative_to(SOURCE_ROOT).as_posix()
+        except ValueError:
+            # Outside src/: nothing this checker owns can be attributed to it.
+            return results
+
+    for name in sorted(set(found) - baseline):
+        if selected is not None and found[name] != selected:
+            continue
+        results.add_violation(
+            f"src/{found[name]}",
+            1,
+            f"new macro name `{name}` — agents/docs/cpp-standards.md requires "
+            "the FL_ prefix (FL_IS_<PLATFORM>, FL_<COMPONENT>_<NAME>). If the "
+            "name must match one published outside this repo, add "
+            "`// fl-lint: macro-prefix-ok(<reason>)`; if you renamed an "
+            "existing macro, refresh the baseline with "
+            "`uv run python ci/tools/check_macro_prefix.py --update-baseline`.",
+        )
+    return results
+
+
 def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
     """Run noexcept + array-param matchers in ONE clang-query session per TU.
 
@@ -949,6 +997,10 @@ def main() -> int:
         if array_param_results.has_violations():
             results["ArrayParamAstChecker"] = array_param_results
 
+        macro_prefix_results = run_macro_prefix_check(str(file_path))
+        if macro_prefix_results.has_violations():
+            results["MacroPrefixChecker"] = macro_prefix_results
+
         # Format and print results
         exit_code = format_and_print_results(results)
 
@@ -1007,6 +1059,10 @@ def main() -> int:
             # PchFileChecker now ship in the Rust binary's run_structural_passes()
             # — see ci/lint_cpp_rs/src/checkers/structural_passes.rs. Violations
             # arrive via `merge_checker_results` above.
+
+            macro_prefix_results = run_macro_prefix_check()
+            if macro_prefix_results.has_violations():
+                results["MacroPrefixChecker"] = macro_prefix_results
 
             noexcept_results, array_param_results = ast_future.result()
             if noexcept_results.has_violations():

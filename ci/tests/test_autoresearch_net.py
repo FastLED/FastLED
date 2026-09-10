@@ -4,16 +4,77 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import importlib
 import io
+import os
+import sys
 import time
+from collections.abc import Callable
+from pathlib import Path
+from types import ModuleType
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+
+# pty and TIOCEXCL are POSIX-only. These two tests exercise the real serial
+# contention mechanism rather than emulating it, so they are resolved through
+# getattr and skipped where the platform has no such thing. ty treats
+# possibly-missing-attribute as a hard error, so the lookups cannot be direct.
+def _optional_module(module_name: str) -> "ModuleType | None":
+    """Import `module_name`, or None when the platform does not have it.
+
+    `sys.platform != "win32"` is not a POSIX capability check: a non-Windows
+    platform without `pty`/`fcntl`/`termios` would raise during collection,
+    before the skip marker below could apply.
+    """
+    try:
+        return importlib.import_module(module_name)
+    except KeyboardInterrupt as ki:
+        # Re-raising alone leaves the interrupt un-propagated to the main
+        # thread, which is what KBI002 is about; this is the repo's handler,
+        # used the same way in ci/tests/test_elf.py.
+        handle_keyboard_interrupt(ki)
+        raise
+    except ImportError:
+        return None
+
+
+def _optional_callable(module_name: str, attribute: str) -> "Callable[..., Any] | None":
+    module = _optional_module(module_name)
+    if module is None:
+        return None
+    found = getattr(module, attribute, None)
+    return found if callable(found) else None
+
+
+def _optional_int(module_name: str, attribute: str) -> "int | None":
+    module = _optional_module(module_name)
+    if module is None:
+        return None
+    found = getattr(module, attribute, None)
+    return found if isinstance(found, int) else None
+
+
+_openpty = _optional_callable("pty", "openpty")
+_ttyname: "Callable[..., Any] | None" = getattr(os, "ttyname", None)
+_ioctl = _optional_callable("fcntl", "ioctl")
+_TIOCEXCL = _optional_int("termios", "TIOCEXCL")
+
+requires_posix_tty = pytest.mark.skipif(
+    not all((_openpty, _ttyname, _ioctl, _TIOCEXCL)),
+    reason="pty/TIOCEXCL are POSIX-only",
+)
+
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
     _describe_failed_client_tests,
+    _describe_port_holder,
+    _port_is_locked,
+    _reclaim_stale_port_locks,
     _summarize_client_tests,
     run_net_peer_autoresearch,
 )
@@ -517,9 +578,13 @@ def test_connect_peer_reads_the_ping_budget_after_connect() -> None:
     )
 
     # boot_wait is bounded by the pre-connect budget...
-    assert peer.connect.await_args.kwargs["boot_wait"] == 3.0
+    connect_call = peer.connect.await_args
+    assert connect_call is not None
+    assert connect_call.kwargs["boot_wait"] == 3.0
     # ...and the ping by what is actually left afterwards, not by 10.0.
-    assert peer.send.await_args.kwargs["timeout"] == 0.5
+    send_call = peer.send.await_args
+    assert send_call is not None
+    assert send_call.kwargs["timeout"] == 0.5
 
 
 def test_connect_peer_retries_a_port_that_will_not_open() -> None:
@@ -604,3 +669,130 @@ def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
     assert elapsed < 5.0, f"took {elapsed:.1f}s"
     # And the half-opened transport is closed every time, final attempt too.
     assert peer.close.await_count == 2
+
+
+@requires_posix_tty
+def test_describe_port_holder_is_silent_when_the_port_opens() -> None:
+    """A port that opens is not contended, whoever else holds an fd.
+
+    Measured on the bench: a tty accepts multiple openers, and another
+    process merely holding one is harmless. Naming that holder would accuse
+    the wrong thing. See FastLED/fbuild#1429.
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        # A second handle is open on this pty right now, and it still opens.
+        assert _describe_port_holder(node, "/proc") == ""
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
+@requires_posix_tty
+def test_describe_port_holder_names_the_locker_under_real_contention() -> None:
+    """When TIOCEXCL is set, say who set it and that the device is fine.
+
+    Setting TIOCEXCL by hand reproduces the exact `Device or resource busy`
+    the serial layer reports as "serial driver may be wedged".
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        assert _ioctl is not None and _TIOCEXCL is not None
+        _ioctl(slave, _TIOCEXCL)
+        described = _describe_port_holder(node, "/proc")
+        assert "locked against other openers" in described
+        assert "the device itself is fine" in described
+        assert str(os.getpid()) in described
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
+@requires_posix_tty
+def test_describe_port_holder_follows_a_by_id_symlink(tmp_path: Path) -> None:
+    """The stable name a bench config uses must still name the holder.
+
+    `/dev/serial/by-id/usb-...` is what a config pins, because `/dev/ttyACM*`
+    renumbers between plugs. But `/proc/<pid>/fd/<n>` links to the canonical
+    node, so matching on the configured basename finds nothing: the probe
+    still detects EBUSY and then reports it with no holder to name, which is
+    the whole diagnostic this helper exists to give.
+
+    A symlink standing in for the by-id path, since a pty cannot be given one
+    under /dev here.
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        alias = tmp_path / "usb-Raspberry_Pi_Pico_by-id-alias"
+        os.symlink(node, alias)
+        assert _ioctl is not None and _TIOCEXCL is not None
+        _ioctl(slave, _TIOCEXCL)
+
+        # Through the alias, not the node the fd table records.
+        described = _describe_port_holder(str(alias), "/proc")
+        assert "locked against other openers" in described
+        assert str(os.getpid()) in described
+        # And it reports the name the caller passed, not the resolved one --
+        # that is the name in their config and the one they can act on.
+        assert str(alias) in described
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
+def test_describe_port_holder_is_silent_for_a_missing_port() -> None:
+    """An absent port is not contention; say nothing rather than guess."""
+    assert _describe_port_holder("/dev/ttyACM-nonexistent-xyz", "/proc") == ""
+
+
+@requires_posix_tty
+def test_reclaim_stale_port_locks_skips_healthy_ports(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A port that opens needs no restart, and must not trigger one.
+
+    Restarting the daemon is disruptive; doing it on every run because a
+    probe was sloppy would be worse than the failure it recovers.
+    """
+    assert _openpty is not None and _ttyname is not None
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        assert _reclaim_stale_port_locks([node]) is False
+        assert "restarting" not in capsys.readouterr().out
+    finally:
+        os.close(master)
+        os.close(slave)
+
+
+def test_reclaim_stale_port_locks_ignores_empty_ports() -> None:
+    """Missing ports are not locks; never restart on their account."""
+    assert _reclaim_stale_port_locks([]) is False
+    assert _reclaim_stale_port_locks([""]) is False
+
+
+@requires_posix_tty
+def test_port_is_locked_tracks_real_exclusivity() -> None:
+    """_port_is_locked must key on EBUSY, not on someone holding a handle."""
+    assert (
+        _openpty is not None
+        and _ttyname is not None
+        and _ioctl is not None
+        and _TIOCEXCL is not None
+    )
+    master, slave = _openpty()
+    try:
+        node = _ttyname(slave)
+        # A second handle is open right now, and the port is still not locked.
+        assert _port_is_locked(node) is False
+        _ioctl(slave, _TIOCEXCL)
+        assert _port_is_locked(node) is True
+    finally:
+        os.close(master)
+        os.close(slave)

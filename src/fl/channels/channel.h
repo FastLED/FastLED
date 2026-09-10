@@ -18,6 +18,8 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/ichannel.h"
 #include "fl/channels/options.h"
+#include "fl/gfx/pipeline.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/weak_ptr.h"
@@ -65,6 +67,7 @@ public:
         ChannelConfig rebound(config);
 #if FL_COLOR_PROFILE_RUNTIME
         rebound.options.clearColorProfile();
+        installColorPipelineHooks();
         rebound.options.mColorProfile.mStaticProfile = &Profile;
         rebound.options.mColorProfile.mRequested = true;
 #else
@@ -141,6 +144,17 @@ public:
 
     /// @brief Get the number of LEDs in this channel
     int size() const override;
+
+#if FL_COLOR_PROFILE_RUNTIME
+    /// How a channel stores the colour pipeline its binding describes.
+    ///
+    /// Named because it is a decision, not an implementation detail: holding
+    /// a `StreamingPipelineQ16` inline charges every channel 88 bytes for a
+    /// pipeline most of them never bind. A static assertion in the tests
+    /// holds this to pointer size so the inline form cannot come back
+    /// unnoticed.
+    using ColorPipelineStorage = fl::unique_ptr<StreamingPipelineQ16>;
+#endif
 
     /// @brief Show the LEDs with optional brightness scaling
     void showLeds(u8 brightness = 255) OVERRIDE_IF_NOT_AVR;
@@ -314,6 +328,23 @@ private:
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     EOrder mRgbOrder;
+#if FL_COLOR_PROFILE_RUNTIME
+    /// The colour pipeline this channel's binding describes, or null when
+    /// nothing is bound. Derived in `reconcileColorProfile`, since building
+    /// it inverts matrices and bisects a lightness bound -- not per frame.
+    ///
+    /// Held behind a pointer rather than inline. `StreamingPipelineQ16` is
+    /// 88 bytes and an `fl::optional` of it carries that whether or not a
+    /// profile is bound: every channel on the sketch paid it, and an unbound
+    /// channel is the ordinary case. Inline storage took `sizeof(Channel)`
+    /// from 488 to 576 bytes, which is 1.4 KB across a sixteen-channel
+    /// parallel output for a feature none of those channels had asked for.
+    ///
+    /// Nothing pays for the indirection per pixel: `showPixels` already
+    /// handed the iterator a `const StreamingPipelineQ16*`, so the change is
+    /// one dereference per frame at the point the pointer is taken.
+    ColorPipelineStorage mPipeline;
+#endif
     fl::weak_ptr<IChannelDriver> mDriver;  // Weak reference to driver (prevents dangling pointers)
     bool mDriverPreBound = false;    // True if setDriver() was called (legacy addLeds<> path).
                                      // When true, showPixels() uses mDriver directly and skips

@@ -6,6 +6,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 
 import asyncio
 import contextlib
+import errno
 import os
 import platform as platform_mod
 import subprocess
@@ -508,6 +509,145 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
     )
 
 
+def _port_is_locked(port: str) -> bool:
+    """Whether `port` currently refuses a plain open with EBUSY.
+
+    Linux-only and best effort; False when the platform cannot say, so a
+    caller never acts on a guess.
+    """
+    noctty = getattr(os, "O_NOCTTY", 0)
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    if not noctty and not nonblock:
+        return False
+    try:
+        probe = os.open(port, os.O_RDWR | noctty | nonblock)
+    except OSError as exc:
+        return exc.errno == errno.EBUSY
+    os.close(probe)
+    return False
+
+
+def _reclaim_stale_port_locks(ports: "list[str]") -> bool:
+    """Reclaim ports the fbuild daemon still holds for a dead client.
+
+    `fbuild daemon locks` reports these directly -- the port stays [HELD]
+    with open=true, readers=0 and writer=none while the owning client is
+    annotated `(dead)`. The deploy that took the lock has exited by the time
+    a peer flow builds its serial interface, so the attach hits EBUSY and is
+    reported as `serial driver may be wedged`, which it is not. Restarting
+    the daemon drops the stale entry; the lock is daemon-held state, not
+    anything at the device. See FastLED/fbuild#1429.
+
+    Called before any client connects, so restarting cannot pull a live
+    session out from under one. Returns whether a restart was performed, and
+    says so on stdout: needing this is worth seeing, not smoothing away.
+    """
+    locked: list[str] = []
+    for port in ports:
+        if port and _port_is_locked(port):
+            locked.append(port)
+    if not locked:
+        return False
+    print(
+        f"  Port(s) {', '.join(locked)} held by the fbuild daemon for an exited "
+        f"client; restarting it to reclaim (FastLED/fbuild#1429)"
+    )
+    try:
+        from ci.util.fbuild_runner import Daemon
+
+        Daemon.stop()
+        Daemon.ensure_running()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as exc:  # noqa: BLE001
+        print(f"  Could not restart the fbuild daemon: {exc}")
+        return False
+    still: list[str] = []
+    for port in locked:
+        if _port_is_locked(port):
+            still.append(port)
+    if still:
+        print(f"  Still held after restart: {', '.join(still)}")
+    return True
+
+
+def _describe_port_holder(port: str, proc_root: str) -> str:
+    """Name the process holding `port`, when the OS will say.
+
+    `attach failed: open_port(...) exceeded 3s; serial driver may be wedged`
+    is what the serial layer reports for what is actually an ordinary EBUSY.
+    Measured on this bench: a tty accepts multiple openers happily, and the
+    error appears only once some process sets TIOCEXCL and leaves it set --
+    setting it by hand reproduces the identical "Device or resource busy".
+    The board stays enumerated and healthy throughout, and the lock dies with
+    the holding process. See FastLED/fbuild#1429.
+
+    Only reports when the port is genuinely unopenable. Another process
+    merely *holding* an fd is harmless -- that was measured too, opening in
+    0.0 s alongside a live holder -- so naming a holder in that case would
+    accuse the wrong thing.
+
+    Linux-only and best effort: returns "" when it cannot tell, and never
+    raises. `proc_root` is passed explicitly -- "/proc" from production
+    callers, a fixture tree from tests -- so this can be tested against a real
+    directory rather than by patching os.
+    """
+    # Through the symlink first. `/dev/serial/by-id/usb-...` is the stable
+    # name a bench config wants to use, but /proc/<pid>/fd/<n> links to the
+    # canonical `/dev/ttyACM0`, so matching on the configured basename finds
+    # no holder and the probe below reports EBUSY with nothing to blame --
+    # which is the diagnostic this helper exists to give.
+    node = os.path.realpath(port).rsplit("/", 1)[-1]
+    if not node:
+        return ""
+    # Establish that there is contention at all before blaming anyone.
+    # O_NOCTTY/O_NONBLOCK are POSIX-only; this whole helper is a Linux
+    # best-effort diagnostic, so degrade to silence rather than raising on a
+    # platform that has neither.
+    noctty = getattr(os, "O_NOCTTY", 0)
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    if not noctty and not nonblock:
+        return ""
+    try:
+        probe = os.open(port, os.O_RDWR | noctty | nonblock)
+    except OSError as exc:
+        if exc.errno != errno.EBUSY:
+            return ""
+    else:
+        os.close(probe)
+        return ""  # opens fine; whoever holds an fd is not the problem
+    try:
+        entries = os.listdir(proc_root)
+    except OSError:
+        return ""
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        fd_dir = f"{proc_root}/{entry}/fd"
+        try:
+            fds = os.listdir(fd_dir)
+        except OSError:
+            continue  # exited, or not ours to inspect
+        for fd in fds:
+            try:
+                target = os.readlink(f"{fd_dir}/{fd}")
+            except OSError:
+                continue
+            if target.rsplit("/", 1)[-1] != node:
+                continue
+            try:
+                with open(f"{proc_root}/{entry}/comm", encoding="utf-8") as handle:
+                    name = handle.read().strip()
+            except OSError:
+                name = "?"
+            return (
+                f"{port} is locked against other openers by "
+                f"{name} (pid {entry}); the device itself is fine"
+            )
+    return ""
+
+
 async def _connect_peer_with_retry(
     peer: RpcClient,
     label: str,
@@ -612,9 +752,11 @@ async def _connect_peer_with_retry(
         # re-enumerating instead of hammering it.
         backoff = min(2.0 * attempt, 8.0)
         await asyncio.sleep(min(backoff, remaining_timeout()))
+    holder = _describe_port_holder(port, "/proc")
+    contention = f"; {holder}" if holder else ""
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "
-        f"connect attempts; last error: {last_error}"
+        f"connect attempts; last error: {last_error}{contention}"
     )
 
 
@@ -729,6 +871,11 @@ async def run_net_peer_autoresearch(
         peer = RpcClient(
             peer_upload_port, timeout=rpc_timeout(), serial_interface=peer_iface
         )
+        # Before either client connects: a deploy that has already exited can
+        # leave its port locked in the daemon, and the attach would then fail
+        # as "serial driver may be wedged". Safe here precisely because no
+        # session exists yet. See FastLED/fbuild#1429.
+        _reclaim_stale_port_locks([upload_port, peer_upload_port])
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")

@@ -87,6 +87,25 @@ namespace fl {
 u32 esp_clk_cpu_freq_impl() FL_NO_EXCEPT;
 #endif
 
+/// The CPU frequency a nanosecond-to-cycle conversion should use, fetched once.
+///
+/// `delayNanoseconds(ns)` re-derives this on *every* call. On ESP32 that is an
+/// ESP-IDF call, not a constant, so a loop calling the one-argument form pays
+/// for it per iteration -- three times per bit in a clockless bit-bang inner
+/// loop (FastLED#4203).
+///
+/// Anything with a per-bit or per-byte loop should call this once outside the
+/// loop and pass the result to `delayNanoseconds(ns, hz)`. The value is stable
+/// for the duration of such a loop: a frequency change mid-transmission would
+/// break the timing whichever form was used.
+FASTLED_FORCE_INLINE u32 cpuFrequencyHz() FL_NO_EXCEPT {
+#if defined(ESP32)
+    return esp_clk_cpu_freq_impl();
+#else
+    return static_cast<u32>(FL_CPU_FREQUENCY());
+#endif
+}
+
 } // namespace fl
 
 #endif // __INC_FASTLED_PLATFORMS_CPU_FREQUENCY_H

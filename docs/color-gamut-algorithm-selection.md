@@ -211,21 +211,151 @@ Widening lms makes the mapper *worse*, and widening XYZ -- which the whole
 P6 working domain would have to follow -- only improves it about fourfold.
 Neither buys anything the budget needs, so the simpler implementation ships.
 
-## Is the feasible chroma ray actually connected?
+### And the bind-time inverse could be fixed point too (P9, #4043)
+
+The section above is about the per-pixel path, which is already integer end to
+end. The derivation that runs once per profile is not: `buildRgbSolveMatrixQ16`
+builds the emitter matrix in float, inverts it in float, and quantises the
+result to s16.16. #4043 calls converting that "the one that is genuinely
+blocked on nothing but effort", and gives the reason it is not small -- the
+profile stores floats and is P2's public type.
+
+That reasoning assumes the narrow question is already settled: **is a Q16
+inverse accurate enough to replace the float one at all?** If it is not, the
+profile conversion buys nothing, because the derivation would still have to
+reach float. It had not been measured. `ci/color_fixed_inverse_study.py`
+measures it.
+
+Both paths end in s16.16, so this is not about the output format. It is about
+where the arithmetic happens: float32 carries a 24-bit mantissa that follows
+the magnitude, while Q16 with 64-bit intermediates carries a fixed 1/65536
+step and much more headroom around one. Neither dominates a priori.
+
+The baseline is modelled at the shipped derivation's own precision --
+float32 through `xyY_to_XYZ` and `invert3x3`, in the same operation order,
+quantised at the end. An earlier revision of this study inverted in float64
+and called that "the float path", which prices a derivation twice as precise
+as the one being replaced. It turned out not to change the verdict: the real
+primary sets score identically either way, and only the near-singular sweep
+moves (569 ULP against 575, 28 848 against 28 487). Recorded because the
+answer being the same is a result, not a reason the distinction did not
+matter.
+
+| primaries | worst coefficient error | worst dE2000 |
+| --- | ---: | ---: |
+| sRGB | 0 ULP | 0.0000 |
+| BT.2020 | 1 ULP | 0.0057 |
+| Display P3 | 1 ULP | 0.0064 |
+
+Against A1's 0.5 budget, of which the shipped mapper already spends 0.15.
+
+**Where it gives out is the more interesting half.** Conditioning is what
+decides a fixed-point inverse's accuracy, so green was walked onto the
+red-blue line until the matrix was nearly singular:
+
+| green collapsed | worst coefficient error | worst dE2000 |
+| --- | ---: | ---: |
+| 90% of the way | 6 ULP | 0.0421 |
+| 99% | 569 ULP | 0.0091 |
+| 99.9% | **28 848 ULP** | **0.0654** |
+
+The coefficients lose four orders of magnitude of precision and *the colour
+error does not follow*. Those ULPs sit in directions a near-collinear device
+can barely produce, so they do not become visible error: even at the edge of
+singularity the two derivations stay an order of magnitude inside A1.
+
+So the answer is yes, and P9 item 2 is effort rather than an open question.
+
+Two things this does **not** say. It compares the two derivations against each
+other, not against float64 -- the shipped path is itself Q16-quantised, and
+"can this replace that" is the question being asked. And the sweep drives are
+in `[0, 1]`, so every target is in gamut by construction; an out-of-gamut
+target goes through the mapper above, which is measured separately.
+
+## Is the feasible chroma ray actually connected? No.
 
 Bisection assumes it is. The reference does not, so the assumption was tested
 rather than argued: 4 680 rays (lightness on a 40-step grid, hue every 3
 degrees), each sampled at 401 chroma values -- about 1.9 million feasibility
-evaluations.
+evaluations. **No disconnected interval was found**, and the same held across
+another 7.5 million evaluations on the four white-emitter devices in "Wide
+hulls" below.
 
-**No disconnected interval was found.** On every ray sampled, the feasible
-chroma was a single interval starting at zero.
+The assumption is false anyway. Sampling was the wrong instrument, and the
+number of samples was never going to fix it.
 
-That is strong evidence for this device, not a proof. The >=4-emitter case,
-where the zonotope gains a redundant generator, is swept separately in "Wide
-hulls" below -- another 7.5 million evaluations across the four white-emitter
-devices, also with no disconnected interval. A coarser sweep of both runs on
-every test invocation so the assumption cannot rot silently.
+The ray does not have to be sampled. As the method note below already says, an
+inverse-OKLab fixed-lightness, fixed-hue ray is cubic in chroma; written out,
+each drive along the ray is `d_i(c) = sum_j K_ij (p_j + q_j c)^3`, an ordinary
+cubic in `c`. So `{c : 0 <= d_i(c) <= 1}` is decided by the real roots of `d_i`
+and `d_i - 1`, and the feasible set for a ray is *exact* -- no gap can hide
+between two samples, however narrow. That is `ci/color_ray_roots.py`.
+
+Exact given that the solver returns every real root, which is worth stating
+because the closed form loses accuracy on a near-double root and can merge two
+that sit closer than the polished result separates. The partition is therefore
+the union of the roots with a uniform guard grid, so the failure mode degrades
+to the resolution of a sampled scan rather than past it. An exact tangency --
+a drive touching a bound with even multiplicity -- is not resolvable in
+floating point at all; it is also measure-zero in lightness and hue, so what a
+grid meets is the near-tangency beside it, which is an ordinary narrow
+interval and is how the wedge below presents.
+
+Computed that way, on the primaries this report uses:
+
+| | |
+| --- | --- |
+| lightness | 0.5 |
+| hue | 264.06 degrees |
+| feasible chroma | `[0, 0.29443]` and `[0.34575, 0.34644]` |
+| what a bisection returns | 0.29443 |
+| what is actually reachable | 0.34644 |
+| chroma given up | 0.0520, **17.6% of the reachable maximum** |
+
+The far interval is a real colour, not an artefact: its LMS response is
+positive on all three cones and its drives are `(0.000005, 0.000214, 0.097553)`
+-- a deep blue at a tenth of full drive. Re-rendering those drives through the
+forward matrix returns `L = 0.500000, C = 0.346092, h = 264.0600`, the target
+it was asked for.
+
+### Why 1.9 million samples walked past it
+
+Two independent reasons, and the second is the one that matters.
+
+**The wedge is thinner than the hue grid.** Disconnection holds for hue in
+roughly `[264.06, 264.20]` degrees -- about 0.14 degrees wide, and present at
+every lightness from 0.05 to 0.75. It contains no multiple of 3, so the dense
+sweep's hue grid steps over it. At 264.0 degrees the set is one interval
+ending at 0.28995; by 264.25 the two have merged into one interval ending at
+0.34578. The disconnection lives in the fold between.
+
+**Density is not the fix.** Handed the exact hue, a 401-sample chroma scan
+*still* reports one interval, because the far island is 0.00069 wide against a
+0.00125 sample step. Refining the grid moves the problem rather than solving
+it: whatever the step, some ray's island is thinner than it.
+
+### What it costs, and what it does not
+
+Narrow: 0.14 degrees of 360, so 0.04% of hues. Inside it, an out-of-gamut
+target above 0.34644 chroma is mapped to 0.29443 instead -- under-saturated,
+hue exact, still in gamut. The mapper returns a producible colour that is
+merely less saturated than one it could have produced, so this is a quality
+loss in a sliver, not a correctness failure anywhere.
+
+It is still worth having on the record as fact rather than as an assumption,
+because the shipped search's validity was resting on it, and because the same
+argument shows what a future device would need: the wedge exists where the ray
+runs nearly along the `red = 0` face, so a different primary set puts it
+somewhere else rather than removing it.
+
+### Scope
+
+The exact method is for the three-emitter case, where feasibility is "the
+unique preimage lands in the box" and each drive is one cubic. With a white
+emitter the preimage stops being unique and feasibility becomes a linear
+program, so the wide hulls in "Wide hulls" below remain swept rather than
+solved. Their claim is still the sampled one, and now known to be the weaker
+kind of evidence.
 
 ## Lightness must be clamped before chroma
 
@@ -234,6 +364,13 @@ chroma the point is still outside the hull, and a chroma-only bisection
 converges on an infeasible answer. Every mapper here clamps into the hull --
 the OKLCh ones by first reducing lightness to the attainable neutral, as the
 reference does, and the naive ones by bounding drives to [0, 1].
+
+That is still true of the *bisection*, and it is no longer the whole story of
+the shipped mapper. "The clamp gives up more than it needs to" below shows the
+clamp discards up to 29.7% of the reachable lightness, and the mapper now
+clamps chroma into its feasible interval above the cap instead, falling back
+to this when that interval is empty. Read this section as why a bracket at
+zero cannot work there, not as a description of what happens.
 
 The corpus contains no over-bright target, so this had to be constructed to
 be tested. That gap has now hidden two defects in this harness: this one and
@@ -260,8 +397,13 @@ Recording this rather than leaving it implicit: the table above is evidence
 for the *objective*, and only provisional evidence for the *search*.
 
 Option 1 has since been taken as far as sampling can take it, for the wide
-hulls as well as this one -- see "Wide hulls" below. What none of it supplies
-is option 2, an analytic bound. The claim remains empirical.
+hulls as well as this one -- see "Wide hulls" below, and it found nothing.
+Option 2 was then taken for the three-emitter device by solving the cubic
+instead of sampling it, and it did not produce a bound: it produced a
+counterexample. See "Is the feasible chroma ray actually connected? No."
+above. The paragraph this section opens with -- that feasibility along the ray
+"can in principle be disconnected" -- turns out to describe this device rather
+than a hypothetical one.
 
 ## Is the mapping continuous enough to animate?
 
@@ -555,6 +697,15 @@ these devices, not a proof. The interval detector is given a predicate with a
 hole punched in it and required to report two intervals, so the sweep cannot
 pass by never firing.
 
+**Read that row with the three-emitter refutation in mind.** The identical
+sweep, at the identical density, reported a clean zero on a device that does
+have a disconnected ray -- see "Is the feasible chroma ray actually connected?
+No." above. A zero in this column means "the grid did not land on one", and
+these numbers are the same grid. The exact method that found the wedge does
+not carry over here, because a white emitter makes feasibility a linear
+program rather than one cubic per drive, so for the wide hulls the question is
+genuinely still open rather than answered in the affirmative.
+
 ### The composition holds, once both halves use the same hull
 
 Scored over roughly 28 000 out-of-gamut targets, mapped at the shipped eight
@@ -620,11 +771,148 @@ here: the clamp is what makes the chroma bisection valid at all (see
 "Lightness must be clamped before chroma"), and removing it without replacing
 the search inverts the bisection's invariant.
 
+## The clamp gives up more than it needs to (#4245)
+
+"Lightness must be clamped before chroma" above is correct about why a chroma
+bisection fails on an over-bright target, and the conclusion drawn from it --
+that lightness must therefore be spent first -- is too strong. What was
+missing is the shape of the feasible set, which is now measured.
+
+Harness: `ci/color_lightness_headroom_study.py`. Regression test:
+`ci/tests/test_color_lightness_headroom.py`.
+
+### The feasible chroma is still one interval; it just stops containing zero
+
+Sampled along fixed-lightness, fixed-hue rays on the three-emitter device
+(neutral cap L = 1.118228):
+
+| L | hue 30 | hue 120 | hue 300 |
+| --- | --- | --- | --- |
+| 1.0623 (below cap) | [0.0000, 0.4215] | [0.0000, 0.1913] | [0.0000, 0.5670] |
+| 1.1741 (above) | **[0.0795, 0.3195]** | (none) | **[0.1275, 0.6000]** |
+| 1.2860 (above) | **[0.2070, 0.2310]** | (none) | **[0.3082, 0.6000]** |
+| 1.3978 (above) | (none) | (none) | **[0.4432, 0.6000]** |
+
+Connected throughout -- so a search is possible -- and above the cap simply
+not anchored at zero. That is the whole of it. A bisection bracketed at
+`[0, C]` has an infeasible low end from its first step, its invariant is
+inverted, and it walks down to zero, which is also infeasible there. The
+clamp is what stops that, not a shortcut.
+
+The headroom being given up is large: brightest reachable L is **1.450614**
+at hue 300, C 0.50, against a neutral cap of 1.118228 -- **29.7% above the
+cap**, on the same device the rest of this document measures.
+
+### Finding both edges keeps the lightness
+
+Probe for a feasible chroma, then bisect each edge. Measured against the
+shipped path on over-bright targets:
+
+| target | shipped L, C | interval clamp L, C | dL |
+| --- | --- | --- | --- |
+| L 1.174, hue 30, C 0.50 | 1.1182, 0.3672 | 1.1741, 0.3196 | +0.056 |
+| L 1.286, hue 300, C 0.30 | 1.1182, 0.2988 | **1.2860, 0.3081** | +0.168 |
+| L 1.398, hue 300, C 0.30 | 1.1182, 0.2988 | **1.3978, 0.4431** | +0.280 |
+| L 1.398, hue 120, C 0.50 | 1.1182, 0.0000 | 1.1182, 0.0000 | 0.000 |
+
+**Never worse** across the sweep -- it falls back to the shipped path when no
+chroma is feasible at that lightness, which is the last row. Hue is preserved
+exactly, and every result is feasible.
+
+Cost is `probes + 2 x halvings`. Those are parameters in the harness, because
+sweeping them is what a study is for; what A3/B11 need is that the cost is
+bounded by a count rather than by a convergence criterion, so an
+implementation fixes both and the loop count is known at compile time. An
+earlier revision of this section called the parameters themselves
+compile-time constants, which they are not.
+
+### What the embedded mapper does with it
+
+Shipped in `gamut_map.cpp.hpp` for all three mappers, at
+`kGamutMapProbes = 8` and `kGamutMapHalvings = 8`, so the above-cap path costs
+24 feasibility tests and the loop count is known at build time. Targets at or
+below the cap never enter it, and neither does an in-gamut target, so nothing
+below the cap moved.
+
+Re-rendered through the emitters rather than read back off the mapper, it
+reproduces the table above:
+
+| target | embedded L, C |
+| --- | --- |
+| L 1.286, hue 300, C 0.30 | 1.2860, 0.3081 |
+| L 1.398, hue 300, C 0.30 | 1.3978, 0.4431 |
+| L 1.398, hue 120, C 0.50 | 1.1182, 0.0000 |
+
+**The fallback had to walk, not jump.** The first version of this dropped
+straight to the neutral cap when the probes stopped landing inside the
+interval -- so the answer tracked the requested lightness up to the edge of
+the reachable region and then fell back to the cap in one step. Swept along
+hue 300 at chroma 0.10 that step measured 0.91 in summed drive, **234 eight-bit
+codes**, against the roughly one code the mapper's other paths stay inside.
+Before #4245 the same sweep was flat above the cap and therefore continuous,
+so this was a regression introduced by the fix.
+
+Bisecting lightness down to the highest reachable one instead lands on the
+edge rather than past it. Worst step over the same sweeps:
+
+| chroma | worst step |
+| --- | ---: |
+| 0.02 | 1 code |
+| 0.05 | 1 code |
+| 0.10 | 2 codes |
+| 0.20 | 3 codes |
+| 0.30 | 3 codes |
+
+It costs `kGamutMapHalvings * kGamutMapProbes` more feasibility tests, and only
+on an above-cap target whose interval was not found at its own lightness.
+
+**One deliberate difference from the harness.** The study probes to an
+absolute `PROBE_CEILING = 0.8`; the mapper works in factors of the request and
+reaches four times it. Both reproduce every row above, and they differ only on
+targets the table does not contain: a bright *near-neutral*, which is
+infeasible precisely because it is not saturated enough. An absolute ceiling
+answers that with a saturated colour; a relative one finds no seed and falls
+back to the clamp, keeping a near-neutral request near-neutral. An over-bright
+grey has no chroma to scale at all and clamps under either.
+
+**A note for whoever tests the wide mappers.** A hull with a white emitter
+swallows a *saturated* target a little above the cap outright -- the
+allocation succeeds and the mapper returns before the clamp is reached -- so
+a case written at chroma 0.30 exercises none of this and passes with the whole
+path disabled. The reachable-but-outside region above the cap is at low
+chroma, which is the finding restating itself. The tests assert the target is
+outside the hull before they assert anything else.
+
+The lower edge is not optional: clamping to the upper edge alone produces
+*infeasible* output on exactly the targets this is meant to fix, which the
+test suite pins.
+
+### Two shapes that do not work, recorded so they are not re-attempted
+
+**Compressing chroma at the target's own lightness.** The same inverted
+bisection described above. Measured converging to zero.
+
+**A line search from the neutral-at-cap toward the target.** Attractive
+because hue is exactly preserved along it -- `(a, b)` scales linearly, so the
+direction is constant. It fails for a different reason: the anchor sits *on*
+the hull boundary, so the segment leaves immediately, the largest feasible
+step is tiny, and chroma collapses. Measured worse than the shipped path on
+most targets.
+
+### What this does not do
+
+It is a host-side result. The embedded mapper still clamps, and converting it
+means a probe loop and a second bisection in `gamut_map.cpp.hpp` for three
+device topologies, plus the s16.16 accuracy work. This measures the shape,
+fixes the algorithm choice, and leaves that.
+
 ## Not covered
 
 The composition is scored against the reference objective and against itself,
 not against measured hardware -- that is P10's gate.
 
 Ray connectivity above four emitters is measured on the four devices the
-corpus ships. A device whose whites are close enough to be near-parallel
-generators, or one with more than two whites, is outside what was swept.
+corpus ships, and only by sampling. A device whose whites are close enough to
+be near-parallel generators, or one with more than two whites, is outside what
+was swept. The three-emitter case is no longer in this list: it is solved
+exactly, and the answer is that the ray is sometimes disconnected.

@@ -299,6 +299,8 @@ public:
 FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT;
 void setTestFileSystemRoot(const char* root_path) FL_NO_EXCEPT;
 const char* getTestFileSystemRoot() FL_NO_EXCEPT;
+void setTestEmbeddedFileSystemRoot(const char* root_path) FL_NO_EXCEPT;
+const char* getTestEmbeddedFileSystemRoot() FL_NO_EXCEPT;
 
 } // namespace fl
 

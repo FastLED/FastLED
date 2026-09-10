@@ -3,6 +3,7 @@
 #include "fl/system/fastled.h"
 
 #include "pixeltypes.h"
+#include "fl/gfx/rgbw.h"
 
 /// @file power_mgt.h
 /// Functions to limit the power used by FastLED
@@ -51,8 +52,7 @@ struct PowerModelRGB {
 };
 
 /// RGBW LED power consumption model
-/// @note Future API enhancement - not yet implemented in power calculations
-/// @note Currently forwards to PowerModelRGB, ignoring white channel
+/// Used for 4-channel LEDs (SK6812 RGBW and similar).
 struct PowerModelRGBW {
     fl::u8 red_mW;    ///< Red channel power at full brightness (255), in milliwatts
     fl::u8 green_mW;  ///< Green channel power at full brightness (255), in milliwatts
@@ -78,8 +78,14 @@ struct PowerModelRGBW {
         : red_mW(r), green_mW(g), blue_mW(b), white_mW(w), dark_mW(d),
           exponent(e) {}
 
-    /// Convert to RGB model (extracts RGB components, preserves exponent)
-    /// @note Used internally until RGBW power calculations are implemented
+    /// The RGB emitters alone, without the white one.
+    ///
+    /// This is not the power model of an RGBW strip: it describes three of
+    /// its four emitters. `set_power_model(const PowerModelRGBW&)` used to
+    /// route through here, which is how `white_mW` came to be accepted by
+    /// the API and then discarded. Kept because callers who genuinely want
+    /// the RGB subset -- driving the same strip as plain RGB, say -- have
+    /// no other way to ask for it.
     constexpr PowerModelRGB toRGB() const {
         return PowerModelRGB(red_mW, green_mW, blue_mW, dark_mW, exponent);
     }
@@ -181,23 +187,41 @@ float get_power_scaling_exponent();
 
 /// Set custom RGBW LED power consumption model
 /// @param model RGBW power consumption model
-/// @note Future API enhancement - currently extracts RGB components only
-/// @note White channel power is stored but not yet used in calculations
-inline void set_power_model(const PowerModelRGBW& model) {
-    set_power_model(model.toRGB());  // TODO: Implement RGBW power model.
-}
+///
+/// `white_mW` is kept and used. It used to be dropped by `toRGB()`, so a
+/// caller who declared an RGBW strip got a budget computed over three
+/// emitters while four were lit. On the shipped default model
+/// (r90 g70 b90 w100) and the shipped conversions, at full white, the
+/// three-emitter figure is 249 units against a true four-emitter draw of
+/// 348 under `kRGBWMaxBrightness` (40% under budget), 266 under
+/// `kRGBWBoostedWhite`, and 99 under `kRGBWExactColors` (2.5x over).
+///
+/// The white emitter is charged only for controllers actually in RGBW mode;
+/// see `calculate_unscaled_power_mW(span, const Rgbw&)`.
+void set_power_model(const PowerModelRGBW& model);
 
 /// Set custom RGBWW LED power consumption model
 /// @param model RGBWW power consumption model
-/// @note Future API enhancement - currently extracts RGB components only
-/// @note White channel power is stored but not yet used in calculations
+///
+/// Unlike the RGBW model above, `PowerModelRGBWW::toRGB()` does not drop its
+/// white emitters -- it spreads them across R/G/B, which over-estimates and
+/// so cannot break the budget. That fold is left in place: it is documented,
+/// safe by construction, and a five-emitter accounting needs the RGBWW
+/// allocation the way the RGBW path needs `rgb_2_rgbw`. #4156 R3.
 inline void set_power_model(const PowerModelRGBWW& model) {
-    set_power_model(model.toRGB());  // TODO: Implement RGBWW power model.
+    set_power_model(model.toRGB());
 }
 
 /// Get current RGB power model
 /// @returns Current RGB power consumption model
 PowerModelRGB get_power_model();
+
+/// The white-emitter draw the caller declared, or zero if they declared only
+/// an RGB model.
+///
+/// Zero is the "not declared" reading rather than "declared as free": no
+/// emitter costs nothing, so the two cannot be confused.
+fl::u8 get_white_emitter_mW();
 
 /// @} PowerModel
 
@@ -259,7 +283,33 @@ fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds);
 /// @param leds span of LED data to check
 fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 
-/// Applies the configured power-scaling response to a total power value
+/// Same, for a strip driven through the RGBW conversion.
+///
+/// The overloads above read the source CRGB triple, which is what the sketch
+/// wrote -- not what the strip is driven with. A controller in RGBW mode
+/// converts every pixel with `rgb_2_rgbw` before latching, and the resulting
+/// four drives are neither bounded by nor proportional to the source triple.
+/// Measured on the shipped default `PowerModelRGBW` at full white, in units
+/// of the sum below: source-triple 249 against a true 348 under
+/// `kRGBWMaxBrightness`, 266 under `kRGBWBoostedWhite`, 99 under
+/// `kRGBWExactColors`. The first two are the budget being under-spent
+/// against; the third is a strip dimmed for no reason.
+///
+/// This runs the same conversion the encoder will and charges all four
+/// emitters. It needs `white_mW`, so it falls back to the three-emitter
+/// figure -- and says so once -- when the caller declared only an RGB model.
+///
+/// @param leds span of LED data to check
+/// @param rgbw the controller's RGBW setting; an inactive one delegates to
+///        the three-emitter overload
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw);
+
+/// Applies the configured power-scaling response to a total power value.
+///
+/// Pass the *scalable* share only. `calculate_unscaled_power_mW()` includes the
+/// per-LED `dark_mW` baseline, which brightness does not reduce; scaling that
+/// with the emitters under-reports demand at low brightness (#4156 R4).
+///
 /// @param total_mW unscaled total power at full brightness
 /// @param brightness requested brightness in FastLED's 0-255 brightness space
 /// @returns estimated power after applying the configured brightness-to-power response
@@ -267,12 +317,29 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness);
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for a given set of LEDs.
+///
+/// What the budget bounds, stated rather than implied (#4156 R4):
+///
+/// - **The baseline is not scalable.** `PowerModel::dark_mW` is drawn per LED
+///   at every brightness including zero, so it is subtracted from the budget
+///   first and only the remainder is divided among the emitters. A budget at
+///   or below the baseline returns **0**: no brightness meets it, and a lit
+///   strip would be promising a bound that cannot be held at any setting.
+/// - **The bound is on the pre-dither frame.** Demand is computed from the
+///   `CRGB` values, and `BINARY_DITHER` adds its offset afterwards, inside the
+///   encoder. That offset is shared across the frame, so a dithered frame can
+///   exceed the budgeted demand by up to one native code per channel per
+///   pixel -- about 0.8 mW per LED on the default WS2812 model. The multi-frame
+///   mean is what the budget holds; a single latched frame can sit that much
+///   above it.
+///
 /// @param ledbuffer the LED data to check
 /// @param numLeds the number of LEDs in the data array
 /// @param target_brightness the brightness you'd ideally like to use
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
-/// but may be lower depending on the power limit.
+/// but may be lower depending on the power limit. Zero when the budget is at
+/// or below the unscalable baseline.
 fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW);
 
 /// @copybrief calculate_max_brightness_for_power_mW()

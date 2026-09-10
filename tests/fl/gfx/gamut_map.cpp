@@ -1316,4 +1316,420 @@ FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
     FL_CHECK_GT(compressed, 0);
 }
 
+// ---------------------------------------------------------------------------
+// Above the brightest neutral (#4245)
+//
+// The clamp to `max_neutral_lightness` throws away lightness the hull can
+// reach off the neutral axis -- up to 29.7% of the headroom on this device.
+// `ci/color_lightness_headroom_study.py` established why the obvious repairs
+// fail and what works: above the cap the feasible chroma is still one
+// interval, it simply stops containing zero, so a seed has to be found before
+// either edge can be bisected. These check the embedded mapper against the
+// numbers that study published.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Re-render mapped drives through the emitters and read back OKLab.
+///
+/// Re-rendered rather than assumed: the point of the change is what the
+/// device actually emits, and a mapper that reported a lightness it did not
+/// produce would pass a test built on its own arithmetic.
+void emittedLab(const i32 (&drives)[3], i32 (&out_lab)[3]) {
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    float xyz[3] = {0.0f, 0.0f, 0.0f};
+    for (int e = 0; e < 3; ++e) {
+        float emitter[3];
+        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                          emitter);
+        for (int i = 0; i < 3; ++i) {
+            xyz[i] += toFloat(drives[e]) * emitter[i];
+        }
+    }
+    const i32 emitted[3] = {q16(xyz[0]), q16(xyz[1]), q16(xyz[2])};
+    xyzToOklabQ16(emitted, out_lab);
+}
+
+float chromaOf(const i32 (&lab)[3]) {
+    const float a = toFloat(lab[1]);
+    const float b = toFloat(lab[2]);
+    return fl::sqrtf(a * a + b * b);
+}
+
+}  // namespace
+
+FL_TEST_CASE("Above the cap the mapper keeps the lightness it was asked for") {
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+
+    // Hue 300 degrees at chroma 0.30, at two lightnesses above the cap. The
+    // study reports 1.2860 / 0.3081 and 1.3978 / 0.4431 for these against the
+    // shipped 1.1182 for both.
+    struct Case {
+        float lightness;
+        float expect_chroma;
+    };
+    const Case cases[] = {{1.286f, 0.3081f}, {1.398f, 0.4431f}};
+    for (const auto& c : cases) {
+        const i32 lab[3] = {q16(c.lightness), q16(0.15f), q16(-0.2598076f)};
+        i32 xyz[3];
+        oklabToXyzQ16(lab, xyz);
+        i32 drives[3];
+        mapAndSolveDrivesQ16(map, xyz, drives);
+
+        for (int i = 0; i < 3; ++i) {
+            FL_CHECK_GE(drives[i], 0);
+            FL_CHECK_LE(drives[i], kFullDrive);
+        }
+
+        i32 emitted[3];
+        emittedLab(drives, emitted);
+        // The requested lightness, not the cap.
+        FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - c.lightness), 0.01f);
+        FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+        FL_CHECK_LT(fl::fabsf(chromaOf(emitted) - c.expect_chroma), 0.01f);
+    }
+}
+
+FL_TEST_CASE("The lower edge is not optional above the cap") {
+    // At lightness 1.398 on hue 300 the feasible chroma is about
+    // [0.4432, 0.6000] -- it starts *above* the requested 0.30. Clamping to
+    // the upper edge alone would be a search that never looks below the seed,
+    // and clamping to the request would return something infeasible: the
+    // answer has to move chroma *up* into the interval.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    const float requested_chroma = 0.30f;
+    const i32 lab[3] = {q16(1.398f), q16(0.15f), q16(-0.2598076f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[3];
+    mapAndSolveDrivesQ16(map, xyz, drives);
+
+    i32 emitted[3];
+    emittedLab(drives, emitted);
+    FL_CHECK_GT(chromaOf(emitted), requested_chroma * 1.3f);
+
+    // Hue is still exact -- raising chroma along the same ray is what makes
+    // that true, and is why this is not simply "return any feasible colour".
+    const float ax = toFloat(lab[1]), ay = toFloat(lab[2]);
+    const float bx = toFloat(emitted[1]), by = toFloat(emitted[2]);
+    const float scale = fl::sqrtf((ax * ax + ay * ay) * (bx * bx + by * by));
+    FL_REQUIRE_GT(scale, 1e-4f);
+    FL_CHECK_GT(ax * bx + ay * by, 0.0f);
+    FL_CHECK_LT(fl::fabsf(ax * by - ay * bx) / scale, 0.005f);
+}
+
+FL_TEST_CASE("It falls back to the clamp when no chroma is feasible there") {
+    // Lightness 1.398 on hue 120 has no feasible chroma at all -- the study
+    // records `(none)` for that row. The interval search finds no seed and the
+    // shipped clamp-then-bisect answers instead, which is what makes this
+    // never worse than what it replaces.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    const i32 lab[3] = {q16(1.398f), q16(-0.25f), q16(0.4330127f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[3];
+    mapAndSolveDrivesQ16(map, xyz, drives);
+
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+    i32 emitted[3];
+    emittedLab(drives, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) -
+                          toFloat(map.max_neutral_lightness)),
+                0.01f);
+}
+
+FL_TEST_CASE("An over-bright neutral still clamps, because it has no chroma") {
+    // The regression this could most easily cause. A neutral has no chroma to
+    // scale, so scaling it by any factor leaves it neutral and infeasible; the
+    // probes find no seed and the lightness clamp still runs. Without this the
+    // change could quietly turn every over-bright grey into a saturated
+    // colour and the existing neutral test would not see it, since it checks
+    // ratios rather than chroma.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+
+    for (float luminance : {2.0f, 5.0f, 30.0f}) {
+        i32 xyz[3];
+        xyzAt(0.3127f, 0.3290f, luminance, xyz);
+        i32 drives[3];
+        mapAndSolveDrivesQ16(map, xyz, drives);
+        i32 emitted[3];
+        emittedLab(drives, emitted);
+        FL_CHECK_LT(chromaOf(emitted), 0.01f);
+        FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) -
+                              toFloat(map.max_neutral_lightness)),
+                    0.01f);
+    }
+}
+
+namespace {
+
+/// OKLab of a four- or five-emitter drive vector, re-rendered through the
+/// device rather than read back off the mapper.
+template <int N>
+void emittedLabWide(const i32 (&drives)[N], const i32 (&white1)[3],
+                    const i32 (&white2)[3], i32 (&out_lab)[3]) {
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    float xyz[3] = {0.0f, 0.0f, 0.0f};
+    for (int e = 0; e < 3; ++e) {
+        float emitter[3];
+        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                          emitter);
+        for (int i = 0; i < 3; ++i) {
+            xyz[i] += toFloat(drives[e]) * emitter[i];
+        }
+    }
+    for (int i = 0; i < 3; ++i) {
+        xyz[i] += toFloat(drives[3]) * toFloat(white1[i]);
+        if (N > 4) {
+            xyz[i] += toFloat(drives[4]) * toFloat(white2[i]);
+        }
+    }
+    const i32 emitted[3] = {q16(xyz[0]), q16(xyz[1]), q16(xyz[2])};
+    xyzToOklabQ16(emitted, out_lab);
+}
+
+}  // namespace
+
+FL_TEST_CASE("RGBW keeps the lightness above its own, higher cap") {
+    // The white emitter moves the cap; it does not change the shape of the
+    // problem, so the same interval clamp has to run there too.
+    //
+    // Low chroma on purpose, and asserted outside the hull before anything
+    // else. A wide hull swallows most *saturated* targets a little above the
+    // cap outright -- `allocateEmitterDrivesQ16` succeeds and the mapper
+    // returns before the clamp is reached -- so a test written at chroma 0.30
+    // measures nothing and passes with the whole path disabled. That is the
+    // shape of test this guard exists to stop, having written one.
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
+    const float cap = toFloat(rgbw.max_neutral_lightness);
+    const float requested = cap + 0.15f;
+
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[4];
+    FL_REQUIRE_FALSE(allocateEmitterDrivesQ16(rgbw.allocation, xyz, drives));
+
+    mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<4>(drives, kWhiteD65, kWhiteD65, emitted);
+
+    // The requested lightness itself, not merely something above the cap.
+    // "Above the cap" is satisfied by any improvement at all, which is not
+    // what this path claims to do.
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+
+    // And on the hue it was asked for. Lightness alone would accept a colour
+    // of the right brightness on any ray at all, which is not what a
+    // hue-preserving mapper promises. `hueDivergence` returns 1.0 for a
+    // neutral result and for an anti-parallel one, so this bound catches a
+    // collapse to grey and a 180-degree rotation as well as a drift.
+    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
+}
+
+FL_TEST_CASE("RGBW walks down to what it can reach, not to its cap") {
+    // The other half of the contract, and the one that keeps this from ever
+    // being worse. It used to assert the answer landed *at* the cap, which
+    // was the old fallback -- dropping straight there is what made the mapper
+    // step by 234 eight-bit codes at the top of the reachable region on the
+    // RGB path. The answer now walks down to the highest lightness that is
+    // still reachable, so it is at or above the cap and below what was asked.
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
+    const float cap = toFloat(rgbw.max_neutral_lightness);
+    const float requested = cap + 0.60f;
+
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[4];
+    FL_REQUIRE_FALSE(allocateEmitterDrivesQ16(rgbw.allocation, xyz, drives));
+
+    mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<4>(drives, kWhiteD65, kWhiteD65, emitted);
+    // Materially above the cap, not merely at it. The old fallback dropped
+    // straight to the cap and would satisfy any `>= cap - epsilon` floor, so
+    // that form of the assertion held with the walk-down deleted. Measured
+    // here the walk-down clears the cap by 0.22; the 0.10 bound is half of
+    // that, far enough above the noise to be a real claim and far enough
+    // below the measurement not to pin the search's exact resolution.
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.10f);
+    FL_CHECK_LT(toFloat(emitted[0]), requested);
+
+    // And asking for more gives the same answer, which is what "walks down to
+    // the edge" means and what a step past it would break.
+    const i32 higher[3] = {q16(requested + 0.20f), q16(0.05f), q16(-0.0866025f)};
+    i32 higher_xyz[3];
+    oklabToXyzQ16(higher, higher_xyz);
+    i32 higher_drives[4];
+    mapAndAllocateRgbwQ16(rgbw, higher_xyz, higher_drives);
+    i32 higher_emitted[3];
+    emittedLabWide<4>(higher_drives, kWhiteD65, kWhiteD65, higher_emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(higher_emitted[0]) - toFloat(emitted[0])),
+                0.02f);
+}
+
+FL_TEST_CASE("RGBWW keeps the lightness above its own cap") {
+    // Two whites raise the cap again, and the same clamp is wired into that
+    // mapper. Wiring it without testing it would have left the third path
+    // asserted only by the fact that it compiles.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+    const float requested = cap + 0.15f;
+
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[5];
+    FL_REQUIRE_FALSE(allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives));
+
+    mapAndAllocateRgbwwQ16(map, xyz, drives);
+    for (int i = 0; i < 5; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+
+    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
+}
+
+FL_TEST_CASE("RGBWW walks down to what it can reach, not to its cap") {
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+
+    const float requested = cap + 0.60f;
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[5];
+    FL_REQUIRE_FALSE(allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives));
+
+    mapAndAllocateRgbwwQ16(map, xyz, drives);
+    for (int i = 0; i < 5; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
+    // Same bound, same reason, on the two-white path: measured 0.21 above
+    // the cap here, so `cap + 0.10f` separates the walk-down from the
+    // direct-to-cap fallback it replaced.
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.10f);
+    FL_CHECK_LT(toFloat(emitted[0]), requested);
+
+    const i32 higher[3] = {q16(requested + 0.20f), q16(0.05f), q16(-0.0866025f)};
+    i32 higher_xyz[3];
+    oklabToXyzQ16(higher, higher_xyz);
+    i32 higher_drives[5];
+    mapAndAllocateRgbwwQ16(map, higher_xyz, higher_drives);
+    i32 higher_emitted[3];
+    emittedLabWide<5>(higher_drives, kWhiteD65, kWhiteD50Map, higher_emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(higher_emitted[0]) - toFloat(emitted[0])),
+                0.02f);
+}
+
+FL_TEST_CASE("Crossing the cap does not step") {
+    // The defect #4271 introduced, and the reason the walk-down exists.
+    //
+    // Before that change every above-cap target clamped to the neutral cap,
+    // so a rising ramp went flat there: continuous, if dim. #4271 made the
+    // answer track the requested lightness while a feasible chroma interval
+    // could be found -- and then drop all the way back to the cap when the
+    // probes stopped landing. Swept along hue 300 at chroma 0.10 that step
+    // measured 0.91 in summed drive, **234 eight-bit codes**, against the
+    // ~1 code the mapper's other paths stay inside.
+    //
+    // Walking down to the highest reachable lightness instead lands on the
+    // edge of the region rather than past it. Worst step over the same
+    // sweeps, at the shipped eight halvings and eight probes:
+    //
+    //   chroma 0.02   1 code
+    //   chroma 0.05   1 code
+    //   chroma 0.10   2 codes
+    //   chroma 0.20   3 codes
+    //   chroma 0.30   3 codes
+    //
+    // The bound below is in drive units, and 0.02 is about five 8-bit codes:
+    // loose enough not to pin the search's exact resolution, tight enough
+    // that the 0.91 step could never pass it.
+    GamutMapQ16 map;
+    FL_REQUIRE(buildGamutMapQ16(rgbDevice(), &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+
+    for (float chroma : {0.02f, 0.05f, 0.10f, 0.20f, 0.30f}) {
+        const float a = chroma * 0.5f;
+        const float b = chroma * -0.8660254f;
+        i32 previous[3] = {0, 0, 0};
+        float worst = 0.0f;
+        int above_cap = 0;
+        const int steps = 4000;
+        for (int step = 0; step <= steps; ++step) {
+            const float t = static_cast<float>(step) / steps;
+            const float lightness = cap - 0.10f + t * 0.40f;
+            if (lightness > cap) {
+                ++above_cap;
+            }
+            const i32 lab[3] = {q16(lightness), q16(a), q16(b)};
+            i32 xyz[3];
+            oklabToXyzQ16(lab, xyz);
+            i32 drives[3];
+            mapAndSolveDrivesQ16(map, xyz, drives);
+            if (step > 0) {
+                float jump = 0.0f;
+                for (int i = 0; i < 3; ++i) {
+                    jump += fl::fabsf(toFloat(drives[i] - previous[i]));
+                }
+                if (jump > worst) {
+                    worst = jump;
+                }
+            }
+            for (int i = 0; i < 3; ++i) {
+                previous[i] = drives[i];
+            }
+        }
+        // The sweep has to actually spend time above the cap, or it is
+        // measuring the ordinary path and saying nothing about this one.
+        FL_CHECK_GT(above_cap, steps / 4);
+        FL_CHECK_LT(worst, 0.02f);
+    }
+}
+
 }  // FL_TEST_FILE

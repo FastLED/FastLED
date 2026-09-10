@@ -11,6 +11,7 @@
 #include "fl/stl/atomic.h"
 #include "fl/log/log.h"
 #include "fl/channels/options.h"
+#include "fl/channels/pipeline_binding.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
 #include "fl/system/trace.h"
@@ -55,6 +56,21 @@ class ReorderingPixelIteratorAny {
     }
     fl::optional<PixelController<RGB, 1, 0xFFFFFFFF>> mAddressedController;
     PixelIteratorAny mPixelIterator;
+#if FL_COLOR_PROFILE_RUNTIME
+    // Present only when a colour profile is bound. The managed source keeps
+    // a reference to the controller it wraps, so it has to outlive the
+    // iterator built over it -- both live here, for the frame.
+    //
+    // Raw storage rather than the types themselves, because naming them here
+    // is what made the whole colour pipeline reachable from `show()` and cost
+    // every sketch ~3.5 KB of flash. `colorPipelineHooks()` builds into this,
+    // and only `setColorProfile` installs those hooks -- so a program that
+    // never binds a profile never references the pipeline and the linker
+    // drops it.
+    FL_ALIGNAS(8) unsigned char mManagedSourceStorage[kColorPipelineSourceStorage];
+    FL_ALIGNAS(8) unsigned char mManagedIteratorStorage[kColorPipelineIteratorStorage];
+    PixelIterator* mManagedIterator = nullptr;
+#endif
 
   public:
     /// @brief Construct pixel iterator with optional addressing transformation
@@ -69,8 +85,10 @@ class ReorderingPixelIteratorAny {
         EOrder rgbOrder,
         Rgbw rgbw,
         Rgbww rgbww,
-        const fl::string& channelName)
+        const fl::string& channelName,
+        const StreamingPipelineQ16* pipeline) FL_NO_EXCEPT
         : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
+        FL_UNUSED(pipeline);
         FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
 
         // Apply addressing transformation if configured
@@ -107,11 +125,54 @@ class ReorderingPixelIteratorAny {
                 pixels.mColorAdjustment, DISABLE_DITHER);
             mPixelIterator = PixelIteratorAny(mAddressedController.value(), rgbOrder, rgbw, rgbww);
         }
+
+#if FL_COLOR_PROFILE_RUNTIME
+        const ColorPipelineHooks& hooks = colorPipelineHooks();
+        if (pipeline != nullptr && hooks.makeIterator != nullptr) {
+            // Colour-managed: build the iterator over a streaming source
+            // instead of over the order-variant controller. The source
+            // applies the colour order itself, so it wraps the RGB-ordered
+            // controller -- whichever of the two that is after addressing.
+            PixelController<RGB, 1, 0xFFFFFFFF>& base =
+                mAddressedController ? mAddressedController.value() : pixels;
+            mManagedIterator = hooks.makeIterator(
+                mManagedSourceStorage, mManagedIteratorStorage, base, rgbOrder,
+                *pipeline, rgbw, rgbww);
+        }
+#endif
+    }
+
+    ~ReorderingPixelIteratorAny() FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        // Placement-new'd into our own storage, so the teardown goes back
+        // through the hooks too -- this file must not name the types.
+        if (mManagedIterator != nullptr) {
+            const ColorPipelineHooks& hooks = colorPipelineHooks();
+            if (hooks.destroyIterator != nullptr) {
+                hooks.destroyIterator(mManagedSourceStorage,
+                                      mManagedIteratorStorage);
+            }
+            mManagedIterator = nullptr;
+        }
+#endif
     }
 
     /// @brief Get the constructed pixel iterator
-    PixelIterator& get() { return mPixelIterator.get(); }
-    const PixelIterator& get() const { return mPixelIterator.get(); }
+    ///
+    /// The colour-managed one when a profile is bound, the legacy one
+    /// otherwise. Everything downstream sees the same type either way, which
+    /// is why the encoders need no branch of their own.
+    PixelIterator& get() FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        if (mManagedIterator != nullptr) {
+            return *mManagedIterator;
+        }
+#endif
+        return mPixelIterator.get();
+    }
+    const PixelIterator& get() const FL_NO_EXCEPT {
+        return const_cast<ReorderingPixelIteratorAny*>(this)->get();
+    }
 };
 
 /// @brief Out-of-line cold-path emitter for the #2517 silent-drop
@@ -309,6 +370,27 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     }
 
     const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
+
+    // Derive the pipeline once, here, rather than per frame: it inverts
+    // matrices and bisects a lightness bound. A binding that does not
+    // describe a usable pipeline leaves the channel on the legacy path
+    // rather than failing -- an unbound channel is the ordinary case, not an
+    // error.
+    mPipeline.reset();
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    if (!rejectedNow && hooks.build != nullptr) {
+        // Through the hook, not by name. Calling `buildPipelineForBinding`
+        // directly from here is what kept the entire pipeline alive in every
+        // build; the pointer is null until `setColorProfile` installs it.
+        // Built on the stack first, so a binding that does not describe a
+        // usable pipeline costs no allocation -- that is the failing half of
+        // an ordinary unbound channel, not an exceptional path.
+        StreamingPipelineQ16 pipeline;
+        if (hooks.build(mSettings.mColorProfile, &pipeline)) {
+            mPipeline = fl::make_unique<StreamingPipelineQ16>(pipeline);
+        }
+    }
+
     if (rejectedNow) {
         setEnabled(false);
     } else if (wasRejectedByUs) {
@@ -542,9 +624,25 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // (#2558) Pass both Rgbw and Rgbww from the channel options; the iterator
     // carries both, and the encoder dispatch below picks the right path based
     // on which variant alternative ChannelOptions::mWhiteCfg holds.
+#if FL_COLOR_PROFILE_RUNTIME
+    // Brightness reaches the pipeline as C4's flux scalar and nowhere else.
+    // `premixed` is the brightness on this path: binding a profile sets
+    // correction and temperature to identity, so nothing else is folded into
+    // it -- and reading it rather than `ColorAdjustment::brightness` keeps
+    // this working when FASTLED_HD_COLOR_MIXING is off, where that field
+    // does not exist.
+    const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
+    const StreamingPipelineQ16* pipeline = mPipeline.get();
+    if (pipeline != nullptr && flux_hooks.setFlux != nullptr) {
+        flux_hooks.setFlux(mPipeline.get(),
+                           pixels.mColorAdjustment.premixed.r);
+    }
+#else
+    const StreamingPipelineQ16* pipeline = nullptr;
+#endif
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
                                         mSettings.rgbw(), mSettings.rgbww(),
-                                        mName);
+                                        mName, pipeline);
     PixelIterator& pixelIterator = iterator.get();
 
     // Encode pixels based on chipset type

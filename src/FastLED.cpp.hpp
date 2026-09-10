@@ -467,12 +467,22 @@ void CFastLED::setDither(fl::u8 ditherMode)  {
 }
 
 fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
-	fl::u32 total_power_mW = 0;
+	fl::u32 fixed_power_mW = 0;
+	fl::u32 controllable_power_mW = 0;
 
-	// Sum unscaled power from all LED controllers using visitor pattern
-	CLEDController::visitControllers([&total_power_mW](const CLEDController* /*controller*/, fl::span<const CRGB> leds) {
+	// Sum unscaled power from all LED controllers using visitor pattern.
+	// The dark-current baseline is kept apart from the part brightness scales,
+	// because it is drawn at every brightness including zero (#4156 R4).
+	const fl::u32 dark_mW_per_led = get_power_model().dark_mW;
+	CLEDController::visitControllers([&](const CLEDController* controller, fl::span<const CRGB> leds) {
 		if (!leds.empty()) {
-			total_power_mW += calculate_unscaled_power_mW(leds);
+			// Through the controller's own RGBW setting, so an RGBW strip is
+			// charged for the diode it actually lights (#4156 R3).
+			const fl::u32 unscaled_mW =
+			    calculate_unscaled_power_mW(leds, controller->getRgbw());
+			const fl::u32 dark_mW = dark_mW_per_led * static_cast<fl::u32>(leds.size());
+			fixed_power_mW += dark_mW;
+			controllable_power_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
 		}
 	});
 
@@ -485,9 +495,12 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 		effective_brightness = (*mPPowerFunc)(mScale, mNPowerData);
 	}
 
-	// Scale by the configured power-brightness response.
+	// Scale only the emitter share by the configured power-brightness response
+	// and add the baseline back, so the estimate matches what the limiter now
+	// budgets against.
 	// Note: MCU power consumption is NOT included - caller should add platform-specific MCU power if needed
-	return scale_power_for_brightness(total_power_mW, effective_brightness);
+	return fixed_power_mW +
+	       scale_power_for_brightness(controllable_power_mW, effective_brightness);
 }
 
 //

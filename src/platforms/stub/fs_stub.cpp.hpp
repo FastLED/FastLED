@@ -24,6 +24,24 @@ const char* getTestFileSystemRoot() FL_NO_EXCEPT {
     return g_stub_fs_root_path.c_str();
 }
 
+// Root for `fl::getEmbeddedFs()`, kept separate from the SD root above.
+// On a device those are two media, and a test that wrote to one and read
+// from the other would pass here and fail on hardware if they shared a
+// directory. Empty by default, which keeps the host result null (#4007).
+fl::string g_stub_embedded_fs_root_path;
+
+void setTestEmbeddedFileSystemRoot(const char* root_path) FL_NO_EXCEPT {
+    if (root_path) {
+        g_stub_embedded_fs_root_path = root_path;
+    } else {
+        g_stub_embedded_fs_root_path.clear();
+    }
+}
+
+const char* getTestEmbeddedFileSystemRoot() FL_NO_EXCEPT {
+    return g_stub_embedded_fs_root_path.c_str();
+}
+
 // Stub platform implementation that maps to real hard drive
 FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT {
     FASTLED_UNUSED(cs_pin);

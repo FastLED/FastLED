@@ -22,6 +22,7 @@ from colorama import Fore, Style
 
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
+    _reclaim_stale_port_locks,
     create_wifi_manager,
     kPeerConnectAttempts,
 )
@@ -164,6 +165,10 @@ async def run_ota_peer_autoresearch(
             timeout=rpc_timeout(),
             serial_interface=create_serial_interface(peer_upload_port),
         )
+        # The companion's deploy has exited by now and can leave its port
+        # locked in the daemon; reclaim before either client connects.
+        # See FastLED/fbuild#1429.
+        _reclaim_stale_port_locks([upload_port, peer_upload_port])
         await primary.connect(boot_wait=3.0, drain_boot=True)
         # The peer flashes last, so its USB-CDC is the one most likely to be
         # mid-re-enumeration here. Four of the captured `No response with ID 1`

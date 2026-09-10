@@ -19,9 +19,28 @@
 // Platform Implementation Namespace
 //==============================================================================
 
+// The namespace this fallback's operations land in.
+//
+// `platforms` is where every backend puts them and what `platforms/simd.h`
+// dispatches to, so the default changes nothing. It is a macro because on a
+// host that selects another backend this file is reached by *nothing*: an
+// x86 machine compiles `simd_x86.hpp`, and an `#error` placed at the top of
+// this header does not fire in any test build. The fallback that ships to
+// AVR, ESP8266, Cortex-M0/M0+/M3, WASM and every unmatched part was
+// therefore covered by no host test at all.
+//
+// Defining this to something else lets a test include the fallback beside
+// the host's real backend and check the two against each other. Two
+// namespaces rather than one because the register types genuinely differ --
+// `simd_u32x4` is a `u32[4]` here and a `__m128i` there -- so they cannot
+// share a name in one translation unit.
+#ifndef FL_SIMD_FALLBACK_NAMESPACE
+#define FL_SIMD_FALLBACK_NAMESPACE platforms
+#endif
+
 namespace fl {
 namespace simd {
-namespace platforms {
+namespace FL_SIMD_FALLBACK_NAMESPACE {
 
 //==============================================================================
 // SIMD Register Types
@@ -586,6 +605,6 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u16x16 set1_u16_16(u16 value) FL_NO_EXCEPT {
     return { v, v };
 }
 
-}  // namespace platforms
+}  // namespace FL_SIMD_FALLBACK_NAMESPACE
 }  // namespace simd
 }  // namespace fl

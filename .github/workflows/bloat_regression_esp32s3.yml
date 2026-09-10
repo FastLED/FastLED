@@ -1,11 +1,17 @@
 name: bloat regression esp32s3
 
-# Asserts that `bash bloat esp32s3` total_flash stays at or below the
-# pinned baseline in tests/data/esp32s3_bloat_baseline.txt. Each Stage
-# PR that lands a measurable saving lowers the baseline file in the
-# same change; a PR that regresses the flash budget fails this gate.
+# Asserts that `bash bloat esp32s3` total_flash equals the pinned
+# baseline in tests/data/esp32s3_bloat_baseline.txt, within build noise.
+# The baseline is a ratchet and it moves in BOTH directions: a PR that
+# lands a saving must re-pin it down, and a PR whose cost is intentional
+# may re-pin it up with the reason written into that file as a comment.
+# Either way the file ends the PR equal to what the PR builds.
 #
-# See FastLED #2886 (Stage 6) for the policy. The path filters mirror
+# Unclaimed headroom fails too. Leaving a saving unpinned is how 232 B
+# of slack accumulated before #4200 and made a 429 B cost print as
+# 197 B; the gate says so rather than passing quietly.
+#
+# See FastLED #2886 (Stage 6) and #4200. The path filters mirror
 # build_esp32s3.yml so the gate runs on the same set of touch points
 # that could plausibly affect ESP32-S3 flash.
 
@@ -64,6 +70,11 @@ jobs:
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The gate compares the baseline against its merge-base version, so
+          # a raise without a recorded reason can be caught. A shallow clone
+          # has no merge base to read.
+          fetch-depth: 0
 
       - name: Set up uv (Python toolchain)
         uses: astral-sh/setup-uv@v6
@@ -73,5 +84,37 @@ jobs:
       - name: Sync project dependencies
         run: uv sync
 
+      - name: Recover the baseline as it stands on the merge base
+        id: previous_baseline
+        run: |
+          set -euo pipefail
+          # For a pull request the comparison point is the merge base, not
+          # the target-branch tip: `base.sha` moves whenever master advances,
+          # so comparing against a newer tip would read someone else's change
+          # to the baseline as this PR's. A push has no merge to take, so its
+          # comparison point is the previous commit.
+          if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
+            base="$(git merge-base "${{ github.event.pull_request.head.sha }}" "${{ github.event.pull_request.base.sha }}" || true)"
+          else
+            base="${{ github.event.before }}"
+          fi
+          out="$RUNNER_TEMP/previous_baseline.txt"
+          if [ -n "$base" ] && git cat-file -e "$base:tests/data/esp32s3_bloat_baseline.txt" 2>/dev/null; then
+            git show "$base:tests/data/esp32s3_bloat_baseline.txt" > "$out"
+            echo "path=$out" >> "$GITHUB_OUTPUT"
+          else
+            # No merge base to compare against (first commit, or a force push
+            # that dropped it). The reason check is skipped rather than
+            # guessed at; the size gate below still runs.
+            echo "path=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run ESP32-S3 bloat regression gate
-        run: uv run python tests/test_esp32s3_bloat_regression.py
+        run: |
+          set -euo pipefail
+          if [ -n "${{ steps.previous_baseline.outputs.path }}" ]; then
+            uv run python tests/test_esp32s3_bloat_regression.py \
+              --previous-baseline "${{ steps.previous_baseline.outputs.path }}"
+          else
+            uv run python tests/test_esp32s3_bloat_regression.py
+          fi

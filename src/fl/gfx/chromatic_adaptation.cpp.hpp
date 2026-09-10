@@ -6,12 +6,7 @@
 
 namespace fl {
 
-namespace {
-
-// Helper names carry an `adaptation` qualifier because .cpp.hpp files are
-// concatenated into one translation unit by the unity build, so an anonymous
-// namespace does not isolate them from a same-named helper in a sibling file
-// -- source_xyz.cpp.hpp defines its own quantizer.
+namespace detail {
 
 /// ICC linear Bradford cone-response matrix.
 const float kBradford[3][3] = {
@@ -19,6 +14,34 @@ const float kBradford[3][3] = {
     {-0.7502f, 1.7135f, 0.0367f},
     {0.0389f, -0.0685f, 1.0296f},
 };
+
+/// Its inverse, precomputed.
+///
+/// This used to be `invert3x3(kBradford, ...)` on every profile bind -- a
+/// float determinant, a reciprocal, three column-scale divisions and nine
+/// multiplies, run to recompute a matrix that cannot change. The operand is a
+/// compile-time constant, so the answer is one too.
+///
+/// The values are what `invert3x3` produces from `kBradford` in float32, to
+/// the last bit, so the adaptation matrix this feeds is unchanged.
+/// `test_bradford_inverse_matches_the_general_solver` pins that against the
+/// solver rather than against a transcription, which is what catches a typo
+/// here -- a wrong digit in a plausible-looking matrix is exactly the kind of
+/// constant nothing else would notice (FastLED #4043).
+const float kBradfordInverse[3][3] = {
+    {0.986992955f, -0.14705427f, 0.159962654f},
+    {0.432305276f, 0.518360257f, 0.049291227f},
+    {-0.0085286675f, 0.0400428213f, 0.968486726f},
+};
+
+} // namespace detail
+
+namespace {
+
+// Helper names carry an `adaptation` qualifier because .cpp.hpp files are
+// concatenated into one translation unit by the unity build, so an anonymous
+// namespace does not isolate them from a same-named helper in a sibling file
+// -- source_xyz.cpp.hpp defines its own quantizer.
 
 /// True only for a real, usable chromaticity.
 ///
@@ -68,8 +91,9 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
 
     float source_cones[3];
     float destination_cones[3];
-    colorimetric_response::matvec3(kBradford, source_xyz, source_cones);
-    colorimetric_response::matvec3(kBradford, destination_xyz,
+    colorimetric_response::matvec3(detail::kBradford, source_xyz,
+                                   source_cones);
+    colorimetric_response::matvec3(detail::kBradford, destination_xyz,
                                    destination_cones);
 
     float scale[3];
@@ -82,18 +106,19 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
         scale[i] = destination_cones[i] / source_cones[i];
     }
 
-    float inverse[3][3];
-    if (!colorimetric_response::invert3x3(kBradford, inverse)) {
-        return false;
-    }
-
     // Collapse B_inv * diag(scale) * B into one matrix. Done once here so the
     // per-pixel path never sees the cone space at all.
+    //
+    // `kBradfordInverse` rather than inverting `kBradford` again: the operand
+    // is a constant, so the inverse is one, and the solver's failure return
+    // could not fire on it. Nothing that varies per profile was being
+    // computed there.
     for (int row = 0; row < 3; ++row) {
         for (int col = 0; col < 3; ++col) {
             float sum = 0.0f;
             for (int k = 0; k < 3; ++k) {
-                sum += inverse[row][k] * scale[k] * kBradford[k][col];
+                sum += detail::kBradfordInverse[row][k] * scale[k] *
+                       detail::kBradford[k][col];
             }
             out->m[row][col] = quantizeAdaptationQ16(sum);
         }

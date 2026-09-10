@@ -314,4 +314,138 @@ FL_TEST_CASE("ScreenMap v2 JSON parsing — EL geometry remains shape-native") {
 
 FL_TEST_FILE(FL_FILEPATH) {
 
-} // FL_TEST_FILE
+
+FL_TEST_CASE("ScreenMap v2 emission omits an unset diameter") {
+    // `mDiameter` defaults to -1 as a sentinel meaning "unset", and the
+    // emitter wrote it out: every segment of a map with no diameter came back
+    // carrying `"diameter":-1.000`, which is not a physical size. The field's
+    // own comment asked for it to be skipped and had the sense inverted --
+    // "Only serialized if it's not > 0.0f" -- which is presumably how the
+    // writer came to do the opposite.
+    //
+    // Omitting round-trips identically, because both parser paths already
+    // read an absent key back as -1. That is what this checks: the value
+    // survives, the sentinel stops being published.
+    fl::flat_map<fl::string, ScreenMap> maps;
+    maps["unset"] = ScreenMap(2);           // no diameter given
+    ScreenMap sized(2, 2.5f);
+    maps["sized"] = sized;
+
+    fl::string out;
+    ScreenMap::toJsonStr(maps, &out);
+
+    // One diameter in the output, not two.
+    int diameters = 0;
+    const fl::string needle("\"diameter\"");
+    fl::size at = out.find(needle);
+    while (at != fl::string::npos) {
+        ++diameters;
+        at = out.find(needle, at + needle.size());
+    }
+    FL_CHECK_EQ(diameters, 1);
+    FL_CHECK(out.find(fl::string("-1")) == fl::string::npos);
+
+    // And the round trip is unchanged for both.
+    fl::flat_map<fl::string, ScreenMap> back;
+    fl::string err;
+    FL_REQUIRE(ScreenMap::ParseJson(out.c_str(), &back, &err));
+    FL_CHECK_EQ(back["sized"].getDiameter(), 2.5f);
+    FL_CHECK_EQ(back["unset"].getDiameter(), -1.0f);
+}
+
+FL_TEST_CASE("ScreenMap keeps every diameter it accepts through a round trip") {
+    // The omission above is written as `diameter > 0.0f`, which skips more
+    // than the sentinel: 0.0f and any other negative are dropped too, and
+    // both parsers restore an absent key as -1.0f. So a caller who stored
+    // 0.0f got -1.0f back from a round trip -- a value they never set, and
+    // one `getDiameter()` agreed with only after the map had been through
+    // JSON.
+    //
+    // The class now folds every non-positive value to the sentinel where it
+    // is stored, so the two agree from the setter onward and the round trip
+    // is the identity on everything the class holds. Checked here for the
+    // sentinel itself, for zero, for another negative, and for a positive
+    // size that must still survive.
+    ScreenMap zero(2);
+    zero.setDiameter(0.0f);
+    FL_CHECK_EQ(zero.getDiameter(), -1.0f);
+
+    ScreenMap negative(2, -2.0f);
+    FL_CHECK_EQ(negative.getDiameter(), -1.0f);
+
+    ScreenMap tiny(2, 0.25f);
+    FL_CHECK_EQ(tiny.getDiameter(), 0.25f);
+
+    fl::flat_map<fl::string, ScreenMap> maps;
+    maps["zero"] = zero;
+    maps["negative"] = negative;
+    maps["tiny"] = tiny;
+
+    fl::string out;
+    ScreenMap::toJsonStr(maps, &out);
+
+    fl::flat_map<fl::string, ScreenMap> back;
+    fl::string err;
+    FL_REQUIRE(ScreenMap::ParseJson(out.c_str(), &back, &err));
+    FL_CHECK_EQ(back["zero"].getDiameter(), zero.getDiameter());
+    FL_CHECK_EQ(back["negative"].getDiameter(), negative.getDiameter());
+    FL_CHECK_EQ(back["tiny"].getDiameter(), tiny.getDiameter());
+
+    // And nothing impossible reached the wire: no negative diameter, and a
+    // positive one that is smaller than the old `> 0.0f` guard's threshold
+    // is still published rather than quietly dropped.
+    FL_CHECK(out.find(fl::string("\"diameter\":-")) == fl::string::npos);
+    FL_CHECK(out.find(fl::string("\"diameter\"")) != fl::string::npos);
+}
+
+FL_TEST_CASE("ScreenMap v2 emission does not invent a pin") {
+    // `toJson` used to write the literal `"pin1"` into every segment -- the
+    // example value from the shape comment above the emitter, copied in as
+    // data. The parser drops `pin` (it is wiring metadata with nowhere to
+    // live on this side), so the round trip did not preserve the field, it
+    // *rewrote* it: a file wired to pin1/pin2/pin3 came back with all three
+    // on pin1, and a numeric `"pin": 7` came back as the string `"pin1"`.
+    //
+    // Wrong is worse than absent here. A consumer reading a rewritten pin
+    // mis-wires a strip with no way to tell; a consumer reading a missing
+    // optional key can see it is missing. Carrying the value through is
+    // #3322, which needs a place to store it and a decision about the
+    // `<int|str>` union.
+    const char *kThreePins = R"({
+      "version": 2,
+      "segments": [
+        { "id": "a", "pin": "pin1", "x": [0, 1], "y": [0, 1] },
+        { "id": "b", "pin": "pin2", "x": [0, 1], "y": [0, 1] },
+        { "id": "c", "pin": 7,      "x": [0, 1], "y": [0, 1] }
+      ]
+    })";
+    fl::flat_map<fl::string, ScreenMap> maps;
+    fl::string err;
+    FL_REQUIRE(ScreenMap::ParseJson(kThreePins, &maps, &err));
+    FL_REQUIRE_EQ(maps.size(), fl::size(3));
+
+    fl::string out;
+    ScreenMap::toJsonStr(maps, &out);
+
+    // Not one pin, and not three: none. Checking the count rather than the
+    // absence of "pin1" specifically, so re-introducing a different constant
+    // fails this too.
+    int pins = 0;
+    const fl::string needle("\"pin\"");
+    fl::size at = out.find(needle);
+    while (at != fl::string::npos) {
+        ++pins;
+        at = out.find(needle, at + needle.size());
+    }
+    FL_CHECK_EQ(pins, 0);
+
+    // And the geometry still round-trips, so this removed a field rather
+    // than the emitter's output.
+    fl::flat_map<fl::string, ScreenMap> again;
+    FL_REQUIRE(ScreenMap::ParseJson(out.c_str(), &again, &err));
+    FL_CHECK_EQ(again.size(), fl::size(3));
+    FL_CHECK_EQ(again["b"].getLength(), fl::u32(2));
+    FL_CHECK(again["b"][1].x == 1.0f);
+}
+
+}

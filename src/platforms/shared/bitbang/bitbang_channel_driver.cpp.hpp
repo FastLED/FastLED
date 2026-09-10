@@ -5,6 +5,7 @@
 
 #include "platforms/shared/bitbang/bitbang_channel_driver.h"
 #include "fl/system/delay.h"
+#include "platforms/cpu_frequency.h"
 #include "fl/log/log.h"
 #include "fl/system/pin.h"
 #include "fl/stl/algorithm.h"
@@ -110,20 +111,26 @@ void BitBangChannelDriver::rebuildPinConfig(
 }
 
 void BitBangChannelDriver::transmitClocklessBit(u8 onesMask, u32 t1_ns,
-                                                  u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT {
+                                                  u32 t2_ns, u32 t3_ns,
+                                                  u32 hz) FL_NO_EXCEPT {
+    // `hz` is passed in rather than looked up here. The one-argument
+    // `delayNanoseconds(ns)` re-derives the CPU frequency on every call, and
+    // on ESP32 that is an ESP-IDF call -- three of them per bit, in the
+    // hottest loop this driver has (FastLED#4203).
+    //
     // Phase 1: ALL active lines HIGH
     mMultiWriter.writeByte(mActiveSlotMask);
 
     // Phase 2: After T1, '0'-bit lanes go LOW (only '1' lanes stay HIGH)
-    fl::delayNanoseconds(t1_ns);
+    fl::delayNanoseconds(t1_ns, hz);
     mMultiWriter.writeByte(onesMask);
 
     // Phase 3: After T2, ALL lines go LOW
-    fl::delayNanoseconds(t2_ns);
+    fl::delayNanoseconds(t2_ns, hz);
     mMultiWriter.writeByte(0x00);
 
     // Phase 4: Low tail
-    fl::delayNanoseconds(t3_ns);
+    fl::delayNanoseconds(t3_ns, hz);
 }
 
 void BitBangChannelDriver::transmitClockless(
@@ -134,6 +141,13 @@ void BitBangChannelDriver::transmitClockless(
     // For simplicity, process one timing group at a time by iterating and
     // collecting channels that share the same timing.
     fl::vector<bool> processed(channels.size(), false);
+
+    // Once for the whole transmission -- outside the timing-group loop as
+    // well as the per-bit one. A strip with two timing configurations is
+    // still one transmission, and querying per group would put an ESP-IDF
+    // call back on a path that is meant not to have one. See
+    // `transmitClocklessBit`.
+    const u32 hz = fl::cpuFrequencyHz();
 
     for (fl::size i = 0; i < channels.size(); ++i) {
         if (processed[i] || !channels[i] || !channels[i]->isClockless()) continue;
@@ -196,7 +210,7 @@ void BitBangChannelDriver::transmitClockless(
                         onesMask |= (1 << slot);
                     }
                 }
-                transmitClocklessBit(onesMask, t1, t2, t3);
+                transmitClocklessBit(onesMask, t1, t2, t3, hz);
             }
         }
 
