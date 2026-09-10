@@ -5,6 +5,7 @@
 #pragma once
 
 #include "fl/stl/json.h"
+#include "fl/log/log.h"  // IWYU pragma: keep -- FL_WARN_F
 #include "fl/system/delay.h"
 #include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
@@ -109,6 +110,11 @@ struct SerialWriter {
 /// auto responseSink = fl::createSerialResponseSink("REMOTE: ");
 /// fl::Remote remote(requestSource, responseSink);
 /// @endcode
+/// Lines at least this long are reported when discarded. Below it, a
+/// non-JSON line is ordinary serial noise; above it, it is more likely a
+/// request that lost bytes on the way in.
+constexpr fl::size kDroppedRequestWarnBytes = 64;
+
 inline fl::function<fl::optional<fl::json>()>
 createSerialRequestSource(const char* prefix = "") {
     return [prefix]() -> fl::optional<fl::json> {
@@ -149,6 +155,21 @@ createSerialRequestSource(const char* prefix = "") {
 
         // Only parse if input starts with '{'
         if (view.empty() || view[0] != '{') {
+            // A short line here is ordinary serial noise -- boot banners,
+            // stray newlines -- and warning about it would drown the log.
+            // A long one is almost certainly a request that arrived damaged,
+            // and dropping that silently is expensive to debug: the caller
+            // sees no reply and no error, indistinguishable from an idle
+            // link, while the device keeps answering everything else. That
+            // is exactly how a receive-buffer truncation presented in
+            // FastLED#3956 -- 735 bytes transmitted, nothing returned, and
+            // no layer saying anything.
+            if (view.size() >= kDroppedRequestWarnBytes) {
+                FL_WARN_F("[RPC] discarded a %u byte line that does not begin "
+                          "with '{'; a request that arrived truncated looks "
+                          "exactly like this",
+                          static_cast<unsigned>(view.size()));
+            }
             return fl::nullopt;
         }
 
