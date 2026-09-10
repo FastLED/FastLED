@@ -304,6 +304,13 @@ converges on an infeasible answer. Every mapper here clamps into the hull --
 the OKLCh ones by first reducing lightness to the attainable neutral, as the
 reference does, and the naive ones by bounding drives to [0, 1].
 
+That is still true of the *bisection*, and it is no longer the whole story of
+the shipped mapper. "The clamp gives up more than it needs to" below shows the
+clamp discards up to 29.7% of the reachable lightness, and the mapper now
+clamps chroma into its feasible interval above the cap instead, falling back
+to this when that interval is empty. Read this section as why a bracket at
+zero cannot work there, not as a description of what happens.
+
 The corpus contains no over-bright target, so this had to be constructed to
 be tested. That gap has now hidden two defects in this harness: this one and
 the missing upper-bound check in `is_feasible` fixed alongside it. Worth
@@ -757,6 +764,40 @@ bounded by a count rather than by a convergence criterion, so an
 implementation fixes both and the loop count is known at compile time. An
 earlier revision of this section called the parameters themselves
 compile-time constants, which they are not.
+
+### What the embedded mapper does with it
+
+Shipped in `gamut_map.cpp.hpp` for all three mappers, at
+`kGamutMapProbes = 8` and `kGamutMapHalvings = 8`, so the above-cap path costs
+24 feasibility tests and the loop count is known at build time. Targets at or
+below the cap never enter it, and neither does an in-gamut target, so nothing
+below the cap moved.
+
+Re-rendered through the emitters rather than read back off the mapper, it
+reproduces the table above:
+
+| target | embedded L, C |
+| --- | --- |
+| L 1.286, hue 300, C 0.30 | 1.2860, 0.3081 |
+| L 1.398, hue 300, C 0.30 | 1.3978, 0.4431 |
+| L 1.398, hue 120, C 0.50 | 1.1182, 0.0000 |
+
+**One deliberate difference from the harness.** The study probes to an
+absolute `PROBE_CEILING = 0.8`; the mapper works in factors of the request and
+reaches four times it. Both reproduce every row above, and they differ only on
+targets the table does not contain: a bright *near-neutral*, which is
+infeasible precisely because it is not saturated enough. An absolute ceiling
+answers that with a saturated colour; a relative one finds no seed and falls
+back to the clamp, keeping a near-neutral request near-neutral. An over-bright
+grey has no chroma to scale at all and clamps under either.
+
+**A note for whoever tests the wide mappers.** A hull with a white emitter
+swallows a *saturated* target a little above the cap outright -- the
+allocation succeeds and the mapper returns before the clamp is reached -- so
+a case written at chroma 0.30 exercises none of this and passes with the whole
+path disabled. The reachable-but-outside region above the cap is at low
+chroma, which is the finding restating itself. The tests assert the target is
+outside the hull before they assert anything else.
 
 The lower edge is not optional: clamping to the upper edge alone produces
 *infeasible* output on exactly the targets this is meant to fix, which the
