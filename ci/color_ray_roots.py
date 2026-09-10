@@ -27,6 +27,23 @@ two samples, however narrow.
 That is what this module computes. It answers the ray exactly and leaves the
 lightness/hue grid sampled, which is the honest split -- and it is enough,
 because the thing the sampled sweeps could not see turns out to be there.
+
+Two limits on "exact", stated here rather than left to be discovered:
+
+* it is exact *given* that `real_roots` returns every real root. A closed-form
+  cubic loses accuracy on a near-double root, and can merge two roots that are
+  closer together than the polished result can separate. `feasible_runs`
+  therefore unions the roots with a uniform guard grid, so the worst this can
+  degrade to is the resolution of a sampled scan at that grid's density --
+  never worse, which is the point of carrying it;
+* an exact tangency -- a drive touching a bound with even multiplicity -- is
+  not resolvable in floating point at all. Horner at a double root returns
+  something of order 1e-18 with an arbitrary sign. `runs_from_cubics`
+  classifies cut points so that such a touch is reported where the arithmetic
+  is exact, but a grid does not land on one anyway: tangency is measure-zero
+  in lightness and hue, and what a grid meets is the near-tangency beside it,
+  which is an ordinary narrow interval and is exactly how this study's wedge
+  presents.
 """
 
 from __future__ import annotations
@@ -279,26 +296,63 @@ def feasible_runs(
                 if 0.0 < root < max_chroma:
                     cuts.add(root)
 
-    ordered = sorted(cuts)
+    return RayScan(lightness, hue_degrees, runs_from_cubics(cubics, sorted(cuts)))
+
+
+def _inside(cubics: tuple[RayCubic, ...], chroma: float) -> bool:
+    for cubic in cubics:
+        drive = evaluate(cubic, chroma)
+        if drive < 0.0 or drive > 1.0:
+            return False
+    return True
+
+
+@typechecked
+def runs_from_cubics(
+    cubics: tuple[RayCubic, ...], ordered: list[float]
+) -> tuple[ChromaInterval, ...]:
+    """Maximal feasible runs over a partition, cut points and open cells alike.
+
+    The cut points are classified as well as the cells between them because a
+    drive with an even-multiplicity root at a bound touches the boundary
+    without crossing it: the ray meets the hull at exactly one chroma, and that
+    chroma is feasible while every neighbourhood of it is not. Testing
+    midpoints alone drops that point, and `RayScan` promises maximal runs
+    rather than runs wider than zero.
+
+    Such a touch is measure-zero in lightness and hue, so no grid finds one by
+    landing on it. What a grid does find is the near-tangency beside it, which
+    is a genuinely narrow interval -- and that is exactly how the wedge this
+    module was written to find presents itself.
+    """
+
+    if not ordered:
+        return ()
+
+    # Point, cell, point, cell, ..., point -- each carrying the chroma range it
+    # stands for, so a merged run reports the union without special cases.
+    atoms: list[tuple[float, float, bool]] = []
+    for index in range(len(ordered)):
+        edge = ordered[index]
+        atoms.append((edge, edge, _inside(cubics, edge)))
+        if index + 1 < len(ordered):
+            middle = (edge + ordered[index + 1]) / 2.0
+            atoms.append((edge, ordered[index + 1], _inside(cubics, middle)))
+
     intervals: list[ChromaInterval] = []
-    start: float | None = None
-    for index in range(len(ordered) - 1):
-        middle = (ordered[index] + ordered[index + 1]) / 2.0
-        inside = True
-        for cubic in cubics:
-            drive = evaluate(cubic, middle)
-            if drive < 0.0 or drive > 1.0:
-                inside = False
-                break
-        if inside:
-            if start is None:
-                start = ordered[index]
-        elif start is not None:
-            intervals.append(ChromaInterval(start, ordered[index]))
-            start = None
-    if start is not None:
-        intervals.append(ChromaInterval(start, ordered[-1]))
-    return RayScan(lightness, hue_degrees, tuple(intervals))
+    low: float | None = None
+    high = 0.0
+    for atom_low, atom_high, feasible in atoms:
+        if feasible:
+            if low is None:
+                low = atom_low
+            high = atom_high
+        elif low is not None:
+            intervals.append(ChromaInterval(low, high))
+            low = None
+    if low is not None:
+        intervals.append(ChromaInterval(low, high))
+    return tuple(intervals)
 
 
 @typechecked

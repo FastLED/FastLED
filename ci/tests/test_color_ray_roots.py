@@ -23,6 +23,7 @@ from ci.color_ray_roots import (
     feasible_runs,
     ray_cubics,
     real_roots,
+    runs_from_cubics,
     sweep_disconnected,
 )
 from ci.color_reference import Matrix3, _invert_3x3, _matvec, _xyz_from_oklab
@@ -235,6 +236,44 @@ class TestTheOrdinaryRayIsStillConnected(unittest.TestCase):
                     )
                     self.assertTrue(scan.is_connected)
                     self.assertTrue(scan.starts_at_zero)
+
+
+class TestTangency(unittest.TestCase):
+    def test_a_touch_point_is_kept_as_a_zero_width_run(self: "TestTangency") -> None:
+        # -(c - 0.5)^2 (c + 1) = -c^3 + 0.75c - 0.25 is zero at c = 0.5 and
+        # negative everywhere else, so 0.5 is feasible and no neighbourhood of
+        # it is. Testing only the midpoints of the cells between cut points
+        # drops it, and the run list is then not the maximal one `RayScan`
+        # promises.
+        #
+        # Every coefficient and every cut below is dyadic, which is not
+        # decoration: Horner on a double root evaluates to something on the
+        # order of 1e-18 with an arbitrary sign, so a touch point is only
+        # detectable at all where the arithmetic happens to be exact. That is
+        # the real limit here -- an exact tangency is not a thing floating
+        # point can resolve, and what a grid meets instead is the near-tangency
+        # beside it, which is an ordinary narrow interval.
+        touching = RayCubic(-1.0, 0.0, 0.75, -0.25)
+        self.assertEqual(evaluate(touching, 0.5), 0.0)
+        self.assertLess(evaluate(touching, 0.25), 0.0)
+        self.assertLess(evaluate(touching, 0.75), 0.0)
+        elsewhere = RayCubic(0.0, 0.0, 0.0, 0.5)
+        cubics = (touching, elsewhere, elsewhere)
+        runs = runs_from_cubics(cubics, [0.0, 0.25, 0.5, 0.75, 1.0])
+        self.assertEqual(len(runs), 1)
+        self.assertEqual(runs[0].low, 0.5)
+        self.assertEqual(runs[0].high, 0.5)
+
+    def test_an_ordinary_run_still_spans_its_cells(self: "TestTangency") -> None:
+        # The control: without a tangency the point classification must not
+        # fragment a run into one interval per cut point.
+        everywhere = RayCubic(0.0, 0.0, 0.0, 0.5)
+        runs = runs_from_cubics(
+            (everywhere, everywhere, everywhere), [0.0, 0.1, 0.2, 0.3]
+        )
+        self.assertEqual(len(runs), 1)
+        self.assertAlmostEqual(runs[0].low, 0.0, delta=1e-12)
+        self.assertAlmostEqual(runs[0].high, 0.3, delta=1e-12)
 
 
 class TestInputValidation(unittest.TestCase):

@@ -230,6 +230,16 @@ cubic in `c`. So `{c : 0 <= d_i(c) <= 1}` is decided by the real roots of `d_i`
 and `d_i - 1`, and the feasible set for a ray is *exact* -- no gap can hide
 between two samples, however narrow. That is `ci/color_ray_roots.py`.
 
+Exact given that the solver returns every real root, which is worth stating
+because the closed form loses accuracy on a near-double root and can merge two
+that sit closer than the polished result separates. The partition is therefore
+the union of the roots with a uniform guard grid, so the failure mode degrades
+to the resolution of a sampled scan rather than past it. An exact tangency --
+a drive touching a bound with even multiplicity -- is not resolvable in
+floating point at all; it is also measure-zero in lightness and hue, so what a
+grid meets is the near-tangency beside it, which is an ordinary narrow
+interval and is how the wedge below presents.
+
 Computed that way, on the primaries this report uses:
 
 | | |
