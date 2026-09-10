@@ -62,12 +62,23 @@ bool productFitsI64(i64 a, i64 b) FL_NO_EXCEPT {
 }
 
 /// Does `a + b` fit an i64, for operands already known to be in range?
+///
+/// The negative bound stops one short of i64's minimum, deliberately.
+/// `divideCoefficientQ16` and `roundedDivI64` both negate the determinant,
+/// and negating the minimum is undefined behaviour -- so this is what
+/// guarantees they never see it.
+///
+/// It is reachable, not theoretical. A single term cannot be the minimum
+/// because `productFitsI64` rejects any product that large, but a sum can:
+/// 2^63 - 1 factors as 7 * 73 * 127 * 337 * 92737 * 649657, so one term can
+/// be made exactly -(2^63 - 1) from i32 entries and a second can contribute
+/// the remaining -1. `tests/fl/gfx/device_solve.cpp` carries the matrix.
 bool sumFitsI64(i64 a, i64 b) FL_NO_EXCEPT {
     if (b > 0) {
         return a <= kI64Max - b;
     }
     if (b < 0) {
-        return a >= -kI64Max - 1 - b;
+        return a >= -kI64Max - b;
     }
     return true;
 }
@@ -121,6 +132,8 @@ i64 roundedDivI64(i64 numerator, i64 denominator) FL_NO_EXCEPT {
 i64 divideCoefficientQ16(i64 cofactor_q32, i64 determinant_q48) FL_NO_EXCEPT {
     i64 numerator = cofactor_q32;
     i64 denominator = determinant_q48;
+    // Safe to negate: `sumFitsI64` refuses a determinant of i64's minimum, so
+    // the caller cannot pass the one value this would be undefined for.
     if (denominator < 0) {
         numerator = -numerator;
         denominator = -denominator;

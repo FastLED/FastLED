@@ -53,10 +53,17 @@ class ArmTools:
 
 @typechecked
 def _arm_tools() -> ArmTools | None:
+    """A complete pair, from PATH if it has one and the caches otherwise.
+
+    Both halves are needed, so a `PATH` carrying only the compiler falls
+    through to the caches rather than reporting no toolchain -- which would
+    skip this test on a machine that has a usable one.
+    """
+
     found = shutil.which("arm-none-eabi-g++")
-    if found is not None:
-        dump = shutil.which("arm-none-eabi-objdump")
-        return ArmTools(compiler=found, objdump=dump) if dump else None
+    dump = shutil.which("arm-none-eabi-objdump")
+    if found is not None and dump is not None:
+        return ArmTools(compiler=found, objdump=dump)
     for root in (Path.home() / ".platformio" / "packages", Path.home() / ".fbuild"):
         if not root.is_dir():
             continue

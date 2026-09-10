@@ -324,6 +324,22 @@ FL_TEST_CASE("Q16 inverse refuses input whose determinant leaves i64") {
     FL_CHECK_EQ(out[0][1], 0);
 }
 
+FL_TEST_CASE("Q16 inverse refuses a determinant of exactly i64's minimum") {
+    // Every product below fits an i64 on its own and every cofactor is a
+    // valid difference of two i32 products, but the three terms sum to
+    // exactly -2^63 -- and negating that, which both the staged divide and
+    // its rounding helper do, is undefined behaviour.
+    //
+    // Constructed rather than found: 2^63 - 1 factors as
+    // 7 * 73 * 127 * 337 * 92737 * 649657, so one term can be made exactly
+    // -(2^63 - 1) with i32 entries, and a second contributes the remaining
+    // -1. Reported by review on FastLED#4305.
+    i32 out[3][3];
+    const i32 int64_min_determinant[3][3] = {
+        {-92737, 64896, 1}, {0, 64897, 1}, {1, 0, 1532540863}};
+    FL_CHECK(!invert3x3Q16(int64_min_determinant, out));
+}
+
 FL_TEST_CASE("Q16 inverse rounds rather than truncates") {
     // Truncation biases every coefficient toward zero, and a solve sums three
     // of them, so the bias does not cancel across a row. 3/2 inverts to 2/3,
