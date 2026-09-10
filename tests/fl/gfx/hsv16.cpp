@@ -1154,10 +1154,17 @@ FL_TEST_CASE("Section 5 can be scored without the frame cadence") {
 }
 
 FL_TEST_CASE("At the worst target the cycle closes what a frame cannot") {
-    // 2% luminance: rounding 0.0605, the best single frame 0.0382, and an
-    // eight-frame cycle 0.0016. Section 5's remaining candidate is not in the
-    // same class as the static ones -- it does not close the last third, it
-    // closes almost all of it.
+    // 2% luminance, everything measured against the same baseline of
+    // per-channel rounding at 0.0605:
+    //
+    //   best value-only shaping         0.0530   12% lower
+    //   distance-optimal single frame   0.0382   37% lower
+    //   distance-optimal 8-frame cycle  0.0016   97% lower
+    //
+    // #4277 framed this candidate as the one that "could close the other two
+    // thirds" -- the part of the static ceiling's 37% that value-only shaping
+    // leaves. That understates it: the cycle is not competing for the
+    // remainder of a 37% budget, it removes almost all of the error.
     const float luminance = 0.02f;
     const Oklab ideal = idealNeutralLight(luminance);
     const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));

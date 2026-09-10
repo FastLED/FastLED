@@ -331,11 +331,21 @@ The static worst sits at a different target from the 2% one quoted above,
 which is why it reads 0.0466 rather than 0.0382: at 1% luminance no single
 frame improves on rounding at all.
 
-At the 2% target specifically -- rounding 0.0605, the distance-optimal single
-frame 0.0382 -- the distance-optimal eight-frame cycle sits at **0.0016**. The
-remaining candidate is not in the same class as the static ones: it does not
-close the last third, it closes almost all of it. Eight frames is also the
-cycle `BINARY_DITHER` already runs, so the cadence question is not a new one.
+At the 2% target, all three against the same baseline of per-channel rounding:
+
+| | chroma | reduction against rounding |
+| --- | ---: | ---: |
+| per-channel rounding | 0.0605 | -- |
+| best value-only shaping | 0.0530 | 12% |
+| distance-optimal single frame | 0.0382 | 37% |
+| **distance-optimal eight-frame cycle** | **0.0016** | **97%** |
+
+The section above framed this candidate as the one that "could close the other
+two thirds", meaning the part of the static ceiling's 37% that value-only
+shaping leaves behind. That framing understates it: the cycle is not competing
+for the remainder of a 37% budget, it removes 97% of the error outright.
+Eight frames is also the cycle `BINARY_DITHER` already runs, so the cadence
+question is not a new one.
 
 The one-frame row is a control rather than a second measurement: at `N = 1`
 the grid collapses to the integer codes over the same window the static search
