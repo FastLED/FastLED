@@ -127,10 +127,26 @@ struct ChannelOptions {
         // mWarnedLegacyCleared on a profile that was then rejected, and
         // clearColorProfile() leaves mCorrection/mTemperature alone -- so the
         // next *valid* profile cleared the caller's legacy settings silently.
-        if (!had_profile &&
-            (mCorrection != UncorrectedColor || mTemperature != UncorrectedTemperature) &&
-            !mWarnedLegacyCleared) {
-            FL_WARN_F("Color profile clears legacy correction/temperature");
+        // Every field cleared below whose loss is detectable has to be
+        // represented here, or the caller loses it in silence. This used to
+        // name mCorrection and mTemperature only, while the clear also resets
+        // mGamma -- so a caller who set just a gamma had it discarded with no
+        // warning, which is exactly what the note above is about (#4331).
+        //
+        // mDitherMode is deliberately absent, and cannot be added by
+        // comparison. Its default is BINARY_DITHER and the clear sets
+        // DISABLE_DITHER, so `mDitherMode != BINARY_DITHER` is true precisely
+        // when the caller already chose DISABLE_DITHER and nothing is being
+        // taken away, and false in the case that loses dithering. Detecting
+        // that needs a "the caller set this" flag, which mGamma gets for free
+        // by being an optional. Until then, binding a profile turns dithering
+        // off quietly (#4331).
+        const bool clearing_legacy =
+            mCorrection != UncorrectedColor ||
+            mTemperature != UncorrectedTemperature ||
+            mGamma.has_value();
+        if (!had_profile && clearing_legacy && !mWarnedLegacyCleared) {
+            FL_WARN_F("Color profile clears legacy correction/temperature/gamma");
             ChannelEvents::instance().onColorProfileWarning(
                 ColorProfileEvent{-1, {}, ColorProfileWarning::LegacyClearedByProfile});
             mWarnedLegacyCleared = true;

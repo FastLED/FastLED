@@ -725,4 +725,64 @@ FL_TEST_CASE("[#4328] isColorManaged is not a synonym for hasColorProfile") {
     FL_CHECK_FALSE(channel->isColorManaged());
 }
 
+// #4331: setColorProfile() clears four legacy settings and the warning used
+// to check two of them, so a caller who set only gamma or only dither had it
+// discarded in silence -- the very failure the comment on that guard says it
+// exists to prevent.
+FL_TEST_CASE("[#4331] a profile warns when it clears gamma, not only correction") {
+    ChannelOptions options;
+    fl::vector<ColorProfileEvent> events;
+    const int listener = FastLED.channelEvents().onColorProfileWarning.add(
+        [&](const ColorProfileEvent& event) { events.push_back(event); });
+
+    // Correction and temperature deliberately untouched: this is the case the
+    // old condition could not see.
+    options.mGamma = 2.2f;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile));
+    FastLED.channelEvents().onColorProfileWarning.remove(listener);
+
+    FL_CHECK_FALSE(options.mGamma.has_value());
+    FL_REQUIRE_EQ(events.size(), size_t(1));
+    FL_CHECK_EQ(events[0].warning, ColorProfileWarning::LegacyClearedByProfile);
+}
+
+FL_TEST_CASE("[#4331] losing the dither mode is not detectable, and is not warned") {
+    // Recorded rather than fixed. mDitherMode's default is BINARY_DITHER and
+    // setColorProfile() sets DISABLE_DITHER, so a caller who wanted dithering
+    // has it by default and loses it -- while a caller who set BINARY_DITHER
+    // explicitly is byte-identical to one who never touched it. Comparison
+    // cannot tell the two apart, so no condition on this field can warn in
+    // the case that loses something without also warning in the case that
+    // does not. mGamma escapes this by being an optional.
+    //
+    // This pins the current, silent behaviour so that giving mDitherMode a
+    // "caller set this" flag is a visible change rather than a quiet one.
+    ChannelOptions options;
+    fl::vector<ColorProfileEvent> events;
+    const int listener = FastLED.channelEvents().onColorProfileWarning.add(
+        [&](const ColorProfileEvent& event) { events.push_back(event); });
+
+    options.mDitherMode = BINARY_DITHER;   // the default: indistinguishable
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile));
+    FastLED.channelEvents().onColorProfileWarning.remove(listener);
+
+    FL_CHECK_EQ((int)options.mDitherMode, (int)DISABLE_DITHER);
+    FL_CHECK_EQ(events.size(), size_t(0));
+}
+
+FL_TEST_CASE("[#4331] a profile bound over untouched defaults stays quiet") {
+    // The guard that keeps the two cases above from passing under a warning
+    // that simply always fires. BINARY_DITHER is mDitherMode's default, so
+    // nothing here was set by a caller and nothing is being taken away.
+    ChannelOptions options;
+    fl::vector<ColorProfileEvent> events;
+    const int listener = FastLED.channelEvents().onColorProfileWarning.add(
+        [&](const ColorProfileEvent& event) { events.push_back(event); });
+
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile));
+    FastLED.channelEvents().onColorProfileWarning.remove(listener);
+
+    FL_CHECK_EQ(events.size(), size_t(0));
+}
+
 }  // FL_TEST_FILE
