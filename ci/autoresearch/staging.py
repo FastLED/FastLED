@@ -30,6 +30,51 @@ from ci.boards import create_board
 from ci.compiler.path_manager import FastLEDPaths, resolve_project_root
 
 
+def apply_ota_fixture_partitions(ini: "Path") -> None:
+    """Point `board_build.partitions` at the OTA fixture table, exactly once.
+
+    Replaces the generated key rather than appending a second one. Appending
+    left two `board_build.partitions` entries in the same [env:esp32c6]
+    section -- the framework's huge_app.csv and this one -- and the build
+    tolerates that, so which table takes effect is decided by the ini parser
+    rather than by us. "The fixture table was silently not applied" then
+    looks identical from the outside to "it was applied". A fixture that may
+    or may not be in effect is worse than either outcome. See FastLED#3956.
+
+    Raises when there is no key to replace: a generated-layout change must
+    fail loudly, not quietly build against the wrong partition table.
+    """
+    replacement = "board_build.partitions = src/sketch/esp32c6_ota_fixture.csv"
+    lines = ini.read_text(encoding="utf-8").splitlines()
+
+    matches: list[int] = []
+    for index, line in enumerate(lines):
+        if line.split("=", 1)[0].strip() == "board_build.partitions":
+            matches.append(index)
+
+    if not matches:
+        raise RuntimeError(
+            f"No board_build.partitions key to replace in {ini}; the generated "
+            f"project layout has changed and the OTA fixture partition table "
+            f"would not be applied"
+        )
+
+    # Every match, not the first. Replacing one and leaving another is the
+    # same defect this function exists to fix, one layer down: the parser
+    # would still be choosing between two keys, and the choice would still
+    # not be ours. Applies whether the duplicate was already there or a
+    # future generator adds one.
+    for index in matches:
+        lines[index] = replacement
+    if len(matches) > 1:
+        # Collapse them, so the file states the table once. Kept in reverse
+        # so the earlier indices stay valid as they are removed.
+        for index in reversed(matches[1:]):
+            del lines[index]
+
+    ini.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def synthesise_autoresearch_project(
     board_name: str,
     project_root: Path | None,
@@ -108,9 +153,6 @@ def synthesise_autoresearch_project(
         if not partitions.is_file():
             raise RuntimeError(f"Missing OTA fixture partition table: {partitions}")
         ini = build_dir / "platformio.ini"
-        with ini.open("a", encoding="utf-8") as output:
-            output.write(
-                "\nboard_build.partitions = src/sketch/esp32c6_ota_fixture.csv\n"
-            )
+        apply_ota_fixture_partitions(ini)
 
     return build_dir
