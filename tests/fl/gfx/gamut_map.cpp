@@ -1540,6 +1540,123 @@ FL_TEST_CASE("the allocator is accurate across the plane, not just at one point"
     FL_CHECK_GT(worst, 0.0f);
 }
 
+FL_TEST_CASE("the two-white allocator never clamps a drive the solve put out of range") {
+    // The question FastLED#4303 left open once the single-white path was
+    // fixed: does the two-white path have the same defect?
+    //
+    // No. The defect *is* accepting a target whose solve wants a drive
+    // outside [0, 1], clamping it, and reporting the target reachable. This
+    // allocator never accepts one, so its uniform slack -- which #4303 left
+    // alone -- never decides feasibility and cannot buy a colour error the
+    // way the single-white slack did.
+    //
+    // Why, measured rather than reasoned. The first explanation tried was
+    // that `kTwoWhiteBoundSlack` is half the final check's tolerance, so the
+    // bounds admit less than the check accepts. That is true and it is *not*
+    // the reason: making them equal changes nothing here.
+    //
+    // What actually holds it is margin. Raising the slack and re-measuring:
+    //
+    //   64 (shipped)  0 accepted with an out-of-range solve
+    //   128           0
+    //   256           0
+    //   512           0
+    //   1024          3
+    //   2048          5
+    //   4096          11
+    //
+    // So 64 sits a factor of eight below where this behaviour changes. It is
+    // a comfortable margin rather than a structural guarantee, which is the
+    // useful thing for anyone thinking of widening it.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                      WhiteAllocationPolicy::WhitePreferred,
+                                      &map));
+
+    int accepted = 0;
+    int accepted_wanting_out_of_range = 0;
+    int rejected_wanting_out_of_range = 0;
+    int wanting_out_of_range = 0;
+    float worst = 0.0f;
+    for (int xi = 4; xi <= 72; xi += 2) {
+        for (int yi = 4; yi <= 72; yi += 2) {
+            const float x = static_cast<float>(xi) * 0.01f;
+            const float y = static_cast<float>(yi) * 0.01f;
+            if (x + y >= 1.0f) {
+                continue;
+            }
+            i32 xyz[3];
+            xyzAt(x, y, 0.5f, xyz);
+
+            // What the RGB solve asks for before any white is chosen. This
+            // is the same matrix the single-white path uses, so "wants a
+            // drive out of range" means the same thing on both.
+            i32 at_zero[3];
+            solveRgbDrivesQ16(map.allocation.rgb_solve, xyz, at_zero);
+            bool wants_out = false;
+            for (int channel = 0; channel < 3; ++channel) {
+                if (at_zero[channel] < 0 || at_zero[channel] > 65536) {
+                    wants_out = true;
+                }
+            }
+            if (wants_out) {
+                ++wanting_out_of_range;
+            }
+
+            i32 drives[5];
+            if (!allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives)) {
+                if (wants_out) {
+                    ++rejected_wanting_out_of_range;
+                }
+                continue;
+            }
+            ++accepted;
+            if (wants_out) {
+                ++accepted_wanting_out_of_range;
+            }
+
+            float as_float[5];
+            for (int i = 0; i < 5; ++i) {
+                as_float[i] = toFloat(drives[i]);
+            }
+            float produced[3];
+            reproduceRgbww(as_float, produced);
+            const i32 produced_q16[3] = {q16(produced[0]), q16(produced[1]),
+                                         q16(produced[2])};
+            i32 target_lab[3];
+            i32 produced_lab[3];
+            xyzToOklabQ16(xyz, target_lab);
+            xyzToOklabQ16(produced_q16, produced_lab);
+            const float divergence = hueDivergence(target_lab, produced_lab);
+            if (divergence > worst) {
+                worst = divergence;
+            }
+        }
+    }
+
+    // The property.
+    FL_CHECK_EQ(accepted_wanting_out_of_range, 0);
+
+    // And the guard that makes it mean something. If no target on this grid
+    // ever wanted an out-of-range drive, the line above would hold over an
+    // empty set and this case would be reporting a property of the corpus
+    // rather than of the allocator. Measured: 670 targets want one, and all
+    // 670 are refused.
+    FL_CHECK_EQ(wanting_out_of_range, 670);
+    FL_CHECK_EQ(rejected_wanting_out_of_range, 670);
+
+    // 283 accepted, the same count the single-white path reaches after
+    // FastLED#4303 -- both are limited by the RGB hull here rather than by
+    // how many whites there are.
+    FL_CHECK_EQ(accepted, 283);
+
+    // Worst OKLab hue divergence 0.00096, against the single-white path's
+    // 0.0197 before that fix and 0.0034 after. Bounded below too: a run
+    // measuring nothing would also report zero.
+    FL_CHECK_LT(worst, 0.005f);
+    FL_CHECK_GT(worst, 0.0f);
+}
+
 FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
     // The last corner of the criterion: the hue objective on the five-emitter
     // hull.
