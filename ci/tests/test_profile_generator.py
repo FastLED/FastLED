@@ -114,22 +114,22 @@ class TestRefusal(unittest.TestCase):
         # The schema keeps min/typical/max ranges precisely so a table is not
         # collapsed into an invented midpoint. Accepting a range here would
         # re-introduce the invention one layer up.
+        ranged_channels: list[dict[str, object]] = []
+        for name in ("red", "green", "blue"):
+            ranged_channels.append(
+                {
+                    "name": name,
+                    "runtime_admissible": True,
+                    "chromaticity_range": {"typical": {"x": 0.3, "y": 0.3}},
+                    "relative_y_range": {"typical": {"value": 0.3}},
+                }
+            )
         payload = {
             "schema_version": "1.0",
             "profile_id": "ranged/rgb/none/r1",
             "runtime_admissible": True,
             "topology": "rgb",
-            "photometric": {
-                "channels": [
-                    {
-                        "name": name,
-                        "runtime_admissible": True,
-                        "chromaticity_range": {"typical": {"x": 0.3, "y": 0.3}},
-                        "relative_y_range": {"typical": {"value": 0.3}},
-                    }
-                    for name in ("red", "green", "blue")
-                ]
-            },
+            "photometric": {"channels": ranged_channels},
         }
         decision = admit(parse_artifact(json.dumps(payload).encode("utf-8"), "ranged"))
         self.assertIsInstance(decision, Refusal)
@@ -137,22 +137,22 @@ class TestRefusal(unittest.TestCase):
         self.assertTrue(any("chromaticity" in r for r in decision.reasons))
 
     def test_the_channel_set_must_match_the_topology(self: "TestRefusal") -> None:
+        short_channels: list[dict[str, object]] = []
+        for name in ("red", "green", "blue"):
+            short_channels.append(
+                {
+                    "name": name,
+                    "runtime_admissible": True,
+                    "chromaticity": {"x": 0.3, "y": 0.3},
+                    "relative_y": {"value": 0.3},
+                }
+            )
         payload = {
             "schema_version": "1.0",
             "profile_id": "short/rgbw/none/r1",
             "runtime_admissible": True,
             "topology": "rgbw",  # requires a white channel that is not here
-            "photometric": {
-                "channels": [
-                    {
-                        "name": name,
-                        "runtime_admissible": True,
-                        "chromaticity": {"x": 0.3, "y": 0.3},
-                        "relative_y": {"value": 0.3},
-                    }
-                    for name in ("red", "green", "blue")
-                ]
-            },
+            "photometric": {"channels": short_channels},
         }
         decision = admit(parse_artifact(json.dumps(payload).encode("utf-8"), "short"))
         self.assertIsInstance(decision, Refusal)
@@ -219,22 +219,22 @@ class TestAdmissionAndRendering(unittest.TestCase):
 class TestRenderableTopologies(unittest.TestCase):
     def _white_artifact(self: "TestRenderableTopologies", topology: str) -> object:
         channels = TOPOLOGY_CHANNELS[topology]
+        channel_records: list[dict[str, object]] = []
+        for name in channels:
+            channel_records.append(
+                {
+                    "name": name,
+                    "runtime_admissible": True,
+                    "chromaticity": {"x": 0.3, "y": 0.3},
+                    "relative_y": {"value": 0.3},
+                }
+            )
         payload = {
             "schema_version": "1.0",
             "profile_id": f"white/{topology}/warm/r1",
             "runtime_admissible": True,
             "topology": topology,
-            "photometric": {
-                "channels": [
-                    {
-                        "name": name,
-                        "runtime_admissible": True,
-                        "chromaticity": {"x": 0.3, "y": 0.3},
-                        "relative_y": {"value": 0.3},
-                    }
-                    for name in channels
-                ]
-            },
+            "photometric": {"channels": channel_records},
         }
         return admit(parse_artifact(json.dumps(payload).encode("utf-8"), topology))
 
@@ -296,9 +296,14 @@ class TestMissingDirectory(unittest.TestCase):
         # Globbing a missing directory yields nothing, which would let write
         # mode emit a header with those parts -- and their refusal records --
         # simply absent.
+        missing = REPO_ROOT / "ci" / "no" / "such" / "directory"
         with self.assertRaises(FileNotFoundError) as caught:
-            load_artifacts(REPO_ROOT / "ci" / "no" / "such" / "directory")
-        self.assertIn("no", str(caught.exception))
+            load_artifacts(missing)
+        # The whole path, not a fragment of it. Asserting on a substring like
+        # "no" passes for almost any message and would not notice the error
+        # naming the wrong directory -- which is the one thing the reader
+        # needs it to get right.
+        self.assertIn(str(missing), str(caught.exception))
 
 
 class TestCheckMode(unittest.TestCase):
