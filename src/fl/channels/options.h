@@ -12,6 +12,7 @@
 #include "fl/channels/color_profile.h"
 #include "fl/channels/channel_events.h"
 #include "fl/log/log.h"
+#include "fl/stl/compiler_control.h"  // FL_DEPRECATED
 
 namespace fl {
 
@@ -181,13 +182,20 @@ struct ChannelOptions {
         return false;
 #endif
     }
-    // No isColorManaged() here on purpose. It used to exist as a hardcoded
-    // `false` with no callers anywhere, and options cannot answer the
-    // question: they carry the *request*, while the transform is built by
-    // Channel::reconcileColorProfile and can fail for a binding these options
-    // accepted. Asking a request object whether rendering is installed can
-    // only ever return a plausible-looking guess. Channel::isColorManaged()
-    // is the one that knows (#4328).
+    /// @deprecated Ask the channel, not the request.
+    ///
+    /// Options carry the *request*; the transform is built by
+    /// `Channel::reconcileColorProfile` and can fail for a binding these
+    /// options accepted -- which is exactly the case
+    /// `Channel::isColorManaged()` distinguishes. A request object asked
+    /// whether rendering is installed can only return a guess, and this one
+    /// returned a hardcoded `false` (#4328).
+    ///
+    /// Kept, returning that same legacy value, so no downstream call stops
+    /// compiling; the attribute is what moves callers along. No in-tree
+    /// caller exists.
+    FL_DEPRECATED("Ask the channel: Channel::isColorManaged()")
+    bool isColorManaged() const FL_NO_EXCEPT { return false; }
     const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         return mColorProfile.profile();
