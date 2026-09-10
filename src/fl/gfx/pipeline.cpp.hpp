@@ -18,7 +18,7 @@ constexpr Chromaticity kPipelineD65 = Chromaticity(0.3127f, 0.3290f);
 }  // namespace
 
 bool buildStreamingPipelineQ16(const SourceProfile& source,
-                               const EmitterProfile& device,
+                               const colorimetric_response::EmitterProfile& device,
                                GamutPolicy policy,
                                StreamingPipelineQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {

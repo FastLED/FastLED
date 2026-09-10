@@ -87,7 +87,7 @@ struct StreamingPipelineQ16 {
 /// and the power limiter reach it, because they change between frames while
 /// everything else here does not.
 bool buildStreamingPipelineQ16(const SourceProfile& source,
-                               const EmitterProfile& device,
+                               const colorimetric_response::EmitterProfile& device,
                                GamutPolicy policy,
                                StreamingPipelineQ16* out) FL_NO_EXCEPT;
 

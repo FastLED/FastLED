@@ -80,12 +80,22 @@ def _arm_tools() -> ArmTools | None:
 
 @typechecked
 def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
-    """Every function in the object, keyed by symbol."""
+    """Every function in the object, keyed by symbol, with relocations.
+
+    `-r` matters. In an unlinked object a call to an undefined symbol
+    disassembles as `bl 0 <name>`, and objdump resolves that `0` against the
+    symbol table -- so when a *defined* function happens to sit at address
+    zero, every unrelocated call in the object appears to go to it. Walking
+    those printed names had `signedCbrtQ16` calling
+    `isUsableSolveChromaticity`: a cube root calling a chromaticity
+    validator, which is what gave it away. The relocation records say where
+    the calls really go.
+    """
 
     # `subprocess.run` and not `RunningProcess.run`: the latter merges stderr
     # into stdout, which would put objdump's warnings into what this parses.
     completed = subprocess.run(  # noqa: SRC001
-        [objdump, "-d", "--no-show-raw-insn", str(obj)],
+        [objdump, "-d", "-r", "--no-show-raw-insn", str(obj)],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -105,6 +115,70 @@ def _disassembly(objdump: str, obj: Path) -> dict[str, list[str]]:
         elif current is not None:
             current = None
     return bodies
+
+
+# Relocations that stand for a transfer of control. `R_ARM_ABS32` and its
+# relatives are data references -- this object carries nine of them, all
+# naming `.rodata` -- and counting those as calls invents edges. False edges
+# only *add* reachability, so they cannot make an absence claim pass wrongly,
+# but they can make the control below pass for the wrong reason.
+kControlRelocation = re.compile(
+    r"\bR_ARM_(?:THM_)?(?:CALL|JUMP24|JUMP19|JUMP11|JUMP8|PC24|PLT32)\b"
+    r"\s+([A-Za-z_][A-Za-z0-9_.]*)"
+)
+
+# A resolved local transfer: `bl`, or a plain `b` when the compiler turns a
+# call in tail position into a jump. Missing the branch form is the dangerous
+# direction -- a lost edge makes "reaches no float" pass by not looking.
+kResolvedTransfer = re.compile(
+    r"\bb(?:l)?(?:\.[nw])?\s+([0-9a-f]+) <([A-Za-z_][A-Za-z0-9_.]*)>"
+)
+
+
+@typechecked
+def _callees(body: list[str]) -> set[str]:
+    """Who this function actually transfers control to.
+
+    A relocation record on the line *after* a transfer names its real target,
+    and supersedes the name objdump printed. Without one, the printed name is
+    correct and is used as it stands.
+
+    The pairing matters in both directions, and getting it wrong is how this
+    walk has been wrong twice.
+
+    Reading the printed name always: an unrelocated call disassembles as
+    `bl 0 <name>` and objdump resolves that `0` against the symbol table, so
+    every such call appears to go to whatever function sits at address zero.
+    That had `signedCbrtQ16` calling `isUsableSolveChromaticity` -- a cube
+    root calling a chromaticity validator, which is what gave it away.
+
+    Discarding every address-zero transfer instead: a function genuinely
+    placed at offset zero in its section is a legitimate target, and dropping
+    the edge loses a real call. Measured in this object, 254 of the 257
+    address-zero transfers carry a relocation and are the ambiguous kind,
+    and the remaining 3 are `buildRgbSolveMatrixQ16` calling
+    `isUsableSolveChromaticity` for real. Losing an edge is the dangerous
+    direction: it makes "reaches no float" pass by not looking.
+    """
+
+    out: set[str] = set()
+    pending_transfer: str | None = None
+    for line in body:
+        relocation = kControlRelocation.search(line)
+        if relocation:
+            # Supersedes the transfer it belongs to, which is the line above.
+            out.add(relocation.group(1))
+            pending_transfer = None
+            continue
+        if pending_transfer is not None:
+            out.add(pending_transfer)
+            pending_transfer = None
+        transfer = kResolvedTransfer.search(line)
+        if transfer:
+            pending_transfer = transfer.group(2)
+    if pending_transfer is not None:
+        out.add(pending_transfer)
+    return out
 
 
 @typechecked
@@ -127,12 +201,10 @@ def _reachable_helpers(objdump: str, obj: Path, symbol: str) -> set[str]:
         if name in seen:
             continue
         seen.add(name)
-        text = "\n".join(bodies.get(name, []))
-        found |= set(kFloatHelper.findall(text))
-        for callee in re.findall(
-            r"<([A-Za-z_][A-Za-z0-9_.]*)(?:\+0x[0-9a-f]+)?>", text
-        ):
-            if callee in bodies and callee != name:
+        for callee in _callees(bodies.get(name, [])):
+            if kFloatHelper.match(callee):
+                found.add(callee)
+            elif callee in bodies and callee != name:
                 pending.append(callee)
     return found
 
@@ -169,6 +241,221 @@ def _helpers_called(objdump: str, obj: Path, symbol: str) -> set[str]:
     if not body:
         raise AssertionError(f"{symbol} not found in {obj.name}")
     return set(kFloatHelper.findall("\n".join(body)))
+
+
+kPerPixelSymbol = "_ZN2fl15processPixelQ16ERKNS_20StreamingPipelineQ16EhhhRA3_l"
+kBindSymbol = (
+    "_ZN2fl25buildStreamingPipelineQ16ERKNS_13SourceProfileERKNS_"
+    "21colorimetric_response14EmitterProfileENS_11GamutPolicyEPNS_"
+    "20StreamingPipelineQ16E"
+)
+
+kPipelineSource = """
+#include "fl/gfx/device_solve.cpp.hpp"
+#include "fl/gfx/flux_scalar.cpp.hpp"
+#include "fl/gfx/gamut_map.cpp.hpp"
+#include "fl/gfx/oklab_q16.cpp.hpp"
+#include "fl/gfx/pipeline.cpp.hpp"
+#include "fl/gfx/source_xyz.cpp.hpp"
+#include "fl/gfx/transfer.cpp.hpp"
+#include "fl/gfx/white_allocation.cpp.hpp"
+"""
+
+
+@typechecked
+@dataclass(frozen=True)
+class CompiledPipeline:
+    """One build of the streaming pipeline, and the tools that read it."""
+
+    tools: ArmTools
+    obj: Path
+    core: str
+
+
+# Two cores, because they exercise different halves of the walk.
+#
+# Cortex-M0+ is ARMv6-M: soft float, and its limited branch range means the
+# compiler never turns a call in tail position into a jump -- measured, zero
+# such branches in this object.
+#
+# Cortex-M33 without an FPU is ARMv8-M: soft float *and* Thumb-2, where a
+# tail call does become `b.n`. That is what makes the branch handling in
+# `_callees` load-bearing rather than defensive; on the M0+ build alone it
+# would never be exercised.
+@typechecked
+@dataclass(frozen=True)
+class FloatFreeTarget:
+    """One core to compile the pipeline for."""
+
+    core: str
+    march: str
+
+
+@typechecked
+def _target_id(target: FloatFreeTarget) -> str:
+    return target.core
+
+
+kFloatFreeTargets: tuple[FloatFreeTarget, ...] = (
+    FloatFreeTarget(core="cortex-m0plus", march="-march=armv6-m"),
+    FloatFreeTarget(core="cortex-m33+nofp", march="-march=armv8-m.main+dsp"),
+)
+
+
+@pytest.fixture(scope="module", params=kFloatFreeTargets, ids=_target_id)
+@typechecked
+def compiled_pipeline(
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
+) -> CompiledPipeline:
+    """The whole streaming pipeline in one object, so calls can be followed.
+
+    Every stage `processPixelQ16` reaches lives in a different translation
+    unit, and reachability cannot cross an object boundary. Compiling them
+    together is what makes the walk complete.
+    """
+
+    tools = _arm_tools()
+    if tools is None:
+        pytest.skip("no arm-none-eabi cross compiler on this machine")
+
+    target: FloatFreeTarget = request.param
+    core = target.core
+    tmp_path = tmp_path_factory.mktemp(f"pipeline_{core.replace('+', '_')}")
+    source = tmp_path / "pipeline_tu.cpp"
+    source.write_text(kPipelineSource, encoding="utf-8")
+    obj = tmp_path / "pipeline_tu.o"
+    subprocess.run(  # noqa: SRC001
+        [
+            tools.compiler,
+            "-c",
+            str(source),
+            "-o",
+            str(obj),
+            "-I",
+            str(PROJECT_ROOT / "src"),
+            f"-mcpu={core}",
+            target.march,
+            "-mthumb",
+            "-Os",
+            "-std=gnu++17",
+            "-ffreestanding",
+            "-fno-exceptions",
+            "-fno-rtti",
+            "-DARDUINO_ARCH_RP2040",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=True,
+    )
+    return CompiledPipeline(tools=tools, obj=obj, core=core)
+
+
+@typechecked
+def test_the_callee_parser_pairs_relocations_with_their_transfer() -> None:
+    """`_callees` on disassembly written out by hand.
+
+    The walk has been wrong twice, in opposite directions, and both mistakes
+    survived every reachability case because they only changed which edges
+    existed -- not whether the walk ran. So the parser is tested on input
+    where the right answer is known by construction.
+    """
+
+    # An unrelocated call: the printed name is whatever sits at address zero,
+    # and the relocation on the next line is the real target.
+    relocated = [
+        "     a20:\tbl\t0 <_ZN2fl9decoyAtZeroEv>",
+        "\t\t\ta20: R_ARM_THM_CALL\t__aeabi_fadd",
+    ]
+    assert _callees(relocated) == {"__aeabi_fadd"}
+
+    # A genuine local call to a function at offset zero: no relocation, so
+    # the printed name stands. Discarding this is how a real edge gets lost.
+    at_zero = ["     78e:\tbl\t0 <_ZN2fl20isUsableChromaticityEv>"]
+    assert _callees(at_zero) == {"_ZN2fl20isUsableChromaticityEv"}
+
+    # A resolved local call, and a tail call emitted as a branch.
+    resolved = [
+        "     a7a:\tbl\t1ba <_ZN2fl9someLeafEv>",
+        "     18c:\tb.n\t16e <_ZN2fl9tailLeafEv>",
+    ]
+    assert _callees(resolved) == {"_ZN2fl9someLeafEv", "_ZN2fl9tailLeafEv"}
+
+    # A data relocation is not a call. Counting it invents an edge.
+    #
+    # Naming a *function* here on purpose: the nine `R_ARM_ABS32` records in
+    # the real object all name `.rodata`, which the symbol pattern rejects on
+    # the leading dot anyway -- so a case built from those would pass whether
+    # or not the relocation type is checked, and would say nothing. A
+    # function-pointer table entry is the shape that needs the type check.
+    data = [
+        "     1c0:\tldr\tr1, [pc, #8]",
+        "\t\t\t1c4: R_ARM_ABS32\t_ZN2fl11addressOnlyEv",
+    ]
+    assert _callees(data) == set()
+
+    # And the two forms interleaved, which is what a real body looks like --
+    # a relocation must attach to the transfer above it and not to the next
+    # one down.
+    mixed = [
+        "     100:\tbl\t0 <_ZN2fl9decoyAtZeroEv>",
+        "\t\t\t100: R_ARM_THM_CALL\t__aeabi_fmul",
+        "     104:\tbl\t0 <_ZN2fl9realAtZeroEv>",
+        "     108:\tbl\t200 <_ZN2fl9plainCallEv>",
+    ]
+    assert _callees(mixed) == {
+        "__aeabi_fmul",
+        "_ZN2fl9realAtZeroEv",
+        "_ZN2fl9plainCallEv",
+    }
+
+
+@typechecked
+def test_the_per_pixel_path_reaches_no_float_runtime(
+    compiled_pipeline: CompiledPipeline,
+) -> None:
+    """P9's criterion, at the place it actually matters (FastLED#4043).
+
+    The phase asks for a tier with no float symbols linked. `processPixelQ16`
+    is the per-pixel path -- decode, source matrix, gamut map, device solve,
+    flux -- and it runs for every pixel of every frame.
+
+    It reaches none. Measured across the 19 functions the walk visits.
+    """
+
+    helpers = _reachable_helpers(
+        compiled_pipeline.tools.objdump, compiled_pipeline.obj, kPerPixelSymbol
+    )
+    assert helpers == set(), (
+        f"the per-pixel path reaches the float runtime on "
+        f"{compiled_pipeline.core}: {sorted(helpers)}"
+    )
+
+
+@typechecked
+def test_the_bind_path_is_where_the_float_still_is(
+    compiled_pipeline: CompiledPipeline,
+) -> None:
+    """Control for the case above, and a statement of what remains.
+
+    If the walk reported nothing for both, it would prove the traversal
+    stopped rather than that the pipeline is clean. `buildStreamingPipelineQ16`
+    is in the same object and derives its matrices in float, so it must show
+    the helpers the per-pixel path does not.
+
+    That float is confined to bind time is P9 item 2's remaining work rather
+    than a defect here -- `buildRgbSolveMatrixFromQ16` is the float-free
+    counterpart, and nothing routes to it yet.
+    """
+
+    helpers = _reachable_helpers(
+        compiled_pipeline.tools.objdump, compiled_pipeline.obj, kBindSymbol
+    )
+    assert len(helpers) >= 8, (
+        f"expected the bind path to reach the soft-float runtime on "
+        f"{compiled_pipeline.core}, found {sorted(helpers)}"
+    )
 
 
 @pytest.fixture(scope="module")
