@@ -471,3 +471,55 @@ FL_TEST_CASE("The generated profile header carries the artifact's numbers") {
     FL_CHECK(fl::colorimetric_response::build_rgb_colorimetric_cache(profile,
                                                                     &cache));
 }
+
+// ============ Declared-but-unusable source space (#4156 R6) ============
+
+FL_TEST_CASE("A declared source space that cannot be built is refused") {
+    // The failure this guards is silent, not loud: folding "declared and
+    // unusable" into "not declared" leaves has_source_space false, which
+    // means the caller's RGB is reinterpreted as device drive coordinates.
+    // The sketch then renders a different colour from primaries it believed
+    // were in effect, with nothing said.
+    fl::colorimetric_response::EmitterProfile profile =
+        fl::colorimetric_response::profiles::WS2812B;
+
+    // Collinear source primaries: a declared space with no usable transform.
+    profile.input_xy_r[0] = 0.30f;  profile.input_xy_r[1] = 0.30f;
+    profile.input_xy_g[0] = 0.35f;  profile.input_xy_g[1] = 0.35f;
+    profile.input_xy_b[0] = 0.40f;  profile.input_xy_b[1] = 0.40f;
+    profile.input_xy_w[0] = 0.3127f; profile.input_xy_w[1] = 0.3290f;
+
+    fl::colorimetric_response::RgbColorimetricCache cache;
+    FL_CHECK(!fl::colorimetric_response::build_rgb_colorimetric_cache(profile,
+                                                                     &cache));
+    FL_CHECK(!cache.has_source_space);
+}
+
+FL_TEST_CASE("Declaring no source space at all is still fine") {
+    // #2705 semantics: an absent source white means the input RGB *is* the
+    // drive triple. That is a supported mode, not a degenerate profile, so
+    // the check above must not swallow it.
+    fl::colorimetric_response::EmitterProfile profile =
+        fl::colorimetric_response::profiles::WS2812B;
+    FL_CHECK_EQ(profile.input_xy_w[1], 0.0f);
+
+    fl::colorimetric_response::RgbColorimetricCache cache;
+    FL_CHECK(fl::colorimetric_response::build_rgb_colorimetric_cache(profile,
+                                                                    &cache));
+    FL_CHECK(!cache.has_source_space);
+}
+
+FL_TEST_CASE("A usable declared source space still builds") {
+    // Guards the rejection from becoming "refuse every declared space".
+    fl::colorimetric_response::EmitterProfile profile =
+        fl::colorimetric_response::profiles::WS2812B;
+    profile.input_xy_r[0] = 0.6400f; profile.input_xy_r[1] = 0.3300f;
+    profile.input_xy_g[0] = 0.3000f; profile.input_xy_g[1] = 0.6000f;
+    profile.input_xy_b[0] = 0.1500f; profile.input_xy_b[1] = 0.0600f;
+    profile.input_xy_w[0] = 0.3127f; profile.input_xy_w[1] = 0.3290f;
+
+    fl::colorimetric_response::RgbColorimetricCache cache;
+    FL_CHECK(fl::colorimetric_response::build_rgb_colorimetric_cache(profile,
+                                                                    &cache));
+    FL_CHECK(cache.has_source_space);
+}

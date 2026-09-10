@@ -390,15 +390,25 @@ struct RgbColorimetricCache {
 };
 
 // Build the precomputed primaries / inverse matrices for `p`. Returns false
-// only when the device-emitter primary matrix is singular (collinear
-// chromaticities); the cache is still populated with zeros so callers can
-// safely fall back to the no-op solve.
+// when the device-emitter primary matrix is singular (collinear
+// chromaticities), or when a declared source space cannot be built; the
+// cache is still populated with zeros so callers can safely fall back to the
+// no-op solve.
 //
 // Source-space handling matches the RGBW path (#2705 semantics): when
 // `input_xy_w[1]` is effectively zero, the input RGB triple IS treated as
 // drive coordinates. Otherwise a source-primary matrix is built and
 // normalized so that the source white at unit drive lands on the maximum
 // per-channel column — keeping outputs in [0, 1] for in-gamut inputs.
+//
+// "No source space declared" and "a source space was declared and is
+// unusable" are different answers and must not collapse into one. Folding
+// the second into the first leaves `has_source_space` false, which means the
+// caller's RGB is reinterpreted as device drive coordinates -- a different
+// colour, produced silently, from primaries the caller believed were in
+// effect. FastLED#4156 R6 asks for that specifically: a near-singular
+// transform needs deterministic rejection, not an arbitrary fallback that
+// destroys the accuracy promise.
 inline bool build_rgb_colorimetric_cache(const EmitterProfile& p,
                                          RgbColorimetricCache* cache) FL_NO_EXCEPT {
     xyY_to_XYZ(p.xy_r[0], p.xy_r[1], p.lum_r, cache->P_R);
@@ -411,7 +421,8 @@ inline bool build_rgb_colorimetric_cache(const EmitterProfile& p,
         { cache->P_R[2], cache->P_G[2], cache->P_B[2] },
     };
     const bool ok_rgb = invert3x3(P_RGB, cache->P_RGB_inv);
-    cache->has_source_space = (p.input_xy_w[1] > 1e-6f)
+    const bool declares_source_space = (p.input_xy_w[1] > 1e-6f);
+    cache->has_source_space = declares_source_space
                            && build_source_matrix(p.input_xy_r, p.input_xy_g,
                                                   p.input_xy_b, p.input_xy_w,
                                                   cache->M_src);
@@ -444,6 +455,9 @@ inline bool build_rgb_colorimetric_cache(const EmitterProfile& p,
                 cache->M_src[i][j] = 0.0f;
             }
         }
+    }
+    if (declares_source_space && !cache->has_source_space) {
+        return false;
     }
     return ok_rgb;
 }
