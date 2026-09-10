@@ -326,6 +326,38 @@ FL_TEST_CASE("Power limiter - the recommendation is the largest that fits") {
     }
 }
 
+FL_TEST_CASE("Power limiter - a binding budget is maximal below full brightness") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+
+    // Every case above asks at brightness 255, where the scaled target is 255
+    // and a ratio taken against it happens to be right. Below full brightness
+    // it is not: `controllable_mW` is the demand at *full* brightness, so
+    // scaling the headroom ratio by the request answers "what fraction of the
+    // request fits" rather than "what brightness fits", and the step-down can
+    // only make that smaller. The answer must still be the largest that fits.
+    const fl::u8 targets[] = {200, 128, 64, 32};
+    const fl::u32 budgets[] = {40000u, 20000u, 10000u, 5000u, 3000u};
+    for (fl::u8 target : targets) {
+        for (fl::u32 budget : budgets) {
+            const fl::u8 recommended =
+                calculate_max_brightness_for_power_mW(leds, kCount, target, budget);
+            FL_CHECK_LE(recommended, target);
+            FL_CHECK_LE(true_demand_mW(span, recommended), budget);
+            if (recommended < target) {
+                FL_CHECK_GT(
+                    true_demand_mW(span, static_cast<fl::u8>(recommended + 1)),
+                    budget);
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("Power limiter - zero brightness still draws the dark current") {
     ScopedDefaultPowerModel guard;
     const int kCount = 300;

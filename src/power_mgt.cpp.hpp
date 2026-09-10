@@ -217,13 +217,26 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
         // division from dividing by zero on an all-dark strip.
         return 0;
     }
+    // The ratio is taken over the whole 0-255 scaled range, because
+    // `controllable_mW` is the demand at *full* brightness. Scaling it by the
+    // requested brightness first would answer "what fraction of the request
+    // fits", which is smaller than "what brightness fits" by exactly that
+    // fraction -- and the step-down below only ever decreases, so it cannot
+    // recover it. The cap is where the request comes back in.
+    //
+    // The cap cannot actually fire from here: the caller only reaches this
+    // branch when the request is already over budget, which is the same
+    // inequality. It is kept because that argument runs through
+    // `map_power_value`'s rounding, and a helper that clamps to its own
+    // argument is cheaper than depending on that.
     const fl::u32 headroom_mW = max_power_mW - fixed_mW;
     const fl::u8 target_scaled = map_power_value(target_brightness);
-    fl::u32 recommended_scaled =
-        (static_cast<fl::u32>(target_scaled) * headroom_mW) / controllable_mW;
-    if (recommended_scaled > 255) {
-        recommended_scaled = 255;
+    fl::u64 allowed_scaled =
+        (static_cast<fl::u64>(255) * headroom_mW) / controllable_mW;
+    if (allowed_scaled > target_scaled) {
+        allowed_scaled = target_scaled;
     }
+    const fl::u32 recommended_scaled = static_cast<fl::u32>(allowed_scaled);
     fl::u8 recommended = unmap_power_value(static_cast<fl::u8>(recommended_scaled));
 
     // Then check the answer instead of trusting the division. Inverting the
