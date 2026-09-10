@@ -61,7 +61,11 @@ private:
 
     // Clockless transmission
     void transmitClockless(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
-    void transmitClocklessBit(u8 onesMask, u32 t1_ns, u32 t2_ns, u32 t3_ns) FL_NO_EXCEPT;
+    /// One clockless bit. `hz` is the CPU frequency, fetched once by the
+    /// caller: the one-argument `delayNanoseconds` re-derives it per call,
+    /// which on ESP32 is an ESP-IDF call three times per bit (FastLED#4203).
+    void transmitClocklessBit(u8 onesMask, u32 t1_ns, u32 t2_ns, u32 t3_ns,
+                              u32 hz) FL_NO_EXCEPT;
 
     // SPI transmission
     void transmitSpi(fl::span<const ChannelDataPtr> channels) FL_NO_EXCEPT;
