@@ -181,7 +181,13 @@ struct ChannelOptions {
         return false;
 #endif
     }
-    bool isColorManaged() const FL_NO_EXCEPT { return false; }
+    // No isColorManaged() here on purpose. It used to exist as a hardcoded
+    // `false` with no callers anywhere, and options cannot answer the
+    // question: they carry the *request*, while the transform is built by
+    // Channel::reconcileColorProfile and can fail for a binding these options
+    // accepted. Asking a request object whether rendering is installed can
+    // only ever return a plausible-looking guess. Channel::isColorManaged()
+    // is the one that knows (#4328).
     const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         return mColorProfile.profile();
