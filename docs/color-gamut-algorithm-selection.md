@@ -211,21 +211,80 @@ Widening lms makes the mapper *worse*, and widening XYZ -- which the whole
 P6 working domain would have to follow -- only improves it about fourfold.
 Neither buys anything the budget needs, so the simpler implementation ships.
 
-## Is the feasible chroma ray actually connected?
+## Is the feasible chroma ray actually connected? No.
 
 Bisection assumes it is. The reference does not, so the assumption was tested
 rather than argued: 4 680 rays (lightness on a 40-step grid, hue every 3
 degrees), each sampled at 401 chroma values -- about 1.9 million feasibility
-evaluations.
+evaluations. **No disconnected interval was found**, and the same held across
+another 7.5 million evaluations on the four white-emitter devices in "Wide
+hulls" below.
 
-**No disconnected interval was found.** On every ray sampled, the feasible
-chroma was a single interval starting at zero.
+The assumption is false anyway. Sampling was the wrong instrument, and the
+number of samples was never going to fix it.
 
-That is strong evidence for this device, not a proof. The >=4-emitter case,
-where the zonotope gains a redundant generator, is swept separately in "Wide
-hulls" below -- another 7.5 million evaluations across the four white-emitter
-devices, also with no disconnected interval. A coarser sweep of both runs on
-every test invocation so the assumption cannot rot silently.
+The ray does not have to be sampled. As the method note below already says, an
+inverse-OKLab fixed-lightness, fixed-hue ray is cubic in chroma; written out,
+each drive along the ray is `d_i(c) = sum_j K_ij (p_j + q_j c)^3`, an ordinary
+cubic in `c`. So `{c : 0 <= d_i(c) <= 1}` is decided by the real roots of `d_i`
+and `d_i - 1`, and the feasible set for a ray is *exact* -- no gap can hide
+between two samples, however narrow. That is `ci/color_ray_roots.py`.
+
+Computed that way, on the primaries this report uses:
+
+| | |
+| --- | --- |
+| lightness | 0.5 |
+| hue | 264.06 degrees |
+| feasible chroma | `[0, 0.29443]` and `[0.34575, 0.34644]` |
+| what a bisection returns | 0.29443 |
+| what is actually reachable | 0.34644 |
+| chroma given up | 0.0520, **17.6% of the reachable maximum** |
+
+The far interval is a real colour, not an artefact: its LMS response is
+positive on all three cones and its drives are `(0.000005, 0.000214, 0.097553)`
+-- a deep blue at a tenth of full drive. Re-rendering those drives through the
+forward matrix returns `L = 0.500000, C = 0.346092, h = 264.0600`, the target
+it was asked for.
+
+### Why 1.9 million samples walked past it
+
+Two independent reasons, and the second is the one that matters.
+
+**The wedge is thinner than the hue grid.** Disconnection holds for hue in
+roughly `[264.06, 264.20]` degrees -- about 0.14 degrees wide, and present at
+every lightness from 0.05 to 0.75. It contains no multiple of 3, so the dense
+sweep's hue grid steps over it. At 264.0 degrees the set is one interval
+ending at 0.28995; by 264.25 the two have merged into one interval ending at
+0.34578. The disconnection lives in the fold between.
+
+**Density is not the fix.** Handed the exact hue, a 401-sample chroma scan
+*still* reports one interval, because the far island is 0.00069 wide against a
+0.00125 sample step. Refining the grid moves the problem rather than solving
+it: whatever the step, some ray's island is thinner than it.
+
+### What it costs, and what it does not
+
+Narrow: 0.14 degrees of 360, so 0.04% of hues. Inside it, an out-of-gamut
+target above 0.34644 chroma is mapped to 0.29443 instead -- under-saturated,
+hue exact, still in gamut. The mapper returns a producible colour that is
+merely less saturated than one it could have produced, so this is a quality
+loss in a sliver, not a correctness failure anywhere.
+
+It is still worth having on the record as fact rather than as an assumption,
+because the shipped search's validity was resting on it, and because the same
+argument shows what a future device would need: the wedge exists where the ray
+runs nearly along the `red = 0` face, so a different primary set puts it
+somewhere else rather than removing it.
+
+### Scope
+
+The exact method is for the three-emitter case, where feasibility is "the
+unique preimage lands in the box" and each drive is one cubic. With a white
+emitter the preimage stops being unique and feasibility becomes a linear
+program, so the wide hulls in "Wide hulls" below remain swept rather than
+solved. Their claim is still the sampled one, and now known to be the weaker
+kind of evidence.
 
 ## Lightness must be clamped before chroma
 
@@ -260,8 +319,13 @@ Recording this rather than leaving it implicit: the table above is evidence
 for the *objective*, and only provisional evidence for the *search*.
 
 Option 1 has since been taken as far as sampling can take it, for the wide
-hulls as well as this one -- see "Wide hulls" below. What none of it supplies
-is option 2, an analytic bound. The claim remains empirical.
+hulls as well as this one -- see "Wide hulls" below, and it found nothing.
+Option 2 was then taken for the three-emitter device by solving the cubic
+instead of sampling it, and it did not produce a bound: it produced a
+counterexample. See "Is the feasible chroma ray actually connected? No."
+above. The paragraph this section opens with -- that feasibility along the ray
+"can in principle be disconnected" -- turns out to describe this device rather
+than a hypothetical one.
 
 ## Is the mapping continuous enough to animate?
 
@@ -555,6 +619,15 @@ these devices, not a proof. The interval detector is given a predicate with a
 hole punched in it and required to report two intervals, so the sweep cannot
 pass by never firing.
 
+**Read that row with the three-emitter refutation in mind.** The identical
+sweep, at the identical density, reported a clean zero on a device that does
+have a disconnected ray -- see "Is the feasible chroma ray actually connected?
+No." above. A zero in this column means "the grid did not land on one", and
+these numbers are the same grid. The exact method that found the wedge does
+not carry over here, because a white emitter makes feasibility a linear
+program rather than one cubic per drive, so for the wide hulls the question is
+genuinely still open rather than answered in the affirmative.
+
 ### The composition holds, once both halves use the same hull
 
 Scored over roughly 28 000 out-of-gamut targets, mapped at the shipped eight
@@ -704,5 +777,7 @@ The composition is scored against the reference objective and against itself,
 not against measured hardware -- that is P10's gate.
 
 Ray connectivity above four emitters is measured on the four devices the
-corpus ships. A device whose whites are close enough to be near-parallel
-generators, or one with more than two whites, is outside what was swept.
+corpus ships, and only by sampling. A device whose whites are close enough to
+be near-parallel generators, or one with more than two whites, is outside what
+was swept. The three-emitter case is no longer in this list: it is solved
+exactly, and the answer is that the ray is sometimes disconnected.
