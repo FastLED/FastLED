@@ -48,6 +48,7 @@ kDeviceProfile = "rgb"
 kSourceProfiles = ("srgb_bt709", "display_p3", "bt2020")
 
 
+@typechecked
 @dataclass
 class Vector:
     """One reference vector, reduced to what the C++ conformance case uses."""

@@ -21,6 +21,7 @@ from pathlib import Path
 from ci.color_reference_export import (
     GOLDEN_FILE,
     HEADER_FILE,
+    PROJECT_ROOT,
     build_header,
     kDeviceProfile,
     load_vectors,
@@ -35,7 +36,7 @@ class TestGeneratedHeaderMatchesCorpus(unittest.TestCase):
         self.assertEqual(
             HEADER_FILE.read_text(),
             build_header(),
-            "tests/fl/gfx/color_reference_vectors.hpp is stale; run "
+            f"{HEADER_FILE.relative_to(PROJECT_ROOT)} is stale; run "
             "`uv run python ci/color_reference_export.py`",
         )
 
@@ -71,9 +72,10 @@ class TestGeneratedHeaderMatchesCorpus(unittest.TestCase):
                 list(exported.emitter_light), list(stages["emitter_light"])
             )
             self.assertEqual(list(exported.mapped_xyz), list(stages["mapped_xyz"]))
-            self.assertEqual(
-                [float(code) for code in exported.encoded], stages["encoded_rgb8"]
-            )
+            encoded_as_floats: list[float] = []
+            for code in exported.encoded:
+                encoded_as_floats.append(float(code))
+            self.assertEqual(encoded_as_floats, stages["encoded_rgb8"])
             # And the value actually reached the file, not just the loader.
             self.assertIn(exported.identifier, header)
 
