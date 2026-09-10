@@ -183,8 +183,8 @@ knowing before spending effort ranking them.
 
 ## The black floor is the source quantization, and it is hard
 
-#4156 R8 asks for the black floor, the luminance-error denominator and the
-unsupported low-light region to be defined rather than inferred from wider
+Issue #4156 R8 asks for the black floor, the luminance-error denominator and
+the unsupported low-light region to be defined rather than inferred from wider
 arithmetic, and gives the arithmetic that motivates it: an identity linear16
 input of `1/65535` is 0.0039 of an 8-bit code, so its nearest 8-bit output is
 zero -- 100% relative luminance error. Matching it by alternating codes 0 and 1

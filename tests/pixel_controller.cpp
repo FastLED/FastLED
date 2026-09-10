@@ -76,8 +76,13 @@ int cycleSum(fl::u8 value, fl::u8 premixed) {
 }
 
 // What the cycle should sum to if the path were exact.
-int idealSum(fl::u8 value, fl::u8 premixed) {
-    return kDitherCycle * static_cast<int>(value) * static_cast<int>(premixed) / 255;
+//
+// Floating point on purpose. An integer version truncates, and the row this
+// is compared against most -- premixed 16, source code 1 -- has an exact
+// ideal of 0.502 codes. Truncating that to 0 turns a +99% error into a
+// division by zero and reads as though the error were unbounded.
+double idealSum(fl::u8 value, fl::u8 premixed) {
+    return static_cast<double>(kDitherCycle) * value * premixed / 255.0;
 }
 
 } // namespace
@@ -117,9 +122,9 @@ FL_TEST_CASE("Dither - the lowest codes render brighter than they should") {
     // full cycle, against the exact product:
     //
     //   premixed  value  emitted/ideal
-    //   255       1      11 / 8    (+37.5%)
-    //   255       2      19 / 16   (+18.8%)
-    //   16        1       1 / 0    (unbounded: the ideal is 0.5 codes)
+    //   255       1      11 / 8      (+37.5%)
+    //   255       2      19 / 16     (+18.8%)
+    //   16        1       1 / 0.502  (+99%)
     //
     // This is not a rounding artefact of the measurement -- the sum is over a
     // whole cycle, so it is the time-averaged light. It is the reason R8 says
@@ -127,14 +132,20 @@ FL_TEST_CASE("Dither - the lowest codes render brighter than they should") {
     // 8-bit reference these all match, and compared against the light they
     // are asking for they do not.
     FL_CHECK_EQ(cycleSum(1, 255), 11);
-    FL_CHECK_EQ(idealSum(1, 255), 8);
+    FL_CHECK_EQ(idealSum(1, 255), 8.0);
     FL_CHECK_EQ(cycleSum(2, 255), 19);
-    FL_CHECK_EQ(idealSum(2, 255), 16);
+    FL_CHECK_EQ(idealSum(2, 255), 16.0);
+
+    // And the low-brightness row the table quotes, where the ideal is a
+    // fraction of a code rather than a whole one.
+    FL_CHECK_EQ(cycleSum(1, 16), 1);
+    FL_CHECK_GT(idealSum(1, 16), 0.50);
+    FL_CHECK_LT(idealSum(1, 16), 0.51);
 
     // The bias shrinks as a fraction as the value grows, which is why it is
     // invisible anywhere but the bottom.
-    FL_CHECK_GT(cycleSum(1, 255) * 100, idealSum(1, 255) * 130);
-    FL_CHECK_LT(cycleSum(64, 255) * 100, idealSum(64, 255) * 102);
+    FL_CHECK_GT(cycleSum(1, 255), idealSum(1, 255) * 1.30);
+    FL_CHECK_LT(cycleSum(64, 255), idealSum(64, 255) * 1.02);
 }
 
 FL_TEST_CASE("Dither - at full scale the correction has nothing to correct") {
