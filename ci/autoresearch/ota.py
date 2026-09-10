@@ -106,6 +106,27 @@ async def _settle_link(
     )
 
 
+# Raw bytes per writeOtaArtifact call.
+#
+# Base64 expands this by 4/3, and the device's RPC receive path stops
+# answering above ~512 characters of request payload: measured on an
+# ESP32-C6, 428 characters answer in 0.33 s and 512 never answer at all.
+# The request is delivered in full -- the daemon transmits all 735 bytes and
+# receives nothing back -- so the drop is device-side, and there is no error
+# response to key off. See FastLED#3956.
+#
+# That makes 512 raw bytes (684 characters) dead today. 256 raw bytes (344
+# characters) does transfer correctly, verified end to end, but per-RPC
+# latency is ~318 ms and size-independent, so a 1,034,444-byte image would
+# need 4,041 round trips -- about 21 minutes against a 12 minute run budget.
+# Halving the chunk trades a fast failure for a slow one.
+#
+# So this stays at 512 until the device-side limit is raised. Once it is,
+# this is the lever that matters: 4 KB chunks move the same image in ~1.3
+# minutes.
+kOtaChunkBytes = 512
+
+
 async def run_ota_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -194,8 +215,18 @@ async def run_ota_peer_autoresearch(
         )
         if not begin.get("success"):
             raise RuntimeError(f"C6 refused OTA artifact: {begin}")
-        for offset in range(0, len(artifact), 512):
-            encoded = base64.b64encode(artifact[offset : offset + 512]).decode("ascii")
+        # 512 raw bytes base64-expand to 684 characters, and the device stops
+        # answering writeOtaArtifact above ~512 characters of payload: measured
+        # on an ESP32-C6, 428 characters answer in 0.33 s and 512 time out,
+        # with nothing stored and the next RPC answering instantly. So every
+        # artifact write failed and the transfer could never progress.
+        # 256 raw bytes -> 344 characters, comfortably inside the limit.
+        # The underlying request-size limit is tracked in FastLED#3956; this
+        # keeps the chunk under it rather than working around it silently.
+        for offset in range(0, len(artifact), kOtaChunkBytes):
+            encoded = base64.b64encode(
+                artifact[offset : offset + kOtaChunkBytes]
+            ).decode("ascii")
             written = await rpc_data(peer, "writeOtaArtifact", encoded)
             if not written.get("success"):
                 raise RuntimeError(
