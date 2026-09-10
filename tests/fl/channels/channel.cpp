@@ -778,6 +778,11 @@ fl::vector<u8> encodeOnce(CRGB colour, bool bindProfile, float gamma, int pin) {
     mgr.clearAllDrivers();
     auto driver = fl::make_shared<CapturingDriver>();
     mgr.addDriver(9100, driver);
+    // And take it back out on the way home. Leaving UCS_CAPTURE registered
+    // lets a later test select it, or trip a zero-driver precondition, in a
+    // way that depends on case order -- which is how the gamma assertion in
+    // this block first went wrong.
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
 
     CRGB leds[1] = {colour};
     ChannelOptions options;
@@ -858,6 +863,7 @@ FL_TEST_CASE("[#4326] a bound profile does not yet make the channel colour-manag
     auto& mgr = ChannelManager::instance();
     mgr.clearAllDrivers();
     mgr.addDriver(9100, fl::make_shared<CapturingDriver>());
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
 
     CRGB leds[1] = {CRGB(127, 0, 0)};
     ChannelOptions options;
