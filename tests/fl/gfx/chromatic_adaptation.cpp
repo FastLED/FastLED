@@ -6,6 +6,8 @@
 // corpus is generated from, ci/color_reference.py::bradford_adaptation.
 
 #include "fl/gfx/chromatic_adaptation.h"
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/math/math.h"
 #include "fl/gfx/color_profile.h"
 #include "fl/gfx/source_xyz.h"
 #include "fl/stl/int.h"
@@ -25,6 +27,42 @@ i32 q16(float v) { return static_cast<i32>(v * 65536.0f + (v >= 0 ? 0.5f : -0.5f
 float toFloat(i32 v) { return static_cast<float>(v) / 65536.0f; }
 
 }  // namespace
+
+// The Bradford inverse is a precomputed constant now, because inverting a
+// compile-time matrix on every profile bind was float work spent recomputing
+// a known answer (#4043).
+//
+// This reads the shipped constants. An earlier revision compared the solver
+// against a copy of the numbers written into this file, which validates the
+// copy and says nothing about the implementation -- and the whole point of
+// precomputing is that nothing recomputes it, so a wrong digit there would
+// have had nothing checking it but the behaviour cases below.
+FL_TEST_CASE("The shipped Bradford inverse is the inverse of the shipped matrix") {
+    float solved[3][3];
+    FL_REQUIRE(colorimetric_response::invert3x3(fl::detail::kBradford, solved));
+
+    for (int row = 0; row < 3; ++row) {
+        for (int col = 0; col < 3; ++col) {
+            FL_CHECK_LT(
+                fl::fabsf(solved[row][col] - fl::detail::kBradfordInverse[row][col]),
+                1e-6f);
+        }
+    }
+
+    // And independently of the solver: the product is the identity, which a
+    // pair of numbers that merely agree with each other would not be.
+    for (int row = 0; row < 3; ++row) {
+        for (int col = 0; col < 3; ++col) {
+            float sum = 0.0f;
+            for (int k = 0; k < 3; ++k) {
+                sum += fl::detail::kBradfordInverse[row][k] *
+                       fl::detail::kBradford[k][col];
+            }
+            const float want = row == col ? 1.0f : 0.0f;
+            FL_CHECK_LT(fl::fabsf(sum - want), 1e-5f);
+        }
+    }
+}
 
 FL_TEST_CASE("Adapting a white to itself is the identity") {
     AdaptationMatrixQ16 matrix;

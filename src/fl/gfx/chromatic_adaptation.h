@@ -13,6 +13,23 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+namespace detail {
+
+/// ICC linear Bradford cone-response matrix, and its inverse.
+///
+/// Declared here rather than kept file-local so the test can check the
+/// *shipped* constants. An earlier revision compared the solver against a
+/// copy of the numbers written into the test, which validates the copy and
+/// says nothing about the implementation -- and the inverse is precomputed
+/// precisely so that nothing recomputes it, which means nothing else would
+/// notice a wrong digit either (FastLED #4043).
+///
+/// Same reason `adaptXyzQ16` is public below: a stage that cannot be run on
+/// its own cannot be bisected when its budget misses.
+extern const float kBradford[3][3];
+extern const float kBradfordInverse[3][3];
+
+} // namespace detail
 
 /// A collapsed adaptation transform in s16.16.
 ///
