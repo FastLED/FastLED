@@ -220,3 +220,17 @@ def test_a_raw_opener_inside_a_line_comment_opens_nothing() -> None:
 def test_a_bare_quote_in_a_comment_opens_nothing_either() -> None:
     source = '// a quote " starts nothing\n#define FASTLED_ALSO 1\n'
     assert names_in(source) == {"FASTLED_ALSO"}
+
+
+def test_a_whitespace_only_reason_does_not_suppress() -> None:
+    """A bare marker with extra steps.
+
+    The reason is required precisely so a suppression cannot be indistinct
+    from someone silencing the check; accepting spaces gives that back.
+    """
+    assert names_in("// fl-lint: macro-prefix-ok(   )\n#define FASTLED_SNEAKY 1\n") == {
+        "FASTLED_SNEAKY"
+    }
+    assert names_in("// fl-lint: macro-prefix-ok(\t)\n#define FASTLED_SNEAKY 1\n") == {
+        "FASTLED_SNEAKY"
+    }

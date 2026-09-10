@@ -158,7 +158,11 @@ def names_in(text: str) -> set[str]:
 
     def classify(match: "re.Match[str]") -> str:
         token = match.group(0)
-        if token.startswith("//") and SUPPRESSION_RE.search(token):
+        suppression = SUPPRESSION_RE.search(token) if token.startswith("//") else None
+        # A whitespace-only reason is a bare marker with extra steps, and the
+        # reason is required precisely so a suppression cannot be indistinct
+        # from someone silencing the check.
+        if suppression is not None and suppression.group(1).strip():
             line = document.count("\n", 0, match.start())
             suppressed.add(line)
             suppressed.add(line + 1)
