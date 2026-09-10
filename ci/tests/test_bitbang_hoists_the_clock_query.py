@@ -84,6 +84,28 @@ class TestTheClockQueryIsHoisted(unittest.TestCase):
     ) -> None:
         self.assertEqual(self.text.count("fl::cpuFrequencyHz()"), 1)
 
+    def test_the_fetch_is_outside_every_loop(
+        self: "TestTheClockQueryIsHoisted",
+    ) -> None:
+        """Once per transmission, not once per timing group.
+
+        The first version of this put the fetch inside the loop over timing
+        groups. A strip with two timing configurations is still one
+        transmission, so that reintroduced an ESP-IDF call on a path meant not
+        to have one -- while the comment above it claimed otherwise.
+        """
+
+        index = self.text.index("fl::cpuFrequencyHz()")
+        function_start = self.text.rindex(
+            "void BitBangChannelDriver::transmitClockless", 0, index
+        )
+        preceding = self.text[function_start:index]
+        self.assertNotIn(
+            "for (",
+            preceding,
+            msg="the frequency fetch sits inside a loop in transmitClockless",
+        )
+
     def test_the_detector_would_catch_a_one_argument_call(
         self: "TestTheClockQueryIsHoisted",
     ) -> None:

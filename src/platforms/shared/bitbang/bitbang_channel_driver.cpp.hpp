@@ -142,6 +142,13 @@ void BitBangChannelDriver::transmitClockless(
     // collecting channels that share the same timing.
     fl::vector<bool> processed(channels.size(), false);
 
+    // Once for the whole transmission -- outside the timing-group loop as
+    // well as the per-bit one. A strip with two timing configurations is
+    // still one transmission, and querying per group would put an ESP-IDF
+    // call back on a path that is meant not to have one. See
+    // `transmitClocklessBit`.
+    const u32 hz = fl::cpuFrequencyHz();
+
     for (fl::size i = 0; i < channels.size(); ++i) {
         if (processed[i] || !channels[i] || !channels[i]->isClockless()) continue;
 
@@ -171,10 +178,6 @@ void BitBangChannelDriver::transmitClockless(
             size_t sz = channels[groupIndices[gi]]->getSize();
             if (sz > maxBytes) maxBytes = sz;
         }
-
-        // Fetched once for the whole transmission, not per delay call. See
-        // `transmitClocklessBit`.
-        const u32 hz = fl::cpuFrequencyHz();
 
         // Disable interrupts for timing-critical section
 #if defined(FL_IS_AVR)
