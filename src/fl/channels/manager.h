@@ -86,6 +86,10 @@ public:
     /// @note Clears the entire driver registry
     /// @note Useful for FastLED.reset() with CHANNEL_DRIVERS flag
     /// @note Waits for all drivers to become READY before clearing (1 second timeout)
+    /// @note Also clears any exclusive-driver filter set by
+    ///       `setExclusiveDriver*()`. The filter names a driver in the
+    ///       registry being emptied, and `addDriver()` consults it, so keeping
+    ///       it would silently disable every subsequently added driver.
     void clearAllDrivers() FL_NO_EXCEPT;
 
     /// @brief Enable or disable a driver by name at runtime

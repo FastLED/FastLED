@@ -25,16 +25,14 @@ TESTS = PROJECT_ROOT / "tests"
 # legitimately includes `fltest.h` directly.
 HARNESS_OWN_TEST = "fl/test/fltest.cpp"
 
-# Known-dormant, and deliberately still dormant. Enabling this one segfaults
-# in `ScaledPixelIteratorRGB::advance()` via `writeAPA102` -- reproduced on a
-# clean checkout with nothing changed but the include, so the crash predates
-# the discovery and wants someone with context on that path. Tracked on
-# #4201.
+# Empty, and meant to stay that way. `fl/channels/channel.cpp` was the last
+# entry; its two crashes were fixed in #4239 and its four assertion failures
+# in #4240, so every test file under `tests/` now registers its cases.
 #
-# The exemption is a single named file rather than a pattern on purpose: the
-# test below asserts the list has not grown, so a second dormant file cannot
-# be waved through by adding it here without a reviewer noticing.
-KNOWN_DORMANT = ("fl/channels/channel.cpp",)
+# The mechanism is kept as a ratchet at zero rather than deleted: the test
+# below asserts the tuple is still empty, so re-dormanting a file cannot be
+# waved through silently -- it takes a visible edit here that a reviewer sees.
+KNOWN_DORMANT: tuple[str, ...] = ()
 
 DEFINES_A_CASE = re.compile(r"^\s*FL_TEST_CASE\s*\(", re.M)
 INCLUDES_HARNESS = re.compile(r'^\s*#\s*include\s+"test\.h"', re.M)
@@ -71,17 +69,23 @@ class TestEveryTestFileRegisters(unittest.TestCase):
             ),
         )
 
-    def test_the_dormant_list_has_not_grown(
+    def test_the_dormant_list_is_empty(
         self: "TestEveryTestFileRegisters",
     ) -> None:
-        # A ratchet, not an allowance. The point of naming the exemption is
-        # that adding a second one has to be a visible edit here.
-        self.assertEqual(KNOWN_DORMANT, ("fl/channels/channel.cpp",))
-        for relative in KNOWN_DORMANT:
-            self.assertTrue(
-                (TESTS / relative).is_file(),
-                msg=f"{relative} is exempted but does not exist; drop the exemption",
-            )
+        # A ratchet, not an allowance. Every test file registers its cases
+        # today, so any new exemption has to be a visible edit here.
+        self.assertEqual(KNOWN_DORMANT, ())
+
+    def test_the_file_that_was_last_dormant_now_registers(
+        self: "TestEveryTestFileRegisters",
+    ) -> None:
+        # Guards the specific regression this list existed for. Without it the
+        # sweep above would still pass if channel.cpp were deleted outright.
+        woken = TESTS / "fl/channels/channel.cpp"
+        self.assertTrue(woken.is_file(), msg=f"{woken} is missing")
+        source = woken.read_text(encoding="utf-8")
+        self.assertIsNotNone(DEFINES_A_CASE.search(source))
+        self.assertIsNotNone(INCLUDES_HARNESS.search(source))
 
     def test_the_check_can_actually_fail(
         self: "TestEveryTestFileRegisters",
