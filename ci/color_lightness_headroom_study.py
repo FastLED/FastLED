@@ -80,6 +80,12 @@ def feasible_intervals(
     test, so establishing the shape has to be done without assuming it.
     """
 
+    if samples <= 0:
+        # Zero samples divides by zero below; a negative count skips the loop
+        # and returns an empty run list, which reads as "nothing on this ray is
+        # feasible" -- a wrong answer rather than a missing one.
+        raise ValueError("samples must be positive")
+
     runs: list[ChromaInterval] = []
     start: float | None = None
     last = 0.0
@@ -217,6 +223,17 @@ def brightest_reachable(
     inverse: Matrix3, hue_step_degrees: int, chroma_steps: int, lightness_steps: int
 ) -> BrightestReachable:
     """Highest feasible lightness anywhere, with the hue and chroma reaching it."""
+
+    if hue_step_degrees <= 0 or chroma_steps <= 0 or lightness_steps <= 1:
+        # Each of these silently degenerates rather than failing: a zero hue
+        # step is the only one Python itself rejects, a non-positive chroma
+        # count empties the middle loop, and a single lightness step divides by
+        # zero. All three would otherwise return the neutral cap as though the
+        # sweep had searched the hull and found nothing above it.
+        raise ValueError(
+            "hue_step_degrees and chroma_steps must be positive and "
+            "lightness_steps must exceed one"
+        )
 
     cap = neutral_cap(inverse)
     best = BrightestReachable(cap, 0.0, 0.0)

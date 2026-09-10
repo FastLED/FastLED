@@ -222,12 +222,8 @@ class TestTheRefutedShapes(unittest.TestCase):
         self.assertLess(chroma * low, shipped.chroma)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
-class TestProbeCountValidation(unittest.TestCase):
-    def test_zero_probes_is_refused(self: "TestProbeCountValidation") -> None:
+class TestSweepCountValidation(unittest.TestCase):
+    def test_zero_probes_is_refused(self: "TestSweepCountValidation") -> None:
         # With no probes the seed search finds nothing and the fallback would
         # read as "no chroma is feasible at this lightness" -- a wrong answer
         # rather than a missing one.
@@ -235,3 +231,29 @@ class TestProbeCountValidation(unittest.TestCase):
         cap = neutral_cap(inverse)
         with self.assertRaises(ValueError):
             map_interval_clamp(inverse, cap * 1.25, 300.0, 0.30, 0, HALVINGS)
+
+    def test_zero_samples_is_refused(self: "TestSweepCountValidation") -> None:
+        # An empty run list is indistinguishable from "the ray is infeasible",
+        # so a sample count that cannot produce one has to fail instead.
+        inverse = _inverse()
+        with self.assertRaises(ValueError):
+            feasible_intervals(inverse, neutral_cap(inverse) * 1.1, 300.0, 0)
+
+    def test_degenerate_sweep_dimensions_are_refused(
+        self: "TestSweepCountValidation",
+    ) -> None:
+        # Each of these would return the neutral cap unchanged, which is the
+        # same answer the sweep gives when the hull really has no headroom.
+        inverse = _inverse()
+        for hue_step, chroma_steps, lightness_steps in (
+            (0, 4, 4),
+            (-30, 4, 4),
+            (30, 0, 4),
+            (30, 4, 1),
+        ):
+            with self.assertRaises(ValueError):
+                brightest_reachable(inverse, hue_step, chroma_steps, lightness_steps)
+
+
+if __name__ == "__main__":
+    unittest.main()
