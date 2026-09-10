@@ -299,8 +299,12 @@ def test_rp2350w_http_responses_wait_for_passive_peer_close() -> None:
     assert "state.response_complete = true;" in poll
     assert "state.response_complete && !state.client->connected()" in poll
     assert "state.client.reset();" in poll
+    # Anchored on the over-budget comparison. `millis()` was hoisted into a
+    # local `now_ms` in #4222 so the stall and budget checks read one clock,
+    # so the elapsed expression names that local rather than calling millis()
+    # inline.
     timeout = poll[
-        poll.index("millis() - state.request_started_ms") : poll.index(
+        poll.index("now_ms - state.request_started_ms") : poll.index(
             "while (state.client->available()"
         )
     ]
