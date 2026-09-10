@@ -49,7 +49,7 @@ FL_TEST_CASE("SourceProfile provides independent named and custom source spaces"
     FL_CHECK_CLOSE(custom.primaries.green.y, 0.600f, 0.0001f);
 }
 
-FL_TEST_CASE("Channel profile binding owns fixture calibration without activating P6 rendering") {
+FL_TEST_CASE("Channel profile binding owns fixture calibration and activates P6 rendering") {
     CRGB leds[1] = {};
     ChannelOptions options;
     options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb());
@@ -58,7 +58,7 @@ FL_TEST_CASE("Channel profile binding owns fixture calibration without activatin
     ChannelPtr channel = Channel::create(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->hasColorProfile());
-    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK(channel->isColorManaged());
     FL_REQUIRE(channel->emitterProfile() != nullptr);
     FL_CHECK_EQ(fl::string(channel->emitterProfile()->id), fl::string("fixture/test-r1"));
 }
@@ -80,7 +80,7 @@ FL_TEST_CASE("SourceProfile default is the ordinary-buffer linear BT.709 space")
     FL_CHECK_CLOSE(profile.primaries.white.y, 0.3290f, 0.0001f);
 }
 
-FL_TEST_CASE("Configured color profiles are not reported active before P6 rendering") {
+FL_TEST_CASE("A configured color profile is reported active once P6 installs the transform") {
     CRGB leds[1] = {};
     ChannelOptions options;
     FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
@@ -88,7 +88,7 @@ FL_TEST_CASE("Configured color profiles are not reported active before P6 render
     ChannelPtr channel = Channel::create(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->hasColorProfile());
-    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK(channel->isColorManaged());
 }
 
 FL_TEST_CASE("Profile binding validates and owns response tables") {
@@ -343,8 +343,8 @@ FL_TEST_CASE("Clearing a binding releases it and leaves nothing bound") {
 // other isColorManaged() assertions in this file are all on channels with no
 // profile, so without this one nothing distinguishes "false because nothing
 // is bound" from "false because P6 has not landed" -- and nothing would fail
-// if someone flipped the accessor to true here ahead of the transform.
-FL_TEST_CASE("A bound fixture profile is configured but not yet color managed") {
+// The transform now exists, so the accessor tracks it rather than a constant.
+FL_TEST_CASE("A bound fixture profile is configured and color managed") {
     CRGB leds[1] = {};
     ChannelOptions options;
     FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
@@ -360,8 +360,10 @@ FL_TEST_CASE("A bound fixture profile is configured but not yet color managed") 
     FL_CHECK_EQ(fl::string(channel->emitterProfile()->id),
                 fl::string(kFixtureProfile.id));
 
-    // Deliberate: flip this in P6 (#4040), not before.
-    FL_CHECK_FALSE(channel->isColorManaged());
+    // P6 (#4040) landed, so this is flipped. The accessor used to be a
+    // hardcoded `false` carrying a note that P6 would change it; it did not,
+    // so it answered "no" on channels that were transforming colour (#4328).
+    FL_CHECK(channel->isColorManaged());
 }
 
 FL_TEST_CASE("Strict fallback turns an unavailable profile into an observable bind error") {
@@ -432,14 +434,14 @@ FL_TEST_CASE("Binding carries target white and CFastLED exposes only global sour
     FastLED.setDefaultSourceProfile(SourceProfile::linearSrgb());
 }
 
-FL_TEST_CASE("Static profile sugar and fallback status are observable without enabling rendering") {
+FL_TEST_CASE("Static profile sugar and fallback status are observable, and rendering is on") {
     CRGB leds[1] = {};
     ChannelOptions options = ChannelOptions::withColorProfile<kFixtureProfile>();
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->hasColorProfile());
-    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK(channel->isColorManaged());
     FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
 }
 
@@ -695,5 +697,32 @@ FL_TEST_CASE("Runtime static Channel factory yields to legacy clear and runtime 
     FL_CHECK_EQ(fl::string(channel->emitterProfile()->id), fl::string("fixture/channel-runtime-r2"));
 }
 
+
+
+FL_TEST_CASE("[#4328] isColorManaged is not a synonym for hasColorProfile") {
+    // The guard that keeps the accessor honest. If every accepted binding
+    // were managed, `isColorManaged()` would carry no information that
+    // `hasColorProfile()` does not, and flipping it from a hardcoded false to
+    // a hardcoded true would pass every other case in this file.
+    //
+    // A profile whose three primaries are the same chromaticity is accepted
+    // on bind -- it is structurally well formed -- but describes no invertible
+    // emitter matrix, so no pipeline is built and the channel stays on the
+    // legacy path. Configured, and not managed.
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    const EmitterProfile degenerate = EmitterProfile::rgb(
+        "fixture/degenerate",
+        Chromaticity(0.3127f, 0.3290f), Chromaticity(0.3127f, 0.3290f),
+        Chromaticity(0.3127f, 0.3290f), 1.0f, 1.0f, 1.0f);
+    FL_REQUIRE(options.setColorProfile(degenerate, SourceProfile::linearSrgb()));
+
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+
+    FL_CHECK(channel->hasColorProfile());
+    FL_CHECK_FALSE(channel->isColorManaged());
+}
 
 }  // FL_TEST_FILE

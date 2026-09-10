@@ -185,9 +185,22 @@ public:
     Rgbw getRgbw() const;
 
     bool hasColorProfile() const FL_NO_EXCEPT { return emitterProfile() != nullptr; }
-    /// P2 binds profiles only. P6 changes this to true when the streaming
-    /// transform is actually installed in the output path.
-    bool isColorManaged() const FL_NO_EXCEPT { return false; }
+    /// True when the streaming transform is actually installed in the output
+    /// path, which is not the same question as `hasColorProfile()`: a binding
+    /// can be accepted and still fail to build a usable pipeline, and that
+    /// channel stays on the legacy path. That difference is why both exist.
+    ///
+    /// This was a hardcoded `false` with a note saying P6 would change it.
+    /// P6 landed, `mPipeline` is built in `reconcileColorProfile` and read in
+    /// `showPixels`, and the accessor was not updated -- so it answered "no"
+    /// on channels that were demonstrably transforming colour (#4328).
+    bool isColorManaged() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mPipeline != nullptr;
+#else
+        return false;
+#endif
+    }
     const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
         return CLEDController::emitterProfile();
     }
