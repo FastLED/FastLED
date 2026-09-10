@@ -508,6 +508,54 @@ def _describe_failed_client_tests(data: dict[str, Any]) -> str:
     )
 
 
+def _describe_port_holder(port: str, proc_root: str = "/proc") -> str:
+    """Name the process holding `port`, when the OS will say.
+
+    `attach failed: open_port(...) exceeded 3s; serial driver may be wedged`
+    is what the serial layer reports for what is often an ordinary EBUSY:
+    another process still owns the fd. Measured on this bench, the holder was
+    fbuild-daemon retaining the companion's port after its own deploy -- a
+    plain os.open() returned [Errno 16] Device or resource busy, the board
+    stayed enumerated and healthy, and removing the holder made open()
+    succeed at once. The "wedged" wording sent that investigation into the
+    device and the USB stack before /proc showed a simple lock, so say who
+    has it. See FastLED/fbuild#1429.
+
+    Linux-only and best effort: returns "" when it cannot tell, and never
+    raises. `proc_root` is a parameter so this can be tested against a real
+    directory tree instead of by patching os.
+    """
+    node = port.rsplit("/", 1)[-1]
+    if not node:
+        return ""
+    try:
+        entries = os.listdir(proc_root)
+    except OSError:
+        return ""
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        fd_dir = f"{proc_root}/{entry}/fd"
+        try:
+            fds = os.listdir(fd_dir)
+        except OSError:
+            continue  # exited, or not ours to inspect
+        for fd in fds:
+            try:
+                target = os.readlink(f"{fd_dir}/{fd}")
+            except OSError:
+                continue
+            if target.rsplit("/", 1)[-1] != node:
+                continue
+            try:
+                with open(f"{proc_root}/{entry}/comm", encoding="utf-8") as handle:
+                    name = handle.read().strip()
+            except OSError:
+                name = "?"
+            return f"{port} is held by {name} (pid {entry})"
+    return ""
+
+
 async def _connect_peer_with_retry(
     peer: RpcClient,
     label: str,
@@ -612,9 +660,11 @@ async def _connect_peer_with_retry(
         # re-enumerating instead of hammering it.
         backoff = min(2.0 * attempt, 8.0)
         await asyncio.sleep(min(backoff, remaining_timeout()))
+    holder = _describe_port_holder(port)
+    contention = f"; {holder}" if holder else ""
     raise RpcTimeoutError(
         f"{label} did not answer its serial RPC on {port} after {attempts} "
-        f"connect attempts; last error: {last_error}"
+        f"connect attempts; last error: {last_error}{contention}"
     )
 
 

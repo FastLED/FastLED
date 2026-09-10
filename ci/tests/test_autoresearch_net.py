@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import os
+from pathlib import Path
 import contextlib
 import io
 import time
@@ -13,6 +15,7 @@ import pytest
 
 from ci.autoresearch.net import (
     _connect_peer_with_retry,
+    _describe_port_holder,
     _describe_failed_client_tests,
     _summarize_client_tests,
     run_net_peer_autoresearch,
@@ -604,3 +607,30 @@ def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
     assert elapsed < 5.0, f"took {elapsed:.1f}s"
     # And the half-opened transport is closed every time, final attempt too.
     assert peer.close.await_count == 2
+
+
+def test_describe_port_holder_names_the_process_holding_it(tmp_path: Path) -> None:
+    """A held port must be reported as contention, naming the holder.
+
+    "serial driver may be wedged" is what the serial layer reports for an
+    ordinary EBUSY. On this bench the holder was fbuild-daemon keeping the
+    companion's port after its own deploy, and that wording cost a long
+    detour through the device and the USB stack before /proc showed a plain
+    lock. See FastLED/fbuild#1429.
+    """
+    proc = tmp_path / "proc"
+    (proc / "4242" / "fd").mkdir(parents=True)
+    (proc / "4242" / "comm").write_text("fbuild-daemon\n", encoding="utf-8")
+    (proc / "4242" / "fd" / "7").symlink_to("/dev/ttyACM2")
+
+    described = _describe_port_holder("/dev/ttyACM2", proc_root=str(proc))
+
+    assert "held by fbuild-daemon" in described
+    assert "pid 4242" in described
+
+
+def test_describe_port_holder_is_silent_when_nothing_holds_it(tmp_path: Path) -> None:
+    """No holder must produce no claim, not a guess."""
+    proc = tmp_path / "proc"
+    (proc / "99" / "fd").mkdir(parents=True)
+    assert _describe_port_holder("/dev/ttyACM2", proc_root=str(proc)) == ""
