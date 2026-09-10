@@ -98,17 +98,26 @@ def feasible_intervals(
 
 
 @typechecked
+@dataclass(frozen=True, slots=True)
+class MappedColor:
+    """A mapper's answer: which lightness and chroma it settled on."""
+
+    lightness: float
+    chroma: float
+
+
+@typechecked
 def map_clamp_then_chroma(
     inverse: Matrix3,
     lightness: float,
     hue_degrees: float,
     chroma: float,
     halvings: int,
-) -> tuple[float, float]:
+) -> MappedColor:
     """The shipped shape: clamp lightness to the neutral cap, bisect chroma."""
 
     if is_feasible(inverse, target_xyz(lightness, hue_degrees, chroma)):
-        return lightness, chroma
+        return MappedColor(lightness, chroma)
     clamped = attainable_lightness(inverse, lightness)
     low, high = 0.0, chroma
     for _ in range(halvings):
@@ -117,7 +126,7 @@ def map_clamp_then_chroma(
             low = middle
         else:
             high = middle
-    return clamped, low
+    return MappedColor(clamped, low)
 
 
 @typechecked
@@ -128,21 +137,31 @@ def map_interval_clamp(
     chroma: float,
     probes: int,
     halvings: int,
-) -> tuple[float, float]:
+) -> MappedColor:
     """Keep the lightness; clamp chroma into the feasible interval there.
 
     Above the cap that interval does not contain zero, so a seed inside it has
     to be found before either edge can be bisected -- which is why this needs
-    a fixed number of probes as well as the halvings. Both counts are
-    compile-time constants, so nothing here is an iterative solver in the
-    A3/B11 sense.
+    a probe count as well as the halvings.
+
+    Both counts are parameters *here*, because this is a study and sweeping
+    them is the point. What matters for A3/B11 is that the cost is bounded by
+    them rather than by a convergence criterion: an implementation fixes both
+    at compile time and the loop count is then known. Calling the parameters
+    themselves compile-time constants, as an earlier revision did, was simply
+    wrong.
 
     Falls back to the shipped path when no chroma is feasible at this
     lightness, so it is never worse.
     """
 
     if is_feasible(inverse, target_xyz(lightness, hue_degrees, chroma)):
-        return lightness, chroma
+        return MappedColor(lightness, chroma)
+    if probes <= 0:
+        # Zero probes finds no seed, and the fallback below would then look
+        # like "no chroma is feasible here" -- a wrong answer rather than a
+        # missing one.
+        raise ValueError("probes must be positive")
     if chroma <= 0.0:
         return map_clamp_then_chroma(inverse, lightness, hue_degrees, chroma, halvings)
 
@@ -173,7 +192,7 @@ def map_interval_clamp(
             high = middle
     upper_edge = low
 
-    return lightness, min(max(chroma, lower_edge), upper_edge)
+    return MappedColor(lightness, min(max(chroma, lower_edge), upper_edge))
 
 
 @typechecked

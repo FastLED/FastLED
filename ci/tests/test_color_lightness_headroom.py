@@ -21,7 +21,7 @@ from ci.color_lightness_headroom_study import (
     neutral_cap,
     target_xyz,
 )
-from ci.color_reference import _invert_3x3, _oklch_from_xyz
+from ci.color_reference import Matrix3, _invert_3x3
 
 
 PRIMARIES = ((0.6400, 0.3300), (0.3000, 0.6000), (0.1500, 0.0600))
@@ -29,14 +29,14 @@ PROBES = 8
 HALVINGS = 12
 
 
-def _device() -> tuple:
-    forward = emitter_matrix(PRIMARIES)
-    return forward, _invert_3x3(forward)
+def _inverse() -> Matrix3:
+    """Only the inverse is used; returning a pair invited unpacking errors."""
+    return _invert_3x3(emitter_matrix(PRIMARIES))
 
 
 class TestTheFeasibleSetIsNotWhatTheClampAssumes(unittest.TestCase):
     def setUp(self: "TestTheFeasibleSetIsNotWhatTheClampAssumes") -> None:
-        _forward, self.inverse = _device()
+        self.inverse = _inverse()
         self.cap = neutral_cap(self.inverse)
 
     def test_the_cap_is_well_below_what_the_device_can_reach(
@@ -86,7 +86,7 @@ class TestTheFeasibleSetIsNotWhatTheClampAssumes(unittest.TestCase):
 
 class TestTheIntervalClampRecoversLightness(unittest.TestCase):
     def setUp(self: "TestTheIntervalClampRecoversLightness") -> None:
-        _forward, self.inverse = _device()
+        self.inverse = _inverse()
         self.cap = neutral_cap(self.inverse)
 
     def _cases(self: "TestTheIntervalClampRecoversLightness") -> list[tuple]:
@@ -111,13 +111,13 @@ class TestTheIntervalClampRecoversLightness(unittest.TestCase):
         # The property that makes it a safe replacement rather than a trade.
         for lightness, hue, chroma in self._cases():
             with self.subTest(L=round(lightness, 3), hue=hue, C=chroma):
-                shipped_l, _shipped_c = map_clamp_then_chroma(
+                shipped = map_clamp_then_chroma(
                     self.inverse, lightness, hue, chroma, HALVINGS
                 )
-                kept_l, _kept_c = map_interval_clamp(
+                kept = map_interval_clamp(
                     self.inverse, lightness, hue, chroma, PROBES, HALVINGS
                 )
-                self.assertGreaterEqual(kept_l, shipped_l - 1e-9)
+                self.assertGreaterEqual(kept.lightness, shipped.lightness - 1e-9)
 
     def test_it_recovers_lightness_on_some_targets(
         self: "TestTheIntervalClampRecoversLightness",
@@ -125,13 +125,13 @@ class TestTheIntervalClampRecoversLightness(unittest.TestCase):
         # Not vacuous: "never worse" is satisfied by doing nothing.
         best = 0.0
         for lightness, hue, chroma in self._cases():
-            shipped_l, _c = map_clamp_then_chroma(
+            shipped = map_clamp_then_chroma(
                 self.inverse, lightness, hue, chroma, HALVINGS
             )
-            kept_l, _k = map_interval_clamp(
+            kept = map_interval_clamp(
                 self.inverse, lightness, hue, chroma, PROBES, HALVINGS
             )
-            best = max(best, kept_l - shipped_l)
+            best = max(best, kept.lightness - shipped.lightness)
         self.assertGreater(best, 0.2)
 
     def test_every_result_is_feasible(
@@ -139,11 +139,13 @@ class TestTheIntervalClampRecoversLightness(unittest.TestCase):
     ) -> None:
         for lightness, hue, chroma in self._cases():
             with self.subTest(L=round(lightness, 3), hue=hue, C=chroma):
-                kept_l, kept_c = map_interval_clamp(
+                kept = map_interval_clamp(
                     self.inverse, lightness, hue, chroma, PROBES, HALVINGS
                 )
                 self.assertTrue(
-                    is_feasible(self.inverse, target_xyz(kept_l, hue, kept_c))
+                    is_feasible(
+                        self.inverse, target_xyz(kept.lightness, hue, kept.chroma)
+                    )
                 )
 
     def test_hue_is_preserved_exactly(
@@ -151,14 +153,14 @@ class TestTheIntervalClampRecoversLightness(unittest.TestCase):
     ) -> None:
         checked = 0
         for lightness, hue, chroma in self._cases():
-            kept_l, kept_c = map_interval_clamp(
+            kept = map_interval_clamp(
                 self.inverse, lightness, hue, chroma, PROBES, HALVINGS
             )
-            if kept_c <= 1e-6:
+            if kept.chroma <= 1e-6:
                 continue
             with self.subTest(L=round(lightness, 3), hue=hue, C=chroma):
                 self.assertAlmostEqual(
-                    hue_of(target_xyz(kept_l, hue, kept_c)), hue, places=3
+                    hue_of(target_xyz(kept.lightness, hue, kept.chroma)), hue, places=3
                 )
             checked += 1
         self.assertGreater(checked, 0)
@@ -171,14 +173,15 @@ class TestTheIntervalClampRecoversLightness(unittest.TestCase):
         kept = map_interval_clamp(
             self.inverse, lightness, hue, chroma, PROBES, HALVINGS
         )
-        self.assertEqual(kept, (lightness, chroma))
+        self.assertEqual(kept.lightness, lightness)
+        self.assertEqual(kept.chroma, chroma)
 
 
 class TestTheRefutedShapes(unittest.TestCase):
     """Both alternatives measured failing, kept so they are not re-attempted."""
 
     def setUp(self: "TestTheRefutedShapes") -> None:
-        _forward, self.inverse = _device()
+        self.inverse = _inverse()
         self.cap = neutral_cap(self.inverse)
 
     def test_a_bracket_at_zero_converges_on_an_infeasible_answer(
@@ -215,11 +218,20 @@ class TestTheRefutedShapes(unittest.TestCase):
                 low = step
             else:
                 high = step
-        _shipped_l, shipped_c = map_clamp_then_chroma(
-            self.inverse, lightness, hue, chroma, HALVINGS
-        )
-        self.assertLess(chroma * low, shipped_c)
+        shipped = map_clamp_then_chroma(self.inverse, lightness, hue, chroma, HALVINGS)
+        self.assertLess(chroma * low, shipped.chroma)
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestProbeCountValidation(unittest.TestCase):
+    def test_zero_probes_is_refused(self: "TestProbeCountValidation") -> None:
+        # With no probes the seed search finds nothing and the fallback would
+        # read as "no chroma is feasible at this lightness" -- a wrong answer
+        # rather than a missing one.
+        inverse = _inverse()
+        cap = neutral_cap(inverse)
+        with self.assertRaises(ValueError):
+            map_interval_clamp(inverse, cap * 1.25, 300.0, 0.30, 0, HALVINGS)

@@ -666,8 +666,14 @@ shipped path on over-bright targets:
 
 **Never worse** across the sweep -- it falls back to the shipped path when no
 chroma is feasible at that lightness, which is the last row. Hue is preserved
-exactly, and every result is feasible. Cost is `probes + 2 x halvings`, all
-compile-time constants, so it is not an iterative solver under A3/B11.
+exactly, and every result is feasible.
+
+Cost is `probes + 2 x halvings`. Those are parameters in the harness, because
+sweeping them is what a study is for; what A3/B11 need is that the cost is
+bounded by a count rather than by a convergence criterion, so an
+implementation fixes both and the loop count is known at compile time. An
+earlier revision of this section called the parameters themselves
+compile-time constants, which they are not.
 
 The lower edge is not optional: clamping to the upper edge alone produces
 *infeasible* output on exactly the targets this is meant to fix, which the
