@@ -43,6 +43,10 @@ TOPOLOGY_CHANNELS: dict[str, tuple[str, ...]] = {
     "rgbww": ("red", "green", "blue", "warm_white", "cool_white"),
 }
 
+# The subset the renderer can actually express. `EmitterProfile` is a
+# three-primary type today, so a white emitter has nowhere to go.
+RENDERABLE_TOPOLOGIES: frozenset[str] = frozenset({"rgb"})
+
 
 @typechecked
 @dataclass(frozen=True, slots=True)
@@ -81,7 +85,7 @@ class Admission:
 
 
 @typechecked
-def parse_artifact(text: str, source_name: str) -> Artifact:
+def parse_artifact(raw: bytes, source_name: str) -> Artifact:
     """Parse one artifact, rejecting an unknown schema major.
 
     Raises rather than returning a refusal: an unparseable or
@@ -90,7 +94,11 @@ def parse_artifact(text: str, source_name: str) -> Artifact:
     as "this LED is not characterised".
     """
 
-    payload = json.loads(text)
+    # Hash the bytes as stored. Hashing a decoded string would make a CRLF
+    # artifact hash differently from its own file, and the provenance header's
+    # whole job is to name the file that was read.
+    content_sha256 = hashlib.sha256(raw).hexdigest()
+    payload = json.loads(raw.decode("utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{source_name}: artifact is not a JSON object")
 
@@ -113,7 +121,7 @@ def parse_artifact(text: str, source_name: str) -> Artifact:
         profile_id=profile_id,
         schema_version=schema_version,
         payload=payload,
-        content_sha256=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        content_sha256=content_sha256,
         source_name=source_name,
     )
 
@@ -145,6 +153,19 @@ def admit(artifact: Artifact) -> Admission | Refusal:
             + ", ".join(sorted(TOPOLOGY_CHANNELS))
         )
         topology = ""
+    elif topology not in RENDERABLE_TOPOLOGIES:
+        # P2's `EmitterProfile` carries three chromaticities and three
+        # luminances, and `EmitterProfile::rgb` is its only factory. Admitting
+        # a white-emitter artifact would hand the renderer a channel set it
+        # cannot express, and it would emit an RGB profile that silently drops
+        # the white -- the exact class of quiet data loss this gate exists to
+        # prevent. Refuse until there is a type to render into.
+        reasons.append(
+            f"topology {topology!r} has no EmitterProfile form yet; only "
+            + ", ".join(sorted(RENDERABLE_TOPOLOGIES))
+            + " can be rendered, and emitting one anyway would drop the "
+            "white channel without saying so"
+        )
 
     channel_names: list[str] = []
     photometric = payload.get("photometric")
@@ -364,7 +385,12 @@ def _render_profile(admission: Admission) -> list[str]:
 def load_artifacts(directory: Path) -> list[Artifact]:
     """Every `*.profile.json` under `directory`, in stable name order."""
 
+    if not directory.is_dir():
+        # Globbing a missing directory yields nothing, which would let
+        # `--mode write` quietly emit a header with that directory's parts --
+        # and their refusal records -- simply absent.
+        raise FileNotFoundError(f"artifact directory does not exist: {directory}")
     artifacts: list[Artifact] = []
     for path in sorted(directory.glob("*.profile.json")):
-        artifacts.append(parse_artifact(path.read_text(encoding="utf-8"), path.name))
+        artifacts.append(parse_artifact(path.read_bytes(), path.name))
     return artifacts

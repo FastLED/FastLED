@@ -9,12 +9,14 @@ manufacturing precision the datasheets do not publish.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import unittest
 from pathlib import Path
 
 from ci import generate_profile_header
 from ci.color_profile_generator import (
+    TOPOLOGY_CHANNELS,
     Admission,
     Refusal,
     admit,
@@ -87,16 +89,18 @@ class TestRefusal(unittest.TestCase):
         catalog records.
         """
 
-        source = (FIXTURES / "fixture-rgb-none-synthetic-r1.profile.json").read_text(
-            encoding="utf-8"
+        payload = json.loads(
+            (FIXTURES / "fixture-rgb-none-synthetic-r1.profile.json").read_bytes()
         )
-        payload = json.loads(source)
         self.assertIsInstance(
-            admit(parse_artifact(json.dumps(payload), "intact")), Admission
+            admit(parse_artifact(json.dumps(payload).encode("utf-8"), "intact")),
+            Admission,
         )
 
         del payload["runtime_admissible"]
-        decision = admit(parse_artifact(json.dumps(payload), "flagless"))
+        decision = admit(
+            parse_artifact(json.dumps(payload).encode("utf-8"), "flagless")
+        )
         self.assertIsInstance(decision, Refusal)
         assert isinstance(decision, Refusal)
         self.assertTrue(
@@ -127,7 +131,7 @@ class TestRefusal(unittest.TestCase):
                 ]
             },
         }
-        decision = admit(parse_artifact(json.dumps(payload), "ranged"))
+        decision = admit(parse_artifact(json.dumps(payload).encode("utf-8"), "ranged"))
         self.assertIsInstance(decision, Refusal)
         assert isinstance(decision, Refusal)
         self.assertTrue(any("chromaticity" in r for r in decision.reasons))
@@ -150,7 +154,7 @@ class TestRefusal(unittest.TestCase):
                 ]
             },
         }
-        decision = admit(parse_artifact(json.dumps(payload), "short"))
+        decision = admit(parse_artifact(json.dumps(payload).encode("utf-8"), "short"))
         self.assertIsInstance(decision, Refusal)
         assert isinstance(decision, Refusal)
         self.assertTrue(any("requires exactly" in r for r in decision.reasons))
@@ -163,7 +167,7 @@ class TestRefusal(unittest.TestCase):
         # as "this LED is not characterised".
         payload = {"schema_version": "2.0", "profile_id": "future/rgb/none/r1"}
         with self.assertRaises(ValueError) as caught:
-            parse_artifact(json.dumps(payload), "future")
+            parse_artifact(json.dumps(payload).encode("utf-8"), "future")
         self.assertIn("unsupported major", str(caught.exception))
 
 
@@ -210,6 +214,91 @@ class TestAdmissionAndRendering(unittest.TestCase):
             symbol_name("ws2812b/5050/none/datasheet-r1"),
             symbol_name("ws2812b/5050/none/datasheet-r2"),
         )
+
+
+class TestRenderableTopologies(unittest.TestCase):
+    def _white_artifact(self: "TestRenderableTopologies", topology: str) -> object:
+        channels = TOPOLOGY_CHANNELS[topology]
+        payload = {
+            "schema_version": "1.0",
+            "profile_id": f"white/{topology}/warm/r1",
+            "runtime_admissible": True,
+            "topology": topology,
+            "photometric": {
+                "channels": [
+                    {
+                        "name": name,
+                        "runtime_admissible": True,
+                        "chromaticity": {"x": 0.3, "y": 0.3},
+                        "relative_y": {"value": 0.3},
+                    }
+                    for name in channels
+                ]
+            },
+        }
+        return admit(parse_artifact(json.dumps(payload).encode("utf-8"), topology))
+
+    def test_a_fully_specified_white_artifact_is_still_refused(
+        self: "TestRenderableTopologies",
+    ) -> None:
+        """No silent reduction to three channels.
+
+        `EmitterProfile` carries three primaries and `EmitterProfile::rgb` is
+        its only factory, so rendering an admitted RGBW artifact would emit an
+        RGB profile with the white simply gone. That is the quiet data loss
+        this gate exists to prevent, so it is refused at admission instead --
+        even though every channel here is individually admissible.
+        """
+
+        for topology in ("rgbw", "rgbww"):
+            with self.subTest(topology=topology):
+                decision = self._white_artifact(topology)
+                self.assertIsInstance(decision, Refusal)
+                assert isinstance(decision, Refusal)
+                self.assertTrue(
+                    any("no EmitterProfile form yet" in r for r in decision.reasons),
+                    msg=f"reasons were {decision.reasons}",
+                )
+
+    def test_rgb_is_still_renderable(self: "TestRenderableTopologies") -> None:
+        # Guards the screen above from becoming "refuse everything".
+        self.assertIsInstance(self._white_artifact("rgb"), Admission)
+
+
+class TestProvenanceHashing(unittest.TestCase):
+    def test_the_hash_is_over_the_bytes_on_disk(self: "TestProvenanceHashing") -> None:
+        # A CRLF artifact must hash as its own file does, or the provenance
+        # header names a file nobody can reproduce.
+        for path in sorted(FIXTURES.glob("*.profile.json")):
+            with self.subTest(artifact=path.name):
+                artifact = parse_artifact(path.read_bytes(), path.name)
+                self.assertEqual(
+                    artifact.content_sha256,
+                    hashlib.sha256(path.read_bytes()).hexdigest(),
+                )
+
+    def test_crlf_changes_the_hash(self: "TestProvenanceHashing") -> None:
+        # Non-vacuity for the test above: the two encodings must differ, or it
+        # would pass for an implementation that hashed a decoded round trip.
+        source = (FIXTURES / "fixture-rgb-none-synthetic-r1.profile.json").read_bytes()
+        crlf = source.replace(b"\n", b"\r\n")
+        self.assertNotEqual(source, crlf)
+        self.assertNotEqual(
+            parse_artifact(source, "lf").content_sha256,
+            parse_artifact(crlf, "crlf").content_sha256,
+        )
+
+
+class TestMissingDirectory(unittest.TestCase):
+    def test_a_missing_artifact_directory_fails_loudly(
+        self: "TestMissingDirectory",
+    ) -> None:
+        # Globbing a missing directory yields nothing, which would let write
+        # mode emit a header with those parts -- and their refusal records --
+        # simply absent.
+        with self.assertRaises(FileNotFoundError) as caught:
+            load_artifacts(REPO_ROOT / "ci" / "no" / "such" / "directory")
+        self.assertIn("no", str(caught.exception))
 
 
 class TestCheckMode(unittest.TestCase):
