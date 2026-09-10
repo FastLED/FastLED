@@ -11,11 +11,31 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/stl/scope_exit.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/span.h"
 #include "fl/stl/int.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
+
+#if FL_COLOR_PROFILE_RUNTIME
+// The pipeline is reached through a pointer, not carried inside every channel.
+//
+// `StreamingPipelineQ16` is 88 bytes. Held inline as an `fl::optional`, every
+// channel on the sketch paid that whether or not it bound a profile, and an
+// unbound channel is the ordinary case -- `sizeof(fl::Channel)` measured 576
+// against 488 without this feature, so 1.4 KB across a sixteen-channel
+// parallel output for something none of those channels asked for. Behind a
+// pointer it measures 504.
+//
+// Asserted on the storage type rather than on `sizeof(fl::Channel)`, which is
+// a different number on every target and would pin the whole class's layout
+// to whatever this host compiles.
+FL_STATIC_ASSERT(sizeof(fl::Channel::ColorPipelineStorage) <= 2 * sizeof(void*),
+                 "Channel must reach its colour pipeline through a pointer: "
+                 "storing StreamingPipelineQ16 inline charges every channel "
+                 "for a pipeline most of them never bind.");
+#endif
 
 using namespace fl;
 

@@ -382,9 +382,12 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         // Through the hook, not by name. Calling `buildPipelineForBinding`
         // directly from here is what kept the entire pipeline alive in every
         // build; the pointer is null until `setColorProfile` installs it.
+        // Built on the stack first, so a binding that does not describe a
+        // usable pipeline costs no allocation -- that is the failing half of
+        // an ordinary unbound channel, not an exceptional path.
         StreamingPipelineQ16 pipeline;
         if (hooks.build(mSettings.mColorProfile, &pipeline)) {
-            mPipeline = pipeline;
+            mPipeline = fl::make_unique<StreamingPipelineQ16>(pipeline);
         }
     }
 
@@ -629,11 +632,11 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // this working when FASTLED_HD_COLOR_MIXING is off, where that field
     // does not exist.
     const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
-    if (mPipeline && flux_hooks.setFlux != nullptr) {
-        flux_hooks.setFlux(&mPipeline.value(),
+    const StreamingPipelineQ16* pipeline = mPipeline.get();
+    if (pipeline != nullptr && flux_hooks.setFlux != nullptr) {
+        flux_hooks.setFlux(mPipeline.get(),
                            pixels.mColorAdjustment.premixed.r);
     }
-    const StreamingPipelineQ16* pipeline = mPipeline ? &mPipeline.value() : nullptr;
 #else
     const StreamingPipelineQ16* pipeline = nullptr;
 #endif
