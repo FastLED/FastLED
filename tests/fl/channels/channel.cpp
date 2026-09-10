@@ -439,9 +439,35 @@ FL_TEST_CASE("cfg.options.mBus = Bus::BIT_BANG binds the BIT_BANG driver on host
 
     auto bitbangDriver = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
     FL_REQUIRE(bitbangDriver != nullptr);
-    FL_CHECK_EQ(bitbangDriver.get(), &BusTraits<Bus::BIT_BANG>::instance());
 
     channel->removeFromDrawList();
+}
+
+// `registerWithManager()` must register the BusTraits singleton itself, not a
+// freshly constructed driver of the same type -- a copy would collect state
+// nothing ever transmits.
+//
+// Asserted against a registration *this* translation unit performs. The
+// obvious form, comparing the driver `fl::enableAllDrivers()` registered
+// against `&BusTraits<Bus::BIT_BANG>::instance()`, is not portable:
+// `instancePtr()` keeps its singleton in a function-local static inside a
+// header, and `enableAllDrivers()` lives in the FastLED library image while
+// the expression above is evaluated in the test image. Where those are
+// separate modules the loader does not merge -- `fastled_lib` is a
+// `shared_library` and every test is another, so that is every Windows DLL
+// build -- each module holds its own copy and the pointers differ by
+// construction. That compares the harness's linkage, not the registration.
+FL_TEST_CASE("BusTraits::registerWithManager registers the singleton itself") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    BusTraits<Bus::BIT_BANG>::registerWithManager();
+
+    auto cleanup = fl::make_scope_exit([&]() { mgr.clearAllDrivers(); });
+
+    auto registered = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
+    FL_REQUIRE(registered != nullptr);
+    FL_CHECK_EQ(registered.get(), &BusTraits<Bus::BIT_BANG>::instance());
 }
 
 FL_TEST_CASE("mBus = Bus::AUTO falls back to priority dispatch") {
