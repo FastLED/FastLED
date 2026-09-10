@@ -1,0 +1,49 @@
+# C9.5: periodic freshness check for the mirrored colour-profile artifacts.
+#
+# Never a commit gate. It does not run on push or pull_request, it does not
+# fail the build, and it does not ingest anything -- ingest is a maintainer
+# action landing as a reviewed PR (C9.1). All this does is keep one standing
+# issue current so a newer upstream report cannot sit unnoticed.
+name: color profile freshness
+
+on:
+  schedule:
+    # Weekly. The upstream registry is append-only and changes rarely; a
+    # daily run would mostly re-post the same body.
+    - cron: "23 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: color-profile-freshness
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Check artifact freshness
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # `|| true` is belt-and-braces: the checker is specified to always
+          # exit 0, and `ci/tests/test_color_profile_freshness.py` pins that.
+          uv run python -m ci.color_profile_freshness > freshness.txt || true
+          cat freshness.txt
+
+      - name: Update the standing tracking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          uv run python ci/color_profile_freshness_issue.py --report freshness.txt --repo "${{ github.repository }}"
