@@ -248,12 +248,57 @@ prose. No change to the dither is proposed here -- R8 asks for the contract to
 be defined, and shifting the low-code rendering of every existing sketch is a
 decision, not a cleanup.
 
-## What this leaves for section 5
+## Section 5: the two static candidates, scored
 
-Two of the five candidates are gone, and the remaining comparison is between
-independent RGB gamma, value-only shaping over the HSV16 path, and
-linear-light temporal dithering, with 0.0605 OKLab chroma at 2% luminance as
-the neutral-axis target to beat.
+The ceiling above is what makes this scoreable without settling the
+strategy-space question first. Whatever shape a strategy has, a single frame
+cannot beat the best code that frame can emit -- so both candidates are
+evaluated at their *best* rather than through a particular curve, and the
+numbers bound the family instead of one member.
+
+### Independent RGB gamma is out
+
+A per-channel transfer applied to the linear drive before quantization, which
+is the honest reading of the name. It is worse than plain rounding at **40 of
+40** targets, by at least 2.3x even where rounding does worst:
+
+| luminance | rounding | gamma 2.2 |
+| --- | ---: | ---: |
+| 2% | 0.0605 | 0.1417 |
+| 8% | 0.0247 | 0.1734 |
+| 14% | 0.0108 | 0.1930 |
+
+The reason is the one that removed `colorBoost`: a WS2812 drives its diodes
+with linear PWM, so nothing downstream decodes the curve, and the emitted
+light is the code rather than the drive the code came from. Gamma is a fine
+appearance control and is not a neutral re-encoding.
+
+### Value-only shaping over HSV16 survives, and takes about a third
+
+Hue and saturation come from the rounded code and only the value moves, so it
+is never worse than per-channel rounding -- **0 of 40** targets regress. Every
+16-bit value is searched, so this is the best any V-only shaping function
+could do.
+
+At the worst target, 2% luminance:
+
+| | chroma |
+| --- | ---: |
+| per-channel rounding | 0.0605 |
+| best value-only shaping | 0.0530 |
+| static ceiling (#4265) | 0.0382 |
+
+It closes 0.0075 of an available 0.0223 -- **about a third of the room a
+single frame has.** Across the sweep it lands at or below the distance-optimal
+code's chroma at 36 of 40 targets; the four exceptions are the distance-versus-
+chroma disagreement recorded above, not a failure of the strategy.
+
+### What that leaves
+
+Linear-light temporal dithering, which is the only remaining candidate that
+could close the other two thirds, and which is stateful and waits on the frame
+cadence P6 wires up. The static half of section 5 is answered: one candidate
+is out, one survives and is worth having, and neither reaches the ceiling.
 
 ## Not covered
 

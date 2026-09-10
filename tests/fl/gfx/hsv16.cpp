@@ -885,4 +885,149 @@ FL_TEST_CASE("The neutral axis leaves the axis from quantization alone") {
     FL_CHECK(worst_boost > worst_identity);
 }
 
+// ---------------------------------------------------------------------------
+// Section 5, the two static candidates that were left (#4042)
+//
+// #4251 removed colorBoost's two forms. #4265 bounded what any static strategy
+// could reach: at the worst target -- 2% luminance, the one the neutral sweep
+// reports at 0.0605 chroma -- the distance-optimal code measures 0.0382.
+//
+// That bound is the yardstick these need, and it is why they can be scored
+// without settling the strategy-space question first: whatever a strategy's
+// shape, a single frame cannot beat the best code that frame can emit.
+//
+// Both candidates are evaluated at their *best*, not through a particular
+// curve. Value-only shaping searches every 16-bit value, so the number is an
+// upper bound on the whole family rather than one member's score -- the same
+// trick #4265 used for the static ceiling.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Exact linear drives for a D65 neutral, before any quantization.
+void neutralDrives(float luminance, float (&out)[3]) {
+    float target[3];
+    xyY_to_XYZ(0.3127f, 0.3290f, luminance, target);
+    const RgbColorimetricCache cache = ws2812Cache();
+    matvec3(cache.P_RGB_inv, target, out);
+}
+
+/// Independent RGB gamma: a per-channel transfer applied to the linear drive
+/// before quantization.
+///
+/// This is the honest reading of the candidate's name, and it is also why it
+/// cannot work here: a WS2812 drives its diodes with linear PWM, so nothing
+/// downstream decodes the curve. The emitted light is the code, not the drive
+/// the code was derived from.
+CRGB pathIndependentGamma(float luminance, float gamma) {
+    float drives[3];
+    neutralDrives(luminance, drives);
+    const float inverse = 1.0f / gamma;
+    float shaped[3];
+    for (int i = 0; i < 3; ++i) {
+        const float d = drives[i] < 0.0f ? 0.0f
+                                         : (drives[i] > 1.0f ? 1.0f : drives[i]);
+        shaped[i] = fl::powf(d, inverse);
+    }
+    return CRGB(quantize_u8(shaped[0]), quantize_u8(shaped[1]),
+                quantize_u8(shaped[2]));
+}
+
+/// Best chroma reachable by shaping only the HSV16 value channel.
+///
+/// Hue and saturation come from the rounded code, so this is exactly "leave
+/// the colour alone and move the brightness". Every value is tried, which
+/// makes the result a bound on the family: no V-only shaping function can do
+/// better than the best V.
+float bestValueOnlyChroma(float luminance, const Oklab& ideal) {
+    const HSV16 base(neutralCodes(luminance));
+    float best_distance = 1e9f;
+    float best_chroma = 0.0f;
+    for (int value = 0; value <= 65535; value += 64) {
+        const HSV16 shaped(base.h, base.s, static_cast<u16>(value));
+        const Oklab light = lightOf(shaped.ToRGB());
+        const float distance = oklabDistance(light, ideal);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_chroma = chromaOf(light);
+        }
+    }
+    return best_chroma;
+}
+
+}  // namespace
+
+FL_TEST_CASE("Independent RGB gamma is an appearance control, not an encoding") {
+    // The same verdict colorBoost got in #4251, for the same reason and with
+    // a wider margin. Applying a transfer to a linear drive and handing the
+    // result to linear hardware moves the light away from the target, so the
+    // neutral-axis error grows rather than shrinks.
+    int worse = 0;
+    int examined = 0;
+    float smallest_ratio = 0.0f;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 100.0f;
+        const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
+        const float gamma_chroma =
+            chromaOf(lightOf(pathIndependentGamma(luminance, 2.2f)));
+        ++examined;
+        if (gamma_chroma > rounded_chroma) {
+            ++worse;
+        }
+        if (rounded_chroma > 1e-6f) {
+            const float ratio = gamma_chroma / rounded_chroma;
+            if (smallest_ratio == 0.0f || ratio < smallest_ratio) {
+                smallest_ratio = ratio;
+            }
+        }
+    }
+    FL_CHECK_EQ(examined, 40);
+    // Every target, not most of them.
+    FL_CHECK_EQ(worse, 40);
+    // And by at least 2.3x even where rounding does worst.
+    FL_CHECK_GT(smallest_ratio, 2.0f);
+}
+
+FL_TEST_CASE("Value-only shaping over HSV16 never loses, and does not win much") {
+    // The surviving candidate. Leaving hue and saturation alone is what keeps
+    // it from ever being worse than per-channel rounding -- and the ceiling
+    // #4265 measured is what shows how little of the available room it takes.
+    int examined = 0;
+    int worse_than_rounding = 0;
+    for (int step = 1; step <= 40; ++step) {
+        const float luminance = static_cast<float>(step) / 100.0f;
+        const Oklab ideal = idealNeutralLight(luminance);
+        const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
+        const float value_only = bestValueOnlyChroma(luminance, ideal);
+        ++examined;
+        if (value_only > rounded_chroma + 1e-6f) {
+            ++worse_than_rounding;
+        }
+    }
+    FL_CHECK_EQ(examined, 40);
+    FL_CHECK_EQ(worse_than_rounding, 0);
+}
+
+FL_TEST_CASE("At the worst target it takes a third of the room there is") {
+    // The number section 5 needs. 2% luminance is where the neutral sweep is
+    // worst, and where #4265 measured the static ceiling.
+    const float luminance = 0.02f;
+    const Oklab ideal = idealNeutralLight(luminance);
+    const CRGB rounded = neutralCodes(luminance);
+    const float rounded_chroma = chromaOf(lightOf(rounded));
+    const float value_only = bestValueOnlyChroma(luminance, ideal);
+
+    // Rounding is 0.0605, value-only reaches 0.0530, and the static ceiling
+    // is 0.0382. So the family closes 0.0075 of an available 0.0223.
+    FL_CHECK_LT(fl::fabsf(rounded_chroma - 0.0605f), 0.001f);
+    FL_CHECK_LT(fl::fabsf(value_only - 0.0530f), 0.001f);
+
+    const float available = rounded_chroma - 0.0382f;
+    const float captured = rounded_chroma - value_only;
+    FL_REQUIRE_GT(available, 0.0f);
+    const float fraction = captured / available;
+    FL_CHECK_GT(fraction, 0.25f);
+    FL_CHECK_LT(fraction, 0.45f);
+}
+
 }  // namespace ws2812_shaping
