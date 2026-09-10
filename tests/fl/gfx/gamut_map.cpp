@@ -1472,45 +1472,151 @@ FL_TEST_CASE("An over-bright neutral still clamps, because it has no chroma") {
     }
 }
 
+namespace {
+
+/// OKLab of a four- or five-emitter drive vector, re-rendered through the
+/// device rather than read back off the mapper.
+template <int N>
+void emittedLabWide(const i32 (&drives)[N], const i32 (&white1)[3],
+                    const i32 (&white2)[3], i32 (&out_lab)[3]) {
+    const float emitters[3][2] = {
+        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
+    float xyz[3] = {0.0f, 0.0f, 0.0f};
+    for (int e = 0; e < 3; ++e) {
+        float emitter[3];
+        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
+                                          emitter);
+        for (int i = 0; i < 3; ++i) {
+            xyz[i] += toFloat(drives[e]) * emitter[i];
+        }
+    }
+    for (int i = 0; i < 3; ++i) {
+        xyz[i] += toFloat(drives[3]) * toFloat(white1[i]);
+        if (N > 4) {
+            xyz[i] += toFloat(drives[4]) * toFloat(white2[i]);
+        }
+    }
+    const i32 emitted[3] = {q16(xyz[0]), q16(xyz[1]), q16(xyz[2])};
+    xyzToOklabQ16(emitted, out_lab);
+}
+
+}  // namespace
+
 FL_TEST_CASE("RGBW keeps the lightness above its own, higher cap") {
     // The white emitter moves the cap; it does not change the shape of the
     // problem, so the same interval clamp has to run there too.
+    //
+    // Low chroma on purpose, and asserted outside the hull before anything
+    // else. A wide hull swallows most *saturated* targets a little above the
+    // cap outright -- `allocateEmitterDrivesQ16` succeeds and the mapper
+    // returns before the clamp is reached -- so a test written at chroma 0.30
+    // measures nothing and passes with the whole path disabled. That is the
+    // shape of test this guard exists to stop, having written one.
     GamutMapRgbwQ16 rgbw;
     FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
                                      WhiteAllocationPolicy::WhitePreferred, &rgbw));
     const float cap = toFloat(rgbw.max_neutral_lightness);
+    const float requested = cap + 0.15f;
 
-    // Just above the RGBW cap, on the hue that has headroom there.
-    const i32 lab[3] = {q16(cap + 0.06f), q16(0.15f), q16(-0.2598076f)};
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
     i32 xyz[3];
     oklabToXyzQ16(lab, xyz);
     i32 drives[4];
+    FL_REQUIRE_FALSE(allocateEmitterDrivesQ16(rgbw.allocation, xyz, drives));
+
     mapAndAllocateRgbwQ16(rgbw, xyz, drives);
     for (int i = 0; i < 4; ++i) {
         FL_CHECK_GE(drives[i], 0);
         FL_CHECK_LE(drives[i], kFullDrive);
     }
 
-    // Re-render through the four emitters, white included.
-    const float emitters[3][2] = {
-        {0.6400f, 0.3300f}, {0.3000f, 0.6000f}, {0.1500f, 0.0600f}};
-    float out[3] = {0.0f, 0.0f, 0.0f};
-    for (int e = 0; e < 3; ++e) {
-        float emitter[3];
-        colorimetric_response::xyY_to_XYZ(emitters[e][0], emitters[e][1], 1.0f,
-                                          emitter);
-        for (int i = 0; i < 3; ++i) {
-            out[i] += toFloat(drives[e]) * emitter[i];
-        }
-    }
-    for (int i = 0; i < 3; ++i) {
-        out[i] += toFloat(drives[3]) * toFloat(kWhiteD65[i]);
-    }
-    const i32 emitted_xyz[3] = {q16(out[0]), q16(out[1]), q16(out[2])};
     i32 emitted[3];
-    xyzToOklabQ16(emitted_xyz, emitted);
+    emittedLabWide<4>(drives, kWhiteD65, kWhiteD65, emitted);
 
-    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.02f);
+    // The requested lightness itself, not merely something above the cap.
+    // "Above the cap" is satisfied by any improvement at all, which is not
+    // what this path claims to do.
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+}
+
+FL_TEST_CASE("RGBW falls back to its cap when no chroma is feasible there") {
+    // The other half of the contract, and the one that keeps this from ever
+    // being worse: a lightness far past what any hue can reach must still
+    // come back clamped rather than wrong.
+    GamutMapRgbwQ16 rgbw;
+    FL_REQUIRE(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                     WhiteAllocationPolicy::WhitePreferred, &rgbw));
+    const float cap = toFloat(rgbw.max_neutral_lightness);
+
+    const i32 lab[3] = {q16(cap + 0.60f), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[4];
+    FL_REQUIRE_FALSE(allocateEmitterDrivesQ16(rgbw.allocation, xyz, drives));
+
+    mapAndAllocateRgbwQ16(rgbw, xyz, drives);
+    for (int i = 0; i < 4; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<4>(drives, kWhiteD65, kWhiteD65, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - cap), 0.02f);
+}
+
+FL_TEST_CASE("RGBWW keeps the lightness above its own cap") {
+    // Two whites raise the cap again, and the same clamp is wired into that
+    // mapper. Wiring it without testing it would have left the third path
+    // asserted only by the fact that it compiles.
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+    const float requested = cap + 0.15f;
+
+    const i32 lab[3] = {q16(requested), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[5];
+    FL_REQUIRE_FALSE(allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives));
+
+    mapAndAllocateRgbwwQ16(map, xyz, drives);
+    for (int i = 0; i < 5; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
+    FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
+}
+
+FL_TEST_CASE("RGBWW falls back to its cap when no chroma is feasible there") {
+    GamutMapRgbwwQ16 map;
+    FL_REQUIRE(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                     WhiteAllocationPolicy::WhitePreferred,
+                                     &map));
+    const float cap = toFloat(map.max_neutral_lightness);
+
+    const i32 lab[3] = {q16(cap + 0.60f), q16(0.05f), q16(-0.0866025f)};
+    i32 xyz[3];
+    oklabToXyzQ16(lab, xyz);
+    i32 drives[5];
+    FL_REQUIRE_FALSE(allocateTwoWhiteDrivesQ16(map.allocation, xyz, drives));
+
+    mapAndAllocateRgbwwQ16(map, xyz, drives);
+    for (int i = 0; i < 5; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], kFullDrive);
+    }
+
+    i32 emitted[3];
+    emittedLabWide<5>(drives, kWhiteD65, kWhiteD50Map, emitted);
+    FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - cap), 0.02f);
 }
 
 }  // FL_TEST_FILE

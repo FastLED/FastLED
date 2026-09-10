@@ -11,6 +11,32 @@ namespace {
 /// Full drive, as an s16.16 raw value.
 constexpr i32 kGamutFullDrive = 65536;
 
+/// Probes used to find a seed inside the feasible chroma interval when the
+/// target is brighter than the device's brightest neutral (#4245).
+///
+/// Above that lightness the feasible chroma is still a single interval, but it
+/// no longer contains zero -- so the halving bracket `[0, target]`, whose whole
+/// invariant is that the low end is feasible, starts infeasible and converges
+/// on zero. That is the clamp this replaces: it discards up to 29.7% of the
+/// lightness the hull can actually reach on this device.
+///
+/// A linear scan rather than a search because there is nothing to search on:
+/// the interval's location is what is unknown. Bounded like the halvings and
+/// for the same reason (A3/B11) -- the cost of the above-cap path is
+/// `kGamutMapProbes + 2 * kGamutMapHalvings` feasibility tests, fixed when the
+/// firmware is built. Targets at or below the cap never run it.
+constexpr int kGamutMapProbes = 8;
+
+/// How far above the target's own chroma the probes reach, in Q16.
+///
+/// The interval above the cap can start *above* the requested chroma -- a
+/// bright near-neutral is infeasible precisely because it is not saturated
+/// enough -- so a ceiling of one would find no seed on exactly the targets
+/// this is for. Four is a factor of the request rather than an absolute
+/// chroma, which keeps a near-neutral request near-neutral instead of
+/// answering it with a saturated colour.
+constexpr i32 kGamutProbeCeilingQ16 = 4 << 16;
+
 /// D65 in s16.16, the white the working domain is normalized to.
 constexpr i32 kGamutD65Q16[3] = {62289, 65536, 71372};
 
