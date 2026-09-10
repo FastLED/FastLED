@@ -236,7 +236,12 @@ paragraph was asserting could not happen.
 The reader now distinguishes absent magic from recognized-but-unsupported
 FLED: no magic still falls back to raw RGB, but once `FLED` is matched, every
 invalidity — unsupported format, future version, reserved bytes set, truncated
-header, malformed envelope, non-seekable input — closes the stream and fails.
+header, malformed envelope — closes the stream and fails. Non-seekable input
+is not itself an invalidity: a stream whose first bytes are not `FLED` still
+plays as raw RGB, and `probeStreamingMagic()` buffers a partial prefix until
+there are enough bytes to decide. What it cannot do is admit a *recognized*
+FLED container, because the header cannot be re-read, so that case is
+refused rather than replayed as pixels.
 So the gate is true going forward and **false for every FastLED release up to
 and including 3.10.5**; the fix is newer than that tag. Adding a format enum
 cannot repair binaries already in the field.
