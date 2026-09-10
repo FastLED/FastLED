@@ -862,6 +862,167 @@ FL_TEST_CASE("Binning adversarial - LOG_REBIN monotonicity sweep") {
     FL_CHECK_EQ(violations, 0);
 }
 
+namespace {
+
+/// One binning mode measured over the declared frequency range.
+struct CoverageResult {
+    int dead;          ///< tones no band answered
+    int centre_hits;   ///< band centres whose tone peaked in their own band
+    int worst_miss;    ///< furthest a centre's peak landed from its band
+};
+
+/// Sweep `steps` log-spaced tones and, separately, one tone per band centre.
+///
+/// "Answered" is a peak above 20 counts, against the 200-2400 a mode returns
+/// when it does resolve a tone -- two orders apart, so the threshold is not
+/// carrying the result.
+CoverageResult measureCoverage(int samples, int bands,
+                               fl::audio::fft::Mode mode, int steps) {
+    const float fmin = fl::audio::fft::Args::DefaultMinFrequency();
+    const float fmax = fl::audio::fft::Args::DefaultMaxFrequency();
+    const float logRatio = fl::logf(fmax / fmin);
+    fl::audio::fft::Args args(samples, bands, fmin, fmax, 44100, mode);
+    fl::audio::fft::Impl fft(args);
+
+    CoverageResult result = {0, 0, 0};
+    for (int s = 0; s < steps; ++s) {
+        const float freq =
+            fmin * fl::expf(logRatio * static_cast<float>(s) /
+                            static_cast<float>(steps - 1));
+        auto pcm = makeAdversarialSine(freq, samples);
+        fl::audio::fft::Bins bins(bands);
+        fft.run(pcm, &bins);
+        if (bins.raw()[findPeakBin(bins.raw())] < 20.0f) {
+            ++result.dead;
+        }
+    }
+    for (int b = 0; b < bands; ++b) {
+        const float freq =
+            fmin * fl::expf(logRatio * static_cast<float>(b) /
+                            static_cast<float>(bands - 1));
+        auto pcm = makeAdversarialSine(freq, samples);
+        fl::audio::fft::Bins bins(bands);
+        fft.run(pcm, &bins);
+        int miss = findPeakBin(bins.raw()) - b;
+        if (miss < 0) {
+            miss = -miss;
+        }
+        if (miss == 0) {
+            ++result.centre_hits;
+        }
+        if (miss > result.worst_miss) {
+            result.worst_miss = miss;
+        }
+    }
+    return result;
+}
+
+}  // namespace
+
+FL_TEST_CASE("CQ_OCTAVE leaves gaps in the range it declares, LOG_REBIN does not") {
+    // FastLED#4301. `CQ_OCTAVE`'s sparse kernels are narrower than the
+    // spacing between adjacent band centres in the upper octaves, so they do
+    // not tile the axis and tones between them fall through: at 512 samples
+    // and 16 bands, 33 of 200 log-spaced tones produce under 20 counts in
+    // *every* band, the widest gap running 146-183 Hz.
+    //
+    // The comparison is what makes that a defect rather than a property of
+    // the problem. `LOG_REBIN` -- which `Args::resolveModeEnums` already
+    // picks for 32 bands or fewer -- answers everywhere, in every
+    // configuration measured here and in the wider sweep on the issue.
+    const int kSteps = 200;
+
+    const CoverageResult octave_512_16 =
+        measureCoverage(512, 16, fl::audio::fft::Mode::CQ_OCTAVE, kSteps);
+    const CoverageResult rebin_512_16 =
+        measureCoverage(512, 16, fl::audio::fft::Mode::LOG_REBIN, kSteps);
+
+    FL_CHECK_EQ(rebin_512_16.dead, 0);
+    // Bounded from below as well, deliberately. The gaps are the subject of
+    // an open issue, so if they close, that is a change someone made and
+    // should record -- not something to absorb silently. The message says so,
+    // because a bound that fails on good news has to explain itself.
+    if (octave_512_16.dead < 10) {
+        FL_WARN_F("CQ_OCTAVE coverage at 512/16 improved to %d dead tones of "
+                  "%d, from the 33 recorded here. That is good news, not a "
+                  "failure: find what changed, note it on FastLED#4301, and "
+                  "re-pin this bound.",
+                  octave_512_16.dead, kSteps);
+    }
+    FL_CHECK_GT(octave_512_16.dead, 10);
+    FL_CHECK_LT(octave_512_16.dead, 60);
+
+    // And the gaps are not the price of resolution: on the same
+    // configuration the two modes land a tone in its own band equally often.
+    // Measured 14 of 16 for CQ_OCTAVE against 15 of 16 for LOG_REBIN.
+    FL_CHECK_GT(rebin_512_16.centre_hits, octave_512_16.centre_hits - 2);
+}
+
+FL_TEST_CASE("answering everywhere is not the same as resolving anything") {
+    // The guard on the case above, and not a hypothetical: `CQ_NAIVE` is a
+    // shipped mode that already fails this way.
+    //
+    // At 256 samples the kernel conditioning `samples * fmin / fmax` is 1.63,
+    // which is the condition `resolveModeEnums` uses to route away from
+    // CQ_NAIVE -- and the measurement says it is right to. CQ_NAIVE answers
+    // every one of the 200 tones and still puts the peak in the correct band
+    // for only 2 of 48 centres, missing by as much as 16 bands.
+    //
+    // So "zero dead tones" alone would be satisfied by a mode that responds
+    // to everything and distinguishes nothing, and any fix for #4301 that
+    // reports zero must clear this too.
+    const int kSteps = 200;
+    const CoverageResult naive_256_48 =
+        measureCoverage(256, 48, fl::audio::fft::Mode::CQ_NAIVE, kSteps);
+    const CoverageResult rebin_256_48 =
+        measureCoverage(256, 48, fl::audio::fft::Mode::LOG_REBIN, kSteps);
+
+    FL_CHECK_EQ(naive_256_48.dead, 0);
+    FL_CHECK_LT(naive_256_48.centre_hits, 8);
+    FL_CHECK_GT(naive_256_48.worst_miss, 8);
+
+    // LOG_REBIN answers everywhere *and* resolves, which is what makes the
+    // first case's comparison meaningful rather than a choice of poisons.
+    FL_CHECK_EQ(rebin_256_48.dead, 0);
+    FL_CHECK_GT(rebin_256_48.centre_hits, 24);
+    FL_CHECK_LT(rebin_256_48.worst_miss, 8);
+}
+
+FL_TEST_CASE("the default configuration does not select CQ_OCTAVE") {
+    // Which is why #4301 is a defect in a mode rather than in what most
+    // sketches get. `Args` defaults to 512 samples and 16 bands with
+    // `Mode::AUTO`, and AUTO takes LOG_REBIN at 32 bands or fewer.
+    //
+    // Recorded because the first report of #4301 measured CQ_OCTAVE at 16
+    // bands and read it as the default path. AUTO never pairs those.
+    fl::audio::fft::Mode mode = fl::audio::fft::Mode::AUTO;
+    fl::audio::fft::Window window = fl::audio::fft::Window::AUTO;
+    fl::audio::fft::Args::resolveModeEnums(
+        mode, window, fl::audio::fft::Args::DefaultBands(),
+        fl::audio::fft::Args::DefaultSamples(),
+        fl::audio::fft::Args::DefaultMinFrequency(),
+        fl::audio::fft::Args::DefaultMaxFrequency());
+    FL_CHECK(mode == fl::audio::fft::Mode::LOG_REBIN);
+
+    // Above 32 bands AUTO chooses on kernel conditioning. With the default
+    // range and 512 samples that is 512 * 90 / 14080 = 3.27, so CQ_NAIVE --
+    // still not CQ_OCTAVE. Reaching CQ_OCTAVE from AUTO needs both more than
+    // 32 bands and a shorter transform.
+    mode = fl::audio::fft::Mode::AUTO;
+    window = fl::audio::fft::Window::AUTO;
+    fl::audio::fft::Args::resolveModeEnums(
+        mode, window, 48, 512, fl::audio::fft::Args::DefaultMinFrequency(),
+        fl::audio::fft::Args::DefaultMaxFrequency());
+    FL_CHECK(mode == fl::audio::fft::Mode::CQ_NAIVE);
+
+    mode = fl::audio::fft::Mode::AUTO;
+    window = fl::audio::fft::Window::AUTO;
+    fl::audio::fft::Args::resolveModeEnums(
+        mode, window, 48, 256, fl::audio::fft::Args::DefaultMinFrequency(),
+        fl::audio::fft::Args::DefaultMaxFrequency());
+    FL_CHECK(mode == fl::audio::fft::Mode::CQ_OCTAVE);
+}
+
 FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
     // Rising input frequency must never drive the CQ peak bin backwards.
     //
