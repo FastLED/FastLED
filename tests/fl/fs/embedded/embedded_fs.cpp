@@ -74,6 +74,14 @@ struct ScopedEmbeddedRoot {
     ~ScopedEmbeddedRoot() { fl::setTestEmbeddedFileSystemRoot(nullptr); }
 };
 
+// The SD root is global too, and a failed FL_REQUIRE leaves the rest of the
+// case unrun -- so clearing it on the way out has to be the destructor's job
+// rather than a line at the bottom.
+struct ScopedSdRoot {
+    explicit ScopedSdRoot(const char *root) { fl::setTestFileSystemRoot(root); }
+    ~ScopedSdRoot() { fl::setTestFileSystemRoot(nullptr); }
+};
+
 } // namespace
 
 FL_TEST_CASE("the host backend stays null until a test asks for it") {
@@ -119,7 +127,7 @@ FL_TEST_CASE("embedded storage and the SD card are separate stores") {
     // read it back from a card must not pass, so the two roots are set
     // independently and pointing one somewhere does not move the other.
     ScopedEmbeddedRoot root("tests/data/audio");
-    fl::setTestFileSystemRoot("tests/data/codec");
+    ScopedSdRoot card_root("tests/data/codec");
 
     fl::FileSystem embedded;
     FL_REQUIRE(embedded.begin(fl::getEmbeddedFs()));
@@ -137,7 +145,6 @@ FL_TEST_CASE("embedded storage and the SD card are separate stores") {
 
     embedded.end();
     card.end();
-    fl::setTestFileSystemRoot(nullptr);
 }
 
 } // FL_TEST_FILE
