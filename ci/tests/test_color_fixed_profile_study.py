@@ -14,15 +14,21 @@ from __future__ import annotations
 import unittest
 
 from ci.color_fixed_inverse_study import (
+    Primaries,
     corpus_primaries,
     emitter_matrix_f32,
     from_q16,
     quantize_rows,
+    rounded_div,
     to_q16,
 )
 from ci.color_fixed_profile_study import (
+    EmitterLuminances,
     compare_profile_quantization,
     emitter_matrix_q16,
+    kLuminanceSets,
+    kQ16One,
+    kUnitLuminance,
     main,
     quantization_residual,
 )
@@ -43,7 +49,7 @@ class TestQuantizedProfileStudy(unittest.TestCase):
         differing = 0
         for _name, primaries in corpus_primaries():
             float_built = quantize_rows(emitter_matrix_f32(primaries))
-            q16_built = emitter_matrix_q16(primaries)
+            q16_built = emitter_matrix_q16(primaries, kUnitLuminance)
             self.assertIsNotNone(q16_built)
             assert q16_built is not None
             for row in range(3):
@@ -62,9 +68,10 @@ class TestQuantizedProfileStudy(unittest.TestCase):
 
         worst = 0.0
         for name, primaries in corpus_primaries():
-            measured = compare_profile_quantization(name, primaries, 9)
-            if measured.delta_e > worst:
-                worst = measured.delta_e
+            for luminances in kLuminanceSets:
+                measured = compare_profile_quantization(name, primaries, 9, luminances)
+                if measured.delta_e > worst:
+                    worst = measured.delta_e
         self.assertLess(worst, 0.35)
         # And a band around the measured 0.1085, tight enough that the
         # figure the issue comment reports is the figure this checks. A
@@ -77,6 +84,140 @@ class TestQuantizedProfileStudy(unittest.TestCase):
         # the budget. A change that moves this at all should say so.
         self.assertGreater(worst, 0.1031)
         self.assertLess(worst, 0.1139)
+
+    def test_luminance_is_priced_too_and_does_not_move_the_answer(self) -> None:
+        """The half the study originally left out.
+
+        `EmitterProfile` carries `lum_r`, `lum_g` and `lum_b` and does not
+        require them to be 1, but the first version of this study fixed them
+        at unity. Quantising a luminance is a second perturbation and it
+        lands on the same columns the divisor sensitivity already stresses,
+        so leaving it out priced item 2's precondition only halfway.
+
+        Measured across four luminance sets and the four-profile corpus, the
+        worst case is still BT.2020 at unit luminance, 0.1085 dE2000. Every
+        non-unit set comes in at or below 0.031.
+        """
+
+        worst_unit = 0.0
+        worst_non_unit = 0.0
+        for name, primaries in corpus_primaries():
+            for luminances in kLuminanceSets:
+                measured = compare_profile_quantization(name, primaries, 9, luminances)
+                if luminances.label == "unit":
+                    worst_unit = max(worst_unit, measured.delta_e)
+                else:
+                    worst_non_unit = max(worst_non_unit, measured.delta_e)
+
+        # The published figure is the unit case, and it stays the binding one.
+        self.assertGreater(worst_unit, worst_non_unit)
+        self.assertLess(worst_non_unit, 0.05)
+
+    def test_the_luminance_sets_actually_perturb_the_matrix(self) -> None:
+        """Vacuity guard for the case above.
+
+        A luminance set that produced the same Q16 matrix as unity would make
+        that comparison a number against itself. `dim-blue` scales an emitter
+        by 0.05, so the columns must differ -- and the point is that they
+        differ *without* the colour error following.
+        """
+
+        _name, primaries = corpus_primaries()[0]
+        unit = emitter_matrix_q16(primaries, kUnitLuminance)
+        self.assertIsNotNone(unit)
+        assert unit is not None
+        for luminances in kLuminanceSets:
+            if luminances.label == "unit":
+                continue
+            scaled = emitter_matrix_q16(primaries, luminances)
+            self.assertIsNotNone(scaled, f"{luminances.label} reported degenerate")
+            assert scaled is not None
+            differing = sum(
+                1
+                for row in range(3)
+                for col in range(3)
+                if unit[row][col] != scaled[row][col]
+            )
+            self.assertGreater(
+                differing, 0, f"{luminances.label} matched unit luminance"
+            )
+
+    def test_coefficient_ulps_are_not_a_proxy_for_colour_error(self) -> None:
+        """Recorded because the two separate, and one is the misleading one.
+
+        `narrow` with `lopsided` luminances moves 1515 coefficient ULPs and
+        still lands 0.0135 dE2000, while BT.2020 at unit luminance moves 2
+        ULPs and lands 0.1085 -- eight times the colour error for a
+        seven-hundredth of the coefficient movement. Conditioning moves the
+        coefficients; the small divisor moves the colour.
+
+        So a future change must not conclude from a small ULP count that the
+        colour is fine, nor from a large one that it is not.
+        """
+
+        by_name = dict(corpus_primaries())
+        lopsided = next(item for item in kLuminanceSets if item.label == "lopsided")
+        narrow = compare_profile_quantization("narrow", by_name["narrow"], 9, lopsided)
+        bt2020 = compare_profile_quantization(
+            "bt2020", by_name["bt2020"], 9, kUnitLuminance
+        )
+        self.assertGreater(narrow.coefficient_ulps, 100 * bt2020.coefficient_ulps)
+        self.assertLess(narrow.delta_e, bt2020.delta_e)
+
+    def test_the_divide_then_scale_order_is_visible_but_not_decisive(self) -> None:
+        """Both halves of a claim the comment in `emitter_matrix_q16` makes.
+
+        It divides by `y` and then scales by the luminance, matching
+        `xyY_to_XYZ`. Writing that as "reversing it would stop modelling the
+        shipped path" invited the reading that the order carries the budget,
+        and it does not -- reversing it passed every other case here.
+
+        So this pins what is actually true: the order is visible at the
+        coefficient level (30 of 144 cells move, by up to 10 raw units) and
+        is not visible in the colour figure. Fidelity to the shipped code is
+        the reason to keep it, not accuracy.
+        """
+
+        def scale_first(
+            primaries: Primaries, luminances: EmitterLuminances
+        ) -> list[list[int]]:
+            columns: list[list[int]] = []
+            for (x_float, y_float), luminance_float in zip(
+                primaries, luminances.per_emitter()
+            ):
+                x = to_q16(x_float)
+                y = to_q16(y_float)
+                luminance = to_q16(luminance_float)
+                z = kQ16One - x - y
+                columns.append(
+                    [
+                        rounded_div(rounded_div(x * luminance, kQ16One) * kQ16One, y),
+                        luminance,
+                        rounded_div(rounded_div(z * luminance, kQ16One) * kQ16One, y),
+                    ]
+                )
+            return [[columns[0][k], columns[1][k], columns[2][k]] for k in range(3)]
+
+        moved = 0
+        worst = 0
+        for _name, primaries in corpus_primaries():
+            for luminances in kLuminanceSets:
+                shipped_order = emitter_matrix_q16(primaries, luminances)
+                self.assertIsNotNone(shipped_order)
+                assert shipped_order is not None
+                other = scale_first(primaries, luminances)
+                for row in range(3):
+                    for col in range(3):
+                        difference = abs(shipped_order[row][col] - other[row][col])
+                        if difference:
+                            moved += 1
+                        worst = max(worst, difference)
+
+        # Visible: the two orders are genuinely different arithmetic.
+        self.assertGreater(moved, 0)
+        # But small: an order that moved a coefficient by a large amount
+        # would deserve its own dE2000 measurement rather than this note.
+        self.assertLess(worst, 32)
 
     def test_bt2020_is_the_worst_and_its_smallest_y_is_why(self) -> None:
         """The mechanism the study claims, checked rather than asserted.
@@ -107,7 +248,7 @@ class TestQuantizedProfileStudy(unittest.TestCase):
 
         degenerate = ((0.64, 0.33), (0.30, 0.60), (0.15, 1.0 / 200000.0))
         self.assertEqual(to_q16(1.0 / 200000.0), 0)
-        self.assertIsNone(emitter_matrix_q16(degenerate))
+        self.assertIsNone(emitter_matrix_q16(degenerate, kUnitLuminance))
 
     def test_q16_round_trip_is_within_one_step(self) -> None:
         """The residual the table reports is a quantisation residual."""
