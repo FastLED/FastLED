@@ -52,9 +52,40 @@ PER_PIXEL_FUNCTIONS: dict[str, tuple[str, ...]] = {
 
 FLOAT_TOKEN = re.compile(r"\b(?:float|double)\b")
 
-# `//` to end of line, and `/* ... */`. Stripped before the scan so a comment
-# that merely discusses float -- several of these explain why they do not use
-# it -- is not read as using it.
+# Comments and string/char literals, in one alternation so a `//` inside a
+# string is not treated as a comment and a quote inside a comment is not
+# treated as a literal. Both are blanked before anything counts a brace: a
+# `}` inside `"}"` truncated a function body and hid everything after it,
+# which is a guard silently scanning the wrong text.
+NOISE = re.compile(
+    r"//[^\n]*"
+    r"|/\*.*?\*/"
+    r"|\"(?:\\.|[^\"\\\n])*\""
+    r"|'(?:\\.|[^'\\\n])*'",
+    re.S,
+)
+
+# What may sit between a definition's parameter list and its opening brace:
+# nothing but qualifier words such as `FL_NO_EXCEPT`, `const`, `noexcept`.
+# A call in a condition -- `if (f()) { ... }` -- has a `)` there instead, and
+# without this check its block was accepted as f()'s body.
+DEFINITION_TAIL = re.compile(r"^\s*(?:[A-Za-z_][A-Za-z0-9_]*\s*)*\{")
+
+
+def blank_noise(text: str) -> str:
+    """Replace comments and literals with spaces, preserving length and lines.
+
+    Length-preserving so every offset computed afterwards still indexes the
+    original text, and newline-preserving so reported line numbers hold.
+    """
+
+    def _blank(match: re.Match[str]) -> str:
+        return "".join("\n" if ch == "\n" else " " for ch in match.group(0))
+
+    return NOISE.sub(_blank, text)
+
+
+# Kept for the cases that only need comments gone.
 COMMENT = re.compile(r"//[^\n]*|/\*.*?\*/", re.S)
 
 
@@ -80,13 +111,13 @@ def definition_body(text: str, name: str) -> str | None:
         else:
             continue
         tail = text[index + 1 :]
-        opening = tail.find("{")
-        semicolon = tail.find(";")
-        # A declaration ends in `;` before any brace; a definition opens one.
-        if opening == -1 or (semicolon != -1 and semicolon < opening):
+        # A declaration ends in `;`, a call sits inside another expression,
+        # and only a definition reaches `{` through qualifier words alone.
+        tail_match = DEFINITION_TAIL.match(tail)
+        if tail_match is None:
             continue
         depth = 0
-        start = index + 1 + opening
+        start = index + 1 + tail_match.end() - 1
         for cursor in range(start, len(text)):
             if text[cursor] == "{":
                 depth += 1
@@ -110,7 +141,7 @@ class TestNoFloatPerPixel(unittest.TestCase):
             path = GFX / file_name
             with self.subTest(file=file_name):
                 self.assertTrue(path.is_file(), f"{path} is missing")
-                text = COMMENT.sub(" ", path.read_text(encoding="utf-8"))
+                text = blank_noise(path.read_text(encoding="utf-8"))
                 for function in functions:
                     self.assertIsNotNone(
                         definition_body(text, function),
@@ -120,7 +151,7 @@ class TestNoFloatPerPixel(unittest.TestCase):
     def test_no_float_in_any_per_pixel_body(self: "TestNoFloatPerPixel") -> None:
         offenders: list[str] = []
         for file_name, functions in PER_PIXEL_FUNCTIONS.items():
-            text = COMMENT.sub(" ", (GFX / file_name).read_text(encoding="utf-8"))
+            text = blank_noise((GFX / file_name).read_text(encoding="utf-8"))
             for function in functions:
                 body = definition_body(text, function)
                 if body is None:
@@ -146,9 +177,7 @@ class TestNoFloatPerPixel(unittest.TestCase):
         it lands rather than silently.
         """
 
-        text = COMMENT.sub(
-            " ", (GFX / "device_solve.cpp.hpp").read_text(encoding="utf-8")
-        )
+        text = blank_noise((GFX / "device_solve.cpp.hpp").read_text(encoding="utf-8"))
         body = definition_body(text, "buildRgbSolveMatrixQ16")
         self.assertIsNotNone(body)
         assert body is not None
@@ -189,6 +218,60 @@ class TestNoFloatPerPixel(unittest.TestCase):
         self.assertIsNotNone(body)
         assert body is not None
         self.assertIn("int b = a;", body)
+
+    def test_a_control_flow_brace_is_not_mistaken_for_a_definition(
+        self: "TestNoFloatPerPixel",
+    ) -> None:
+        """`if (f()) { ... }` used to be accepted as f()'s body.
+
+        The consequence is the one that matters: the guard then scanned the
+        `if` block and reported no float while the real body had one. A test
+        that silently examines the wrong text is worse than no test.
+        """
+
+        source = (
+            "void caller() {\n"
+            "    if (f()) { int q = 0; }\n"
+            "}\n"
+            "void f(int a) {\n"
+            "    float sneaky = 1.0f;\n"
+            "}\n"
+        )
+        body = definition_body(blank_noise(source), "f")
+        self.assertIsNotNone(body)
+        assert body is not None
+        self.assertIsNotNone(FLOAT_TOKEN.search(body))
+
+    def test_a_brace_inside_a_string_does_not_truncate_the_body(
+        self: "TestNoFloatPerPixel",
+    ) -> None:
+        # Counting raw characters stopped at the `}` in `"}"`, hiding
+        # everything after it -- including the float.
+        source = (
+            'void f(int a) {\n    const char* s = "}";\n    float sneaky = 1.0f;\n}\n'
+        )
+        body = definition_body(blank_noise(source), "f")
+        self.assertIsNotNone(body)
+        assert body is not None
+        self.assertIsNotNone(FLOAT_TOKEN.search(body))
+
+    def test_a_qualifier_between_the_parameters_and_the_brace_is_allowed(
+        self: "TestNoFloatPerPixel",
+    ) -> None:
+        # Every function under guard is declared `FL_NO_EXCEPT`, so rejecting
+        # qualifier words would reject all of them.
+        source = "void f(int a) FL_NO_EXCEPT {\n    int b = a;\n}\n"
+        self.assertIsNotNone(definition_body(blank_noise(source), "f"))
+
+    def test_blanking_preserves_offsets_and_lines(
+        self: "TestNoFloatPerPixel",
+    ) -> None:
+        source = 'int a;  // note\nconst char* s = "xy";\n/* two\n   lines */\nint b;\n'
+        blanked = blank_noise(source)
+        self.assertEqual(len(blanked), len(source))
+        self.assertEqual(blanked.count("\n"), source.count("\n"))
+        self.assertNotIn("note", blanked)
+        self.assertNotIn("xy", blanked)
 
     def test_comments_mentioning_float_do_not_count(
         self: "TestNoFloatPerPixel",
