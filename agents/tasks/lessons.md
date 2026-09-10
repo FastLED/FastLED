@@ -298,3 +298,30 @@
   would have reported a wedged board and halted the loop for nothing. Scan
   the whole vendor family and wait for re-enumeration before calling a board
   lost.
+- "Are stray processes accumulating?" and "have my long-lived daemons grown?"
+  are different questions, and I only asked the first one for nine kills. Nine
+  unattended campaigns died to host memory pressure. Each time I checked for
+  orphaned `autoresearch`/`esptool` processes, found none, saw `MemAvailable`
+  looking healthy, and concluded the pressure was external. It was not:
+  `zccache-daemon` had grown to 4.4 GB and `fbuild-daemon` to 3.5 GB, ~8 GB of
+  reclaimable cache sitting idle between runs. Killing both -- they respawn on
+  demand -- moved `MemAvailable` from 82 GB to 91 GB, and the run that had
+  failed nine times completed immediately. The 9 GB recovered exceeds the
+  8 GB those two processes reported as RSS; page cache and shared mappings
+  released alongside them make up the difference, so treat the two numbers as
+  separate measurements rather than one. Every mitigation applied before
+  that was real but aimed elsewhere: pre-building images removed the build
+  spike, `--skip-lint` removed the lint phase, a memory floor gated each run,
+  smaller batches limited the loss. None of them touched a daemon idling on
+  4 GB. When a resource problem survives several plausible fixes, enumerate
+  what is actually holding the resource before absorbing the failure as
+  environmental. See [[worktree-memory-exhaustion]].
+- A merged PR does not mean your last commits are in. #4233 was merged from an
+  earlier commit while three later pushes sat on the branch; the branch still
+  existed, the PR read MERGED, and none of that work was on master. I caught it
+  only because I grepped the merged file for each fix instead of trusting the
+  merge status -- `grep -c` for one of the fixes printed `0`, i.e. it matched
+  zero times, which is not the same signal as grep's exit status. Verify
+  content, not state, and
+  when commits are stranded rebuild them onto current master as a fresh PR
+  rather than reopening the merged one.
