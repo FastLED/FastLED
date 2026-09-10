@@ -66,6 +66,37 @@ entry:
     assert result.stage_sites["huffman"] == 1
 
 
+def test_the_huffman_stage_carries_dequant_for_both_minimp3_builds() -> None:
+    """The measured "huffman" stage is not integer-only work.
+
+    minimp3 dequantises inline as it decodes, so `L3_huffman` covers both and
+    the separate `dequant` row reads 0.0 ns. FastLED#4155 called the fixed
+    build's huffman timing "a concrete lead ... despite huffman being integer
+    work in both", which follows only if the stage really is integer-only. It
+    is not, and a residual float/fixed gap there is the arithmetic doing what
+    it was changed to do.
+
+    Pinned structurally rather than by timing so it cannot rot into that
+    reading again.
+    """
+
+    for backend in ("minimp3-float", "minimp3-fixed"):
+        assert AUDIT._FUSED_STAGES[backend]["dequant"] == "huffman"
+
+    # And the fusion is not cosmetic: the per-coefficient dequant genuinely
+    # differs between the two builds, which is where the gap comes from.
+    source = (ROOT / "src" / "third_party" / "minimp3" / "minimp3.h").read_text(
+        encoding="utf-8"
+    )
+    definitions = [
+        line for line in source.splitlines() if "define MP3D_HUFF_TAB" in line
+    ]
+    assert len(definitions) == 2, definitions
+    fixed, float_ = definitions
+    assert "mp3d_dequant" in fixed
+    assert "g_pow43[idx]" in float_
+
+
 def test_integer_product_selection_ignores_address_and_size_math() -> None:
     """`mul` is ambiguous in a way `fmul` is not: at -O0 the fixed-point
     decoder's arithmetic and the compiler's address/size arithmetic share the
