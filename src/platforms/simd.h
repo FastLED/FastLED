@@ -23,9 +23,18 @@
     // ESP32 platforms (Xtensa PIE or RISC-V scalar)
     #include "platforms/esp/32/simd_esp32.hpp"  // IWYU pragma: keep
 #elif defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP + 0) == 1
-    // ARMv7E-M DSP extension: Cortex-M4 / M4F / M7 (Teensy 3.x and 4.x,
-    // Apollo3, SAMD51, nRF52, STM32F4/F7, ...). Packed-byte and packed-half
-    // arithmetic via UQADD8 / UQSUB8 / UADD16 / etc. See issue #2628.
+    // The DSP extension: ARMv7E-M Cortex-M4 / M4F / M7 (Teensy 3.x and 4.x,
+    // Apollo3, SAMD51, nRF52, STM32F4/F7, ...) and ARMv8-M Cortex-M33 parts
+    // that carry it, which includes the RP2350 -- the Arduino-Pico core
+    // builds it with `-march=armv8-m.main+fp+dsp`. Packed-byte and
+    // packed-half arithmetic via UQADD8 / UQSUB8 / UADD16 / etc. See issue
+    // #2628.
+    //
+    // The M33 is spelled out because leaving it implied has already cost
+    // once: FastLED#4216 read this arm as ARMv7E-M only, concluded an RP2350
+    // took the scalar fallback, and tuned `simd_noop.hpp` for two rounds
+    // against a build that never included it. The header's path says
+    // `teensy/` for the same historical reason and is just as misleading.
     #include "platforms/arm/teensy/simd_arm_dsp.hpp"  // IWYU pragma: keep
 #elif defined(__ARM_NEON) || defined(__ARM_NEON__)
     // ARM Advanced SIMD, on compilers that advertise it the GNU way:
