@@ -13,6 +13,7 @@ import contextlib
 import io
 import os
 from pathlib import Path
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -25,6 +26,7 @@ from ci.autoresearch.phases import (
     RP2XXX_ENVIRONMENTS,
     _build_environment_for_mode,
     _is_valid_rp_concurrency_result,
+    _is_valid_rp_pio_parallel_result,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -91,7 +93,7 @@ def test_rp_concurrency_gate_accepts_matching_integer_counters() -> None:
 
 def _make_args(**overrides) -> Args:
     """Create Args with sensible defaults for testing."""
-    defaults = dict(
+    defaults: dict[str, Any] = dict(
         environment_positional=None,
         parlio=True,
         rmt=False,
@@ -190,7 +192,7 @@ def _make_mock_driver(
 
 def _make_ctx(**overrides) -> RunContext:
     """Create RunContext with sensible defaults for testing."""
-    defaults = dict(
+    defaults: dict[str, Any] = dict(
         args=_make_args(),
         drivers=["PARLIO"],
         json_rpc_commands=[
@@ -2427,6 +2429,8 @@ class TestRunTestsOrSpecialMode:
             "drivers",
             "testNoSerial",
             "testRpConcurrency",
+            "testRpPioContention",
+            "testRpPioParallelResources",
         ]
 
         def response(data):
@@ -2479,6 +2483,33 @@ class TestRunTestsOrSpecialMode:
                         "actual": 2000,
                     }
                 ),
+                response(
+                    {
+                        "success": True,
+                        "noLeak": True,
+                        "control": {
+                            "proxyValid": True,
+                            "claimedOne": True,
+                            "released": True,
+                        },
+                        "contention": {
+                            "starvedSms": 10,
+                            "freeAfterStarve": 0,
+                            "claimsIntact": True,
+                            "noTheft": True,
+                            "survivedShow": True,
+                        },
+                    }
+                ),
+                response(
+                    {
+                        "success": True,
+                        "collisionFree": True,
+                        "showsCompleted": True,
+                        "noResidueBetweenFrames": True,
+                        "noLeak": True,
+                    }
+                ),
                 RpcError(
                     "Method not found",
                     code=-32601,
@@ -2494,7 +2525,7 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
 
         assert rc == 0
-        assert mock_client.send.await_count == 10
+        assert mock_client.send.await_count == 12
         debug_test_call = mock_client.send.await_args_list[4]
         assert debug_test_call.args == ("debugTest",)
         assert debug_test_call.kwargs["args"] == expected_payload
@@ -2604,6 +2635,8 @@ class TestRunTestsOrSpecialMode:
             "drivers",
             "testNoSerial",
             "testRpConcurrency",
+            "testRpPioContention",
+            "testRpPioParallelResources",
         ]
 
         def response(data):
@@ -2658,6 +2691,33 @@ class TestRunTestsOrSpecialMode:
                         "actual": 2000,
                     }
                 ),
+                response(
+                    {
+                        "success": True,
+                        "noLeak": True,
+                        "control": {
+                            "proxyValid": True,
+                            "claimedOne": True,
+                            "released": True,
+                        },
+                        "contention": {
+                            "starvedSms": 10,
+                            "freeAfterStarve": 0,
+                            "claimsIntact": True,
+                            "noTheft": True,
+                            "survivedShow": True,
+                        },
+                    }
+                ),
+                response(
+                    {
+                        "success": True,
+                        "collisionFree": True,
+                        "showsCompleted": True,
+                        "noResidueBetweenFrames": True,
+                        "noLeak": True,
+                    }
+                ),
                 RpcTimeoutError("missing method timed out"),
             ]
         )
@@ -2669,7 +2729,7 @@ class TestRunTestsOrSpecialMode:
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
 
         assert rc == 1
-        assert mock_client.send.await_count == 10
+        assert mock_client.send.await_count == 12
 
     def test_rp_coroutine_mode_reports_null_backend_as_unsupported(self) -> None:
         ctx = _make_ctx(
@@ -3107,3 +3167,34 @@ def test_spi_family_predicate_covers_every_platform_spelling() -> None:
 
     for name in ("PARLIO", "RMT", "UART", "UART0", "LCD_SPI", "I2S_SPI", "SPIX", ""):
         assert not _is_spi_family_driver(name), name
+
+
+def test_parallel_validator_rejects_an_oversized_request_error() -> None:
+    """An InvalidArgs refusal is a refusal, not a pass.
+
+    runRpPioParallelResources bounds numLeds and iterations and answers
+    oversized requests with success=False and error="InvalidArgs" rather than
+    allocating. The host validator must not be loosened into treating that
+    error envelope as a result -- a rejected request has proven nothing about
+    PIO0+PIO1 resource behaviour.
+    """
+    refusal = {
+        "success": False,
+        "error": "InvalidArgs",
+        "maxNumLeds": 2000,
+        "maxIterations": 256,
+    }
+    assert not _is_valid_rp_pio_parallel_result(refusal)
+
+    # And the same envelope carrying the resource flags must still fail: the
+    # flags are meaningless when the request was never run.
+    refusal_with_flags = dict(refusal)
+    refusal_with_flags.update(
+        {
+            "collisionFree": True,
+            "showsCompleted": True,
+            "noResidueBetweenFrames": True,
+            "noLeak": True,
+        }
+    )
+    assert not _is_valid_rp_pio_parallel_result(refusal_with_flags)

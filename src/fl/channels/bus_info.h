@@ -182,6 +182,22 @@ template<> struct DeviceInfoResolver<Bus::UART, 1> {
     }
 };
 
+// RP's two fixed SPI blocks are PL022 controllers, registered as concrete
+// Bus::SPI instances 0 and 1 by rp_spi_bus_traits.h. Without these the
+// generic resolver reports them as unavailable no-ops, which is wrong: they
+// are real engines that resolve and run.
+template<> struct DeviceInfoResolver<Bus::SPI, 0> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::SPI, 0, "PL022", "RP SPI0");
+    }
+};
+
+template<> struct DeviceInfoResolver<Bus::SPI, 1> {
+    static inline DeviceInfo get() FL_NO_EXCEPT {
+        return makeInfo(Bus::SPI, 1, "PL022", "RP SPI1");
+    }
+};
+
 #if defined(FL_IS_RP2350)
 template<> struct DeviceInfoResolver<Bus::FLEX_IO, 2> {
     static inline DeviceInfo get() FL_NO_EXCEPT {

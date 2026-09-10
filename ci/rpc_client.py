@@ -340,7 +340,14 @@ class RpcClient:
             print(f"📊 [RPC] Session sent {self._sent_count} request(s)")
         if self._serial is not None:
             await self._serial.close()
-            self._serial = None
+            # Keep a *borrowed* interface. `connect()` fabricates a default
+            # fbuild backend whenever `_serial` is None, so dropping an
+            # injected one here means a caller that closes and reconnects --
+            # every retry loop -- silently stops using the transport it was
+            # given. `_owns_serial` already records which case this is; it
+            # just was not consulted (#4233).
+            if self._owns_serial:
+                self._serial = None
             await asyncio.sleep(0)  # Yield control
 
     async def drain_boot_output(

@@ -20,7 +20,11 @@ from typing import TYPE_CHECKING, Any
 import httpx
 from colorama import Fore, Style
 
-from ci.autoresearch.net import create_wifi_manager
+from ci.autoresearch.net import (
+    _connect_peer_with_retry,
+    create_wifi_manager,
+    kPeerConnectAttempts,
+)
 from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -161,7 +165,12 @@ async def run_ota_peer_autoresearch(
             serial_interface=create_serial_interface(peer_upload_port),
         )
         await primary.connect(boot_wait=3.0, drain_boot=True)
-        await peer.connect(boot_wait=3.0, drain_boot=True)
+        # The peer flashes last, so its USB-CDC is the one most likely to be
+        # mid-re-enumeration here. Four of the captured `No response with ID 1`
+        # failures came from this path. See FastLED#3899.
+        await _connect_peer_with_retry(
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout, kPeerConnectAttempts
+        )
 
         # Settle both links before the first real call. The peer flash runs
         # for ~60-90 s after the primary's, and the first request on the
@@ -315,7 +324,19 @@ async def run_ota_autoresearch(
         # Connect to device via RPC
         print(f"\n  Connecting to device on {upload_port}...")
         client = RpcClient(upload_port, timeout=timeout, serial_interface=serial_iface)
-        await client.connect(boot_wait=3.0, drain_boot=True)
+        # This path has no budget helper of its own, so give it one rather
+        # than letting the retry waits run unbounded.
+        ota_deadline = time.monotonic() + timeout
+
+        def ota_remaining() -> float:
+            left = ota_deadline - time.monotonic()
+            if left <= 0:
+                raise RpcTimeoutError("--ota deadline expired")
+            return min(20.0, left)
+
+        await _connect_peer_with_retry(
+            client, "device", upload_port, ota_remaining, kPeerConnectAttempts
+        )
         print(f"  {Fore.GREEN}Connected to device{Style.RESET_ALL}")
 
         # Step 1: Start OTA on device

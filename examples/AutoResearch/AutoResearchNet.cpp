@@ -639,6 +639,13 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     return response;
 }
 
+fl::json netServerStats() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "netServerStats is RP-only");
+    return response;
+}
+
 fl::json runNetLoopback() {
     fl::json response = fl::json::object();
     int tests_passed = 0;
@@ -784,6 +791,17 @@ struct RpPeerState {
     bool headers_complete = false;
     bool response_complete = false;
     uint32_t request_started_ms = 0;
+    // Why the last request was abandoned, for netServerStats. A 408 tells the
+    // peer that time ran out but not which budget ran out, nor how much of
+    // the request had arrived -- which is the difference between a slow peer,
+    // a request the server never completes, and a starved poll loop.
+    uint32_t timeout_count = 0;
+    bool last_timeout_was_stall = false;
+    size_t last_timeout_body_length = 0;
+    size_t last_timeout_expected_body = 0;
+    uint32_t last_timeout_elapsed_ms = 0;
+    bool last_timeout_headers_complete = false;
+    char last_timeout_request[64] = {};
     // Progress watermark. The request deadline must measure a *stall*, not
     // total elapsed time: a 4096-byte POST body arrives across several TCP
     // segments and legitimately outruns a fixed budget on CYW43 SoftAP.
@@ -839,13 +857,31 @@ void writeHttpErrorResponse(WiFiClient& client, const char* status,
     client.print(body);
 }
 
-// A peer that has sent nothing for this long is stalled. Matches the old
-// flat budget, so a genuinely dead peer is abandoned just as quickly.
-constexpr uint32_t kRpHttpClientStallMs = 2000;
+// A peer that has sent nothing for this long is stalled.
+//
+// This has to exceed the peer's own budget for producing a response, or the
+// client abandons work the server is still legitimately doing. The ESP peer
+// does not answer from its network task: handle_esp_request() queues the
+// request to the sketch's main loop (ServerAsyncRunner, pumped by
+// task::Executor) and blocks up to 5000 ms waiting for it, so nothing is
+// written at all until that completes. There are no early bytes to refresh a
+// stall timer, which is why a 2000 ms value behaved exactly like the flat
+// deadline it replaced for this failure.
+//
+// Measured on the RP2350W <-> ESP32-C6 bench: 4 hard failures in 241 cycles,
+// every one with the socket still open, zero bytes read, and elapsed of
+// exactly the client budget. With a larger budget, 215 cycles produced none,
+// and five requests took 2706, 2734, 2961, 3108 and 3586 ms and completed
+// correctly -- each of which the old value would have failed. The maximum,
+// 3586 ms, sits under the peer's own 5000 ms ceiling, as the mechanism
+// predicts. See FastLED#3899.
+constexpr uint32_t kRpHttpClientStallMs = 6000;
 // Ceiling for one exchange, so a peer dribbling a byte at a time cannot hold
-// the loop past AutoResearch's 5 s watchdog. The loop feeds the WDT while
+// the loop past AutoResearch's watchdog. The loop feeds the WDT while
 // waiting, but bounding it keeps a wedged peer from stalling the sketch.
-constexpr uint32_t kRpHttpClientMaxMs = 4000;
+// Matches kRpPeerMaxRequestMs so both sides of the fixture agree on how long
+// one request may take, rather than the client being the stricter of the two.
+constexpr uint32_t kRpHttpClientMaxMs = kRpPeerMaxRequestMs;
 
 fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
                           const char* method, const char* path,
@@ -904,6 +940,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     // line -- harmless when everything was drained into one buffer, fatal once
     // the headers have to be parsed. Returns false only if the deadline
     // expires with the line unfinished. See FastLED#4173.
+    //
+    // Bytes consumed by the most recent call, including the '\r' that is
+    // stripped from `out`. An empty `out` on its own cannot separate "the
+    // peer sent nothing" from "the peer sent only '\r' and then stalled or
+    // closed", and those are different faults.
+    size_t last_line_bytes_read = 0;
     auto read_line = [&](char* out, size_t out_size) -> bool {
         size_t used = 0;
         while (!expired()) {
@@ -932,8 +974,18 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         return false;
     };
 
+    // Whether a full status line actually arrived. Discarding this made every
+    // no-response failure report "Unexpected HTTP status" with an empty
+    // status_line -- the peer had answered nothing at all, which is a
+    // different fault from answering with the wrong code, and the one that
+    // actually occurs on this link. See FastLED#3899.
     char status_line[64];
-    read_line(status_line, sizeof(status_line));
+    const bool status_line_complete = read_line(status_line, sizeof(status_line));
+    const bool status_bytes_seen = last_line_bytes_read > 0;
+    // Captured before the body loop and the stop() below can change it. With
+    // no status line, this is what separates "the peer closed without
+    // answering" from "the peer held the connection open and never answered".
+    const bool peer_open_after_status = client.connected();
 
     // Consume headers, capturing Content-Length. Every response this client
     // talks to sends one along with `Connection: close`; stopping on the
@@ -987,6 +1039,12 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
         FastLED.watchdog().feed();
         delay(1);
     }
+    // Captured before stop(), which would make connected() false regardless.
+    // With a short body this separates "the peer closed early" from "the peer
+    // held the connection and stopped sending", and elapsed_ms says whether
+    // the 2 s deadline is what ended the read.
+    const bool peer_open_after_body = client.connected();
+    const uint32_t elapsed_ms = millis() - exchange_started_ms;
     client.stop();
     response[response_length] = '\0';
 
@@ -1014,9 +1072,28 @@ fl::json runRpHttpRequestTest(const char* host_ip, uint16_t port,
     result.set("status_line", status_line);
     result.set("content_length", static_cast<int32_t>(content_length));
     result.set("body_read", static_cast<int32_t>(body_read));
-    result.set("passed", passed && content_ok && body_complete);
+    const bool failed = !(passed && content_ok && body_complete);
+    result.set("passed", !failed);
+    if (failed) {
+        // Recorded for every failure mode, not just one: a truncated body is
+        // the mode actually seen on this link, and without these two fields
+        // it cannot say whether the peer closed early or simply stopped
+        // sending until the deadline expired.
+        result.set("peer_open_after_status", peer_open_after_status);
+        result.set("peer_open_after_body", peer_open_after_body);
+        result.set("elapsed_ms", static_cast<int32_t>(elapsed_ms));
+    }
     if (!passed) {
-        result.set("error", "Unexpected HTTP status");
+        // Distinguish "no answer" from "wrong answer": an empty status line
+        // means the request went out and nothing came back within the
+        // deadline, so the status code is not the thing that failed.
+        if (!status_line_complete && !status_bytes_seen) {
+            result.set("error", "No HTTP response: request sent, nothing read");
+        } else if (!status_line_complete) {
+            result.set("error", "Truncated HTTP status line");
+        } else {
+            result.set("error", "Unexpected HTTP status");
+        }
     } else if (!body_complete) {
         result.set("error", "Truncated response body");
     } else if (!content_ok) {
@@ -1243,6 +1320,23 @@ fl::json runNetClientTest(const char* host_ip, uint16_t port) {
     return response;
 }
 
+fl::json netServerStats() {
+    RpPeerState& state = rpPeerState();
+    fl::json response = fl::json::object();
+    response.set("success", true);
+    response.set("timeoutCount", static_cast<int64_t>(state.timeout_count));
+    response.set("lastTimeoutWasStall", state.last_timeout_was_stall);
+    response.set("lastTimeoutBodyLength",
+                 static_cast<int64_t>(state.last_timeout_body_length));
+    response.set("lastTimeoutExpectedBody",
+                 static_cast<int64_t>(state.last_timeout_expected_body));
+    response.set("lastTimeoutElapsedMs",
+                 static_cast<int64_t>(state.last_timeout_elapsed_ms));
+    response.set("lastTimeoutHeadersComplete", state.last_timeout_headers_complete);
+    response.set("lastTimeoutRequest", state.last_timeout_request);
+    return response;
+}
+
 fl::json runNetLoopback() {
     fl::json response = fl::json::object();
     response.set("success", false);
@@ -1302,6 +1396,18 @@ void pollNetServer() {
         static_cast<int32_t>(now_ms - state.request_started_ms) >= kRpPeerMaxRequestMs;
     if (stalled || over_budget) {
         if (!state.response_complete) {
+            ++state.timeout_count;
+            state.last_timeout_was_stall = stalled;
+            state.last_timeout_body_length = state.body_length;
+            state.last_timeout_expected_body = state.expected_body_length;
+            state.last_timeout_elapsed_ms = now_ms - state.request_started_ms;
+            state.last_timeout_headers_complete = state.headers_complete;
+            fl::size copy_len = state.request_length;
+            if (copy_len >= sizeof(state.last_timeout_request)) {
+                copy_len = sizeof(state.last_timeout_request) - 1;
+            }
+            fl::memcpy(state.last_timeout_request, state.request, copy_len);
+            state.last_timeout_request[copy_len] = '\0';
             writeHttpErrorResponse(*state.client, "408 Request Timeout", "");
         }
         state.client->stop();
@@ -1446,6 +1552,13 @@ void pollNetServer() {
 }
 
 #else  // !FL_IS_ESP32 && !FL_IS_RP2350
+
+fl::json netServerStats() {
+    fl::json response = fl::json::object();
+    response.set("success", false);
+    response.set("error", "netServerStats is RP-only");
+    return response;
+}
 
 // ============================================================================
 // Stub Implementation for Non-ESP32 Platforms

@@ -143,6 +143,21 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     CMinWait<WAIT_TIME> mWait;
 #endif
 public:
+#if FASTLED_RP2040_CLOCKLESS_PIO
+    // init() drives the pad output early so the blocking fallback can use it.
+    // When acquisition fails and no fallback is compiled in, nothing will ever
+    // write the pin again, so leaving it driving contradicts the "output
+    // disabled on this pin" warning and holds the strip at whatever level the
+    // pad happens to sit at. With FASTLED_RP2040_CLOCKLESS_M0_FALLBACK on,
+    // showRGBBlocking() still bit-bangs this pin, so it must stay an output.
+    static void releaseDataPinOnInitFailure() FL_NO_EXCEPT {
+#if !FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
+        gpio_set_function(DATA_PIN, GPIO_FUNC_SIO);
+        gpio_set_dir(DATA_PIN, GPIO_IN);
+#endif
+    }
+#endif
+
     virtual void init() FL_NO_EXCEPT {
 #if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel != -1) return; // maybe init was called twice somehow? not sure if possible
@@ -192,10 +207,14 @@ public:
                       "another library holds them all. Set "
                       "FASTLED_RP2040_CLOCKLESS_PIO 0 to bit-bang instead.",
                       int(DATA_PIN));
+            releaseDataPinOnInitFailure();
             return;
         }
 
-        // Store PIO, state machine, and offset for later use
+        // Store PIO, state machine, and offset for later use. Note the
+        // rollback paths below must remove the program themselves: they clear
+        // mPio, so the destructor's cleanup can no longer see it, and PIO
+        // instruction memory would leak on every failed init.
         mPio = pio;
         mSm = sm;
         mPioOffset = offset;
@@ -204,9 +223,12 @@ public:
             FL_WARN_F("[RP PIO] no free DMA channel for pin %d; "
                       "output disabled on this pin.",
                       int(DATA_PIN));
+            remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
             resources.releasePioStateMachine(mPio, mSm);
             mPio = nullptr;
             mSm = -1;
+            mPioOffset = -1;
+            releaseDataPinOnInitFailure();
             return;
         }
 
@@ -215,10 +237,13 @@ public:
                       "output disabled on this pin.",
                       int(DATA_PIN));
             resources.releaseDmaChannel(dma_channel);
+            remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
             resources.releasePioStateMachine(mPio, mSm);
             dma_channel = -1;
             mPio = nullptr;
             mSm = -1;
+            mPioOffset = -1;
+            releaseDataPinOnInitFailure();
             return;
         }
 
@@ -271,6 +296,65 @@ public:
         }
         dma_channel_set_irq0_enabled(dma_channel, true);
 #endif // FASTLED_RP2040_CLOCKLESS_PIO
+    }
+
+    /// Return every resource init() claimed.
+    ///
+    /// Without this the PIO state machine, its program space, the DMA channel
+    /// and the pin claim were held for the life of the process, so a sketch
+    /// that adds and drops controllers walked itself into the very "no free
+    /// PIO state machine" exhaustion reported in FastLED#1471. The stale
+    /// `dma_chan_waits` entry was worse than a leak: the shared DMA ISR would
+    /// keep dereferencing the `mWait` of a destroyed controller.
+    virtual ~ClocklessController() FL_NO_EXCEPT {
+#if FASTLED_RP2040_CLOCKLESS_PIO
+        auto& resources = RpPioDmaResourceManager::instance();
+
+        if (dma_channel != -1) {
+            // A transfer in flight would otherwise keep writing into a state
+            // machine that is about to belong to someone else.
+            if (dma_channel_is_busy(dma_channel)) {
+                dma_channel_wait_for_finish_blocking(dma_channel);
+            }
+            dma_channel_set_irq0_enabled(dma_channel, false);
+            // Clear before releasing: the handler is shared and stays
+            // installed, so a live entry here outlives this object.
+            dma_chan_waits[dma_channel] = nullptr;
+            resources.releaseDmaChannel(dma_channel);
+            dma_channel = -1;
+        }
+
+        if (mPio != nullptr && mSm >= 0) {
+            pio_sm_set_enabled(mPio, mSm, false);
+            if (mPioOffset >= 0) {
+                remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
+                mPioOffset = -1;
+            }
+            resources.releasePioStateMachine(mPio, mSm);
+            // Undo pio_gpio_init(): releasing the pin in the ledger alone
+            // leaves the pad muxed to a now-disabled PIO and still driving.
+            // Matches the teardown in rp_pio_tx_peripheral.cpp.hpp.
+            // Direction before function, and the order matters. `setOutput()`
+            // during init leaves SIO's output-enable set for this pin, and
+            // `gpio_set_function()` clears the pad's output-disable as it
+            // switches the mux -- so selecting SIO first hands the pad
+            // straight to SIO's stale output value and briefly drives the
+            // data line. `gpio_set_dir(GPIO_IN)` writes SIO's OE-clear
+            // register directly, whatever the mux currently says, so doing
+            // it first means the mux switch lands on an input.
+            gpio_set_dir(DATA_PIN, GPIO_IN);
+            gpio_set_function(DATA_PIN, GPIO_FUNC_SIO);
+            resources.releasePins(DATA_PIN, 1);
+            mPio = nullptr;
+            mSm = -1;
+        }
+
+        if (dma_buf != nullptr) {
+            fl::free(dma_buf);
+            dma_buf = nullptr;
+            dma_buf_size = 0;
+        }
+#endif
     }
 
     virtual u16 getMaxRefreshRate() const { return 400; }

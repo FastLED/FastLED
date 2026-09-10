@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import io
+import time
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from ci.autoresearch.net import (
+    _connect_peer_with_retry,
+    _describe_failed_client_tests,
     _summarize_client_tests,
     run_net_peer_autoresearch,
 )
@@ -312,3 +317,290 @@ def test_summarize_client_tests_rejects_incomplete_reports() -> None:
     # Booleans are not acceptable integers for a tally.
     with pytest.raises(RpcError, match="payload leg"):
         _summarize_client_tests("boolish", {**complete, "tests_passed": True})
+
+
+def test_describe_failed_client_tests_names_the_no_response_row() -> None:
+    """The failing row must be named, not buried in eleven passing ones.
+
+    This is the payload captured on the bench: RP2350W -> ESP32-C6, cycle 10,
+    where only `GET /leds` came back with nothing at all. Raising the raw
+    dict put that row in the middle of one unwrapped line.
+    """
+    data: dict[str, Any] = {
+        "success": False,
+        "tests_passed": 11,
+        "tests_failed": 1,
+        "results": [
+            {"test": "GET /ping", "passed": True, "body_read": 4},
+            {
+                "test": "GET /leds",
+                "passed": False,
+                "error": "No HTTP response: request sent, nothing read",
+                "status_line": "",
+                "body_read": 0,
+                "content_length": -1,
+            },
+            {"test": "POST /echo 4096-byte FNV-1a", "passed": True, "bytes": 4096},
+        ],
+    }
+
+    described = _describe_failed_client_tests(data)
+
+    assert "1 of 3 sub-tests failed" in described
+    assert "GET /leds" in described
+    assert "No HTTP response" in described
+    # The field that separates "answered wrongly" from "did not answer".
+    assert "status_line=''" in described
+    # Passing rows must not be listed.
+    assert "GET /ping" not in described
+
+
+def test_describe_failed_client_tests_handles_a_malformed_report() -> None:
+    """A report with no results array must say so, not raise."""
+    assert "no 'results' array" in _describe_failed_client_tests({"success": False})
+    assert "no sub-test reported a failure" == _describe_failed_client_tests(
+        {"results": [{"test": "GET /ping", "passed": True}]}
+    )
+
+
+def test_describe_failed_client_tests_reports_a_malformed_row() -> None:
+    """A non-dict row must be reported, not skipped into a false all-clear."""
+    described = _describe_failed_client_tests(
+        {"results": [{"test": "GET /ping", "passed": True}, "not-a-dict"]}
+    )
+    assert "1 of 2 sub-tests failed" in described
+    assert "result[1] is not an object" in described
+    assert "not-a-dict" in described
+
+
+def test_connect_peer_retries_a_mute_endpoint() -> None:
+    """A first connect that opens but never answers must be retried.
+
+    This is the captured bench failure: `No response with ID 1 within 15.0s`
+    while attaching to the ESP32-C6, with connect() itself succeeding. A
+    stale CDC endpoint opens fine and stays mute, so only the follow-up ping
+    detects it.
+    """
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(
+        side_effect=[RpcTimeoutError("No response with ID 1 within 15.0s"), MagicMock()]
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0, 3)
+        )
+
+    assert peer.connect.await_count == 2
+    assert peer.send.await_count == 2
+
+
+def test_connect_peer_gives_up_and_names_the_port() -> None:
+    """Exhausting the retries must fail loudly, naming port and cause."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(side_effect=RpcTimeoutError("still mute"))
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        with pytest.raises(RpcTimeoutError) as excinfo:
+            asyncio.run(
+                _connect_peer_with_retry(
+                    peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0, attempts=2
+                )
+            )
+
+    message = str(excinfo.value)
+    assert "/dev/ttyACM1" in message
+    assert "2 connect attempts" in message
+    assert "still mute" in message
+    assert peer.connect.await_count == 2
+
+
+def test_connect_peer_does_not_retry_a_healthy_board() -> None:
+    """A board that answers first time must not be reconnected."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+
+    asyncio.run(
+        _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 30.0, 3)
+    )
+
+    assert peer.connect.await_count == 1
+    assert peer.close.await_count == 0
+
+
+def test_connect_peer_clamps_waits_to_the_run_budget() -> None:
+    """Retry waits must not outlive the run's own deadline.
+
+    Unclamped, three mute attempts spend ~43s of boot waits, pings and
+    back-offs before any later call notices the deadline passed -- a recovery
+    mechanism consuming the run it exists to save.
+    """
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(side_effect=[RpcTimeoutError("mute"), MagicMock()])
+    sleeps: list[float] = []
+
+    async def _record_sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+
+    # Only 1.5s of budget left: every wait must be clamped below its default.
+    with patch("ci.autoresearch.net.asyncio.sleep", new=_record_sleep):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 1.5, 3)
+        )
+
+    assert peer.connect.await_args_list[0].kwargs["boot_wait"] == 1.5
+    assert peer.send.await_args_list[0].kwargs["timeout"] == 1.5
+    assert sleeps == [1.5]
+
+
+def test_connect_peer_propagates_an_expired_budget() -> None:
+    """A budget helper that raises must abort the retry loop, not be swallowed."""
+    peer = AsyncMock()
+    peer.connect = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+
+    def _expired() -> float:
+        raise RpcTimeoutError("--net-peer deadline expired")
+
+    captured = io.StringIO()
+    with contextlib.redirect_stdout(captured):
+        with pytest.raises(RpcTimeoutError, match="deadline expired"):
+            asyncio.run(
+                _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", _expired, 3)
+            )
+
+    # The point of the test: an expired budget must not be *reported* as an
+    # unresponsive board. Checking the budget inside the try block still
+    # aborts (the back-off re-raises), but first prints
+    # "ESP32-C6 did not answer ... reconnecting" -- blaming the peer for the
+    # caller running out of time.
+    assert peer.connect.await_count == 0
+    assert peer.send.await_count == 0
+    assert "did not answer" not in captured.getvalue()
+    assert "reconnecting" not in captured.getvalue()
+
+
+def test_connect_peer_reads_the_ping_budget_after_connect() -> None:
+    """The ping budget must be read after connect(), not before it.
+
+    connect() can consume most of the remaining budget itself, so a ping
+    timeout computed beforehand is stale and can outlive the caller's
+    deadline -- the exact thing the clamping exists to prevent. The budget
+    here shrinks *because* connect ran, so a reading taken before it differs
+    from one taken after.
+    """
+    budget = {"left": 10.0}
+
+    def _remaining() -> float:
+        return budget["left"]
+
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+
+    async def _connect_that_spends_the_budget(**_kwargs: object) -> None:
+        budget["left"] = 0.5
+
+    peer.connect = AsyncMock(side_effect=_connect_that_spends_the_budget)
+
+    asyncio.run(
+        _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", _remaining, 3)
+    )
+
+    # boot_wait is bounded by the pre-connect budget...
+    assert peer.connect.await_args.kwargs["boot_wait"] == 3.0
+    # ...and the ping by what is actually left afterwards, not by 10.0.
+    assert peer.send.await_args.kwargs["timeout"] == 0.5
+
+
+def test_connect_peer_retries_a_port_that_will_not_open() -> None:
+    """A port that cannot be opened is the same fault class as a mute one.
+
+    Observed on the bench: attempts 1-2 failed mute with RpcTimeoutError, and
+    the third reconnect raised "attach failed: open_port(...) exceeded 3s"
+    from the serial layer -- a different exception type, which escaped a
+    narrow catch list and propagated raw, so this helper's own diagnostic
+    never printed and the caller saw a bare serial error instead.
+    """
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock(return_value=MagicMock())
+    peer.connect = AsyncMock(
+        side_effect=[
+            RuntimeError("attach failed: open_port(/dev/ttyACM2) exceeded 3s"),
+            None,
+        ]
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM2", lambda: 30.0, 3)
+        )
+
+    assert peer.connect.await_count == 2
+
+
+def test_connect_peer_reports_a_serial_error_in_its_own_message() -> None:
+    """Exhausting the attempts must surface this helper's diagnostic.
+
+    Previously a non-RpcError type escaped entirely, so the run reported the
+    raw serial error with no port, attempt count, or context.
+    """
+    peer = AsyncMock()
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+    peer.connect = AsyncMock(
+        side_effect=RuntimeError("attach failed: open_port exceeded 3s")
+    )
+
+    with patch("ci.autoresearch.net.asyncio.sleep", new=AsyncMock()):
+        with pytest.raises(RpcTimeoutError) as excinfo:
+            asyncio.run(
+                _connect_peer_with_retry(
+                    peer, "ESP32-C6", "/dev/ttyACM2", lambda: 30.0, attempts=2
+                )
+            )
+
+    message = str(excinfo.value)
+    assert "/dev/ttyACM2" in message
+    assert "2 connect attempts" in message
+    assert "attach failed" in message
+
+
+def test_connect_peer_bounds_a_transport_that_never_opens() -> None:
+    """A hung port open must not outlive the caller's deadline.
+
+    `boot_wait` was bounded by the remaining budget, but the transport open
+    itself was not: the serial layer self-bounds at about 3 s and knows
+    nothing of this caller's deadline, so with under 3 s left the attach
+    alone could overrun before the ping and back-off checks ran.
+    """
+    peer = MagicMock()
+
+    async def _never_opens(**_kwargs: Any) -> None:
+        await asyncio.sleep(30.0)
+
+    peer.connect = AsyncMock(side_effect=_never_opens)
+    peer.close = AsyncMock()
+    peer.send = AsyncMock()
+
+    started = time.monotonic()
+    with pytest.raises(RpcTimeoutError):
+        asyncio.run(
+            _connect_peer_with_retry(peer, "ESP32-C6", "/dev/ttyACM1", lambda: 0.25, 2)
+        )
+    elapsed = time.monotonic() - started
+
+    # Two attempts of a 30 s hang would be a minute; the budget caps each.
+    assert elapsed < 5.0, f"took {elapsed:.1f}s"
+    # And the half-opened transport is closed every time, final attempt too.
+    assert peer.close.await_count == 2

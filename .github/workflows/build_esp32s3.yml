@@ -46,18 +46,42 @@ on:
 
 jobs:
   build:
-    name: ESP32-S3 examples shard ${{ matrix.shard_index }} (8 total)
+    name: ESP32-S3 examples shard ${{ matrix.shard_index }} (3 total)
     # Hard-block external-fork pull requests (no exceptions per #2757).
     # `github.event.pull_request == null` lets push / workflow_dispatch / etc.
     # pass; the equality clause only matches when the PR head repo IS the base.
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     strategy:
       fail-fast: false
-      # A serial esp32s3 all-example sweep takes several hours because each
-      # sketch rebuilds the framework sources. Keep full coverage while each
-      # reusable-workflow job remains below its 45-minute bound (#3791).
+      # Three, and the count is measured rather than inherited (#4165).
+      #
+      # This was 8, sized when a serial sweep took "several hours" because
+      # every sketch rebuilt the framework sources. That was FastLED/fbuild
+      # #1411/#1413 -- the ESP32 SDK-libs completion check looked for
+      # `<mcu>/lib/libfreertos.a`, which ESP32-S3 alone does not ship there --
+      # and it shipped fixed in fbuild 2.5.22. The cost the sharding was
+      # written for no longer exists.
+      #
+      # Measured on one branch on one day, so the numbers are comparable:
+      #
+      #     shards   wall clock   runner minutes
+      #          1     35.0 min          35.0
+      #          3     21.8 min          61.9
+      #          8     14.4 min          80.3   (09-06 run, for reference)
+      #
+      # Each extra shard duplicates about 8.9 minutes of setup and warm-up --
+      # not the ~35 s the issue estimated from step timings, which is why 8
+      # costs more than twice a serial sweep in runner time for 20 minutes of
+      # wall clock.
+      #
+      # 3 keeps the gate at ~22 minutes, less than half the 45-minute bound in
+      # build_template.yml even as the sweep grows, while cutting runner
+      # consumption 22.9% (80.3 -> 61.9). Serial is cheaper still at 35.0 --
+      # 56% off -- but leaves only 10 minutes of headroom on a set of
+      # examples that only gets bigger, and #3791's lesson was that a gate
+      # quietly running long is how a defect hides.
       matrix:
-        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+        shard_index: [0, 1, 2]
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 8
+      args: esp32s3 all --shard-index ${{ matrix.shard_index }} --shard-count 3

@@ -5,6 +5,7 @@ Provides WiFi management, HTTP server, and autoresearch flows for
 """
 
 import asyncio
+import contextlib
 import os
 import platform as platform_mod
 import subprocess
@@ -20,6 +21,8 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ci.util.serial_interface import SerialInterface
 
 # WiFi AP credentials (must match firmware constants)
@@ -437,15 +440,182 @@ async def run_net_loopback_autoresearch(
             await client.close()
 
 
+# WiFiServer::begin() sets SOF_REUSEADDR and recreates its PCB per call, so a
+# listen failure is most likely tcp_new() returning NULL on an exhausted lwIP
+# PCB pool. Wait past TIME_WAIT before retrying so recovery distinguishes
+# transient exhaustion from a genuine leak.
+kListenRetryDelayS = 30.0
+# Keep enough of the deadline to report the outcome of the retry.
+kListenReserveSeconds = 15.0
+
+# How many times to reopen the companion board's serial RPC before giving up.
+# Three covers the observed USB-JTAG CDC re-enumeration window without letting
+# a genuinely dead board stall the run.
+kPeerConnectAttempts = 3
+
 # CYW43 association is not instant, and a re-join after stopNet has been
-# observed to take longer than the original 10 s budget allowed. Poll for up
-# to ~30 s before calling it a failure; a healthy join still returns on the
-# first or second poll, so this costs nothing when things are working.
-kJoinPollAttempts = 60
+# observed to take longer than the original 10 s budget allowed.
+#
+# `connectSta()` does not retry, so a transient association failure is
+# terminal until the join is re-issued -- no amount of extra polling recovers
+# a radio whose status() is stuck at FAILED. So poll ~15 s per attempt and
+# re-issue the join a few times, which subsumes the single 60-poll sweep this
+# replaces.
+kJoinAttempts = 4
+kJoinPollsPerAttempt = 30
 # Reserve enough of the run deadline for the post-failure wifiStatus report and
 # the teardown pings. Polling to the very last second loses the diagnostics
 # this change exists to produce.
 kJoinReserveSeconds = 20.0
+
+
+def _describe_failed_client_tests(data: dict[str, Any]) -> str:
+    """Name the sub-tests that failed, and why, in one line.
+
+    runNetClientTest returns a 12-entry `results` array. Raising it verbatim
+    put the single failing row in the middle of eleven passing ones, on one
+    unwrapped line -- when `GET /leds` came back with no response at all, the
+    interesting row was the hardest part of the message to find. Lead with
+    the diagnosis; the caller still appends the full payload.
+    """
+    results = data.get("results")
+    if not isinstance(results, list):
+        return "response carried no 'results' array"
+    failures: list[str] = []
+    for index, entry in enumerate(results):
+        if not isinstance(entry, dict):
+            # A row that is not a dict cannot be shown to have passed, and
+            # skipping it would let a malformed report read as "nothing
+            # failed" -- the same silent skip this helper exists to remove.
+            failures.append(f"result[{index}] is not an object: {entry!r}")
+            continue
+        if entry.get("passed") is True:
+            continue
+        name = entry.get("test", "<unnamed test>")
+        why = entry.get("error", "no error reported")
+        # status_line is the field that distinguishes "answered wrongly" from
+        # "did not answer", so it is worth naming even when empty.
+        detail = (
+            f"status_line={entry.get('status_line')!r} "
+            f"body_read={entry.get('body_read')} "
+            f"content_length={entry.get('content_length')}"
+        )
+        failures.append(f"{name}: {why} ({detail})")
+    if not failures:
+        return "no sub-test reported a failure"
+    return f"{len(failures)} of {len(results)} sub-tests failed -- " + "; ".join(
+        failures
+    )
+
+
+async def _connect_peer_with_retry(
+    peer: RpcClient,
+    label: str,
+    port: str,
+    remaining_timeout: "Callable[[], float]",
+    attempts: int,
+) -> None:
+    """Connect the companion board, retrying a silent first RPC.
+
+    The most frequent failure on this fixture is not a network fault at all:
+    `No response with ID 1 within 15.0s` while attaching to the ESP32-C6,
+    before any cycle runs. Across the captured logs it is always the C6 and
+    never the RP2350W, which points at the C6's USB-JTAG CDC re-enumerating
+    after the post-flash reset -- the port path is unchanged, so a connect
+    that lands inside that window attaches to an endpoint that never answers.
+
+    A fixed `boot_wait` cannot cover this, because the wait is over before the
+    endpoint is replaced. Reconnecting is what recovers it. Each retry is
+    reported so the need for one stays visible instead of being smoothed away.
+
+    Every wait is clamped by `remaining_timeout`, the run's own budget helper.
+    Unclamped, three mute attempts would spend ~43 s of boot waits, pings and
+    back-offs before any later call noticed the deadline had passed, so a
+    recovery mechanism would end up consuming the run it exists to save.
+    """
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        # Every remaining_timeout() call sits outside a try on purpose. It
+        # signals expiry by raising RpcTimeoutError, the same type a mute
+        # endpoint raises; caught here it would retry a run that has already
+        # run out of time and report it as an unresponsive board.
+        #
+        # Each budget is also read immediately before the call it bounds, not
+        # once per attempt. connect() can itself consume most of the budget,
+        # so a ping timeout computed before it would be stale and could
+        # outlive the caller's deadline.
+        failure: Exception | None = None
+
+        boot_wait = min(3.0, remaining_timeout())
+        # Bound the whole open, not just the boot wait. The serial layer
+        # self-bounds the port open at about 3 s -- that is where
+        # "open_port(...) exceeded 3s" comes from -- but it knows nothing of
+        # this caller's deadline, so with under 3 s left the attach alone can
+        # outlive it before the ping and back-off checks get to look. Six is
+        # the natural ceiling: three for the open, three for the boot wait.
+        open_budget = min(6.0, remaining_timeout())
+        try:
+            await asyncio.wait_for(
+                peer.connect(boot_wait=boot_wait, drain_boot=True),
+                timeout=open_budget,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as exc:  # noqa: BLE001
+            # Deliberately broad. Observed on the bench: attempts 1-2 failed
+            # mute (RpcTimeoutError), and the third reconnect failed with
+            # "attach failed: open_port(...) exceeded 3s" from the serial
+            # layer -- a different type entirely, which escaped a narrow
+            # (RpcError, RpcTimeoutError, OSError) list and propagated raw,
+            # so this helper's own diagnostic never printed. Every failure to
+            # bring the peer up is the same fault class here, and the last
+            # error is re-raised verbatim once the attempts are spent.
+            failure = exc
+
+        if failure is None:
+            ping_timeout = min(10.0, remaining_timeout())
+            try:
+                # Prove the endpoint answers. connect() only opens the port;
+                # a stale CDC endpoint opens fine and stays mute.
+                await peer.send("ping", {}, timeout=ping_timeout)
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as exc:  # noqa: BLE001
+                failure = exc
+
+        if failure is None:
+            if attempt > 1:
+                print(f"  {label} answered on connect attempt {attempt}/{attempts}")
+            return
+
+        last_error = failure
+        # Close on every failure, including the last. `wait_for` cancels the
+        # open mid-flight, so skipping this on the final attempt would hand
+        # the caller a half-opened transport along with the exception.
+        with contextlib.suppress(Exception):
+            await peer.close()
+        if attempt == attempts:
+            break
+        print(
+            f"  {label} did not answer on {port} "
+            f"(attempt {attempt}/{attempts}: {failure}); reconnecting"
+        )
+        # Also outside any suppression: if the budget went while we were
+        # failing, stop rather than sleep past the deadline.
+        #
+        # Backs off progressively. A flat 2 s was measured to be too short:
+        # the peer went from "opens but stays mute" on attempts 1-2 to
+        # "will not open at all" by attempt 3, i.e. reconnecting quickly made
+        # the port worse rather than better. Give the CDC time to finish
+        # re-enumerating instead of hammering it.
+        backoff = min(2.0 * attempt, 8.0)
+        await asyncio.sleep(min(backoff, remaining_timeout()))
+    raise RpcTimeoutError(
+        f"{label} did not answer its serial RPC on {port} after {attempts} "
+        f"connect attempts; last error: {last_error}"
+    )
 
 
 def _summarize_client_tests(label: str, data: dict[str, Any]) -> None:
@@ -562,7 +732,9 @@ async def run_net_peer_autoresearch(
         print(f"  Connecting RP2350W on {upload_port}...")
         await primary.connect(boot_wait=3.0, drain_boot=True)
         print(f"  Connecting ESP32-C6 on {peer_upload_port}...")
-        await peer.connect(boot_wait=3.0, drain_boot=True)
+        await _connect_peer_with_retry(
+            peer, "ESP32-C6", peer_upload_port, rpc_timeout, kPeerConnectAttempts
+        )
 
         primary_status = await rpc_data(primary, "status")
         if "rp2350" not in str(primary_status.get("platform", "")).lower():
@@ -600,50 +772,121 @@ async def run_net_peer_autoresearch(
             if not connect.get("success"):
                 raise RpcError(f"RP2350W wifiConnect failed: {connect}")
 
+            # connectSta() issues a single WiFi.beginNoBlock() and never
+            # retries (src/platforms/arm/rp/wifi_rp.cpp.hpp), so one transient
+            # CYW43 association failure leaves status()=FAILED for good. Re-issue
+            # the join rather than failing the cycle on a single attempt.
             rp_ip: str | None = None
             wifi_status: dict[str, Any] = {}
             join_started = time.monotonic()
+            attempts = 0
             polls = 0
-            for _ in range(kJoinPollAttempts):
-                # Stop polling once the whole-run deadline is close enough that
-                # continuing would starve the remaining cycles -- and, more
-                # importantly, would consume the budget the failure
-                # diagnostics below need in order to report at all.
-                if deadline - time.monotonic() < kJoinReserveSeconds:
+            cut_short = False
+            for attempt in range(kJoinAttempts):
+                attempts = attempt + 1
+                if attempt > 0:
+                    print(
+                        f"  RP2350W association reported "
+                        f"{wifi_status.get('status')!r}; re-issuing join "
+                        f"({attempts}/{kJoinAttempts})"
+                    )
+                    reconnect = await rpc_data(
+                        primary, "wifiConnect", {"ssid": ssid, "password": password}
+                    )
+                    if not reconnect.get("success"):
+                        raise RpcError(f"RP2350W wifiConnect failed: {reconnect}")
+                for _ in range(kJoinPollsPerAttempt):
+                    # Stop polling once the whole-run deadline is close enough
+                    # that continuing would starve the remaining cycles -- and,
+                    # more importantly, would consume the budget the failure
+                    # diagnostics below need in order to report at all.
+                    poll_budget = deadline - time.monotonic() - kJoinReserveSeconds
+                    if poll_budget <= 0:
+                        cut_short = True
+                        break
+                    polls += 1
+                    # Clamp the poll itself to the budget, not just the check
+                    # before it. Checking first and then letting the RPC wait
+                    # its own 15 s can land the next check inside the reserve
+                    # -- and if that RPC times out, the run dies before the
+                    # join-failure report this reserve exists to protect.
+                    wifi_status = await rpc_data(
+                        primary, "wifiStatus", max_wait=min(15.0, poll_budget)
+                    )
+                    candidate_ip = wifi_status.get("ip")
+                    if wifi_status.get("connected") and isinstance(candidate_ip, str):
+                        rp_ip = candidate_ip
+                        break
+                    if str(wifi_status.get("status")) == "FAILED":
+                        break  # terminal for this attempt; re-issue the join
+                    await asyncio.sleep(min(0.5, rpc_timeout()))
+                if rp_ip:
                     break
-                polls += 1
-                wifi_status = await rpc_data(primary, "wifiStatus")
-                candidate_ip = wifi_status.get("ip")
-                if wifi_status.get("connected") and isinstance(candidate_ip, str):
-                    rp_ip = candidate_ip
-                    break
-                await asyncio.sleep(min(0.5, rpc_timeout()))
             join_elapsed = time.monotonic() - join_started
             if not rp_ip:
-                # Report what the radio actually said. Without this the failure
-                # is indistinguishable between "still associating", "auth
-                # rejected" and "associated but no DHCP lease", which are three
-                # different problems with three different fixes.
-                # Report the polls actually made. Quoting the configured
-                # maximum would overstate the evidence whenever the deadline
-                # reserve cut the loop short, which is exactly the case a
-                # reader needs to distinguish from a full unsuccessful sweep.
-                cut_short = (
+                # Report the polls actually made, not the configured maximum:
+                # quoting the maximum would overstate the evidence whenever
+                # the deadline reserve cut the sweep short, which is exactly
+                # the case a reader needs to tell apart from a full
+                # unsuccessful one.
+                stopped_early = (
                     " (stopped early to reserve deadline for this report)"
-                    if polls < kJoinPollAttempts
+                    if cut_short
                     else ""
                 )
                 raise RpcTimeoutError(
                     "RP2350W did not join the ESP32-C6 AP after "
-                    f"{join_elapsed:.1f}s across {polls} wifiStatus "
-                    f"poll(s){cut_short}; last wifiStatus={wifi_status!r}"
+                    f"{join_elapsed:.1f}s across {attempts} attempt(s) and "
+                    f"{polls} wifiStatus poll(s){stopped_early}; "
+                    f"last wifiStatus={wifi_status!r}"
                 )
-            print(f"  RP2350W joined in {join_elapsed:.1f}s -> {rp_ip}")
+            print(
+                f"  RP2350W joined in {join_elapsed:.1f}s "
+                f"(attempt {attempts}) -> {rp_ip}"
+            )
 
             rp_server = await rpc_data(primary, "startNetServer")
             rp_port = rp_server.get("port")
             if not rp_server.get("success") or not isinstance(rp_port, int):
-                raise RpcError(f"RP2350W startNetServer failed: {rp_server}")
+                # WiFiServer::begin() closes and recreates its PCB each call
+                # and sets SOF_REUSEADDR, so a bind blocked by TIME_WAIT is
+                # ruled out. tcp_new() returning NULL on an exhausted lwIP PCB
+                # pool is the leading candidate (~24 connections per cycle),
+                # but begin() reports only a bool, so nothing here can confirm
+                # which resource ran out. Retrying after a wait distinguishes
+                # transient from persistent, which is all it can honestly
+                # claim; naming the resource needs a firmware-side error code.
+                # Cap the drain against the caller's deadline: waiting the
+                # full interval past it would trade a diagnostic for a
+                # timeout, and there would be nothing left to report with.
+                remaining = deadline - time.monotonic()
+                drain_s = min(kListenRetryDelayS, remaining - kListenReserveSeconds)
+                if drain_s <= 0:
+                    raise RpcError(
+                        f"RP2350W startNetServer failed at cycle {cycle}: "
+                        f"{rp_server}. Not enough of the run deadline remains "
+                        "to test whether it recovers."
+                    )
+                print(
+                    f"  startNetServer failed at cycle {cycle}: {rp_server}; "
+                    f"waiting {drain_s:.0f}s and retrying once to see whether "
+                    "the condition is transient"
+                )
+                await asyncio.sleep(drain_s)
+                rp_server = await rpc_data(primary, "startNetServer")
+                rp_port = rp_server.get("port")
+                if not rp_server.get("success") or not isinstance(rp_port, int):
+                    raise RpcError(
+                        f"RP2350W startNetServer failed at cycle {cycle}, and "
+                        f"again after a {drain_s:.0f}s wait: {rp_server}. The "
+                        "condition is persistent rather than transient; the "
+                        "specific resource is not identified here."
+                    )
+                print(
+                    "  startNetServer recovered after the wait -> the condition "
+                    "is transient. Which resource was exhausted is not "
+                    "established by recovery alone."
+                )
 
             rp_to_c6 = await rpc_data(
                 primary,
@@ -652,7 +895,11 @@ async def run_net_peer_autoresearch(
                 max_wait=30.0,
             )
             if not rp_to_c6.get("success"):
-                raise RpcError(f"RP2350W -> ESP32-C6 HTTP failed: {rp_to_c6}")
+                raise RpcError(
+                    f"RP2350W -> ESP32-C6 HTTP failed: "
+                    f"{_describe_failed_client_tests(rp_to_c6)}; "
+                    f"full result: {rp_to_c6}"
+                )
             _summarize_client_tests("RP2350W -> ESP32-C6", rp_to_c6)
             c6_to_rp = await rpc_data(
                 peer,
@@ -661,7 +908,21 @@ async def run_net_peer_autoresearch(
                 max_wait=30.0,
             )
             if not c6_to_rp.get("success"):
-                raise RpcError(f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}")
+                # The RP is the server for this direction, so ask it why it
+                # gave up. A 408 alone does not say which budget expired or
+                # how much of the request had arrived.
+                server_stats: Any = None
+                try:
+                    server_stats = await rpc_data(primary, "netServerStats")
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except (RpcError, RpcTimeoutError) as exc:  # noqa: BLE001
+                    server_stats = f"<unavailable: {exc}>"
+                raise RpcError(
+                    f"ESP32-C6 -> RP2350W HTTP failed: {c6_to_rp}; "
+                    f"RP server stats: {server_stats!r}"
+                )
             _summarize_client_tests("ESP32-C6 -> RP2350W", c6_to_rp)
 
             stop_result = await rpc_data(primary, "stopNet")
@@ -733,7 +994,6 @@ async def run_net_autoresearch(
         print("  No current WiFi connection detected")
 
     client: RpcClient | None = None
-    host_server: _HostHttpServer | None = None
 
     try:
         # Connect to device via RPC
@@ -755,9 +1015,8 @@ async def run_net_autoresearch(
         print(f"\n  {Fore.RED}Network autoresearch error: {e}{Style.RESET_ALL}")
         return 1
     finally:
-        # Cleanup
-        if host_server:
-            host_server.stop()
+        # Cleanup. The HTTP server in client mode is owned and stopped by
+        # _run_net_client_autoresearch itself; nothing to stop here.
         if client:
             # Send stopNet to clean up device resources
             try:
