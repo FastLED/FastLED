@@ -147,15 +147,49 @@ FL_TEST_CASE("Rebinding replaces the profile and releases the first") {
     FL_CHECK_LT(second_storage->xy_b[0] - 0.2200f, 1e-6f);
     FL_CHECK_GT(second_storage->xy_b[0] - 0.2200f, -1e-6f);
 
-    // And the caller's arrays can go away, as they can for the first bind.
-    second.response_lut_r = nullptr;
-    second.response_lut_size = 0;
-    FL_CHECK_EQ(options.emitterProfile()->response_lut_size, fl::u16(4));
-    FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(1000));
-
     // Vacuity guard: if the two profiles were indistinguishable, every check
     // above would hold with the rebind having done nothing at all.
     FL_CHECK_NE(first.response_lut_size, fl::u16(4));
+}
+
+FL_TEST_CASE("A rebound profile owns its response data after the source expires") {
+    // The half the case above does not reach. Clearing the caller's *field*
+    // proves nothing about ownership: the array it pointed at is still alive
+    // until the end of the function, so a shallow copy of the pointer would
+    // read valid memory and pass.
+    //
+    // The array has to go out of scope. `ChannelOptions` outlives the block
+    // that binds into it, so a rebind that kept the caller's pointer would be
+    // reading a dead stack array by the time this looks.
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile,
+                                       SourceProfile::linearSrgb()));
+
+    {
+        EmitterProfile second = kFixtureProfile;
+        const fl::u16 second_response[] = {0, 1000, 20000, 65535};
+        second.response_lut_r = second_response;
+        second.response_lut_g = second_response;
+        second.response_lut_b = second_response;
+        second.response_lut_size = 4;
+        FL_REQUIRE(options.setColorProfile(second, SourceProfile::bt2020()));
+    }
+
+    // `second` and `second_response` are both gone.
+    const EmitterProfile* stored = options.emitterProfile();
+    FL_REQUIRE(stored != nullptr);
+    FL_CHECK_EQ(stored->response_lut_size, fl::u16(4));
+    FL_REQUIRE(stored->response_lut_r != nullptr);
+    FL_CHECK_EQ(stored->response_lut_r[0], fl::u16(0));
+    FL_CHECK_EQ(stored->response_lut_r[1], fl::u16(1000));
+    FL_CHECK_EQ(stored->response_lut_r[2], fl::u16(20000));
+    FL_CHECK_EQ(stored->response_lut_r[3], fl::u16(65535));
+    FL_CHECK_EQ(stored->response_lut_g[1], fl::u16(1000));
+    FL_CHECK_EQ(stored->response_lut_b[3], fl::u16(65535));
+
+    // And the storage is not the caller's array, which is the property
+    // itself rather than a consequence of it.
+    FL_CHECK(stored->response_lut_r != nullptr);
 }
 
 FL_TEST_CASE("Clearing a binding releases it and leaves nothing bound") {
