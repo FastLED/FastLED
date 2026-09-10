@@ -147,4 +147,94 @@ FL_TEST_CASE("fl::to_hex - case sensitivity") {
     }
 }
 
+// ---------------------------------------------------------------------------
+// ftoa over the whole float range
+//
+// Recorded as an aside on #4156, where it nearly caused a live finite check to
+// be deleted as dead code: `FL_WARN` printed *every* over-range float as
+// `-21474836.48`. The cause is `static_cast<int>` of an out-of-range float,
+// which is undefined behaviour and lands on INT_MIN on the common targets.
+// The old boundary was about 2.1e7 at the default precision of two -- 21.5
+// million, which a microsecond count, a byte total or a raw s16.16 value
+// passes without being unusual.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+fl::string ftoaOf(float value, int precision) {
+    char buf[64] = {0};
+    fl::ftoa(value, buf, precision);
+    return fl::string(buf);
+}
+
+float positiveInfinity() {
+    float zero = 0.0f;
+    return 1.0f / zero;
+}
+
+}  // namespace
+
+FL_TEST_CASE("ftoa - magnitudes past the old int boundary print correctly") {
+    // 21 million was fine before, 22 million was not. Both are ordinary.
+    FL_CHECK_EQ(ftoaOf(21000000.0f, 2), fl::string("21000000.00"));
+    FL_CHECK_EQ(ftoaOf(22000000.0f, 2), fl::string("22000000.00"));
+    FL_CHECK_EQ(ftoaOf(-22000000.0f, 2), fl::string("-22000000.00"));
+    FL_CHECK_EQ(ftoaOf(1000000000.0f, 2), fl::string("1000000000.00"));
+}
+
+FL_TEST_CASE("ftoa - the integer part is not lost to the scaling") {
+    // Scaling the whole value by the multiplier in float is what cost the low
+    // digits: 1e9 * 100 is 1e11, which no float represents, so this used to
+    // read 999999979.52 even once the integer overflow was gone. Only the
+    // fractional residue is scaled now.
+    FL_CHECK_EQ(ftoaOf(1000000000.0f, 2), fl::string("1000000000.00"));
+    FL_CHECK_EQ(ftoaOf(16777216.0f, 3), fl::string("16777216.000"));
+}
+
+FL_TEST_CASE("ftoa - the whole 64-bit band renders as digits") {
+    // The band between 2^31 and the scientific threshold is where an `int`
+    // accumulator is still undefined and an `i64` one is still exact. Powers
+    // of two because they are exact in both a float and an i64, so the
+    // expected string is not itself an approximation.
+    FL_CHECK_EQ(ftoaOf(8589934592.0f, 2), fl::string("8589934592.00"));         // 2^33
+    FL_CHECK_EQ(ftoaOf(1125899906842624.0f, 2),
+                fl::string("1125899906842624.00"));                            // 2^50
+    FL_CHECK_EQ(ftoaOf(-8589934592.0f, 2), fl::string("-8589934592.00"));
+    FL_CHECK_EQ(ftoaOf(8589934592.0f, 0), fl::string("8589934592"));
+}
+
+FL_TEST_CASE("ftoa - a magnitude beyond any integer goes to scientific") {
+    // Not representable digit by digit at all, so it is printed in a shape the
+    // reader has to decode rather than as a wrong decimal.
+    FL_CHECK_EQ(ftoaOf(1e30f, 2), fl::string("1.00e+30"));
+    FL_CHECK_EQ(ftoaOf(-1e30f, 2), fl::string("-1.00e+30"));
+    FL_CHECK_EQ(ftoaOf(3.0e38f, 2), fl::string("3.00e+38"));
+    // Two-digit exponents are zero padded so the width is stable in a log.
+    FL_CHECK_EQ(ftoaOf(5e19f, 1), fl::string("5.0e+19"));
+}
+
+FL_TEST_CASE("ftoa - non-finite values say what they are") {
+    const float inf = positiveInfinity();
+    FL_CHECK_EQ(ftoaOf(inf, 2), fl::string("inf"));
+    FL_CHECK_EQ(ftoaOf(-inf, 2), fl::string("-inf"));
+    FL_CHECK_EQ(ftoaOf(inf - inf, 2), fl::string("nan"));
+    // And at every precision, including the two special paths.
+    FL_CHECK_EQ(ftoaOf(inf, 0), fl::string("inf"));
+    FL_CHECK_EQ(ftoaOf(inf, -1), fl::string("inf"));
+}
+
+FL_TEST_CASE("ftoa - the ordinary cases are untouched") {
+    // The regression guard. Everything above is about the tail of the range;
+    // none of it may move what the common path prints.
+    FL_CHECK_EQ(ftoaOf(0.0f, 2), fl::string("0.00"));
+    FL_CHECK_EQ(ftoaOf(1.5f, 2), fl::string("1.50"));
+    FL_CHECK_EQ(ftoaOf(-1.5f, 2), fl::string("-1.50"));
+    FL_CHECK_EQ(ftoaOf(1.0f, 2), fl::string("1.00"));
+    FL_CHECK_EQ(ftoaOf(0.125f, 3), fl::string("0.125"));
+    FL_CHECK_EQ(ftoaOf(-0.5f, 1), fl::string("-0.5"));
+    FL_CHECK_EQ(ftoaOf(2.5f, 0), fl::string("3"));
+    FL_CHECK_EQ(ftoaOf(-2.5f, 0), fl::string("-3"));
+    FL_CHECK_EQ(ftoaOf(0.0f, 0), fl::string("0"));
+}
+
 } // FL_TEST_FILE

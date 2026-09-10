@@ -318,51 +318,146 @@ inline fl::string apply_width(const fl::string& str, const FormatSpec& spec, boo
     return result;
 }
 
+// Largest magnitude whose scaled form still fits an i64 with room for the
+// rounding step. Anything past this cannot be rendered digit-by-digit from an
+// integer, so it goes to the scientific path below.
+constexpr float kFloatDecimalLimit = 4.0e18f;
+
+// True for a value that is neither NaN nor an infinity.
+//
+// Written without <cmath> because this header is reachable from every
+// platform: `v != v` is the definition of NaN, and the magnitude bound catches
+// both infinities. 1e38 is inside the float range, so a finite value can
+// exceed it -- which is why the caller must handle large finites separately
+// rather than treating this as "printable".
+inline bool float_is_finite(float value) FL_NO_EXCEPT {
+    if (value != value) {
+        return false;
+    }
+    return value > -3.5e38f && value < 3.5e38f;
+}
+
+inline fl::string format_float(float value, int precision) FL_NO_EXCEPT;
+
+// `d.ddde+NN` for a magnitude no integer accumulator can hold.
+//
+// The alternative is to print such a value as though it were small, which is
+// what this file used to do: every magnitude at or above 2^31 / 10^precision
+// came out as `-21474836.48`, because `static_cast<int>` of an out-of-range
+// float is undefined behaviour and lands on INT_MIN on the common targets.
+// A number that is wrong without saying so is worse than one in a shape the
+// reader has to decode (FastLED #4156).
+//
+// Precondition: `value` is finite. The normalisation loop below divides while
+// the magnitude is at or above ten, which never terminates for an infinity --
+// removing the caller's non-finite check hangs rather than mis-prints, which
+// is how that ordering was confirmed to be load-bearing.
+inline fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT {
+    const bool negative = value < 0.0f;
+    float magnitude = negative ? -value : value;
+    int exponent = 0;
+    while (magnitude >= 10.0f) {
+        magnitude /= 10.0f;
+        ++exponent;
+    }
+    while (magnitude > 0.0f && magnitude < 1.0f) {
+        magnitude *= 10.0f;
+        --exponent;
+    }
+
+    sstream stream;
+    if (negative) {
+        stream << "-";
+    }
+    // The mantissa is in [1, 10) now, so the ordinary path renders it.
+    stream << format_float(magnitude, precision);
+    stream << "e";
+    if (exponent < 0) {
+        stream << "-";
+        exponent = -exponent;
+    } else {
+        stream << "+";
+    }
+    if (exponent < 10) {
+        stream << "0";
+    }
+    stream << exponent;
+    return stream.str();
+}
+
 // Format floating point with specified precision
 inline fl::string format_float(float value, int precision) FL_NO_EXCEPT {
+    // Non-finite first. These used to reach the integer cast below and print
+    // as `-21474836.48` -- a plausible-looking number for a value that is not
+    // a number at all.
+    if (value != value) {
+        return fl::string("nan");
+    }
+    if (!float_is_finite(value)) {
+        return fl::string(value < 0.0f ? "-inf" : "inf");
+    }
+
     if (precision < 0) {
         // Default precision - use sstream's default behavior
         sstream stream;
         stream << value;
         return stream.str();
     }
-    
-    // Simple precision formatting
-    // This is a basic implementation - could be enhanced
+
+    // Past what an integer accumulator can hold, digit-by-digit rendering is
+    // not available at all, so say so in a different shape rather than
+    // printing a wrong number.
+    if (value >= kFloatDecimalLimit || value <= -kFloatDecimalLimit) {
+        return format_float_scientific(value, precision > 0 ? precision : 6);
+    }
+
+    const bool negative = value < 0.0f;
+    const float magnitude = negative ? -value : value;
+
+    // Split before scaling, not after. Multiplying the whole value by the
+    // multiplier in float loses the low digits of a large integer part -- 1e9
+    // at precision 2 came out as 999999979.52, because 1e11 is not
+    // representable in a float. Only the fractional residue is scaled; the
+    // integer part goes through as an integer.
+    //
+    // Above 2^24 a float has no fractional part, so the residue is exactly
+    // zero there and the clamp below is for the rounding of the cast back,
+    // not for a value that genuinely has digits to lose.
+    fl::i64 int_part = static_cast<fl::i64>(magnitude);
+    float residue = magnitude - static_cast<float>(int_part);
+    if (residue < 0.0f) {
+        residue = 0.0f;
+    }
+
     if (precision == 0) {
-        int int_part = static_cast<int>(value + 0.5f); // Round
+        if (residue >= 0.5f) {
+            ++int_part;
+        }
         sstream stream;
+        if (negative && int_part != 0) {
+            stream << "-";
+        }
         stream << int_part;
         return stream.str();
     }
-    
-    // For non-zero precision, use basic rounding
-    int multiplier = 1;
+
+    fl::i64 multiplier = 1;
     for (int i = 0; i < precision; ++i) {
         multiplier *= 10;
     }
 
-    // Handle rounding correctly for both positive and negative numbers
-    float scaled_float = value * multiplier;
-    int scaled;
-    if (scaled_float >= 0) {
-        scaled = static_cast<int>(scaled_float + 0.5f);
-    } else {
-        scaled = static_cast<int>(scaled_float - 0.5f);
-    }
-
-    int int_part = scaled / multiplier;
-    int frac_part = scaled % multiplier;
-
-    // For negative numbers, frac_part will be negative, so take absolute value
-    if (frac_part < 0) {
-        frac_part = -frac_part;
+    fl::i64 frac_part =
+        static_cast<fl::i64>(residue * static_cast<float>(multiplier) + 0.5f);
+    if (frac_part >= multiplier) {
+        // Rounded up through the next whole unit.
+        frac_part -= multiplier;
+        ++int_part;
     }
 
     sstream stream;
-    // Preserve sign for values like -0.5 that round to int_part=0 (printed
-    // without sign by the integer write below).
-    if (value < 0 && int_part == 0) {
+    // The sign is printed from the sign of the input, not recovered from the
+    // integer part, so -0.5 keeps its sign at precision 1.
+    if (negative && (int_part != 0 || frac_part != 0)) {
         stream << "-";
     }
     stream << int_part;
@@ -373,10 +468,10 @@ inline fl::string format_float(float value, int precision) FL_NO_EXCEPT {
     // to 1, which produced "0.0"/"1.0" instead of "0.00"/"1.00" for any
     // integer-valued input. It also omitted the digits entirely when
     // frac_part == 0.
-    int temp_multiplier = multiplier / 10;
+    fl::i64 temp_multiplier = multiplier / 10;
     while (temp_multiplier > 0) {
-        int digit = (frac_part / temp_multiplier) % 10;
-        stream << static_cast<char>('0' + digit);
+        const fl::i64 digit = (frac_part / temp_multiplier) % 10;
+        stream << static_cast<char>('0' + static_cast<int>(digit));
         temp_multiplier /= 10;
     }
 
