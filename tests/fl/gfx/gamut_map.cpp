@@ -1337,9 +1337,30 @@ FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
         const float divergence = hueDivergence(target_lab, mapped_lab);
         if (fl::fabsf(c[0] - 0.55f) < 1e-6f && fl::fabsf(c[1] - 0.42f) < 1e-6f) {
             FL_CHECK_LT(divergence, 0.030f);
-            // And it is genuinely worse than its neighbours: a fix that
-            // brought it into line should fail here and be looked at, not
-            // slide past a bound wide enough to cover it.
+            // Bounded from below as well, which is deliberate and is the
+            // same shape as the flash-bloat gate: that one fails on
+            // *unclaimed headroom* rather than congratulating you on it,
+            // because a ratchet with slack is not a ratchet.
+            //
+            // What makes it apply here is that 0.026 is unexplained. It is
+            // an order of magnitude above its four neighbours and above what
+            // RGBWW does on the same input, and nobody has established
+            // whether it comes from the allocation or the quantisation. If
+            // it quietly drops, something touched that path and the anomaly
+            // stopped being reproducible -- which is exactly when you want
+            // to be told rather than have the evidence absorbed.
+            //
+            // So this firing is not a defect, and the message says so,
+            // because a bound that fails on good news has to explain itself.
+            if (divergence <= 0.010f) {
+                FL_WARN_F("RGBW hue divergence at (0.55, 0.42) improved to %f "
+                          "from the 0.026 recorded here. That is good news, "
+                          "not a failure: find what changed, note it on "
+                          "FastLED#4041, and re-pin this bound. The point of "
+                          "the lower bound is that the anomaly cannot vanish "
+                          "unremarked.",
+                          static_cast<double>(divergence));
+            }
             FL_CHECK_GT(divergence, 0.010f);
         } else {
             FL_CHECK_LT(divergence, 0.005f);
