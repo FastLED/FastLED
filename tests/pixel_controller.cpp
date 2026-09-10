@@ -1,3 +1,4 @@
+#include "FastLED.h"  // FL_DITHER_ENABLE_MIN_REFRESH_HZ
 #include "pixel_controller.h"
 #include "fl/math/math.h"
 #include "test.h"
@@ -209,9 +210,16 @@ FL_TEST_CASE("Dither - the cycle rate at the enable threshold is below the file'
     FL_CHECK_EQ(MIN_ACCEPTABLE_DITHER_RATE_HZ, 50);
     FL_CHECK_EQ(MAX_LIKELY_UPDATE_RATE_HZ, 400);
 
-    // The threshold `show()` actually applies, repeated here because it is a
-    // literal there rather than a named constant.
-    const int kDitherEnableFps = 100;
+    // The threshold `show()` actually applies -- the shipped constant, not a
+    // copy of it. It used to be a bare `100` at both call sites and a second
+    // bare `100` here, so changing the threshold moved the behaviour and
+    // failed nothing. That is the defect FastLED#4279 fixed elsewhere: a
+    // test that reads a copy is not reading the thing it names.
+    const int kDitherEnableFps = FL_DITHER_ENABLE_MIN_REFRESH_HZ;
+    // Pinned separately so a change to the threshold fails *here*, where the
+    // cadence consequence is written down, rather than only wherever it is
+    // next used.
+    FL_CHECK_EQ(kDitherEnableFps, 100);
 
     // In floating point, because the number is 12.5 and the point of this
     // case is to record the cadence rather than a rounded stand-in for it.

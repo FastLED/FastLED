@@ -683,6 +683,31 @@ inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) {
 
 /// High level controller interface for FastLED.
 /// This class manages controllers, global settings, and trackings such as brightness
+/// Refresh rate below which `show()` and `showColor()` turn temporal
+/// dithering off, in Hertz.
+///
+/// Named because it was a bare `100` at both call sites, which meant the case
+/// in `tests/pixel_controller.cpp` that records the resulting cadence had to
+/// carry its own copy of the number -- so changing the threshold moved the
+/// behaviour without failing anything.
+///
+/// **This does not agree with the constants the cycle length comes from**, and
+/// the gap is the point of naming it. `pixel_controller.h` derives
+/// `UPDATES_PER_FULL_DITHER_CYCLE` as `MAX_LIKELY_UPDATE_RATE_HZ /
+/// MIN_ACCEPTABLE_DITHER_RATE_HZ` = 400 / 50 = 8, so eight frames is the
+/// number that makes a 400 Hz refresh complete a cycle at 50 Hz. At *this*
+/// threshold an eight-frame cycle completes at 12.5 Hz -- a quarter of that
+/// floor, and near the peak of human flicker sensitivity rather than above
+/// it.
+///
+/// The refresh that would actually reach the floor is
+/// `MAX_LIKELY_UPDATE_RATE_HZ`. Raising this to it would disable dithering
+/// for most sketches, so it is a decision rather than a cleanup, and it is
+/// left as it was. FastLED#4042 owns the flicker budget that settles it;
+/// FastLED#4156 R8 asked for the cadence to be written down, and this is
+/// where it now is.
+#define FL_DITHER_ENABLE_MIN_REFRESH_HZ 100
+
 /// and refresh rates, and provides access functions for driving led data to controllers
 /// via the show() / showColor() / clear() methods.
 /// This is instantiated as a global object with the name FastLED.
