@@ -600,19 +600,25 @@ Constructing over-bright targets for these devices turned up a case worth
 recording on its own. The mappers clamp lightness to the brightest reachable
 *neutral*, and the hull reaches higher than that off the neutral axis:
 
-| device | brightest neutral | brightest reachable | at | headroom |
-| --- | --- | --- | --- | --- |
-| `rgbw` | 1.338544 | 1.623559 | hue 300, C 0.48 | **+21.3%** |
-| `non_d65_white` | 1.333993 | 1.633584 | hue 300, C 0.50 | **+22.5%** |
-| `rgbww` | 1.499835 | 1.748872 | hue 300, C 0.46 | **+16.6%** |
-| `rgbww_two_white` | 1.152403 | 1.167419 | hue 0, C 0.02 | +1.3% |
+Two denominators are in play and they are not interchangeable, so both are
+given. *Headroom* is the gain relative to the neutral cap, which is what the
+clamp gives up as a fraction of what it keeps. *Share* is the same interval as
+a fraction of the whole reachable range.
+
+| device | brightest neutral | brightest reachable | at | headroom | share of reachable |
+| --- | --- | --- | --- | --- | --- |
+| `rgbw` | 1.338544 | 1.623559 | hue 300, C 0.48 | **+21.3%** | 17.6% |
+| `non_d65_white` | 1.333993 | 1.633584 | hue 300, C 0.50 | **+22.5%** | 18.3% |
+| `rgbww` | 1.499835 | 1.748872 | hue 300, C 0.46 | **+16.6%** | 14.2% |
+| `rgbww_two_white` | 1.152403 | 1.167419 | hue 0, C 0.02 | +1.3% | 1.3% |
 
 So a chromatic target just above the neutral cap can be exactly reachable and
 is compressed anyway. That is #4245, and these are the first numbers on it for
-wide hulls -- up to **22% of reachable lightness** discarded on a four-emitter
-device. It is not fixed here: the clamp is what makes the chroma bisection
-valid at all (see "Lightness must be clamped before chroma"), and removing it
-without replacing the search inverts the bisection's invariant.
+wide hulls: on a four-emitter device the clamp gives up **22.5% on top of the
+neutral cap**, which is **18.3% of the reachable range**. It is not fixed
+here: the clamp is what makes the chroma bisection valid at all (see
+"Lightness must be clamped before chroma"), and removing it without replacing
+the search inverts the bisection's invariant.
 
 ## Not covered
 
