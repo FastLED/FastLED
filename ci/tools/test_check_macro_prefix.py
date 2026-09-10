@@ -1,0 +1,95 @@
+"""The macro-prefix ratchet has to catch the case that motivated it.
+
+`FASTLED_SAMD51_HW_SPI` (FastLED#4021) was a user-supplied opt-in: it appeared
+only as `#if defined(...)` and was never `#define`d in this repo. A checker
+that scanned definitions alone would have passed it, which is the failure
+these tests exist to prevent.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from ci.tools.check_macro_prefix import (
+    is_excluded,
+    load_baseline,
+    names_in,
+    render_baseline,
+    scan,
+)
+
+
+def test_a_reference_only_macro_is_found() -> None:
+    """The historical defect's exact shape: tested, never defined."""
+    source = "#if defined(FL_IS_SAMD51) && defined(FASTLED_SAMD51_HW_SPI)\n#endif\n"
+    assert names_in(source) == {"FASTLED_SAMD51_HW_SPI"}
+
+
+def test_a_definition_is_found() -> None:
+    assert names_in("#define FASTLED_SOMETHING 1\n") == {"FASTLED_SOMETHING"}
+
+
+def test_every_conditional_form_is_covered() -> None:
+    # `#ifdef`, `#ifndef` and `#elif` all name a macro just as `#if` does;
+    # missing one leaves a hole the next opt-in flag walks through.
+    for line in (
+        "#ifdef FASTLED_KNOB",
+        "#ifndef FASTLED_KNOB",
+        "#elif defined(FASTLED_KNOB)",
+        "#if FASTLED_KNOB > 0",
+        "#undef FASTLED_KNOB",
+        "  #  define FASTLED_KNOB 1",
+    ):
+        assert names_in(line + "\n") == {"FASTLED_KNOB"}, line
+
+
+def test_a_conforming_name_is_not_flagged() -> None:
+    assert names_in("#if defined(FL_SAMD51_HW_SPI)\n") == set()
+    assert names_in("#define FL_WATCHDOG_HAS_WINDOW_MODE 1\n") == set()
+
+
+def test_a_mention_outside_a_preprocessor_line_is_ignored() -> None:
+    # Prose and code that merely name a macro are not declarations of one;
+    # flagging them would make the checker unusable in commentary.
+    assert names_in("// FASTLED_SAMD51_HW_SPI is documented here\n") == set()
+    assert names_in('const char* s = "FASTLED_SAMD51_HW_SPI";\n') == set()
+
+
+def test_a_suppression_needs_a_reason() -> None:
+    with_reason = (
+        "// fl-lint: macro-prefix-ok(matches the Arduino core's own name)\n"
+        "#define FASTLED_EXTERNALLY_NAMED 1\n"
+    )
+    assert names_in(with_reason) == set()
+
+    # A bare marker is indistinguishable from someone silencing the check.
+    bare = "// fl-lint: macro-prefix-ok\n#define FASTLED_EXTERNALLY_NAMED 1\n"
+    assert names_in(bare) == {"FASTLED_EXTERNALLY_NAMED"}
+
+
+def test_a_same_line_suppression_works() -> None:
+    line = "#define FASTLED_X 1  // fl-lint: macro-prefix-ok(vendor header)\n"
+    assert names_in(line) == set()
+
+
+def test_vendored_code_is_out_of_scope() -> None:
+    assert is_excluded("third_party/minimp3/minimp3.h")
+    assert not is_excluded("platforms/arm/d51/spi_hw_2_samd51.cpp.hpp")
+
+
+def test_the_tree_matches_its_baseline() -> None:
+    """The ratchet is only meaningful if it is currently satisfied."""
+    from ci.tools.check_macro_prefix import BASELINE_PATH, SOURCE_ROOT
+
+    found = set(scan(SOURCE_ROOT))
+    baseline = load_baseline(BASELINE_PATH)
+    assert found - baseline == set(), "regenerate the baseline"
+    # Not vacuous: there really are names being tracked.
+    assert len(baseline) > 100
+
+
+def test_the_baseline_round_trips(tmp_path: Path) -> None:
+    names = ["FASTLED_A", "FASTLED_B"]
+    path = tmp_path / "baseline.txt"
+    path.write_text(render_baseline(names), encoding="utf-8")
+    assert load_baseline(path) == set(names)

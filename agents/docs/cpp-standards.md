@@ -178,6 +178,20 @@ reason.
 - Wrong: `FASTLED_STM32_F1`, `FASTLED_STM32` (missing `FL_IS_` prefix)
 - Wrong: `FL_STM32_F1`, `IS_STM32_F1` (incorrect prefix pattern)
 
+**Enforced, as of FastLED#4021.** `ci/tools/check_macro_prefix.py` runs inside
+`bash lint` and fails on a *new* `FASTLED_*` macro name. The ~490 existing ones
+are baselined -- most are public knobs users set in their own sketches, so
+renaming them would break people -- and the baseline may shrink freely.
+
+It matches names on preprocessor lines, so a macro that is only ever *tested*
+counts. That is deliberate: `FASTLED_SAMD51_HW_SPI` was a user-supplied opt-in
+appearing solely as `#if defined(...)`, never defined here, and a
+definitions-only check would have passed exactly the case that motivated the
+rule's enforcement.
+
+If a name genuinely has to match one published outside this repo, annotate it
+with `// fl-lint: macro-prefix-ok(<reason>)`. The reason is required.
+
 **Detection and Usage:**
 - Platform defines like `FL_IS_ARM`, `FL_IS_STM32`, `FL_IS_ESP32` and their variants
 - Feature detection like `FASTLED_STM32_HAS_TIM5`, `FASTLED_STM32_DMA_CHANNEL_BASED` (not platform IDs)
