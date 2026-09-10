@@ -237,6 +237,42 @@ bool feasibleChromaInterval(const i32 (&lab)[3], i32 lightness,
     return true;
 }
 
+/// The highest lightness at or below `requested` whose feasible chroma
+/// interval the probe scan can still find.
+///
+/// Without this the mapper is discontinuous at the top of the reachable
+/// region, and badly: holding the requested lightness works until the probes
+/// stop landing inside the interval, and the fallback then drops all the way
+/// to the neutral cap. Swept along a fixed hue at chroma 0.10 that step
+/// measured 0.91 in summed drive -- 234 eight-bit codes, against the ~1 code
+/// the rest of the mapper's paths stay inside.
+///
+/// Bisecting instead lands on the edge of the region rather than jumping past
+/// it, so the answer walks down continuously as the target rises. The neutral
+/// cap is the low end of the bracket because chroma zero is feasible there by
+/// construction, which is the invariant the search needs.
+///
+/// Costs `kGamutMapHalvings * kGamutMapProbes` feasibility tests, and only on
+/// an above-cap target whose interval was not found at its own lightness.
+template <typename Feasible>
+i32 highestReachableLightness(const i32 (&lab)[3], i32 cap, i32 requested,
+                              Feasible feasible) FL_NO_EXCEPT {
+    i32 low = cap;       // feasible: chroma zero is reachable at the cap
+    i32 high = requested; // not feasible, or the caller would not be here
+    for (int step = 0; step < kGamutMapHalvings; ++step) {
+        const i32 middle = low + ((high - low) >> 1);
+        i32 unused_low = 0;
+        i32 unused_high = 0;
+        if (feasibleChromaInterval(lab, middle, feasible, &unused_low,
+                                   &unused_high)) {
+            low = middle;
+        } else {
+            high = middle;
+        }
+    }
+    return low;
+}
+
 /// The target's chroma clamped into `[low, high]`, in factor space.
 i32 clampChromaFactor(i32 low, i32 high) FL_NO_EXCEPT {
     i32 factor = kGamutFullDrive;
@@ -350,8 +386,33 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
                 return;
             }
         }
-        // No seed, or the accepted candidate fell outside on the re-solve.
-        // Fall through to the clamp, which is what shipped before this.
+        // No seed at this lightness. Walking down to the highest lightness
+        // that still has one keeps the answer continuous; dropping straight
+        // to the neutral cap does not, and that step measured 234 eight-bit
+        // codes before this search was added.
+        const i32 reachable = highestReachableLightness(
+            lab, map.max_neutral_lightness, lightness, RgbFeasible{map.solve});
+        i32 edge_low = 0;
+        i32 edge_high = 0;
+        if (reachable > map.max_neutral_lightness &&
+            feasibleChromaInterval(lab, reachable, RgbFeasible{map.solve},
+                                   &edge_low, &edge_high)) {
+            i32 candidate_xyz[3];
+            chromaCandidateXyz(lab, reachable,
+                               clampChromaFactor(edge_low, edge_high),
+                               candidate_xyz);
+            i32 candidate[3];
+            solveRgbDrivesQ16(map.solve, candidate_xyz, candidate);
+            if (gamutDrivesAreInRange(candidate, kGamutFeasibilitySlack)) {
+                for (int i = 0; i < 3; ++i) {
+                    drives[i] = candidate[i];
+                }
+                clampGamutDrives(drives);
+                return;
+            }
+        }
+        // Nothing above the cap works for this hue at all. Fall through to
+        // the clamp, which is what shipped before #4245.
         lightness = map.max_neutral_lightness;
     }
 
@@ -498,6 +559,24 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
             chromaCandidateXyz(lab, lightness, clampChromaFactor(low_edge, high_edge),
                                candidate_xyz);
             if (allocateEmitterDrivesQ16(map.allocation, candidate_xyz, drives)) {
+                return;
+            }
+        }
+
+        // Same walk-down as the RGB path: dropping straight to the cap when
+        // the probes stop landing is a step, not a mapping.
+        const i32 reachable = highestReachableLightness(
+            lab, map.max_neutral_lightness, lightness,
+            RgbwFeasible{map.allocation});
+        i32 edge_low = 0;
+        i32 edge_high = 0;
+        if (reachable > map.max_neutral_lightness &&
+            feasibleChromaInterval(lab, reachable, RgbwFeasible{map.allocation},
+                                   &edge_low, &edge_high)) {
+            i32 edge_xyz[3];
+            chromaCandidateXyz(lab, reachable,
+                               clampChromaFactor(edge_low, edge_high), edge_xyz);
+            if (allocateEmitterDrivesQ16(map.allocation, edge_xyz, drives)) {
                 return;
             }
         }
@@ -661,6 +740,24 @@ void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
             chromaCandidateXyz(lab, lightness, clampChromaFactor(low_edge, high_edge),
                                candidate_xyz);
             if (allocateTwoWhiteDrivesQ16(map.allocation, candidate_xyz, drives)) {
+                return;
+            }
+        }
+
+        // Same walk-down as the RGB path: dropping straight to the cap when
+        // the probes stop landing is a step, not a mapping.
+        const i32 reachable = highestReachableLightness(
+            lab, map.max_neutral_lightness, lightness,
+            RgbwwFeasible{map.allocation});
+        i32 edge_low = 0;
+        i32 edge_high = 0;
+        if (reachable > map.max_neutral_lightness &&
+            feasibleChromaInterval(lab, reachable, RgbwwFeasible{map.allocation},
+                                   &edge_low, &edge_high)) {
+            i32 edge_xyz[3];
+            chromaCandidateXyz(lab, reachable,
+                               clampChromaFactor(edge_low, edge_high), edge_xyz);
+            if (allocateTwoWhiteDrivesQ16(map.allocation, edge_xyz, drives)) {
                 return;
             }
         }

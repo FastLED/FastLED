@@ -843,6 +843,29 @@ reproduces the table above:
 | L 1.398, hue 300, C 0.30 | 1.3978, 0.4431 |
 | L 1.398, hue 120, C 0.50 | 1.1182, 0.0000 |
 
+**The fallback had to walk, not jump.** The first version of this dropped
+straight to the neutral cap when the probes stopped landing inside the
+interval -- so the answer tracked the requested lightness up to the edge of
+the reachable region and then fell back to the cap in one step. Swept along
+hue 300 at chroma 0.10 that step measured 0.91 in summed drive, **234 eight-bit
+codes**, against the roughly one code the mapper's other paths stay inside.
+Before #4245 the same sweep was flat above the cap and therefore continuous,
+so this was a regression introduced by the fix.
+
+Bisecting lightness down to the highest reachable one instead lands on the
+edge rather than past it. Worst step over the same sweeps:
+
+| chroma | worst step |
+| --- | ---: |
+| 0.02 | 1 code |
+| 0.05 | 1 code |
+| 0.10 | 2 codes |
+| 0.20 | 3 codes |
+| 0.30 | 3 codes |
+
+It costs `kGamutMapHalvings * kGamutMapProbes` more feasibility tests, and only
+on an above-cap target whose interval was not found at its own lightness.
+
 **One deliberate difference from the harness.** The study probes to an
 absolute `PROBE_CEILING = 0.8`; the mapper works in factors of the request and
 reaches four times it. Both reproduce every row above, and they differ only on
