@@ -34,8 +34,9 @@ def test_all_example_shards_are_disjoint_and_exhaustive() -> None:
     parser = CompilationArgumentParser(ROOT)
     all_examples = parser._discover_all_examples()
 
-    shards = [
-        parser.parse(
+    shards: list[list[str]] = []
+    for index in range(SHARD_COUNT):
+        parsed = parser.parse(
             [
                 "esp32s3",
                 "all",
@@ -44,11 +45,14 @@ def test_all_example_shards_are_disjoint_and_exhaustive() -> None:
                 "--shard-count",
                 str(SHARD_COUNT),
             ]
-        ).examples
-        for index in range(SHARD_COUNT)
-    ]
+        )
+        shards.append(parsed.examples)
 
-    flattened = [example for shard in shards for example in shard]
+    flattened: list[str] = []
+    for shard in shards:
+        for example in shard:
+            flattened.append(example)
+
     assert sorted(flattened) == all_examples
     assert len(flattened) == len(set(flattened))
     assert max(map(len, shards)) - min(map(len, shards)) <= 1
