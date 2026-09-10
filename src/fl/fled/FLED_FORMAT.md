@@ -220,9 +220,36 @@ tuple, so old readers degrade to reduced fidelity, never to wrong data. That is
 why adding `video.color` is not a version bump.
 
 Payloads whose color semantics are **mandatory** rather than advisory gate on a
-new `pixel_format` value instead, and readers that predate one already reject
-unknown pixel formats. Mandatory-ness is a property of the payload format, not
-a version flag.
+new `pixel_format` value instead. Mandatory-ness is a property of the payload
+format, not a version flag.
+
+That gate only holds for readers that actually validate the format field, and
+it is worth being exact about which ones do, because FastLED's own reader is
+the counterexample (FastLED #4156 R1). `PixelStream::begin()` recognizes FLED
+v1 with `rgb8`; on **any** other format or version it used to rewind to byte
+zero and succeed as a headerless `.rgb` stream. A seekable `rgb16_linear` file
+with enough bytes was therefore played as raw data, and its first `readPixel()`
+returned the ASCII magic `FLE` — RGB `(70, 76, 69)`, a near-neutral dark grey — rather
+than refusing the file. Header bytes reaching the LEDs is the failure this
+paragraph was asserting could not happen.
+
+The reader now distinguishes absent magic from recognized-but-unsupported
+FLED: no magic still falls back to raw RGB, but once `FLED` is matched, every
+invalidity — unsupported format, future version, reserved bytes set, truncated
+header, malformed envelope — closes the stream and fails. Non-seekable input
+is not itself an invalidity: a stream whose first bytes are not `FLED` still
+plays as raw RGB, and `probeStreamingMagic()` buffers a partial prefix until
+there are enough bytes to decide. What it cannot do is admit a *recognized*
+FLED container, because the header cannot be re-read, so that case is
+refused rather than replayed as pixels.
+So the gate is true going forward and **false for every FastLED release up to
+and including 3.10.5**; the fix is newer than that tag. Adding a format enum
+cannot repair binaries already in the field.
+
+For producers that is a deployment constraint, not a format one: shipping
+`rgb16_linear` to an audience that may be running a released FastLED means the
+old players show grey noise instead of rejecting the file. Gate on the player,
+not on the container.
 
 "Mandatory" is about *unresolvable* declarations, not about *absent* ones, and
 the two are easy to run together. `rgb16_linear` carries a default tuple like
