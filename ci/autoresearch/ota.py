@@ -150,6 +150,35 @@ def ota_chunk_is_deliverable(chunk_bytes: int, character_limit: int) -> bool:
     return encoded_characters <= character_limit
 
 
+def ota_largest_request_bytes(artifact_bytes: int, chunk_bytes: int) -> int:
+    """The largest slice a transfer of this artifact will actually send.
+
+    The chunk size only when the artifact is at least that big: a shorter
+    artifact sends one shorter request, and judging it against the chunk
+    would refuse a transfer that would have worked.
+    """
+
+    if artifact_bytes < chunk_bytes:
+        return artifact_bytes
+    return chunk_bytes
+
+
+def ota_transfer_is_deliverable(
+    artifact_bytes: int, chunk_bytes: int, character_limit: int
+) -> bool:
+    """Whether every request in this transfer fits the device's limit.
+
+    The preflight's whole decision, in one place a test can call. Keeping it
+    inline meant a case could only check the pieces and would pass with the
+    preflight wired to the wrong one -- which is exactly what happened on the
+    first attempt at covering this.
+    """
+
+    return ota_chunk_is_deliverable(
+        ota_largest_request_bytes(artifact_bytes, chunk_bytes), character_limit
+    )
+
+
 async def run_ota_peer_autoresearch(
     upload_port: str,
     peer_upload_port: str,
@@ -253,12 +282,20 @@ async def run_ota_peer_autoresearch(
         # image -- about 21 minutes against a 12 minute run budget. So both
         # candidate values fail today, one quickly and one slowly, and the
         # real fix is device-side. FastLED#3956.
-        if not ota_chunk_is_deliverable(
-            kOtaChunkBytes, kOtaLargestAnsweredRequestCharacters
+        # The largest slice this transfer will actually send, which is the
+        # chunk size only when the artifact is at least that big. An artifact
+        # shorter than one chunk sends one shorter request, and rejecting it
+        # against `kOtaChunkBytes` would refuse a transfer that would have
+        # worked -- a 321-byte artifact is one 428-character request, inside
+        # the measured limit.
+        largest_slice = ota_largest_request_bytes(len(artifact), kOtaChunkBytes)
+        if not ota_transfer_is_deliverable(
+            len(artifact), kOtaChunkBytes, kOtaLargestAnsweredRequestCharacters
         ):
             raise RuntimeError(
-                f"OTA artifact transfer cannot run: a {kOtaChunkBytes}-byte "
-                f"chunk base64-expands past the measured "
+                f"OTA artifact transfer cannot run: the largest request this "
+                f"{len(artifact)}-byte artifact sends is {largest_slice} bytes, "
+                f"which base64-expands past the measured "
                 f"{kOtaLargestAnsweredRequestCharacters}-character request limit, so "
                 f"writeOtaArtifact will not be answered. This is FastLED#3956 "
                 f"and is device-side; lowering the chunk to 256 transfers "

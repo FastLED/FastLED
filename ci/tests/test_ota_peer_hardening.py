@@ -18,6 +18,8 @@ from ci.autoresearch.ota import (
     kOtaChunkBytes,
     kOtaLargestAnsweredRequestCharacters,
     ota_chunk_is_deliverable,
+    ota_largest_request_bytes,
+    ota_transfer_is_deliverable,
 )
 
 
@@ -242,6 +244,34 @@ class TestOtaChunkDeliverability(unittest.TestCase):
         self.assertTrue(ota_chunk_is_deliverable(320, limit))  # 428 chars
         self.assertFalse(ota_chunk_is_deliverable(384, limit))  # 512 chars
         self.assertFalse(ota_chunk_is_deliverable(512, limit))  # 684 chars
+
+    def test_an_artifact_shorter_than_a_chunk_is_judged_on_what_it_sends(
+        self,
+    ) -> None:
+        """The preflight prices the largest *actual* request, not the constant.
+
+        A transfer sends `min(kOtaChunkBytes, len(artifact))` in its largest
+        request. Judging a short artifact against the 512-byte chunk would
+        refuse one that would have worked: 321 bytes is a single
+        428-character request, inside the measured limit, while 512 bytes is
+        684 and outside it.
+        """
+
+        limit = kOtaLargestAnsweredRequestCharacters
+        # Through the function the preflight calls, not by recomputing the
+        # `min` here. A case that did the arithmetic itself passed with the
+        # preflight still wired to the constant -- it checked the pieces and
+        # not the decision.
+        self.assertTrue(ota_transfer_is_deliverable(321, kOtaChunkBytes, limit))
+        # And what judging the constant alone would have claimed about it.
+        self.assertFalse(ota_chunk_is_deliverable(kOtaChunkBytes, limit))
+        # An artifact at or above one chunk is judged on the chunk, which is
+        # the case that still fails today.
+        self.assertFalse(ota_transfer_is_deliverable(4096, kOtaChunkBytes, limit))
+        self.assertEqual(ota_largest_request_bytes(321, kOtaChunkBytes), 321)
+        self.assertEqual(
+            ota_largest_request_bytes(4096, kOtaChunkBytes), kOtaChunkBytes
+        )
 
     def test_the_expansion_rounds_up_to_a_whole_base64_group(self) -> None:
         """Three bytes to four characters, padded."""
