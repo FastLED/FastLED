@@ -162,3 +162,44 @@ def test_a_genuine_line_comment_still_suppresses() -> None:
     assert names_in(above) == set()
     same_line = "#define FASTLED_OK 1  // fl-lint: macro-prefix-ok(vendor name)\n"
     assert names_in(same_line) == set()
+
+
+def test_a_literal_spanning_a_continuation_does_not_break_the_splice() -> None:
+    """Splice before masking, or the backslash the splice needs is gone.
+
+    A string literal spanning a backslash-newline inside a continued
+    directive is legal C. Masking it first blanked the backslash, the
+    continuation broke, and the name on the next physical line was never seen
+    as part of a directive -- a false negative.
+    """
+    source = '#define BANNER "abc\\\ndef" \\\n    FASTLED_HIDDEN\n'
+    assert names_in(source) == {"FASTLED_HIDDEN"}
+
+
+def test_a_directive_inside_a_raw_string_is_not_a_directive() -> None:
+    source = (
+        'const char* k = R"json(\n'
+        "#define FASTLED_IN_RAW 1\n"
+        ')json";\n'
+        "#define FASTLED_REAL 1\n"
+    )
+    # The real macro after the literal must still be found.
+    assert names_in(source) == {"FASTLED_REAL"}
+
+
+def test_a_raw_string_body_may_contain_a_close_paren() -> None:
+    # The delimiter is back-matched, which is what makes a bare `)` in the
+    # body harmless; a non-delimiter-aware pattern would end the literal
+    # early and expose the rest.
+    source = (
+        'const char* k = R"j(a) not the end\n'
+        "#define FASTLED_HIDDEN 1\n"
+        ')j";\n'
+        "#define FASTLED_REAL 1\n"
+    )
+    assert names_in(source) == {"FASTLED_REAL"}
+
+
+def test_a_prefixed_raw_string_is_recognised() -> None:
+    source = 'const char* k = u8R"x(\n#define FASTLED_IN_RAW 1\n)x";\n'
+    assert names_in(source) == set()

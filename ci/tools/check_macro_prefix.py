@@ -49,12 +49,23 @@ BASELINE_PATH = Path(__file__).resolve().parent / "macro_prefix_baseline.txt"
 PREPROCESSOR_RE = re.compile(r"^\s*#\s*(define|undef|if|ifdef|ifndef|elif)\b")
 NAME_RE = re.compile(r"FASTLED_[A-Za-z0-9_]+")
 
-# String/char literals and block comments. Blanked first, leaving `//`
-# comments intact, so that afterwards a `//` really is a line comment rather
-# than something inside a string. Length- and newline-preserving, because the
-# suppression lookup indexes by physical line.
+# Raw strings first: `R"j(...)j"` must not be read as `R` followed by an
+# ordinary `"..."`, and its body may contain anything -- including a line that
+# looks exactly like a directive. The delimiter is captured and back-matched,
+# which is what makes `)` inside the body harmless.
+#
+# Limit worth stating: a backslash-newline inside a raw string is spliced by
+# the pass above, which C++ does not do. No such literal exists in this tree,
+# and chasing it would mean recognising raw strings before splicing -- a
+# tokeniser, for a case nobody writes.
+RAW_STRING = r'(?:u8|u|U|L)?R"([^()\\ \t\n]{0,16})\(.*?\)\1"'
+
+# String/char literals and block comments. Blanked after the splice, leaving
+# `//` comments intact, so that afterwards a `//` really is a line comment
+# rather than something inside a string. Length- and newline-preserving,
+# because the suppression lookup indexes by line.
 LITERAL_OR_BLOCK_RE = re.compile(
-    r"/\*.*?\*/" r'|"(?:\\.|[^"\\\n])*"' r"|'(?:\\.|[^'\\\n])*'",
+    RAW_STRING + r"|/\*.*?\*/" + r'|"(?:\\.|[^"\\\n])*"' + r"|'(?:\\.|[^'\\\n])*'",
     re.S,
 )
 
@@ -118,34 +129,45 @@ def _blank(match: "re.Match[str]") -> str:
 def names_in(text: str) -> set[str]:
     """Every `FASTLED_*` name this file defines or tests, minus suppressed ones.
 
-    The order is the substance. Literals and block comments go first, so what
-    is left of a `//` really is a line comment; suppressions are then read
-    only out of those; and only then are the line comments themselves blanked
-    for the name scan.
+    The order is the substance, and it took two goes to get right:
 
-    Reading suppressions off the raw text instead lets a marker inside a
-    string or a block comment silence a real macro -- a hole in the
-    `// fl-lint: macro-prefix-ok(<reason>)` contract rather than a use of it.
+    1. **Splice first, on the raw text.** Masking first destroys the very
+       backslash the splice needs -- a string literal spanning a
+       backslash-newline inside a continued directive is legal C, and blanking
+       it left the continuation broken, so a name on the next physical line
+       was never seen as part of a directive. That is a false negative, the
+       direction that matters for a ratchet.
+    2. **Then mask literals and block comments**, in one alternation so a
+       `//` inside a string is not read as a comment and a `/*` inside a
+       string does not open one. Masking the whole document rather than each
+       line, because a block comment may span lines.
+    3. **Then read suppressions, only out of what is left of a `//`.** A
+       marker inside a string or a block comment is a way past the check
+       rather than a use of it.
+    4. **Then blank the line comments** and scan.
+
+    Doing any two of these in the other order reopens one hole or another.
     """
 
-    masked = LITERAL_OR_BLOCK_RE.sub(_blank, text)
+    spliced = _splice(text.split("\n"))
+    document = "\n".join(line for line, _ in spliced)
+    masked = LITERAL_OR_BLOCK_RE.sub(_blank, document)
+    masked_lines = masked.split("\n")
 
     suppressed: set[int] = set()
-    for index, line in enumerate(masked.split("\n")):
+    for index, line in enumerate(masked_lines):
         marker = line.find("//")
         if marker != -1 and SUPPRESSION_RE.search(line[marker:]):
             suppressed.add(index)
             suppressed.add(index + 1)
 
-    code_text = LINE_COMMENT_RE.sub(_blank, masked)
-
     found: set[str] = set()
-    for line, first_physical_line in _splice(code_text.split("\n")):
+    for index, line in enumerate(masked_lines):
         if PREPROCESSOR_RE.match(line) is None:
             continue
-        if first_physical_line in suppressed:
+        if index in suppressed:
             continue
-        for name in NAME_RE.findall(line):
+        for name in NAME_RE.findall(LINE_COMMENT_RE.sub(" ", line)):
             found.add(name)
     return found
 
