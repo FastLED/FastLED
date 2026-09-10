@@ -438,16 +438,25 @@ FL_TEST_CASE("the float-free build lands close to the float one") {
     // of the study is that quantising the profile first costs something -- so
     // this bounds the difference rather than pinning it away.
     //
-    // Measured worst coefficient difference over the corpus: 38 raw units,
-    // which the study prices at 0.1085 dE2000 against A1's 0.5.
+    // Measured worst coefficient difference: **34** raw units, and all of it
+    // is `narrow`. Across the three well-conditioned profiles the worst is
+    // **2**, so a version of this case that left `narrow` out -- as the first
+    // one did -- bounded a value of 2 at 64 and would have passed through
+    // almost any divergence. The study prices this at 0.1085 dE2000 against
+    // A1's 0.5.
+    // All four the study prices, `narrow` included. Leaving out the
+    // near-degenerate set would exclude the profile where the two
+    // derivations are most likely to part company, which is the opposite of
+    // what a comparison is for.
     const float kFloatXy[][6] = {
         {0.6400f, 0.3300f, 0.3000f, 0.6000f, 0.1500f, 0.0600f},
         {0.7080f, 0.2920f, 0.1700f, 0.7970f, 0.1310f, 0.0460f},
         {0.6800f, 0.3200f, 0.2650f, 0.6900f, 0.1500f, 0.0600f},
+        {0.6400f, 0.3300f, 0.5000f, 0.4200f, 0.4400f, 0.4000f},
     };
     i32 worst = 0;
     int compared = 0;
-    for (int index = 0; index < 3; ++index) {
+    for (int index = 0; index < 4; ++index) {
         const float* xy = kFloatXy[index];
         colorimetric_response::EmitterProfile as_float = {};
         as_float.xy_r[0] = xy[0]; as_float.xy_r[1] = xy[1];
@@ -480,12 +489,13 @@ FL_TEST_CASE("the float-free build lands close to the float one") {
             }
         }
     }
-    FL_CHECK_EQ(compared, 27);
-    FL_CHECK_LT(worst, 64);
-    // Bounded below as well: if the two paths ever agreed exactly, one of
-    // them would have stopped being what it claims to be, and every bound
-    // above would be comparing a matrix with itself.
-    FL_CHECK_GT(worst, 0);
+    FL_CHECK_EQ(compared, 36);
+    // Bracketed rather than capped, now that the number means something.
+    // Both arms are deterministic integer paths over a fixed corpus, so this
+    // cannot drift on its own -- anything that moves it is a change to a
+    // derivation and should be looked at, in either direction.
+    FL_CHECK_LT(worst, 40);
+    FL_CHECK_GT(worst, 28);
 }
 
 FL_TEST_CASE("the float-free build scales an emitter by its luminance") {
@@ -506,9 +516,13 @@ FL_TEST_CASE("the float-free build scales an emitter by its luminance") {
         const i32 actual = dimmed.m[1][col];
         FL_CHECK_LT(actual - doubled, 2);
         FL_CHECK_GT(actual - doubled, -2);
-        // And the other rows do not move, because only green's column did.
+        // And *both* other rows stay put, because only green's column moved.
+        // Checking one of them would let a defect in the other through, and
+        // the sentence above claims both.
         FL_CHECK_LT(dimmed.m[0][col] - unit.m[0][col], 2);
         FL_CHECK_GT(dimmed.m[0][col] - unit.m[0][col], -2);
+        FL_CHECK_LT(dimmed.m[2][col] - unit.m[2][col], 2);
+        FL_CHECK_GT(dimmed.m[2][col] - unit.m[2][col], -2);
     }
 }
 
