@@ -942,14 +942,20 @@ FL_TEST_CASE("CQ_OCTAVE leaves gaps in the range it declares, LOG_REBIN does not
     // an open issue, so if they close, that is a change someone made and
     // should record -- not something to absorb silently. The message says so,
     // because a bound that fails on good news has to explain itself.
-    if (octave_512_16.dead < 10) {
+    //
+    // One constant for both, so the warning cannot stop covering the failure
+    // it exists to explain. Written as two separate numbers first, and
+    // exactly 10 fell between them: the check failed and the message did not
+    // print. FastLED#4306.
+    const int kRecordedGapFloor = 10;
+    if (octave_512_16.dead <= kRecordedGapFloor) {
         FL_WARN_F("CQ_OCTAVE coverage at 512/16 improved to %d dead tones of "
                   "%d, from the 33 recorded here. That is good news, not a "
                   "failure: find what changed, note it on FastLED#4301, and "
                   "re-pin this bound.",
                   octave_512_16.dead, kSteps);
     }
-    FL_CHECK_GT(octave_512_16.dead, 10);
+    FL_CHECK_GT(octave_512_16.dead, kRecordedGapFloor);
     FL_CHECK_LT(octave_512_16.dead, 60);
 
     // And the gaps are not the price of resolution: on the same
