@@ -8,6 +8,12 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "hsv2rgb.h"
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/crgb.h"
+#include "fl/gfx/oklab_q16.h"
+#include "fl/math/ease.h"
+#include "fl/math/math.h"
+#include "fl/stl/int.h"
 
 
 FL_TEST_CASE("RGB to HSV16 to RGB") {
@@ -401,3 +407,322 @@ FL_TEST_CASE("colorBoost() preserves hue - hard cases") {
 FL_TEST_FILE(FL_FILEPATH) {
 
 } // FL_TEST_FILE
+
+// Intrinsic hue and neutral distortion of FastLED's 8-bit shaping paths,
+// for the colour pipeline's P8 section-5 study (#4042).
+//
+// Section 5 asks which strategy best spends a WS2812's 8 bits. Before that
+// can be answered, each candidate path has to be characterised on its own:
+// a path that moves hue or tints neutrals by itself cannot be part of the
+// answer, whatever it does for smoothness.
+//
+// The paths run here are the shipping functions, not models of them --
+// re-implementing `colorBoost()` or the HSV16 round trip in a harness would
+// score a paraphrase. Scoring likewise uses the shipping colorimetry
+// (`rgb_source_to_XYZ` + `xyzToOklabQ16`) rather than a second copy.
+//
+// Measured numbers and what they rule in or out:
+// docs/color-ws2812-shaping-paths.md
+//
+// Grouped into `tests/fl/gfx/hsv16.cpp` rather than standing alone: the
+// paths under test are `HSV16::ToRGB` and `CRGB::colorBoost`, both of which
+// live in `fl/gfx/hsv16.h`, and each extra test file costs compile time.
+
+
+using namespace fl;
+using namespace fl::colorimetric_response;
+
+namespace ws2812_shaping {
+namespace {
+
+constexpr float kQ16 = 65536.0f;
+constexpr float kPi = 3.14159265358979323846f;
+
+struct Oklab {
+    float lightness;
+    float a;
+    float b;
+};
+
+/// Built by value on each call rather than cached in a function-local
+/// static. A static inside a header gets one copy per module that links it,
+/// which is a real portability trap (see the BusTraits singleton note in
+/// tests/fl/channels/channel.cpp) and buys nothing here: this is a 3x3
+/// inverse.
+RgbColorimetricCache ws2812Cache() {
+    RgbColorimetricCache cache;
+    const bool built = build_rgb_colorimetric_cache(
+        fl::colorimetric_response::profiles::WS2812B, &cache);
+    FL_ASSERT(built, "WS2812B primaries must not be singular");
+    return cache;
+}
+
+/// The light an 8-bit code triple actually produces, in OKLab.
+///
+/// A WS2812 drives its diodes with linear PWM, so the code *is* the drive.
+/// Nothing here re-applies a transfer function: that is the point of the
+/// measurement, since every path under test is claiming to shape the codes.
+Oklab lightOf(const CRGB& code) {
+    float xyz[3];
+    const RgbColorimetricCache cache = ws2812Cache();
+    rgb_source_to_XYZ(cache, static_cast<float>(code.r) / 255.0f,
+                      static_cast<float>(code.g) / 255.0f,
+                      static_cast<float>(code.b) / 255.0f, xyz);
+    const i32 q16[3] = {
+        static_cast<i32>(xyz[0] * kQ16 + 0.5f),
+        static_cast<i32>(xyz[1] * kQ16 + 0.5f),
+        static_cast<i32>(xyz[2] * kQ16 + 0.5f),
+    };
+    i32 lab[3];
+    xyzToOklabQ16(q16, lab);
+    return Oklab{static_cast<float>(lab[0]) / kQ16,
+                 static_cast<float>(lab[1]) / kQ16,
+                 static_cast<float>(lab[2]) / kQ16};
+}
+
+float chromaOf(const Oklab& lab) {
+    return fl::sqrtf(lab.a * lab.a + lab.b * lab.b);
+}
+
+/// Absolute hue difference in degrees, wrapped into [0, 180].
+///
+/// Returns 180 -- the worst possible answer -- when either colour has
+/// collapsed to the neutral axis while the other has not. Hue is undefined
+/// there, and returning 0 would let a path that destroys all chroma score as
+/// perfectly hue-preserving, which is the failure this metric exists to
+/// catch.
+float hueDriftDegrees(const Oklab& before, const Oklab& after) {
+    constexpr float kChromaFloor = 1e-6f;
+    const float chroma_before = chromaOf(before);
+    const float chroma_after = chromaOf(after);
+    const bool before_neutral = chroma_before < kChromaFloor;
+    const bool after_neutral = chroma_after < kChromaFloor;
+    if (before_neutral && after_neutral) {
+        return 0.0f;
+    }
+    if (before_neutral != after_neutral) {
+        return 180.0f;
+    }
+    const float first = fl::atan2f(before.b, before.a);
+    const float second = fl::atan2f(after.b, after.a);
+    float difference = (second - first) * 180.0f / kPi;
+    while (difference > 180.0f) {
+        difference -= 360.0f;
+    }
+    while (difference < -180.0f) {
+        difference += 360.0f;
+    }
+    return fl::fabsf(difference);
+}
+
+CRGB pathIdentity(const CRGB& in) { return in; }
+
+CRGB pathHsv16RoundTrip(const CRGB& in) { return HSV16(in).ToRGB(); }
+
+CRGB pathColorBoostSaturation(const CRGB& in) {
+    return in.colorBoost(EaseType::EASE_IN_QUAD, EaseType::EASE_NONE);
+}
+
+CRGB pathColorBoostLuminance(const CRGB& in) {
+    return in.colorBoost(EaseType::EASE_NONE, EaseType::EASE_IN_QUAD);
+}
+
+/// Saturated inputs across the hue circle, at the drive levels that matter.
+///
+/// The interesting range is the bottom few percent: linear quantisation is
+/// already inside a quarter of a dE2000 above ten percent, so a path only
+/// has to earn its keep down low.
+struct Sample {
+    CRGB code;
+    int level;
+    int saturation;
+};
+
+fl::vector<Sample> darkHueSweep() {
+    fl::vector<Sample> samples;
+    const int levels[] = {1, 2, 3, 5, 8, 13, 26, 64, 128, 255};
+    // Saturation has to vary. A fully saturated sweep makes
+    // `colorBoost(EASE_IN_QUAD, ...)` a no-op -- there is no headroom left to
+    // boost -- and it would score as perfectly colour-preserving for the one
+    // reason that says nothing about it.
+    const int saturations[] = {96, 176, 255};
+    for (int level : levels) {
+        for (int saturation : saturations) {
+            for (int step = 0; step < 12; ++step) {
+                const CHSV hsv(static_cast<u8>(step * 21),
+                               static_cast<u8>(saturation),
+                               static_cast<u8>(level));
+                CRGB rgb;
+                hsv2rgb_rainbow(hsv, rgb);
+                samples.push_back(Sample{rgb, level, saturation});
+            }
+        }
+    }
+    return samples;
+}
+
+/// True when a path has driven a coloured input all the way to black.
+///
+/// Tracked separately from hue drift: folding it in reports 180 degrees,
+/// which is arithmetically right and analytically useless -- the interesting
+/// fact is that the colour is gone, not that its hue moved.
+bool collapsedToBlack(const CRGB& before, const CRGB& after) {
+    const bool had_light = before.r != 0 || before.g != 0 || before.b != 0;
+    const bool has_light = after.r != 0 || after.g != 0 || after.b != 0;
+    return had_light && !has_light;
+}
+
+/// Codes that render a D65 neutral at the given luminance on this profile.
+///
+/// Equal codes are NOT a neutral here: the profile normalises each emitter to
+/// unit luminance, so an equal-drive triple is neither D65 nor unit
+/// luminance. Measuring "does grey stay grey" on equal drives scores the
+/// device normalisation rather than the path -- the mistake this helper
+/// exists to prevent.
+CRGB neutralCodes(float luminance) {
+    float target[3];
+    xyY_to_XYZ(0.3127f, 0.3290f, luminance, target);
+    float drives[3];
+    const RgbColorimetricCache cache = ws2812Cache();
+    matvec3(cache.P_RGB_inv, target, drives);
+    CRGB out;
+    out.r = quantize_u8(drives[0]);
+    out.g = quantize_u8(drives[1]);
+    out.b = quantize_u8(drives[2]);
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("The sweep reaches the dark, partly-saturated inputs the study is about") {
+    // Every bound below is quantified over this sweep. An all-bright or
+    // fully-saturated one would make them pass without measuring anything --
+    // and a fully saturated sweep in particular makes `colorBoost`'s
+    // saturation easing a no-op, since there is no headroom left to boost.
+    const fl::vector<Sample> samples = darkHueSweep();
+    FL_CHECK_EQ(samples.size(), fl::size(360));
+    int dark = 0;
+    int unsaturated = 0;
+    for (const Sample& sample : samples) {
+        if (sample.level <= 13) {
+            ++dark;
+        }
+        if (sample.saturation < 255) {
+            ++unsaturated;
+        }
+    }
+    FL_CHECK_EQ(dark, 216);
+    FL_CHECK_EQ(unsaturated, 240);
+}
+
+FL_TEST_CASE("Identity is hue-exact, so the metric is not reporting round-trip noise") {
+    // A control. Without it every number below could be measuring the
+    // colorimetry round trip rather than the path.
+    float worst = 0.0f;
+    for (const Sample& sample : darkHueSweep()) {
+        worst = fl::max(worst, hueDriftDegrees(lightOf(sample.code),
+                                               lightOf(pathIdentity(sample.code))));
+    }
+    FL_CHECK_EQ(worst, 0.0f);
+}
+
+FL_TEST_CASE("The HSV16 round trip is colour-preserving to within a code") {
+    float worst_hue = 0.0f;
+    float worst_gain = 0.0f;
+    float worst_loss = 2.0f;
+    int collapses = 0;
+    for (const Sample& sample : darkHueSweep()) {
+        const CRGB out = pathHsv16RoundTrip(sample.code);
+        if (collapsedToBlack(sample.code, out)) {
+            ++collapses;
+            continue;
+        }
+        const Oklab before = lightOf(sample.code);
+        const Oklab after = lightOf(out);
+        if (chromaOf(before) > 0.01f && chromaOf(after) > 0.01f) {
+            worst_hue = fl::max(worst_hue, hueDriftDegrees(before, after));
+            const float ratio = chromaOf(after) / chromaOf(before);
+            worst_gain = fl::max(worst_gain, ratio);
+            worst_loss = fl::min(worst_loss, ratio);
+        }
+    }
+    // Measured 0.649 deg, 0.973x .. 1.003x. Bracketed on both sides: a
+    // one-sided bound would still pass if the metric collapsed to zero.
+    FL_CHECK(worst_hue < 1.0f);
+    FL_CHECK(worst_hue > 0.1f);
+    FL_CHECK(worst_gain < 1.05f);
+    FL_CHECK(worst_loss > 0.95f);
+    FL_CHECK_EQ(collapses, 0);
+}
+
+FL_TEST_CASE("colorBoost zeroes minor channels at low codes, moving hue a long way") {
+    // The finding that rules it out as a hue-preserving re-encoding. It is an
+    // appearance control and changes the colour on purpose; section 5 needs
+    // to know it cannot be used as a neutral 8-bit shaping stage.
+    const CRGB dim(1, 3, 1);
+    const CRGB boosted = pathColorBoostSaturation(dim);
+    FL_CHECK_EQ(boosted.r, u8(0));
+    FL_CHECK_EQ(boosted.g, u8(3));
+    FL_CHECK_EQ(boosted.b, u8(0));
+
+    float worst_hue = 0.0f;
+    int scored = 0;
+    for (const Sample& sample : darkHueSweep()) {
+        const CRGB out = pathColorBoostSaturation(sample.code);
+        if (collapsedToBlack(sample.code, out)) {
+            continue;
+        }
+        const Oklab before = lightOf(sample.code);
+        const Oklab after = lightOf(out);
+        if (chromaOf(before) > 0.01f && chromaOf(after) > 0.01f) {
+            worst_hue = fl::max(worst_hue, hueDriftDegrees(before, after));
+            ++scored;
+        }
+    }
+    // 142.969 deg measured, on a sample that stays visibly chromatic on both
+    // sides -- so this is a real hue shift, not the ill-conditioning that
+    // afflicts hue near the neutral axis.
+    FL_CHECK(worst_hue > 100.0f);
+    FL_CHECK(scored > 300);
+}
+
+FL_TEST_CASE("colorBoost luminance easing is a dimming curve, not an encoding") {
+    int collapses = 0;
+    const fl::vector<Sample> samples = darkHueSweep();
+    for (const Sample& sample : samples) {
+        if (collapsedToBlack(sample.code, pathColorBoostLuminance(sample.code))) {
+            ++collapses;
+        }
+    }
+    // 254 of 360 measured. Quadratic easing on an 8-bit value drives dark
+    // content to zero, which is exactly the range section 5 is about.
+    FL_CHECK(collapses > 200);
+    FL_CHECK(collapses < static_cast<int>(samples.size()));
+}
+
+FL_TEST_CASE("The neutral axis leaves the axis from quantization alone") {
+    // Evaluated on a real D65 neutral target, not on equal drives: this
+    // profile normalises each emitter to unit luminance, so equal codes are
+    // neither D65 nor unit luminance, and scoring them measures the device
+    // normalisation instead of the path.
+    float worst_identity = 0.0f;
+    float worst_hsv16 = 0.0f;
+    float worst_boost = 0.0f;
+    for (int step = 1; step <= 100; ++step) {
+        const CRGB grey = neutralCodes(static_cast<float>(step) / 100.0f);
+        worst_identity = fl::max(worst_identity, chromaOf(lightOf(grey)));
+        worst_hsv16 =
+            fl::max(worst_hsv16, chromaOf(lightOf(pathHsv16RoundTrip(grey))));
+        worst_boost =
+            fl::max(worst_boost, chromaOf(lightOf(pathColorBoostLuminance(grey))));
+    }
+    // 0.0605 at 2% luminance, from rounding three drives to 8 bits. This is
+    // the number any section-5 dithering strategy has to beat.
+    FL_CHECK(worst_identity > 0.05f);
+    FL_CHECK(worst_identity < 0.07f);
+    // Neither existing path improves it, and the boost makes it worse.
+    FL_CHECK_EQ(worst_hsv16, worst_identity);
+    FL_CHECK(worst_boost > worst_identity);
+}
+
+}  // namespace ws2812_shaping
