@@ -12,6 +12,7 @@
 #include "test.h"
 
 #include "fl/fs/embedded/embedded_fs.h"
+#include "fl/fs/testing.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -46,6 +47,104 @@ FL_TEST_CASE("a failed mount leaves the FileSystem safe to use") {
 
     // And tearing down an unmounted filesystem is harmless.
     fs.end();
+}
+
+// ---------------------------------------------------------------------------
+// The host backend (#4007 question 3)
+//
+// #4007 asked whether the stub should implement this, and answered its own
+// question: "Mapping it to a scratch directory would let host tests exercise
+// real read paths instead of only the null-fallback contract." Everything
+// above tests the null fallback. These test the read path.
+//
+// The root is opt-in, so the cases above still see null and still mean what
+// they meant.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// A file that exists under tests/data and is not going anywhere.
+const char *kEmbeddedRoot = "tests/data";
+const char *kExistingFile = "audio/README.md";
+
+struct ScopedEmbeddedRoot {
+    explicit ScopedEmbeddedRoot(const char *root) {
+        fl::setTestEmbeddedFileSystemRoot(root);
+    }
+    ~ScopedEmbeddedRoot() { fl::setTestEmbeddedFileSystemRoot(nullptr); }
+};
+
+// The SD root is global too, and a failed FL_REQUIRE leaves the rest of the
+// case unrun -- so clearing it on the way out has to be the destructor's job
+// rather than a line at the bottom.
+struct ScopedSdRoot {
+    explicit ScopedSdRoot(const char *root) { fl::setTestFileSystemRoot(root); }
+    ~ScopedSdRoot() { fl::setTestFileSystemRoot(nullptr); }
+};
+
+} // namespace
+
+FL_TEST_CASE("the host backend stays null until a test asks for it") {
+    // Every case above depends on this. If pointing the host at a directory
+    // became the default, they would stop testing the no-embedded-storage
+    // contract and nothing would say so.
+    fl::setTestEmbeddedFileSystemRoot(nullptr);
+    FL_CHECK(!fl::getEmbeddedFs());
+}
+
+FL_TEST_CASE("the host backend reads a real file once a root is set") {
+    ScopedEmbeddedRoot root(kEmbeddedRoot);
+
+    fl::FsImplPtr impl = fl::getEmbeddedFs();
+    FL_REQUIRE(impl);
+
+    fl::FileSystem fs;
+    FL_REQUIRE(fs.begin(impl));
+
+    fl::ifstream handle = fs.openRead(kExistingFile);
+    FL_REQUIRE(handle.is_open());
+
+    // Reading, not just opening: the null fallback can fake an open, and it
+    // is the bytes that the ESP backend has to match.
+    char first = 0;
+    handle.read(&first, 1);
+    FL_CHECK_NE(first, 0);
+
+    fs.end();
+}
+
+FL_TEST_CASE("a missing file still fails closed with a root set") {
+    ScopedEmbeddedRoot root(kEmbeddedRoot);
+
+    fl::FileSystem fs;
+    FL_REQUIRE(fs.begin(fl::getEmbeddedFs()));
+    FL_CHECK(!fs.openRead("no/such/file.bin").is_open());
+    fs.end();
+}
+
+FL_TEST_CASE("embedded storage and the SD card are separate stores") {
+    // On a device these are two media. A test that wrote to on-chip flash and
+    // read it back from a card must not pass, so the two roots are set
+    // independently and pointing one somewhere does not move the other.
+    ScopedEmbeddedRoot root("tests/data/audio");
+    ScopedSdRoot card_root("tests/data/codec");
+
+    fl::FileSystem embedded;
+    FL_REQUIRE(embedded.begin(fl::getEmbeddedFs()));
+
+    fl::FileSystem card;
+    FL_REQUIRE(card.begin(fl::make_sdcard_filesystem(0)));
+
+    // README.md is under the embedded root only.
+    FL_CHECK(embedded.openRead("README.md").is_open());
+    FL_CHECK(!card.openRead("README.md").is_open());
+
+    // file.gif is under the card root only.
+    FL_CHECK(!embedded.openRead("file.gif").is_open());
+    FL_CHECK(card.openRead("file.gif").is_open());
+
+    embedded.end();
+    card.end();
 }
 
 } // FL_TEST_FILE
