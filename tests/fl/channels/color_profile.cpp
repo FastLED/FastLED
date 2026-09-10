@@ -3,6 +3,7 @@
 #include "FastLED.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/color_profile.h"
+#include "fl/gfx/pipeline.h"
 #include "test.h"
 
 using namespace fl;
@@ -109,6 +110,83 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
     FL_REQUIRE(options.emitterProfile() != nullptr);
     FL_CHECK_EQ(options.emitterProfile()->response_lut_size, fl::u16(3));
     FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(257));
+}
+
+FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
+    // FastLED#4156 R2 turns on P2 permitting a per-channel nonlinear
+    // code-to-light response: a shared brightness scalar preserves
+    // chromaticity only while what it scales is linear light, so a
+    // compensation stage and the flux stage cannot be in either order.
+    //
+    // The defect is not live, because the compensation does not exist.
+    // `response_lut_r/g/b` are checked for non-null and monotonicity on bind
+    // and copied into owned storage -- and outside `options.h` nothing in
+    // `src/` reads them. `processPixelQ16` goes decode, source matrix, gamut
+    // map, device solve, flux, with no response stage anywhere.
+    //
+    // When one is added, the ordering constraint is written down as
+    // arithmetic in `tests/fl/gfx/flux_scalar.cpp`: "A shared scalar is only
+    // chromaticity-preserving on linear quantities".
+    ChannelOptions options;
+    EmitterProfile profile = kFixtureProfile;
+    const fl::u16 curve[] = {0, 4096, 32768, 65535};
+    profile.response_lut_r = curve;
+    profile.response_lut_g = curve;
+    profile.response_lut_b = curve;
+    profile.response_lut_size = 4;
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::linearSrgb()));
+
+    // Validated and owned -- that half works.
+    const EmitterProfile* stored = options.emitterProfile();
+    FL_REQUIRE(stored != nullptr);
+    FL_CHECK_EQ(stored->response_lut_size, fl::u16(4));
+    FL_CHECK_EQ(stored->response_lut_r[1], fl::u16(4096));
+
+    // A non-monotonic curve is refused, which is the check that exists.
+    EmitterProfile bad = kFixtureProfile;
+    const fl::u16 backwards[] = {0, 32768, 4096, 65535};
+    bad.response_lut_r = backwards;
+    bad.response_lut_g = backwards;
+    bad.response_lut_b = backwards;
+    bad.response_lut_size = 4;
+    ChannelOptions rejecting;
+    FL_CHECK_FALSE(rejecting.setColorProfile(bad, SourceProfile::linearSrgb()));
+
+    // The inert half: a profile carrying a response curve builds the same
+    // streaming pipeline as one without, because no stage consults it.
+    EmitterProfile plain = kFixtureProfile;
+    ChannelOptions plain_options;
+    FL_REQUIRE(plain_options.setColorProfile(plain, SourceProfile::linearSrgb()));
+
+    StreamingPipelineQ16 with_curve;
+    StreamingPipelineQ16 without_curve;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), *stored,
+                                         GamutPolicy::ChromaCompress,
+                                         &with_curve));
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(),
+                                         *plain_options.emitterProfile(),
+                                         GamutPolicy::ChromaCompress,
+                                         &without_curve));
+    setPipelineFluxQ16(&with_curve, FluxScalar::fromBrightness(64));
+    setPipelineFluxQ16(&without_curve, FluxScalar::fromBrightness(64));
+
+    // Same drives for the same source pixel, curve or no curve. When the
+    // curve starts being applied this stops holding, and that is the signal
+    // to go and read the ordering case.
+    int compared = 0;
+    const fl::u8 kSamples[][3] = {{200, 40, 10}, {10, 180, 90}, {128, 128, 128}};
+    for (const auto& pixel : kSamples) {
+        i32 with_drives[3];
+        i32 without_drives[3];
+        processPixelQ16(with_curve, pixel[0], pixel[1], pixel[2], with_drives);
+        processPixelQ16(without_curve, pixel[0], pixel[1], pixel[2],
+                        without_drives);
+        for (int i = 0; i < 3; ++i) {
+            FL_CHECK_EQ(with_drives[i], without_drives[i]);
+            ++compared;
+        }
+    }
+    FL_CHECK_EQ(compared, 9);
 }
 
 FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {
