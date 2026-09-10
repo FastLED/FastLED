@@ -531,8 +531,10 @@ Harness: `ci/color_wide_hull_study.py`. Regression test:
 ### The ray stays connected
 
 The same sweep as the three-emitter one -- lightness on a 40-step grid, hue
-every 3 degrees, 401 chroma samples per ray -- against each white-emitter
-device the corpus ships, using the *oracle* hull rather than the closed form.
+every 3 degrees, 401 chroma steps per ray -- against each white-emitter device
+the corpus ships, using the *oracle* hull rather than the closed form. The
+steps are intervals, not points: both endpoints are evaluated, so a ray costs
+402 evaluations and not 401.
 That choice matters: a sweep built on `allocate_two_white` could only confirm
 that function's own idea of the hull, which is the assumption under test.
 

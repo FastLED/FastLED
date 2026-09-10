@@ -64,6 +64,20 @@ class ChromaInterval:
 
 @typechecked
 @dataclass(frozen=True, slots=True)
+class Realization:
+    """What a device actually produced for a target, and how.
+
+    `realized` is re-rendered from `drives` rather than copied from the
+    target, so comparing the two is what catches an allocation that reports
+    success while producing something else.
+    """
+
+    realized: Xyz
+    drives: tuple[float, ...]
+
+
+@typechecked
+@dataclass(frozen=True, slots=True)
 class RayScan:
     """Every feasible chroma interval found along one ray."""
 
@@ -254,7 +268,7 @@ def map_oklch(test: FeasibilityTest, xyz: Xyz, halvings: int) -> Xyz:
 @typechecked
 def realize_one_white(
     forward: Matrix3, inverse: Matrix3, white: Xyz, target: Xyz
-) -> tuple[Xyz, tuple[float, float, float, float]] | None:
+) -> Realization | None:
     """Allocate `target` on an RGB+W device and re-render the drives to XYZ.
 
     Returning the re-rendered XYZ rather than trusting the drives is the
@@ -272,13 +286,13 @@ def realize_one_white(
         rendered[1] + drives.white * white[1],
         rendered[2] + drives.white * white[2],
     )
-    return realized, (drives.red, drives.green, drives.blue, drives.white)
+    return Realization(realized, (drives.red, drives.green, drives.blue, drives.white))
 
 
 @typechecked
 def realize_two_white(
     forward: Matrix3, inverse: Matrix3, first: Xyz, second: Xyz, target: Xyz
-) -> tuple[Xyz, tuple[float, float, float, float, float]] | None:
+) -> Realization | None:
     """The same, for RGB + two whites."""
 
     levels = allocate_two_white(inverse, target, first, second)
@@ -301,7 +315,7 @@ def realize_two_white(
         rendered[1] + levels.first * first[1] + levels.second * second[1],
         rendered[2] + levels.first * first[2] + levels.second * second[2],
     )
-    return realized, (rgb[0], rgb[1], rgb[2], levels.first, levels.second)
+    return Realization(realized, (rgb[0], rgb[1], rgb[2], levels.first, levels.second))
 
 
 @typechecked
@@ -338,9 +352,7 @@ class WideDevice:
     hull: FeasibilityTest
     solve: FeasibilityTest
 
-    def realize(
-        self: "WideDevice", target: Xyz
-    ) -> tuple[Xyz, tuple[float, ...]] | None:
+    def realize(self: "WideDevice", target: Xyz) -> Realization | None:
         """Allocate and re-render, so the drives are checked rather than trusted."""
 
         if len(self.whites) == 1:
@@ -351,10 +363,7 @@ class WideDevice:
             allocated = realize_two_white(
                 self.forward, self.inverse, self.whites[0], self.whites[1], target
             )
-        if allocated is None:
-            return None
-        realized, drives = allocated
-        return realized, tuple(drives)
+        return allocated
 
 
 def _build_device(name: str, columns: list[Xyz], whites: tuple[Xyz, ...]) -> WideDevice:

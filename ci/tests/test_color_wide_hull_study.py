@@ -185,9 +185,9 @@ class TestMapThenAllocate(unittest.TestCase):
                     mapped = map_oklch(device.solve, point, HALVINGS)
                     allocated = device.realize(mapped)
                     self.assertIsNotNone(allocated)
-                    realized, _drives = allocated
                     difference = delta_e2000(
-                        xyz_to_lab(realized, D65_WHITE), xyz_to_lab(mapped, D65_WHITE)
+                        xyz_to_lab(allocated.realized, D65_WHITE),
+                        xyz_to_lab(mapped, D65_WHITE),
                     )
                     worst = max(worst, difference)
                 self.assertLess(worst, 1e-9)
@@ -204,8 +204,9 @@ class TestMapThenAllocate(unittest.TestCase):
                     mapped = map_oklch(device.solve, point, HALVINGS)
                     if _oklch_from_xyz(mapped).chroma <= 0.02:
                         continue
-                    realized, _drives = device.realize(mapped)
-                    self.assertLess(hue_drift_degrees(mapped, realized), 1e-6)
+                    allocated = device.realize(mapped)
+                    self.assertIsNotNone(allocated)
+                    self.assertLess(hue_drift_degrees(mapped, allocated.realized), 1e-6)
                     checked += 1
                 self.assertGreater(checked, 0)
 
@@ -216,8 +217,9 @@ class TestMapThenAllocate(unittest.TestCase):
             with self.subTest(device=device.name):
                 for point in self._out_of_gamut(device):
                     mapped = map_oklch(device.solve, point, HALVINGS)
-                    _realized, drives = device.realize(mapped)
-                    for drive in drives:
+                    allocated = device.realize(mapped)
+                    self.assertIsNotNone(allocated)
+                    for drive in allocated.drives:
                         self.assertGreaterEqual(drive, -1e-9)
                         self.assertLessEqual(drive, 1.0 + 1e-9)
 
