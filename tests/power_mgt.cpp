@@ -256,4 +256,149 @@ FL_TEST_CASE("Power scaling exponent - limiter becomes more conservative") {
     }
 }
 
+// #4156 R4: "Fixed idle consumption cannot be reduced by multiplying LED
+// flux." These pin the three things that finding asked for -- the baseline,
+// a budget below it, and the encoded demand against the declared bound.
+
+namespace {
+
+struct ScopedDefaultPowerModel {
+    ScopedDefaultPowerModel() : previous_model(get_power_model()) {
+        set_power_model(PowerModelRGB());
+    }
+    ~ScopedDefaultPowerModel() { set_power_model(previous_model); }
+    PowerModelRGB previous_model;
+};
+
+// What the strip really draws at a brightness: the dark current of every
+// controller IC, which no scalar touches, plus the scaled emitter share.
+fl::u32 true_demand_mW(fl::span<const CRGB> leds, fl::u8 brightness) {
+    const fl::u32 fixed_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * leds.size();
+    const fl::u32 total_mW = calculate_unscaled_power_mW(leds);
+    const fl::u32 controllable_mW = total_mW - fixed_mW;
+    return fixed_mW + scale_power_for_brightness(controllable_mW, brightness);
+}
+
+} // namespace
+
+FL_TEST_CASE("Power limiter - the recommendation stays inside the budget") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+    const fl::u32 baseline_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+
+    // Every one of these used to come back over budget, by 5.6% at 20 W and
+    // by 73% at 2 W: the whole estimate including the baseline was multiplied
+    // by brightness, so lowering brightness "reduced" a draw that is constant.
+    const fl::u32 budgets[] = {60000u, 40000u, 20000u, 10000u, 5000u, 3000u, 2000u};
+    for (fl::u32 budget : budgets) {
+        const fl::u8 recommended =
+            calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
+        FL_CHECK_GT(budget, baseline_mW);
+        FL_CHECK_LE(true_demand_mW(span, recommended), budget);
+    }
+}
+
+FL_TEST_CASE("Power limiter - the recommendation is the largest that fits") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::span<const CRGB> span(leds, kCount);
+
+    // Staying under the budget is trivially satisfied by returning zero. The
+    // limiter has to be tight as well as safe, so one step up must not fit.
+    const fl::u32 budgets[] = {40000u, 20000u, 10000u, 5000u, 3000u};
+    for (fl::u32 budget : budgets) {
+        const fl::u8 recommended =
+            calculate_max_brightness_for_power_mW(leds, kCount, 255, budget);
+        FL_CHECK_GT(recommended, 0);
+        FL_CHECK_GT(true_demand_mW(span, static_cast<fl::u8>(recommended + 1)),
+                    budget);
+    }
+}
+
+FL_TEST_CASE("Power limiter - zero brightness still draws the dark current") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    // The baseline is the whole point of the finding: at brightness zero the
+    // strip is dark and still drawing 1500 mW on this model.
+    const fl::u32 baseline_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+    FL_CHECK_EQ(true_demand_mW(fl::span<const CRGB>(leds, kCount), 0),
+                baseline_mW);
+    FL_CHECK_GT(baseline_mW, 0);
+}
+
+FL_TEST_CASE("Power limiter - a budget under the baseline turns the strip off") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    const fl::u32 baseline_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+
+    // No brightness meets a budget below the dark current, so the only honest
+    // answer is zero. It used to return a lit strip and claim the budget was
+    // met -- 1000 mW asked for, 2480 mW drawn.
+    const fl::u32 budgets[] = {baseline_mW - 1, baseline_mW / 2, 1u};
+    for (fl::u32 budget : budgets) {
+        FL_CHECK_EQ(calculate_max_brightness_for_power_mW(leds, kCount, 255, budget),
+                    0);
+    }
+    // Exactly at the baseline nothing can be lit either, since any emitter
+    // adds to it.
+    FL_CHECK_EQ(
+        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW), 0);
+}
+
+FL_TEST_CASE("Power limiter - an all-dark strip over budget is still answerable") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 300;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB::Black;
+    }
+    // Black leaves nothing for brightness to scale, so the controllable share
+    // is zero. Reaching the ratio with that as its denominator divides by
+    // zero, and a budget under the baseline is the one path that gets there.
+    const fl::u32 baseline_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
+    FL_CHECK_EQ(calculate_unscaled_power_mW(leds, kCount), baseline_mW);
+    FL_CHECK_EQ(
+        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW / 2),
+        0);
+    // And under a budget it does fit, the request is untouched.
+    FL_CHECK_EQ(
+        calculate_max_brightness_for_power_mW(leds, kCount, 255, baseline_mW * 2),
+        255);
+}
+
+FL_TEST_CASE("Power limiter - a budget over demand leaves brightness alone") {
+    ScopedDefaultPowerModel guard;
+    const int kCount = 60;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(64, 64, 64);
+    }
+    // Nothing above should have made the limiter pessimistic in the ordinary
+    // case, where the budget is not binding at all.
+    FL_CHECK_EQ(calculate_max_brightness_for_power_mW(leds, kCount, 200, 1000000u),
+                200);
+}
+
 } // FL_TEST_FILE

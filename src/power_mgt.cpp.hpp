@@ -185,23 +185,74 @@ fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds ) //
 }
 
 
+// The part of the estimate a brightness scalar cannot touch: every controller
+// IC draws its quiescent current whether or not an emitter is lit, and the MCU
+// draws its own regardless of what the strip is doing. #4156 R4:
+//
+//     Fixed idle consumption cannot be reduced by multiplying LED flux.
+//
+// Scaling that baseline along with the emitters is what let the limiter
+// under-report. At 300 WS2812s on the default model the baseline is 1500 mW,
+// and a 2000 mW budget used to be answered with a brightness that draws 3461.
+static fl::u32 fixed_power_mW(fl::u32 led_count) {
+    return static_cast<fl::u32>(gPowerModel().dark_mW) * led_count;
+}
+
+// Largest brightness whose *total* demand -- baseline included -- stays inside
+// the budget. Zero when the baseline alone is already over it: no brightness
+// meets the budget then, and answering with a lit strip would promise a bound
+// that cannot be held at any setting.
+static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW,
+                                       fl::u8 target_brightness,
+                                       fl::u32 max_power_mW) {
+    const fl::u32 requested_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, target_brightness);
+    if (requested_mW <= max_power_mW) {
+        return target_brightness;
+    }
+    if (controllable_mW == 0 || max_power_mW <= fixed_mW) {
+        // Nothing left to scale, or the baseline alone is already over the
+        // budget. Either way no brightness meets it, and returning here is
+        // also what keeps the subtraction below from underflowing and the
+        // division from dividing by zero on an all-dark strip.
+        return 0;
+    }
+    const fl::u32 headroom_mW = max_power_mW - fixed_mW;
+    const fl::u8 target_scaled = map_power_value(target_brightness);
+    fl::u32 recommended_scaled =
+        (static_cast<fl::u32>(target_scaled) * headroom_mW) / controllable_mW;
+    if (recommended_scaled > 255) {
+        recommended_scaled = 255;
+    }
+    fl::u8 recommended = unmap_power_value(static_cast<fl::u8>(recommended_scaled));
+
+    // Then check the answer instead of trusting the division. Inverting the
+    // ratio in scaled space is off by the rounding of whichever `scale32by8`
+    // the platform compiled -- the FASTLED_SCALE8_FIXED form computes
+    // `i * (s + 1) >> 8`, so the closed form lands about `controllable/256`
+    // over the budget, which was 176 mW of a 5000 mW budget on the default
+    // model. Demand is monotone in brightness, so stepping down until it fits
+    // is exact whatever the rounding, and terminates: 0 always fits here,
+    // because the branch above already returned for a budget under baseline.
+    while (recommended > 0 &&
+           fixed_mW + scale_power_for_brightness(controllable_mW, recommended) >
+               max_power_mW) {
+        --recommended;
+    }
+    return recommended;
+}
+
 fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) {
 	return calculate_max_brightness_for_power_mW(ledbuffer, numLeds, target_brightness, max_power_V * max_power_mA);
 }
 
 fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW) {
- 	fl::u32 total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+	const fl::u32 total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+	const fl::u32 fixed_mW = fixed_power_mW(numLeds);
+	const fl::u32 controllable_mW = total_mW > fixed_mW ? total_mW - fixed_mW : 0;
 
-	fl::u8 target_brightness_scaled = map_power_value(target_brightness);
-	fl::u32 requested_power_mW = scale_power_for_brightness(total_mW, target_brightness);
-
-	fl::u8 recommended_brightness = target_brightness;
-	if(requested_power_mW > max_power_mW) { 
-        fl::u8 recommended_scaled = (fl::u32)(target_brightness_scaled * (fl::u32)(max_power_mW)) / requested_power_mW;
-        recommended_brightness = unmap_power_value(recommended_scaled);
-	}
-
-	return recommended_brightness;
+	return brightness_within_budget(fixed_mW, controllable_mW, target_brightness,
+	                                max_power_mW);
 }
 
 // sets brightness to
@@ -209,21 +260,29 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 //  - no more than max_mW milliwatts
 fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW)
 {
-    fl::u32 total_mW = gMCU_mW;
+    // gMCU_mW and every controller's dark current are baseline: present at any
+    // brightness, and so kept out of the part the scalar acts on (#4156 R4).
+    fl::u32 fixed_mW = gMCU_mW;
+    fl::u32 controllable_mW = 0;
 
     CLEDController *pCur = CLEDController::head();
 	while(pCur) {
-        total_mW += calculate_unscaled_power_mW( pCur->leds(), pCur->size());
+        const fl::u32 count = pCur->size();
+        const fl::u32 unscaled_mW =
+            calculate_unscaled_power_mW(fl::span<const CRGB>(pCur->leds(), count));
+        const fl::u32 dark_mW = fixed_power_mW(count);
+        fixed_mW += dark_mW;
+        controllable_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
 		pCur = pCur->next();
 	}
 
 #if POWER_DEBUG_PRINT == 1
     Serial.print("power demand at full brightness mW = ");
-    Serial.println( total_mW);
+    Serial.println( fixed_mW + controllable_mW);
 #endif
 
-    fl::u8 target_brightness_scaled = map_power_value(target_brightness);
-    fl::u32 requested_power_mW = scale_power_for_brightness(total_mW, target_brightness);
+    const fl::u32 requested_power_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, target_brightness);
 #if POWER_DEBUG_PRINT == 1
     if( target_brightness != 255 ) {
         Serial.print("power demand at scaled brightness mW = ");
@@ -233,7 +292,7 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
     Serial.println( max_power_mW);
 #endif
 
-    if( requested_power_mW < max_power_mW) {
+    if( requested_power_mW <= max_power_mW) {
 #if POWER_LED > 0
         if( gMaxPowerIndicatorLEDPinNumber ) {
             Pin(gMaxPowerIndicatorLEDPinNumber).lo(); // turn the LED off
@@ -245,13 +304,14 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
         return target_brightness;
     }
 
-    fl::u8 recommended_scaled = (fl::u32)(target_brightness_scaled * (fl::u32)(max_power_mW)) / ((fl::u32)(requested_power_mW));
-    fl::u8 recommended_brightness = unmap_power_value(recommended_scaled);
+    const fl::u8 recommended_brightness = brightness_within_budget(
+        fixed_mW, controllable_mW, target_brightness, max_power_mW);
 #if POWER_DEBUG_PRINT == 1
     Serial.print("recommended brightness # = ");
     Serial.println( recommended_brightness);
 
-    fl::u32 resultant_power_mW = scale_power_for_brightness(total_mW, recommended_brightness);
+    fl::u32 resultant_power_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, recommended_brightness);
     Serial.print("resultant power demand mW = ");
     Serial.println( resultant_power_mW);
 
