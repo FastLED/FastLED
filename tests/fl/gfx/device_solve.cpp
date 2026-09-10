@@ -179,4 +179,196 @@ FL_TEST_CASE("Degenerate and non-finite emitter profiles are rejected") {
     FL_CHECK(buildRgbSolveMatrixQ16(rgbDevice(), &matrix));
 }
 
+namespace {
+
+/// The four profiles `ci/color_fixed_inverse_study.py` prices P9 item 2
+/// against, quantised to s16.16 exactly as its `quantize_rows` does, with the
+/// inverse its `invert3x3_q16` produces using Python's unbounded integers.
+///
+/// These are a reference, not a recording of this implementation's output.
+/// The study computes `(cofactor << 32) / determinant` exactly; that is the
+/// thing `invert3x3Q16` claims to reproduce without a 128-bit intermediate,
+/// and a table written from C++ output could not tell the two apart.
+struct StudyInverse {
+    i32 forward[3][3];
+    i32 inverse[3][3];
+};
+
+const StudyInverse kStudyInverses[] = {
+    // srgb
+    {{{127100, 32768, 163840}, {65536, 65536, 65536}, {5958, 10923, 862891}},
+     {{45165, -21424, -6948}, {-45428, 87925, 1948}, {263, -965, 5001}}},
+    // bt2020
+    {{{158902, 13979, 186635}, {65536, 65536, 65536}, {0, 2714, 1172525}},
+     {{29555, -6123, -4362}, {-29623, 71826, 701}, {69, -166, 3661}}},
+    // display_p3
+    {{{139264, 25170, 163840}, {65536, 65536, 65536}, {0, 4274, 862891}},
+     {{37418, -13977, -6043}, {-37604, 79908, 1071}, {186, -396, 4972}}},
+    // narrow -- the near-degenerate set, where the determinant is smallest
+    {{{127100, 78019, 72090}, {65536, 65536, 65536}, {5958, 12483, 26214}},
+     {{92837, -118156, 40087}, {-136953, 299419, -371929}, {44116, -115727, 331843}}},
+};
+
+/// The (0,0) cofactor, which is what `cofactor << 32` would have to hold.
+i64 leadCofactor(const i32 (&m)[3][3]) {
+    return static_cast<i64>(m[1][1]) * static_cast<i64>(m[2][2]) -
+           static_cast<i64>(m[1][2]) * static_cast<i64>(m[2][1]);
+}
+
+}  // namespace
+
+FL_TEST_CASE("Q16 inverse reproduces the host study exactly") {
+    for (const auto& item : kStudyInverses) {
+        i32 out[3][3];
+        FL_REQUIRE(invert3x3Q16(item.forward, out));
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                FL_CHECK_EQ(out[row][col], item.inverse[row][col]);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("the wide numerator the staged divide avoids really is needed") {
+    // Vacuity guard for the case above. If every cofactor fitted in the 31
+    // bits that `cofactor << 32` leaves, the staged divide would be an
+    // elaborate way to write one division and the agreement above would say
+    // nothing about it.
+    //
+    // Lead cofactors, in bits: srgb 2^35.7, bt2020 2^36.2, display_p3 2^35.7,
+    // narrow 2^29.7. Three of the four need more than the 31 bits available,
+    // and narrow -- the near-degenerate set -- is the one that does not.
+    int needing_wide = 0;
+    for (const auto& item : kStudyInverses) {
+        const i64 cofactor = leadCofactor(item.forward);
+        const i64 magnitude = cofactor < 0 ? -cofactor : cofactor;
+        if (magnitude >= (static_cast<i64>(1) << 31)) {
+            ++needing_wide;
+        }
+    }
+    FL_CHECK_EQ(needing_wide, 3);
+}
+
+FL_TEST_CASE("Q16 inverse round-trips to the identity") {
+    // Independent of the study: M . M^-1 must be I, which no transcription
+    // error in the table above could satisfy by accident.
+    for (const auto& item : kStudyInverses) {
+        i32 inverse[3][3];
+        FL_REQUIRE(invert3x3Q16(item.forward, inverse));
+        i32 worst_diagonal = 0;
+        i32 worst_off_diagonal = 0;
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                i64 acc = 0;
+                for (int k = 0; k < 3; ++k) {
+                    acc += static_cast<i64>(item.forward[row][k]) *
+                           static_cast<i64>(inverse[k][col]);
+                }
+                const i32 value = static_cast<i32>((acc + 32768) >> 16);
+                const i32 expected = row == col ? 65536 : 0;
+                i32 error = value - expected;
+                if (error < 0) {
+                    error = -error;
+                }
+                if (row == col) {
+                    if (error > worst_diagonal) {
+                        worst_diagonal = error;
+                    }
+                } else if (error > worst_off_diagonal) {
+                    worst_off_diagonal = error;
+                }
+            }
+        }
+        // Measured worst across the four: 7 raw units on the diagonal and 8
+        // off it, both on bt2020 -- about 1e-4 of a unit, which is the
+        // inputs' own quantisation rather than anything the inversion adds.
+        // display_p3 and narrow are inside 3.
+        FL_CHECK_LT(worst_diagonal, 16);
+        FL_CHECK_LT(worst_off_diagonal, 16);
+    }
+}
+
+FL_TEST_CASE("Q16 inverse refuses a singular matrix") {
+    i32 out[3][3];
+    // Two identical columns: determinant exactly zero.
+    const i32 repeated_column[3][3] = {
+        {65536, 65536, 32768}, {65536, 65536, 16384}, {13107, 13107, 65536}};
+    FL_CHECK(!invert3x3Q16(repeated_column, out));
+
+    // Singular by a different route, and the one a zero-initialised profile
+    // would produce.
+    const i32 zero[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    FL_CHECK(!invert3x3Q16(zero, out));
+}
+
+FL_TEST_CASE("Q16 inverse refuses input whose determinant leaves i64") {
+    // Why the guard is a check and not a bound on the input: this is refused
+    // for arithmetic reasons, not because the entries are implausible. A
+    // fixed input limit safe enough to make the determinant fit would have to
+    // sit near 16.0, and a deep-blue emitter at xy = (0.14, 0.03) already has
+    // a Z column near 28.
+    i32 out[3][3];
+    const i32 huge[3][3] = {
+        {2000000000, 3, 5}, {7, 2000000000, 11}, {13, 17, 2000000000}};
+    FL_CHECK(!invert3x3Q16(huge, out));
+
+    // And it refuses rather than wrapping. A wrapped determinant would hand
+    // back a plausible-looking inverse for a matrix that has none in s16.16,
+    // so the identity is checked alongside to show refusal is not the only
+    // thing this function does.
+    const i32 identity[3][3] = {{65536, 0, 0}, {0, 65536, 0}, {0, 0, 65536}};
+    FL_REQUIRE(invert3x3Q16(identity, out));
+    FL_CHECK_EQ(out[0][0], 65536);
+    FL_CHECK_EQ(out[1][1], 65536);
+    FL_CHECK_EQ(out[2][2], 65536);
+    FL_CHECK_EQ(out[0][1], 0);
+}
+
+FL_TEST_CASE("Q16 inverse refuses a determinant of exactly i64's minimum") {
+    // Every product below fits an i64 on its own and every cofactor is a
+    // valid difference of two i32 products, but the three terms sum to
+    // exactly -2^63 -- and negating that, which both the staged divide and
+    // its rounding helper do, is undefined behaviour.
+    //
+    // Constructed rather than found: 2^63 - 1 factors as
+    // 7^2 * 73 * 127 * 337 * 92737 * 649657, so one term can be made exactly
+    // -(2^63 - 1) with i32 entries, and a second contributes the remaining
+    // -1. Reported by review on FastLED#4305.
+    i32 out[3][3];
+    const i32 int64_min_determinant[3][3] = {
+        {-92737, 64896, 1}, {0, 64897, 1}, {1, 0, 1532540863}};
+    FL_CHECK(!invert3x3Q16(int64_min_determinant, out));
+
+    // The determinant really is the minimum, computed here the way
+    // `invert3x3Q16` computes it. Without this the case would still pass if
+    // the matrix stopped being the witness and started being refused for
+    // some unrelated reason -- review caught the factorisation above being
+    // wrong by a factor of 7, which is exactly the kind of drift that leaves
+    // a comment describing a matrix the test no longer contains.
+    const i32 (&m)[3][3] = int64_min_determinant;
+    const i64 cofactor0 = static_cast<i64>(m[1][1]) * static_cast<i64>(m[2][2]) -
+                          static_cast<i64>(m[1][2]) * static_cast<i64>(m[2][1]);
+    const i64 cofactor1 = static_cast<i64>(m[1][2]) * static_cast<i64>(m[2][0]) -
+                          static_cast<i64>(m[1][0]) * static_cast<i64>(m[2][2]);
+    const i64 cofactor2 = static_cast<i64>(m[1][0]) * static_cast<i64>(m[2][1]) -
+                          static_cast<i64>(m[1][1]) * static_cast<i64>(m[2][0]);
+    const i64 determinant = static_cast<i64>(m[0][0]) * cofactor0 +
+                            static_cast<i64>(m[0][1]) * cofactor1 +
+                            static_cast<i64>(m[0][2]) * cofactor2;
+    FL_CHECK_EQ(determinant, -9223372036854775807LL - 1);
+}
+
+FL_TEST_CASE("Q16 inverse rounds rather than truncates") {
+    // Truncation biases every coefficient toward zero, and a solve sums three
+    // of them, so the bias does not cancel across a row. 3/2 inverts to 2/3,
+    // which is 43690.667 in s16.16 -- rounding gives 43691 and truncation
+    // 43690, so the two are distinguishable. `diag(3)` would not do: 1/3 is
+    // 21845.33 and both give 21845.
+    i32 out[3][3];
+    const i32 three_halves[3][3] = {
+        {98304, 0, 0}, {0, 98304, 0}, {0, 0, 98304}};
+    FL_REQUIRE(invert3x3Q16(three_halves, out));
+    FL_CHECK_EQ(out[0][0], 43691);
+}
+
 }  // FL_TEST_FILE
