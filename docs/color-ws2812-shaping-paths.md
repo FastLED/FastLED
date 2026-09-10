@@ -307,7 +307,17 @@ perceptual coordinates do not -- the same assumption the dither guide in
 `pixel_controller.h` makes when it says the eye integrates the cycle above
 ~50 Hz.
 
-Worst case over the same 40 targets:
+**What is tabulated is the chroma of the *distance-optimal* cycle**, not the
+lowest chroma a cycle could reach. The distinction is the one recorded above
+under "Distance is not chroma": the search minimises OKLab distance to the
+ideal and the table reports that candidate's neutral-axis error. Minimising
+chroma directly would be meaningless here -- a cycle drives chroma to zero by
+going to black, so an unconstrained chroma minimum answers "emit nothing" at
+every target. What a strategy picks is the closest reproduction, and this is
+what that costs on the axis.
+
+Worst case over the same 40 targets, all searches over the same `[-2, 2]`
+window:
 
 | | worst chroma |
 | --- | ---: |
@@ -321,14 +331,20 @@ The static worst sits at a different target from the 2% one quoted above,
 which is why it reads 0.0466 rather than 0.0382: at 1% luminance no single
 frame improves on rounding at all.
 
-At the 2% target specifically -- rounding 0.0605, best single frame 0.0382 --
-an eight-frame cycle reaches **0.0016**. The remaining candidate is not in the
-same class as the static ones: it does not close the last third, it closes
-almost all of it. Eight frames is also the cycle `BINARY_DITHER` already runs,
-so the cadence question is not a new one.
+At the 2% target specifically -- rounding 0.0605, the distance-optimal single
+frame 0.0382 -- the distance-optimal eight-frame cycle sits at **0.0016**. The
+remaining candidate is not in the same class as the static ones: it does not
+close the last third, it closes almost all of it. Eight frames is also the
+cycle `BINARY_DITHER` already runs, so the cadence question is not a new one.
 
-Three things this does not say. It is a **ceiling**, like the static one -- the
-best an N-frame cycle could do, not what an algorithm achieves. It says
+The one-frame row is a control rather than a second measurement: at `N = 1`
+the grid collapses to the integer codes over the same window the static search
+uses, so it must reproduce the static answer exactly. It does, to within a
+float ULP.
+
+Three things this does not say. It is a **ceiling**, like the static one -- what
+a distance-optimal N-frame cycle costs on the axis, not what an algorithm
+achieves. It says
 nothing about flicker; a cycle that reaches the floor by toggling the bottom
 codes is exactly the trade #4156 R8 asks to have declared. And it assumes a
 pipeline dither that can choose sub-code average drives, which is a different

@@ -1050,22 +1050,42 @@ FL_TEST_CASE("At the worst target it takes a third of the room there is") {
 
 namespace {
 
-/// Best chroma reachable by averaging an N-frame cycle's emitted light.
+/// Chroma of the *distance-optimal* N-frame cycle.
+///
+/// Not "the best chroma an N-frame cycle can reach", which is what an earlier
+/// revision called it. The search minimises OKLab distance to the ideal and
+/// then reports that candidate's chroma, and #4265 established in this same
+/// file that the two objectives can disagree -- so naming it after chroma
+/// described a quantity it does not compute.
+///
+/// Distance is the right objective anyway, and the reason is worth stating:
+/// minimising chroma on its own is degenerate. A cycle can drive chroma to
+/// zero by going to black, so an unconstrained chroma minimum answers "emit
+/// nothing" at every target. What a strategy actually picks is the closest
+/// reproduction, and its neutral-axis error is what this reports.
 ///
 /// A cycle that spends `k` of its `N` frames one code higher averages to a
 /// drive of `base + k/N`, and the choice is per channel, so the reachable
-/// averages are a grid. `frames == 1` collapses that grid to the integer
-/// codes, which is what makes it a control rather than a second measurement.
-float bestTemporalChroma(float luminance, const Oklab& ideal, int frames) {
+/// averages are a grid. Base offsets run -2..1 so that `base + k/N` covers
+/// [-2, 2] for every cycle length -- the same window the static search uses,
+/// which is what lets `frames == 1` be compared against it directly.
+///
+/// That widening is an argument, not a measurement: no target in the sweep
+/// has a static optimum at a -2 offset, so narrowing the window back to -1..1
+/// changes no number here. It is done anyway because the control's claim is
+/// "the same domain", and a control whose domain merely happens to suffice is
+/// one nobody can check.
+float distanceOptimalCycleChroma(float luminance, const Oklab& ideal,
+                                 int frames) {
     const RgbColorimetricCache cache = ws2812Cache();
     const CRGB rounded = neutralCodes(luminance);
     float best_distance = 1e9f;
     float best_chroma = 0.0f;
-    for (int base_r = -1; base_r <= 1; ++base_r)
+    for (int base_r = -2; base_r <= 1; ++base_r)
     for (int step_r = 0; step_r <= frames; ++step_r)
-    for (int base_g = -1; base_g <= 1; ++base_g)
+    for (int base_g = -2; base_g <= 1; ++base_g)
     for (int step_g = 0; step_g <= frames; ++step_g)
-    for (int base_b = -1; base_b <= 1; ++base_b)
+    for (int base_b = -2; base_b <= 1; ++base_b)
     for (int step_b = 0; step_b <= frames; ++step_b) {
         const float dr =
             (rounded.r + base_r + static_cast<float>(step_r) / frames) / 255.0f;
@@ -1118,7 +1138,7 @@ FL_TEST_CASE("Section 5 can be scored without the frame cadence") {
         const float luminance = static_cast<float>(step) / 100.0f;
         const Oklab ideal = idealNeutralLight(luminance);
         const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
-        const float temporal = bestTemporalChroma(luminance, ideal, 8);
+        const float temporal = distanceOptimalCycleChroma(luminance, ideal, 8);
         if (rounded_chroma > worst_rounding) {
             worst_rounding = rounded_chroma;
         }
@@ -1141,7 +1161,7 @@ FL_TEST_CASE("At the worst target the cycle closes what a frame cannot") {
     const float luminance = 0.02f;
     const Oklab ideal = idealNeutralLight(luminance);
     const float rounded_chroma = chromaOf(lightOf(neutralCodes(luminance)));
-    const float temporal = bestTemporalChroma(luminance, ideal, 8);
+    const float temporal = distanceOptimalCycleChroma(luminance, ideal, 8);
 
     FL_CHECK_LT(fl::fabsf(rounded_chroma - 0.0605f), 0.001f);
     FL_CHECK_LT(temporal, 0.003f);
@@ -1151,27 +1171,51 @@ FL_TEST_CASE("At the worst target the cycle closes what a frame cannot") {
 FL_TEST_CASE("A longer cycle never does worse, and one frame is the static case") {
     // The reachable averages nest -- every k/2 is a k/4 is a k/8 -- so a
     // longer cycle cannot lose. A search that violated that would be finding
-    // something other than the best average, which is the failure mode this
-    // construction is most exposed to.
+    // something other than the distance-optimal average, which is the failure
+    // mode this construction is most exposed to.
     //
-    // And at one frame the grid collapses to the integer codes, so the result
-    // must be an ordinary static answer rather than a sub-code one. Without
-    // this the whole measurement could be an artefact of the search.
+    // And at one frame the grid collapses to the integer codes over the same
+    // [-2, 2] window the static search uses, so it must reproduce the static
+    // answer exactly. An earlier revision searched [-1, 2] here and asserted
+    // only a lower bound, which could not have shown that. Without this the
+    // whole measurement could be an artefact of the search.
     const float luminance = 0.02f;
     const Oklab ideal = idealNeutralLight(luminance);
 
-    const float one = bestTemporalChroma(luminance, ideal, 1);
-    const float two = bestTemporalChroma(luminance, ideal, 2);
-    const float four = bestTemporalChroma(luminance, ideal, 4);
-    const float eight = bestTemporalChroma(luminance, ideal, 8);
+    const float one = distanceOptimalCycleChroma(luminance, ideal, 1);
+    const float two = distanceOptimalCycleChroma(luminance, ideal, 2);
+    const float four = distanceOptimalCycleChroma(luminance, ideal, 4);
+    const float eight = distanceOptimalCycleChroma(luminance, ideal, 8);
 
     FL_CHECK_LE(two, one + 1e-6f);
     FL_CHECK_LE(four, two + 1e-6f);
     FL_CHECK_LE(eight, four + 1e-6f);
 
-    // One frame reaches no further than the static ceiling the ±2 search
-    // finds, and no better than it: the same mechanism, without the cycle.
-    FL_CHECK_GE(one, 0.0382f - 0.001f);
+    // The static reference, computed here the way #4265 computes it.
+    const CRGB rounded = neutralCodes(luminance);
+    float best_distance = oklabDistance(lightOf(rounded), ideal);
+    float static_chroma = chromaOf(lightOf(rounded));
+    for (int dr = -2; dr <= 2; ++dr) {
+        for (int dg = -2; dg <= 2; ++dg) {
+            for (int db = -2; db <= 2; ++db) {
+                const int r = static_cast<int>(rounded.r) + dr;
+                const int g = static_cast<int>(rounded.g) + dg;
+                const int b = static_cast<int>(rounded.b) + db;
+                if (r < 0 || g < 0 || b < 0) continue;
+                if (r > 255 || g > 255 || b > 255) continue;
+                const CRGB candidate(static_cast<u8>(r), static_cast<u8>(g),
+                                     static_cast<u8>(b));
+                const Oklab light = lightOf(candidate);
+                const float distance = oklabDistance(light, ideal);
+                if (distance < best_distance) {
+                    best_distance = distance;
+                    static_chroma = chromaOf(light);
+                }
+            }
+        }
+    }
+    // Same domain, same objective, so the same answer -- not merely a bound.
+    FL_CHECK_LT(fl::fabsf(one - static_chroma), 1e-6f);
 }
 
 }  // namespace ws2812_shaping
