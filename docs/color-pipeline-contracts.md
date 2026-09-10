@@ -256,15 +256,34 @@ Its effect on A1, over all 57 vectors the corpus holds for that device:
 | every vector | 1.3055, at `bt2020-rgb-03` -- source code (0,0,1) in BT.2020, whose reference drives are (0, 5.242e-05, **1.447e-05**) |
 | vectors with no sub-ULP drive (49 of 57) | **0.3951** |
 
-So A1's 0.5 is met everywhere the arithmetic can represent the target, and the
-two vectors above it are unreachable by any fixed-point implementation of this
-width rather than by this one. Eight of the 57 carry a sub-ULP drive.
+So A1's 0.5 is met everywhere the arithmetic can represent the target **in a
+single frame**, which is what these figures measure: `processPixelQ16` returns
+one `i32` triple per pixel and the corpus is compared frame by frame. The
+vectors above 0.5 are out of reach of a one-frame fixed-point answer of this
+width -- by any implementation of it, not just this one. They are not thereby
+unreachable altogether, because a cycle can average to a sub-ULP drive; see
+the note below on the unsupported low-light region, which is the same
+distinction from the other side. Eight of the 57 carry a sub-ULP drive.
 
-Both figures are asserted in `tests/fl/gfx/pipeline.cpp`, so neither the
-floored result nor the unfloored miss can drift while the other passes. This
-does not silently exclude difficult vectors: the excluded set is defined by a
-property of the arithmetic, counted, and the unfloored number is published
-beside the floored one.
+What `tests/fl/gfx/pipeline.cpp` asserts, stated exactly rather than as "both
+figures are pinned", which they are not:
+
+* the corpus size and the excluded count are pinned exactly -- `kVectorCount
+  == 57` and `below_floor == 8` -- so a shrunken corpus, or a floor that
+  swallowed it, cannot satisfy the bounds below;
+* the floored worst is bounded above twice, at A1's `0.5` and again at `0.45`,
+  so a regression that stays inside A1 still fails;
+* the unfloored worst is bounded above at `1.4`, so the low-light miss cannot
+  quietly grow while the floored bound keeps passing.
+
+Those are upper bounds and not equalities: a floored worst of 0.44 would pass.
+The measured values, 0.3951 and 1.3055, are recorded in the comments beside
+those assertions and here, and are what a change should be read against. The
+count of vectors above 0.5 is not asserted at all -- `below_floor` is.
+
+This does not silently exclude difficult vectors: the excluded set is defined
+by a property of the arithmetic, its size is asserted, and the unfloored
+number is published beside the floored one.
 
 What this floor does **not** settle is the *unsupported low-light region* the
 same paragraph asks for -- that is a statement about what a device is allowed
