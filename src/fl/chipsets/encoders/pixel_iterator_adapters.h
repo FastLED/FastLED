@@ -17,6 +17,7 @@
 #include "fl/stl/pair.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/noexcept.h"
+#include "crgb.h"  // FASTLED_HD_COLOR_MIXING
 
 namespace fl {
 
@@ -234,9 +235,19 @@ private:
     bool mHasValue;
 };
 
+#if FASTLED_HD_COLOR_MIXING
 /// @brief Input iterator adapter for PixelIterator yielding brightness values
 ///
-/// Extracts per-LED brightness values from PixelIterator for HD encoders.
+/// Yields the strip's brightness for the HD encoders, which pair it with a
+/// `ScaledPixelIteratorRGB` over the *same* `PixelIterator`.
+///
+/// It must never move that shared cursor. It used to: `advance()` ended with
+/// `stepDithering()` + `advanceData()` exactly as the RGB adapter's does, so
+/// with both stepped in lockstep by the encoder two source pixels were eaten
+/// per emitted LED and the strip came out half length, showing every other
+/// pixel (#4321). Under `FASTLED_HD_COLOR_MIXING` the value is a per-strip
+/// constant -- `ColorAdjustment::brightness` -- so there is nothing to walk
+/// for in the first place.
 class ScaledPixelIteratorBrightness {
 public:
     // Iterator traits
@@ -249,13 +260,9 @@ public:
     /// @brief Construct from PixelIterator
     /// @param pixels Pointer to PixelIterator (must outlive this adapter)
     explicit ScaledPixelIteratorBrightness(PixelIterator* pixels) FL_NO_EXCEPT
-        : mPixels(pixels), mCurrent(0), mHasValue(false) {
-        advance();  // Preload first brightness
+        : mPixels(pixels), mCurrent(0) {
+        load();
     }
-
-    /// @brief Sentinel constructor (end iterator)
-    ScaledPixelIteratorBrightness() FL_NO_EXCEPT
-        : mPixels(nullptr), mCurrent(0), mHasValue(false) {}
 
     /// @brief Dereference operator
     u8 operator*() const FL_NO_EXCEPT {
@@ -264,41 +271,30 @@ public:
 
     /// @brief Pre-increment operator
     ScaledPixelIteratorBrightness& operator++() FL_NO_EXCEPT {
-        advance();
+        load();
         return *this;
     }
 
     /// @brief Post-increment operator
     ScaledPixelIteratorBrightness operator++(int) FL_NO_EXCEPT {
         ScaledPixelIteratorBrightness tmp = *this;
-        advance();
+        load();
         return tmp;
     }
 
-    /// @brief Equality comparison
-    bool operator==(const ScaledPixelIteratorBrightness& other) const FL_NO_EXCEPT {
-        if (!mHasValue && !other.mHasValue) {
-            return true;
-        }
-        if (mHasValue != other.mHasValue) {
-            return false;
-        }
-        return mPixels == other.mPixels;
-    }
-
-    /// @brief Inequality comparison
-    bool operator!=(const ScaledPixelIteratorBrightness& other) const FL_NO_EXCEPT {
-        return !(*this == other);
-    }
+    // No sentinel constructor and no comparisons, on purpose. This iterator
+    // advances nothing, so it can never reach an end -- any loop written
+    // against a sentinel here would spin forever. The encoders stop on the
+    // RGB range they walk alongside, which is the only real termination.
 
 private:
-    /// @brief Advance to next brightness value (or mark as end)
-    void advance() FL_NO_EXCEPT;
+    /// @brief Re-read the strip's brightness. Moves no cursor.
+    void load() FL_NO_EXCEPT;
 
     PixelIterator* mPixels;  ///< Underlying PixelIterator
     u8 mCurrent;             ///< Current brightness value (cached)
-    bool mHasValue;          ///< true if current value is valid
 };
+#endif  // FASTLED_HD_COLOR_MIXING
 
 /// @brief Input iterator adapter for PixelIterator yielding 16-bit RGB pixel data
 ///
@@ -419,16 +415,28 @@ makeScaledPixelRangeRGBWW(PixelIterator* pixels) FL_NO_EXCEPT {
     );
 }
 
-/// @brief Create brightness input iterator range from PixelIterator
+#if FASTLED_HD_COLOR_MIXING
+/// @brief Create the brightness input iterator for the HD encoders
 /// @param pixels PixelIterator to wrap
-/// @return Pair of begin/end iterators
-inline pair<detail::ScaledPixelIteratorBrightness, detail::ScaledPixelIteratorBrightness>
-makeScaledBrightnessRange(PixelIterator* pixels) FL_NO_EXCEPT {
-    return make_pair(
-        detail::ScaledPixelIteratorBrightness(pixels),
-        detail::ScaledPixelIteratorBrightness()  // End sentinel
-    );
+/// @return A single iterator, deliberately not a range
+///
+/// This used to return a begin/end pair, and it should not have. The iterator
+/// yields a per-strip constant and must not move the shared `PixelIterator`
+/// cursor -- the `ScaledPixelIteratorRGB` it is paired with owns that (#4321).
+/// An iterator that advances nothing can never reach an end sentinel, so a
+/// standalone `for (it = r.first; it != r.second; ++it)` over the old pair
+/// could not terminate whatever the sentinel checked. Making `mHasValue`
+/// track `has(1)` would not have fixed it either: with nothing advancing the
+/// cursor, `has(1)` never becomes false on its own.
+///
+/// So there is no end to hand out. The HD encoders take this iterator
+/// alongside the RGB range and stop on the RGB range, which is the only
+/// termination that was ever real. All callers used `.first`.
+inline detail::ScaledPixelIteratorBrightness
+makeScaledBrightness(PixelIterator* pixels) FL_NO_EXCEPT {
+    return detail::ScaledPixelIteratorBrightness(pixels);
 }
+#endif  // FASTLED_HD_COLOR_MIXING
 
 /// @brief Create 16-bit RGB input iterator range from PixelIterator
 /// @param pixels PixelIterator to wrap

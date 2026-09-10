@@ -246,9 +246,9 @@ class PixelIterator {
         if (hd_gamma) {
             // HD gamma mode: per-LED brightness
             auto pixel_range = makeScaledPixelRangeRGB(this);
-            auto brightness_range = makeScaledBrightnessRange(this);
+            auto brightness = makeScaledBrightness(this);
             encodeAPA102_HD(pixel_range.first, pixel_range.second,
-                                      brightness_range.first, back_ins);
+                                      brightness, back_ins);
             return;
         }
         #endif
@@ -279,9 +279,9 @@ class PixelIterator {
         if (hd_gamma) {
             // HD gamma mode: per-LED brightness
             auto pixel_range = makeScaledPixelRangeRGB(this);
-            auto brightness_range = makeScaledBrightnessRange(this);
+            auto brightness = makeScaledBrightness(this);
             encodeSK9822_HD(pixel_range.first, pixel_range.second,
-                                      brightness_range.first, back_ins);
+                                      brightness, back_ins);
             return;
         }
         #endif
@@ -374,9 +374,9 @@ class PixelIterator {
         #if FASTLED_HD_COLOR_MIXING
         // HD mode: per-LED brightness
         auto pixel_range = makeScaledPixelRangeRGB(this);
-        auto brightness_range = makeScaledBrightnessRange(this);
+        auto brightness = makeScaledBrightness(this);
         encodeHD108_HD(pixel_range.first, pixel_range.second,
-                                 brightness_range.first, back_ins);
+                                 brightness, back_ins);
         #else
         // Standard mode: global brightness (255 = full)
         auto pixel_range = makeScaledPixelRangeRGB(this);
@@ -471,33 +471,25 @@ inline void ScaledPixelIteratorRGBWW::advance() FL_NO_EXCEPT {
     }
 }
 
+#if FASTLED_HD_COLOR_MIXING
 // ScaledPixelIteratorBrightness implementation
-inline void ScaledPixelIteratorBrightness::advance() FL_NO_EXCEPT {
+//
+// Named load() rather than advance() because it advances nothing. It must not
+// call stepDithering()/advanceData(): the RGB adapter alongside owns the
+// shared cursor, and both moving it consumed two source pixels per emitted
+// LED and halved the strip (#4321).
+inline void ScaledPixelIteratorBrightness::load() FL_NO_EXCEPT {
     if (!mPixels) {
-        mHasValue = false;
         return;
     }
 
-    if (mPixels->has(1)) {
-        #if FASTLED_HD_COLOR_MIXING
-        u8 r, g, b, brightness;
-        mPixels->loadRGBScaleAndBrightness(&r, &g, &b, &brightness);
-        mCurrent = brightness;
-        #else
-        // Fallback: compute brightness from max RGB component
-        u8 r, g, b;
-        mPixels->loadAndScaleRGB(&r, &g, &b);
-        // Use sequential comparisons to avoid nested fl::max (helps AVR register allocation)
-        u8 max_rg = (r > g) ? r : g;
-        mCurrent = (max_rg > b) ? max_rg : b;
-        #endif
-        mPixels->stepDithering();
-        mPixels->advanceData();
-        mHasValue = true;
-    } else {
-        mHasValue = false;
-    }
+    // ColorAdjustment::brightness -- a per-strip constant, so the same value
+    // is correct at every position and no cursor movement is needed.
+    u8 r, g, b, brightness;
+    mPixels->loadRGBScaleAndBrightness(&r, &g, &b, &brightness);
+    mCurrent = brightness;
 }
+#endif  // FASTLED_HD_COLOR_MIXING
 
 // ScaledPixelIteratorRGB16 implementation
 inline void ScaledPixelIteratorRGB16::advance() FL_NO_EXCEPT {
