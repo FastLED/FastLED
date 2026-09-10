@@ -70,7 +70,10 @@ inline u16 hd108GammaCorrect(u8 value) FL_NO_EXCEPT {
 }
 
 /// @brief Generate HD108 per-channel gain header bytes
-/// @param brightness_8bit 8-bit brightness (0-255) - UNUSED, kept for API compatibility
+/// @param brightness_8bit 8-bit brightness (0-255) - UNUSED, kept for API
+///        compatibility. Callers advertising a working brightness parameter on
+///        top of this are advertising something that does not happen; see
+///        encodeHD108() (FastLED#4042).
 /// @param f0_out Output: first header byte
 /// @param f1_out Output: second header byte
 /// @note HD108 uses per-channel gain encoding: 5 bits each for R/G/B

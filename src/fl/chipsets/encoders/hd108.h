@@ -31,7 +31,12 @@ namespace fl {
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel
 /// @param out Output iterator for encoded bytes
-/// @param global_brightness Global 8-bit brightness (0-255), default 255
+/// @param global_brightness Accepted and ignored. HD108's per-channel 5-bit
+///        gains are pinned at maximum (31) for precision and brightness is
+///        expected to be applied to the 16-bit values before encoding, so this
+///        argument reaches neither the header nor the payload. Kept for source
+///        compatibility; the sole in-tree caller passes 255 and pre-scales.
+///        Passing anything else does not dim (FastLED#4042).
 /// @note Uses gamma 2.8 correction for 16-bit RGB
 /// @note HD108 uses RGB wire order: pixel[0]=Red, pixel[1]=Green, pixel[2]=Blue
 template <typename InputIterator, typename OutputIterator>
@@ -83,7 +88,10 @@ void encodeHD108(InputIterator first, InputIterator last, OutputIterator out,
 /// @tparam OutputIterator Output iterator accepting uint8_t
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel
-/// @param brightness_first Iterator to first brightness value (8-bit, 0-255)
+/// @param brightness_first Iterator to first brightness value (8-bit, 0-255).
+///        Read once per LED and then discarded: hd108BrightnessHeader() pins
+///        all gains at 31 regardless. Per-LED brightness has no effect on the
+///        output (FastLED#4042).
 /// @param out Output iterator for encoded bytes
 /// @note HD108 uses RGB wire order: pixel[0]=Red, pixel[1]=Green, pixel[2]=Blue
 template <typename InputIterator, typename BrightnessIterator, typename OutputIterator>

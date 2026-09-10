@@ -53,11 +53,13 @@ static void verifyEndFrame(const fl::vector<u8>& data, size_t expected_size) {
     }
 }
 
-/// Helper to verify header bytes use maximum gain (31) for all channels
-/// Brightness parameter is ignored - gain is always max for maximum precision
-static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset, u8 expected_bri5) {
-    (void)expected_bri5;  // Unused - all gains are max (31) regardless of brightness input
-
+/// Verify the header pins all three gains at maximum (31).
+///
+/// It takes no expected value on purpose. It used to accept one and open with
+/// `(void)expected_bri5;`, so a caller could pass any number and still pass --
+/// which is what let the case below carry a twelve-row table of expected 5-bit
+/// gains that nothing compared against.
+static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset) {
     u8 f0 = data[offset];
     u8 f1 = data[offset + 1];
 
@@ -110,8 +112,9 @@ FL_TEST_CASE("encodeHD108() - single LED, max brightness") {
 
     verifyStartFrame(output);
 
-    // Verify header: brightness 255 -> 5-bit 31
-    verifyHeaderBytes(output, 8, 31);
+    // Header is 0xFF/0xFF whatever brightness is passed: HD108 gains are
+    // pinned at 31 and the argument is ignored.
+    verifyHeaderBytes(output, 8);
 
     // Verify RGB data with gamma correction
     verifyLEDData(output, 10, 255, 128, 64);
@@ -127,8 +130,8 @@ FL_TEST_CASE("encodeHD108() - single LED, mid brightness") {
 
     FL_REQUIRE_EQ(output.size(), 20);
 
-    // Verify header: brightness 128 -> 5-bit 16
-    verifyHeaderBytes(output, 8, 16);
+    // Header unchanged at mid brightness -- the argument reaches nothing.
+    verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 200, 100, 50);
 }
@@ -141,8 +144,8 @@ FL_TEST_CASE("encodeHD108() - single LED, min brightness") {
 
     FL_REQUIRE_EQ(output.size(), 20);
 
-    // Verify header: brightness 1 -> 5-bit 1 (non-zero preservation)
-    verifyHeaderBytes(output, 8, 1);
+    // Header unchanged at minimum brightness too.
+    verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 100, 50, 25);
 }
@@ -159,11 +162,11 @@ FL_TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
     verifyStartFrame(output);
 
     // LED 1
-    verifyHeaderBytes(output, 8, 31);
+    verifyHeaderBytes(output, 8);
     verifyLEDData(output, 10, 255, 0, 0);
 
     // LED 2
-    verifyHeaderBytes(output, 16, 31);
+    verifyHeaderBytes(output, 16);
     verifyLEDData(output, 18, 0, 255, 0);
 
     verifyEndFrame(output, 5);
@@ -184,8 +187,8 @@ FL_TEST_CASE("encodeHD108() - three LEDs, end frame size") {
 
     verifyStartFrame(output);
 
-    // Verify brightness 200 -> 5-bit 24 (200*31+127)/255 = 24.8
-    verifyHeaderBytes(output, 8, 24);
+    // Header unchanged; brightness 200 is passed and discarded.
+    verifyHeaderBytes(output, 8);
 
     verifyEndFrame(output, 5);
 }
@@ -214,36 +217,52 @@ FL_TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
     verifyEndFrame(output, 8);
 }
 
-FL_TEST_CASE("encodeHD108() - brightness mapping 8-bit to 5-bit") {
-    // Test critical brightness values
-    struct BrightnessTest {
-        u8 input;
-        u8 expected_5bit;
-    };
+FL_TEST_CASE("encodeHD108() - the gain header ignores global_brightness, by design") {
+    // HD108 carries a 5-bit gain per channel. FastLED pins all three at 31 and
+    // does brightness in the 16-bit values instead, which is what
+    // hd108BrightnessHeader() means by ignoring its argument.
+    //
+    // This case used to be called "brightness mapping 8-bit to 5-bit" and
+    // carried a twelve-row table mapping inputs to expected 5-bit gains --
+    // {0,0}, {128,16}, {255,31} and so on. None of it was compared: the helper
+    // discarded the expectation and asserted the constant. Every row asserted
+    // the same thing, so the case would not have failed if a mapping had been
+    // introduced, or if an existing one had broken.
+    //
+    // Stated as what actually holds: across the full 8-bit range the header is
+    // invariant, and it is 0xFF/0xFF.
+    const u8 brightnesses[] = {0, 1, 8, 16, 64, 127, 128, 191, 192, 200, 254, 255};
 
-    BrightnessTest tests[] = {
-        {0, 0},      // Zero maps to zero
-        {1, 1},      // Min non-zero preserved
-        {8, 1},      // Low values map to 1
-        {16, 2},
-        {64, 8},
-        {127, 15},
-        {128, 16},
-        {191, 23},
-        {192, 23},   // 192*31+127 = 6079/255 = 23.8
-        {200, 24},   // 200*31+127 = 6327/255 = 24.8
-        {254, 31},
-        {255, 31}    // Max maps to max
-    };
-
-    for (const auto& test : tests) {
+    for (const u8 brightness : brightnesses) {
         fl::vector<fl::array<u8, 3>> leds = {{{50, 50, 50}}};
         fl::vector<u8> output;
 
-        encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), test.input);
+        encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), brightness);
 
-        verifyHeaderBytes(output, 8, test.expected_5bit);
+        verifyHeaderBytes(output, 8);
     }
+}
+
+FL_TEST_CASE("encodeHD108() - brightness does not reach the payload either") {
+    // The other half of the contract, and the guard that keeps the case above
+    // from being satisfiable by an encoder that ignores brightness everywhere:
+    // the 16-bit values are the gamma-corrected input, unscaled. So
+    // global_brightness reaches neither the header nor the payload -- it is
+    // accepted and discarded, which is worth pinning because the public
+    // signature still advertises it.
+    fl::vector<u8> dim;
+    fl::vector<u8> bright;
+    fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(dim), 1);
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(bright), 255);
+
+    FL_REQUIRE_EQ(dim.size(), bright.size());
+    FL_CHECK_EQ(dim, bright);
+
+    // And the payload is the gamma of the input, so "unscaled" is a claim
+    // about a known value rather than about two things merely matching.
+    FL_CHECK_EQ(getBigEndian16(dim, 10), Gamma28LUT16::read(200));
 }
 
 FL_TEST_CASE("encodeHD108() - gamma correction verification") {
@@ -310,8 +329,8 @@ FL_TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
 
     verifyStartFrame(output);
 
-    // Verify per-LED brightness 200 -> 5-bit 24
-    verifyHeaderBytes(output, 8, 24);
+    // Per-LED brightness is read and discarded; the header stays 0xFF/0xFF.
+    verifyHeaderBytes(output, 8);
 
     verifyLEDData(output, 10, 255, 128, 64);
 
@@ -334,16 +353,16 @@ FL_TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
 
     verifyStartFrame(output);
 
-    // LED 1: brightness 255 -> 31
-    verifyHeaderBytes(output, 8, 31);
+    // LED 1: header pinned regardless of its brightness
+    verifyHeaderBytes(output, 8);
     verifyLEDData(output, 10, 255, 0, 0);
 
-    // LED 2: brightness 128 -> 16
-    verifyHeaderBytes(output, 16, 16);
+    // LED 2: same header, different brightness
+    verifyHeaderBytes(output, 16);
     verifyLEDData(output, 18, 0, 255, 0);
 
-    // LED 3: brightness 64 -> 8
-    verifyHeaderBytes(output, 24, 8);
+    // LED 3: same header again
+    verifyHeaderBytes(output, 24);
     verifyLEDData(output, 26, 0, 0, 255);
 
     verifyEndFrame(output, 5);
@@ -363,10 +382,10 @@ FL_TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
 
     FL_REQUIRE_EQ(output.size(), 37);
 
-    // All LEDs should have same header bytes (brightness 200 -> 24)
-    verifyHeaderBytes(output, 8, 24);
-    verifyHeaderBytes(output, 16, 24);
-    verifyHeaderBytes(output, 24, 24);
+    // All LEDs share the same header -- as they would for any brightness.
+    verifyHeaderBytes(output, 8);
+    verifyHeaderBytes(output, 16);
+    verifyHeaderBytes(output, 24);
 
     // Verify colors differ despite same brightness
     verifyLEDData(output, 10, 100, 0, 0);
@@ -418,11 +437,11 @@ FL_TEST_CASE("encodeHD108_HD() - min/max brightness values") {
 
     encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
 
-    // LED 1: brightness 0 -> 0
-    verifyHeaderBytes(output, 8, 0);
+    // LED 1: brightness 0 still yields the pinned header
+    verifyHeaderBytes(output, 8);
 
-    // LED 2: brightness 255 -> 31
-    verifyHeaderBytes(output, 16, 31);
+    // LED 2: and so does brightness 255
+    verifyHeaderBytes(output, 16);
 }
 
 //-----------------------------------------------------------------------------
