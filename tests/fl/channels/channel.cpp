@@ -853,28 +853,34 @@ FL_TEST_CASE("[#4326] binding a profile clears the caller's gamma") {
     }
 }
 
-FL_TEST_CASE("[#4326] the encode path takes a bound profile") {
-    // Recorded because it bounds what the cases above can be read to mean:
-    // the profile binds and is owned by the channel that encodes here.
+FL_TEST_CASE("[#4326] a bound profile reaches the encode path") {
+    // The name has to be earned: this encodes, rather than only checking that
+    // the channel owns a profile. What it pins is that the binding changes
+    // what goes on the wire -- the same pixel through the same encoder, bound
+    // and unbound, does not produce the same bytes.
+    //
     // Whether the 2.8 that `mGamma.value_or(2.8f)` falls back to should give
     // way to identity once the device solve runs is #4326's remaining half.
-    auto& mgr = ChannelManager::instance();
-    mgr.clearAllDrivers();
-    mgr.addDriver(9100, fl::make_shared<CapturingDriver>());
-    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+    fl::vector<u8> bound = encodeOnce(CRGB(127, 0, 0), true, 2.8f, 16);
+    fl::vector<u8> unbound = encodeOnce(CRGB(127, 0, 0), false, 2.8f, 17);
 
-    CRGB leds[1] = {CRGB(127, 0, 0)};
-    ChannelOptions options;
-    FL_REQUIRE(options.setColorProfile(kProfile, SourceProfile::linearSrgb()));
-    ChannelConfig config(ucs16(16), fl::span<CRGB>(leds, 1), RGB, options);
-    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE_GT((int)bound.size(), 16);
+    FL_REQUIRE_EQ((int)bound.size(), (int)unbound.size());
 
-    FL_REQUIRE(channel != nullptr);
-    FL_CHECK(channel->hasColorProfile());
-    // Deliberately no isColorManaged() assertion here. That accessor was a
-    // hardcoded constant when this file was written, and #4328/#4329 give it
-    // real semantics plus the guard that stops it collapsing into
-    // hasColorProfile(). Pinning its old value here would only have made
+    bool differs = false;
+    for (fl::size k = 0; k < bound.size(); ++k) {
+        if (bound[k] != unbound[k]) { differs = true; }
+    }
+    FL_CHECK(differs);
+
+    // And specifically in the payload rather than only in the preamble, so a
+    // difference in current-control bytes could not satisfy it.
+    FL_CHECK_NE((int)((bound[15] << 8) | bound[16]),
+                (int)((unbound[15] << 8) | unbound[16]));
+
+    // Deliberately no isColorManaged() assertion. That accessor was a
+    // hardcoded constant when this file was written; #4328/#4329 give it real
+    // semantics, and pinning its old value here would only have made
     // whichever of the two landed second fail.
 }
 
