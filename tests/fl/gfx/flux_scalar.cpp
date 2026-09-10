@@ -114,6 +114,13 @@ i32 emittedLightQ16(int channel, i32 drive) {
     return static_cast<i32>((squared + 32768) >> 16);
 }
 
+/// A plain Q16 multiply, so the nonlinear control below can be built out of
+/// the same "scale, then scale again" shape the linear check uses.
+i32 scaleQ16(i32 value, i32 scalar_q16) {
+    const i64 product = static_cast<i64>(value) * static_cast<i64>(scalar_q16);
+    return static_cast<i32>((product + 32768) >> 16);
+}
+
 /// The drive that emits a given light, i.e. `F^-1`.
 i32 driveForLightQ16(int channel, i32 light) {
     if (channel == 0) {
@@ -201,6 +208,12 @@ FL_TEST_CASE("The shipped order scales linear drives, which is the safe one") {
     i32 once[3] = {60000, 40000, 12345};
     applyFluxScalar(FluxScalar::fromRawQ16(16384), span<i32>(once, 3));
 
+    // The scaling has to have happened, or the agreement below is the
+    // agreement of two untouched values: a no-op `applyFluxScalar` would
+    // satisfy the +/-1 bound perfectly.
+    FL_CHECK_EQ(once[0], 15000);
+    FL_CHECK_EQ(twice[0], 15000);
+
     for (int i = 0; i < 3; ++i) {
         // Within one raw unit, which is the two roundings rather than a
         // curve. A square-law stage would put these thousands apart.
@@ -209,11 +222,20 @@ FL_TEST_CASE("The shipped order scales linear drives, which is the safe one") {
         FL_CHECK_GT(difference, -2);
     }
 
-    // And the same operands through a square law, so the check above is
-    // shown to be capable of separating the two.
-    const i32 squared_twice = emittedLightQ16(1, emittedLightQ16(1, 60000));
-    const i32 squared_once = emittedLightQ16(1, 60000);
-    FL_CHECK_GT(squared_once - squared_twice, 1000);
+    // The same comparison under a nonlinear stage, so the bound above is
+    // shown to discriminate rather than to be satisfiable by anything. Same
+    // structure -- half applied twice against a quarter applied once -- with
+    // the square law standing in for the linear scale.
+    const i32 half = 32768;
+    const i32 quarter = 16384;
+    i32 nonlinear_twice = 60000;
+    nonlinear_twice = emittedLightQ16(1, scaleQ16(nonlinear_twice, half));
+    nonlinear_twice = emittedLightQ16(1, scaleQ16(nonlinear_twice, half));
+    const i32 nonlinear_once = emittedLightQ16(1, scaleQ16(60000, quarter));
+    // Not "different by a bit": the two orders separate by thousands of raw
+    // units, which is what the +/-1 bound above would have caught.
+    const i32 gap = nonlinear_once - nonlinear_twice;
+    FL_CHECK_GT(gap > 0 ? gap : -gap, 1000);
 }
 
 }  // FL_TEST_FILE
