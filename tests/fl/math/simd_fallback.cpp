@@ -43,6 +43,7 @@
 #include "platforms/shared/simd_noop.hpp"
 #endif  // !FL_SIMD_BACKEND_IS_FALLBACK
 
+#include "fl/stl/cstring.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 
@@ -123,15 +124,59 @@ const float kBf[4] = {4.0f, -0.5f, 2.0f, 0.25f};
         }                                                                      \
     } while (0)
 
-// u16x8 and u16x16 have no store of their own in the API; both backends reach
-// them only through narrow_*, so they are compared by narrowing back down.
+// u16x8 and u16x16 have no store of their own in the API, and comparing them
+// by narrowing back down does not work on its own: `narrow_*` saturates, so
+// every lane above 255 maps to 255 and any two of them compare equal.
+// `0x8000` and `0x8100` would have passed identically, and a later
+// `srli_u16_8(v, 8)` makes that 128 against 129.
+//
+// So the lanes are read out of the register directly. Both backends' types
+// are trivially-copyable storage of the same size -- a `u16[8]` in the
+// fallback, a `__m128i` on x86 -- and `memcpy` is the portable way to look at
+// either without an aligned-load requirement or a strict-aliasing violation.
+template <typename Vector>
+void readLanes(const Vector& vec, fl::u16* out, int count) {
+    fl::memcpy(out, &vec, sizeof(fl::u16) * static_cast<fl::size>(count));
+}
+
+#define FL_SAME_U16_8(expr_host, expr_fallback)                                \
+    do {                                                                       \
+        fl::u16 out_h[8] = {0}, out_f[8] = {0};                                \
+        readLanes((expr_host), out_h, 8);                                      \
+        readLanes((expr_fallback), out_f, 8);                                  \
+        for (int i = 0; i < 8; ++i) {                                          \
+            FL_CHECK_EQ(int(out_f[i]), int(out_h[i]));                         \
+        }                                                                      \
+    } while (0)
+
+#define FL_SAME_U16_16(expr_host, expr_fallback)                               \
+    do {                                                                       \
+        fl::u16 out_h[16] = {0}, out_f[16] = {0};                              \
+        readLanes((expr_host), out_h, 16);                                     \
+        readLanes((expr_fallback), out_f, 16);                                 \
+        for (int i = 0; i < 16; ++i) {                                         \
+            FL_CHECK_EQ(int(out_f[i]), int(out_h[i]));                         \
+        }                                                                      \
+    } while (0)
+
+// The narrowing comparison is kept alongside, because `narrow_*` is itself
+// one of the 66 operations and saturation is its documented behaviour -- it
+// is just no longer the only thing standing behind the u16 arithmetic.
 #define FL_SAME_U16_8_PAIR(lo_h, hi_h, lo_f, hi_f)                             \
-    FL_SAME_U8_16(host::narrow_u16_to_u8((lo_h), (hi_h)),                      \
-                  fallback::narrow_u16_to_u8((lo_f), (hi_f)))
+    do {                                                                       \
+        FL_SAME_U16_8((lo_h), (lo_f));                                         \
+        FL_SAME_U16_8((hi_h), (hi_f));                                         \
+        FL_SAME_U8_16(host::narrow_u16_to_u8((lo_h), (hi_h)),                  \
+                      fallback::narrow_u16_to_u8((lo_f), (hi_f)));             \
+    } while (0)
 
 #define FL_SAME_U16_16_PAIR(lo_h, hi_h, lo_f, hi_f)                            \
-    FL_SAME_U8_32(host::narrow_u16x16_to_u8((lo_h), (hi_h)),                   \
-                  fallback::narrow_u16x16_to_u8((lo_f), (hi_f)))
+    do {                                                                       \
+        FL_SAME_U16_16((lo_h), (lo_f));                                        \
+        FL_SAME_U16_16((hi_h), (hi_f));                                        \
+        FL_SAME_U8_32(host::narrow_u16x16_to_u8((lo_h), (hi_h)),               \
+                      fallback::narrow_u16x16_to_u8((lo_f), (hi_f)));          \
+    } while (0)
 
 #endif  // !FL_SIMD_BACKEND_IS_FALLBACK
 
