@@ -29,6 +29,21 @@
     #include "platforms/arm/teensy/simd_arm_dsp.hpp"  // IWYU pragma: keep
 #else
     // No SIMD support - use scalar fallback
-    // Covers: AVR, ESP8266, ARM Cortex-M0/M0+/M3 (no DSP ext), WASM, and others
+    // Covers: AVR, ESP8266, ARM Cortex-M0/M0+/M3 (no DSP ext), WASM, ARMv8-A
+    // (there is a NEON backend in `platforms/arm/simd_arm_neon.hpp`, but no
+    // arm above selects it), and anything else unmatched.
     #include "platforms/shared/simd_noop.hpp"  // IWYU pragma: keep
+    #define FL_SIMD_BACKEND_IS_FALLBACK 1
+#endif
+
+/// 1 when the branch above selected the scalar fallback, 0 when it selected an
+/// accelerated backend.
+///
+/// Exists because "which backend am I" is otherwise only answerable by
+/// restating the whole condition above, and a test that wants to compare the
+/// fallback against the selected backend has to know whether there are two of
+/// them: on an x86 host there are, and on Apple Silicon the fallback *is* the
+/// selection, so the comparison would be an identity.
+#ifndef FL_SIMD_BACKEND_IS_FALLBACK
+    #define FL_SIMD_BACKEND_IS_FALLBACK 0
 #endif

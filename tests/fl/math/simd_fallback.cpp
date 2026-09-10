@@ -1,29 +1,48 @@
 /// @file simd_fallback.cpp
-/// Differential coverage for the scalar SIMD fallback.
+/// Contract and differential coverage for the scalar SIMD fallback.
 ///
 /// `src/platforms/shared/simd_noop.hpp` is the SIMD backend for AVR, ESP8266,
-/// Cortex-M0/M0+/M3, WASM, RP2350 and every part `platforms/simd.h` does not
-/// otherwise match. On an x86 host that dispatch selects `simd_x86.hpp`, so
-/// the fallback was reached by nothing: an `#error` placed at the top of it
-/// does not fire anywhere in the test build. Its 66 operations shipped to
-/// those targets with no host test behind them.
+/// Cortex-M0/M0+/M3, WASM, RP2350, every ARMv8-A part, and anything else
+/// `platforms/simd.h` does not match.
 ///
-/// This file includes the fallback under a second namespace and checks every
-/// one of those operations against the backend the host actually selected.
-/// A differential oracle rather than hand-written expectations, because the
-/// point is that the fallback and the accelerated path agree -- that is the
-/// promise the dispatch makes, and hand-copied constants would only restate
-/// whichever implementation they were copied from.
+/// On an **x86** host that dispatch selects `simd_x86.hpp`, so the fallback is
+/// reached by nothing: an `#error` placed at the top of it does not fire in
+/// the Linux test build. On **Apple Silicon** the opposite holds -- the
+/// fallback *is* the selection, and the existing `fl/math/simd.cpp` cases
+/// exercise it as the platform backend. So its coverage depended entirely on
+/// which machine ran the suite, and the machine most people develop on was
+/// the one that skipped it.
+///
+/// Two kinds of case here, for that reason:
+///
+/// - **Contract cases** run everywhere. They assert the semantics all six
+///   backends agree on, against values written out by hand.
+/// - **Differential cases** run only where the host selected something other
+///   than the fallback, and check all 66 operations against it. That is the
+///   stronger check, because hand-copied constants only restate whichever
+///   implementation they were copied from -- but it needs two backends to
+///   exist, which `FL_SIMD_BACKEND_IS_FALLBACK` is how to ask.
 ///
 /// Issue #4216 wants the fallback's lane storage rewritten from `u32[4]` to
 /// named members, and gave "verifiable on two of many targets" as the reason
 /// not to. That rewrite touches all 80 `data[...]` accesses; these cases are
 /// what turn it into a refactor with an oracle.
 
+#include "fl/math/simd.h"
+
+#if !FL_SIMD_BACKEND_IS_FALLBACK
+// Under a second namespace, so the fallback's types and the selected
+// backend's can coexist: `simd_u32x4` is a `u32[4]` here and a `__m128i`
+// there, so they cannot share a name in one translation unit.
+//
+// Only where the host did not already select the fallback. Where it did, the
+// test build's precompiled header has included this file already and
+// `#pragma once` makes a second include a no-op -- the alias below would then
+// name a namespace that was never opened.
 #define FL_SIMD_FALLBACK_NAMESPACE platforms_fallback
 #include "platforms/shared/simd_noop.hpp"
+#endif  // !FL_SIMD_BACKEND_IS_FALLBACK
 
-#include "fl/math/simd.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 
@@ -32,8 +51,15 @@ FL_TEST_FILE(FL_FILEPATH) {
 namespace {
 
 namespace host = fl::simd::platforms;
+#if !FL_SIMD_BACKEND_IS_FALLBACK
 namespace fallback = fl::simd::platforms_fallback;
+#endif
 
+#if !FL_SIMD_BACKEND_IS_FALLBACK
+// Everything below is used only by the differential cases, which the
+// same condition guards. Left outside it, an unused corpus fails the
+// build under -Werror=unused-const-variable on a host that selects the
+// fallback -- which is exactly where the differential does not run.
 // Inputs chosen to reach the edges the two implementations are most likely to
 // disagree on: saturation limits, sign boundaries for the ops that read the
 // lanes as signed, and zero.
@@ -107,7 +133,94 @@ const float kBf[4] = {4.0f, -0.5f, 2.0f, 0.25f};
     FL_SAME_U8_32(host::narrow_u16x16_to_u8((lo_h), (hi_h)),                   \
                   fallback::narrow_u16x16_to_u8((lo_f), (hi_f)))
 
+#endif  // !FL_SIMD_BACKEND_IS_FALLBACK
+
 } // namespace
+
+// ---------------------------------------------------------------------------
+// Contract cases: the semantics every backend agrees on, checked against the
+// one this host selected. These run everywhere, including where the selected
+// backend *is* the fallback.
+// ---------------------------------------------------------------------------
+
+FL_TEST_CASE("SIMD contract: avg_u8_16 truncates and avg_round_u8_16 rounds") {
+    // Two operations, not one. x86 answered both with `_mm_avg_epu8`, which
+    // is `(a+b+1)>>1`, and was the only backend of six to do so: NEON's
+    // `vhaddq_u8`, ARM-DSP's `uhadd8`, the Xtensa, RISC-V and fallback loops
+    // -- and the non-SSE2 path inside simd_x86.hpp itself -- all truncate.
+    fl::u8 a[16], b[16];
+    for (int i = 0; i < 16; ++i) { a[i] = 0; b[i] = 0; }
+    // 0+1 is the smallest pair the two answers differ on, and 254+255 the
+    // largest that still fits: 254 truncating, 255 rounding.
+    a[0] = 0;   b[0] = 1;
+    a[1] = 254; b[1] = 255;
+    a[2] = 10;  b[2] = 10;   // equal inputs: both answers are 10
+    a[3] = 255; b[3] = 255;  // both 255, and neither may overflow
+
+    fl::u8 trunc[16] = {0}, round[16] = {0};
+    const auto va = host::load_u8_16(a);
+    const auto vb = host::load_u8_16(b);
+    host::store_u8_16(trunc, host::avg_u8_16(va, vb));
+    host::store_u8_16(round, host::avg_round_u8_16(va, vb));
+
+    FL_CHECK_EQ(int(trunc[0]), 0);    FL_CHECK_EQ(int(round[0]), 1);
+    FL_CHECK_EQ(int(trunc[1]), 254);  FL_CHECK_EQ(int(round[1]), 255);
+    FL_CHECK_EQ(int(trunc[2]), 10);   FL_CHECK_EQ(int(round[2]), 10);
+    FL_CHECK_EQ(int(trunc[3]), 255);  FL_CHECK_EQ(int(round[3]), 255);
+}
+
+FL_TEST_CASE("SIMD contract: narrow_u16_to_u8 clamps its lanes as unsigned") {
+    // The lanes are u16. x86 packed them with `_mm_packus_epi16`, which
+    // saturates on the *signed* reading, so anything above 32767 came out 0
+    // where every other backend clamps it to 255.
+    fl::u8 src[16] = {0};
+    const auto zero = host::load_u8_16(src);
+    auto lo = host::widen_lo_u8_to_u16(zero);
+
+    // Build the u16 lanes by arithmetic on widened bytes rather than by a
+    // load, because the API has no u16x8 load: 255 * 257 == 65535, which is
+    // deep in the range where the two readings disagree.
+    for (int i = 0; i < 16; ++i) { src[i] = 255; }
+    const auto full = host::load_u8_16(src);
+    lo = host::widen_lo_u8_to_u16(full);                     // 255 per lane
+    const auto big = host::mullo_u16_8(lo, host::set1_u16_8(257));  // 65535
+
+    fl::u8 out[16] = {0};
+    host::store_u8_16(out, host::narrow_u16_to_u8(big, big));
+    for (int i = 0; i < 16; ++i) {
+        FL_CHECK_EQ(int(out[i]), 255);  // not 0, which the signed reading gives
+    }
+
+    // And a value that is unambiguous either way still passes through.
+    const auto small = host::mullo_u16_8(lo, host::set1_u16_8(1));  // 255
+    host::store_u8_16(out, host::narrow_u16_to_u8(small, small));
+    for (int i = 0; i < 16; ++i) {
+        FL_CHECK_EQ(int(out[i]), 255);
+    }
+}
+
+FL_TEST_CASE("SIMD contract: narrow_u16x16_to_u8 clamps its lanes as unsigned") {
+    // Same property on the 32-byte path, which x86 packs with the AVX2
+    // `_mm256_packus_epi16` and had the same signed reading.
+    fl::u8 src[32];
+    for (int i = 0; i < 32; ++i) { src[i] = 255; }
+    const auto full = host::load_u8_32(src);
+    const auto lanes = host::widen_lo_u8x32_to_u16(full);           // 255
+    const auto big = host::mullo_u16_16(lanes, host::set1_u16_16(257));  // 65535
+
+    fl::u8 out[32] = {0};
+    host::store_u8_32(out, host::narrow_u16x16_to_u8(big, big));
+    for (int i = 0; i < 32; ++i) {
+        FL_CHECK_EQ(int(out[i]), 255);
+    }
+}
+
+#if !FL_SIMD_BACKEND_IS_FALLBACK
+// ---------------------------------------------------------------------------
+// Differential cases: all 66 operations against the backend this host chose.
+// Skipped where that backend is the fallback, since the comparison would be
+// an identity -- see the file comment.
+// ---------------------------------------------------------------------------
 
 FL_TEST_CASE("Fallback u8x16: load, store and the byte-wise operations agree") {
     const auto ah = host::load_u8_16(kA8);
@@ -309,5 +422,7 @@ FL_TEST_CASE("Fallback u8x32 and u16x16: the wide operations agree") {
                             fallback::srli_u16_16(la_f, shift));
     }
 }
+
+#endif  // !FL_SIMD_BACKEND_IS_FALLBACK
 
 } // FL_TEST_FILE
