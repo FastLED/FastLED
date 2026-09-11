@@ -57,6 +57,53 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
     // ========================================================================
 
     // Test: Basic coroutine creation and completion
+// Decline the await-based coroutine tests where no coroutine can run.
+//
+// `fl::platforms::await()` (platforms/await.h) polls
+// `while (!promise.is_completed()) { promise.update(); suspendMainthread(); }`
+// with no bound. On RP the coroutine backend is null, so the producer
+// coroutine that would resolve the promise never executes and that loop never
+// exits: the sketch stops answering RPC entirely and only comes back when the
+// watchdog resets the board. Confirmed on an RP2350W, each of the three
+// tested *in isolation* with a `ping` after it: the call returns no response,
+// the following `ping` returns nothing either, and the board re-enumerates
+// reporting `lastResetCause: WATCHDOG`.
+//
+// Only the three tests that actually call `fl::task::await()` are guarded --
+// Await and AwaitError have one call site each, ChainedAwait two. The two
+// promise-callback tests call it zero times: they wait on
+// `while (producer.isRunning() && millis() - start < 5000)`, which is bounded
+// and exits immediately on RP because a coroutine that never starts is never
+// running. They measure 0 ms and 1 ms. They first looked like hangs only
+// because they were called *after* `testCoroutineAwait` had already wedged
+// the board -- "returned null" and "was called after something else died"
+// are indistinguishable from a transcript.
+//
+// `testCoroutineAll` already declines on FL_IS_RP, but these binds are
+// unconditional and `rpc.discover` advertises them, so the RPC surface invites
+// exactly the call that wedges the board. The three non-await tests
+// (Basic/Stop/Concurrent) are deliberately left callable: they return
+// `taskRan: false` promptly and are the evidence that the backend is null.
+//
+// This guards the symptom. The underlying hazard is that an unbounded
+// `await()` hangs wherever a promise cannot be resolved; see FastLED#3832.
+#if defined(FL_IS_RP)
+#define AUTORESEARCH_DECLINE_AWAIT_ON_RP(name)                                 \
+    do {                                                                       \
+        fl::json r = fl::json::object();                                       \
+        r.set("success", false);                                               \
+        r.set("supported", false);                                             \
+        r.set("backend", "null");                                              \
+        r.set("reason",                                                        \
+              "RP2xxx selects the null coroutine backend; " name               \
+              " would block forever in await() and wedge the board "           \
+              "until the watchdog resets it");                                 \
+        return r;                                                              \
+    } while (0)
+#else
+#define AUTORESEARCH_DECLINE_AWAIT_ON_RP(name) do { } while (0)
+#endif
+
     remote.bind("testCoroutineBasic", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
@@ -172,6 +219,7 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
     // Main thread does NOT touch the promise — only the producer coroutine does.
     remote.bind("testCoroutineAwait", [](const fl::json& args) -> fl::json {
         (void)args;
+        AUTORESEARCH_DECLINE_AWAIT_ON_RP("testCoroutineAwait");
         fl::json r = fl::json::object();
 
         auto promise_ptr = fl::make_shared<fl::task::Promise<int>>(fl::task::Promise<int>::create());
@@ -238,6 +286,7 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
     // Verifies that fl::task::await() properly propagates errors from producer.
     remote.bind("testCoroutineAwaitError", [](const fl::json& args) -> fl::json {
         (void)args;
+        AUTORESEARCH_DECLINE_AWAIT_ON_RP("testCoroutineAwaitError");
         fl::json r = fl::json::object();
 
         auto promise_ptr = fl::make_shared<fl::task::Promise<int>>(fl::task::Promise<int>::create());
@@ -382,6 +431,7 @@ void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
     // coroutine A produces value -> promise1 -> coroutine B transforms -> promise2 -> coroutine C consumes
     remote.bind("testCoroutineChainedAwait", [](const fl::json& args) -> fl::json {
         (void)args;
+        AUTORESEARCH_DECLINE_AWAIT_ON_RP("testCoroutineChainedAwait");
         fl::json r = fl::json::object();
 
         auto p1 = fl::make_shared<fl::task::Promise<int>>(fl::task::Promise<int>::create());
