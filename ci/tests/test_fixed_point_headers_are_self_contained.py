@@ -41,6 +41,20 @@ kSelfContainedHeaders = [
     # the `using` from `fl/channels/color_profile.h`. FastLED#4043, and then
     # the same thing again in its neighbour -- which is the argument for
     # listing the whole group rather than adding them one incident at a time.
+    # The eight per-pixel stages, kept whole on purpose. This list held six
+    # of them. `flux_scalar.h` and `source_xyz.h` were covered by accident --
+    # `pipeline.h` is listed and includes both, so a break failed, blamed on
+    # `pipeline.h`. `transfer.h` and `chromatic_adaptation.h` are included by
+    # no listed header and had no coverage at all: dropping an include from
+    # `transfer.h` left this file green at 15 passed (FastLED#4337).
+    #
+    # Two sibling guards scan the same eight -- test_no_rgb8_intermediate.py
+    # and test_no_iterative_solver_per_pixel.py. Three hand-maintained lists
+    # over one path; keep them in step.
+    "fl/gfx/transfer.h",
+    "fl/gfx/source_xyz.h",
+    "fl/gfx/chromatic_adaptation.h",
+    "fl/gfx/flux_scalar.h",
     "fl/gfx/device_solve.h",
     "fl/gfx/white_allocation.h",
     "fl/gfx/gamut_map.h",
