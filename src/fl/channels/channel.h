@@ -397,6 +397,11 @@ private:
 
     bool mColorProfileFallback = false;
     bool mProfileBindingAccepted = true;
+    // C5 asks for the fallback warning to be one-time. Set on the first
+    // emission and never cleared: a channel reconfigured repeatedly while
+    // still unable to bind should say so once, not once per configure
+    // (#4333).
+    bool mWarnedColorProfileFallback = false;
 #endif
 };
 

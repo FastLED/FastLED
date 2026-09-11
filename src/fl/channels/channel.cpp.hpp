@@ -364,6 +364,21 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     if (options.mColorProfile.mRequested && !options.hasColorProfile()) {
         mColorProfileFallback = true;
         mProfileBindingAccepted = !detail::colorProfileStrictMode();
+        // C5's one-time warning. The event below is the machine-readable
+        // half; this is the half a sketch sees without subscribing to
+        // anything, and it was the only one of C5's four items never built
+        // (#4333). Strict mode turns the same condition into a disabled
+        // channel, so say which happened.
+        if (!mWarnedColorProfileFallback) {
+            if (mProfileBindingAccepted) {
+                FL_WARN_F("Channel %d: color management requested but no profile "
+                          "bound; falling back to the legacy path", id());
+            } else {
+                FL_WARN_F("Channel %d: color management requested but no profile "
+                          "bound; strict mode disables this channel", id());
+            }
+            mWarnedColorProfileFallback = true;
+        }
     }
     if (options.mColorProfile.mUseGlobalSourceDefault) {
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();

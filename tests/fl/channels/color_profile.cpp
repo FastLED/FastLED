@@ -5,6 +5,7 @@
 #include "fl/channels/color_profile.h"
 #include "fl/gfx/pipeline.h"
 #include "test.h"
+#include "fl/stl/cstdio.h"
 
 using namespace fl;
 
@@ -783,6 +784,115 @@ FL_TEST_CASE("[#4331] a profile bound over untouched defaults stays quiet") {
     FastLED.channelEvents().onColorProfileWarning.remove(listener);
 
     FL_CHECK_EQ(events.size(), size_t(0));
+}
+
+// #4333: C5 promises a channel that asks for colour management and does not
+// get it four things -- a one-time warning, a queryable isColorManaged(), a
+// fallback flag in telemetry, and strict mode. The last three were built.
+// The warning was not, and stayed missing because nothing checked for it.
+FL_TEST_CASE("[#4333] falling back to the legacy path warns once") {
+    CRGB leds[1] = {};
+    fl::vector<fl::string> lines;
+    fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());   // no profile
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    fl::clear_print_handler();
+
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->hasColorProfileFallback());
+
+    // The distinguishing half of the message, not the shared prefix: the two
+    // branches differ only after "no profile bound", so matching the common
+    // text would pass even if the strict-mode wording were emitted here.
+    int warned = 0;
+    int wrong_branch = 0;
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        if (lines[i].find("falling back to the legacy path") != fl::string::npos) { ++warned; }
+        if (lines[i].find("strict mode disables this channel") != fl::string::npos) { ++wrong_branch; }
+    }
+    FL_CHECK_EQ(warned, 1);
+    FL_CHECK_EQ(wrong_branch, 0);
+}
+
+FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell back") {
+    // The other branch. Without it the message text is only half checked, and
+    // swapping the two arms would go unnoticed -- the condition that selects
+    // them is the same one that decides whether the channel stays enabled.
+    CRGB leds[1] = {};
+    fl::vector<fl::string> lines;
+    FastLED.setColorManagementStrict(true);
+    fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+
+    fl::clear_print_handler();
+    FastLED.setColorManagementStrict(false);
+
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->hasColorProfileFallback());
+    FL_REQUIRE_FALSE(channel->profileBindingAccepted());
+
+    int strict = 0;
+    int wrong_branch = 0;
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        if (lines[i].find("strict mode disables this channel") != fl::string::npos) { ++strict; }
+        if (lines[i].find("falling back to the legacy path") != fl::string::npos) { ++wrong_branch; }
+    }
+    FL_CHECK_EQ(strict, 1);
+    FL_CHECK_EQ(wrong_branch, 0);
+}
+
+FL_TEST_CASE("[#4333] a channel that gets its profile says nothing") {
+    // The guard. Without it, a warning emitted unconditionally on every
+    // channel would satisfy the case above.
+    CRGB leds[1] = {};
+    fl::vector<fl::string> lines;
+    fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    fl::clear_print_handler();
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_FALSE(channel->hasColorProfileFallback());
+
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        FL_CHECK(lines[i].find("color management") == fl::string::npos);
+    }
+}
+
+
+FL_TEST_CASE("[#4333] and it stays quiet on every reconfigure after the first") {
+    // "One-time" is the contract word, so it has to be the thing checked.
+    // Without this, a warning emitted on every reconcile would pass the case
+    // above, and applyConfig() reconciles again each time it is called.
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->hasColorProfileFallback());
+
+    // Capture only the reconfigures, so the create-time warning is not
+    // counted here -- the case above owns that one.
+    fl::vector<fl::string> lines;
+    fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    channel->applyConfig(config);
+    channel->applyConfig(config);
+    fl::clear_print_handler();
+
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        FL_CHECK(lines[i].find("color management") == fl::string::npos);
+    }
 }
 
 }  // FL_TEST_FILE
