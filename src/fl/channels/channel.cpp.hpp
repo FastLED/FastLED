@@ -348,6 +348,26 @@ Channel::~Channel() FL_NO_EXCEPT {
 }
 
 #if FL_COLOR_PROFILE_RUNTIME
+void Channel::raiseColorProfileFallback(const char* reason) FL_NO_EXCEPT {
+    mColorProfileFallback = true;
+    mProfileBindingAccepted = !detail::colorProfileStrictMode();
+    // C5's one-time warning. The event fired by the callers is the
+    // machine-readable half; this is the half a sketch sees without
+    // subscribing to anything (#4333). Strict mode turns the same condition
+    // into a disabled channel, so say which happened.
+    if (mWarnedColorProfileFallback) {
+        return;
+    }
+    if (mProfileBindingAccepted) {
+        FL_WARN_F("Channel %d: color management requested but %s; "
+                  "falling back to the legacy path", id(), reason);
+    } else {
+        FL_WARN_F("Channel %d: color management requested but %s; "
+                  "strict mode disables this channel", id(), reason);
+    }
+    mWarnedColorProfileFallback = true;
+}
+
 bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT {
     // A strict-mode rejection disables the channel. Remember whether the
     // current disabled state is ours, so that withdrawing the rejection
@@ -361,24 +381,12 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     mColorProfileFallback = false;
     mProfileBindingAccepted = true;
 
+    // C5's fallback, raised by the two conditions that mean the same thing to
+    // a caller: management was asked for and is not happening. The second one
+    // -- a profile that binds but builds no pipeline -- is raised further
+    // down, once the build has been attempted.
     if (options.mColorProfile.mRequested && !options.hasColorProfile()) {
-        mColorProfileFallback = true;
-        mProfileBindingAccepted = !detail::colorProfileStrictMode();
-        // C5's one-time warning. The event below is the machine-readable
-        // half; this is the half a sketch sees without subscribing to
-        // anything, and it was the only one of C5's four items never built
-        // (#4333). Strict mode turns the same condition into a disabled
-        // channel, so say which happened.
-        if (!mWarnedColorProfileFallback) {
-            if (mProfileBindingAccepted) {
-                FL_WARN_F("Channel %d: color management requested but no profile "
-                          "bound; falling back to the legacy path", id());
-            } else {
-                FL_WARN_F("Channel %d: color management requested but no profile "
-                          "bound; strict mode disables this channel", id());
-            }
-            mWarnedColorProfileFallback = true;
-        }
+        raiseColorProfileFallback("no profile bound");
     }
     if (options.mColorProfile.mUseGlobalSourceDefault) {
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
@@ -403,6 +411,18 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         StreamingPipelineQ16 pipeline;
         if (hooks.build(mSettings.mColorProfile, &pipeline)) {
             mPipeline = fl::make_unique<StreamingPipelineQ16>(pipeline);
+        } else if (options.hasColorProfile()) {
+            // R6: a profile outside the numerical bounds must "fail
+            // explicitly" and "not become native-drive input". A binding that
+            // cannot produce a pipeline used to leave every reporting surface
+            // saying the channel was fine -- Configured, no fallback flag, no
+            // warning -- while it rendered through the legacy path (#4345).
+            //
+            // This reports; it does not reject. Refusing the binding at
+            // setColorProfile() time is R6's fuller reading and needs the
+            // published coefficient bounds it also asks for, which do not
+            // exist yet.
+            raiseColorProfileFallback("bound profile builds no usable pipeline");
         }
     }
 

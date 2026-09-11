@@ -395,6 +395,11 @@ private:
     // remembers that management was asked for; the caller's options do.
     bool reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT;
 
+    /// Raise C5's fallback state and its one-time warning. Shared by the two
+    /// conditions that mean the same thing to a caller: no profile bound, and
+    /// a profile that binds but builds no usable pipeline (#4345).
+    void raiseColorProfileFallback(const char* reason) FL_NO_EXCEPT;
+
     bool mColorProfileFallback = false;
     bool mProfileBindingAccepted = true;
     // C5 asks for the fallback warning to be one-time. Set on the first
