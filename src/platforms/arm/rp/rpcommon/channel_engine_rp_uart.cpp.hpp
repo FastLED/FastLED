@@ -36,7 +36,29 @@ bool ChannelEngineRpUart::isValidTxPin(int pin) const FL_NO_EXCEPT {
 }
 
 bool ChannelEngineRpUart::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
+    // Every call starts a fresh evaluation, so the previous run's numbers
+    // stop being reportable here rather than in enqueue(). canHandle() is
+    // also reached during driver selection without enqueue() following, which
+    // is the path that left `attempted=True baud=2000000` visible on a
+    // channel this engine had just refused. show() re-establishes these for a
+    // channel that is accepted and actually runs.
+    mLastStartAttempted = false;
+    mLastStartSucceeded = false;
+    mLastEncodedSize = 0;
+    mLastActualBaud = 0;
     if (!data || !data->isClockless() || !isValidTxPin(data->getPin())) {
+        // Say why. The three guards below all record a reason; this one did
+        // not, so a decline for a pin this UART instance cannot drive was
+        // indistinguishable from the engine never being consulted -- the
+        // caller saw `attempted=false` with an empty error either way.
+        // FastLED#4375.
+        if (!data) {
+            mLastError = "RP UART: no channel data";
+        } else if (!data->isClockless()) {
+            mLastError = "RP UART: channel is not clockless";
+        } else {
+            mLastError = "RP UART: TX pin is not usable by this UART instance";
+        }
         return false;
     }
     // Ask the backend what it can actually reach rather than assuming a fixed
@@ -61,11 +83,29 @@ bool ChannelEngineRpUart::canHandle(const ChannelDataPtr& data) const FL_NO_EXCE
                      "backend maximum";
         return false;
     }
+    // Clear the reason here rather than with the numerics above: show()
+    // records a failed DMA start in mLastError and poll() is what reports it,
+    // so an evaluation must not be able to wipe that. Accepting is the only
+    // outcome that makes a previous decline's reason wrong, and this is the
+    // only path that reaches it.
+    mLastError.clear();
     return true;
 }
 
 void ChannelEngineRpUart::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
-    if (channelData && canHandle(channelData)) {
+    // canHandle() clears the numeric diagnostics and, on a decline, records
+    // the reason -- so nothing is needed here. It is done there rather than
+    // in show() because show() returns at its `mPendingChannels.empty()`
+    // guard before reaching its own reset, and an empty queue is exactly what
+    // a decline produces. Resetting above that guard would be worse: show()
+    // runs every frame, so it would wipe a successful run's diagnostics
+    // before the caller read them. See FastLED#4375.
+    // No `channelData &&` short-circuit: that would skip canHandle() for a
+    // null channel, leaving the diagnostics stale in exactly the case this
+    // change exists to fix -- and making canHandle()'s own null branch
+    // unreachable from here. canHandle() checks `!data` first, so calling it
+    // unconditionally is safe and is what records the reason.
+    if (canHandle(channelData)) {
         mPendingChannels.push_back(fl::move(channelData));
     }
 }
