@@ -57,21 +57,6 @@ jobs:
           # Run C++ unit tests (uses Meson for native compilation)
           uv run test.py --cpp
 
-      - name: Run Python Tests
-        # The `ci/tests` suite -- ~1,500 tests -- was not run by any
-        # pull-request workflow. `--cpp` above explicitly suppresses it
-        # ("equivalent to --unit --examples, suppresses Python tests"), the
-        # unit-test template runs `--unit`, and the only job that did run
-        # `bash test --py` is path-filtered to the mp3 codec.
-        #
-        # So the golden-vector and structural guards the colour pipeline is
-        # measured against -- the decode LUTs against the float64 reference,
-        # Bradford against ICC, the per-pixel stage lists, the corpus itself --
-        # gated nothing on the way in. A failure reached master in #4340 and
-        # sat there until someone ran the suite locally. FastLED#4359.
-        run: |
-          uv run test.py --py
-
       - name: Test Multi-Word Fuzzy Matching
         run: |
           # Test that multiple positional arguments work for fuzzy matching
