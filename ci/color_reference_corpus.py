@@ -371,7 +371,16 @@ def measure_color_reference_corpus(serialized: str) -> dict[str, float | int]:
             )
             max_stage_error = max(max_stage_error, error)
             if error > 1e-12 and stage != "d65_xyz":
-                raise ValueError(f"stage {stage} differs from reference")
+                # Say by how much. On the machine that generated the artifact
+                # this recomputation is bit-identical -- max error exactly 0.0
+                # -- so the 1e-12 budget is never approached and a failure
+                # elsewhere carries no information about whether it is libm
+                # noise or a different answer. FastLED#4364.
+                raise ValueError(
+                    f"stage {stage} differs from reference for "
+                    f"{reference['id']}: max abs error {error:.6g} "
+                    f"exceeds 1e-12"
+                )
         actual_d65 = stages["d65_xyz"]
         reference_d65 = reference["stages"]["d65_xyz"]
         # CIELAB is undefined for signed wide XYZ.  Preserve those stages

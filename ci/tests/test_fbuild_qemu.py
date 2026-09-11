@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -30,6 +31,27 @@ from ci.util.test_runner import (
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_DIR = ROOT / "tests" / "fbuild_qemu_smoke"
+
+
+def _fbuild_executable() -> str | None:
+    """The fbuild this project pins, not whichever one is first on PATH.
+
+    `shutil.which("fbuild")` resolved a user-installed 2.5.22 on a developer
+    machine while CI ran the pinned 2.5.23 from the project venv, so the local
+    run and the CI run were exercising different builds of the thing under
+    test -- and the local one could not reproduce a CI failure no matter how
+    the fixture was cleaned. Prefer the interpreter's own directory, which is
+    the venv `uv run` puts us in, and fall back to PATH so a non-uv invocation
+    still finds something.
+    """
+
+    candidate = Path(sys.executable).parent / "fbuild"
+    if candidate.exists():
+        return str(candidate)
+    return shutil.which("fbuild")
+
+
+FBUILD = _fbuild_executable()
 SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
 ERROR_PATTERN = (
     r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
@@ -108,13 +130,33 @@ def test_top_level_watchdog_outlives_python_worker_and_deadman_grace() -> None:
     reason="FASTLED_SKIP_FBUILD_QEMU=1",
 )
 @pytest.mark.skipif(
-    shutil.which("fbuild") is None,
-    reason="fbuild CLI not on PATH — install with `uv pip install fbuild`",
+    FBUILD is None,
+    reason="fbuild CLI not found — install with `uv pip install fbuild`",
 )
 def test_fbuild_test_emu_esp32dev() -> None:
     """`fbuild test-emu` builds and boots the smoke sketch under ESP32 QEMU."""
+    assert FBUILD is not None
+
+    # Build from a known state. `.fbuild/` lives inside the repo tree and is
+    # gitignored, so it survives branch switches and can hold objects compiled
+    # against a different FastLED source -- which then link against symbols
+    # that have since moved or gone. Reproduced locally with a cache from an
+    # earlier commit: `undefined reference to fl::detail::ditherFrame()`.
+    # Building the integration this test exists to check means building it
+    # against the tree as it is now.
+    cache_dir = PROJECT_DIR / ".fbuild"
+    if cache_dir.exists():
+        # Not `ignore_errors=True`. A removal that failed or half-finished
+        # would leave exactly the stale objects this is here to clear, and the
+        # build would then fail with a link error blamed on the integration
+        # rather than on the cleanup. Let it raise, and check the
+        # post-condition -- an empty-but-present directory is not a clean
+        # state either.
+        shutil.rmtree(cache_dir)
+    assert not cache_dir.exists(), f"stale fbuild cache survived removal: {cache_dir}"
+
     cmd = [
-        "fbuild",
+        FBUILD,
         "test-emu",
         str(PROJECT_DIR),
         "-e",
