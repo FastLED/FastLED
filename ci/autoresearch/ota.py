@@ -52,6 +52,25 @@ def _served_request_count(status: dict[str, Any]) -> int:
     return value if value >= 0 else 0
 
 
+def ota_applied_ok(applied: dict[str, Any]) -> bool:
+    """Whether `rpOtaUpdateStatus` says the RP actually applied the image.
+
+    Both flags are required, and both must be exactly `True`:
+
+    * ``attempted`` false means `pollOtaArtifactUpdate` never ran the fetch,
+      so nothing was applied regardless of what the C6 served.
+    * ``succeeded`` false means it ran and `HTTPUpdate` rejected the image --
+      `ERROR[4]: Not Enough Space` is that case, and it is reached *after*
+      the artifact has been served, so the C6 side looks healthy.
+
+    Identity against `True` rather than truthiness on purpose: a device that
+    answers `"succeeded": "false"` or `1` is malformed, and reading either as
+    a pass is the failure mode this whole flow keeps producing. Anything that
+    is not the boolean means "not proven", which fails.
+    """
+    return applied.get("attempted") is True and applied.get("succeeded") is True
+
+
 async def _settle_link(
     client: "RpcClient",
     label: str,
@@ -429,7 +448,7 @@ async def run_ota_peer_autoresearch(
         # #3832 asks this criterion to prove the expected build after reboot;
         # ask the board. See FastLED#3956.
         applied = await rpc_data(primary, "rpOtaUpdateStatus", {})
-        if applied.get("attempted") is not True or applied.get("succeeded") is not True:
+        if not ota_applied_ok(applied):
             raise RuntimeError(
                 f"RP2350W did not apply the artifact it fetched: {applied}; "
                 f"C6 side: {served}"

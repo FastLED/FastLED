@@ -17,6 +17,7 @@ from ci.autoresearch.ota import (
     _served_request_count,
     kOtaChunkBytes,
     kOtaLargestAnsweredRequestCharacters,
+    ota_applied_ok,
     ota_chunk_is_deliverable,
     ota_largest_request_bytes,
     ota_transfer_is_deliverable,
@@ -281,6 +282,49 @@ class TestOtaChunkDeliverability(unittest.TestCase):
         self.assertTrue(ota_chunk_is_deliverable(4, 8))
         self.assertTrue(ota_chunk_is_deliverable(256, 344))
         self.assertFalse(ota_chunk_is_deliverable(256, 343))
+
+
+class TestOtaAppliedOk(unittest.TestCase):
+    """`servedRequests >= 1` proves a download, not an applied image.
+
+    The peer-OTA run used to report PASSED on the served count alone.
+    `HTTPUpdate` can fetch an entire artifact and still reject it, and
+    `ERROR[4]: Not Enough Space` -- the RP2350W staging-region defect this
+    flow was built to surface -- is exactly that: it happens *after* the C6
+    has served the image, so the C6 side looks healthy. That failure was
+    being scored a pass. See FastLED#3956.
+    """
+
+    def test_both_flags_true_is_the_only_pass(self) -> None:
+        self.assertTrue(ota_applied_ok({"attempted": True, "succeeded": True}))
+
+    def test_fetched_then_rejected_is_not_a_pass(self) -> None:
+        # The verbatim shape of the Not Enough Space failure.
+        self.assertFalse(
+            ota_applied_ok(
+                {
+                    "attempted": True,
+                    "succeeded": False,
+                    "host": "192.168.4.1",
+                    "port": 8081,
+                    "lastError": "Update error: ERROR[4]: Not Enough Space",
+                }
+            )
+        )
+
+    def test_never_attempted_is_not_a_pass(self) -> None:
+        # `succeeded` left true while nothing ran must not carry the check.
+        self.assertFalse(ota_applied_ok({"attempted": False, "succeeded": True}))
+
+    def test_missing_flags_are_not_a_pass(self) -> None:
+        # Firmware too old to answer this cannot be assumed to have applied it.
+        self.assertFalse(ota_applied_ok({}))
+
+    def test_truthy_non_booleans_do_not_count_as_proof(self) -> None:
+        # A device answering `1` or `"true"` is malformed, and reading either
+        # as a pass is the failure mode this flow keeps producing.
+        self.assertFalse(ota_applied_ok({"attempted": 1, "succeeded": 1}))
+        self.assertFalse(ota_applied_ok({"attempted": True, "succeeded": "true"}))
 
 
 if __name__ == "__main__":
