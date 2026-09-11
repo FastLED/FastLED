@@ -109,9 +109,20 @@ jobs:
         #
         # Linux only: these are pure Python and platform-independent, and the
         # template runs on three OSes.
+        #
+        # `--clean` because a CI step that can silently skip its own tests is
+        # the failure this step exists to prevent. Nothing restores
+        # `.cache/fingerprint/` today -- the cache above holds only
+        # `ci/lint_cpp_rs/target` and `.cache/rust_lint_binary.fingerprint` --
+        # so the suite would run without it, but a later widening of that
+        # `path:` would turn this step green and empty with no other symptom.
+        # `--clean` is the sanctioned way to force a run; the flag that
+        # disables fingerprinting outright is forbidden by project policy.
+        # With `--py` it forces the run without touching the native build the
+        # next step consumes -- checked, object count unchanged.
         if: runner.os == 'Linux'
         run: |
-          uv run test.py --py
+          uv run test.py --py --clean
         shell: bash
 
       - name: Run All Unit Tests
