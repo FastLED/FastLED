@@ -30,9 +30,19 @@ bool toPixelStorage(PixelFormat fledFormat, PixelStorage* out) FL_NO_EXCEPT {
         out->mFormat = fl::PixelFormat::Rgb16;
         out->mComponentByteOrder = ComponentByteOrder::LittleEndian;
         return true;
-    default:
+    // Known to the container and carried by `bytesPerLed`, but with no
+    // generic storage descriptor to map onto. Listed rather than swept into a
+    // `default:` so that a *seventh* wire format is a compile error naming
+    // this function instead of a silent `false` discovered at playback --
+    // D1 asks for a checked explicit mapping, and the check is worth more
+    // when the compiler performs it.
+    case PixelFormat::Gray8:
+    case PixelFormat::Rgba8:
+    case PixelFormat::Rgbw8:
+    case PixelFormat::Rgb565Le:
         return false;
     }
+    return false;
 }
 
 }  // namespace fled
