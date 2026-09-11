@@ -24,7 +24,7 @@ import re
 import unittest
 from pathlib import Path
 
-from ci.color_reference import RgbPrimaries
+from ci.color_reference import _D65, RgbPrimaries
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -47,7 +47,10 @@ kChromaticity = re.compile(r"Chromaticity\(\s*(-?[0-9.]+)f?\s*,\s*(-?[0-9.]+)f?\
 
 
 def _pairs(text: str) -> list[tuple[float, float]]:
-    return [(float(a), float(b)) for a, b in kChromaticity.findall(text)]
+    pairs: list[tuple[float, float]] = []
+    for x, y in kChromaticity.findall(text):
+        pairs.append((float(x), float(y)))
+    return pairs
 
 
 def _cxx_space(name: str) -> list[tuple[float, float]]:
@@ -71,7 +74,9 @@ def _cxx_space(name: str) -> list[tuple[float, float]]:
 
 
 class TestNamedSourceSpacesAgree(unittest.TestCase):
-    def test_cxx_named_spaces_match_the_standards(self) -> None:
+    def test_cxx_named_spaces_match_the_standards(
+        self: "TestNamedSourceSpacesAgree",
+    ) -> None:
         # srgbPrimaries() carries only r/g/b; its white comes from d65().
         for cxx_name, key in (
             ("srgbPrimaries()", "srgb"),
@@ -83,14 +88,16 @@ class TestNamedSourceSpacesAgree(unittest.TestCase):
                 self.assertEqual(len(found), 3, msg=f"{cxx_name}: expected r/g/b")
                 self.assertEqual(tuple(found), EXPECTED[key][:3])
 
-    def test_cxx_d65_matches(self) -> None:
+    def test_cxx_d65_matches(self: "TestNamedSourceSpacesAgree") -> None:
         # All three spaces take their white by calling `d65()`, so checking it
         # once covers every white in the header. Only the first pair in the
         # window is d65's own -- it is a one-liner, and the window runs into
         # the definition below it.
         self.assertEqual(_cxx_space("d65()")[0], D65)
 
-    def test_reference_named_spaces_match_the_standards(self) -> None:
+    def test_reference_named_spaces_match_the_standards(
+        self: "TestNamedSourceSpacesAgree",
+    ) -> None:
         # The corpus generator is what the golden artifact is built from, so
         # this is the copy the ΔE budget is actually measured against.
         bt709 = RgbPrimaries.bt709()
@@ -99,6 +106,12 @@ class TestNamedSourceSpacesAgree(unittest.TestCase):
         self.assertEqual((bt709.blue.x, bt709.blue.y), EXPECTED["srgb"][2])
         self.assertEqual((bt709.white.x, bt709.white.y), D65)
 
+        # The corpus writes its white as the bare name `d65`, an alias for
+        # `_D65`, so the regex never sees it and widening the slice would pick
+        # up the next profile's red primary instead of a white. Check the
+        # alias's value directly, then require each profile to use it.
+        self.assertEqual((_D65.x, _D65.y), D65)
+
         corpus = (PROJECT_ROOT / "ci" / "color_reference_corpus.py").read_text(
             encoding="utf-8"
         )
@@ -106,8 +119,21 @@ class TestNamedSourceSpacesAgree(unittest.TestCase):
         for key in ("display_p3", "bt2020"):
             with self.subTest(space=key):
                 start = block.index(f'"{key}"')
-                found = _pairs(block[start : start + 400])[:3]
+                window = block[start : start + 400]
+                found = _pairs(window)[:3]
                 self.assertEqual(tuple(found), EXPECTED[key][:3])
+                # Fourth RgbPrimaries argument: the text between the third
+                # chromaticity literal and the constructor's closing paren.
+                end = 0
+                count = 0
+                for match in kChromaticity.finditer(window):
+                    count += 1
+                    if count == 3:
+                        end = match.end()
+                        break
+                self.assertGreater(end, 0, msg=f"{key}: fewer than three primaries")
+                white_arg = window[end : window.index(")", end + 1) + 1]
+                self.assertIn("d65", white_arg, msg=f"{key}: white is not d65")
 
 
 if __name__ == "__main__":
