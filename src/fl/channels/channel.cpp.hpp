@@ -392,7 +392,13 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
     }
 
-    const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
+    // Guards the build below: a binding already rejected by strict mode must
+    // not be built. It is deliberately *not* reused for the enablement
+    // branch -- the build can raise the fallback itself (#4345), and reading
+    // this stale value there left a strict-mode channel reporting Rejected
+    // while still enabled and rendering through the legacy path, which is the
+    // one thing strict mode exists to prevent.
+    const bool rejectedBeforeBuild = mColorProfileFallback && !mProfileBindingAccepted;
 
     // Derive the pipeline once, here, rather than per frame: it inverts
     // matrices and bisects a lightness bound. A binding that does not
@@ -401,7 +407,7 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     // error.
     mPipeline.reset();
     const ColorPipelineHooks& hooks = colorPipelineHooks();
-    if (!rejectedNow && hooks.build != nullptr) {
+    if (!rejectedBeforeBuild && hooks.build != nullptr) {
         // Through the hook, not by name. Calling `buildPipelineForBinding`
         // directly from here is what kept the entire pipeline alive in every
         // build; the pointer is null until `setColorProfile` installs it.
@@ -426,6 +432,9 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         }
     }
 
+    // Recomputed after the build, so a rejection raised by a failed build
+    // reaches this branch.
+    const bool rejectedNow = mColorProfileFallback && !mProfileBindingAccepted;
     if (rejectedNow) {
         setEnabled(false);
     } else if (wasRejectedByUs) {

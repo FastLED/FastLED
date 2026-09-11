@@ -972,6 +972,10 @@ FL_TEST_CASE("[#4345] strict mode disables a channel whose profile cannot build"
     FL_CHECK(channel->hasColorProfileFallback());
     FL_CHECK_FALSE(channel->profileBindingAccepted());
     FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Rejected);
+    // The thing strict mode is for. Reporting Rejected while still rendering
+    // through the legacy path is the failure it exists to prevent, and the
+    // first version of this case did not check it.
+    FL_CHECK_FALSE(channel->isEnabled());
 }
 
 
