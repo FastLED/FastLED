@@ -144,7 +144,16 @@ def test_fbuild_test_emu_esp32dev() -> None:
     # earlier commit: `undefined reference to fl::detail::ditherFrame()`.
     # Building the integration this test exists to check means building it
     # against the tree as it is now.
-    shutil.rmtree(PROJECT_DIR / ".fbuild", ignore_errors=True)
+    cache_dir = PROJECT_DIR / ".fbuild"
+    if cache_dir.exists():
+        # Not `ignore_errors=True`. A removal that failed or half-finished
+        # would leave exactly the stale objects this is here to clear, and the
+        # build would then fail with a link error blamed on the integration
+        # rather than on the cleanup. Let it raise, and check the
+        # post-condition -- an empty-but-present directory is not a clean
+        # state either.
+        shutil.rmtree(cache_dir)
+    assert not cache_dir.exists(), f"stale fbuild cache survived removal: {cache_dir}"
 
     cmd = [
         FBUILD,
