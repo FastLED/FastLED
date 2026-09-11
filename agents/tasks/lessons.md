@@ -333,9 +333,19 @@
   nine hours earlier. My local `master` was clean but stale, so every check I
   ran agreed with me. This is the third time this session I have rebuilt work
   the remote already had. The cheap guard is not "check before pushing" -- by
-  then the work exists -- it is `git fetch origin` plus
-  `git log --oneline <local-base>..origin/master -- <the files you are about to
-  touch>` as the first action, before reading the code. The measurement was
+  then the work exists -- it is running this before reading the code, with the
+  paths you are about to touch spelled out:
+
+  ```bash
+  git fetch origin
+  git log --oneline HEAD..origin/master -- src/platforms/shared/simd_noop.hpp
+  ```
+
+  `HEAD..origin/master` lists what upstream has that you do not, and the
+  path filter narrows it to the files in question -- in the #4216 case that
+  one command would have printed the commit for #4299 and saved the whole
+  detour. Name real paths rather than a placeholder: without them the log is
+  the full upstream delta and you will skim past the one line that matters. The measurement was
   still worth posting to the issue, because #4299 argued from instruction
   counts and I had before/after on real silicon; salvage the part that is
   genuinely yours rather than opening a duplicate PR.
