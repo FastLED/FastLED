@@ -42,11 +42,16 @@ class TestSrcFileListHashMemoization(unittest.TestCase):
         """Deterministic check that the memo works: wrap os.scandir with a
         call counter and verify the warm call skips the recursive walk.
 
-        Both cold and warm calls invoke os.scandir once (via iterdir() for
-        top_count). The cold call additionally drives the recursive _scan
-        which walks every src/ subdirectory — many extra scandir calls. The
-        warm call must short-circuit and add no further calls beyond the
-        single iterdir."""
+        The cold call drives the recursive _scan, which walks every src/
+        subdirectory -- many scandir calls. The warm call must short-circuit
+        and add no more than the single `iterdir()` top-count probe.
+
+        "No more than", not "exactly one". Whether that probe shows up as an
+        `os.scandir` at all is a Python version detail: `Path.iterdir()` moved
+        to `os.scandir` in 3.13 and used `os.listdir` before it. This asserted
+        exactly 1 and so passed on 3.13 and failed on CI's 3.11 with the
+        message "Memo missed" -- while the memo had in fact worked perfectly.
+        The count went *down*, which no memo miss can do."""
         real_scandir = os.scandir
         call_count = [0]
 
@@ -67,13 +72,13 @@ class TestSrcFileListHashMemoization(unittest.TestCase):
             10,
             f"Cold call did not perform recursive walk (only {cold_calls} scandirs)",
         )
-        # Warm call only does the iterdir() top-count probe (1 scandir).
-        # Anything more means the memo missed and _scan ran again.
-        self.assertEqual(
+        # Warm call does at most the iterdir() top-count probe. Anything
+        # more means the memo missed and _scan ran again.
+        self.assertLessEqual(
             warm_calls,
             1,
             f"Memo missed: warm call made {warm_calls} scandir calls "
-            f"(expected exactly 1 for the top_count probe)",
+            f"(at most 1 expected, for the top_count probe)",
         )
 
     def test_reset_forces_full_walk(self) -> None:

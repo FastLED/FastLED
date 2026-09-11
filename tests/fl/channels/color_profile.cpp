@@ -107,17 +107,36 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
     FL_CHECK_FALSE(options.hasColorProfile());
 
     EmitterProfile profile = kFixtureProfile;
-    const fl::u16 response[] = {0, 257, 65535};
+    fl::u16 response[] = {0, 257, 65535};
     profile.response_lut_r = response;
     profile.response_lut_g = response;
     profile.response_lut_b = response;
     profile.response_lut_size = 3;
     FL_REQUIRE(options.setColorProfile(profile, SourceProfile::linearSrgb()));
+
+    // Clearing the struct's fields shows the `EmitterProfile` was copied. It
+    // does not show the *table* was: `response` is still alive and unchanged,
+    // so storage that kept the caller's pointer reads the same values and
+    // passes. R9 asks for ownership of the response tables themselves.
     profile.response_lut_r = nullptr;
     profile.response_lut_size = 0;
+
+    // So change what the caller's array says. A binding that aliased it now
+    // reports the new values; one that copied reports what it was given.
+    response[1] = 4242;
+    response[2] = 1;
+
     FL_REQUIRE(options.emitterProfile() != nullptr);
     FL_CHECK_EQ(options.emitterProfile()->response_lut_size, fl::u16(3));
     FL_CHECK_EQ(options.emitterProfile()->response_lut_r[1], fl::u16(257));
+    FL_CHECK_EQ(options.emitterProfile()->response_lut_r[2], fl::u16(65535));
+    FL_CHECK_EQ(options.emitterProfile()->response_lut_g[1], fl::u16(257));
+    FL_CHECK_EQ(options.emitterProfile()->response_lut_b[1], fl::u16(257));
+
+    // And the copy is a distinct object, checked directly rather than
+    // inferred from the values agreeing.
+    FL_CHECK_NE(options.emitterProfile()->response_lut_r,
+                static_cast<const fl::u16*>(response));
 }
 
 FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
@@ -323,9 +342,15 @@ FL_TEST_CASE("A rebound profile owns its response data after the source expires"
     FL_CHECK_EQ(stored->response_lut_g[1], fl::u16(1000));
     FL_CHECK_EQ(stored->response_lut_b[3], fl::u16(65535));
 
-    // And the storage is not the caller's array, which is the property
-    // itself rather than a consequence of it.
-    FL_CHECK(stored->response_lut_r != nullptr);
+    // This case cannot check that the storage is a distinct object: the
+    // array it would be compared against is gone, and reading a dead
+    // pointer's value to compare it is not something to write into a test.
+    // Reaching the right values after the source expired is what this one
+    // proves. "Profile binding validates and owns response tables" above
+    // makes the distinctness check, while the caller's array is still alive
+    // to be compared with -- and mutates it, so agreement there is not just
+    // two reads of the same memory.
+    FL_CHECK_EQ(stored->response_lut_g[2], fl::u16(20000));
 }
 
 FL_TEST_CASE("Clearing a binding releases it and leaves nothing bound") {
