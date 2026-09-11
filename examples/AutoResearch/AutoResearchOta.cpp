@@ -452,6 +452,16 @@ fl::json finishOtaArtifact() {
         response.set("error", "Artifact publish failed");
         return response;
     }
+    // A fresh artifact starts with a fresh serve count. `served_requests`
+    // lives in singleton state that outlives any one transfer, and
+    // `otaArtifactStatus` is what the host uses to decide whether the RP
+    // actually fetched: `servedRequests < 1` is the failure condition. Left
+    // carrying a previous artifact's count, that check passes on history --
+    // the run is scored on a download that happened before this image
+    // existed. In practice the C6 is reflashed between runs, which hides it;
+    // any path that stages twice without a reflash does not. See
+    // FastLED#3956.
+    state.served_requests = 0;
     response.set("success", true);
     response.set("size", static_cast<int64_t>(state.received_size));
     response.set("sha256", actual_sha256);

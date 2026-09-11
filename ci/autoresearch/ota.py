@@ -405,12 +405,36 @@ async def run_ota_peer_autoresearch(
             # that never ran. See FastLED#3956.
             try:
                 rp_update = await rpc_data(primary, "rpOtaUpdateStatus", {})
+            except KeyboardInterrupt as ki:
+                # Ahead of the tuple below on purpose. KeyboardInterrupt
+                # derives from BaseException so the tuple cannot catch it
+                # today, but this file already keeps the handler explicit
+                # everywhere else so a later widening cannot silently start
+                # swallowing Ctrl-C -- and this probe runs inside the failure
+                # path, where an interrupt is most likely.
+                handle_keyboard_interrupt(ki)
+                raise
             except (RpcTimeoutError, RuntimeError, OSError) as probe_error:
                 rp_update = {"probeFailed": str(probe_error)}
             raise RuntimeError(
                 f"C6 did not serve the RP2350W artifact: {served}; "
                 f"RP2350W update state: {rp_update}"
             )
+
+        # The C6 having served the image proves a download happened, not that
+        # the RP accepted it. `HTTPUpdate` can fetch the whole artifact and
+        # still reject it -- `ERROR[4]: Not Enough Space` is exactly that
+        # shape -- so passing on `servedRequests >= 1` alone would score the
+        # run on the transfer and call an update proven that never applied.
+        # #3832 asks this criterion to prove the expected build after reboot;
+        # ask the board. See FastLED#3956.
+        applied = await rpc_data(primary, "rpOtaUpdateStatus", {})
+        if applied.get("attempted") is not True or applied.get("succeeded") is not True:
+            raise RuntimeError(
+                f"RP2350W did not apply the artifact it fetched: {applied}; "
+                f"C6 side: {served}"
+            )
+
         print(f"{Fore.GREEN}OTA PEER AUTORESEARCH PASSED{Style.RESET_ALL}")
         return 0
     except KeyboardInterrupt as ki:
