@@ -132,8 +132,16 @@ class TestNamedSourceSpacesAgree(unittest.TestCase):
                         end = match.end()
                         break
                 self.assertGreater(end, 0, msg=f"{key}: fewer than three primaries")
-                white_arg = window[end : window.index(")", end + 1) + 1]
-                self.assertIn("d65", white_arg, msg=f"{key}: white is not d65")
+                # Up to but not including the constructor's closing paren,
+                # then matched whole. `assertIn("d65", ...)` would have
+                # accepted `wrong_d65` -- a substring test is the wrong tool
+                # in a check whose entire job is catching a wrong value.
+                white_arg = window[end : window.index(")", end + 1)]
+                self.assertRegex(
+                    white_arg,
+                    r"^\s*,\s*d65\s*,?\s*$",
+                    msg=f"{key}: fourth RgbPrimaries argument is not d65",
+                )
 
 
 if __name__ == "__main__":
