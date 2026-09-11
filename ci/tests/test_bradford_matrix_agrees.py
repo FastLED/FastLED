@@ -66,6 +66,31 @@ def _rows_after(text: str, anchor: str, count: int) -> tuple[tuple[float, ...], 
     return tuple(rows)
 
 
+def _invert3x3(
+    m: tuple[tuple[float, ...], ...],
+) -> tuple[tuple[float, ...], ...]:
+    """Cofactor inverse, written out rather than pulled from a dependency."""
+
+    a, b, c = m[0]
+    d, e, f = m[1]
+    g, h, i = m[2]
+    determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+    if determinant == 0.0:
+        raise ValueError("singular matrix")
+    cofactors = (
+        (e * i - f * h, c * h - b * i, b * f - c * e),
+        (f * g - d * i, a * i - c * g, c * d - a * f),
+        (d * h - e * g, b * g - a * h, a * e - b * d),
+    )
+    rows: list[tuple[float, ...]] = []
+    for row in cofactors:
+        scaled: list[float] = []
+        for value in row:
+            scaled.append(value / determinant)
+        rows.append(tuple(scaled))
+    return tuple(rows)
+
+
 class TestBradfordMatrixAgrees(unittest.TestCase):
     def test_cxx_matches_icc(self: "TestBradfordMatrixAgrees") -> None:
         source = CXX.read_text(encoding="utf-8")
@@ -84,16 +109,37 @@ class TestBradfordMatrixAgrees(unittest.TestCase):
             with self.subTest(row=index):
                 self.assertEqual(rows[index], ICC_BRADFORD[index])
 
-    def test_the_inverse_is_still_derived_from_this_matrix(
+    def test_the_hard_coded_inverse_is_the_inverse_of_icc(
         self: "TestBradfordMatrixAgrees",
     ) -> None:
-        # Not a re-test of the C++ inverse guard, which lives in
-        # tests/fl/gfx/. This only pins that the header still says the inverse
-        # is derived rather than independently typed, so the two constants
-        # cannot drift apart silently if that comment stops being true.
+        # An independent path to the same constant. The C++ guard pins
+        # `kBradfordInverse` against `invert3x3(kBradford, ...)`, which is
+        # sound now that `kBradford` is pinned above -- but it still routes
+        # through FastLED's own inversion. This inverts the *published*
+        # matrix here instead, so a bug in `invert3x3` cannot certify its own
+        # output.
+        #
+        # This replaces two `assertIn` checks for the strings
+        # "kBradfordInverse" and "invert3x3", which asserted nothing:
+        # `invert3x3` appears in that header only inside a comment, so the
+        # test passed on prose.
         source = CXX.read_text(encoding="utf-8")
-        self.assertIn("kBradfordInverse", source)
-        self.assertIn("invert3x3", source)
+        rows = _rows_after(source, "kBradfordInverse[3][3]", 3)
+        self.assertEqual(len(rows), 3, msg="kBradfordInverse: expected three rows")
+
+        expected = _invert3x3(ICC_BRADFORD)
+        # places=7 is 5e-8. The constant is float32, whose ulp near these
+        # magnitudes is about 1.5e-8, so the gap between a correctly rounded
+        # float32 and this float64 inverse is a few ulps and fits inside that
+        # bound -- while a mistyped digit anywhere in the nine transcribed
+        # decimals does not. Measured rather than assumed: at places=6 a
+        # seventh-decimal change passed, which is how this number was chosen.
+        for row in range(3):
+            for column in range(3):
+                with self.subTest(row=row, column=column):
+                    self.assertAlmostEqual(
+                        rows[row][column], expected[row][column], places=7
+                    )
 
 
 if __name__ == "__main__":
