@@ -140,39 +140,16 @@ void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIter
 /// @param out Output iterator for encoded bytes
 /// @param gamma Gamma8 LUT for 8-to-16 bit expansion
 /// @note Writes 6 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo)
-/// One range, one encoder, both paths (P8, #4042 / #4326).
-///
-/// The input is always the 16-bit range now. For an unbound channel that is
-/// `map8_to_16` of the same 8-bit pixel, and `map8_to_16(b) >> 8 == b`
-/// exactly -- `b * 257 >> 8` is `b` for every `b <= 255` -- so recovering the
-/// byte the gamma LUT wants is lossless and this stays byte-identical to the
-/// 8-bit range it replaces.
-///
-/// Keeping one range rather than branching between two matters: both would be
-/// instantiated, and a Blink build that binds no profile would carry the
-/// second for nothing. Measured at +1,120 B on ESP32-S3 before this was
-/// folded together.
-///
-/// `gamma == nullptr` is the colour-managed case: the source has already
-/// quantized its device drive once, to 16 bits, and a curve on top of that is
-/// the second shaping stage B1 and section 6 of the spec forbid after the device solve.
 template <typename InputIterator, typename OutputIterator>
 void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out,
-                              const Gamma8* gamma) FL_NO_EXCEPT {
+                              const Gamma8& gamma) FL_NO_EXCEPT {
     while (first != last) {
         const auto& pixel = *first;
 
+        // Apply gamma correction for 16-bit output
+        u8 rgb_in[3] = { pixel[0], pixel[1], pixel[2] };
         u16 rgb_out[3];
-        if (gamma) {
-            u8 rgb_in[3] = { static_cast<u8>(pixel[0] >> 8),
-                             static_cast<u8>(pixel[1] >> 8),
-                             static_cast<u8>(pixel[2] >> 8) };
-            gamma->convert(fl::span<const u8>(rgb_in, 3), fl::span<u16>(rgb_out, 3));
-        } else {
-            rgb_out[0] = pixel[0];
-            rgb_out[1] = pixel[1];
-            rgb_out[2] = pixel[2];
-        }
+        gamma.convert(fl::span<const u8>(rgb_in, 3), fl::span<u16>(rgb_out, 3));
 
         // Write big-endian 16-bit values
         *out++ = rgb_out[0] >> 8;
@@ -182,6 +159,35 @@ void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIter
         *out++ = rgb_out[2] >> 8;
         *out++ = rgb_out[2] & 0xFF;
         ++first;
+    }
+}
+
+/// Wide RGB straight off the iterator, with no adapter (P8, #4042 / #4326).
+///
+/// Deliberately a plain loop over `PixelIterator` rather than a second
+/// `makeScaledPixelRange*` range. `fl::Channel::showPixels` keeps every
+/// `writeUCS7604(...)` statically reachable, so whatever this path
+/// instantiates is linked into sketches that never touch UCS7604 -- routing
+/// it through `ScaledPixelIteratorRGB16` cost 988 B on an ESP32-S3 Blink
+/// build that binds no profile. This does what that adapter does, in the same
+/// order, without the iterator-pair templates.
+///
+/// No gamma by construction: the source has already quantized its device
+/// drive once, to 16 bits, and a curve on top of that is the second shaping
+/// stage B1 and section 6 of the spec forbid after the device solve.
+template <typename OutputIterator>
+void encodeUCS7604_16bit_RGB_wide(PixelIterator& pixels, OutputIterator out) FL_NO_EXCEPT {
+    while (pixels.has(1)) {
+        u16 r16, g16, b16;
+        pixels.loadAndScaleRGB16(&r16, &g16, &b16);
+        *out++ = r16 >> 8;
+        *out++ = r16 & 0xFF;
+        *out++ = g16 >> 8;
+        *out++ = g16 & 0xFF;
+        *out++ = b16 >> 8;
+        *out++ = b16 & 0xFF;
+        pixels.stepDithering();
+        pixels.advanceData();
     }
 }
 
@@ -275,10 +281,11 @@ void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator ou
             // there is no wide drive to consume here yet.
             auto range = makeScaledPixelRangeRGBW(&pixel_iter);
             encodeUCS7604_16bit_RGBW(range.first, range.second, out, g);
+        } else if (wide_source) {
+            encodeUCS7604_16bit_RGB_wide(pixel_iter, out);
         } else {
-            auto range = makeScaledPixelRangeRGB16(&pixel_iter);
-            encodeUCS7604_16bit_RGB(range.first, range.second, out,
-                                    wide_source ? nullptr : &g);
+            auto range = makeScaledPixelRangeRGB(&pixel_iter);
+            encodeUCS7604_16bit_RGB(range.first, range.second, out, g);
         }
     }
 }
