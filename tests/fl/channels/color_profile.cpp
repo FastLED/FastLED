@@ -804,11 +804,48 @@ FL_TEST_CASE("[#4333] falling back to the legacy path warns once") {
     FL_REQUIRE(channel != nullptr);
     FL_REQUIRE(channel->hasColorProfileFallback());
 
+    // The distinguishing half of the message, not the shared prefix: the two
+    // branches differ only after "no profile bound", so matching the common
+    // text would pass even if the strict-mode wording were emitted here.
     int warned = 0;
+    int wrong_branch = 0;
     for (fl::size i = 0; i < lines.size(); ++i) {
-        if (lines[i].find("color management") != fl::string::npos) { ++warned; }
+        if (lines[i].find("falling back to the legacy path") != fl::string::npos) { ++warned; }
+        if (lines[i].find("strict mode disables this channel") != fl::string::npos) { ++wrong_branch; }
     }
     FL_CHECK_EQ(warned, 1);
+    FL_CHECK_EQ(wrong_branch, 0);
+}
+
+FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell back") {
+    // The other branch. Without it the message text is only half checked, and
+    // swapping the two arms would go unnoticed -- the condition that selects
+    // them is the same one that decides whether the channel stays enabled.
+    CRGB leds[1] = {};
+    fl::vector<fl::string> lines;
+    FastLED.setColorManagementStrict(true);
+    fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+
+    ChannelOptions options;
+    options.requestColorManagement(SourceProfile::linearSrgb());
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+
+    fl::clear_print_handler();
+    FastLED.setColorManagementStrict(false);
+
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->hasColorProfileFallback());
+    FL_REQUIRE_FALSE(channel->profileBindingAccepted());
+
+    int strict = 0;
+    int wrong_branch = 0;
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        if (lines[i].find("strict mode disables this channel") != fl::string::npos) { ++strict; }
+        if (lines[i].find("falling back to the legacy path") != fl::string::npos) { ++wrong_branch; }
+    }
+    FL_CHECK_EQ(strict, 1);
+    FL_CHECK_EQ(wrong_branch, 0);
 }
 
 FL_TEST_CASE("[#4333] a channel that gets its profile says nothing") {
