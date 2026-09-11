@@ -251,6 +251,10 @@ SourceProfile sourceFor(fl::reference_corpus::SourceKind kind) {
     switch (kind) {
     case fl::reference_corpus::SourceKind::DisplayP3: return SourceProfile::displayP3();
     case fl::reference_corpus::SourceKind::Bt2020:    return SourceProfile::bt2020();
+    // The default source a channel gets when nothing else is declared, and
+    // the one the corpus did not carry until #4339 -- so the budget below
+    // was measured on three non-default sources and not on this one.
+    case fl::reference_corpus::SourceKind::LinearSrgb: return SourceProfile::linearSrgb();
     case fl::reference_corpus::SourceKind::SrgbBt709: break;
     }
     return SourceProfile::srgbBt709();
@@ -409,7 +413,14 @@ FL_TEST_CASE("Streaming pipeline is inside A1's budget against the P5 reference"
 
     // A corpus that shrank to nothing, or a floor that swallowed it, would
     // otherwise satisfy every bound below.
-    FL_CHECK_EQ(kVectorCount, 57);
+    // 76 = 19 vectors x 4 source profiles. It was 57 x 3 until `linear_srgb`
+    // joined the corpus (#4339): the budget below had been measured on three
+    // non-default sources and not on the one a channel gets by default.
+    // Adding it moved nothing -- worst dE2000 is still 0.395096 at
+    // `display_p3-rgb-05`, luminance still 3.66438e-04, and `below_floor`
+    // still 8 -- so the numbers pinned below are the same numbers, now
+    // covering the default.
+    FL_CHECK_EQ(kVectorCount, 76);
     FL_CHECK_EQ(below_floor, 8);
 
     // A1, above the floor. Measured worst: 0.3951 dE2000 at

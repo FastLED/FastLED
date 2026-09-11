@@ -45,7 +45,7 @@ HEADER_FILE = (
 kDeviceProfile = "rgb"
 
 # Source profiles, in the order `SourceProfile` exposes them.
-kSourceProfiles = ("srgb_bt709", "display_p3", "bt2020")
+kSourceProfiles = ("srgb_bt709", "display_p3", "bt2020", "linear_srgb")
 
 
 @typechecked

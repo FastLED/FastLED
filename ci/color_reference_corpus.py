@@ -117,6 +117,7 @@ def legacy_independent_gamma_video(
 def _source_profiles() -> dict[str, SourceProfile]:
     d65 = _D65
     return {
+        "linear_srgb": SourceProfile(RgbPrimaries.bt709(), TransferFunction.LINEAR),
         "srgb_bt709": SourceProfile(RgbPrimaries.bt709(), TransferFunction.SRGB),
         "display_p3": SourceProfile(
             RgbPrimaries(

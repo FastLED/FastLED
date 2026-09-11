@@ -88,7 +88,8 @@ class TestColorReferenceCorpus(unittest.TestCase):
         for vector in decoded["vectors"]:
             self.assertEqual(set(vector["stages"]), required_stages)
             self.assertIn(
-                vector["source_profile"], {"srgb_bt709", "display_p3", "bt2020"}
+                vector["source_profile"],
+                {"srgb_bt709", "display_p3", "bt2020", "linear_srgb"},
             )
             self.assertIn(
                 vector["device_profile"],
