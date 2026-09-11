@@ -885,6 +885,95 @@ FL_TEST_CASE("[#4326] a bound profile reaches the encode path") {
 }
 
 
+FL_TEST_CASE("[#4326] the managed path gamma-encodes the device drive") {
+    // The end-to-end measurement #4326 says it lacks: "I have not measured
+    // this end to end ... the claim should be confirmed by it before the fix
+    // is judged."
+    //
+    // `kProfile` gives all three emitters luminance 1.0 at sRGB
+    // chromaticities, and the source is linear sRGB. Full red is therefore a
+    // target of Y = 0.2126 -- sRGB red's luminance share -- against an emitter
+    // that makes Y = 1.0 at full drive, so the device solve's answer is a red
+    // drive of 0.2126. That is correct, and it is where the pipeline's job
+    // ends.
+    //
+    // A 16-bit encoder consuming that drive should put 0.2126 * 65535 = 13933
+    // on the wire. It puts 849.
+    //
+    // 849 is not arbitrary: it is the drive quantized to 8 bits, 0.2126 * 255
+    // = 54, pushed through the gamma-2.8 LUT -- (54/255)^2.8 * 65535 = 849.
+    // Both halves of #4326 in one number. The drive is narrowed to 8 bits
+    // before the encoder sees it, and then a second shaping stage, the one
+    // B1/§6 forbid after the device solve, is applied on top of it. The 2.8
+    // is `mGamma.value_or(2.8f)` -- a default, not something asked for; the
+    // case above pins that binding a profile clears the caller's gamma.
+    fl::vector<u8> bound = encodeOnce(CRGB(255, 0, 0), true, 2.8f, 20);
+    FL_REQUIRE_EQ((int)bound.size(), 21);
+
+    const int red16 = (bound[15] << 8) | bound[16];
+    FL_CHECK_EQ(red16, 849);
+
+    // Stated as the shortfall rather than only as a literal, so the failure
+    // says what is wrong rather than that a number moved. A linear encoding
+    // of the same 8-bit drive would be 54/255 * 65535 = 13878; the emitted
+    // value is more than ten times darker than that.
+    const int linear_of_same_drive = 54 * 65535 / 255;
+    FL_CHECK_GT(linear_of_same_drive, red16 * 10);
+
+    // Black still encodes to black, so the above is a shaping error and not
+    // an offset.
+    fl::vector<u8> black = encodeOnce(CRGB(0, 0, 0), true, 2.8f, 20);
+    FL_REQUIRE_EQ((int)black.size(), 21);
+    FL_CHECK_EQ((int)((black[15] << 8) | black[16]), 0);
+
+    // This case describes behaviour the contract forbids. It is written to
+    // fail when #4326 is fixed -- a 16-bit encoder fed the wide drive would
+    // emit near 13933 -- which is the point of recording it now.
+}
+
+FL_TEST_CASE("[#4326] the 16-bit encoder reaches 252 of 65536 levels") {
+    // P8 also owns "encoders consume wide output directly -- no RGB8
+    // correction round-trip". #4326 states the consequence without a number:
+    // the native 16-bit chipsets "reach at most 256 distinct levels per
+    // channel out of 65536".
+    //
+    // Measured on the unbound path, where the 8-bit-plus-gamma chain is the
+    // legacy behaviour and correct, so this is the resolution the encoder
+    // itself has rather than a managed-mode defect: 252 distinct values from
+    // the 256 source codes -- four pairs collide in the gamma LUT -- and the
+    // widest step between neighbours is 717 counts.
+    fl::vector<int> seen;
+    int previous = -1;
+    int widest_step = 0;
+    int top = -1;
+    for (int code = 0; code < 256; ++code) {
+        fl::vector<u8> out = encodeOnce(CRGB(code, 0, 0), false, 2.8f, 20);
+        FL_REQUIRE_EQ((int)out.size(), 21);
+        const int value = (out[15] << 8) | out[16];
+        bool found = false;
+        for (fl::size j = 0; j < seen.size(); ++j) {
+            if (seen[j] == value) { found = true; }
+        }
+        if (!found) { seen.push_back(value); }
+        if (previous >= 0 && value - previous > widest_step) {
+            widest_step = value - previous;
+        }
+        previous = value;
+        top = value;
+    }
+
+    FL_CHECK_EQ((int)seen.size(), 252);
+
+    // The endpoints are reached, so the range is used -- the loss is
+    // resolution inside it, not a squeezed scale.
+    FL_CHECK_EQ(top, 65535);
+
+    // And the coarseness, which is what "256 of 65536" costs in practice:
+    // near full scale, neighbouring source codes are 717 counts apart, so
+    // 716 of every 717 representable values are unreachable there.
+    FL_CHECK_EQ(widest_step, 717);
+}
+
 // ============ Legacy output with colour management disabled (#4034) ============
 // The tracker lists "Legacy output byte-identical with CM disabled" as an
 // acceptance criterion and nothing verified it. The colour pipeline reaches
