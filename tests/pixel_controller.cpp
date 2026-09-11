@@ -367,10 +367,17 @@ FL_TEST_CASE("[#4347] uncorrelated drops keep the mean; correlation is the fault
         ++presented;
     }
 
-    // Roughly half of them, and enough that sampling noise is well under the
-    // effect being ruled out: the per-frame spread is about +/-0.4 codes, so
-    // the standard error here is near 0.01.
-    FL_CHECK_GT(presented, kFrames / 4);
+    // Pinned exactly, not as a lower bound. The LCG is fixed-seed u32
+    // arithmetic, so this is deterministic -- and a lower bound alone would
+    // be satisfied by a drop rule that stopped dropping, which would then
+    // trivially render the undropped mean this case compares against. That
+    // is the one way this test could go vacuous.
+    //
+    // 2058 of 4096 is about half, and enough that sampling noise sits well
+    // under the effect being ruled out: the per-frame spread is about +/-0.4
+    // codes, so the standard error here is near 0.01 against a 0.05 bound.
+    FL_CHECK_EQ(presented, 2058);
+    FL_CHECK_EQ(kFrames, 4096);
     const double mean = static_cast<double>(sum) / presented;
 
     // Lands on the undropped value, where the parity split missed it by 0.38.
