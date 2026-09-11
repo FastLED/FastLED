@@ -240,4 +240,141 @@ FL_TEST_CASE("Dither - the cycle rate at the enable threshold is below the file'
                 MAX_LIKELY_UPDATE_RATE_HZ);
 }
 
+// ---------------------------------------------------------------------------
+// #4347: the phase advances on frame *attempt*, so a frame that is never
+// presented still consumes one. Every measurement above sums a *complete*
+// eight-frame cycle, which is exactly the condition a phase-correlated drop
+// breaks -- and #4347 records that nothing observes the consequence.
+//
+// These do. A drop pattern that correlates with the phase leaves the
+// presented frames sampling a biased subset of the dither offsets, and the
+// time-weighted mean moves off the value the dither exists to render.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// Total emitted code over `kDitherCycle` logical frames, counting only those
+// the predicate presents. The phase advances either way -- that is the
+// behaviour under test, not an approximation of it.
+int presentedSum(fl::u8 value, fl::u8 premixed, bool keep_odd_phase,
+                 int* out_presented) {
+    int sum = 0;
+    int presented = 0;
+    for (int frame = 0; frame < kDitherCycle; ++frame) {
+        fl::detail::advanceDitherFrame();
+        const bool odd = (fl::detail::ditherFrame() & 0x01) != 0;
+        if (odd != keep_odd_phase) {
+            continue;  // dropped: phase consumed, nothing emitted
+        }
+        CRGB pixel(value, value, value);
+        ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+        adjustment.premixed = CRGB(premixed, premixed, premixed);
+        PixelController<RGB> pixels(&pixel, 1, adjustment, BINARY_DITHER);
+        sum += pixels.loadAndScale0();
+        ++presented;
+    }
+    *out_presented = presented;
+    return sum;
+}
+
+} // namespace
+
+FL_TEST_CASE("[#4347] dropping every other frame biases the dithered mean") {
+    // A quarter brightness, where the dither has real work to do: the exact
+    // product is fractional, so the rendered value depends on the offsets
+    // averaging out over the cycle.
+    const fl::u8 kValue = 9;
+    const fl::u8 kPremixed = 64;
+
+    // The baseline: a complete cycle lands near the exact product.
+    const double ideal_per_frame = idealSum(kValue, kPremixed) / kDitherCycle;
+    const double whole_cycle =
+        static_cast<double>(cycleSum(kValue, kPremixed)) / kDitherCycle;
+    FL_CHECK_LT(fl::fabs(whole_cycle - ideal_per_frame), 1.0);
+
+    // Now drop by parity of the phase. The low half of the bit-reversed
+    // offsets lives on even phases and the high half on odd, so each subset
+    // renders a consistently displaced value rather than a noisier one.
+    int even_frames = 0;
+    int odd_frames = 0;
+    const double even_mean =
+        static_cast<double>(presentedSum(kValue, kPremixed, false, &even_frames)) /
+        even_frames;
+    const double odd_mean =
+        static_cast<double>(presentedSum(kValue, kPremixed, true, &odd_frames)) /
+        odd_frames;
+
+    // Half the cycle survives either way -- the drops are the correlation,
+    // not a change in how much light is asked for.
+    FL_CHECK_EQ(even_frames, kDitherCycle / 2);
+    FL_CHECK_EQ(odd_frames, kDitherCycle / 2);
+
+    // Measured against the *undropped* cycle, not against the exact product.
+    // The two are not the same number here -- the whole cycle renders 2.38
+    // where the product is 2.26, the low-code brightening the case above
+    // records -- and charging that pre-existing offset to the drop pattern
+    // would overstate this effect by a third.
+    //
+    // Against the right baseline the subsets straddle it almost exactly:
+    // 2.00 and 2.75 about 2.38, or -0.38 and +0.37. That symmetry is the
+    // signature of a phase-correlated drop rather than of lost light.
+    FL_CHECK_LT(even_mean, whole_cycle - 0.2);
+    FL_CHECK_GT(odd_mean, whole_cycle + 0.2);
+    FL_CHECK_LT(fl::fabs((whole_cycle - even_mean) - (odd_mean - whole_cycle)),
+                0.1);
+
+    // And the swing is bounded by the dither amplitude, which is what #4347
+    // claims without measuring: one output LSB per channel. 0.75 codes
+    // separation, so each subset sits under half an LSB off -- real, and
+    // inside the stated bound.
+    const double separation = odd_mean - even_mean;
+    FL_CHECK_GT(separation, 0.5);
+    FL_CHECK_LE(separation, 1.0);
+}
+
+FL_TEST_CASE("[#4347] uncorrelated drops keep the mean; correlation is the fault") {
+    // The other half of #4347's claim, and the reason the issue is about
+    // *correlation* rather than about dropping frames: "Uncorrelated drops
+    // average out and cost nothing but noise."
+    //
+    // Worth stating what does not work. A contiguous half-window -- present
+    // the first four phases of each cycle, drop the rest -- is still a
+    // correlated subset, and still biased: it renders 2.25 against the
+    // undropped 2.38. Bit-reversal maps phases 0-3 to offsets 16/144/80/208,
+    // whose mean is 112 rather than 128, so "contiguous" is not "unbiased".
+    // Only a drop pattern independent of the phase is.
+    const fl::u8 kValue = 9;
+    const fl::u8 kPremixed = 64;
+    const double whole_cycle =
+        static_cast<double>(cycleSum(kValue, kPremixed)) / kDitherCycle;
+
+    // A plain LCG, fixed seed: deterministic, and independent of the phase.
+    fl::u32 rng = 0x13579bdfu;
+    int sum = 0;
+    int presented = 0;
+    const int kFrames = kDitherCycle * 512;
+    for (int frame = 0; frame < kFrames; ++frame) {
+        fl::detail::advanceDitherFrame();
+        rng = rng * 1664525u + 1013904223u;
+        if (((rng >> 16) & 0x01) == 0) {
+            continue;  // dropped, phase still consumed
+        }
+        CRGB pixel(kValue, kValue, kValue);
+        ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+        adjustment.premixed = CRGB(kPremixed, kPremixed, kPremixed);
+        PixelController<RGB> pixels(&pixel, 1, adjustment, BINARY_DITHER);
+        sum += pixels.loadAndScale0();
+        ++presented;
+    }
+
+    // Roughly half of them, and enough that sampling noise is well under the
+    // effect being ruled out: the per-frame spread is about +/-0.4 codes, so
+    // the standard error here is near 0.01.
+    FL_CHECK_GT(presented, kFrames / 4);
+    const double mean = static_cast<double>(sum) / presented;
+
+    // Lands on the undropped value, where the parity split missed it by 0.38.
+    FL_CHECK_LT(fl::fabs(mean - whole_cycle), 0.05);
+}
+
 } // FL_TEST_FILE
