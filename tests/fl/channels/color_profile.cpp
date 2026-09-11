@@ -18,6 +18,13 @@ constexpr EmitterProfile kFixtureProfile = EmitterProfile::rgb(
     Chromaticity(0.640f, 0.330f), Chromaticity(0.300f, 0.600f),
     Chromaticity(0.150f, 0.060f), 1.0f, 1.0f, 1.0f);
 
+/// Structurally valid, numerically unusable: three primaries at one
+/// chromaticity describe no invertible emitter matrix (#4345).
+constexpr EmitterProfile kDegenerateProfile = EmitterProfile::rgb(
+    "fixture/degenerate",
+    Chromaticity(0.3127f, 0.3290f), Chromaticity(0.3127f, 0.3290f),
+    Chromaticity(0.3127f, 0.3290f), 1.0f, 1.0f, 1.0f);
+
 ChannelPtr makeChannelWithLocalProfile(CRGB* leds) {
     const fl::u16 response[] = {0, 257, 65535};
     EmitterProfile profile = kFixtureProfile;
@@ -894,5 +901,82 @@ FL_TEST_CASE("[#4333] and it stays quiet on every reconfigure after the first") 
         FL_CHECK(lines[i].find("color management") == fl::string::npos);
     }
 }
+
+
+// #4345: R6 says a profile outside the numerical bounds must "fail
+// explicitly" and "not become native-drive input". A profile whose three
+// primaries share one chromaticity is structurally well formed and describes
+// no invertible emitter matrix, so no pipeline is built -- and every
+// reporting surface used to say the channel was fine.
+FL_TEST_CASE("[#4345] a profile that builds no pipeline reports fallback, not Configured") {
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kDegenerateProfile, SourceProfile::linearSrgb()));
+
+    fl::vector<fl::string> lines;
+    fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    fl::clear_print_handler();
+
+    FL_REQUIRE(channel != nullptr);
+    // The binding is still owned -- this is not a rejection, it is an honest
+    // report that management asked for something it did not get.
+    FL_CHECK(channel->hasColorProfile());
+    FL_CHECK_FALSE(channel->isColorManaged());
+
+    FL_CHECK(channel->hasColorProfileFallback());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Fallback);
+
+    int warned = 0;
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        if (lines[i].find("color management") != fl::string::npos) { ++warned; }
+    }
+    FL_CHECK_EQ(warned, 1);
+}
+
+FL_TEST_CASE("[#4345] a usable profile still reports Configured and stays quiet") {
+    // The guard: without it, marking every binding as fallback would satisfy
+    // the case above.
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
+
+    fl::vector<fl::string> lines;
+    fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    fl::clear_print_handler();
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->isColorManaged());
+    FL_CHECK_FALSE(channel->hasColorProfileFallback());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
+    for (fl::size i = 0; i < lines.size(); ++i) {
+        FL_CHECK(lines[i].find("color management") == fl::string::npos);
+    }
+}
+
+FL_TEST_CASE("[#4345] strict mode disables a channel whose profile cannot build") {
+    // C5: strict mode upgrades fallback to a hard error. It could not reach
+    // this case before, because the case did not report fallback.
+    CRGB leds[1] = {};
+    FastLED.setColorManagementStrict(true);
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kDegenerateProfile, SourceProfile::linearSrgb()));
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FastLED.setColorManagementStrict(false);
+
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->hasColorProfileFallback());
+    FL_CHECK_FALSE(channel->profileBindingAccepted());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Rejected);
+    // The thing strict mode is for. Reporting Rejected while still rendering
+    // through the legacy path is the failure it exists to prevent, and the
+    // first version of this case did not check it.
+    FL_CHECK_FALSE(channel->isEnabled());
+}
+
 
 }  // FL_TEST_FILE
