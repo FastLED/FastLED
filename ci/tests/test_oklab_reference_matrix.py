@@ -131,6 +131,13 @@ class TestOklabReferenceMatrix(unittest.TestCase):
         # OKLab's defining normalization, and the property the corrected
         # coefficients exist to satisfy. The C++ pins this; the reference did
         # not.
+        #
+        # places=7, not the places=9 used elsewhere in this file, and the two
+        # are not measuring the same thing. `_D65` is the four-decimal
+        # chromaticity (0.3127, 0.3290), so what is compared here is a rounded
+        # white point against an exact normalization: D65 lands at
+        # b = 3.7e-8, and the floor is set by those four decimals rather than
+        # by matrix precision. places=9 would fail on correct code.
         lightness, a_value, b_value = _oklab_from_xyz(_xy_to_xyz(_D65))
         self.assertAlmostEqual(lightness, 1.0, places=7)
         self.assertAlmostEqual(a_value, 0.0, places=7)
