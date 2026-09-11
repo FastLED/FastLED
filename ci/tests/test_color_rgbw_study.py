@@ -154,23 +154,65 @@ class TestTwoWhitesNeedMoreThanOne(unittest.TestCase):
     def setUp(self: "TestTwoWhitesNeedMoreThanOne") -> None:
         self.inverse = _invert_3x3(rgb_matrix(RGB_COLUMNS))
 
-    def test_the_corpus_never_lights_both_whites(
+    def test_the_plain_rgbww_device_barely_discriminates(
         self: "TestTwoWhitesNeedMoreThanOne",
     ) -> None:
-        """Why the corpus cannot settle the two-white question.
+        """Why this device cannot settle the two-white question.
 
-        Every `rgbww` vector the reference solves uses at most one of the two
-        white emitters. Agreement with a one-white-at-a-time reduction over
-        this corpus therefore says nothing at all, which is the trap the test
-        below exists to keep open.
+        Every emitter here carries unit luminance, so the strip is roughly
+        five times brighter than the white it renders and nearly every target
+        is reachable with one white or none. Agreement with a
+        one-white-at-a-time reduction over this device therefore says almost
+        nothing -- the trap `TestTwoWhiteCorpusVectors` exists to close, on a
+        device scaled so that bright neutrals genuinely need both.
+
+        Stated as "needs both", not "lights both". Counting lit whites was the
+        wrong proxy from the start: the reference may split a total across two
+        usable whites without needing either of them. This asserted that no
+        vector lit both until #4340 added a source-profile pass over the
+        inputs, which produced one that does -- and that vector turns out to
+        need both, so the premise had quietly become false rather than the
+        proxy merely becoming noisy.
         """
 
-        both = 0
-        for vector in corpus_vectors("rgbww"):
-            light = vector.emitter_light
-            if light[3] > 1e-12 and light[4] > 1e-12:
-                both += 1
-        self.assertEqual(both, 0)
+        vectors = corpus_vectors("rgbww")
+        self.assertGreaterEqual(len(vectors), 40)
+        using_white = 0
+        requiring_both = 0
+        for vector in vectors:
+            total = vector.emitter_light[3] + vector.emitter_light[4]
+            if total <= 1e-12:
+                continue
+            using_white += 1
+            single = best_single_white(
+                self.inverse, vector.target, D65_WHITE_COLUMN, D50_WHITE_COLUMN
+            )
+            if single is None or single < total - 1e-6:
+                requiring_both += 1
+        self.assertGreater(using_white, 20)
+        # Two-sided on purpose. The lower bound keeps the measurement live: an
+        # upper bound alone would be satisfied by a `best_single_white` that
+        # always succeeded, which is exactly the degenerate result this test
+        # is supposed to notice.
+        self.assertGreaterEqual(
+            requiring_both,
+            1,
+            msg="no rgbww vector needs both whites; the proxy change is moot",
+        )
+        # And nowhere near enough to measure an allocation against: a single
+        # discriminating vector cannot separate a correct two-white allocation
+        # from one that simply fills the first white first. If this device ever
+        # does carry the case, that is a decision to make deliberately -- not
+        # something to reach by letting the guard lapse.
+        self.assertLess(
+            requiring_both,
+            using_white // 10,
+            msg=(
+                f"{requiring_both} of {using_white} rgbww vectors need both "
+                "whites; this device is still not a substitute for "
+                "rgbww_two_white"
+            ),
+        )
 
     def test_using_only_one_white_loses_badly(
         self: "TestTwoWhitesNeedMoreThanOne",
@@ -424,10 +466,10 @@ class TestTwoWhitesAreAlsoClosedForm(unittest.TestCase):
 class TestTwoWhiteCorpusVectors(unittest.TestCase):
     """The corpus now reaches targets that need both whites (#4198).
 
-    Every `rgbww` vector is reachable with one white or none, so agreement
-    over that device says nothing about the two-white case -- the same gap
-    that let the "run the one-white form twice" reduction look correct while
-    being wrong on 85% of random targets. `rgbww_two_white` scales its
+    Nearly every `rgbww` vector is reachable with one white or none -- one of
+    its 76 is not -- so agreement over that device says next to nothing about
+    the two-white case: the same gap that let the "run the one-white form
+    twice" reduction look correct while being wrong on 85% of random targets. `rgbww_two_white` scales its
     emitters so the strip can only just exceed its own rendering white, and
     bright neutrals then need both.
     """
