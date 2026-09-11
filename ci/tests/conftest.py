@@ -9,6 +9,43 @@ from _pytest.nodes import Item
 from pytest import FixtureRequest, MonkeyPatch
 
 
+@pytest.fixture(autouse=True)
+def _restore_platformio_src_dir() -> Any:
+    """Keep `PLATFORMIO_SRC_DIR` from leaking out of the test that set it.
+
+    `ci/autoresearch/phases.py` assigns this into `os.environ` on purpose --
+    its own comment says "so fbuild and any downstream sketch resolver pick up
+    the freshly-copied source" -- and a test that drives that path leaves it
+    set for the rest of the session, pointing at a pytest tmpdir that is
+    deleted moments later.
+
+    fbuild honours it. `test_fbuild_test_emu_esp32dev` then builds that
+    directory instead of `tests/fbuild_qemu_smoke/src`, so the generated
+    Arduino `main.cpp` wrapper compiles while the sketch never does:
+
+        undefined reference to `_Z5setupv'
+        undefined reference to `_Z4loopv'
+
+    Which is why that test passed on its own and failed in the full suite,
+    here and on CI alike (FastLED#4364). Restoring it per test costs nothing
+    and removes a whole class of order-dependent failure -- the variable is
+    global to the process, so any test that touches it can reach any later
+    one.
+    """
+
+    import os
+
+    sentinel = object()
+    prior: Any = os.environ.get("PLATFORMIO_SRC_DIR", sentinel)
+    try:
+        yield
+    finally:
+        if prior is sentinel:
+            os.environ.pop("PLATFORMIO_SRC_DIR", None)
+        else:
+            os.environ["PLATFORMIO_SRC_DIR"] = prior
+
+
 def pytest_addoption(parser: Parser) -> None:
     """Add custom command line options."""
     parser.addoption(
