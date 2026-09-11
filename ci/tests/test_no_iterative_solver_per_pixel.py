@@ -18,11 +18,25 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 GFX = PROJECT_ROOT / "src" / "fl" / "gfx"
 
 # The stages that execute once per pixel inside show().
+#
+# This list used to omit `pipeline.cpp.hpp`, `gamut_map.cpp.hpp` and
+# `white_allocation.cpp.hpp`, which is most of the point: `processPixelQ16`
+# calls `mapAndSolveDrivesQ16(pipeline.gamut, ...)` per pixel, so the gamut
+# mapper is exactly where an iterative solve would be reached for -- and it is
+# the stage A3 names when it says iterative solves never run per-pixel. The
+# guard was blind there. Verified by injecting an `nnls3` call into
+# `gamut_map.cpp.hpp`: the old list passed, this one fails (FastLED#4041).
+#
+# Keep in step with `test_no_rgb8_intermediate.py`, which scans the same eight
+# and is where the missing three were noticed.
 PER_PIXEL_STAGES = (
+    "pipeline.cpp.hpp",
     "transfer.cpp.hpp",
     "source_xyz.cpp.hpp",
     "chromatic_adaptation.cpp.hpp",
     "device_solve.cpp.hpp",
+    "gamut_map.cpp.hpp",
+    "white_allocation.cpp.hpp",
     "flux_scalar.cpp.hpp",
 )
 
