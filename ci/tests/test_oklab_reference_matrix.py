@@ -53,7 +53,12 @@ REFERENCE = PROJECT_ROOT / "ci" / "color_reference.py"
 Matrix: TypeAlias = tuple[Xyz, Xyz, Xyz]
 
 kSignedFloat = re.compile(r"[+-]\d+\.\d+")
-kAnyFloat = re.compile(r"\d+\.\d+")
+# The bound spells its terms as `+ 0.3619...` -- operator, space, then the
+# literal -- so a sign has to be matched across the gap. `[+-]?\d+\.\d+`
+# does not reach it, and would read a negated coefficient as positive,
+# which is the one regression the magnitude comparison below cannot see
+# on its own: a negative term stops the cap bounding anything.
+kSignedTerm = re.compile(r"(?:([+-])\s*)?(\d+\.\d+)")
 
 # Off-white as well as neutral: a matrix error that cancels on the achromatic
 # axis still has to show up somewhere.
@@ -114,8 +119,8 @@ def _bound_floats(start_anchor: str, end_anchor: str) -> list[float]:
     start = source.index(start_anchor)
     end = source.index(end_anchor, start)
     values: list[float] = []
-    for token in kAnyFloat.findall(source[start:end]):
-        values.append(float(token))
+    for sign, token in kSignedTerm.findall(source[start:end]):
+        values.append(-float(token) if sign == "-" else float(token))
     return values
 
 
@@ -167,8 +172,9 @@ class TestOklabReferenceMatrix(unittest.TestCase):
     ) -> None:
         # The zonotope chroma cap re-copies both matrices with every sign
         # forced positive, so it cannot round-trip and the checks above do not
-        # reach it. Its magnitudes still have to be these magnitudes: a cap
-        # built from drifted coefficients stops bounding what it claims to.
+        # reach it. Its magnitudes still have to be these magnitudes, and its
+        # signs still have to be positive: a drifted coefficient or a negated
+        # term stops the cap bounding what it claims to.
         expected: list[float] = []
         for row in M1:
             for value in row:
