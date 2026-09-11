@@ -2,6 +2,26 @@
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
+## License for contributions
+
+By submitting a contribution, you agree that it is offered under the
+[FastLED Reciprocal License 1.0](LICENSE), including the incorporated MPL 2.0
+copyright and patent grants and the contributor representations in MPL 2.0.
+You represent that you have the right to submit the contribution on those
+terms. Do not submit third-party code unless its license and provenance have
+been identified and are compatible with the repository policy.
+
+Independent applications, sketches, firmware, plugins, and products that only
+use FastLED APIs may remain proprietary. Reciprocity stops at files containing
+FastLED or source derived from FastLED. If a first sale includes Modified
+FastLED, those FastLED modifications must be public on or before that sale,
+through either a public fork or a public issue/bug report containing the exact
+base commit SHA and complete reproducible unified diff.
+
+AI agents must read [LICENSE-AI-AGENT-INSTRUCTIONS.md](LICENSE-AI-AGENT-INSTRUCTIONS.md)
+before making a substantial FastLED change. Those AI instructions are
+behaviorally mandatory for participating agents but legally non-remedial.
+
 The FastLED library includes a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
 
 ## FastLED compiler cli

@@ -39,7 +39,6 @@
         "url": "https://github.com/FastLED/FastLED.git"
     },
     "version": "3.10.3",
-    "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
     "platforms": "atmelavr, atmelmegaavr, atmelsam, freescalekinetis, nordicnrf51, nordicnrf52, nxplpc, ststm32, renesas-ra, teensy, espressif8266, espressif32, raspberrypi, native",

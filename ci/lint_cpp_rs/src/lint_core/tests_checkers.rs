@@ -6,6 +6,23 @@
 // itself.
 
     #[test]
+    fn cpp_hpp_no_header_suppression_stops_after_license_window() {
+        let checker = CppHppHeaderPairChecker;
+        let line_ten = format!("{}// ok no header\n", "// preamble\n".repeat(9));
+        assert!(checker
+            .check_file_content(&file("src/fl/no_pair.cpp.hpp", &line_ten))
+            .is_empty());
+
+        let line_eleven = format!("{}// ok no header\n", "// preamble\n".repeat(10));
+        assert_eq!(
+            checker
+                .check_file_content(&file("src/fl/no_pair.cpp.hpp", &line_eleven))
+                .len(),
+            1
+        );
+    }
+
+    #[test]
     fn prefer_constexpr_ignores_compound_assignment_and_increment() {
         for mutation in ["sCount += 1;", "sCount++;", "sCount |= 2;"] {
             let src = format!(
@@ -728,4 +745,3 @@ int b = 2;
         let visible = scan_visible(&src);
         assert!(visible[0].contains("after_ident"), "{visible:?}");
     }
-

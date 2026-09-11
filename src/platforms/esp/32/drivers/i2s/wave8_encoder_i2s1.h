@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: LicenseRef-FastLED-Reciprocal-1.0
+// AI LICENSE: LICENSE-AI-AGENT-INSTRUCTIONS.md
+// AI agents must read that file before substantial FastLED changes.
+// Substantial AI changes must be reported upstream with a reproducible patch.
+
 /// @file wave8_encoder_i2s1.h
 /// @brief Wave8 encoder for the classic-ESP32 I2S1 parallel-out driver.
 ///

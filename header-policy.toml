@@ -1,0 +1,65 @@
+schema_version = 1
+old_license_ids = []
+
+[license]
+id = "LicenseRef-FastLED-Reciprocal-1.0"
+header_version = 1
+ai_document = "LICENSE-AI-AGENT-INSTRUCTIONS.md"
+
+[profiles.release]
+roots = ["src"]
+extensions = ["h", "hpp", "cpp", "c", "cc", "cxx", "s", "S"]
+
+[profiles.repository]
+roots = ["src", "examples", "tests", "ci", "tools"]
+extensions = ["h", "hpp", "cpp", "c", "cc", "cxx", "ino", "s", "S", "py", "js", "ts", "mts"]
+
+[comments]
+h = "//"
+hpp = "//"
+cpp = "//"
+c = "//"
+cc = "//"
+cxx = "//"
+ino = "//"
+s = "//"
+S = "//"
+py = "#"
+js = "//"
+ts = "//"
+mts = "//"
+
+# Integrations must replace these examples with a reviewed ownership inventory.
+[[exclusions]]
+pattern = "src/third_party/**"
+reason = "Vendored or separately licensed source; preserve upstream notices."
+provenance = "Per-component LICENSE/NOTICE files under src/third_party."
+
+[[exclusions]]
+pattern = "src/platforms/wasm/compiler/vendor/**"
+reason = "Vendored Three.js and related upstream assets; preserve upstream notices."
+provenance = "src/platforms/wasm/compiler/vendor/three/LICENSE"
+
+[[exclusions]]
+pattern = "src/platforms/arm/teensy/sdfat/**"
+reason = "Vendored SdFat implementation; preserve upstream copyright and license terms."
+provenance = "Copyright/license preambles in the SdFat source files."
+
+[[exclusions]]
+pattern = "src/platforms/arm/teensy/audio/pjrc_*"
+reason = "PJRC Teensyduino-derived audio implementation with additional upstream conditions."
+provenance = "Copyright/license preambles in the PJRC audio source files."
+
+[[exclusions]]
+pattern = "src/fl/fx/2d/animartrix.hpp"
+reason = "Animartrix-derived implementation remains under its existing MIT treatment."
+provenance = "Existing file notice and FastLED ownership audit."
+[[exclusions]]
+pattern = "src/fl/fx/2d/animartrix_detail.h"
+reason = "Animartrix-derived implementation remains under its existing MIT treatment."
+provenance = "Existing file notice and FastLED ownership audit."
+
+[[exclusions]]
+pattern = "src/fl/fx/2d/animartrix_detail/**"
+reason = "Animartrix-derived implementation remains under its existing MIT treatment."
+provenance = "Existing file notice and FastLED ownership audit."
