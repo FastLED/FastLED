@@ -884,4 +884,93 @@ FL_TEST_CASE("[#4326] a bound profile reaches the encode path") {
     // whichever of the two landed second fail.
 }
 
+
+// ============ Legacy output with colour management disabled (#4034) ============
+// The tracker lists "Legacy output byte-identical with CM disabled" as an
+// acceptance criterion and nothing verified it. The colour pipeline reaches
+// into `showPixels` and into how the pixel iterator is built, so a change
+// there can alter output for every sketch that never asked for colour
+// management -- silently, because no managed test would notice.
+//
+// The observable form of "byte-identical" in one build is that an unbound
+// channel emits exactly the legacy arithmetic: colour order applied, each
+// channel scaled by brightness, and nothing else. Literals rather than a
+// recomputation, so this compares against a recorded answer instead of
+// against the same code that produced it.
+
+FL_TEST_CASE("[#4034] an unbound channel emits the legacy bytes exactly") {
+    struct Case {
+        const char* name;
+        EOrder order;
+        u8 brightness;
+        int expect[3];
+    };
+    // Source is CRGB(200, 100, 50) throughout.
+    const Case cases[] = {
+        {"full brightness is the identity",   RGB, 255, {200, 100, 50}},
+        {"half",                              RGB, 128, {100,  50, 25}},
+        {"quarter",                           RGB,  64, { 50,  25, 12}},
+        // scale8 with FASTLED_SCALE8_FIXED is (v * (b + 1)) >> 8, so the
+        // lowest brightness keeps a non-zero channel alive rather than
+        // rounding the whole pixel to black.
+        {"lowest brightness keeps red lit",   RGB,   1, {  1,   0,  0}},
+        // Colour order moves bytes and must not touch values.
+        {"GRB reorders without rescaling",    GRB, 255, {100, 200, 50}},
+        {"BGR reorders and scales",           BGR, 128, { 25,  50, 100}},
+    };
+
+    for (fl::size i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        FL_SUBCASE(cases[i].name) {
+            auto& mgr = ChannelManager::instance();
+            mgr.clearAllDrivers();
+            auto driver = fl::make_shared<CapturingDriver>();
+            mgr.addDriver(9300, driver);
+            auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+            CRGB leds[1] = {CRGB(200, 100, 50)};
+            ChannelOptions options;
+            options.mDitherMode = DISABLE_DITHER;
+            auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+            ChannelConfig config(120 + (int)i, timing, fl::span<CRGB>(leds, 1),
+                                 cases[i].order, options);
+            ChannelPtr ch = Channel::create(config);
+            FL_REQUIRE(ch != nullptr);
+            FL_CHECK_FALSE(ch->hasColorProfile());
+            ch->showLeds(cases[i].brightness);
+
+            FL_REQUIRE_EQ((int)driver->last.size(), 3);
+            FL_CHECK_EQ((int)driver->last[0], cases[i].expect[0]);
+            FL_CHECK_EQ((int)driver->last[1], cases[i].expect[1]);
+            FL_CHECK_EQ((int)driver->last[2], cases[i].expect[2]);
+        }
+    }
+}
+
+FL_TEST_CASE("[#4034] and binding a profile does change them") {
+    // The guard. Without it, the case above would pass just as well against a
+    // pipeline that had stopped doing anything at all -- which is the other
+    // way this criterion can be satisfied for the wrong reason.
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<CapturingDriver>();
+    mgr.addDriver(9300, driver);
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    CRGB leds[1] = {CRGB(200, 100, 50)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    FL_REQUIRE(options.setColorProfile(kProfile, SourceProfile::linearSrgb()));
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelConfig config(126, timing, fl::span<CRGB>(leds, 1), RGB, options);
+    ChannelPtr ch = Channel::create(config);
+    FL_REQUIRE(ch != nullptr);
+    FL_REQUIRE(ch->isColorManaged());
+    ch->showLeds(255);
+
+    FL_REQUIRE_EQ((int)driver->last.size(), 3);
+    const bool same = driver->last[0] == 200 && driver->last[1] == 100 &&
+                      driver->last[2] == 50;
+    FL_CHECK_FALSE(same);
+}
+
 }  // FL_TEST_FILE
