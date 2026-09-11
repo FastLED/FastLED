@@ -173,6 +173,22 @@ class ReorderingPixelIteratorAny {
     const PixelIterator& get() const FL_NO_EXCEPT {
         return const_cast<ReorderingPixelIteratorAny*>(this)->get();
     }
+
+    /// True when `get()` hands back the colour-managed iterator.
+    ///
+    /// Not the same question as "is a profile configured". The managed
+    /// iterator exists only when a pipeline was actually built and the hooks
+    /// were installed; a channel can have a profile on its options and still
+    /// be iterating the legacy controller -- a rejected binding, or a build
+    /// where the seam is not linked. Asking the options instead would send
+    /// 8-bit legacy pixels down the no-gamma path.
+    bool isManaged() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mManagedIterator != nullptr;
+#else
+        return false;
+#endif
+    }
 };
 
 /// @brief Out-of-line cold-path emitter for the #2517 silent-drop
@@ -485,7 +501,7 @@ namespace {
 /// @param rgbOrder RGB ordering for current control reordering
 void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
                   ClocklessEncoder encoder, const ChannelOptions& settings,
-                  EOrder rgbOrder) {
+                  EOrder rgbOrder, bool managed) FL_NO_EXCEPT {
     // Map encoder enum to UCS7604Mode
     UCS7604Mode mode;
     switch (encoder) {
@@ -520,10 +536,15 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
     // Only the unbound path uses it. With a profile bound the pixel source
     // has already produced the device drive and quantized it once, to 16
     // bits, so widening it again through a curve is the second shaping stage
-    // B1/§6 forbid after the device solve -- and the 2.8 here is
+    // B1 and section 6 forbid after the device solve -- and the 2.8 here is
     // `value_or`'s default rather than anything the caller asked for, since
     // `setColorProfile` clears `mGamma`. #4326.
-    const bool wide_source = settings.hasColorProfile();
+    // The iterator's own state, not the options'. `hasColorProfile()` says a
+    // profile is configured; it does not say the managed iterator was built.
+    // A rejected binding leaves the legacy controller in place, and taking
+    // the no-gamma path over its 8-bit pixels would drop a stage that path
+    // still needs.
+    const bool wide_source = managed;
     float gamma = settings.mGamma.value_or(2.8f);
     fl::shared_ptr<const Gamma8> gamma8 = Gamma8::getOrCreate(gamma);
 
@@ -735,7 +756,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
                 writeUCS7604(&data, pixelIterator, clockless->encoder,
-                             mSettings, mRgbOrder);
+                             mSettings, mRgbOrder, iterator.isManaged());
                 break;
 #endif  // !FASTLED_DISABLE_UCS7604
         }

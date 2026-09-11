@@ -155,7 +155,7 @@ void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIter
 ///
 /// `gamma == nullptr` is the colour-managed case: the source has already
 /// quantized its device drive once, to 16 bits, and a curve on top of that is
-/// the second shaping stage B1/§6 forbid after the device solve.
+/// the second shaping stage B1 and section 6 of the spec forbid after the device solve.
 template <typename InputIterator, typename OutputIterator>
 void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out,
                               const Gamma8* gamma) FL_NO_EXCEPT {
