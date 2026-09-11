@@ -162,6 +162,34 @@ void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIter
     }
 }
 
+/// @brief Encode RGB pixels already at 16-bit precision, with no shaping
+/// @tparam InputIterator Iterator yielding fl::array<u16, 3> (wire-order RGB)
+/// @tparam OutputIterator Output iterator accepting u8
+///
+/// The wide path (P8, #4042). The gamma form above exists because its input
+/// is 8-bit and something has to widen it; a LUT that happens to be a gamma
+/// curve is what does. On a colour-managed channel that is a second shaping
+/// stage after the device solve, which B1/§6 forbid, and it was measured in
+/// #4326 putting 849 on the wire where the drive asked for 13933.
+///
+/// Here the source has already quantized once, to 16 bits, so there is
+/// nothing left to do but write the bytes.
+template <typename InputIterator, typename OutputIterator>
+void encodeUCS7604_16bit_RGB_wide(InputIterator first, InputIterator last,
+                                  OutputIterator out) FL_NO_EXCEPT {
+    while (first != last) {
+        const auto& pixel = *first;
+        // Big-endian, matching the gamma form byte for byte.
+        *out++ = pixel[0] >> 8;
+        *out++ = pixel[0] & 0xFF;
+        *out++ = pixel[1] >> 8;
+        *out++ = pixel[1] & 0xFF;
+        *out++ = pixel[2] >> 8;
+        *out++ = pixel[2] & 0xFF;
+        ++first;
+    }
+}
+
 /// @brief Encode RGBW pixels in UCS7604 16-bit format with gamma correction
 /// @tparam InputIterator Iterator yielding fl::array<uint8_t, 4> (RGBW bytes)
 /// @tparam OutputIterator Output iterator accepting uint8_t
@@ -208,7 +236,8 @@ void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIte
 template <typename OutputIterator>
 void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator out,
                    UCS7604Mode mode, const UCS7604CurrentControl& current, bool is_rgbw,
-                   const Gamma8* gamma = nullptr) {
+                   const Gamma8* gamma = nullptr,
+                   bool wide_source = false) FL_NO_EXCEPT {
     constexpr size_t PREAMBLE_LEN = 15;
 
     // Calculate bytes per LED based on mode and RGB/RGBW
@@ -246,8 +275,14 @@ void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator ou
         static fl::shared_ptr<const Gamma8> default_gamma;
         const Gamma8& g = gamma ? *gamma : *(default_gamma ? default_gamma : (default_gamma = Gamma8::getOrCreate(2.8f)));
         if (is_rgbw) {
+            // RGBW stays on the gamma path: `ColorManagedPixelSource`
+            // delegates its RGBW entry point to the legacy controller, so
+            // there is no wide drive to consume here yet.
             auto range = makeScaledPixelRangeRGBW(&pixel_iter);
             encodeUCS7604_16bit_RGBW(range.first, range.second, out, g);
+        } else if (wide_source) {
+            auto range = makeScaledPixelRangeRGB16(&pixel_iter);
+            encodeUCS7604_16bit_RGB_wide(range.first, range.second, out);
         } else {
             auto range = makeScaledPixelRangeRGB(&pixel_iter);
             encodeUCS7604_16bit_RGB(range.first, range.second, out, g);

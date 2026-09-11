@@ -11,6 +11,7 @@
 
 
 #include "fl/math/intmap.h"
+#include "fl/system/sketch_macros.h"  // IWYU pragma: keep  (FL_PLATFORM_HAS_TINY_MEMORY)
 #include "fl/math/math8.h"
 #include "platforms/is_platform.h"
 
@@ -589,6 +590,25 @@ struct PixelController {
         *b1_out = loadAndScale1();
         *b2_out = loadAndScale2();
     }
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// Wide load for the 16-bit encoders (P8, #4042).
+    ///
+    /// The legacy answer, and deliberately so: this controller's pixels are
+    /// 8-bit, so widening is all there is to do and `map8_to_16` is the exact
+    /// widening the RGB16 adapter already applied. Byte-identical to what
+    /// WS2816 received before this entry point existed.
+    ///
+    /// What it buys is the seam. A colour-managed source overrides this and
+    /// quantizes its s16.16 drives to 16 bits once, instead of to 8 and back
+    /// up -- which is the "encoders consume wide output" half of P8.
+    FASTLED_FORCE_INLINE void loadAndScaleRGB16(fl::u16 *b0_out, fl::u16 *b1_out,
+                                                fl::u16 *b2_out) {
+        *b0_out = fl::map8_to_16(loadAndScale0());
+        *b1_out = fl::map8_to_16(loadAndScale1());
+        *b2_out = fl::map8_to_16(loadAndScale2());
+    }
+#endif
 
     // NOTE: loadAndScale_WS2816_HD() has been moved to src/fl/chipsets/encoders/ws2816.h
     // Use fl::loadAndScale_WS2816_HD<RGB_ORDER>(pixels, ...) instead

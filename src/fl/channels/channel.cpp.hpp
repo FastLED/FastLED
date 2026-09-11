@@ -515,7 +515,15 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
     UCS7604CurrentControl wire_current(
         rgb_currents[pos0], rgb_currents[pos1], rgb_currents[pos2], current.w);
 
-    // Get gamma LUT
+    // Get gamma LUT.
+    //
+    // Only the unbound path uses it. With a profile bound the pixel source
+    // has already produced the device drive and quantized it once, to 16
+    // bits, so widening it again through a curve is the second shaping stage
+    // B1/§6 forbid after the device solve -- and the 2.8 here is
+    // `value_or`'s default rather than anything the caller asked for, since
+    // `setColorProfile` clears `mGamma`. #4326.
+    const bool wide_source = settings.hasColorProfile();
     float gamma = settings.mGamma.value_or(2.8f);
     fl::shared_ptr<const Gamma8> gamma8 = Gamma8::getOrCreate(gamma);
 
@@ -538,7 +546,7 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 
     // Encode into the data buffer
     encodeUCS7604(pixelIterator, num_leds, fl::back_inserter(*data),
-                  mode, wire_current, is_rgbw, gamma8.get());
+                  mode, wire_current, is_rgbw, gamma8.get(), wide_source);
 }
 
 } // anonymous namespace
