@@ -15,10 +15,10 @@ from typing import Any
 import pytest
 
 from ci.compiled_size import (
-    _find_fbuild_elf,
     _find_size_tool,
     _parse_size_tool_text,
 )
+from ci.util.firmware_elf import find_fbuild_elf as _find_fbuild_elf
 
 
 def test_parse_size_tool_text_berkeley_format() -> None:

@@ -11,6 +11,7 @@ from typing import Any
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
+from ci.util.firmware_elf import resolve_firmware_elf
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.map_dump import map_dump
 from ci.util.symbol_analysis import SymbolInfo, analyze_symbols
@@ -224,13 +225,18 @@ def main() -> int:
     board = board_dir.name
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
 
-    # Validate paths from build_info.json
-    elf_path = Path(board_info.get("prog_path", ""))
-    if not elf_path.exists():
+    # Resolve via the shared helper, not `prog_path` alone: on an fbuild board
+    # `prog_path` names a PlatformIO location that was never written, and every
+    # tool below then fails one at a time against it (FastLED#4402).
+    resolved_elf = resolve_firmware_elf(board_info, board_dir)
+    if resolved_elf is None:
         print(
-            f"Error: ELF path '{elf_path}' does not exist. Check the 'prog_path' in build_info.json."
+            f"Error: no firmware ELF found for '{board}'. Looked for an fbuild "
+            f"artifact under {board_dir / '.fbuild' / 'build'} and at "
+            f"prog_path '{board_info.get('prog_path', '')}'."
         )
         return 1
+    elf_path = resolved_elf
 
     bin_file = elf_path.with_suffix(".bin")
     if not bin_file.exists():

@@ -1,3 +1,4 @@
+from ci.util.firmware_elf import resolve_firmware_elf
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -930,7 +931,20 @@ def main():
 
     nm_path = board_info["aliases"]["nm"]
     cppfilt_path = board_info["aliases"]["c++filt"]
-    elf_file = board_info["prog_path"]
+    # `prog_path` names the PlatformIO location, which an fbuild board never
+    # writes. Reading it directly is why this report came out with
+    # `Total symbols: 0` on esp32dev while the build sat under `.fbuild/`
+    # (FastLED#4402); the resolver checks there first.
+    resolved_elf = resolve_firmware_elf(board_info, build_info_path.parent)
+    if resolved_elf is None:
+        print(
+            f"Error: no firmware ELF found for {board_name}. Looked for an "
+            f"fbuild artifact under "
+            f"{build_info_path.parent / '.fbuild' / 'build'} and at prog_path "
+            f"'{board_info.get('prog_path', '')}'."
+        )
+        sys.exit(1)
+    elf_file = str(resolved_elf)
 
     # Get readelf path (derive from nm path if not in aliases)
     if "readelf" in board_info["aliases"]:
