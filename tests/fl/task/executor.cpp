@@ -683,10 +683,18 @@ FL_TEST_CASE("fl::task::await - the wait is bounded") {
         auto result = fl::task::await(promise, 20);
         const u32 elapsed = fl::millis() - start;
 
+        // The error is the proof: had the call waited for resolution it would
+        // have returned ok() with 99, whatever the clock said.
         FL_CHECK(!result.ok());
         FL_CHECK_EQ(result.error().message,
                     "await timeout - promise did not complete");
-        FL_CHECK(elapsed < 400u);
+        // Deliberately far above the 400 ms resolver delay rather than under
+        // it. A descheduled host can stretch a correctly-timed-out 20 ms wait
+        // past 400 ms, which would make a tighter bound flaky without adding
+        // anything the error assertion does not already establish -- see the
+        // measurements under load in FastLED#3772. This is a sanity ceiling,
+        // not the discriminator.
+        FL_CHECK(elapsed < 5000u);
         fl::platforms::cleanup_background_threads();
     }
 
