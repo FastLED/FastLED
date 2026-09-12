@@ -16,6 +16,17 @@ namespace fl {
 constexpr size_t kRpPioRxEdgeCapacity = 100u * 3u * 16u + 1u;
 using RpPioRxEdgeStorage = fl::FixedVector<EdgeTime, kRpPioRxEdgeCapacity>;
 
+// Sampler geometry. These live in the header rather than beside their use in
+// rx_pio_channel.cpp.hpp because they are what bounds a capture, and callers
+// that have to predict whether a frame will fit need them (FastLED#4371).
+//
+// After synchronizing to the first rising edge the PIO runs one IN PINS
+// instruction per cycle, so 20 MHz gives 50 ns samples -- enough to separate
+// WS2812 timing phases without losing the first phase to counter setup.
+constexpr u32 kPioRxClockHz = 20000000u;
+constexpr u32 kPioRxSamplesPerDmaWord = 32u;
+constexpr size_t kPioRxDmaTailWords = 64u;
+
 /// @brief RP PIO RX lifecycle device. Capture programming is Phase 2.
 class RpPioRxDevice : public RxDevice {
   public:

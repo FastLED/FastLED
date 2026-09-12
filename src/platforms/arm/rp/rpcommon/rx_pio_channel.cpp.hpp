@@ -23,11 +23,6 @@ namespace fl {
 namespace {
 
 constexpr size_t kPioRxProgramLength = 3;
-// After synchronizing to the first rising edge, the PIO runs one IN PINS
-// instruction per cycle. 20 MHz gives 50 ns samples, enough to distinguish
-// WS2812 timing phases without losing the first phase to counter setup.
-constexpr u32 kPioRxClockHz = 20000000u;
-constexpr size_t kPioRxDmaTailWords = 64u;
 // AutoResearch's RP tier is capped at 100 RGB LEDs. A static DMA target keeps
 // capture independent of the Arduino-Pico heap, which is not usable while the
 // full RPC harness owns its transient result objects.
@@ -290,8 +285,9 @@ void RpPioRxDevice::collectDurations() FL_NO_EXCEPT {
     const size_t transferred = mDmaWordCount - dma_hw->ch[mDmaChannel].transfer_count;
     while (mDmaWordsProcessed < transferred) {
         const u32 samples = mDmaWords[mDmaWordsProcessed];
-        for (u32 bit = 0; bit < 32; ++bit) {
-            const bool high = (samples & (1u << (31u - bit))) != 0;
+        for (u32 bit = 0; bit < kPioRxSamplesPerDmaWord; ++bit) {
+            const bool high =
+                (samples & (1u << (kPioRxSamplesPerDmaWord - 1u - bit))) != 0;
             if (!mHaveSample) {
                 mSampleHigh = high;
                 mHaveSample = true;

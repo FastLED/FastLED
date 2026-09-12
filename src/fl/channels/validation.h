@@ -91,6 +91,79 @@ inline size_t captureEdgeCapacity(size_t shared_buffer_bytes,
     return capacity;
 }
 
+/// @brief Largest frame, in wire bytes, an RP PIO RX capture can hold.
+///
+/// Two independent ceilings bound a capture, and each is the binding one in
+/// its own regime -- which is why no single constant, and no single model,
+/// predicts both (FastLED#4371):
+///
+///  1. **Edge pool.** The capture appends one `EdgeTime` per signal phase into
+///     a fixed pool: two phases per bit, eight bits per wire byte. Past
+///     `edge_capacity / 16` bytes it overflows.
+///  2. **Sample-time budget.** The sampler writes `samples_per_dma_word`
+///     samples per DMA word at a fixed clock, and the word count is
+///     `(edge_capacity + 1) / 2 + dma_tail_words` for every frame large enough
+///     for either ceiling to matter. That is a constant quantity of *wall
+///     clock*, not of data. The frame, plus the trailing idle the capture must
+///     observe before it will terminate, plus the gap between arming and the
+///     first edge, all have to fit inside it.
+///
+/// At a 1225 ns bit period the pool binds first (300 bytes, 2.9 ms); at
+/// 2500 ns the clock binds first (3.84 ms, 189 bytes). Measured on an RP2350W
+/// across WS2812B-V5, WS2818, WS2814, UCS7604-800KHZ and WS2811-400KHZ, the
+/// smaller of the two reproduces every pass/fail boundary to the byte.
+///
+/// Shorter frames are not shortchanged by using the clamped word count: below
+/// the clamp the budget grows by 16 words per byte while the frame grows by
+/// only 8 bit-periods, so it never becomes the binding constraint there.
+///
+/// @param edge_capacity        Phase slots in the capture pool
+///                             (`kRpPioRxEdgeCapacity`)
+/// @param dma_tail_words       Reset-tail words added to the DMA transfer
+///                             (`kPioRxDmaTailWords`)
+/// @param samples_per_dma_word Pin samples packed into one DMA word
+///                             (`kPioRxSamplesPerDmaWord`)
+/// @param sample_period_ns     Nanoseconds per sample (1e9 / `kPioRxClockHz`)
+/// @param idle_tail_ns         Trailing idle the capture must see to finish
+///                             (`RxChannelConfig::signal_range_max_ns`)
+/// @param arming_lead_in_ns    Reserve for the arm-to-first-edge gap
+/// @param bit_period_ns        T1 + T2 + T3 of the chipset under test
+/// @return Maximum wire bytes, or 0 if nothing fits
+inline size_t rpPioMaxWireBytes(size_t edge_capacity,
+                                size_t dma_tail_words,
+                                u32 samples_per_dma_word,
+                                u32 sample_period_ns,
+                                u32 idle_tail_ns,
+                                u32 arming_lead_in_ns,
+                                u32 bit_period_ns) FL_NO_EXCEPT {
+    constexpr size_t kPhasesPerByte = 16;  // 8 bits x (high + low)
+    constexpr u64 kBitsPerByte = 8;
+
+    if (bit_period_ns == 0 || edge_capacity == 0 || samples_per_dma_word == 0 ||
+        sample_period_ns == 0) {
+        return 0;
+    }
+
+    const size_t by_pool = edge_capacity / kPhasesPerByte;
+
+    const u64 dma_words =
+        static_cast<u64>((edge_capacity + 1u) / 2u) + dma_tail_words;
+    const u64 budget_ns =
+        dma_words * samples_per_dma_word * sample_period_ns;
+    const u64 reserved_ns =
+        static_cast<u64>(idle_tail_ns) + arming_lead_in_ns;
+    if (budget_ns <= reserved_ns) {
+        return 0;
+    }
+    const u64 by_clock =
+        (budget_ns - reserved_ns) / (kBitsPerByte * bit_period_ns);
+
+    if (static_cast<u64>(by_pool) < by_clock) {
+        return by_pool;
+    }
+    return static_cast<size_t>(by_clock);
+}
+
 }  // namespace validation
 
 /// @brief Single test configuration - fully stateless

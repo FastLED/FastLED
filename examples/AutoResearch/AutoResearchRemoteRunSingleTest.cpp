@@ -48,7 +48,10 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
 #include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
+#include "platforms/arm/rp/rpcommon/rx_pio_channel.h"
 #endif
+#include "fl/channels/validation.h"
+#include "fl/chipsets/encoders/ucs7604.h"
 #include <Arduino.h>
 
 #include "fl/net/ble.h"
@@ -105,6 +108,69 @@ class StandingRxChannelSwap {
     AutoResearchState* mState;
     bool mReleased;
 };
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+
+/// @brief UCS7604 protocol mode behind an encoder selector, if it is one.
+///
+/// Returns false for every other encoder, including the ones this file cannot
+/// select -- see `rpPioWireFrameBytes`.
+bool ucs7604ModeForEncoder(fl::ClocklessEncoder encoder,
+                           fl::UCS7604Mode* out_mode) {
+    switch (encoder) {
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
+            *out_mode = fl::UCS7604Mode::UCS7604_MODE_8BIT_800KHZ;
+            return true;
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
+            *out_mode = fl::UCS7604Mode::UCS7604_MODE_16BIT_800KHZ;
+            return true;
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
+            *out_mode = fl::UCS7604Mode::UCS7604_MODE_16BIT_1600KHZ;
+            return true;
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
+        case fl::ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
+            return false;
+    }
+    return false;
+}
+
+/// @brief Wire bytes one lane of `leds` puts on the wire, or 0 if unknown.
+///
+/// A UCS7604 lane is more than twice a WS2812 lane of the same length -- a
+/// 15-byte preamble, 16-bit channels, padding to a multiple of three -- so the
+/// capture bound has to be phrased in wire bytes, not LEDs (FastLED#4371).
+///
+/// TM1812 and TM1908 have layouts this does not model. Neither is reachable
+/// from `runSingleTest`'s timing list, and 0 makes the caller skip the bound
+/// rather than enforce a wrong one: no check is what happens today, a check
+/// with the wrong number is the defect being fixed.
+fl::size rpPioWireFrameBytes(fl::size leds, fl::ClocklessEncoder encoder) {
+    fl::UCS7604Mode mode;
+    if (ucs7604ModeForEncoder(encoder, &mode)) {
+        return fl::ucs7604FrameBytes(leds, mode, false);
+    }
+    if (encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812) {
+        return leds * 3u;
+    }
+    return 0;
+}
+
+/// @brief Inverse of `rpPioWireFrameBytes`, for the error message.
+fl::size rpPioMaxLedsForWireBytes(fl::size wire_bytes,
+                                  fl::ClocklessEncoder encoder) {
+    fl::UCS7604Mode mode;
+    if (ucs7604ModeForEncoder(encoder, &mode)) {
+        constexpr fl::size kPreambleLen = 15;
+        if (wire_bytes <= kPreambleLen) {
+            return 0;
+        }
+        return (wire_bytes - kPreambleLen) / fl::ucs7604BytesPerLed(mode, false);
+    }
+    return wire_bytes / 3u;
+}
+
+#endif  // FL_IS_RP2040 || FL_IS_RP2350
 
 uint32_t expectedClocklessWireUs(const fl::ChipsetTimingConfig& timing,
                                  uint32_t max_leds) {
@@ -555,6 +621,11 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     fl::vector<int> lane_sizes;
+    // A coarse, platform-independent backstop, kept only so an absurd request
+    // is rejected before anything is allocated. It is not the capture limit:
+    // on RP the real, encoder- and timing-aware bound is applied further down,
+    // once the timing is resolved, and is strictly tighter than this one
+    // (FastLED#4371).
     const int max_leds_per_lane = mState->rx_buffer.size() / 32;
     for (fl::size i = 0; i < lane_sizes_json.size(); i++) {
         if (!lane_sizes_json[i].is_int()) {
@@ -891,6 +962,58 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();
     }
     fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str(), resolved_encoder);
+
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+    // The `laneSizes` guard above bounds the request with
+    // `rx_buffer.size() / 32`, which measures the wrong thing: `rx_buffer` is
+    // the decode *output*, and 32 has no relation to the capture. It advertised
+    // 103 LEDs, and 101, 102 and 103 were all accepted and then failed in
+    // capture with no error at all -- the outcome a bounds check exists to
+    // prevent (FastLED#4371).
+    //
+    // The real ceiling needs the resolved timing and encoder, which is why the
+    // check lands here rather than with the rest of the argument validation.
+    if (driver_name == "PIO0" || driver_name == "PIO1" || driver_name == "PIO2") {
+        // Reserve for the gap between arming the capture and the transmitter's
+        // first edge, which the sampler also spends words on. Measured on an
+        // RP2350W it sits between 4 us and 64 us: a 63-LED 400 kHz frame passes
+        // with 64 us of budget to spare and a 64-LED one fails with 4 us. Take
+        // the upper end -- advertising a maximum that does not work is the
+        // defect being removed here, so erring long is not symmetric with
+        // erring short.
+        constexpr fl::u32 kArmingLeadInNs = 64000;
+
+        const fl::u32 bit_period_ns =
+            static_cast<fl::u32>(resolved_timing.total_period_ns());
+        const fl::size max_wire_bytes = fl::validation::rpPioMaxWireBytes(
+            fl::kRpPioRxEdgeCapacity, fl::kPioRxDmaTailWords,
+            fl::kPioRxSamplesPerDmaWord,
+            1000000000u / fl::kPioRxClockHz,
+            fl::RxChannelConfig(pin_rx).signal_range_max_ns,
+            kArmingLeadInNs, bit_period_ns);
+
+        for (fl::size i = 0; i < lane_sizes.size(); i++) {
+            const fl::size leds = static_cast<fl::size>(lane_sizes[i]);
+            const fl::size wire_bytes =
+                rpPioWireFrameBytes(leds, timing_config.encoder);
+            if (wire_bytes > max_wire_bytes) {
+                response.set("success", false);
+                response.set("error", "LaneSizeTooLarge");
+                fl::sstream msg;
+                msg << "laneSizes[" << i << "] = " << lane_sizes[i] << " puts "
+                    << static_cast<int>(wire_bytes) << " bytes on the wire at "
+                    << timing_name.c_str() << "; PIO RX capture holds "
+                    << static_cast<int>(max_wire_bytes) << " ("
+                    << static_cast<int>(
+                           rpPioMaxLedsForWireBytes(max_wire_bytes,
+                                                    timing_config.encoder))
+                    << " LEDs)";
+                response.set("message", msg.str().c_str());
+                return response;
+            }
+        }
+    }
+#endif
 
     // Dynamically allocate LED arrays for each lane
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
