@@ -51,6 +51,21 @@ jobs:
       - name: Check Compiled Program Size for ${{ inputs.board }}
         run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink ${{ inputs.extra_args }}
 
+      # P9 (FastLED#4043) asks for the TINY tier's link-time property to be
+      # verified by symbol inspection. The test existed and skipped everywhere,
+      # because nothing built an ATtiny85 before it ran -- this job just did.
+      # FL_REQUIRE_TINY_ELF makes a missing build fail instead of skip, so the
+      # check cannot quietly go back to asserting nothing.
+      #
+      # Only the unmodified build: the sibling job compiles with
+      # FASTLED_NO_FORCE_INLINE, whose link-time symbol set is a separate
+      # question this does not claim to answer.
+      - name: TINY tier links no float and no solver (FastLED#4043)
+        if: inputs.board == 'attiny85' && inputs.extra_args == ''
+        env:
+          FL_REQUIRE_TINY_ELF: '1'
+        run: uv run python -m pytest ci/tests/test_tiny_links_no_float.py -v
+
       - name: Inspect Binary
         if: always()
         continue-on-error: true
