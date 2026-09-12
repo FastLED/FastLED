@@ -126,13 +126,26 @@ FL_TEST_CASE("Noise Range Analysis") {
                 << " (not using full 0-255 range, which is expected)");
     }
     
-    // Test if raw values are within expected -64 to +64 range
+    // Test if raw values are within expected -64 to +64 range.
+    //
+    // This is the corrected contract only. FASTLED_NOISE_FIXED=0 selects the old
+    // easing, which overshoots it in every dimension -- measured -125..120 for 1-D,
+    // -126..127 for 2-D and 3-D on a clean build -- and that is what the flag is
+    // for: reproducing the old output, glitches included, as fastled_config.h says
+    // in as many words. Asserting the bound there made a supported configuration
+    // fail to pass its own tests.
+#if FASTLED_NOISE_FIXED
     FL_CHECK_GE(min_raw_1d, -64);
     FL_CHECK_LE(max_raw_1d, 64);
     FL_CHECK_GE(min_raw_2d, -64);
     FL_CHECK_LE(max_raw_2d, 64);
     FL_CHECK_GE(min_raw_3d, -64);
     FL_CHECK_LE(max_raw_3d, 64);
+#else
+    FL_UNUSED(min_raw_1d); FL_UNUSED(max_raw_1d);
+    FL_UNUSED(min_raw_2d); FL_UNUSED(max_raw_2d);
+    FL_UNUSED(min_raw_3d); FL_UNUSED(max_raw_3d);
+#endif
     
     FL_WARN("=== END NOISE RANGE ANALYSIS ===");
 }
