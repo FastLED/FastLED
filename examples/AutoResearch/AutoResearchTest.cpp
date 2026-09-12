@@ -707,32 +707,34 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // windows -- so a correct frame decoded to nothing. See FastLED#4379.
     if (is_uart_driver) {
         AR_FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
-        // Derive the geometry from the chipset under test. Pass the baud the
-        // engine reports when it reports one: uartWireTiming() re-runs the
-        // same P=5/P=4 selection the encoder ran, and handing it the baud that
-        // was used reproduces that choice rather than guessing it from a
-        // generic ceiling.
-        fl::u32 uart_max_baud = fl::kMaxUartBaudRate;
+        // Take the geometry the engine recorded when it transmitted, rather
+        // than re-deriving it. Which geometry gets chosen depends on the
+        // backend's *maximum* baud, not on anything visible here, and the
+        // achieved baud is the wrong input: it is allowed to sit up to 1%
+        // under the requested one, and fed back as a ceiling that shortfall
+        // makes the transmitted geometry look infeasible and selects the
+        // other. Re-deriving from the generic ceiling is the fallback for
+        // backends that do not report one.
+        fl::ChipsetTiming uart_timing{0, 0, 0, 0, nullptr};
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
         if (fl::strcmp(driver_name, "UART0") == 0) {
-            const fl::u32 actual =
-                fl::BusTraits<fl::Bus::UART, 0>::instance().lastActualBaud();
-            if (actual != 0) { uart_max_baud = actual; }
+            uart_timing =
+                fl::BusTraits<fl::Bus::UART, 0>::instance().lastWireTiming();
         } else if (fl::strcmp(driver_name, "UART1") == 0) {
-            const fl::u32 actual =
-                fl::BusTraits<fl::Bus::UART, 1>::instance().lastActualBaud();
-            if (actual != 0) { uart_max_baud = actual; }
+            uart_timing =
+                fl::BusTraits<fl::Bus::UART, 1>::instance().lastWireTiming();
         }
 #endif
-        // uartWireTiming() carries timing.reset_us and names the result
-        // "uart_wire", so nothing further needs setting here.
-        const fl::ChipsetTiming uart_timing =
-            fl::uartWireTiming(timing, uart_max_baud);
+        if (uart_timing.T1 == 0) {
+            // uartWireTiming() carries timing.reset_us and names the result
+            // "uart_wire", so nothing further needs setting here.
+            uart_timing = fl::uartWireTiming(timing, fl::kMaxUartBaudRate);
+        }
         if (uart_timing.T1 == 0 && uart_timing.T2 == 0) {
             // No representable geometry. Decoding against zeros would reject
             // every symbol and report it as a capture fault; say what it is.
             AR_FL_WARN("[CAPTURE] UART: no representable wave geometry for "
-                       << timing.name << " at " << uart_max_baud << " baud");
+                       << timing.name);
             return 0;
         }
         // Use wider tolerance (250ns) for UART because the UART clock and RMT

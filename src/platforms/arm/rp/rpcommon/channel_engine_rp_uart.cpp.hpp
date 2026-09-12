@@ -13,7 +13,8 @@ ChannelEngineRpUart::ChannelEngineRpUart(
       mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
       mActive(false), mLatchPending(false), mFailed(false),
       mLastStartAttempted(false), mLastStartSucceeded(false),
-      mLastEncodedSize(0), mLastActualBaud(0) {}
+      mLastEncodedSize(0), mLastActualBaud(0),
+      mLastWireTiming{0, 0, 0, 0, nullptr} {}
 
 ChannelEngineRpUart::~ChannelEngineRpUart() {
     releaseInFlight();
@@ -83,6 +84,7 @@ void ChannelEngineRpUart::show() FL_NO_EXCEPT {
     mLastStartSucceeded = false;
     mLastEncodedSize = 0;
     mLastActualBaud = 0;
+    mLastWireTiming = ChipsetTiming{0, 0, 0, 0, nullptr};
     mLastError.clear();
     for (const ChannelDataPtr& channel : mInFlightChannels) {
         if (channel) {
@@ -186,6 +188,11 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
     mLastStartSucceeded = false;
     mLastEncodedSize = 0;
     mLastActualBaud = 0;
+    // Record the geometry under the same ceiling the LUT above was built
+    // with, so a decoder reads the shape that went on the wire rather than
+    // re-deriving it and getting the other one (FastLED#4379).
+    mLastWireTiming = uartWireTiming(channel->getTiming(),
+                                     mPeripheral->maxBaudRate());
     RpUartConfig config;
     config.uart_index = mUartIndex;
     config.tx_pin = static_cast<u8>(channel->getPin());

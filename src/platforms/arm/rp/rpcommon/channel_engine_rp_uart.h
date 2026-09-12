@@ -37,6 +37,22 @@ class ChannelEngineRpUart final : public IChannelDriver {
     bool lastStartSucceeded() const FL_NO_EXCEPT { return mLastStartSucceeded; }
     size_t lastEncodedSize() const FL_NO_EXCEPT { return mLastEncodedSize; }
     u32 lastActualBaud() const FL_NO_EXCEPT { return mLastActualBaud; }
+
+    /// @brief Wire timing of the geometry the last transmission actually used.
+    ///
+    /// Which geometry gets picked (P=5 vs P=4) depends on the backend's
+    /// *maximum* baud, so a caller that has to decode this waveform cannot
+    /// re-derive it from the chipset timing alone. Re-deriving it from
+    /// `lastActualBaud()` is worse than not having it: the achieved baud is
+    /// allowed to sit up to 1% under the requested one, and fed back in as a
+    /// ceiling that shortfall makes the transmitted geometry look infeasible
+    /// and selects the other one. Recorded here instead, from the same LUT the
+    /// encoder ran. `T1 == 0` means nothing has been transmitted yet.
+    /// See FastLED#4379.
+    const ChipsetTiming& lastWireTiming() const FL_NO_EXCEPT {
+        return mLastWireTiming;
+    }
+
     const fl::string& lastError() const FL_NO_EXCEPT { return mLastError; }
 
   private:
@@ -57,6 +73,7 @@ class ChannelEngineRpUart final : public IChannelDriver {
     bool mActive;
     bool mLatchPending;
     bool mFailed;
+    ChipsetTiming mLastWireTiming;
     fl::string mError;
     bool mLastStartAttempted;
     bool mLastStartSucceeded;
