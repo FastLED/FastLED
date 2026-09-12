@@ -41,6 +41,16 @@ jobs:
       # 10 KB to 340000. Apa102 remains at 330000 after its templated addLeds
       # path stopped enrolling every ESP32 channel driver (321275 B).
       #
+      # 2026-09-12: this gate went red on master at 340235 B, 235 B over, and
+      # stayed red. Cause: #4368 and #4387 (16-bit encoders and HD108 consume
+      # the solved device drive) raised the esp32s3 bloat baseline with
+      # symbol-level justification and nothing connected that to this ceiling.
+      # Tracked in #4402. The number below was deliberately NOT raised -- the
+      # bytes were found in code instead, in the HD108 encoder's per-LED
+      # brightness handling, which computed a constant header. Left here as the
+      # record that this ceiling has been tested against a real regression and
+      # held.
+      #
       # The value here is mirror-locked by `ci/lint/check_size_thresholds.py`:
       # changing this number without updating the frozen-list constant in that
       # script will fail `bash lint`. The matching CodeRabbit rule on path

@@ -88,46 +88,42 @@ void encodeHD108(InputIterator first, InputIterator last, OutputIterator out,
 /// @tparam OutputIterator Output iterator accepting uint8_t
 /// @param first Iterator to first pixel
 /// @param last Iterator past last pixel
-/// @param brightness_first Iterator to first brightness value (8-bit, 0-255).
-///        Read once per LED and then discarded: hd108BrightnessHeader() pins
-///        all gains at 31 regardless. Per-LED brightness has no effect on the
-///        output (FastLED#4042).
+/// @param brightness_first Accepted and never read. hd108BrightnessHeader()
+///        pins all gains at 31 regardless, so per-LED brightness has no effect
+///        on the output (FastLED#4042) -- it used to be dereferenced once per
+///        LED and thrown away, which cost a call each time (FastLED#4402).
+///        Kept for source compatibility.
 /// @param out Output iterator for encoded bytes
 /// @note HD108 uses RGB wire order: pixel[0]=Red, pixel[1]=Green, pixel[2]=Blue
 template <typename InputIterator, typename BrightnessIterator, typename OutputIterator>
 void encodeHD108_HD(InputIterator first, InputIterator last,
                     BrightnessIterator brightness_first, OutputIterator out) FL_NO_EXCEPT {
+    FL_UNUSED(brightness_first);
     // Start frame: 64 bits (8 bytes) of 0x00
     for (int i = 0; i < 8; i++) {
         *out++ = 0x00;
     }
 
-    // Brightness conversion cache (avoid recomputing same values)
-    u8 lastBrightness8 = 0;
-    u8 lastF0 = 0xFF, lastF1 = 0xFF;  // Invalid markers
+    // One header for the whole strip. `hd108BrightnessHeader` discards its
+    // argument -- `(void)brightness_8bit`, then three `constexpr` gains of 31
+    // -- so it returns 0xFF 0xFF for every input. There was a per-LED cache
+    // here guarding against recomputing a value that cannot change, and a
+    // `*brightness_first` read feeding it; both computed the same two bytes
+    // every time. Reading the brightness per LED was the more expensive half:
+    // `ScaledPixelIteratorBrightness::load()` is out of line, so it was a call
+    // per LED to fetch a number that reached nothing. See FastLED#4402.
+    u8 f0, f1;
+    hd108BrightnessHeader(0, &f0, &f1);
 
     // LED data: 2-byte header + 6-byte RGB16 (count as we go)
     size_t num_leds = 0;
     while (first != last) {
         const fl::array<u8, BYTES_PER_PIXEL_RGB>& pixel = *first;
-        u8 brightness = *brightness_first;
 
         // Apply gamma correction (2.8) to 16-bit (RGB order: 0=R, 1=G, 2=B)
         u16 r16 = hd108GammaCorrect(pixel[0]);  // Red
         u16 g16 = hd108GammaCorrect(pixel[1]);  // Green
         u16 b16 = hd108GammaCorrect(pixel[2]);  // Blue
-
-        // Compute brightness header (with caching)
-        u8 f0, f1;
-        if (brightness == lastBrightness8 && lastF0 != 0xFF) {
-            f0 = lastF0;
-            f1 = lastF1;
-        } else {
-            hd108BrightnessHeader(brightness, &f0, &f1);
-            lastBrightness8 = brightness;
-            lastF0 = f0;
-            lastF1 = f1;
-        }
 
         // Transmit: 2 header + 6 color bytes (16-bit RGB, big-endian)
         *out++ = f0;
@@ -140,7 +136,6 @@ void encodeHD108_HD(InputIterator first, InputIterator last,
         *out++ = static_cast<u8>(b16 & 0xFF);
 
         ++first;
-        ++brightness_first;
         ++num_leds;
     }
 
