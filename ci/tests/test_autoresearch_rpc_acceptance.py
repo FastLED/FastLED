@@ -360,3 +360,88 @@ def test_failed_response_with_edges_is_decode_mismatch() -> None:
 
     assert failure_class == "decode_mismatch"
     assert "did not match" in detail
+
+
+def test_driver_that_declined_is_not_a_capture_failure() -> None:
+    """A backend that refused the chipset must not read as a wiring fault.
+
+    Verbatim shape of a `bash autoresearch rp2350 --uart` response on the
+    Pico 2 W: GPIO0 -> GPIO1 *is* UART0 TX/RX, so the route is wired, but
+    the RP UART backend declines WS2812B-V5 because the bit period needs a
+    baud above its maximum. It never transmitted, so of course RX saw
+    nothing -- reporting `zero_capture` describes the consequence and hides
+    the driver's own explanation. See FastLED#3899.
+    """
+    failure_class, detail = _classify_test_failure(
+        {
+            "passed": False,
+            "rpUartStartAttempted": False,
+            "rpUartStartSucceeded": False,
+            "rpUartEncodedSize": 0,
+            "rpUartActualBaud": 0,
+            "rpUartLastError": (
+                "RP UART: chipset timing needs a baud above the UART backend maximum"
+            ),
+            "captureEvidenceBytes": 0,
+            "captureEvidenceRawEdges": 0,
+            "patterns": [
+                {
+                    "capturedBytes": 0,
+                    "rawEdgesAfterWait": 0,
+                    "mismatchedBytes": 300,
+                    "captureFailed": True,
+                }
+            ],
+        }
+    )
+
+    assert failure_class == "driver_declined"
+    # The driver's own words reach the operator, not a paraphrase.
+    assert "baud above the UART backend maximum" in detail
+
+
+def test_driver_that_did_transmit_still_classifies_on_capture() -> None:
+    """`rpUartStartAttempted=True` must not divert a real capture failure.
+
+    The new branch sits ahead of the capture evidence, so this pins that it
+    only catches a genuine decline rather than swallowing every RP UART
+    failure.
+    """
+    failure_class, _ = _classify_test_failure(
+        {
+            "passed": False,
+            "rpUartStartAttempted": True,
+            "rpUartStartSucceeded": True,
+            "captureEvidenceBytes": 0,
+            "captureEvidenceRawEdges": 0,
+            "patterns": [
+                {
+                    "capturedBytes": 0,
+                    "rawEdgesAfterWait": 0,
+                    "mismatchedBytes": 300,
+                    "captureFailed": True,
+                }
+            ],
+        }
+    )
+
+    assert failure_class == "zero_capture"
+
+
+def test_driver_decline_without_a_reason_still_says_it_declined() -> None:
+    """Absent `rpUartLastError`, the class must still be the decline.
+
+    Losing the reason is worse reporting; silently falling back to
+    `zero_capture` would be a wrong finding.
+    """
+    failure_class, detail = _classify_test_failure(
+        {
+            "passed": False,
+            "rpUartStartAttempted": False,
+            "captureEvidenceBytes": 0,
+            "captureEvidenceRawEdges": 0,
+        }
+    )
+
+    assert failure_class == "driver_declined"
+    assert "gave no reason" in detail
