@@ -120,10 +120,10 @@ inline size_t captureEdgeCapacity(size_t shared_buffer_bytes,
 /// @param edge_capacity        Phase slots in the capture pool
 ///                             (`kRpPioRxEdgeCapacity`)
 /// @param dma_tail_words       Reset-tail words added to the DMA transfer
-///                             (`kPioRxDmaTailWords`)
+///                             (`kRpPioRxDmaTailWords`)
 /// @param samples_per_dma_word Pin samples packed into one DMA word
-///                             (`kPioRxSamplesPerDmaWord`)
-/// @param sample_period_ns     Nanoseconds per sample (1e9 / `kPioRxClockHz`)
+///                             (`kRpPioRxSamplesPerDmaWord`)
+/// @param sample_period_ns     Nanoseconds per sample (1e9 / `kRpPioRxClockHz`)
 /// @param idle_tail_ns         Trailing idle the capture must see to finish
 ///                             (`RxChannelConfig::signal_range_max_ns`)
 /// @param arming_lead_in_ns    Reserve for the arm-to-first-edge gap

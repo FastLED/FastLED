@@ -154,14 +154,14 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
     sm_config_set_in_shift(&pio_config, false, true, 32);
     sm_config_set_fifo_join(&pio_config, PIO_FIFO_JOIN_RX);
     const u32 system_clock_hz = clock_get_hz(clk_sys);
-    sm_config_set_clkdiv(&pio_config, static_cast<float>(system_clock_hz) / kPioRxClockHz);
+    sm_config_set_clkdiv(&pio_config, static_cast<float>(system_clock_hz) / kRpPioRxClockHz);
     pio_sm_init(pio, static_cast<uint>(state_machine), static_cast<uint>(program_offset),
                 &pio_config);
     mPio = pio;
     mStateMachine = state_machine;
     mDmaChannel = dma_channel;
     mProgramOffset = program_offset;
-    mPioClockHz = kPioRxClockHz;
+    mPioClockHz = kRpPioRxClockHz;
     mTailLimitNs = config.signal_range_max_ns == 0 ? 1 : config.signal_range_max_ns;
     mLastTransitionUs = micros();
     mCapacity = config.buffer_size;
@@ -169,7 +169,7 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
     // Each 32-bit DMA word stores 32 samples. A WS2812 byte uses roughly
     // seven words at 20 MHz; the edge capacity is sixteen phases per byte,
     // so half that capacity plus a reset tail is safely conservative.
-    mDmaWordCount = (mCapacity + 1u) / 2u + kPioRxDmaTailWords;
+    mDmaWordCount = (mCapacity + 1u) / 2u + kRpPioRxDmaTailWords;
     mDmaWordsProcessed = 0;
     mIdleHigh = !config.start_low;
     mSampleHigh = mIdleHigh;
@@ -285,9 +285,9 @@ void RpPioRxDevice::collectDurations() FL_NO_EXCEPT {
     const size_t transferred = mDmaWordCount - dma_hw->ch[mDmaChannel].transfer_count;
     while (mDmaWordsProcessed < transferred) {
         const u32 samples = mDmaWords[mDmaWordsProcessed];
-        for (u32 bit = 0; bit < kPioRxSamplesPerDmaWord; ++bit) {
+        for (u32 bit = 0; bit < kRpPioRxSamplesPerDmaWord; ++bit) {
             const bool high =
-                (samples & (1u << (kPioRxSamplesPerDmaWord - 1u - bit))) != 0;
+                (samples & (1u << (kRpPioRxSamplesPerDmaWord - 1u - bit))) != 0;
             if (!mHaveSample) {
                 mSampleHigh = high;
                 mHaveSample = true;

@@ -4,6 +4,7 @@
 
 #include "test.h"
 #include "fl/channels/validation.h"
+#include "fl/channels/rx/pio_geometry.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -129,22 +130,16 @@ FL_TEST_CASE("ISR validation capture uses a frame-sized power-of-two buffer") {
                 26400u);
 }
 
-// The RP PIO sampler's own constants, so the expectations below are the
-// numbers the device actually runs with (rx_pio_channel.h). They are repeated
-// rather than included because that header is RP-only and this test builds on
-// the host.
-constexpr size_t kEdgeCapacity = 100u * 3u * 16u + 1u;  // 4801
-constexpr size_t kDmaTailWords = 64u;
-constexpr u32 kSamplesPerWord = 32u;
-constexpr u32 kSamplePeriodNs = 50u;   // 20 MHz
+// The sampler's own constants, from the header the RP device is built from,
+// so these expectations cannot drift from the numbers production computes.
+constexpr u32 kSamplePeriodNs = 1000000000u / kRpPioRxClockHz;
 constexpr u32 kIdleTailNs = 100000u;   // RxChannelConfig default
 constexpr u32 kArmingLeadInNs = 64000u;
 
 size_t maxWireBytesAt(u32 bit_period_ns) {
-    return validation::rpPioMaxWireBytes(kEdgeCapacity, kDmaTailWords,
-                                         kSamplesPerWord, kSamplePeriodNs,
-                                         kIdleTailNs, kArmingLeadInNs,
-                                         bit_period_ns);
+    return validation::rpPioMaxWireBytes(
+        kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords, kRpPioRxSamplesPerDmaWord,
+        kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, bit_period_ns);
 }
 
 FL_TEST_CASE("RP PIO capture bound reproduces the measured hardware ceilings") {
@@ -176,22 +171,24 @@ FL_TEST_CASE("RP PIO capture bound is the smaller of the two ceilings") {
 
 FL_TEST_CASE("RP PIO capture bound rejects degenerate inputs") {
     FL_CHECK_EQ(maxWireBytesAt(0u), 0u);
-    FL_CHECK_EQ(validation::rpPioMaxWireBytes(0, kDmaTailWords, kSamplesPerWord,
-                                              kSamplePeriodNs, kIdleTailNs,
-                                              kArmingLeadInNs, 1225u),
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    0, kRpPioRxDmaTailWords, kRpPioRxSamplesPerDmaWord,
+                    kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, 1225u),
                 0u);
-    FL_CHECK_EQ(validation::rpPioMaxWireBytes(kEdgeCapacity, kDmaTailWords, 0u,
-                                              kSamplePeriodNs, kIdleTailNs,
-                                              kArmingLeadInNs, 1225u),
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords, 0u,
+                    kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, 1225u),
                 0u);
-    FL_CHECK_EQ(validation::rpPioMaxWireBytes(kEdgeCapacity, kDmaTailWords,
-                                              kSamplesPerWord, 0u, kIdleTailNs,
-                                              kArmingLeadInNs, 1225u),
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords,
+                    kRpPioRxSamplesPerDmaWord, 0u, kIdleTailNs,
+                    kArmingLeadInNs, 1225u),
                 0u);
     // Reserves that swallow the entire budget yield nothing, not an underflow.
-    FL_CHECK_EQ(validation::rpPioMaxWireBytes(kEdgeCapacity, kDmaTailWords,
-                                              kSamplesPerWord, kSamplePeriodNs,
-                                              4000000u, 0u, 1225u),
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords,
+                    kRpPioRxSamplesPerDmaWord, kSamplePeriodNs, 4000000u, 0u,
+                    1225u),
                 0u);
 }
 
