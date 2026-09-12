@@ -434,6 +434,29 @@ FL_TEST_CASE("[#4402] HD108 output does not depend on brightness at all") {
     FL_CHECK_EQ(dark_out[9], 0xFF);
 }
 
+FL_TEST_CASE("[#4402] encodeHD108 and encodeHD108_HD agree byte for byte") {
+    // `writeHD108` calls only `encodeHD108` now, on the strength of this. The
+    // two differed by a per-LED brightness read and a cache around a header
+    // that `hd108BrightnessHeader` pins regardless; once those went, the HD
+    // variant was the plain one with an extra argument. If a real per-LED
+    // brightness ever lands, this fails and says the collapse has to be undone.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{0, 0, 0}}, {{255, 255, 255}}, {{200, 100, 50}}, {{1, 2, 3}}, {{9, 9, 9}},
+    };
+    fl::vector<u8> brightness = {0, 64, 128, 200, 255};
+
+    fl::vector<u8> plain;
+    fl::vector<u8> hd;
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(plain), 255);
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(),
+                   fl::back_inserter(hd));
+
+    FL_REQUIRE_EQ(plain.size(), hd.size());
+    for (fl::size i = 0; i < plain.size(); ++i) {
+        FL_CHECK_EQ(plain[i], hd[i]);
+    }
+}
+
 FL_TEST_CASE("encodeHD108_HD() - end frame calculation") {
     // Test end frame size: (num_leds / 2) + 4
 

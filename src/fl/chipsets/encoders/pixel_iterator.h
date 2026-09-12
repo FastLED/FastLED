@@ -490,18 +490,21 @@ class PixelIterator {
         FL_UNUSED(managed);
 #endif
 
-        #if FASTLED_HD_COLOR_MIXING
-        // HD mode: per-LED brightness
+        // One call, not one per FASTLED_HD_COLOR_MIXING branch. The two
+        // encoders emit the same bytes for the same pixels: both walk
+        // `makeScaledPixelRangeRGB`, both widen through `hd108GammaCorrect`,
+        // both frame with the same start/latch, and both headers come from
+        // `hd108BrightnessHeader`, which pins all gains at 31 whatever it is
+        // handed. `encodeHD108_HD` differed only by a per-LED brightness read
+        // and a cache around that constant header; with those gone (#4402) it
+        // is `encodeHD108` with an extra argument, so building HD-colour-mixing
+        // sketches was paying for a second copy of one function.
+        //
+        // `encodeHD108_HD` stays in hd108.h for source compatibility, and a
+        // test asserts the two agree byte for byte so this collapse cannot
+        // quietly stop being true.
         auto pixel_range = makeScaledPixelRangeRGB(this);
-        auto brightness = makeScaledBrightness(this);
-        encodeHD108_HD(pixel_range.first, pixel_range.second,
-                                 brightness, back_ins);
-        #else
-        // Standard mode: global brightness (255 = full)
-        auto pixel_range = makeScaledPixelRangeRGB(this);
-        encodeHD108(pixel_range.first, pixel_range.second,
-                              back_ins, 255);
-        #endif
+        encodeHD108(pixel_range.first, pixel_range.second, back_ins, 255);
     }
 
   private:
