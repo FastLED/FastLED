@@ -236,6 +236,28 @@ void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIte
     }
 }
 
+/// @brief Wire bytes each LED contributes to a UCS7604 frame
+inline size_t ucs7604BytesPerLed(UCS7604Mode mode, bool is_rgbw) FL_NO_EXCEPT {
+    if (mode == UCS7604Mode::UCS7604_MODE_8BIT_800KHZ) {
+        return is_rgbw ? 4u : 3u;
+    }
+    return is_rgbw ? 8u : 6u;
+}
+
+/// @brief Total wire bytes of a complete UCS7604 frame
+///
+/// Preamble + padding + pixel data, the length `encodeUCS7604` writes. Callers
+/// that must size a capture or predict whether a frame fits need this without
+/// encoding it first (FastLED#4371); `encodeUCS7604` computes its own padding
+/// from here so the two cannot drift.
+inline size_t ucs7604FrameBytes(size_t num_leds, UCS7604Mode mode,
+                                bool is_rgbw) FL_NO_EXCEPT {
+    constexpr size_t kPreambleLen = 15;
+    const size_t total = kPreambleLen + num_leds * ucs7604BytesPerLed(mode, is_rgbw);
+    // The protocol requires the total to be divisible by 3.
+    return total + (3u - (total % 3u)) % 3u;
+}
+
 /// @brief Encode complete UCS7604 frame (preamble + padding + pixel data)
 /// @tparam OutputIterator Output iterator accepting uint8_t
 /// @param pixel_iter PixelIterator with pixel data and scaling/gamma/dithering
@@ -259,18 +281,11 @@ void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator ou
     FL_UNUSED(wide_source);
 #endif
 
-    // Calculate bytes per LED based on mode and RGB/RGBW
-    size_t bytes_per_led;
-    if (mode == UCS7604Mode::UCS7604_MODE_8BIT_800KHZ) {
-        bytes_per_led = is_rgbw ? 4 : 3;
-    } else {
-        bytes_per_led = is_rgbw ? 8 : 6;
-    }
-
-    // Calculate total data size and padding
-    size_t led_data_size = num_leds * bytes_per_led;
-    size_t total_data_size = PREAMBLE_LEN + led_data_size;
-    size_t padding = (3 - (total_data_size % 3)) % 3;
+    // Padding comes from ucs7604FrameBytes() so the length callers predict and
+    // the length written here are the same number by construction.
+    const size_t led_data_size = num_leds * ucs7604BytesPerLed(mode, is_rgbw);
+    const size_t padding =
+        ucs7604FrameBytes(num_leds, mode, is_rgbw) - PREAMBLE_LEN - led_data_size;
 
     // Build preamble (15 bytes) with current control
     buildUCS7604Preamble(out, mode, current.r, current.g, current.b, current.w);

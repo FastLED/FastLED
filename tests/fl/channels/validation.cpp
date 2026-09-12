@@ -4,6 +4,7 @@
 
 #include "test.h"
 #include "fl/channels/validation.h"
+#include "fl/channels/rx/pio_geometry.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -127,6 +128,68 @@ FL_TEST_CASE("ISR validation capture uses a frame-sized power-of-two buffer") {
     FL_CHECK_EQ(validation::captureEdgeCapacity(
                     3300, 30, RxBackend::RMT),
                 26400u);
+}
+
+// The sampler's own constants, from the header the RP device is built from,
+// so these expectations cannot drift from the numbers production computes.
+constexpr u32 kSamplePeriodNs = 1000000000u / kRpPioRxClockHz;
+constexpr u32 kIdleTailNs = 100000u;   // RxChannelConfig default
+constexpr u32 kArmingLeadInNs = 64000u;
+
+size_t maxWireBytesAt(u32 bit_period_ns) {
+    return validation::rpPioMaxWireBytes(
+        kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords, kRpPioRxSamplesPerDmaWord,
+        kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, bit_period_ns);
+}
+
+FL_TEST_CASE("RP PIO capture bound reproduces the measured hardware ceilings") {
+    // Measured on an RP2350W (PIO0, GPIO0 -> GPIO1), 3/3 per boundary --
+    // FastLED#4371. Each row is the largest frame that captures, expressed in
+    // wire bytes so the chipsets are comparable.
+
+    // 800 kHz class: the edge pool binds. 4801 / 16 phases per byte = 300.
+    FL_CHECK_EQ(maxWireBytesAt(1200u), 300u);  // WS2818,     100 LEDs
+    FL_CHECK_EQ(maxWireBytesAt(1225u), 300u);  // WS2812B-V5, 100 LEDs
+    FL_CHECK_EQ(maxWireBytesAt(1250u), 300u);  // UCS7604,     47 LEDs (15 + 6n)
+    FL_CHECK_EQ(maxWireBytesAt(1280u), 300u);  // WS2814,     100 LEDs
+
+    // 400 kHz: the sample-time budget binds well below the pool.
+    // 63 LEDs = 189 bytes passes, 64 LEDs = 192 bytes fails.
+    FL_CHECK_EQ(maxWireBytesAt(2500u), 189u);
+}
+
+FL_TEST_CASE("RP PIO capture bound is the smaller of the two ceilings") {
+    // Below the crossover the pool is the answer and the bound is flat;
+    // above it the clock takes over and the bound falls with the bit period.
+    FL_CHECK_EQ(maxWireBytesAt(1u), 300u);
+    FL_CHECK(maxWireBytesAt(2000u) < 300u);
+    FL_CHECK(maxWireBytesAt(2500u) < maxWireBytesAt(2000u));
+
+    // A bit period long enough to exhaust the whole budget leaves nothing.
+    FL_CHECK_EQ(maxWireBytesAt(1000000u), 0u);
+}
+
+FL_TEST_CASE("RP PIO capture bound rejects degenerate inputs") {
+    FL_CHECK_EQ(maxWireBytesAt(0u), 0u);
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    0, kRpPioRxDmaTailWords, kRpPioRxSamplesPerDmaWord,
+                    kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, 1225u),
+                0u);
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords, 0u,
+                    kSamplePeriodNs, kIdleTailNs, kArmingLeadInNs, 1225u),
+                0u);
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords,
+                    kRpPioRxSamplesPerDmaWord, 0u, kIdleTailNs,
+                    kArmingLeadInNs, 1225u),
+                0u);
+    // Reserves that swallow the entire budget yield nothing, not an underflow.
+    FL_CHECK_EQ(validation::rpPioMaxWireBytes(
+                    kRpPioRxEdgeCapacity, kRpPioRxDmaTailWords,
+                    kRpPioRxSamplesPerDmaWord, kSamplePeriodNs, 4000000u, 0u,
+                    1225u),
+                0u);
 }
 
 FL_TEST_CASE("Invalid driver name - empty") {

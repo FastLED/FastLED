@@ -7,13 +7,13 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #include "fl/channels/rx.h"
+#include "fl/channels/rx/pio_geometry.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_edge_capture.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 
 namespace fl {
 
-constexpr size_t kRpPioRxEdgeCapacity = 100u * 3u * 16u + 1u;
 using RpPioRxEdgeStorage = fl::FixedVector<EdgeTime, kRpPioRxEdgeCapacity>;
 
 /// @brief RP PIO RX lifecycle device. Capture programming is Phase 2.
