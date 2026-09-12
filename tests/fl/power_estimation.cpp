@@ -366,3 +366,107 @@ FL_TEST_CASE("[#4342] the unaccounted draw matters most where the signal is smal
     FL_CHECK_GT(dim_ratio, 1.10);
     FL_CHECK_GT(bright_ratio, 1.05);
 }
+
+// ---------------------------------------------------------------------------
+// #4344: the limiter charges for the source, the strip draws the solved drives.
+//
+// `CFastLED::show()` calls the power function once on the raw CRGB array,
+// before any controller traversal; the managed transform runs later, inside
+// `showPixels`. So the two numbers are about different pixels.
+//
+// The contract asks the prepass to "evaluate solved demand across every
+// channel participating in a supply budget". That is unimplemented, and this
+// measures what the gap costs while it stays that way -- and, more usefully,
+// what *decides* the gap, which is a property of the bound profile the
+// limiter never reads.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// An RGB device at sRGB chromaticities whose emitters share `luminance`.
+///
+/// Luminance relative to the rendering white is the knob. An emitter brighter
+/// than the white being targeted needs drives below the source, and the
+/// limiter over-charges -- safe, wasteful. A dimmer one needs drives above it,
+/// and the limiter under-charges.
+EmitterProfile deviceWithLuminance(float luminance) {
+    EmitterProfile p = {};
+    p.xy_r[0] = 0.6400f; p.xy_r[1] = 0.3300f;
+    p.xy_g[0] = 0.3000f; p.xy_g[1] = 0.6000f;
+    p.xy_b[0] = 0.1500f; p.xy_b[1] = 0.0600f;
+    p.lum_r = luminance;
+    p.lum_g = luminance;
+    p.lum_b = luminance;
+    p.native_code_depth = 8;
+    return p;
+}
+
+/// The drives the pipeline solves for one source pixel, as 8-bit codes.
+CRGB solvedDrives(CRGB source, float luminance) {
+    StreamingPipelineQ16 pipeline;
+    const bool built = buildStreamingPipelineQ16(
+        SourceProfile::linearSrgb(), deviceWithLuminance(luminance),
+        GamutPolicy::ChromaCompress, &pipeline);
+    if (!built) {
+        return CRGB(0, 0, 0);
+    }
+    fl::i32 drives[3];
+    processPixelQ16(pipeline, source.r, source.g, source.b, drives);
+    CRGB out;
+    for (int i = 0; i < 3; ++i) {
+        fl::i32 d = drives[i];
+        if (d < 0) { d = 0; }
+        if (d > 65536) { d = 65536; }
+        const fl::u8 code = static_cast<fl::u8>((d * 255 + 32768) >> 16);
+        out.raw[i] = code;
+    }
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#4344] what the limiter charges is not what the strip draws") {
+    // The limiter powers the source array. The strip lights the solved drives.
+    // With sRGB primaries on both sides the only thing separating them is
+    // emitter luminance, which is exactly the profile property the limiter
+    // never reads.
+    const CRGB source(40, 40, 40);
+    const fl::u32 charged = powerOfStrip(source);
+
+    // Emitters as bright as the rendering white: the solve needs less drive
+    // than the source asks for, so the limiter over-charges. Wasteful, safe.
+    const fl::u32 drawn_bright = powerOfStrip(solvedDrives(source, 1.0f));
+    FL_CHECK_LT(drawn_bright, charged);
+
+    // Dimmer emitters need more drive than the source, and the limiter
+    // under-charges -- the direction that matters, because a budget is a
+    // promise not to exceed something.
+    const fl::u32 drawn_dim = powerOfStrip(solvedDrives(source, 0.10f));
+    FL_CHECK_GT(drawn_dim, charged);
+
+    // Non-trivial, or the two comparisons above are noise around a constant.
+    FL_CHECK_GT(charged, 0u);
+    FL_CHECK_GT(drawn_dim, drawn_bright);
+}
+
+FL_TEST_CASE("[#4344] the error's direction is set by emitter luminance alone") {
+    // The honest framing from the issue: not "the model is wrong by 4x" but
+    // "the sign and magnitude are set by a property of the bound profile the
+    // limiter never reads". Same source, same primaries, four devices.
+    const CRGB source(40, 40, 40);
+    const fl::u32 charged = powerOfStrip(source);
+
+    const fl::u32 at_100 = powerOfStrip(solvedDrives(source, 1.00f));
+    const fl::u32 at_25 = powerOfStrip(solvedDrives(source, 0.25f));
+    const fl::u32 at_10 = powerOfStrip(solvedDrives(source, 0.10f));
+
+    // Monotone in luminance: dimmer emitters, more drive, more draw.
+    FL_CHECK_LT(at_100, at_25);
+    FL_CHECK_LT(at_25, at_10);
+
+    // And the crossing sits between them, so the same estimate is
+    // conservative for one device and optimistic for another with identical
+    // primaries and an identical source.
+    FL_CHECK_LT(at_100, charged);
+    FL_CHECK_GT(at_10, charged);
+}
