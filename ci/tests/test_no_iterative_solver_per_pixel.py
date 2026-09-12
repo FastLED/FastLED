@@ -79,10 +79,9 @@ KNOWN_REACHING_WRAPPERS = (
 )
 
 # C++ constructs that look like a call or a definition to a regex and are not.
-# Without these, `if (...) { ... }` parses as a function named `if` whose body
-# is the block, every branch in the tree becomes a call edge, and the fixpoint
-# swallows the whole namespace -- measured 230 names including `blur1d` and
-# `fill_solid` before this list existed.
+# Without these, `if (...) { ... }` parses as a function named `if`, every
+# branch in the tree becomes a call edge, and the fixpoint swallows the whole
+# namespace -- measured 230 names including `blur1d` and `fill_solid`.
 NOT_FUNCTIONS = frozenset(
     (
         "if",
@@ -114,21 +113,90 @@ NOT_FUNCTIONS = frozenset(
     )
 )
 
-# `name(params)` followed by trailing specifiers and an opening brace. Ctor
-# initialiser lists and trailing return types are not matched on purpose: a
-# definition this misses simply contributes no call edges, which loses
-# coverage rather than inventing it. The vacuity test below is what keeps that
-# honest.
 _TRAILER = r"(?:\s|const|noexcept|FL_NO_EXCEPT|override|final|mutable|volatile)*"
+# A constructor initialiser list, narrowly: `: name(...), name(...)`. Anchored
+# on the colon and on `name(` entries rather than "anything up to the brace".
+# The permissive form was tried and is wrong -- a ternary `f(x) : g(y)` then
+# matches and runs to a distant brace, swallowing the real definition that
+# follows. Measured: the closure collapsed from 21 names to 5 and lost
+# `project_to_hull` itself.
+_INIT_ENTRY = r"[A-Za-z_]\w*\s*\([^;{}()]*\)"
+_CTOR_INIT = r"(?::\s*" + _INIT_ENTRY + r"(?:\s*,\s*" + _INIT_ENTRY + r")*\s*)?"
+
 DEFINITION = re.compile(
-    r"\b(?P<name>[A-Za-z_]\w*)\s*\((?P<args>[^;{}()]*)\)" + _TRAILER + r"\{"
+    r"\b(?P<name>[A-Za-z_]\w*)\s*\((?P<args>[^;{}()]*)\)"
+    + _TRAILER
+    + _CTOR_INIT
+    + r"\{"
 )
 CALLED_NAME = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
 
-# Measured 455 on the tree that introduced this check. A parser change that
+# Definition syntax `DEFINITION` cannot parse. A function written this way
+# contributes no call edges, so a solver wrapper spelled
+# `auto wrap(...) -> bool { nnls3(...); }` would never enter the derived set
+# and a stage could call it freely. The vacuity floor below does not catch
+# that -- one missed definition out of hundreds moves no count. So the forms
+# are detected and the test fails, rather than silently losing coverage:
+# extend `DEFINITION` to cover the form, then drop it from here.
+UNSUPPORTED_DEFINITION_SYNTAX = (
+    ("trailing return type", re.compile(r"\)" + _TRAILER + r"->[^;{}]*\{")),
+    ("requires clause", re.compile(r"\)" + _TRAILER + r"requires\b[^;{}]*\{")),
+    ("attribute before body", re.compile(r"\)" + _TRAILER + r"\[\[[^\]]*\]\]\s*\{")),
+)
+
+# Measured 461 on the tree that introduced this check. A parser change that
 # drops most definitions would make the fixpoint find nothing and the scan
 # pass vacuously, so the floor is asserted rather than trusted.
 MIN_PARSED_DEFINITIONS = 300
+
+
+def scanned_sources() -> "list[Path]":
+    """The translation units the call graph is built from."""
+
+    return sorted(GFX.glob("*.cpp.hpp")) + sorted(GFX.glob("*.h"))
+
+
+def strip_comments_and_literals(text: str) -> str:
+    """Blank out comments and string/char literals, preserving offsets loosely.
+
+    Necessary, not cosmetic. Prose is full of things that read as code: the
+    arrow diagram `(R,0,0)->(R,0,0,0)` in `rgbw_colorimetric.h` made the
+    trailing-return detector fire on a file that has no trailing-return
+    definition, and a comment in `lookup_lut` mentioning `build_lut()` put
+    `lookup_lut` in the forbidden set -- a per-pixel LUT lookup, which A3
+    explicitly permits ("matrix + clamp/compress, optionally LUT-backed").
+    Forbidding it would have blocked the very thing P7 asks for.
+    """
+
+    out: list[str] = []
+    index = 0
+    length = len(text)
+    while index < length:
+        char = text[index]
+        if char == "/" and index + 1 < length and text[index + 1] == "*":
+            close = text.find("*/", index + 2)
+            index = length if close < 0 else close + 2
+            out.append(" ")
+        elif char == "/" and index + 1 < length and text[index + 1] == "/":
+            close = text.find("\n", index)
+            index = length if close < 0 else close
+            out.append(" ")
+        elif char == '"' or char == "'":
+            quote = char
+            index += 1
+            while index < length:
+                if text[index] == "\\":
+                    index += 2
+                    continue
+                if text[index] == quote:
+                    index += 1
+                    break
+                index += 1
+            out.append('""')
+        else:
+            out.append(char)
+            index += 1
+    return "".join(out)
 
 
 def _end_of_block(text: str, open_index: int) -> int:
@@ -151,9 +219,8 @@ def call_edges() -> "dict[str, set[str]]":
     """Map every function defined under `src/fl/gfx` to the names it calls."""
 
     edges: dict[str, set[str]] = {}
-    sources = sorted(GFX.glob("*.cpp.hpp")) + sorted(GFX.glob("*.h"))
-    for source in sources:
-        text = source.read_text(encoding="utf-8")
+    for source in scanned_sources():
+        text = strip_comments_and_literals(source.read_text(encoding="utf-8"))
         for match in DEFINITION.finditer(text):
             name = match.group("name")
             if name in NOT_FUNCTIONS:
@@ -193,16 +260,13 @@ def call_pattern(symbol: str) -> re.Pattern[str]:
 
     So this matches the identifier followed by an open paren, allowing
     whitespace and block or line comments in between -- which covers
-    `nnls3 /* why */ (args)`. Two known limits:
+    `nnls3 /* why */ (args)`. One known limit:
 
-    * A comment or string literal that itself contains `nnls3(` fails the
-      test. That is a false positive, so it fails closed; the fix is obvious
-      to whoever hits it.
-    * Preprocessor tricks that split the identifier would evade it. Anyone
-      doing that is deliberately defeating the guard, not tripping over it.
-
-    Prose naming the symbol without a following paren -- as the comments in
-    these files do -- does not match.
+    Callers pass text with comments and literals already stripped, so
+    prose mentioning a symbol cannot trip it either way. One known limit
+    remains: preprocessor tricks that split the identifier would evade
+    it, and anyone doing that is deliberately defeating the guard, not
+    tripping over it.
     """
 
     gap = r"(?:\s|/\*.*?\*/|//[^\n]*\n)*"
@@ -250,12 +314,33 @@ class TestNoIterativeSolverPerPixel(unittest.TestCase):
                     "say why in the same commit",
                 )
 
+    def test_every_definition_form_present_is_parseable(
+        self: "TestNoIterativeSolverPerPixel",
+    ) -> None:
+        # A definition the parser cannot see contributes no call edges, so a
+        # solver wrapper written that way never joins the forbidden set and a
+        # stage may call it freely. The vacuity floor does not catch this --
+        # one missed definition out of hundreds moves no count. Fail loudly
+        # instead of losing coverage quietly.
+        for label, pattern in UNSUPPORTED_DEFINITION_SYNTAX:
+            for source in scanned_sources():
+                text = strip_comments_and_literals(source.read_text(encoding="utf-8"))
+                with self.subTest(form=label, source=source.name):
+                    self.assertIsNone(
+                        pattern.search(text),
+                        f"{source.name} defines a function using a {label}, "
+                        "which DEFINITION cannot parse -- its call edges are "
+                        "invisible to the forbidden-set derivation. Extend "
+                        "DEFINITION to cover the form, then remove it from "
+                        "UNSUPPORTED_DEFINITION_SYNTAX.",
+                    )
+
     def test_no_iterative_solver_on_the_per_pixel_path(
         self: "TestNoIterativeSolverPerPixel",
     ) -> None:
         forbidden = sorted(forbidden_symbols())
         for name in PER_PIXEL_STAGES:
-            text = (GFX / name).read_text(encoding="utf-8")
+            text = strip_comments_and_literals((GFX / name).read_text(encoding="utf-8"))
             for symbol in forbidden:
                 with self.subTest(stage=name, symbol=symbol):
                     self.assertIsNone(
