@@ -1,3 +1,17 @@
+# 2026-09-12, PR #4407 (issue #4402): -182 B, 342891 -> 342709.
+#
+# A reduction, locked in by the ratchet. `writeHD108` was two complete loops
+# -- the managed path written by hand, the 8-bit path routed through
+# `encodeHD108` -- each with its own copy of the start frame, per-LED emit and
+# latch. On esp32dev it was the largest encoder body in a Blink build (481 B,
+# ahead of `writeWS2812`, the only encoder Blink runs). One loop now, the
+# source being the only branch: 481 -> 280 B there, esp32dev Blink
+# 340,183 -> 339,955 B, back under its 340,000 B ceiling.
+#
+# Byte-identical to the iterator path by construction and by test: a case
+# drives both through a real PixelIterator with binary dither on and a GRB
+# order and holds them to the same bytes.
+#
 # 2026-09-12, PR #4403 (issue #4402): -66 B, 342957 -> 342891.
 #
 # A reduction, so the ratchet asks for it to be locked in rather than left as
@@ -126,4 +140,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342891
+342709
