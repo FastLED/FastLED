@@ -59,9 +59,21 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
    To refresh the measured numbers in the SLIM doc, run `uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md` — the script builds the ESP32-S3 Blink under each opt-in combo, runs `bash bloat esp32s3` against each ELF, and emits a Markdown comparison table sized to drop straight into the doc. See #2905.
 
-4. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from PIO packages. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
+4. **The ELF it analyses is the newest one, and `--build` refuses a stale one.** Two layouts coexist under a single board directory — `--build` runs the platformio backend and writes `.build/pio/<board>/.pio/build/<board>/firmware.elf`, while fbuild-native builds write `.build/pio/<board>/.fbuild/build/release/firmware.elf`. `find_elf` used to rank them by fixed priority and ignore mtime, so `--build` could compile one and report on the other. That is fixed in #4386: the newest candidate wins, with the documented order only as a tie-break, and after `--build` an ELF older than the build is refused outright rather than analysed.
 
-5. **Diff two builds with the existing diff script.** Save two `report.json` files and run `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` for a per-symbol delta table (added / removed / grew / shrunk). The wrapper does NOT do this automatically; ship a follow-up PR if you need it inline.
+   If you see
+
+   ```
+   Bloat: --build ran, but the ELF selected for analysis predates it by N h
+   ```
+
+   that guard is doing its job — a layout the build did not write is sitting where the analyser looks. Remove it, or build the layout it belongs to.
+
+   Worth knowing what the old behaviour looked like, because it was silent: two `--build --top 200` runs across a real code change produced **byte-identical** `report.json` files, `total_flash` included, and the local total did not match CI's for the same board and example because they described different binaries. The failure mode was plausible output and an inverted conclusion, not an error.
+
+5. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from PIO packages. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
+
+6. **Diff two builds with the existing diff script.** Save two `report.json` files and run `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` for a per-symbol delta table (added / removed / grew / shrunk). The wrapper does NOT do this automatically; ship a follow-up PR if you need it inline.
 
 ## Don'ts
 
