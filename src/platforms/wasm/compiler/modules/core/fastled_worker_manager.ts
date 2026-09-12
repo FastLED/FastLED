@@ -61,6 +61,10 @@ export class FastLEDWorkerManager {
     this.lastScreenMaps = null;
     /** @type {Object|null} Graphics manager that already received lastScreenMaps */
     this.screenMapsTarget = null;
+    /** @type {number[]} Timestamps of frames drawn on the main thread in the last second */
+    this.mainThreadRenderTimes = [];
+    /** @type {Object|null} Last performance_stats payload from the worker */
+    this.lastWorkerStats = null;
 
     /** @type {WorkerCapabilities} Detected browser capabilities */
     this.capabilities = this.detectCapabilities();
@@ -441,6 +445,42 @@ export class FastLEDWorkerManager {
     pushScreenMaps(); // manager already exists: new layout applies to this frame
     window.updateCanvas(frameData);
     pushScreenMaps(); // manager was just created by updateCanvas()
+    this.recordMainThreadRender();
+  }
+
+  /** Records one frame drawn on the main thread (main-thread rendering mode). */
+  recordMainThreadRender() {
+    const now = performance.now();
+    this.mainThreadRenderTimes.push(now);
+    while (this.mainThreadRenderTimes.length && now - this.mainThreadRenderTimes[0] > 1000) {
+      this.mainThreadRenderTimes.shift();
+    }
+  }
+
+  /**
+   * Frames rendered per second. Comes from the worker when it draws on its
+   * OffscreenCanvas, and from the main-thread counter otherwise. Today a render
+   * happens for every loop iteration; once LED draw simulation throttles
+   * FastLED.show(), this rate will drop below the loop rate.
+   * @returns {number} Render frames per second
+   */
+  getRenderFPS() {
+    if (this.renderOnMainThread) {
+      const now = performance.now();
+      while (this.mainThreadRenderTimes.length && now - this.mainThreadRenderTimes[0] > 1000) {
+        this.mainThreadRenderTimes.shift();
+      }
+      return this.mainThreadRenderTimes.length;
+    }
+    return this.lastWorkerStats ? (this.lastWorkerStats.renderFps || 0) : 0;
+  }
+
+  /**
+   * Sketch loop iterations per second, measured wall-clock by the worker.
+   * @returns {number} Loop frames per second
+   */
+  getLoopFPS() {
+    return this.lastWorkerStats ? (this.lastWorkerStats.loopFps || 0) : 0;
   }
 
   handleWorkerMessage(event) {
@@ -551,6 +591,7 @@ export class FastLEDWorkerManager {
    * @param {Object} payload - Performance data
    */
   handlePerformanceStats(payload) {
+    this.lastWorkerStats = payload || null;
     // Emit performance data for monitoring
     fastLEDEvents.emit('performance:stats', {
       source: 'background_worker',

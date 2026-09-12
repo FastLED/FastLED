@@ -524,8 +524,23 @@ class FastLEDAsyncController {
      * @returns {number} Current FPS
      */
   getFPS() {
+    // Worker mode: wall-clock loop rate reported by the worker. The old
+    // 1000 / averageFrameTime figure is loop *cost*, not a rate (it read ~700
+    // while 60 frames/s were delivered), so it is only a fallback for the
+    // legacy main-thread loop, which has no other measurement.
+    if (this.workerMode) {
+      return fastLEDWorkerManager.getLoopFPS();
+    }
     const avgFrameTime = this.getAverageFrameTime();
     return avgFrameTime > 0 ? 1000 / avgFrameTime : 0;
+  }
+
+  /**
+     * Gets frames rendered per second (see FastLEDWorkerManager.getRenderFPS)
+     * @returns {number} Render FPS
+     */
+  getRenderFPS() {
+    return this.workerMode ? fastLEDWorkerManager.getRenderFPS() : this.getFPS();
   }
 
   /**
@@ -537,6 +552,7 @@ class FastLEDAsyncController {
       frameCount: this.frameCount,
       averageFrameTime: this.getAverageFrameTime(),
       fps: this.getFPS(),
+      renderFps: this.getRenderFPS(),
       running: this.running,
       setupCompleted: this.setupCompleted,
     };
