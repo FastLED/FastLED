@@ -243,7 +243,20 @@ def test_ota_peer_stages_artifact_without_a_host_wifi_manager(tmp_path) -> None:
         return _response(responses[method])
 
     async def primary_after_send(method: str, *_args: Any, **_kwargs: Any) -> MagicMock:
-        return _response({"success": True})
+        responses = {
+            # The run's final criterion asks the board whether it applied the
+            # image, because the C6 having served it only proves a download
+            # (#3956). A blanket success for every method answered that with
+            # `{"success": True}`, which `ota_applied_ok` reads as "not proven"
+            # -- correctly, since neither flag is there. Answer the question the
+            # success path is meant to be asserting.
+            "rpOtaUpdateStatus": {
+                "success": True,
+                "attempted": True,
+                "succeeded": True,
+            },
+        }
+        return _response(responses.get(method, {"success": True}))
 
     async def peer_send(method: str, *_args: Any, **_kwargs: Any) -> MagicMock:
         responses = {
