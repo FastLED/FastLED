@@ -138,36 +138,38 @@ bool ucs7604ModeForEncoder(fl::ClocklessEncoder encoder,
 /// @brief Wire bytes one lane of `leds` puts on the wire, or 0 if unknown.
 ///
 /// A UCS7604 lane is more than twice a WS2812 lane of the same length -- a
-/// 15-byte preamble, 16-bit channels, padding to a multiple of three -- so the
-/// capture bound has to be phrased in wire bytes, not LEDs (FastLED#4371).
+/// 15-byte preamble, 16-bit channels, padding to a multiple of three -- and an
+/// RGBW lane is a third wider than an RGB one, so the capture bound has to be
+/// phrased in wire bytes, not LEDs (FastLED#4371).
 ///
 /// TM1812 and TM1908 have layouts this does not model. Neither is reachable
 /// from `runSingleTest`'s timing list, and 0 makes the caller skip the bound
 /// rather than enforce a wrong one: no check is what happens today, a check
 /// with the wrong number is the defect being fixed.
-fl::size rpPioWireFrameBytes(fl::size leds, fl::ClocklessEncoder encoder) {
+fl::size rpPioWireFrameBytes(fl::size leds, fl::ClocklessEncoder encoder,
+                             bool rgbw) {
     fl::UCS7604Mode mode;
     if (ucs7604ModeForEncoder(encoder, &mode)) {
-        return fl::ucs7604FrameBytes(leds, mode, false);
+        return fl::ucs7604FrameBytes(leds, mode, rgbw);
     }
     if (encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812) {
-        return leds * 3u;
+        return leds * (rgbw ? 4u : 3u);
     }
     return 0;
 }
 
 /// @brief Inverse of `rpPioWireFrameBytes`, for the error message.
 fl::size rpPioMaxLedsForWireBytes(fl::size wire_bytes,
-                                  fl::ClocklessEncoder encoder) {
+                                  fl::ClocklessEncoder encoder, bool rgbw) {
     fl::UCS7604Mode mode;
     if (ucs7604ModeForEncoder(encoder, &mode)) {
         constexpr fl::size kPreambleLen = 15;
         if (wire_bytes <= kPreambleLen) {
             return 0;
         }
-        return (wire_bytes - kPreambleLen) / fl::ucs7604BytesPerLed(mode, false);
+        return (wire_bytes - kPreambleLen) / fl::ucs7604BytesPerLed(mode, rgbw);
     }
-    return wire_bytes / 3u;
+    return wire_bytes / (rgbw ? 4u : 3u);
 }
 
 #endif  // FL_IS_RP2040 || FL_IS_RP2350
@@ -1120,8 +1122,15 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
         for (fl::size i = 0; i < lane_sizes.size(); i++) {
             const fl::size leds = static_cast<fl::size>(lane_sizes[i]);
+            // Same predicate the comparison uses (`legacyLaneUsesRgbw`): an
+            // RGBW lane is four bytes per LED, so a 100-LED RGBW frame is 400
+            // wire bytes and does not fit where an RGB one does.
+            const bool lane_rgbw =
+                legacy_rgbw ||
+                (i < legacy_chipsets.size() &&
+                 legacyClocklessChipsetHasAutomaticRgbw(legacy_chipsets[i]));
             const fl::size wire_bytes =
-                rpPioWireFrameBytes(leds, timing_config.encoder);
+                rpPioWireFrameBytes(leds, timing_config.encoder, lane_rgbw);
             if (wire_bytes > max_wire_bytes) {
                 response.set("success", false);
                 response.set("error", "LaneSizeTooLarge");
@@ -1132,7 +1141,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
                     << static_cast<int>(max_wire_bytes) << " ("
                     << static_cast<int>(
                            rpPioMaxLedsForWireBytes(max_wire_bytes,
-                                                    timing_config.encoder))
+                                                    timing_config.encoder,
+                                                    lane_rgbw))
                     << " LEDs)";
                 response.set("message", msg.str().c_str());
                 return response;
