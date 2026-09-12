@@ -325,3 +325,28 @@
   content, not state, and
   when commits are stranded rebuild them onto current master as a fresh PR
   rather than reopening the merged one.
+- A diagnostic field named after the subsystem you are testing may be sourced
+  from the other side of the loopback. Chasing the RP PIO capture ceiling in
+  #4371 I used `rpPioWordCount` as evidence about the RX DMA and wrote on the
+  issue that "the DMA is not the constraint", because the field read exactly
+  `8 * wire_bytes` in every row, passing and failing alike. It comes from
+  `fl::BusTraits<fl::Bus::FLEX_IO, N>::instance().lastWordCount()` -- the
+  **transmitter**. Eight words per byte is one TX word per bit, which is
+  precisely why it tracked byte count so cleanly and said nothing at all about
+  capture. The tell was there in the data: a number that is an exact linear
+  function of the input, with no variation between the cases you are trying to
+  tell apart, is usually not measuring the thing that separates them. Grep the
+  field back to where the response sets it before drawing a conclusion from it.
+  The pass/fail boundaries themselves were unaffected, which is the reason the
+  rest of that analysis survived the correction -- prefer evidence from the
+  behaviour you are measuring over evidence from a field that claims to explain
+  it.
+- Two constraints can hide each other completely. The same capture had an edge
+  pool bounding fast chipsets at 300 wire bytes and a fixed sample-time budget
+  bounding slow ones at 3.8 ms, and each ceiling is unreachable in the other's
+  regime -- so every 800 kHz part reported 100 LEDs, the one 400 kHz part
+  reported 63, and no single model fit. Separating them took constructing a
+  case where one variable was held equal: 192 wire bytes and 3072 phases passes
+  at 800 kHz and fails at 400 kHz. When measurements refuse to collapse into
+  one model, stop fitting curves and look for the input you have never varied
+  independently.
