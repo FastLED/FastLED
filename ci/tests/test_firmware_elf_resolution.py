@@ -65,6 +65,25 @@ class TestResolveFirmwareElf(unittest.TestCase):
         board_info = {"prog_path": str(elf.with_suffix(".bin"))}
         self.assertEqual(resolve_firmware_elf(board_info, self.build_dir), elf)
 
+    def test_an_existing_bin_does_not_beat_its_existing_elf_sibling(
+        self: "TestResolveFirmwareElf",
+    ) -> None:
+        # Both on disk. Returning the `.bin` resolves to a real file and is
+        # still wrong: every caller runs readelf/nm/objdump, so it would trade
+        # one silent empty report for another.
+        elf = self._write(".pio/build/uno/firmware.elf")
+        self._write(".pio/build/uno/firmware.bin")
+        board_info = {"prog_path": str(elf.with_suffix(".bin"))}
+        self.assertEqual(resolve_firmware_elf(board_info, self.build_dir), elf)
+
+    def test_a_suffixless_prog_path_is_still_returned_when_it_is_the_binary(
+        self: "TestResolveFirmwareElf",
+    ) -> None:
+        # No `.elf` sibling to prefer; the path itself is all there is.
+        binary = self._write(".pio/build/uno/firmware")
+        board_info = {"prog_path": str(binary)}
+        self.assertEqual(resolve_firmware_elf(board_info, self.build_dir), binary)
+
     def test_nothing_on_disk_returns_none_rather_than_a_bad_path(
         self: "TestResolveFirmwareElf",
     ) -> None:

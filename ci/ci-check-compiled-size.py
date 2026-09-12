@@ -99,6 +99,14 @@ def main():
         ],
         capture_output=True,
     )
+    # Echo it. `ci.compiled_size` reports which ELF it measured -- "measured
+    # fbuild ELF: <path>" or "no fbuild ELF found ...; falling through to pio
+    # size" -- and capturing without printing threw that away, so the log
+    # recorded a number with no way to tell which backend's binary produced it.
+    # Both write under `.build/pio/<board>/`, so the path is the only thing
+    # that distinguishes them (FastLED#4402).
+    if output:
+        print(output)
     size_match = re.search(r": *(\d+)", output)  # type: ignore
 
     if not size_match:

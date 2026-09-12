@@ -84,10 +84,16 @@ def resolve_firmware_elf(board_info: dict[str, Any], build_dir: Path) -> Path | 
     if not isinstance(prog_path_raw, str) or not prog_path_raw:
         return None
 
+    # The `.elf` sibling first when `prog_path` is not already one. Every
+    # caller here runs `readelf`/`nm`/`objdump`, so an existing `.bin` next to
+    # an existing `.elf` is the wrong answer even though the path resolves --
+    # it would swap one silent empty report for another.
     prog_path = Path(prog_path_raw)
-    if prog_path.is_file():
-        return prog_path
-    elf_candidate = prog_path.with_suffix(".elf")
-    if elf_candidate.is_file():
-        return elf_candidate
+    candidates: list[Path] = []
+    if prog_path.suffix != ".elf":
+        candidates.append(prog_path.with_suffix(".elf"))
+    candidates.append(prog_path)
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
     return None
