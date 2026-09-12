@@ -1,4 +1,4 @@
-# 2026-09-12, PR TBD (issue #4326, colour pipeline P8): +240 B,
+# 2026-09-12, PR #4387 (issue #4326, colour pipeline P8): +240 B,
 # 342714 -> 342954.
 #
 # HD108 joins UCS7604-16 in consuming the device drive rather than an 8-bit
