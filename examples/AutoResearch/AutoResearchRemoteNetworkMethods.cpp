@@ -384,6 +384,10 @@ void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
         return otaArtifactStatus();
     });
 
+    remote.bind("rpOtaUpdateStatus", [](const fl::json& args) -> fl::json {
+        return rpOtaUpdateStatus();
+    });
+
     remote.bind("applyOtaArtifact", [](const fl::json& args) -> fl::json {
         if (!args.contains("host") || !args["host"].is_string() ||
             !args.contains("port") || !args["port"].is_int()) {

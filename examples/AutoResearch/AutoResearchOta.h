@@ -50,6 +50,11 @@ fl::json otaArtifactStatus();
 /// @brief Queue an RP2350W HTTP update so the RPC response can be sent first.
 fl::json queueOtaArtifactUpdate(const char* host, uint16_t port);
 
+/// Outcome of the last `pollOtaArtifactUpdate` fetch, readable after the
+/// host reconnects. The fetch runs with the RPC link closed, so without this
+/// a failure leaves no reason anywhere. See FastLED#3956.
+fl::json rpOtaUpdateStatus();
+
 /// @brief Execute a queued RP2350W update from the sketch loop.
 ///
 /// The HTTP update blocks for the whole firmware download, which routinely
