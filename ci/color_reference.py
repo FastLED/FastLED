@@ -73,6 +73,34 @@ class DeviceProfile:
             raise ValueError("device emitter names must be unique")
 
 
+# Drives below this are solver residue, not allocations (FastLED#4370).
+#
+# Nothing can be driven at 1e-15, and the inverse response amplifies such a
+# value by eight orders -- `(1e-16) ** 0.5` is `1e-8` -- so leaving it in makes
+# the artifact depend on the last bit of the machine that produced it. That is
+# what broke revalidation off the generating machine: a residual that is
+# exactly 0.0 here and ~1e-15 on a CI runner became a 1.58e-8 difference in
+# `physical_drive`, against a 1e-12 budget.
+#
+# The threshold is not a judgement call. Across the corpus's 7,436 nonzero
+# entries, 102 fall below 1e-12 and the next real value is above 1e-9 -- a
+# clean three-order gap, so any cut inside it partitions the same way.
+#
+# This is the "deterministic tie-breaks" the contract asks P5/P7 to publish,
+# and the "deterministic policy" its numerical-admission section requires of
+# the inverse response.
+_DRIVE_EPSILON = 1e-12
+
+
+def _snap_drives(drives: Sequence[float]) -> tuple[float, ...]:
+    """Zero sub-epsilon residue so the drives are the same on every machine."""
+
+    snapped: list[float] = []
+    for value in drives:
+        snapped.append(0.0 if abs(value) < _DRIVE_EPSILON else value)
+    return tuple(snapped)
+
+
 @dataclass(frozen=True, slots=True)
 class MappingSolution:
     """Mapped target and deterministic device drives."""
@@ -737,7 +765,9 @@ def map_and_solve(target_xyz: Xyz, profile: DeviceProfile) -> MappingSolution:
     if direct_drives is not None:
         # Feasible inputs are an identity operation, including their exact
         # rendering-white XYZ representation.
-        return MappingSolution(target_xyz, direct_drives, target_oklch, target_oklch)
+        return MappingSolution(
+            target_xyz, _snap_drives(direct_drives), target_oklch, target_oklch
+        )
 
     columns = _adapted_columns(profile)
     rendering_white_direction = _xy_to_xyz(profile.rendering_white)
@@ -820,7 +850,7 @@ def map_and_solve(target_xyz: Xyz, profile: DeviceProfile) -> MappingSolution:
         else bradford_adaptation(mapped_xyz, profile.rendering_white, _D65)
     )
     return MappingSolution(
-        mapped_xyz, drives, target_oklch, _oklch_from_xyz(mapped_d65)
+        mapped_xyz, _snap_drives(drives), target_oklch, _oklch_from_xyz(mapped_d65)
     )
 
 
