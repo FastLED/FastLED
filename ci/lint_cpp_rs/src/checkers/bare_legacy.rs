@@ -254,10 +254,27 @@ impl FileContentChecker for FlNoUnderscoreChecker {
 
 // --- LegacyLogMacroChecker ---------------------------------------------------
 //
-// Bans legacy stream-style FastLED logging macros (FL_WARN, FL_PRINT, FL_DBG,
-// FL_ERROR, FL_LOG_*) in src/. Each call site should use the `_F` printf-style
-// variant so the formatter lives in fl::printf instead of a fresh fl::sstream
-// chain per call site. Origin: ci/lint_cpp/legacy_log_macro_checker.py.
+// Requires the `_F` spelling of the FastLED logging macros (FL_WARN, FL_PRINT,
+// FL_DBG, FL_ERROR, FL_LOG_*) in src/. Origin:
+// ci/lint_cpp/legacy_log_macro_checker.py.
+//
+// This used to say the `_F` form "puts the formatter in fl::printf instead of
+// a fresh fl::sstream chain per call site". That is not achievable by the
+// spelling, and saying so here sent readers looking for a cost that the
+// suffix does not control. `src/fl/log/log.h:330` is:
+//
+//     #define FL_WARN_F(...) FL_WARN(__VA_ARGS__)
+//
+// so the two are the same token sequence. What selects `log_emit_f` over
+// `log_emit` is the argument count -- one argument builds an `fl::sstream`,
+// two or more do not -- and the suffix has no bearing on it.
+//
+// So what this rule enforces is a spelling, for consistency. Whether that is
+// the right rule is open: `log.h` tells new code to drop the suffix and "rely
+// on argument-count dispatch", which is the opposite instruction, and more
+// than half the `_F` calls this rule approves are single-argument ones that
+// build the sstream anyway. FastLED#4297 has the counts and the options; do
+// not resolve that by editing this comment.
 
 struct LegacyLogMacroChecker;
 
