@@ -106,6 +106,17 @@ struct UartWaveFit {
     u8 pulses_0;
     u8 pulses_1;
     u32 total_err_ns; ///< |T0H err| + |T1H err| vs nominal, post-bump
+    /// @brief Worst single-symbol error, measured pre-bump.
+    ///
+    /// `total_err_ns` cannot distinguish 125 ns spread over two symbols from
+    /// 200 ns concentrated in one, and only the concentrated case leaves a
+    /// symbol outside what a receiver will classify (FastLED#4379).
+    ///
+    /// Pre-bump because the separation widening below is deliberate -- it
+    /// moves T1H away from T0H on purpose and a longer HIGH still reads as 1
+    /// -- so charging it as error would relitigate #3569/#3572 rather than
+    /// measure rounding.
+    u32 max_err_ns;
 };
 
 /// @brief Evaluate whether P pulses/LED-bit can represent the timing.
@@ -169,10 +180,14 @@ UartWaveFit fitUartWave(const ChipsetTimingConfig& timing,
     if (err_t0h > tolerance_ns) return fit;
     if (err_t1h > t1h_tolerance_ns) return fit;
 
+    const u32 raw_t1h = static_cast<u32>(pulses_1_raw) * pulse_width_ns;
+    const u32 err_t1h_raw = absDiff(raw_t1h, t1h_ns);
+
     fit.ok = true;
     fit.pulses_0 = pulses_0;
     fit.pulses_1 = pulses_1;
     fit.total_err_ns = err_t0h + err_t1h;
+    fit.max_err_ns = err_t0h > err_t1h_raw ? err_t0h : err_t1h_raw;
     return fit;
 }
 
@@ -221,8 +236,24 @@ Wave10Lut buildWave10LutForMaxBaud(const ChipsetTimingConfig& timing,
     u8 P = 0;
     UartWaveFit fit = {};
     constexpr u32 kHysteresisNs = 50;
+    // A symbol further than this from nominal is one a receiver may not
+    // classify at all. WS281x parts quote about +/-150 ns, and AutoResearch
+    // decodes at +/-170; `fitUartWave` on its own admits half a pulse width,
+    // which at a 2500 ns period is 250 ns -- wider than either, which is how a
+    // geometry emitting an unclassifiable symbol got selected. See #4379.
+    constexpr u32 kMaxSymbolErrorNs = 150;
     if (fit5.ok && fit4.ok) {
-        if (fit4.total_err_ns + kHysteresisNs < fit5.total_err_ns) {
+        const bool fit5_classifiable = fit5.max_err_ns <= kMaxSymbolErrorNs;
+        const bool fit4_classifiable = fit4.max_err_ns <= kMaxSymbolErrorNs;
+        if (fit5_classifiable != fit4_classifiable) {
+            // Exactly one geometry keeps every symbol inside a receiver's
+            // tolerance. Take it, whatever the totals say -- a smaller sum
+            // bought by putting one symbol out of range is not a better fit.
+            // WS2811 at 400 kHz is the case: P=5 nails T0H and misses T1H by
+            // 200 ns, P=4 spends 125 ns on T0H to bring T1H within 50 ns.
+            P = fit5_classifiable ? 5 : 4;
+            fit = fit5_classifiable ? fit5 : fit4;
+        } else if (fit4.total_err_ns + kHysteresisNs < fit5.total_err_ns) {
             P = 4;
             fit = fit4;
         } else {

@@ -23,7 +23,11 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 #include "fl/stl/atomic.h"
 #include "fl/stl/isr.h"
+// lastActualBaud() identifies the UART geometry the transmitter actually ran,
+// which is what the capture has to be decoded against.
+#include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
 #endif
+#include "fl/channels/uart_wave_encoder.h"
 #include "LegacyClocklessProxy.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.h"
 #include <FastLED.h>
@@ -691,22 +695,46 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
         AR_FL_WARN("[CAPTURE] UART: attempting decode with captured edges despite timeout");
     }
 
-    // UART with TX inversion at 4 Mbps produces a standard WS2812-compatible
-    // waveform on the wire. Each 10-bit UART frame (2500ns) encodes exactly 2
-    // LED bits with correct WS2812 timing:
-    //   T0H=250ns, T0L=1000ns (LED bit "0")
-    //   T1H=750ns, T1L=500ns  (LED bit "1")
-    // Use the standard WS2812 decoder with UART-specific timing thresholds.
+    // UART TX with inversion puts a WS2812-shaped waveform on the wire, but
+    // quantized onto the UART pulse grid -- exactly like the wave8 and wave3
+    // cases handled above, and for the same reason: the decoder has to be told
+    // what the transmitter actually emitted, not what the datasheet says.
+    //
+    // This used to hardcode T0H=250 / T1H=750 / T1L=500, the shape an ESP32
+    // UART produces at 4 Mbps for a WS2812. That is right for one chipset on
+    // one platform and wrong everywhere else. At 400 kHz the real wire is
+    // 625 / 1250 / 1250, every phase of which falls outside those hardcoded
+    // windows -- so a correct frame decoded to nothing. See FastLED#4379.
     if (is_uart_driver) {
         AR_FL_WARN("[CAPTURE] UART (inverted TX): using standard WS2812 decoder with UART timing...");
-        // UART timing at 4 Mbps: T0H=250ns, T1H-T0H=500ns, T0L=1000ns
-        fl::ChipsetTiming uart_timing{
-            250,   // T1 = T0H (1 UART bit = 250ns)
-            500,   // T2 = T1H - T0H (3 bits - 1 bit = 2 bits = 500ns)
-            500,   // T3 = T1L (2 UART bits = 500ns, stop + next start)
-            50,    // reset_us (WS2812 minimum)
-            "UART_4Mbps"
-        };
+        // Derive the geometry from the chipset under test. Pass the baud the
+        // engine reports when it reports one: uartWireTiming() re-runs the
+        // same P=5/P=4 selection the encoder ran, and handing it the baud that
+        // was used reproduces that choice rather than guessing it from a
+        // generic ceiling.
+        fl::u32 uart_max_baud = fl::kMaxUartBaudRate;
+#if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+        if (fl::strcmp(driver_name, "UART0") == 0) {
+            const fl::u32 actual =
+                fl::BusTraits<fl::Bus::UART, 0>::instance().lastActualBaud();
+            if (actual != 0) { uart_max_baud = actual; }
+        } else if (fl::strcmp(driver_name, "UART1") == 0) {
+            const fl::u32 actual =
+                fl::BusTraits<fl::Bus::UART, 1>::instance().lastActualBaud();
+            if (actual != 0) { uart_max_baud = actual; }
+        }
+#endif
+        // uartWireTiming() carries timing.reset_us and names the result
+        // "uart_wire", so nothing further needs setting here.
+        const fl::ChipsetTiming uart_timing =
+            fl::uartWireTiming(timing, uart_max_baud);
+        if (uart_timing.T1 == 0 && uart_timing.T2 == 0) {
+            // No representable geometry. Decoding against zeros would reject
+            // every symbol and report it as a capture fault; say what it is.
+            AR_FL_WARN("[CAPTURE] UART: no representable wave geometry for "
+                       << timing.name << " at " << uart_max_baud << " baud");
+            return 0;
+        }
         // Use wider tolerance (250ns) for UART because the UART clock and RMT
         // sample clock are asynchronous, and GPIO matrix adds ~10-20ns jitter
         auto rx_timing = fl::make4PhaseTiming(uart_timing, 250);
