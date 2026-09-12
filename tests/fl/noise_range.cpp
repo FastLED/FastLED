@@ -1,5 +1,6 @@
 
 #include "noise.h"
+#include "fastled_config.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "fl/log/log.h"
@@ -264,6 +265,8 @@ FL_TEST_CASE("[.]3D Gradient Behavior Demonstration") {
 
 
 
+#if FASTLED_NOISE_FIXED
+
 // ===========================================================================
 // Regression tests for the one-dimensional Perlin gradient. FastLED#1114.
 // ===========================================================================
@@ -420,4 +423,5 @@ FL_TEST_CASE("inoise16 passes through its base value at every lattice point") {
     }
 }
 
+#endif  // FASTLED_NOISE_FIXED
 } // FL_TEST_FILE

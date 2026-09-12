@@ -172,10 +172,7 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
 /// their signs independently, so hashes 9, 10, 13 and 14 had no gradient, and
 /// `inoise16` went flat across whole 65536-wide cubes on the same 21 cube pairs.
 static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) {
-    fl::i16 u = x;
-    fl::i16 v = x;
-    if(hash&1) { u = -u; v = -v; }
-    return AVG15(u,v);
+    return (hash & 1) ? static_cast<fl::i16>(-x) : x;
 }
 #endif
 
@@ -287,15 +284,13 @@ static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
 /// at a lattice point the way Perlin noise is defined to.
 ///
 /// Both follow from there being no second coordinate. In 1-D the gradient set is
-/// {+1, -1} and one hash bit selects it, which is what this does. `avg7(x, x)`
-/// is exactly `x`, kept in that form so the saturating behaviour at x = -128 is
-/// the same as before.
+/// {+1, -1} and one hash bit selects it, which is what this does. Writing it as
+/// `avg7(u, v)` with u == v would be the same number for every input -- avg7(x, x)
+/// is exactly x, including the wrap at x = -128 -- so the average is dropped
+/// rather than computed.
 static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
 {
-    fl::i8 u = x;
-    fl::i8 v = x;
-    if(hash&1) { u = -u; v = -v; }
-    return fl::avg7(u,v);
+    return (hash & 1) ? static_cast<fl::i8>(-x) : x;
 }
 #endif
 
