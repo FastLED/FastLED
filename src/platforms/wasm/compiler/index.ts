@@ -112,25 +112,37 @@ console.log(`⭐ index.js loading, URL: ${window.location.href}`);
 
 /**
  * Browser Compatibility Check
- * FastLED WASM requires OffscreenCanvas and WebGL2 support for Web Worker mode
+ *
+ * WebGL2 on a regular canvas is required. WebGL2 on an OffscreenCanvas lets
+ * the Web Worker render directly; when it is missing (WebKitGTK, which backs
+ * the Tauri viewer on Linux, has OffscreenCanvas but no WebGL on it) the
+ * worker still runs the sketch and posts frames to the main thread, which
+ * draws them. FastLEDWorkerManager detects that itself; this only warns.
  */
 (function checkBrowserCompatibility() {
   const errors = [];
 
-  // Check OffscreenCanvas support
-  if (typeof OffscreenCanvas === 'undefined') {
-    errors.push('OffscreenCanvas not supported');
-  } else {
-    // Check WebGL2 support with OffscreenCanvas
-    try {
-      const testCanvas = new OffscreenCanvas(1, 1);
-      const ctx = testCanvas.getContext('webgl2');
-      if (!ctx) {
-        errors.push('WebGL2 not supported with OffscreenCanvas');
-      }
-    } catch (error) {
-      errors.push(`OffscreenCanvas WebGL2 test failed: ${error.message}`);
+  // WebGL2 on a regular canvas is the hard requirement
+  try {
+    const ctx = document.createElement('canvas').getContext('webgl2');
+    if (!ctx) {
+      errors.push('WebGL2 not supported');
     }
+  } catch (error) {
+    errors.push(`WebGL2 test failed: ${error.message}`);
+  }
+
+  // WebGL2 on an OffscreenCanvas is optional: without it frames are drawn on the main thread
+  let offscreenWebGL2 = false;
+  if (typeof OffscreenCanvas !== 'undefined') {
+    try {
+      offscreenWebGL2 = !!new OffscreenCanvas(1, 1).getContext('webgl2');
+    } catch (error) {
+      offscreenWebGL2 = false;
+    }
+  }
+  if (!offscreenWebGL2) {
+    console.warn('WebGL2 on OffscreenCanvas is unavailable; frames will be rendered on the main thread');
   }
 
   if (errors.length > 0) {
@@ -582,12 +594,14 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
 
     FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, initializing worker mode...');
 
-    // Initialize Web Worker mode for background thread rendering (always enabled)
     const canvas = /** @type {HTMLCanvasElement | null} */ (document.getElementById('myCanvas'));
     if (!canvas) {
       throw new Error('Canvas element not found');
     }
 
+    // Web Worker mode for background thread rendering (always enabled). When
+    // the browser has no WebGL2 on OffscreenCanvas the worker still runs the
+    // sketch and posts frames back for main-thread rendering.
     FASTLED_DEBUG_LOG('INDEX_JS', 'Initializing Web Worker mode with OffscreenCanvas...');
     await fastLEDController.initializeWorkerMode(canvas, {
       maxRetries: 3

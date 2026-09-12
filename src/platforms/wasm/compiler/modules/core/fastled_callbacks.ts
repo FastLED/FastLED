@@ -110,12 +110,12 @@ globalThis.FastLED_onFrame = async function (frameData) {
       }
     }
 
-    // Final defensive check: ensure screenMap has proper structure
-    if (frameData.screenMap && (!frameData.screenMap.strips || typeof frameData.screenMap.strips !== 'object')) {
-      console.warn('FastLED_onFrame: screenMap exists but has invalid structure, using fallback:', frameData.screenMap);
-      frameData.screenMap = {
-        strips: {},
-      };
+    // Final defensive check: screenMap is a dictionary keyed by strip id
+    // ({ "0": { strips, absMin, absMax }, ... }), the same shape the graphics
+    // managers' updateScreenMap() consumes. Drop anything that is not an object.
+    if (frameData.screenMap && typeof frameData.screenMap !== 'object') {
+      console.warn('FastLED_onFrame: screenMap has invalid structure, dropping it:', frameData.screenMap);
+      delete frameData.screenMap;
     }
 
     // Render to canvas using existing graphics manager (main thread)

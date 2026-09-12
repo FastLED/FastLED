@@ -55,6 +55,13 @@ export class FastLEDWorkerManager {
     /** @type {HTMLCanvasElement|null} Original main thread canvas */
     this.mainCanvas = null;
 
+    /** @type {boolean} Worker posts frames here when OffscreenCanvas WebGL2 is unavailable */
+    this.renderOnMainThread = false;
+    /** @type {Object|null} Last screenmap dictionary received from the worker */
+    this.lastScreenMaps = null;
+    /** @type {Object|null} Graphics manager that already received lastScreenMaps */
+    this.screenMapsTarget = null;
+
     /** @type {WorkerCapabilities} Detected browser capabilities */
     this.capabilities = this.detectCapabilities();
 
@@ -148,11 +155,20 @@ export class FastLEDWorkerManager {
       this.mainCanvas = config.canvas;
       this.maxRetries = config.maxRetries || 3;
 
-      // Transfer canvas control to OffscreenCanvas
-      console.log('🔧 About to transfer canvas to offscreen...');
-      this.offscreenCanvas = this.mainCanvas.transferControlToOffscreen();
-      console.log('🔧 Canvas transferred successfully');
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', `Canvas control transferred to OffscreenCanvas`);
+      // Transfer canvas control to OffscreenCanvas — unless this browser cannot
+      // create WebGL2 on one (WebKitGTK behind the Tauri viewer on Linux). Then
+      // the worker still runs the sketch, so blocking calls stay off the main
+      // thread, and posts every frame back here to draw on the real canvas.
+      this.renderOnMainThread = !this.capabilities.webgl2;
+      if (this.renderOnMainThread) {
+        console.log('🔧 No WebGL2 on OffscreenCanvas: worker will post frames for main-thread rendering');
+        this.offscreenCanvas = null;
+      } else {
+        console.log('🔧 About to transfer canvas to offscreen...');
+        this.offscreenCanvas = this.mainCanvas.transferControlToOffscreen();
+        console.log('🔧 Canvas transferred successfully');
+        FASTLED_DEBUG_LOG('WORKER_MANAGER', `Canvas control transferred to OffscreenCanvas`);
+      }
 
       // Create and configure worker
       console.log('🔧 About to create worker...');
@@ -175,7 +191,8 @@ export class FastLEDWorkerManager {
       fastLEDEvents.emit('worker:initialized', {
         mode: 'background_worker',
         capabilities: this.capabilities,
-        canvas: { width: this.offscreenCanvas.width, height: this.offscreenCanvas.height }
+        renderOnMainThread: this.renderOnMainThread,
+        canvas: { width: this.mainCanvas.width, height: this.mainCanvas.height }
       });
 
       FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Background worker initialized successfully');
@@ -239,6 +256,7 @@ export class FastLEDWorkerManager {
         id: this.generateMessageId(),
         payload: {
           canvas: this.offscreenCanvas,
+          renderOnMainThread: this.renderOnMainThread,
           capabilities: this.capabilities,
           frameRate: config.frameRate,
           urlParams: urlParamsObject, // Pass URL parameters to worker
@@ -253,7 +271,7 @@ export class FastLEDWorkerManager {
 
       console.log('🔧 createWorker: About to call sendMessageWithResponse...');
       console.log('🔧 createWorker: isWorkerActive BEFORE send:', this.isWorkerActive);
-      const success = await this.sendMessageWithResponse(initMessage, [this.offscreenCanvas]);
+      const success = await this.sendMessageWithResponse(initMessage, this.offscreenCanvas ? [this.offscreenCanvas] : null);
       console.log('🔧 createWorker: sendMessageWithResponse returned:', success);
       if (!success) {
         throw new Error('Worker initialization message failed');
@@ -397,6 +415,34 @@ export class FastLEDWorkerManager {
    * Handles messages received from the worker
    * @param {MessageEvent} event - Worker message event
    */
+  /**
+   * Draws a frame the worker posted because it has no OffscreenCanvas
+   * (main-thread rendering). The screenmap dictionary arrives only when it
+   * changed; it is cached and pushed to whichever graphics manager is current.
+   * @param {{frameData: Array, frameNumber: number, screenMaps?: Object}} payload
+   */
+  handleFrameData(payload) {
+    if (!payload || typeof window.updateCanvas !== 'function') return;
+    if (payload.screenMaps) {
+      this.lastScreenMaps = payload.screenMaps;
+      this.screenMapsTarget = null;
+    }
+    const pushScreenMaps = () => {
+      const gm = window.graphicsManager;
+      if (this.lastScreenMaps && gm && typeof gm.updateScreenMap === 'function' && this.screenMapsTarget !== gm) {
+        gm.updateScreenMap(this.lastScreenMaps);
+        this.screenMapsTarget = gm;
+      }
+    };
+    const frameData = payload.frameData || [];
+    // null, not undefined: updateCanvas() treats undefined as "no screenmap yet"
+    // and skips the frame; the screenmap is pushed separately.
+    frameData.screenMap = null;
+    pushScreenMaps(); // manager already exists: new layout applies to this frame
+    window.updateCanvas(frameData);
+    pushScreenMaps(); // manager was just created by updateCanvas()
+  }
+
   handleWorkerMessage(event) {
     const { data } = event;
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'handleWorkerMessage', 'ENTER', { messageType: data.type });
@@ -423,6 +469,10 @@ export class FastLEDWorkerManager {
       switch (data.type) {
         case 'frame_rendered':
           this.handleFrameRendered(data.payload);
+          break;
+
+        case 'frame_data':
+          this.handleFrameData(data.payload);
           break;
 
         case 'error':
