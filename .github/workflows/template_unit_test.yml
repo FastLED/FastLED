@@ -93,6 +93,38 @@ jobs:
           bash lint --cpp
         shell: bash
 
+      - name: Python tests (ci/tests)
+        # ~1,500 tests that no pull-request workflow ran. The C++ runs here
+        # and in `build_linux.yml` both exclude them by definition -- `--unit`
+        # is "C++ unit tests only" and `--cpp` "suppresses Python tests" --
+        # and the one job that did run `bash test --py`, `mp3_cpu_audit.yml`,
+        # is path-filtered to the mp3 codec, so it never fires for a change
+        # under `ci/`.
+        #
+        # That left the guards the colour pipeline is measured against gating
+        # nothing on the way in: the decode LUTs against the float64
+        # reference, Bradford against ICC, the per-pixel stage lists, the
+        # golden corpus itself. A failure reached master in #4340 and stayed
+        # there until the suite happened to be run locally. FastLED#4359.
+        #
+        # Linux only: these are pure Python and platform-independent, and the
+        # template runs on three OSes.
+        #
+        # `--clean` because a CI step that can silently skip its own tests is
+        # the failure this step exists to prevent. Nothing restores
+        # `.cache/fingerprint/` today -- the cache above holds only
+        # `ci/lint_cpp_rs/target` and `.cache/rust_lint_binary.fingerprint` --
+        # so the suite would run without it, but a later widening of that
+        # `path:` would turn this step green and empty with no other symptom.
+        # `--clean` is the sanctioned way to force a run; the flag that
+        # disables fingerprinting outright is forbidden by project policy.
+        # With `--py` it forces the run without touching the native build the
+        # next step consumes -- checked, object count unchanged.
+        if: runner.os == 'Linux'
+        run: |
+          uv run test.py --py --clean
+        shell: bash
+
       - name: Run All Unit Tests
         id: run_tests
         run: |
