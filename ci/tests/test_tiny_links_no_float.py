@@ -20,10 +20,20 @@ every pull request. Run
     bash compile attiny85 --examples Blink
 
 and this checks what it produced.
+
+Skipping is the right default and was, on its own, the whole problem: nothing
+built an ATtiny85 before this ran, so it skipped everywhere, every time, and
+P9's link-time half was asserted by a test that never executed a single
+assertion. `check_attiny85.yml` now runs it in the job that has just built
+the ELF, with `FL_REQUIRE_TINY_ELF=1` set -- which turns a missing build from
+a skip into a failure. Without that, wiring it up would be worth nothing: the
+first thing to move the ELF would return this file to passing vacuously, and
+nothing would say so.
 """
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import unittest
@@ -32,16 +42,34 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-ELF = (
-    PROJECT_ROOT
-    / ".build"
-    / "pio"
-    / "attiny85"
-    / ".fbuild"
-    / "build"
-    / "release"
-    / "firmware.elf"
+
+# Where an attiny85 build lands. Both roots and a recursive glob, rather than
+# one hardcoded path, because `ci/compiled_size.py` documents two fbuild
+# layouts -- `<build_dir>/.fbuild/build/release/firmware.elf` and
+# `<build_dir>/.fbuild/build/<env>/release/firmware.elf` -- and falls back
+# between two build roots. Pinning one of those spellings meant this file
+# silently found nothing whenever the other was produced.
+kBuildRoots = (
+    PROJECT_ROOT / ".build" / "pio" / "attiny85",
+    PROJECT_ROOT / ".build" / "attiny85",
 )
+
+
+def _find_elf() -> "Path | None":
+    """Newest attiny85 firmware ELF under either build root, or None."""
+
+    newest: Path | None = None
+    for root in kBuildRoots:
+        for candidate in root.glob(".fbuild/build/**/firmware.elf"):
+            if not candidate.is_file():
+                continue
+            # Newest wins, matching the rule `ci/bloat.py` settled on in
+            # FastLED#4386: two layouts can coexist under one board directory
+            # and a fixed preference reports on whichever is stale.
+            if newest is None or candidate.stat().st_mtime > newest.stat().st_mtime:
+                newest = candidate
+    return newest
+
 
 # avr-gcc's soft-float helpers. An ATtiny has no FPU, so any float arithmetic
 # that survives to link time arrives as a call to one of these -- which is what
@@ -87,23 +115,54 @@ def _avr_nm() -> str | None:
     return None
 
 
+# Set by the CI job that has just built the ELF. A skip there means the build
+# it was supposed to inspect is not where it expects, which is a failure of
+# that job, not a reason to report success.
+kRequireElfEnvVar = "FL_REQUIRE_TINY_ELF"
+
+
+def _elf_is_required() -> bool:
+    """Whether a missing build must fail rather than skip."""
+
+    return os.environ.get(kRequireElfEnvVar, "") not in ("", "0")
+
+
 class TestTinyLinksNoFloat(unittest.TestCase):
     def setUp(self: "TestTinyLinksNoFloat") -> None:
-        if not ELF.is_file():
+        required = _elf_is_required()
+        elf = _find_elf()
+        if elf is None:
+            searched = ", ".join(
+                str(root.relative_to(PROJECT_ROOT)) for root in kBuildRoots
+            )
+            if required:
+                self.fail(
+                    f"{kRequireElfEnvVar} is set, so this must inspect a real "
+                    f"build, but no firmware.elf was found under {searched}. "
+                    "Either the attiny85 build did not run before this step or "
+                    "it wrote somewhere else; skipping here would report P9's "
+                    "link-time check as satisfied without having read a single "
+                    "symbol."
+                )
             warnings.warn(
-                "Skipping TestTinyLinksNoFloat because "
-                f"{ELF.relative_to(PROJECT_ROOT)} does not exist. "
+                "Skipping TestTinyLinksNoFloat because no attiny85 "
+                f"firmware.elf was found under {searched}. "
                 "Run 'bash compile attiny85 --examples Blink' to generate it."
             )
             self.skipTest("attiny85 build missing")
         nm = _avr_nm()
         if nm is None:
+            if required:
+                self.fail(
+                    f"{kRequireElfEnvVar} is set but avr-nm was not found; the "
+                    "toolchain that produced the ELF should provide it."
+                )
             self.skipTest("avr-nm not found; build attiny85 to fetch the toolchain")
         # `subprocess.run` and not `RunningProcess.run`: the latter merges
         # stderr into stdout, and a symbol table is not something to parse out
         # of a merged stream.
         completed = subprocess.run(  # noqa: SRC001
-            [nm, str(ELF)],
+            [nm, str(elf)],
             capture_output=True,
             text=True,
             encoding="utf-8",
