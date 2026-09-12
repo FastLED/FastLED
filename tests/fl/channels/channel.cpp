@@ -973,6 +973,83 @@ FL_TEST_CASE("[#4326] the 16-bit encoder reaches 252 of 65536 levels") {
     FL_CHECK_EQ(widest_step, 717);
 }
 
+FL_TEST_CASE("[#4042] the wide path is monotonic and keeps its low-light levels") {
+    // P8 owns "native 16-bit encoders consume wide output; monotonic;
+    // low-light resolution". #4368 did the first clause; this measures the
+    // other two, on the UCS7604-16 path, against the legacy path beside it.
+    //
+    // Both are swept over all 256 source codes. What differs is what reaches
+    // the encoder: the managed path carries the device drive at 16 bits, the
+    // unbound one carries an 8-bit pixel that a gamma LUT widens.
+    int previous_managed = -1;
+    int previous_legacy = -1;
+    int backwards_managed = 0;
+    int backwards_legacy = 0;
+    fl::vector<int> managed_low;
+    fl::vector<int> legacy_low;
+    fl::vector<int> managed_all;
+    fl::vector<int> legacy_all;
+
+    for (int code = 0; code < 256; ++code) {
+        fl::vector<u8> managed = encodeOnce(CRGB(code, 0, 0), true, 2.8f, 40);
+        fl::vector<u8> legacy = encodeOnce(CRGB(code, 0, 0), false, 2.8f, 40);
+        FL_REQUIRE_EQ((int)managed.size(), 21);
+        FL_REQUIRE_EQ((int)legacy.size(), 21);
+        const int m = (managed[15] << 8) | managed[16];
+        const int l = (legacy[15] << 8) | legacy[16];
+
+        if (previous_managed >= 0 && m < previous_managed) { ++backwards_managed; }
+        if (previous_legacy >= 0 && l < previous_legacy) { ++backwards_legacy; }
+        previous_managed = m;
+        previous_legacy = l;
+
+        bool seen_m = false;
+        for (fl::size j = 0; j < managed_all.size(); ++j) {
+            if (managed_all[j] == m) { seen_m = true; }
+        }
+        if (!seen_m) { managed_all.push_back(m); }
+        bool seen_l = false;
+        for (fl::size j = 0; j < legacy_all.size(); ++j) {
+            if (legacy_all[j] == l) { seen_l = true; }
+        }
+        if (!seen_l) { legacy_all.push_back(l); }
+
+        if (code < 32) {
+            bool low_m = false;
+            for (fl::size j = 0; j < managed_low.size(); ++j) {
+                if (managed_low[j] == m) { low_m = true; }
+            }
+            if (!low_m) { managed_low.push_back(m); }
+            bool low_l = false;
+            for (fl::size j = 0; j < legacy_low.size(); ++j) {
+                if (legacy_low[j] == l) { low_l = true; }
+            }
+            if (!low_l) { legacy_low.push_back(l); }
+        }
+    }
+
+    // Monotonic, on both paths. A rising source code must never lower the
+    // emitted value -- that is the property, and neither path violates it.
+    FL_CHECK_EQ(backwards_managed, 0);
+    FL_CHECK_EQ(backwards_legacy, 0);
+
+    // Low-light resolution, which is where the two part company. In the
+    // bottom 32 codes the managed path keeps every one distinguishable;
+    // the gamma LUT collapses four pairs, so four inputs that differ produce
+    // bytes that do not.
+    FL_CHECK_EQ((int)managed_low.size(), 32);
+    FL_CHECK_EQ((int)legacy_low.size(), 28);
+
+    // Across the whole range the same gap: 256 against 252. Worth stating
+    // plainly -- this is not more *reachable* levels, since an 8-bit CRGB can
+    // only ask for 256 things. It is that none of them are lost on the way
+    // out. A wide source (.fled rgb16_linear) is what turns the 16-bit wire
+    // into more than 256 levels; this is the half that stops throwing them
+    // away first.
+    FL_CHECK_EQ((int)managed_all.size(), 256);
+    FL_CHECK_EQ((int)legacy_all.size(), 252);
+}
+
 // ============ HD108 through the Channels encode path (#4326 / #4042) ============
 // The other native 16-bit chipset. #4326 called it "the same shape and worse":
 // `hd108GammaCorrect` is a hardcoded 2.8 inside the encoder, so unlike
