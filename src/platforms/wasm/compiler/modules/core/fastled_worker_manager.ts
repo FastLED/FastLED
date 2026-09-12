@@ -452,6 +452,11 @@ export class FastLEDWorkerManager {
   recordMainThreadRender() {
     const now = performance.now();
     this.mainThreadRenderTimes.push(now);
+    this.pruneMainThreadRenderTimes(now);
+  }
+
+  /** Drops main-thread render timestamps older than one second. */
+  pruneMainThreadRenderTimes(now) {
     while (this.mainThreadRenderTimes.length && now - this.mainThreadRenderTimes[0] > 1000) {
       this.mainThreadRenderTimes.shift();
     }
@@ -466,10 +471,7 @@ export class FastLEDWorkerManager {
    */
   getRenderFPS() {
     if (this.renderOnMainThread) {
-      const now = performance.now();
-      while (this.mainThreadRenderTimes.length && now - this.mainThreadRenderTimes[0] > 1000) {
-        this.mainThreadRenderTimes.shift();
-      }
+      this.pruneMainThreadRenderTimes(performance.now());
       return this.mainThreadRenderTimes.length;
     }
     return this.lastWorkerStats ? (this.lastWorkerStats.renderFps || 0) : 0;

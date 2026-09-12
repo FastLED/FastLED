@@ -590,6 +590,10 @@ async function handleStart(_payload) {
     workerState.running = true;
     workerState.startTime = performance.now();
     workerState.frameCount = 0;
+    // Rate counters measure from here, not from page load
+    workerState.loopCount = 0;
+    workerState.renderCount = 0;
+    performanceMonitor.lastStatsReport = workerState.startTime;
 
     startAnimationLoop();
 

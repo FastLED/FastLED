@@ -46,6 +46,7 @@ class FastLEDAsyncController {
     this.lastFrameTime = 0;
     this.frameInterval = 1000 / this.frameRate;
     this.lastSlowFrameWarningTime = 0; // Track last slow frame warning timestamp
+    this.renderTimes = []; // Timestamps of renders in the last second (legacy main-thread loop)
 
     // Worker integration properties
     this.isMainThread = typeof Worker !== 'undefined' && typeof window !== 'undefined';
@@ -430,6 +431,11 @@ class FastLEDAsyncController {
     if (globalThis.FastLED_onFrame) {
       await globalThis.FastLED_onFrame(frameData);
     }
+    const now = performance.now();
+    this.renderTimes.push(now);
+    while (this.renderTimes.length && now - this.renderTimes[0] > 1000) {
+      this.renderTimes.shift();
+    }
   }
 
   /**
@@ -540,7 +546,15 @@ class FastLEDAsyncController {
      * @returns {number} Render FPS
      */
   getRenderFPS() {
-    return this.workerMode ? fastLEDWorkerManager.getRenderFPS() : this.getFPS();
+    if (this.workerMode) {
+      return fastLEDWorkerManager.getRenderFPS();
+    }
+    // Legacy main-thread loop: count renderFrame() calls in the last second
+    const now = performance.now();
+    while (this.renderTimes.length && now - this.renderTimes[0] > 1000) {
+      this.renderTimes.shift();
+    }
+    return this.renderTimes.length;
   }
 
   /**
