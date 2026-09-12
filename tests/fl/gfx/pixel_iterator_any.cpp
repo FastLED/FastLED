@@ -123,7 +123,10 @@ const EOrder kAllOrders[6] = {RGB, RBG, GRB, GBR, BRG, BGR};
 ColorAdjustment lopsidedAdjustment() {
     ColorAdjustment adj = ColorAdjustment::noAdjustment();
     adj.premixed = CRGB(230, 140, 60);
+#if FASTLED_HD_COLOR_MIXING
+    // `color` only exists in the HD build; premixed is the one every build has.
     adj.color = CRGB(230, 140, 60);
+#endif
     return adj;
 }
 
