@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from ci.util.elf import dump_symbol_sizes
+from ci.util.firmware_elf import resolve_firmware_elf
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -73,7 +74,15 @@ def main() -> int:
     build_info = json.loads(build_info_json.read_text())
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
 
-    firmware_path = Path(board_info["prog_path"])
+    # See ci/util/firmware_elf.py: `prog_path` is not where fbuild writes.
+    firmware_path = resolve_firmware_elf(board_info, board_dir)
+    if firmware_path is None:
+        print(
+            f"Error: no firmware ELF found for {board}. Looked for an fbuild "
+            f"artifact under {board_dir / '.fbuild' / 'build'} and at "
+            f"prog_path '{board_info.get('prog_path', '')}'."
+        )
+        return 1
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
 
     print(f"Dumping symbol sizes for {board} firmware: {firmware_path}")

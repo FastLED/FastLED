@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from ci.util.firmware_elf import find_fbuild_elf
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.pio_runner import run_pio_command
 
@@ -193,51 +194,6 @@ def _find_size_tool(board_info: dict[str, Any]) -> Path | None:
     return None
 
 
-def _find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
-    """Locate the ELF that fbuild produced for this build, if any.
-
-    Checks (in order):
-      1. `prog_path` from `build_info.json` if it lives under a `.fbuild/`
-         directory — covers builds where `_override_prog_path_for_fbuild`
-         already rewrote the metadata (or where fbuild emitted the
-         metadata itself).
-      2. A recursive glob under `<build_dir>/.fbuild/build/**/firmware.elf`
-         covering both fbuild layouts:
-           - `<build_dir>/.fbuild/build/release/firmware.elf` (used by
-             `bash compile <arm-board>` on the standalone driver path)
-           - `<build_dir>/.fbuild/build/<env>/release/firmware.elf` (used
-             by `PioCompiler._build_fbuild_sync` on the PIO-wrapper path
-             that handles ESP32 boards) — see `ci/compiler/pio.py`
-             `_artifacts_dir`.
-
-    Returns the resolved ELF path, or None if no fbuild artifact is present
-    (i.e. the build was driven by PlatformIO and the old `_run_pio_size`
-    path should win).
-    """
-    prog_path_raw = board_info.get("prog_path")
-    if isinstance(prog_path_raw, str) and prog_path_raw:
-        prog_path = Path(prog_path_raw)
-        if ".fbuild" in prog_path.parts:
-            # prog_path may end in .bin (what fbuild emits as `prog_path`)
-            # or .elf (what `_override_prog_path_for_fbuild` writes). The
-            # size tool only takes ELF, so normalise to .elf.
-            elf_candidate = prog_path.with_suffix(".elf")
-            if elf_candidate.exists():
-                return elf_candidate
-
-    fbuild_root = build_dir / ".fbuild" / "build"
-    if not fbuild_root.is_dir():
-        return None
-
-    # Glob both `release/firmware.elf` and `<env>/release/firmware.elf` plus
-    # their `debug/` siblings. Picking the newest mtime handles the case
-    # where a `--release` build was followed by `--quick`.
-    candidates: list[Path] = list(fbuild_root.glob("**/firmware.elf"))
-    if not candidates:
-        return None
-    return max(candidates, key=lambda p: p.stat().st_mtime)
-
-
 def check_firmware_size(board: str, example: str | None = None) -> int:
     build_info_json = _find_build_info(board, example)
     board_info = _create_board_info(build_info_json)
@@ -251,7 +207,7 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
     # (e.g. `-Wl,--gc-sections`, `.eh_frame` stripping) and (b) report the
     # PIO binary which is ~169 KB larger on esp32dev. Without this branch
     # the CI size-check measures the wrong build.
-    fbuild_elf = _find_fbuild_elf(board_info, build_dir)
+    fbuild_elf = find_fbuild_elf(board_info, build_dir)
     size_tool = _find_size_tool(board_info)
     if fbuild_elf is not None and size_tool is not None:
         size = _run_size_on_elf(size_tool, fbuild_elf)
