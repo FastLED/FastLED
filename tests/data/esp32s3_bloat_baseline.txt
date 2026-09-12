@@ -1,3 +1,35 @@
+# 2026-09-12, PR #4368 (issue #4326, colour pipeline P8): +231 B,
+# 342483 -> 342714.
+#
+# The 16-bit encoders now consume the device drive instead of an 8-bit copy
+# of it widened by a gamma LUT. A managed UCS7604-16 channel was putting 849
+# on the wire where the solve asked for 13933; it now puts 13935.
+#
+# What the 231 B is, from a symbol diff against master (`fbuild symbols` on
+# the ELF the build actually produced -- `bash bloat --build` analyses a
+# different one, FastLED#4384):
+#
+#   +157  encodeUCS7604_16bit_RGB_wide<back_insert_iterator<vector_psram<u8>>>
+#    +63  fl::Channel::showPixels(PixelController<(EOrder)10, 1, ...>&)
+#     +17  fl::PixelIterator::has(int)
+#
+# Statically reachable rather than elidable, and for a documented reason:
+# `fl::Channel::showPixels` keeps every `writeUCS7604(...)` reference live so
+# the encoder bodies link, which the switch in that function says in as many
+# words. `-DFASTLED_DISABLE_UCS7604=1` drops this along with the rest of that
+# chipset.
+#
+# What it is NOT: the first three attempts at this cost 1,120 B, 988 B and
+# 940 B. A symbol diff found 750 B of that in six copies of one vtable thunk
+# -- `PixelControllerVtable<...>::loadAndScaleRGB16`, once per colour order,
+# each widening an 8-bit pixel identically. Binding that thunk only for
+# sources that declare a wide load removed all six. The 231 B here is what
+# remains after that, not what the naive version cost.
+#
+# A tiny-memory target pays 0 B: the wide path sits behind
+# !FL_PLATFORM_HAS_TINY_MEMORY, the condition FL_COLOR_PROFILE_RUNTIME
+# expands to.
+#
 # 2026-09-10, PR #4200 (issue #4040, colour pipeline P6): +305 B,
 # 342178 -> 342483.
 #
@@ -20,4 +52,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342483
+342714

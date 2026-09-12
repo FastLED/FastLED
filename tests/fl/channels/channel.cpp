@@ -885,50 +885,49 @@ FL_TEST_CASE("[#4326] a bound profile reaches the encode path") {
 }
 
 
-FL_TEST_CASE("[#4326] the managed path gamma-encodes the device drive") {
-    // The end-to-end measurement #4326 says it lacks: "I have not measured
-    // this end to end ... the claim should be confirmed by it before the fix
-    // is judged."
+FL_TEST_CASE("[#4326] the managed path puts the device drive on the wire") {
+    // This case used to assert the defect. It read 849 and said so, and said
+    // it was written to fail when #4326 was fixed. This is that failure,
+    // turned into the statement of the fix.
     //
     // `kProfile` gives all three emitters luminance 1.0 at sRGB
     // chromaticities, and the source is linear sRGB. Full red is therefore a
     // target of Y = 0.2126 -- sRGB red's luminance share -- against an emitter
-    // that makes Y = 1.0 at full drive, so the device solve's answer is a red
-    // drive of 0.2126. That is correct, and it is where the pipeline's job
-    // ends.
+    // making Y = 1.0 at full drive, so the device solve's answer is a red
+    // drive of 0.2126. That is where the pipeline's job ends, and a 16-bit
+    // encoder should put 0.2126 * 65535 = 13933 on the wire.
     //
-    // A 16-bit encoder consuming that drive should put 0.2126 * 65535 = 13933
-    // on the wire. It puts 849.
-    //
-    // 849 is not arbitrary: it is the drive quantized to 8 bits, 0.2126 * 255
-    // = 54, pushed through the gamma-2.8 LUT -- (54/255)^2.8 * 65535 = 849.
-    // Both halves of #4326 in one number. The drive is narrowed to 8 bits
-    // before the encoder sees it, and then a second shaping stage, the one
-    // B1/§6 forbid after the device solve, is applied on top of it. The 2.8
-    // is `mGamma.value_or(2.8f)` -- a default, not something asked for; the
-    // case above pins that binding a profile clears the caller's gamma.
+    // It used to put 849: the drive narrowed to 8 bits (0.2126 * 255 = 54)
+    // and then widened by the gamma-2.8 LUT, (54/255)^2.8 * 65535 = 849.
+    // Both halves of #4326 in one number -- the 8-bit round trip, and the
+    // second shaping stage B1/§6 forbid after the device solve.
     fl::vector<u8> bound = encodeOnce(CRGB(255, 0, 0), true, 2.8f, 20);
     FL_REQUIRE_EQ((int)bound.size(), 21);
 
     const int red16 = (bound[15] << 8) | bound[16];
-    FL_CHECK_EQ(red16, 849);
 
-    // Stated as the shortfall rather than only as a literal, so the failure
-    // says what is wrong rather than that a number moved. A linear encoding
-    // of the same 8-bit drive would be 54/255 * 65535 = 13878; the emitted
-    // value is more than ten times darker than that.
-    const int linear_of_same_drive = 54 * 65535 / 255;
-    FL_CHECK_GT(linear_of_same_drive, red16 * 10);
+    // Within rounding of the drive itself. Two counts of 65535, which is the
+    // s16.16 drive and `quantize16` each rounding once -- a single
+    // quantization, which is what B3 asks for.
+    FL_CHECK_GT(red16, 13900);
+    FL_CHECK_LT(red16, 13970);
 
-    // Black still encodes to black, so the above is a shaping error and not
-    // an offset.
+    // And specifically not the old value, so a regression that restored the
+    // gamma stage could not pass the bounds above by coincidence.
+    FL_CHECK_NE(red16, 849);
+
+    // Black still encodes to black.
     fl::vector<u8> black = encodeOnce(CRGB(0, 0, 0), true, 2.8f, 20);
     FL_REQUIRE_EQ((int)black.size(), 21);
     FL_CHECK_EQ((int)((black[15] << 8) | black[16]), 0);
 
-    // This case describes behaviour the contract forbids. It is written to
-    // fail when #4326 is fixed -- a 16-bit encoder fed the wide drive would
-    // emit near 13933 -- which is the point of recording it now.
+    // The unbound path is untouched: it has no device drive to carry, its
+    // pixels are 8-bit, and the gamma there is the legacy behaviour rather
+    // than a second stage. The resolution case below measures what that
+    // costs; this one is only about the managed path.
+    fl::vector<u8> unbound = encodeOnce(CRGB(255, 0, 0), false, 2.8f, 20);
+    FL_REQUIRE_EQ((int)unbound.size(), 21);
+    FL_CHECK_EQ((int)((unbound[15] << 8) | unbound[16]), 65535);
 }
 
 FL_TEST_CASE("[#4326] the 16-bit encoder reaches 252 of 65536 levels") {

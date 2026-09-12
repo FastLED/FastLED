@@ -18,6 +18,22 @@ void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
         *b2_out = channels[mSlot2];
 }
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+void ColorManagedPixelSource::loadAndScaleRGB16(u16* b0_out, u16* b1_out,
+                                               u16* b2_out) FL_NO_EXCEPT {
+        const u8* raw = mController.mData;
+        i32 drives[3];
+        processPixelQ16(mPipeline, raw[0], raw[1], raw[2], drives);
+        u16 channels[3];
+        for (int i = 0; i < 3; ++i) {
+            channels[i] = quantize16(drives[i]);
+        }
+        *b0_out = channels[mSlot0];
+        *b1_out = channels[mSlot1];
+        *b2_out = channels[mSlot2];
+}
+#endif
+
 void ColorManagedPixelSource::loadAndScaleRGBW(const Rgbw& rgbw, u8* b0_out,
                                               u8* b1_out, u8* b2_out,
                                               u8* b3_out) FL_NO_EXCEPT {
@@ -51,4 +67,20 @@ u8 ColorManagedPixelSource::quantize(i32 drive) FL_NO_EXCEPT {
         }
         return static_cast<u8>((static_cast<i32>(drive) * 255 + 32768) >> 16);
 }
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+u16 ColorManagedPixelSource::quantize16(i32 drive) FL_NO_EXCEPT {
+        if (drive <= 0) {
+            return 0;
+        }
+        if (drive >= 65536) {
+            return 65535;
+        }
+        // 64-bit intermediate on purpose: drive reaches 65535 and 65535*65535
+        // leaves i32. The 8-bit form above multiplies by 255 and stays inside
+        // it, which is why it does not need this.
+        return static_cast<u16>(
+            (static_cast<i64>(drive) * 65535 + 32768) >> 16);
+}
+#endif
 }  // namespace fl

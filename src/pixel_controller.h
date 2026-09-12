@@ -11,6 +11,7 @@
 
 
 #include "fl/math/intmap.h"
+#include "fl/system/sketch_macros.h"  // IWYU pragma: keep  (FL_PLATFORM_HAS_TINY_MEMORY)
 #include "fl/math/math8.h"
 #include "platforms/is_platform.h"
 

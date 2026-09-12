@@ -20,7 +20,9 @@
 #include "fl/stl/stdint.h"
 #include "fl/math/ease.h"
 #include "fl/chipsets/encoders/pixel_iterator_adapters.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep  (FL_UNUSED)
 #include "fl/stl/noexcept.h"
+#include "fl/system/sketch_macros.h"  // IWYU pragma: keep  (FL_PLATFORM_HAS_TINY_MEMORY)
 
 namespace fl {
 
@@ -59,7 +61,7 @@ struct UCS7604CurrentControl {
 /// @param b_current Blue channel current control (0x0-0xF, wire order)
 /// @param w_current White channel current control (0x0-0xF, wire order)
 /// @note Current control values should already be reordered to match wire protocol (RGB)
-/// @note KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20µs "W-code low"
+/// @note KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20us "W-code low"
 /// delay between the 8-byte verification code and the 7-byte configuration block.
 /// Our clockless controller sends all 15 bytes as a continuous bit-encoded stream
 /// without this gap. If this causes issues on some hardware, the transmission would
@@ -142,7 +144,7 @@ void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIter
 /// @note Writes 6 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo)
 template <typename InputIterator, typename OutputIterator>
 void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIterator out,
-                              const Gamma8& gamma) {
+                              const Gamma8& gamma) FL_NO_EXCEPT {
     while (first != last) {
         const auto& pixel = *first;
 
@@ -161,6 +163,46 @@ void encodeUCS7604_16bit_RGB(InputIterator first, InputIterator last, OutputIter
         ++first;
     }
 }
+
+/// Wide RGB straight off the iterator, with no adapter (P8, #4042 / #4326).
+///
+/// TINY only: `PixelIterator::loadAndScaleRGB16` is itself compiled out on
+/// parts with <=1KB SRAM, which carry no colour pipeline and so have nothing
+/// wider than the 8-bit pixel to load. `pixels` is a concrete
+/// `PixelIterator&`, not a dependent type, so that call is looked up when
+/// this template is *defined* rather than when it is instantiated -- leaving
+/// the body visible on TINY is a hard compile error even though no caller
+/// ever selects it. Hence the guard here, and the matching one around the
+/// `wide_source` branch in `encodeUCS7604`.
+///
+/// Deliberately a plain loop over `PixelIterator` rather than a second
+/// `makeScaledPixelRange*` range. `fl::Channel::showPixels` keeps every
+/// `writeUCS7604(...)` statically reachable, so whatever this path
+/// instantiates is linked into sketches that never touch UCS7604 -- routing
+/// it through `ScaledPixelIteratorRGB16` cost 988 B on an ESP32-S3 Blink
+/// build that binds no profile. This does what that adapter does, in the same
+/// order, without the iterator-pair templates.
+///
+/// No gamma by construction: the source has already quantized its device
+/// drive once, to 16 bits, and a curve on top of that is the second shaping
+/// stage B1 and section 6 of the spec forbid after the device solve.
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+template <typename OutputIterator>
+void encodeUCS7604_16bit_RGB_wide(PixelIterator& pixels, OutputIterator out) FL_NO_EXCEPT {
+    while (pixels.has(1)) {
+        u16 r16, g16, b16;
+        pixels.loadAndScaleRGB16(&r16, &g16, &b16);
+        *out++ = r16 >> 8;
+        *out++ = r16 & 0xFF;
+        *out++ = g16 >> 8;
+        *out++ = g16 & 0xFF;
+        *out++ = b16 >> 8;
+        *out++ = b16 & 0xFF;
+        pixels.stepDithering();
+        pixels.advanceData();
+    }
+}
+#endif  // !FL_PLATFORM_HAS_TINY_MEMORY
 
 /// @brief Encode RGBW pixels in UCS7604 16-bit format with gamma correction
 /// @tparam InputIterator Iterator yielding fl::array<uint8_t, 4> (RGBW bytes)
@@ -208,8 +250,14 @@ void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIte
 template <typename OutputIterator>
 void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator out,
                    UCS7604Mode mode, const UCS7604CurrentControl& current, bool is_rgbw,
-                   const Gamma8* gamma = nullptr) {
+                   const Gamma8* gamma = nullptr,
+                   bool wide_source = false) FL_NO_EXCEPT {
     constexpr size_t PREAMBLE_LEN = 15;
+
+#if FL_PLATFORM_HAS_TINY_MEMORY
+    // No wide encoder exists on TINY, so the flag selects nothing there.
+    FL_UNUSED(wide_source);
+#endif
 
     // Calculate bytes per LED based on mode and RGB/RGBW
     size_t bytes_per_led;
@@ -242,12 +290,19 @@ void encodeUCS7604(PixelIterator& pixel_iter, size_t num_leds, OutputIterator ou
             encodeUCS7604_8bit_RGB(range.first, range.second, out);
         }
     } else {
-        // 16-bit modes — fall back to gamma 2.8 if no gamma provided
+        // 16-bit modes -- fall back to gamma 2.8 if no gamma provided
         static fl::shared_ptr<const Gamma8> default_gamma;
         const Gamma8& g = gamma ? *gamma : *(default_gamma ? default_gamma : (default_gamma = Gamma8::getOrCreate(2.8f)));
         if (is_rgbw) {
+            // RGBW stays on the gamma path: `ColorManagedPixelSource`
+            // delegates its RGBW entry point to the legacy controller, so
+            // there is no wide drive to consume here yet.
             auto range = makeScaledPixelRangeRGBW(&pixel_iter);
             encodeUCS7604_16bit_RGBW(range.first, range.second, out, g);
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+        } else if (wide_source) {
+            encodeUCS7604_16bit_RGB_wide(pixel_iter, out);
+#endif
         } else {
             auto range = makeScaledPixelRangeRGB(&pixel_iter);
             encodeUCS7604_16bit_RGB(range.first, range.second, out, g);
