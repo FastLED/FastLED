@@ -126,7 +126,8 @@ _TRAILER = r"(?:\s|const|noexcept|FL_NO_EXCEPT|override|final|mutable|volatile)*
 # does not match, the whole definition does not match, and the constructor
 # contributes no edges at all; a mutation covers this.
 _INIT_ARG = r"[^;{}()]*(?:\([^;{}()]*\)[^;{}()]*)*"
-_INIT_ENTRY = r"[A-Za-z_]\w*\s*\(" + _INIT_ARG + r"\)"
+# `: member(expr)` and `: member{expr}` both initialise, so both are entries.
+_INIT_ENTRY = r"[A-Za-z_]\w*\s*(?:\(" + _INIT_ARG + r"\)|\{" + _INIT_ARG + r"\})"
 _CTOR_INIT = r"(?::\s*" + _INIT_ENTRY + r"(?:\s*,\s*" + _INIT_ENTRY + r")*\s*)?"
 
 DEFINITION = re.compile(
@@ -287,8 +288,15 @@ def call_pattern(symbol: str) -> re.Pattern[str]:
     # constructor is usually reached and which `Name(` alone does not match --
     # found by a mutation that the first version of this guard let through.
     declarator = r"(?:[A-Za-z_]\w*" + gap + r")?"
+    # `(` or `{`: `InitProbe probe{args}` constructs exactly as
+    # `InitProbe probe(args)` does, and matching only the paren let a stage
+    # build a forbidden type unchallenged.
+    #
+    # `symbol` comes from the derived set -- names parsed out of this repo's
+    # own sources -- not from anything a caller supplies, and it is escaped
+    # regardless. The surrounding parts are fixed literals.
     return re.compile(
-        r"\b" + re.escape(symbol) + r"(?:\s+|" + gap + r")" + declarator + r"\(",
+        r"\b" + re.escape(symbol) + r"(?:\s+|" + gap + r")" + declarator + r"[({]",
         re.S,
     )
 
