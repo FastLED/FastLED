@@ -63,6 +63,13 @@
 /// noise function output that had "edges" and glitches in it.  This is now fixed, and the
 /// fix is enabled by default.  However, if for some reason you wish to run with the old
 /// noise code, including the glitches, you can disable the bugfix here.
+///
+/// This also covers the one-dimensional gradient used by inoise8(x) and inoise16(x),
+/// corrected for FastLED#1114.  It was the two-dimensional gradient with the second
+/// coordinate missing, which left a quarter of the hash table with no gradient at all,
+/// and 21 of the 256 lattice cubes flat across every one of their inputs -- the longest
+/// plateau ran 1063 consecutive samples of inoise8 at a constant 128.  Setting this to 0
+/// restores that behaviour along with the rest of the old noise code.
 #define FASTLED_NOISE_FIXED 1
 //#define FASTLED_NOISE_FIXED 0
 

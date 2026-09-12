@@ -1,5 +1,6 @@
 
 #include "noise.h"
+#include "fastled_config.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "fl/log/log.h"
@@ -125,13 +126,26 @@ FL_TEST_CASE("Noise Range Analysis") {
                 << " (not using full 0-255 range, which is expected)");
     }
     
-    // Test if raw values are within expected -64 to +64 range
+    // Test if raw values are within expected -64 to +64 range.
+    //
+    // This is the corrected contract only. FASTLED_NOISE_FIXED=0 selects the old
+    // easing, which overshoots it in every dimension -- measured -125..120 for 1-D,
+    // -126..127 for 2-D and 3-D on a clean build -- and that is what the flag is
+    // for: reproducing the old output, glitches included, as fastled_config.h says
+    // in as many words. Asserting the bound there made a supported configuration
+    // fail to pass its own tests.
+#if FASTLED_NOISE_FIXED
     FL_CHECK_GE(min_raw_1d, -64);
     FL_CHECK_LE(max_raw_1d, 64);
     FL_CHECK_GE(min_raw_2d, -64);
     FL_CHECK_LE(max_raw_2d, 64);
     FL_CHECK_GE(min_raw_3d, -64);
     FL_CHECK_LE(max_raw_3d, 64);
+#else
+    FL_UNUSED(min_raw_1d); FL_UNUSED(max_raw_1d);
+    FL_UNUSED(min_raw_2d); FL_UNUSED(max_raw_2d);
+    FL_UNUSED(min_raw_3d); FL_UNUSED(max_raw_3d);
+#endif
     
     FL_WARN("=== END NOISE RANGE ANALYSIS ===");
 }
@@ -263,4 +277,164 @@ FL_TEST_CASE("[.]3D Gradient Behavior Demonstration") {
 #endif  // End disabled noise tests
 
 
+
+#if FASTLED_NOISE_FIXED
+
+// ===========================================================================
+// Regression tests for the one-dimensional Perlin gradient. FastLED#1114.
+// ===========================================================================
+///
+/// `grad8(hash, x)` and `grad16(hash, x)` used to be the two/three-dimensional
+/// gradient with the second coordinate missing. Feeding x to both terms and then
+/// flipping their signs independently produced `avg7(x, -x)`, which is zero for
+/// every x, so a quarter of the hash table had no gradient at all. A lattice cube
+/// whose two corners both hashed into that quarter interpolated zero against zero
+/// and went flat across every one of its inputs.
+///
+/// Measured before the fix:
+///
+///   inoise8   longest constant run 1063 samples (at x = 24048, value 128)
+///             value at lattice points 126..130, not a single value
+///   inoise16  the whole 65536-sample cube at x = 24064 << 8 constant at 34616
+///
+/// and after:
+///
+///   inoise8   longest constant run 17 samples; every lattice point exactly 128
+///   inoise16  longest constant run 182 samples in that cube; lattice 34616
+///
+/// Range (0..255) and maximum step between neighbours (4) are unchanged by the
+/// fix, which is the point: this removes flat spots without making the function
+/// less smooth.
+
+namespace {
+/// Samples per lattice cube: `inoise8` takes the cube index from the high byte.
+constexpr u32 kCubeSamples8 = 256;
+constexpr u32 kCubes8 = 256;
+}  // namespace
+
+FL_TEST_CASE("inoise8 has no dead lattice cube") {
+    // The direct statement of the defect: a cube both of whose corner hashes had
+    // a zero gradient produced one value for all 256 of its inputs. 21 of the 256
+    // cubes did. Not one may.
+    u32 dead = 0;
+    u32 first_dead = kCubes8;
+    for (u32 cube = 0; cube < kCubes8; ++cube) {
+        const u8 base = inoise8(static_cast<u16>(cube * kCubeSamples8));
+        bool flat = true;
+        for (u32 off = 1; off < kCubeSamples8; ++off) {
+            if (inoise8(static_cast<u16>(cube * kCubeSamples8 + off)) != base) {
+                flat = false;
+                break;
+            }
+        }
+        if (flat) {
+            ++dead;
+            if (first_dead == kCubes8) {
+                first_dead = cube;
+            }
+        }
+    }
+    FL_CHECK_EQ(dead, 0u);
+    FL_CHECK_EQ(first_dead, kCubes8);
+}
+
+FL_TEST_CASE("inoise8 passes through its base value at every lattice point") {
+    // Perlin noise is defined to equal its base value where the fractional part
+    // is zero. The old gradient's `avg7(+-1, x)` branches contributed +-1 at x = 0,
+    // so it did not: lattice values ranged 126..130.
+    for (u32 cube = 0; cube < kCubes8; ++cube) {
+        FL_CHECK_EQ(inoise8(static_cast<u16>(cube * kCubeSamples8)), 128);
+    }
+}
+
+FL_TEST_CASE("inoise8 keeps its range and its smoothness") {
+    u8 lo = 255;
+    u8 hi = 0;
+    u32 max_step = 0;
+    u32 longest_flat = 1;
+    u32 run = 1;
+    u8 prev = inoise8(0);
+    for (u32 x = 1; x < 65536; ++x) {
+        const u8 v = inoise8(static_cast<u16>(x));
+        if (v < lo) { lo = v; }
+        if (v > hi) { hi = v; }
+        const u32 step = static_cast<u32>(v > prev ? v - prev : prev - v);
+        if (step > max_step) { max_step = step; }
+        if (v == prev) {
+            ++run;
+            if (run > longest_flat) { longest_flat = run; }
+        } else {
+            run = 1;
+        }
+        prev = v;
+    }
+
+    // Full 8-bit range, as before the fix.
+    FL_CHECK_EQ(static_cast<int>(lo), 0);
+    FL_CHECK_EQ(static_cast<int>(hi), 255);
+
+    // Neighbouring samples still differ by at most 4, so nothing was traded for
+    // the flat spots: the function is no less continuous than it was.
+    FL_CHECK_EQ(max_step, 4u);
+
+    // Measured 17. The bound is a quarter of a cube -- far enough above the
+    // measurement to survive incidental change, far enough below the 1063 of the
+    // defect that a regression cannot hide under it.
+    FL_CHECK(longest_flat <= 64u);
+}
+
+FL_TEST_CASE("the range FastLED#1114 reported is no longer flat") {
+    // "inoise8(i) returns a constant value of 128 from i = 3061 to 3599."
+    u32 changes = 0;
+    u8 prev = inoise8(3061);
+    for (u32 x = 3062; x <= 3599; ++x) {
+        const u8 v = inoise8(static_cast<u16>(x));
+        if (v != prev) { ++changes; }
+        prev = v;
+    }
+    // Measured 245 over the wider 3072..3606 window; the reported window is
+    // narrower. One change would still have been a flat cube with an edge in it.
+    FL_CHECK(changes > 100u);
+}
+
+FL_TEST_CASE("inoise16 has no dead lattice cube either") {
+    // Same gradient, same defect, 65536 samples per cube instead of 256. Walking
+    // all 256 cubes at full resolution is 16M calls, so this checks the cube the
+    // 8-bit scan identified as the worst, plus a stride over the rest.
+    constexpr u32 kDeadCube = 94;  // 24048 >> 8, the old 1063-sample plateau
+    const u16 base = inoise16(static_cast<u32>(kDeadCube) << 16);
+    bool flat = true;
+    for (u32 off = 1; off < 65536; off += 7) {
+        if (inoise16((static_cast<u32>(kDeadCube) << 16) + off) != base) {
+            flat = false;
+            break;
+        }
+    }
+    FL_CHECK(!flat);
+
+    u32 dead = 0;
+    for (u32 cube = 0; cube < 256; ++cube) {
+        const u16 cube_base = inoise16(static_cast<u32>(cube) << 16);
+        bool cube_flat = true;
+        for (u32 off = 251; off < 65536; off += 251) {
+            if (inoise16((static_cast<u32>(cube) << 16) + off) != cube_base) {
+                cube_flat = false;
+                break;
+            }
+        }
+        if (cube_flat) { ++dead; }
+    }
+    FL_CHECK_EQ(dead, 0u);
+}
+
+FL_TEST_CASE("inoise16 passes through its base value at every lattice point") {
+    // 34616 rather than 32768 because inoise16 offsets by 17308 before doubling;
+    // what matters is that it is one value and not the 34614..34618 spread the
+    // old gradient produced.
+    for (u32 cube = 0; cube < 256; ++cube) {
+        FL_CHECK_EQ(inoise16(static_cast<u32>(cube) << 16), 34616);
+    }
+}
+
+#endif  // FASTLED_NOISE_FIXED
 } // FL_TEST_FILE

@@ -154,6 +154,7 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
     return AVG15(u,v);
 }
 
+#if FASTLED_NOISE_FIXED == 0
 static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) {
     hash = hash & 15;
     fl::i16 u,v;
@@ -165,6 +166,15 @@ static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16
 
     return AVG15(u,v);
 }
+#else
+/// One-dimensional Perlin gradient, 16-bit. Same defect and same correction as
+/// the 8-bit overload above: `hash > 8` fed x to both terms and then flipped
+/// their signs independently, so hashes 9, 10, 13 and 14 had no gradient, and
+/// `inoise16` went flat across whole 65536-wide cubes on the same 21 cube pairs.
+static fl::i16 inline __attribute__((always_inline)) grad16(fl::u8 hash, fl::i16 x) {
+    return (hash & 1) ? static_cast<fl::i16>(-x) : x;
+}
+#endif
 
 // selectBasedOnHashBit performs this:
 //   result = (hash & (1<<bitnumber)) ? a : b
@@ -234,6 +244,7 @@ static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x,
     return fl::avg7(u,v);
 }
 
+#if FASTLED_NOISE_FIXED == 0
 static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
 {
     // since the tests below can be done bit-wise on the bottom
@@ -256,6 +267,32 @@ static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
 
     return fl::avg7(u,v);
 }
+#else
+/// One-dimensional Perlin gradient: the hash picks between the only two unit
+/// directions a line has.
+///
+/// The shape above is the 2-D/3-D gradient with the second coordinate missing,
+/// and substituting for it breaks the function in two ways. Feeding `x` to both
+/// terms and then flipping their signs independently makes `avg7(x, -x)` -- zero
+/// for every x -- so hashes 9, 10, 13 and 14, a quarter of the table, have no
+/// gradient at all. A cube whose two corners both land there interpolates zero
+/// against zero and the output is flat across all 256 of its inputs; 21 of the
+/// 256 cubes do, and two adjacent ones give the 535-sample plateau at 128 that
+/// FastLED#1114 reported (the longest is 1052 samples, at x = 24064). The other
+/// branches substitute the literal 1, which is not a gradient either: it leaves
+/// `grad8(hash, 0)` non-zero, so the noise does not pass through its base value
+/// at a lattice point the way Perlin noise is defined to.
+///
+/// Both follow from there being no second coordinate. In 1-D the gradient set is
+/// {+1, -1} and one hash bit selects it, which is what this does. Writing it as
+/// `avg7(u, v)` with u == v would be the same number for every input -- avg7(x, x)
+/// is exactly x, including the wrap at x = -128 -- so the average is dropped
+/// rather than computed.
+static fl::i8 inline __attribute__((always_inline)) grad8(fl::u8 hash, fl::i8 x)
+{
+    return (hash & 1) ? static_cast<fl::i8>(-x) : x;
+}
+#endif
 
 
 #ifdef FADE_12

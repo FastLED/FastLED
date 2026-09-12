@@ -1,3 +1,25 @@
+# 2026-09-12, PR #4398 (issue #1114): +3 B, 342954 -> 342957.
+#
+# The one-dimensional Perlin gradient now has a gradient in every hash bucket.
+# `grad8(hash, x)` and `grad16(hash, x)` were the 2-D/3-D gradient with the
+# second coordinate missing; feeding x to both terms and flipping their signs
+# independently gave `avg7(x, -x)`, zero for every x, so a quarter of the hash
+# table had no gradient and 21 of the 256 lattice cubes were flat across every
+# one of their inputs -- 1063 consecutive samples of inoise8 at a constant 128,
+# at worst.
+#
+# 3 B is below the resolution at which a symbol diff says anything: alignment
+# padding alone moves by up to 4. Stated plainly rather than attributed, because
+# I did not run a local platform build to attribute it -- what is measured is
+# that the total is deterministic: two CI builds of this branch, one with the
+# gradient written as `avg7(u, v)` and one as a ternary, both produced exactly
+# 342,957. `src/noise.cpp.hpp` is the only file in the PR that compiles into
+# this image at all -- the other two are a test and a comment block in
+# fastled_config.h.
+#
+# Accepted because 3 B is 0.0009% of the image and buys a noise function that
+# is not flat across 8% of its input domain.
+#
 # 2026-09-12, PR #4387 (issue #4326, colour pipeline P8): +240 B,
 # 342714 -> 342954.
 #
@@ -82,4 +104,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342954
+342957
