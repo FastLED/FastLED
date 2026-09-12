@@ -900,8 +900,19 @@ void runTest(const char* test_name,
         size_t num_leds = leds.size();
         const bool lane_uses_rgbw =
             legacyLaneUsesRgbw(config, config_idx);
+        // UCS7604 puts a 15-byte preamble and 16-bit channels on the wire, so
+        // its frame runs several times the pixel byte count. This number sizes
+        // the RX edge capacity as well as the comparison below, so deriving it
+        // from the pixel count truncates the capture (FastLED#4373).
+        const bool lane_uses_ucs7604 = isUCS7604(config.encoder);
+        fl::vector<uint8_t> expected_encoded;
+        if (lane_uses_ucs7604) {
+            expected_encoded = buildExpectedUCS7604(
+                config.tx_configs[config_idx].mLeds, config.encoder);
+        }
         const size_t expected_data_bytes =
-            num_leds * (lane_uses_rgbw ? 4u : 3u);
+            lane_uses_ucs7604 ? expected_encoded.size()
+                              : num_leds * (lane_uses_rgbw ? 4u : 3u);
 
         fl::TestContext ctx{
             config.driver_name,
@@ -944,10 +955,8 @@ void runTest(const char* test_name,
 
         int mismatches = 0;
 
-        if (isUCS7604(config.encoder)) {
+        if (lane_uses_ucs7604) {
             // UCS7604: Compare full encoded frame (preamble + padding + pixel data) byte-for-byte
-            fl::vector<uint8_t> expected_encoded = buildExpectedUCS7604(
-                config.tx_configs[config_idx].mLeds, config.encoder);
             size_t expected_len = expected_encoded.size();
 
             AR_FL_WARN("UCS7604 encoded comparison: expected " << expected_len << " bytes, captured " << bytes_captured);
@@ -1106,6 +1115,17 @@ void runMultiTest(const char* test_name,
             buildExpectedClockless(config.tx_configs[0].mLeds, true);
     }
 
+    // Same reasoning for the UCS7604 encoded frame, plus one more: its length
+    // is what sizes the RX edge capacity in capture(). UCS7604 carries a
+    // 15-byte preamble and 16-bit channels, so the pixel byte count is several
+    // times short of the wire frame and truncates the capture (FastLED#4373).
+    const bool lane_uses_ucs7604 = isUCS7604(config.encoder);
+    fl::vector<uint8_t> expected_ucs7604;
+    if (channels_to_test > 0 && lane_uses_ucs7604) {
+        expected_ucs7604 =
+            buildExpectedUCS7604(config.tx_configs[0].mLeds, config.encoder);
+    }
+
     // Execute multiple runs
     for (int run = 1; run <= multi_config.num_runs; run++) {
         // runSingleTest executes synchronously inside the RPC task, so the
@@ -1130,7 +1150,8 @@ void runMultiTest(const char* test_name,
             const bool lane_uses_rgbw =
                 legacyLaneUsesRgbw(config, config_idx);
             const size_t expected_data_bytes =
-                num_leds * (lane_uses_rgbw ? 4u : 3u);
+                lane_uses_ucs7604 ? expected_ucs7604.size()
+                                  : num_leds * (lane_uses_rgbw ? 4u : 3u);
             result.total_leds = num_leds;
             result.totalBytes = static_cast<int>(expected_data_bytes);
 
@@ -1178,10 +1199,9 @@ void runMultiTest(const char* test_name,
                         << " first" << static_cast<int>(dump_count) << "=" << hex_dump.str());
             }
 
-            if (isUCS7604(config.encoder)) {
+            if (lane_uses_ucs7604) {
                 // UCS7604: Compare full encoded frame byte-for-byte
-                fl::vector<uint8_t> expected_encoded = buildExpectedUCS7604(
-                    config.tx_configs[config_idx].mLeds, config.encoder);
+                const fl::vector<uint8_t>& expected_encoded = expected_ucs7604;
                 size_t expected_len = expected_encoded.size();
                 result.totalBytes = static_cast<int>(expected_len);
 
@@ -1508,8 +1528,16 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
             // SPI chipset: pass through the SPI config directly
             channel = FastLED.add(config.tx_configs[i]);
         } else {
-            // Clockless chipset: re-create with runtime timing
-            fl::ChannelConfig channel_config(config.tx_configs[i].getDataPin(), config.timing, config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order);
+            // Clockless chipset: re-create with runtime timing. The encoder
+            // has to come with it. ChannelConfig(pin, timing, ...) defaults
+            // the encoder to WS2812, so a UCS7604 timing used to put raw
+            // pixel bytes on the wire while the comparison below expected the
+            // encoded frame -- every UCS7604 run failed at every LED count
+            // with a captured pattern that looked like a driver fault
+            // (FastLED#4373).
+            fl::ClocklessChipset clockless_chipset(
+                config.tx_configs[i].getDataPin(), config.timing, config.encoder);
+            fl::ChannelConfig channel_config(clockless_chipset, config.tx_configs[i].mLeds, config.tx_configs[i].rgb_order);
             channel = FastLED.add(channel_config);
         }
         if (!channel) {
