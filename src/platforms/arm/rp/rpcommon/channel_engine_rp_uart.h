@@ -58,10 +58,15 @@ class ChannelEngineRpUart final : public IChannelDriver {
     bool mLatchPending;
     bool mFailed;
     fl::string mError;
-    bool mLastStartAttempted;
-    bool mLastStartSucceeded;
-    size_t mLastEncodedSize;
-    u32 mLastActualBaud;
+    // Mutable alongside mLastError: canHandle() is const and is where a
+    // decline is decided, including declines that never reach enqueue()
+    // because the manager is only asking whether this engine could take the
+    // channel. Clearing them there is what keeps a declined channel from
+    // reporting the previous run's numbers. See FastLED#4375.
+    mutable bool mLastStartAttempted;
+    mutable bool mLastStartSucceeded;
+    mutable size_t mLastEncodedSize;
+    mutable u32 mLastActualBaud;
     mutable fl::string mLastError;   // also set from const canHandle()
 };
 
