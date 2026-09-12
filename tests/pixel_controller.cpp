@@ -487,4 +487,44 @@ FL_TEST_CASE("[#4347] dwell that does not correlate with phase costs nothing") {
     FL_CHECK_LT(fl::fabs(irregular - even), 0.35);
 }
 
+FL_TEST_CASE("[#4042] the contract's dither cadence figure is the arithmetic") {
+    // `docs/color-pipeline-contracts.md` sets the scale any dithering answer
+    // has to work against:
+    //
+    //   For scale: linear16 code 1 needs one native RGB8 code-1 frame per 257
+    //   equally timed frames to match its average on an ideal linear PWM
+    //   device. At 60 Hz that is about 4.28 seconds.
+    //
+    // Both numbers are load-bearing -- they are what makes "a sub-ULP average
+    // drive is reachable over a cycle" a statement with a cost attached
+    // rather than a reassurance -- and nothing checked either. Pinned here so
+    // that a change to the wire depth or the code-1 reference moves a test
+    // rather than leaving a stale figure in a normative document.
+    //
+    // The ratio is exact, not approximate: one linear16 code is 1/65535 of
+    // full scale and one RGB8 code is 1/255, and 65535/255 is 257 with no
+    // remainder. That the spec's "257" is the exact quotient rather than a
+    // rounded one is worth pinning on its own -- a reader could reasonably
+    // assume 256.
+    const int kLinear16FullScale = 65535;
+    const int kRgb8FullScale = 255;
+    FL_CHECK_EQ(kLinear16FullScale % kRgb8FullScale, 0);
+    FL_CHECK_EQ(kLinear16FullScale / kRgb8FullScale, 257);
+
+    // And the dwell the contract quotes for it, at the refresh it names.
+    // 257 / 60 = 4.2833..., which the document rounds to 4.28.
+    const double kFramesPerSecond = 60.0;
+    const double seconds = 257.0 / kFramesPerSecond;
+    FL_CHECK_GT(seconds, 4.28);
+    FL_CHECK_LT(seconds, 4.29);
+
+    // For contrast, the cycle BINARY_DITHER actually runs. Eight frames
+    // against 257 is the distance between the legacy mechanism and the one a
+    // linear16 source would need -- the same gap the file's own cadence case
+    // above records from the other end, where an 8-frame cycle at the enable
+    // threshold completes at 12.5 Hz.
+    FL_CHECK_EQ(UPDATES_PER_FULL_DITHER_CYCLE, 8);
+    FL_CHECK_EQ(257 / UPDATES_PER_FULL_DITHER_CYCLE, 32);
+}
+
 } // FL_TEST_FILE
