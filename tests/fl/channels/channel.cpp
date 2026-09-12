@@ -973,6 +973,89 @@ FL_TEST_CASE("[#4326] the 16-bit encoder reaches 252 of 65536 levels") {
     FL_CHECK_EQ(widest_step, 717);
 }
 
+// ============ HD108 through the Channels encode path (#4326 / #4042) ============
+// The other native 16-bit chipset. #4326 called it "the same shape and worse":
+// `hd108GammaCorrect` is a hardcoded 2.8 inside the encoder, so unlike
+// UCS7604's `mGamma.value_or(2.8f)` no caller could ever have chosen
+// otherwise, and `writeHD108` took no settings at all -- the information
+// needed to suppress it was not in scope.
+
+namespace {
+
+/// Encode one HD108 frame through `fl::Channel` and hand back the bytes.
+fl::vector<u8> encodeHd108Once(CRGB colour, bool bindProfile, int pin) {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto engine = fl::make_shared<ByteCapturingMockEngine>("HD108_CAPTURE");
+    mgr.addDriver(9200, engine);
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    CRGB leds[1] = {colour};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    if (bindProfile) {
+        options.setColorProfile(kProfile, SourceProfile::linearSrgb());
+    }
+    SpiChipsetConfig spiConfig{pin, pin + 1, SpiEncoder::hd108()};
+    ChannelConfig config(spiConfig, fl::span<CRGB>(leds, 1), RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    fl::vector<u8> out;
+    if (channel) {
+        channel->showLeds(255);
+        if (!engine->mCapturedChannels.empty()) {
+            ChannelDataPtr data = engine->mCapturedChannels[0];
+            if (data) {
+                for (fl::size i = 0; i < data->getData().size(); ++i) {
+                    out.push_back(data->getData()[i]);
+                }
+            }
+        }
+    }
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#4326] HD108 puts the device drive on the wire when managed") {
+    // Same fixture and reasoning as the UCS7604 case above: all three emitters
+    // at luminance 1.0 with sRGB chromaticities and a linear sRGB source, so
+    // full red is a target of Y = 0.2126 against an emitter making Y = 1.0 at
+    // full drive, and the solve's answer is a red drive of 0.2126. A 16-bit
+    // encoder consuming that should put 0.2126 * 65535 = 13933 on the wire.
+    fl::vector<u8> bound = encodeHd108Once(CRGB(255, 0, 0), true, 30);
+    fl::vector<u8> unbound = encodeHd108Once(CRGB(255, 0, 0), false, 32);
+
+    // 8 start bytes, then 2 brightness header bytes, then RGB16 big-endian.
+    FL_REQUIRE_GT((int)bound.size(), 16);
+    FL_REQUIRE_EQ((int)bound.size(), (int)unbound.size());
+
+    const int bound_red = (bound[10] << 8) | bound[11];
+    const int unbound_red = (unbound[10] << 8) | unbound[11];
+
+    // Managed: the drive itself, within rounding.
+    FL_CHECK_GT(bound_red, 13900);
+    FL_CHECK_LT(bound_red, 13970);
+
+    // Unbound is the legacy path and must be untouched by this change: the
+    // hardcoded 2.8 curve still widens its 8-bit pixel, which at full scale
+    // saturates.
+    FL_CHECK_EQ(unbound_red, 65535);
+
+    // And the two differ, so the branch is actually taken.
+    FL_CHECK_NE(bound_red, unbound_red);
+}
+
+FL_TEST_CASE("[#4326] HD108 black stays black on both paths") {
+    // The gamma curve maps 0 to 0, and so does the drive, so this is the
+    // control: a difference above can only be shaping, not an offset.
+    fl::vector<u8> bound = encodeHd108Once(CRGB(0, 0, 0), true, 34);
+    fl::vector<u8> unbound = encodeHd108Once(CRGB(0, 0, 0), false, 36);
+    FL_REQUIRE_GT((int)bound.size(), 16);
+    FL_REQUIRE_GT((int)unbound.size(), 16);
+    FL_CHECK_EQ((int)((bound[10] << 8) | bound[11]), 0);
+    FL_CHECK_EQ((int)((unbound[10] << 8) | unbound[11]), 0);
+}
+
 // ============ Legacy output with colour management disabled (#4034) ============
 // The tracker lists "Legacy output byte-identical with CM disabled" as an
 // acceptance criterion and nothing verified it. The colour pipeline reaches
