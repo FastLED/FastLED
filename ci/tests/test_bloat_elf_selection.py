@@ -18,7 +18,10 @@ import os
 import tempfile
 import time
 import unittest
+from dataclasses import dataclass
 from pathlib import Path
+
+from typeguard import typechecked
 
 from ci.bloat import ElfLocation, _assert_fresh, find_elf
 
@@ -29,26 +32,35 @@ def _touch(path: Path, mtime: float) -> None:
     os.utime(path, (mtime, mtime))
 
 
+@typechecked
+@dataclass(frozen=True, slots=True)
+class Layouts:
+    """The two ELF layouts that coexist under one board directory."""
+
+    fbuild: Path
+    pio: Path
+
+
 class TestFindElfPrefersTheNewest(unittest.TestCase):
-    def _layouts(self: "TestFindElfPrefersTheNewest", root: Path) -> tuple[Path, Path]:
+    def _layouts(self: "TestFindElfPrefersTheNewest", root: Path) -> Layouts:
         """The two that coexist in practice, and did here."""
 
         fbuild = root / "pio" / "esp32s3" / ".fbuild" / "build" / "release"
         pio = root / "pio" / "esp32s3" / ".pio" / "build" / "esp32s3"
-        return fbuild / "firmware.elf", pio / "firmware.elf"
+        return Layouts(fbuild=fbuild / "firmware.elf", pio=pio / "firmware.elf")
 
     def test_the_newer_pio_elf_wins_over_a_stale_fbuild_one(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            fbuild_elf, pio_elf = self._layouts(root)
+            layouts = self._layouts(root)
             now = time.time()
-            _touch(fbuild_elf, now - 5 * 86400)
-            _touch(pio_elf, now)
+            _touch(layouts.fbuild, now - 5 * 86400)
+            _touch(layouts.pio, now)
 
             # Priority alone would return the fbuild one, which is the bug.
-            self.assertEqual(find_elf("esp32s3", root).elf, pio_elf)
+            self.assertEqual(find_elf("esp32s3", root).elf, layouts.pio)
 
     def test_the_newer_fbuild_elf_still_wins_when_it_is_newer(
         self: "TestFindElfPrefersTheNewest",
@@ -57,13 +69,13 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            fbuild_elf, pio_elf = self._layouts(root)
+            layouts = self._layouts(root)
             now = time.time()
-            _touch(pio_elf, now - 5 * 86400)
-            _touch(fbuild_elf, now)
+            _touch(layouts.pio, now - 5 * 86400)
+            _touch(layouts.fbuild, now)
 
             location = find_elf("esp32s3", root)
-            self.assertEqual(location.elf, fbuild_elf)
+            self.assertEqual(location.elf, layouts.fbuild)
             self.assertTrue(location.fbuild_native)
 
     def test_a_missing_build_still_reports_where_it_looked(
