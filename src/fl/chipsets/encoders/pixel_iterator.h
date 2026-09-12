@@ -438,73 +438,75 @@ class PixelIterator {
     void writeHD108(CONTAINER_UIN8_T* out, bool managed = false) FL_NO_EXCEPT {
         auto back_ins = fl::back_inserter(*out);
 
-#if !FL_PLATFORM_HAS_TINY_MEMORY
-        if (managed) {
-            // Inline rather than an `encodeHD108_wide` in hd108.h: that header
-            // is included *by* this one, before `PixelIterator` exists, and a
-            // concrete `PixelIterator&` parameter is not a dependent type --
-            // so its body would be checked there and fail. Same reason the
-            // UCS7604 wide path had to be guarded for TINY (#4326).
-            //
-            // `hd108GammaCorrect` is skipped by construction. It exists to
-            // widen an 8-bit pixel to the 16 bits this chipset carries; the
-            // managed source has already quantized its device drive once, to
-            // 16 bits, so a fixed 2.8 curve on top is the second shaping stage
-            // B1 and section 6 of the spec forbid after the device solve. And
-            // unlike UCS7604's `mGamma.value_or(2.8f)`, this one is hardcoded
-            // -- no caller could have chosen otherwise.
-            for (int i = 0; i < 8; i++) {
-                *back_ins++ = 0x00;  // start frame
-            }
-            // `hd108BrightnessHeader` discards its argument and pins every
-            // gain at 31, so this is 0xFF 0xFF whatever is passed. The strip
-            // brightness used to be fetched through `makeScaledBrightness`
-            // purely to hand it over here, which built an adapter and called
-            // its out-of-line `load()` to produce a number that reached
-            // nothing. FastLED#4402.
-            u8 f0, f1;
-            hd108BrightnessHeader(0, &f0, &f1);
-            fl::size num_leds = 0;
-            while (has(1)) {
-                u16 r16, g16, b16;
-                loadAndScaleRGB16(&r16, &g16, &b16);
-                *back_ins++ = f0;
-                *back_ins++ = f1;
-                *back_ins++ = static_cast<u8>(r16 >> 8);
-                *back_ins++ = static_cast<u8>(r16 & 0xFF);
-                *back_ins++ = static_cast<u8>(g16 >> 8);
-                *back_ins++ = static_cast<u8>(g16 & 0xFF);
-                *back_ins++ = static_cast<u8>(b16 >> 8);
-                *back_ins++ = static_cast<u8>(b16 & 0xFF);
-                stepDithering();
-                advanceData();
-                ++num_leds;
-            }
-            const fl::size latch = num_leds / 2 + 4;
-            for (fl::size i = 0; i < latch; i++) {
-                *back_ins++ = 0xFF;  // end frame
-            }
-            return;
-        }
-#else
+        // One loop for both sources. This used to be two: the managed path
+        // written out by hand here, and the 8-bit path routed through
+        // `encodeHD108` over `makeScaledPixelRangeRGB`. Each carried its own
+        // copy of the framing -- the 8-byte start frame, the per-LED emit of
+        // header + three big-endian channels, the latch -- and together they
+        // made this the largest encoder body in a Blink build (481 B on
+        // esp32dev, ahead of `writeWS2812`, the only one Blink runs). The only
+        // thing that differed was where the 16-bit channels came from, so
+        // that is now the only branch (FastLED#4402).
+        //
+        // Byte-identical to the iterator path by construction:
+        // `ScaledPixelIteratorRGB::advance()` is exactly `has(1)`,
+        // `loadAndScaleRGB` into wire order, `stepDithering`, `advanceData`,
+        // once per pixel; the bytes it hands `encodeHD108` are captured before
+        // the step, which is what this loop does too.
+        //
+        // Inline rather than an `encodeHD108_wide` in hd108.h: that header is
+        // included *by* this one, before `PixelIterator` exists, and a
+        // concrete `PixelIterator&` parameter is not a dependent type -- so
+        // its body would be checked there and fail (#4326).
+#if FL_PLATFORM_HAS_TINY_MEMORY
+        // No wide source exists on TINY, so the flag selects nothing there.
         FL_UNUSED(managed);
 #endif
-
-        // One call, not one per FASTLED_HD_COLOR_MIXING branch. The two
-        // encoders emit the same bytes for the same pixels: both walk
-        // `makeScaledPixelRangeRGB`, both widen through `hd108GammaCorrect`,
-        // both frame with the same start/latch, and both headers come from
-        // `hd108BrightnessHeader`, which pins all gains at 31 whatever it is
-        // handed. `encodeHD108_HD` differed only by a per-LED brightness read
-        // and a cache around that constant header; with those gone (#4402) it
-        // is `encodeHD108` with an extra argument, so building HD-colour-mixing
-        // sketches was paying for a second copy of one function.
-        //
-        // `encodeHD108_HD` stays in hd108.h for source compatibility, and a
-        // test asserts the two agree byte for byte so this collapse cannot
-        // quietly stop being true.
-        auto pixel_range = makeScaledPixelRangeRGB(this);
-        encodeHD108(pixel_range.first, pixel_range.second, back_ins, 255);
+        for (int i = 0; i < 8; i++) {
+            *back_ins++ = 0x00;  // start frame
+        }
+        // `hd108BrightnessHeader` discards its argument and pins every gain
+        // at 31, so this is 0xFF 0xFF whatever is passed (#4402).
+        u8 f0, f1;
+        hd108BrightnessHeader(0, &f0, &f1);
+        fl::size num_leds = 0;
+        while (has(1)) {
+            u16 r16, g16, b16;
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+            if (managed) {
+                // The managed source has already quantized its device drive
+                // once, to 16 bits. `hd108GammaCorrect` exists to widen an
+                // 8-bit pixel to the 16 this chipset carries; a fixed 2.8
+                // curve on top of a solved drive is the second shaping stage
+                // B1 and section 6 of the spec forbid after the device
+                // solve, and unlike UCS7604's `mGamma.value_or(2.8f)` this
+                // one is hardcoded -- no caller could have chosen otherwise.
+                loadAndScaleRGB16(&r16, &g16, &b16);
+            } else
+#endif
+            {
+                u8 b0, b1, b2;
+                loadAndScaleRGB(&b0, &b1, &b2);  // wire order
+                r16 = hd108GammaCorrect(b0);
+                g16 = hd108GammaCorrect(b1);
+                b16 = hd108GammaCorrect(b2);
+            }
+            *back_ins++ = f0;
+            *back_ins++ = f1;
+            *back_ins++ = static_cast<u8>(r16 >> 8);
+            *back_ins++ = static_cast<u8>(r16 & 0xFF);
+            *back_ins++ = static_cast<u8>(g16 >> 8);
+            *back_ins++ = static_cast<u8>(g16 & 0xFF);
+            *back_ins++ = static_cast<u8>(b16 >> 8);
+            *back_ins++ = static_cast<u8>(b16 & 0xFF);
+            stepDithering();
+            advanceData();
+            ++num_leds;
+        }
+        const fl::size latch = num_leds / 2 + 4;
+        for (fl::size i = 0; i < latch; i++) {
+            *back_ins++ = 0xFF;  // end frame
+        }
     }
 
   private:

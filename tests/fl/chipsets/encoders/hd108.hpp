@@ -616,6 +616,36 @@ FL_TEST_CASE("[#4321] writeHD108 emits one LED per source pixel") {
     }
 }
 
+FL_TEST_CASE("[#4402] writeHD108 through a real PixelIterator equals encodeHD108 byte for byte") {
+    // `writeHD108` no longer routes the 8-bit path through `encodeHD108`; it
+    // walks the source itself in one loop shared with the managed path. This
+    // holds the two to the same bytes on the real adapter, with binary dither
+    // ON and a non-trivial colour order, so the dither-step and wire-order
+    // bookkeeping the iterator used to do is proven, not assumed.
+    fl::CRGB leds[5] = {fl::CRGB(10, 200, 33), fl::CRGB(0, 0, 0),
+                        fl::CRGB(255, 255, 255), fl::CRGB(7, 8, 9),
+                        fl::CRGB(128, 64, 32)};
+
+    PixelController<GRB> via_writer(leds, 5, ColorAdjustment::noAdjustment(),
+                                    BINARY_DITHER);
+    fl::PixelIteratorAny writer_adapter(via_writer, GRB, fl::Rgbw());
+    fl::vector<fl::u8> from_writer;
+    writer_adapter.get().writeHD108(&from_writer);
+
+    PixelController<GRB> via_encoder(leds, 5, ColorAdjustment::noAdjustment(),
+                                     BINARY_DITHER);
+    fl::PixelIteratorAny encoder_adapter(via_encoder, GRB, fl::Rgbw());
+    auto range = fl::makeScaledPixelRangeRGB(&encoder_adapter.get());
+    fl::vector<fl::u8> from_encoder;
+    fl::encodeHD108(range.first, range.second, fl::back_inserter(from_encoder), 255);
+
+    FL_REQUIRE_EQ(from_writer.size(), from_encoder.size());
+    FL_REQUIRE_EQ((int)from_writer.size(), 8 + 5 * 8 + (5 / 2 + 4));
+    for (fl::size i = 0; i < from_writer.size(); ++i) {
+        FL_CHECK_EQ(from_writer[i], from_encoder[i]);
+    }
+}
+
 FL_TEST_CASE("[#4321] writeAPA102 and writeSK9822 emit one LED per source pixel in HD mode") {
     // 4 start bytes + 4 per LED + ((N/32)+1)*4 end.  N=4 -> 4 + 16 + 4.
     FL_SUBCASE("APA102") {
