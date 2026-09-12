@@ -60,6 +60,52 @@
 
 namespace {
 
+/// @brief Stand down the session's RX channel for the duration of one call.
+///
+/// A capture backend can own an exclusive, process-wide resource -- on RP the
+/// PIO capture buffer is a single global claimed in `begin()` and released
+/// only in `stop()`. A per-call channel built while the standing one is still
+/// alive therefore fails to arm. Releasing every reference destroys the
+/// standing device and frees the claim; the destructor rebuilds it on the pin
+/// the session is still configured for, so inline pins stay scoped to the call
+/// that asked for them however that call exits. See FastLED#4374.
+class StandingRxChannelSwap {
+  public:
+    explicit StandingRxChannelSwap(AutoResearchState* state)
+        : mState(state), mReleased(false) {}
+
+    /// @param alias The caller's own reference to the standing channel, which
+    ///              has to go too -- a surviving alias keeps the device, and
+    ///              its claim, alive.
+    void release(fl::shared_ptr<fl::RxChannel>* alias) {
+        if (mReleased || mState == nullptr) {
+            return;
+        }
+        if (alias != nullptr) {
+            alias->reset();
+        }
+        mState->rx_channel.reset();
+        mReleased = true;
+    }
+
+    ~StandingRxChannelSwap() {
+        if (!mReleased || mState == nullptr || mState->rx_factory == nullptr) {
+            return;
+        }
+        // Rebuild, do not restore: the previous device is gone. A failure here
+        // leaves rx_channel null, which the next call reports as a missing RX
+        // channel rather than as a mystery zero capture.
+        mState->rx_channel = mState->rx_factory(mState->pin_rx);
+    }
+
+    StandingRxChannelSwap(const StandingRxChannelSwap&) = delete;
+    StandingRxChannelSwap& operator=(const StandingRxChannelSwap&) = delete;
+
+  private:
+    AutoResearchState* mState;
+    bool mReleased;
+};
+
 uint32_t expectedClocklessWireUs(const fl::ChipsetTimingConfig& timing,
                                  uint32_t max_leds) {
     const uint64_t bit_period_ns = timing.total_period_ns();
@@ -923,7 +969,26 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         have_backend_override = true;
     }
 
+    // A per-call RX channel has to displace the standing one, not sit
+    // alongside it.
+    //
+    // The RP PIO capture buffer is a single global, claimed by whichever
+    // device calls begin() first and released only in stop() -- so a standing
+    // channel that has already captured once still owns it. A second channel
+    // built next to it fails begin() with `dma_buffer_busy` and captures
+    // nothing, while the response echoes the requested pins back through
+    // actualRxPin as though the change took effect. `setPins` never hit this
+    // because it *replaces* mState->rx_channel, destroying the old device and
+    // releasing the claim. Confirmed on an RP2350W: the failing run reports
+    // rxBeginError='dma_buffer_busy'. See FastLED#4374.
+    //
+    // Restoring it afterwards keeps inline pins scoped to the one call, which
+    // is what a caller probing alternative wiring means by them -- adopting
+    // the pin as standing state would trade a silent failure for a silent
+    // reconfiguration.
+    StandingRxChannelSwap standing_rx_swap(mState.get());
     if (have_backend_override) {
+        standing_rx_swap.release(&rx_channel_to_use);
         fl::RxChannelConfig rx_cfg(pin_rx, rx_backend_override);
         rx_channel_to_use = FastLED.addRx(rx_cfg);
         if (!rx_channel_to_use) {
@@ -933,6 +998,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             return response;
         }
     } else if (pin_rx != mState->pin_rx && mState->rx_factory) {
+        standing_rx_swap.release(&rx_channel_to_use);
         rx_channel_to_use = mState->rx_factory(pin_rx);
         if (!rx_channel_to_use) {
             response.set("success", false);
