@@ -13,7 +13,8 @@ ChannelEngineRpUart::ChannelEngineRpUart(
       mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
       mActive(false), mLatchPending(false), mFailed(false),
       mLastStartAttempted(false), mLastStartSucceeded(false),
-      mLastEncodedSize(0), mLastActualBaud(0) {}
+      mLastEncodedSize(0), mLastActualBaud(0),
+      mLastWireTiming{0, 0, 0, 0, nullptr} {}
 
 ChannelEngineRpUart::~ChannelEngineRpUart() {
     releaseInFlight();
@@ -123,6 +124,7 @@ void ChannelEngineRpUart::show() FL_NO_EXCEPT {
     mLastStartSucceeded = false;
     mLastEncodedSize = 0;
     mLastActualBaud = 0;
+    mLastWireTiming = ChipsetTiming{0, 0, 0, 0, nullptr};
     mLastError.clear();
     for (const ChannelDataPtr& channel : mInFlightChannels) {
         if (channel) {
@@ -226,6 +228,7 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
     mLastStartSucceeded = false;
     mLastEncodedSize = 0;
     mLastActualBaud = 0;
+    mLastWireTiming = ChipsetTiming{0, 0, 0, 0, nullptr};
     RpUartConfig config;
     config.uart_index = mUartIndex;
     config.tx_pin = static_cast<u8>(channel->getPin());
@@ -266,6 +269,14 @@ bool ChannelEngineRpUart::beginTransmission(const ChannelDataPtr& channel) FL_NO
         mLastError = mError;
         return false;
     }
+    // Only now, with a transmission actually running. Recorded before the
+    // start, a failed attempt would leave a non-zero geometry behind and break
+    // the `T1 == 0` sentinel lastWireTiming() documents -- a decoder would
+    // then be handed the shape of a frame that never went on the wire. The
+    // LUT above is what this reproduces; the ceiling is the same one it was
+    // built with (FastLED#4379).
+    mLastWireTiming = uartWireTiming(channel->getTiming(),
+                                     mPeripheral->maxBaudRate());
     mLastStartSucceeded = true;
     mError.clear();
     mLastError.clear();

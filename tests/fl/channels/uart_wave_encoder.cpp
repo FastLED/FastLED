@@ -509,6 +509,79 @@ FL_TEST_CASE("uartWireTiming reproduces the timing actually put on the wire") {
     FL_CHECK((t1h % (period / 5u) == 0u) || (t1h % (period / 4u) == 0u));
 }
 
+// Nominal-vs-wire distance for one symbol, the quantity a receiver's
+// tolerance is stated in.
+u32 symbolError(u32 wire_ns, u32 nominal_ns) {
+    return wire_ns > nominal_ns ? wire_ns - nominal_ns : nominal_ns - wire_ns;
+}
+
+FL_TEST_CASE("400 kHz UART geometry keeps both symbols classifiable") {
+    // FastLED#4379. P=5 fits T0H exactly (500 ns on a 500 ns pulse grid) and
+    // rounds T1H 1200 -> 2 pulses = 1000 ns, 200 ns low. That is outside the
+    // part's ~+/-150 ns spec and 30 ns outside the +/-170 window AutoResearch
+    // decodes with, so every '1' bit in the frame classified as neither
+    // symbol and UART0 failed the RP2350 loopback at every length while PIO0
+    // passed on the same wire.
+    //
+    // P=5 totals 200 ns of error and P=4 totals 175, so the summed-error rule
+    // kept P=5 (the difference is inside its 50 ns hysteresis). Summed error
+    // cannot see that all 200 sits on one symbol.
+    const auto ws2811 = fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+    const fl::ChipsetTiming wire =
+        fl::uartWireTiming(ws2811, fl::kMaxUartBaudRate);
+    const u32 t0h = wire.T1;
+    const u32 t1h = wire.T1 + wire.T2;
+    FL_CHECK_EQ(t0h, 625u);   // P=4: 2500 / 4 = 625 ns pulses
+    FL_CHECK_EQ(t1h, 1250u);
+
+    // The property that matters, stated the way the decoder states it.
+    constexpr u32 kDecodeToleranceNs = 170;
+    FL_CHECK(symbolError(t0h, ws2811.t1_ns) <= kDecodeToleranceNs);
+    FL_CHECK(symbolError(t1h, ws2811.t1_ns + ws2811.t2_ns) <=
+             kDecodeToleranceNs);
+
+    // 1.6 Mbaud, which the RP PL011 reaches (clk_peri/16 = 3.0 Mbaud) where
+    // P=5's 2.0 Mbaud also fits -- so this is a choice, not a fallback.
+    const fl::Wave10Lut lut = fl::buildWave10Lut(ws2811);
+    FL_CHECK_EQ(static_cast<u32>(lut.pulses_per_bit), 4u);
+    FL_CHECK_EQ(fl::uartWireTiming(ws2811, 3000000u).T1, 625u);
+}
+
+FL_TEST_CASE("in-tolerance preference leaves settled geometries alone") {
+    // The criterion only intervenes when exactly one geometry keeps every
+    // symbol inside the receiver bound. Audited across all 37 chipset
+    // timings, WS2811-400KHZ is the only selection it moves; these are the
+    // ones most likely to drift if that ever stopped being true.
+    struct Expected {
+        fl::ChipsetTimingConfig timing;
+        u32 t0h;
+        u32 t1h;
+    };
+    const Expected cases[] = {
+        // P=5 stays: its worst symbol is inside the bound.
+        {fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>(), 250u, 750u},
+        {fl::makeTimingConfig<fl::TIMING_WS2811_800KHZ_LEGACY>(), 250u, 750u},
+        // P=5 stays because neither geometry qualifies, so the summed-error
+        // rule still decides -- the separation bump is not charged as error.
+        {fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), 245u, 735u},
+        {fl::makeTimingConfig<fl::TIMING_WS2814>(), 256u, 768u},
+        {fl::makeTimingConfig<fl::TIMING_GW6205_800KHZ>(), 480u, 960u},
+        {fl::makeTimingConfig<fl::TIMING_WS2815>(), 378u, 1512u},
+        // Both geometries agree; nothing to choose.
+        {fl::makeTimingConfig<fl::TIMING_SK6812>(), 300u, 900u},
+        {fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>(), 312u, 936u},
+        // A 400 kHz part that was already exact stays exact.
+        {fl::makeTimingConfig<fl::TIMING_UCS1903_400KHZ>(), 500u, 2000u},
+        {fl::makeTimingConfig<fl::TIMING_DP1903_400KHZ>(), 800u, 2400u},
+    };
+    for (const Expected& c : cases) {
+        const fl::ChipsetTiming w =
+            fl::uartWireTiming(c.timing, fl::kMaxUartBaudRate);
+        FL_CHECK_EQ(w.T1, c.t0h);
+        FL_CHECK_EQ(w.T1 + w.T2, c.t1h);
+    }
+}
+
 FL_TEST_CASE("uartWireTiming reports infeasible timing rather than guessing") {
     // A baud ceiling below anything the chipset needs leaves no geometry.
     const auto ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
