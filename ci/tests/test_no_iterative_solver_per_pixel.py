@@ -120,13 +120,21 @@ _TRAILER = r"(?:\s|const|noexcept|FL_NO_EXCEPT|override|final|mutable|volatile)*
 # matches and runs to a distant brace, swallowing the real definition that
 # follows. Measured: the closure collapsed from 21 names to 5 and lost
 # `project_to_hull` itself.
-_INIT_ENTRY = r"[A-Za-z_]\w*\s*\([^;{}()]*\)"
+# One level of nesting inside an entry, because the interesting case is
+# exactly `: ok(solve_wx_overdrive(o))` -- a solver reached from an
+# initialiser and never mentioned in the body. Without the nesting the entry
+# does not match, the whole definition does not match, and the constructor
+# contributes no edges at all; a mutation covers this.
+_INIT_ARG = r"[^;{}()]*(?:\([^;{}()]*\)[^;{}()]*)*"
+_INIT_ENTRY = r"[A-Za-z_]\w*\s*\(" + _INIT_ARG + r"\)"
 _CTOR_INIT = r"(?::\s*" + _INIT_ENTRY + r"(?:\s*,\s*" + _INIT_ENTRY + r")*\s*)?"
 
 DEFINITION = re.compile(
     r"\b(?P<name>[A-Za-z_]\w*)\s*\((?P<args>[^;{}()]*)\)"
     + _TRAILER
+    + r"(?P<init>"
     + _CTOR_INIT
+    + r")"
     + r"\{"
 )
 CALLED_NAME = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
@@ -227,8 +235,12 @@ def call_edges() -> "dict[str, set[str]]":
                 continue
             open_index = text.index("{", match.end() - 1)
             body = text[open_index : _end_of_block(text, open_index)]
+            # The initialiser list counts as part of the constructor: a call
+            # in `Foo(x) : mResult(solve_rgbcct(...)) {}` runs every time the
+            # object is built, and scanning only from the brace would miss it.
+            initialiser = match.group("init") or ""
             called = edges.setdefault(name, set())
-            for candidate in CALLED_NAME.findall(body):
+            for candidate in CALLED_NAME.findall(initialiser + body):
                 if candidate not in NOT_FUNCTIONS:
                     called.add(candidate)
     return edges
@@ -270,7 +282,15 @@ def call_pattern(symbol: str) -> re.Pattern[str]:
     """
 
     gap = r"(?:\s|/\*.*?\*/|//[^\n]*\n)*"
-    return re.compile(r"\b" + re.escape(symbol) + gap + r"\(", re.S)
+    # `Name(` covers a call and a temporary. The optional identifier covers a
+    # variable declaration, `InitProbe probe(args)`, which is how a
+    # constructor is usually reached and which `Name(` alone does not match --
+    # found by a mutation that the first version of this guard let through.
+    declarator = r"(?:[A-Za-z_]\w*" + gap + r")?"
+    return re.compile(
+        r"\b" + re.escape(symbol) + r"(?:\s+|" + gap + r")" + declarator + r"\(",
+        re.S,
+    )
 
 
 class TestNoIterativeSolverPerPixel(unittest.TestCase):
