@@ -299,9 +299,15 @@ namespace task {
 ///     }
 /// });
 /// @endcode
+/// @param timeout_ms Wall-clock budget before the wait returns an error rather
+///        than continuing to poll. Defaults to
+///        `fl::platforms::kAwaitDefaultTimeoutMs`; see FastLED#4369 for why
+///        the wait is bounded at all.
 template<typename T>
-inline PromiseResult<T> await(Promise<T> p) {
-    return fl::platforms::await(p);
+inline PromiseResult<T> await(
+    Promise<T> p,
+    fl::u32 timeout_ms = fl::platforms::kAwaitDefaultTimeoutMs) FL_NO_EXCEPT {
+    return fl::platforms::await(p, timeout_ms);
 }
 
 } // namespace task

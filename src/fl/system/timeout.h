@@ -44,14 +44,14 @@ public:
     /// @brief Construct a timeout with specified start time and duration
     /// @param start_time Start timestamp (in any consistent units)
     /// @param duration Duration (in same units as start_time)
-    Timeout(u32 start_time, u32 duration)
+    Timeout(u32 start_time, u32 duration) FL_NO_EXCEPT
         : mStartTime(start_time), mDuration(duration) {}
 
     /// @brief Check if the timeout has completed
     /// @param current_time Current timestamp (in same units as constructor)
     /// @return true if elapsed time >= duration, false otherwise
     /// @note Handles uint32_t rollover correctly via unsigned arithmetic
-    bool done(u32 current_time) const {
+    bool done(u32 current_time) const FL_NO_EXCEPT {
         u32 elapsed_time = current_time - mStartTime;  // Rollover-safe
         return elapsed_time >= mDuration;
     }
@@ -59,20 +59,20 @@ public:
     /// @brief Get elapsed time since timeout started
     /// @param current_time Current timestamp (in same units as constructor)
     /// @return Elapsed time (in same units as constructor)
-    u32 elapsed(u32 current_time) const {
+    u32 elapsed(u32 current_time) const FL_NO_EXCEPT {
         return current_time - mStartTime;  // Rollover-safe
     }
 
     /// @brief Reset the timeout to start counting from specified time
     /// @param start_time New start timestamp
-    void reset(u32 start_time) {
+    void reset(u32 start_time) FL_NO_EXCEPT {
         mStartTime = start_time;
     }
 
     /// @brief Reset with a new start time and duration
     /// @param start_time New start timestamp
     /// @param duration New duration (in same units as start_time)
-    void reset(u32 start_time, u32 duration) {
+    void reset(u32 start_time, u32 duration) FL_NO_EXCEPT {
         mStartTime = start_time;
         mDuration = duration;
     }
