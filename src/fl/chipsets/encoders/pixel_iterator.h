@@ -453,19 +453,17 @@ class PixelIterator {
             // B1 and section 6 of the spec forbid after the device solve. And
             // unlike UCS7604's `mGamma.value_or(2.8f)`, this one is hardcoded
             // -- no caller could have chosen otherwise.
-        #if FASTLED_HD_COLOR_MIXING
-            // Per-strip constant, which is why the brightness iterator loads
-            // without advancing the shared cursor (#4321).
-            auto brightness_it = makeScaledBrightness(this);
-            const u8 brightness = *brightness_it;
-        #else
-            const u8 brightness = 255;
-        #endif
             for (int i = 0; i < 8; i++) {
                 *back_ins++ = 0x00;  // start frame
             }
+            // `hd108BrightnessHeader` discards its argument and pins every
+            // gain at 31, so this is 0xFF 0xFF whatever is passed. The strip
+            // brightness used to be fetched through `makeScaledBrightness`
+            // purely to hand it over here, which built an adapter and called
+            // its out-of-line `load()` to produce a number that reached
+            // nothing. FastLED#4402.
             u8 f0, f1;
-            hd108BrightnessHeader(brightness, &f0, &f1);
+            hd108BrightnessHeader(0, &f0, &f1);
             fl::size num_leds = 0;
             while (has(1)) {
                 u16 r16, g16, b16;
@@ -492,18 +490,21 @@ class PixelIterator {
         FL_UNUSED(managed);
 #endif
 
-        #if FASTLED_HD_COLOR_MIXING
-        // HD mode: per-LED brightness
+        // One call, not one per FASTLED_HD_COLOR_MIXING branch. The two
+        // encoders emit the same bytes for the same pixels: both walk
+        // `makeScaledPixelRangeRGB`, both widen through `hd108GammaCorrect`,
+        // both frame with the same start/latch, and both headers come from
+        // `hd108BrightnessHeader`, which pins all gains at 31 whatever it is
+        // handed. `encodeHD108_HD` differed only by a per-LED brightness read
+        // and a cache around that constant header; with those gone (#4402) it
+        // is `encodeHD108` with an extra argument, so building HD-colour-mixing
+        // sketches was paying for a second copy of one function.
+        //
+        // `encodeHD108_HD` stays in hd108.h for source compatibility, and a
+        // test asserts the two agree byte for byte so this collapse cannot
+        // quietly stop being true.
         auto pixel_range = makeScaledPixelRangeRGB(this);
-        auto brightness = makeScaledBrightness(this);
-        encodeHD108_HD(pixel_range.first, pixel_range.second,
-                                 brightness, back_ins);
-        #else
-        // Standard mode: global brightness (255 = full)
-        auto pixel_range = makeScaledPixelRangeRGB(this);
-        encodeHD108(pixel_range.first, pixel_range.second,
-                              back_ins, 255);
-        #endif
+        encodeHD108(pixel_range.first, pixel_range.second, back_ins, 255);
     }
 
   private:

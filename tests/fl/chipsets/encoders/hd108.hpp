@@ -368,8 +368,11 @@ FL_TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
     verifyEndFrame(output, 5);
 }
 
-FL_TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
-    // When consecutive LEDs have same brightness, header should be cached
+FL_TEST_CASE("encodeHD108_HD() - one header for the whole strip") {
+    // Was "brightness caching optimization", back when a per-LED cache guarded
+    // against recomputing the header. It never could change, so the cache was
+    // removed in FastLED#4402 and this verifies what it always verified: every
+    // LED carries the same header bytes.
     fl::vector<fl::array<u8, 3>> leds = {
         {{100, 0, 0}},
         {{0, 100, 0}},
@@ -391,6 +394,67 @@ FL_TEST_CASE("encodeHD108_HD() - brightness caching optimization") {
     verifyLEDData(output, 10, 100, 0, 0);
     verifyLEDData(output, 18, 0, 100, 0);
     verifyLEDData(output, 26, 0, 0, 100);
+}
+
+FL_TEST_CASE("[#4402] HD108 output does not depend on brightness at all") {
+    // The premise that lets the encoder drop its per-LED brightness read:
+    // `hd108BrightnessHeader` discards its argument and pins every gain at 31,
+    // so nothing downstream of brightness can move a single output byte. If
+    // that ever stops being true -- a real per-channel gain, say -- this fails
+    // here rather than silently emitting a strip at one thirty-first of the
+    // intended level.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{200, 100, 50}},
+        {{10, 250, 3}},
+    };
+
+    fl::vector<u8> dark_out;
+    fl::vector<u8> bright_out;
+    fl::vector<u8> ramped_out;
+    fl::vector<u8> all_dark = {0, 0};
+    fl::vector<u8> all_bright = {255, 255};
+    fl::vector<u8> ramped = {0, 255};
+
+    encodeHD108_HD(leds.begin(), leds.end(), all_dark.begin(),
+                   fl::back_inserter(dark_out));
+    encodeHD108_HD(leds.begin(), leds.end(), all_bright.begin(),
+                   fl::back_inserter(bright_out));
+    encodeHD108_HD(leds.begin(), leds.end(), ramped.begin(),
+                   fl::back_inserter(ramped_out));
+
+    FL_REQUIRE_EQ(dark_out.size(), bright_out.size());
+    FL_REQUIRE_EQ(dark_out.size(), ramped_out.size());
+    for (fl::size i = 0; i < dark_out.size(); ++i) {
+        FL_CHECK_EQ(dark_out[i], bright_out[i]);
+        FL_CHECK_EQ(dark_out[i], ramped_out[i]);
+    }
+
+    // And the header really is the pinned-maximum pair, not merely constant.
+    FL_CHECK_EQ(dark_out[8], 0xFF);
+    FL_CHECK_EQ(dark_out[9], 0xFF);
+}
+
+FL_TEST_CASE("[#4402] encodeHD108 and encodeHD108_HD agree byte for byte") {
+    // `writeHD108` calls only `encodeHD108` now, on the strength of this. The
+    // two differed by a per-LED brightness read and a cache around a header
+    // that `hd108BrightnessHeader` pins regardless; once those went, the HD
+    // variant was the plain one with an extra argument. If a real per-LED
+    // brightness ever lands, this fails and says the collapse has to be undone.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{0, 0, 0}}, {{255, 255, 255}}, {{200, 100, 50}}, {{1, 2, 3}}, {{9, 9, 9}},
+    };
+    fl::vector<u8> brightness = {0, 64, 128, 200, 255};
+
+    fl::vector<u8> plain;
+    fl::vector<u8> hd;
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(plain), 255);
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(),
+                   fl::back_inserter(hd));
+
+    FL_REQUIRE_EQ(plain.size(), hd.size());
+    for (fl::size i = 0; i < plain.size(); ++i) {
+        FL_CHECK_EQ(plain[i], hd[i]);
+    }
 }
 
 FL_TEST_CASE("encodeHD108_HD() - end frame calculation") {

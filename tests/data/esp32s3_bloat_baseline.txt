@@ -1,3 +1,25 @@
+# 2026-09-12, PR #4403 (issue #4402): -66 B, 342957 -> 342891.
+#
+# A reduction, so the ratchet asks for it to be locked in rather than left as
+# headroom. The HD108 encoder stopped doing work to feed a function that throws
+# its argument away: `hd108BrightnessHeader` is `(void)brightness_8bit` followed
+# by three constexpr gains of 31, so it returns 0xFF 0xFF for every input, and
+# both encode paths were computing a brightness to hand it.
+#
+# `encodeHD108_HD` cached that constant per LED and read `*brightness_first`
+# once per LED to feed the cache -- through `ScaledPixelIteratorBrightness`,
+# whose `load()` is out of line, so a call per LED for a number that reached
+# nothing. `writeHD108`'s managed path built the whole adapter for the same
+# purpose. With both gone the two encoders are the same function, so the call
+# site collapsed to one.
+#
+# Output is unchanged by construction rather than by measurement: every removed
+# value fed only an argument that is cast to void. Two tests pin that -- HD108
+# output is byte-identical across brightness 0, 255 and a ramp, and the two
+# encoders agree byte for byte.
+#
+# Measured the same direction on esp32dev: 340,235 -> 340,183 B (-52).
+#
 # 2026-09-12, PR #4398 (issue #1114): +3 B, 342954 -> 342957.
 #
 # The one-dimensional Perlin gradient now has a gradient in every hash bucket.
@@ -104,4 +126,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342957
+342891
