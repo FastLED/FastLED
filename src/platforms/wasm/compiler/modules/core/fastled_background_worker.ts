@@ -91,6 +91,13 @@ const workerState = {
   // Dictionary format: { "0": {strips: {...}, absMin: [...], absMax: [...]}, "1": {...} }
   screenMaps: {},
   screenMapsDirty: false, // screenMaps changed and the main thread has not been told yet (main-thread rendering)
+  // Rate counters, reset every stats report. loopCount: extern_loop() iterations
+  // (the sketch frame rate). renderCount: frames handed to the renderer here;
+  // in main-thread rendering mode the main thread counts renders instead.
+  loopCount: 0,
+  renderCount: 0,
+  loopFps: 0,
+  renderFps: 0,
   renderOnMainThread: false, // frames are posted to the main thread instead of drawn on an OffscreenCanvas
 
   // Audio sample queue - samples buffered here from onmessage, flushed to WASM at frame start
@@ -583,6 +590,10 @@ async function handleStart(_payload) {
     workerState.running = true;
     workerState.startTime = performance.now();
     workerState.frameCount = 0;
+    // Rate counters measure from here, not from page load
+    workerState.loopCount = 0;
+    workerState.renderCount = 0;
+    performanceMonitor.lastStatsReport = workerState.startTime;
 
     startAnimationLoop();
 
@@ -1007,6 +1018,7 @@ async function executeFrameLoop(currentTime) {
 
   try {
     workerState.frameCount++;
+    workerState.loopCount++;
 
     // Flush buffered audio samples to WASM BEFORE running C++ loop.
     // This ensures Module.ccall('pushAudioSamples') happens in the same
@@ -1033,6 +1045,7 @@ async function executeFrameLoop(currentTime) {
       } else {
         // Render frame to OffscreenCanvas (automatically syncs to main thread canvas)
         workerState.graphicsManager.updateCanvas(frameData);
+        workerState.renderCount++;
 
         // Capture frame for main-thread recording if enabled
         if (workerState.isCapturingFrames) {
@@ -1174,6 +1187,13 @@ function updatePerformanceMetrics(frameTime) {
  * Reports performance statistics to main thread
  */
 function reportPerformanceStats() {
+  // Wall-clock rates over the interval since the last report
+  const now = performance.now();
+  const intervalSec = Math.max((now - performanceMonitor.lastStatsReport) / 1000, 0.001);
+  workerState.loopFps = workerState.loopCount / intervalSec;
+  workerState.renderFps = workerState.renderCount / intervalSec;
+  workerState.loopCount = 0;
+  workerState.renderCount = 0;
   const stats = getPerformanceStats();
 
   postMessage({
@@ -1192,8 +1212,11 @@ function getPerformanceStats() {
   const fps = workerState.frameCount / (runTime / 1000);
 
   return {
-    fps: fps || 0,
-    averageFrameTime: workerState.averageFrameTime,
+    fps: fps || 0, // cumulative loop iterations per second since start
+    loopFps: workerState.loopFps, // sketch frame rate over the last stats interval
+    renderFps: workerState.renderFps, // frames rendered here over the last interval (0 in main-thread rendering mode)
+    renderOnMainThread: workerState.renderOnMainThread,
+    averageFrameTime: workerState.averageFrameTime, // CPU cost of one loop iteration, ms
     frameCount: workerState.frameCount,
     runTime: runTime,
     memoryUsage: 'self' in globalThis && 'performance' in self && self.performance.memory ? {

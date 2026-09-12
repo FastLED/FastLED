@@ -46,6 +46,7 @@ class FastLEDAsyncController {
     this.lastFrameTime = 0;
     this.frameInterval = 1000 / this.frameRate;
     this.lastSlowFrameWarningTime = 0; // Track last slow frame warning timestamp
+    this.renderTimes = []; // Timestamps of renders in the last second (legacy main-thread loop)
 
     // Worker integration properties
     this.isMainThread = typeof Worker !== 'undefined' && typeof window !== 'undefined';
@@ -430,6 +431,11 @@ class FastLEDAsyncController {
     if (globalThis.FastLED_onFrame) {
       await globalThis.FastLED_onFrame(frameData);
     }
+    const now = performance.now();
+    this.renderTimes.push(now);
+    while (this.renderTimes.length && now - this.renderTimes[0] > 1000) {
+      this.renderTimes.shift();
+    }
   }
 
   /**
@@ -524,8 +530,31 @@ class FastLEDAsyncController {
      * @returns {number} Current FPS
      */
   getFPS() {
+    // Worker mode: wall-clock loop rate reported by the worker. The old
+    // 1000 / averageFrameTime figure is loop *cost*, not a rate (it read ~700
+    // while 60 frames/s were delivered), so it is only a fallback for the
+    // legacy main-thread loop, which has no other measurement.
+    if (this.workerMode) {
+      return fastLEDWorkerManager.getLoopFPS();
+    }
     const avgFrameTime = this.getAverageFrameTime();
     return avgFrameTime > 0 ? 1000 / avgFrameTime : 0;
+  }
+
+  /**
+     * Gets frames rendered per second (see FastLEDWorkerManager.getRenderFPS)
+     * @returns {number} Render FPS
+     */
+  getRenderFPS() {
+    if (this.workerMode) {
+      return fastLEDWorkerManager.getRenderFPS();
+    }
+    // Legacy main-thread loop: count renderFrame() calls in the last second
+    const now = performance.now();
+    while (this.renderTimes.length && now - this.renderTimes[0] > 1000) {
+      this.renderTimes.shift();
+    }
+    return this.renderTimes.length;
   }
 
   /**
@@ -537,6 +566,7 @@ class FastLEDAsyncController {
       frameCount: this.frameCount,
       averageFrameTime: this.getAverageFrameTime(),
       fps: this.getFPS(),
+      renderFps: this.getRenderFPS(),
       running: this.running,
       setupCompleted: this.setupCompleted,
     };

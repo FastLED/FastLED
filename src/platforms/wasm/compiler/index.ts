@@ -660,13 +660,14 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
       FASTLED_DEBUG_LOG('INDEX_JS', 'Setting up performance monitoring...');
       setInterval(() => {
         const fps = fastLEDController.getFPS();
+        const renderFps = fastLEDController.getRenderFPS();
         const frameTime = fastLEDController.getAverageFrameTime();
 
         // Record performance metrics
         fastLEDPerformanceMonitor.recordFrameTime(frameTime);
 
         // Update display
-        fpsDisplay.textContent = `FPS: ${fps.toFixed(1)} | Frame: ${frameTime.toFixed(1)}ms`;
+        fpsDisplay.textContent = `FPS: ${fps.toFixed(1)} | Render: ${renderFps.toFixed(1)} fps | Loop: ${frameTime.toFixed(2)}ms`;
 
         // Monitor memory usage if available
         if (performance.memory) {
