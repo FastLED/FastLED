@@ -430,9 +430,67 @@ class PixelIterator {
     /// @brief Encode pixels in HD108 format (zero allocation)
     /// @param out Output buffer to write encoded bytes
     /// @note Protocol: 16-bit RGB with gamma correction and brightness control
+    /// @param managed True when the source is the colour-managed one, i.e.
+    ///        `loadAndScaleRGB16` yields a device drive rather than a widened
+    ///        8-bit pixel. Then the fixed 2.8 gamma is skipped: it would be a
+    ///        second shaping stage after the device solve (#4326).
     template <typename CONTAINER_UIN8_T>
-    void writeHD108(CONTAINER_UIN8_T* out) FL_NO_EXCEPT {
+    void writeHD108(CONTAINER_UIN8_T* out, bool managed = false) FL_NO_EXCEPT {
         auto back_ins = fl::back_inserter(*out);
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+        if (managed) {
+            // Inline rather than an `encodeHD108_wide` in hd108.h: that header
+            // is included *by* this one, before `PixelIterator` exists, and a
+            // concrete `PixelIterator&` parameter is not a dependent type --
+            // so its body would be checked there and fail. Same reason the
+            // UCS7604 wide path had to be guarded for TINY (#4326).
+            //
+            // `hd108GammaCorrect` is skipped by construction. It exists to
+            // widen an 8-bit pixel to the 16 bits this chipset carries; the
+            // managed source has already quantized its device drive once, to
+            // 16 bits, so a fixed 2.8 curve on top is the second shaping stage
+            // B1 and section 6 of the spec forbid after the device solve. And
+            // unlike UCS7604's `mGamma.value_or(2.8f)`, this one is hardcoded
+            // -- no caller could have chosen otherwise.
+        #if FASTLED_HD_COLOR_MIXING
+            // Per-strip constant, which is why the brightness iterator loads
+            // without advancing the shared cursor (#4321).
+            auto brightness_it = makeScaledBrightness(this);
+            const u8 brightness = *brightness_it;
+        #else
+            const u8 brightness = 255;
+        #endif
+            for (int i = 0; i < 8; i++) {
+                *back_ins++ = 0x00;  // start frame
+            }
+            u8 f0, f1;
+            hd108BrightnessHeader(brightness, &f0, &f1);
+            fl::size num_leds = 0;
+            while (has(1)) {
+                u16 r16, g16, b16;
+                loadAndScaleRGB16(&r16, &g16, &b16);
+                *back_ins++ = f0;
+                *back_ins++ = f1;
+                *back_ins++ = static_cast<u8>(r16 >> 8);
+                *back_ins++ = static_cast<u8>(r16 & 0xFF);
+                *back_ins++ = static_cast<u8>(g16 >> 8);
+                *back_ins++ = static_cast<u8>(g16 & 0xFF);
+                *back_ins++ = static_cast<u8>(b16 >> 8);
+                *back_ins++ = static_cast<u8>(b16 & 0xFF);
+                stepDithering();
+                advanceData();
+                ++num_leds;
+            }
+            const fl::size latch = num_leds / 2 + 4;
+            for (fl::size i = 0; i < latch; i++) {
+                *back_ins++ = 0xFF;  // end frame
+            }
+            return;
+        }
+#else
+        FL_UNUSED(managed);
+#endif
 
         #if FASTLED_HD_COLOR_MIXING
         // HD mode: per-LED brightness

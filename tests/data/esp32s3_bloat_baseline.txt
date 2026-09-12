@@ -1,3 +1,33 @@
+# 2026-09-12, PR #4387 (issue #4326, colour pipeline P8): +240 B,
+# 342714 -> 342954.
+#
+# HD108 joins UCS7604-16 in consuming the device drive rather than an 8-bit
+# copy of it widened by a gamma curve. #4326 called HD108 "the same shape and
+# worse": `hd108GammaCorrect` is a hardcoded 2.8 inside the encoder, so unlike
+# UCS7604's `mGamma.value_or(2.8f)` no caller could ever have chosen
+# otherwise. Measured on a managed channel it put the same 849 on the wire
+# where the solve asked for 13933; it now puts 13935.
+#
+# Where the 240 B is, from a symbol diff against master (`fbuild symbols` on
+# the ELF the build produced -- `bash bloat --build` used to analyse a
+# different one, fixed in #4386):
+#
+#   +255  PixelIterator::writeHD108<vector_psram<u8>>
+#    +72  PixelIterator::loadAndScaleRGB16
+#         (minus ~87 B recovered elsewhere)
+#
+# `loadAndScaleRGB16` was inlined into its single caller before; with a second
+# one it is emitted once and called twice, which is the cheaper of the two.
+#
+# The wide loop is inline in `writeHD108` rather than a function in hd108.h
+# because that header is included *by* pixel_iterator.h, before the class
+# exists, and a concrete `PixelIterator&` parameter is not a dependent type --
+# its body would be checked there and fail.
+#
+# A tiny-memory target pays 0 B: the branch sits behind
+# !FL_PLATFORM_HAS_TINY_MEMORY, verified by compiling the header with
+# FL_PLATFORM_HAS_TINY_MEMORY=1.
+#
 # 2026-09-12, PR #4368 (issue #4326, colour pipeline P8): +231 B,
 # 342483 -> 342714.
 #
@@ -52,4 +82,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342714
+342954

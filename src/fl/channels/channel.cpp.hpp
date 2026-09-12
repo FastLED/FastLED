@@ -833,7 +833,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                 break;
 
             case SpiChipset::HD108:
-                pixelIterator.writeHD108(&data);
+                pixelIterator.writeHD108(&data, iterator.isManaged());
                 break;
         }
         // No default case - compiler will error if any enum value is missing
