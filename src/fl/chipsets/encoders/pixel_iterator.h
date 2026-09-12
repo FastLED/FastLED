@@ -11,6 +11,8 @@
 #include "fl/gfx/rgbww.h"
 #include "crgb.h"
 #include "fl/math/intmap.h"
+#include "fl/system/sketch_macros.h"  // IWYU pragma: keep  (FL_PLATFORM_HAS_TINY_MEMORY)
+#include "fl/stl/type_traits.h"  // IWYU pragma: keep  (declval for WideLoadBinder)
 #include "fl/chipsets/encoders/ws2801.h"
 #include "fl/chipsets/encoders/ws2803.h"
 #include "fl/chipsets/encoders/ws2812.h"
@@ -64,6 +66,20 @@ struct PixelControllerVtable {
     pc->loadAndScaleRGB(r_out, g_out, b_out);
   }
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+  // Wide load (P8, #4042), bound only for sources that actually have one.
+  //
+  // Measured: binding it for every source cost 750 B on an ESP32-S3 Blink
+  // build -- six copies of this thunk at 125 B, one per EOrder
+  // instantiation, all doing the identical widening. Only a colour-managed
+  // source has a wider pixel to offer; every PixelController just widens its
+  // 8-bit one, and PixelIterator can do that once for all of them.
+  static void loadAndScaleRGB16(void* pixel_controller, u16* r_out, u16* g_out, u16* b_out) FL_NO_EXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    pc->loadAndScaleRGB16(r_out, g_out, b_out);
+  }
+#endif
+
   // NOTE: loadAndScale_APA102_HD() removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
   // NOTE: loadAndScale_WS2816_HD() removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
 
@@ -103,6 +119,30 @@ struct PixelControllerVtable {
 typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out);
 typedef void (*loadAndScaleRGBWWFunction)(void* pixel_controller, Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out, u8* b4_out);
 typedef void (*loadAndScaleRGBFunction)(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out);
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+typedef void (*loadAndScaleRGB16Function)(void* pixel_controller, u16* r_out, u16* g_out, u16* b_out);
+
+/// Binds the wide thunk only when `T` declares `loadAndScaleRGB16`.
+///
+/// A plain `PixelController` does not, so nothing is emitted for it and the
+/// pointer stays null; `PixelIterator::loadAndScaleRGB16` then widens the
+/// 8-bit load in one place instead of once per colour order.
+template <typename T, typename = void>
+struct WideLoadBinder {
+    static loadAndScaleRGB16Function get() FL_NO_EXCEPT { return nullptr; }
+};
+
+template <typename T>
+struct WideLoadBinder<T, decltype(static_cast<void>(
+                             fl::declval<T&>().loadAndScaleRGB16(
+                                 static_cast<u16*>(nullptr),
+                                 static_cast<u16*>(nullptr),
+                                 static_cast<u16*>(nullptr))))> {
+    static loadAndScaleRGB16Function get() FL_NO_EXCEPT {
+        return &PixelControllerVtable<T>::loadAndScaleRGB16;
+    }
+};
+#endif
 // NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
 // NOTE: loadAndScale_WS2816_HDFunction removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
 typedef void (*stepDitheringFunction)(void* pixel_controller);
@@ -154,6 +194,9 @@ class PixelIterator {
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
       mLoadAndScaleRGBWW = &Vtable::loadAndScaleRGBWW;
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+      mLoadAndScaleRGB16 = WideLoadBinder<PixelControllerT>::get();
+#endif
       // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
       // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
       mStepDithering = &Vtable::stepDithering;
@@ -177,6 +220,26 @@ class PixelIterator {
     void loadAndScaleRGB(u8 *r_out, u8 *g_out, u8 *b_out) FL_NO_EXCEPT {
       mLoadAndScaleRGB(mPixelController, r_out, g_out, b_out);
     }
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// One pixel at the source's own precision, wire-ordered.
+    ///
+    /// For an ordinary `PixelController` that is its 8-bit pixel widened
+    /// exactly; for a colour-managed source it is the s16.16 device drive
+    /// quantized once, to 16 bits rather than to 8 and back up.
+    void loadAndScaleRGB16(u16 *r_out, u16 *g_out, u16 *b_out) FL_NO_EXCEPT {
+      if (mLoadAndScaleRGB16 != nullptr) {
+        mLoadAndScaleRGB16(mPixelController, r_out, g_out, b_out);
+        return;
+      }
+      // The source has no wider pixel than its 8-bit one. Widening exactly,
+      // here rather than in a per-source thunk.
+      u8 r8, g8, b8;
+      loadAndScaleRGB(&r8, &g8, &b8);
+      *r_out = fl::map8_to_16(r8);
+      *g_out = fl::map8_to_16(g8);
+      *b_out = fl::map8_to_16(b8);
+    }
+#endif
     // NOTE: loadAndScale_APA102_HD() removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
     // NOTE: loadAndScale_WS2816_HD() removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
     void stepDithering() FL_NO_EXCEPT { mStepDithering(mPixelController); }
@@ -393,6 +456,9 @@ class PixelIterator {
     loadAndScaleRGBWFunction mLoadAndScaleRGBW = nullptr;
     loadAndScaleRGBWWFunction mLoadAndScaleRGBWW = nullptr;
     loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    loadAndScaleRGB16Function mLoadAndScaleRGB16 = nullptr;
+#endif
     // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
     // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
     stepDitheringFunction mStepDithering = nullptr;
@@ -518,12 +584,25 @@ inline void ScaledPixelIteratorRGB16::advance() FL_NO_EXCEPT {
         // dropping it. Doing that properly needs a primitive that loads the
         // pixel scaled at full brightness, which PixelIterator does not
         // expose today.
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+        // The wide load the comment above asks for (P8, #4042). For an
+        // ordinary controller it is `map8_to_16` of the same 8-bit pixel, so
+        // an unbound channel is byte-identical to what this did before. A
+        // colour-managed source instead quantizes its s16.16 drive straight
+        // to 16 bits, which is what lets a 16-bit encoder reach more than 256
+        // levels.
+        u16 r16, g16, b16;
+        mPixels->loadAndScaleRGB16(&r16, &g16, &b16);
+#else
+        // TINY carries no colour pipeline, so there is nothing wider than the
+        // 8-bit pixel to load and the extra function pointer is not spent.
         u8 b0, b1, b2;
         mPixels->loadAndScaleRGB(&b0, &b1, &b2);
 
         const u16 r16 = fl::map8_to_16(b0);
         const u16 g16 = fl::map8_to_16(b1);
         const u16 b16 = fl::map8_to_16(b2);
+#endif
 
         mCurrent = array<u16, 3>{{r16, g16, b16}};  // Wire order 16-bit channels
         mPixels->stepDithering();

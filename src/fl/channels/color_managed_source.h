@@ -55,6 +55,17 @@ class ColorManagedPixelSource {
     /// which is what the `LegacyClearedByProfile` warning is for.
     void loadAndScaleRGB(u8* b0_out, u8* b1_out, u8* b2_out) FL_NO_EXCEPT;
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// The same pixel, quantized once to 16 bits instead of to 8 (P8, #4042).
+    ///
+    /// B3 asks for a single final quantization. The 8-bit entry point above is
+    /// that, for an 8-bit wire. A 16-bit encoder fed from it gets the drive
+    /// narrowed to 256 levels and then widened again, which is a quantization
+    /// the wire never asked for -- measured on UCS7604-16 in #4326 as 252 of
+    /// 65536 reachable levels.
+    void loadAndScaleRGB16(u16* b0_out, u16* b1_out, u16* b2_out) FL_NO_EXCEPT;
+#endif
+
     /// Legacy. An RGBW device's white emitter has no home in
     /// `EmitterProfile`, which carries three primaries and nothing else, so
     /// there is no profile for `allocateEmitterDrivesQ16` to be given. That
@@ -90,6 +101,12 @@ class ColorManagedPixelSource {
     /// This is the single final quantization B3 asks for: nothing upstream
     /// of it is 8-bit, and nothing downstream re-quantizes.
     static u8 quantize(i32 drive) FL_NO_EXCEPT;
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// `quantize` onto the 16-bit wire. Same clamps, same rounding, 65535
+    /// full scale rather than 255.
+    static u16 quantize16(i32 drive) FL_NO_EXCEPT;
+#endif
 
     PixelController<RGB>& mController;
     const StreamingPipelineQ16& mPipeline;
