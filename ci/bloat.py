@@ -142,6 +142,10 @@ class ElfLocation:
     fbuild_native: bool
 
 
+# See `_assert_fresh`: the coarsest common filesystem mtime granularity.
+_MTIME_GRANULARITY_SLACK_S = 2.0
+
+
 def _assert_fresh(location: ElfLocation, build_started: float | None) -> None:
     """Refuse to analyse an ELF older than the build that just ran.
 
@@ -153,7 +157,13 @@ def _assert_fresh(location: ElfLocation, build_started: float | None) -> None:
     if build_started is None:
         return
     mtime = location.elf.stat().st_mtime
-    if mtime >= build_started:
+    # Slack for coarse mtime granularity. `time.time()` is sub-microsecond,
+    # but a filesystem may store mtimes to the second (ext3, HFS+) or to two
+    # seconds (FAT/exFAT), so an ELF written moments after the build began can
+    # carry a timestamp rounded below it. Two seconds covers the coarsest of
+    # those while still refusing the artifact this guard exists for, which was
+    # five days stale.
+    if mtime >= build_started - _MTIME_GRANULARITY_SLACK_S:
         return
     age = build_started - mtime
     raise SystemExit(
@@ -199,11 +209,10 @@ def find_elf(board: str, build_root: Path) -> ElfLocation:
         (candidates[0], False),
         (candidates[1], False),
     ]
-    found = [
-        (path, native, path.stat().st_mtime)
-        for path, native in ranked
-        if path.is_file()
-    ]
+    found: list[tuple[Path, bool, float]] = []
+    for path, native in ranked:
+        if path.is_file():
+            found.append((path, native, path.stat().st_mtime))
     if found:
         newest = max(mtime for _, _, mtime in found)
         for path, native, mtime in found:
@@ -415,7 +424,6 @@ def main() -> int:
 
     try:
         location = find_elf(args.board, Path(args.build_root))
-        _assert_fresh(location, build_started)
     except SystemExit:
         if not args.allow_overflow:
             raise
@@ -431,6 +439,13 @@ def main() -> int:
                 "(expected for over-budget builds). Checking for ELF..."
             )
         location = find_elf(args.board, Path(args.build_root))
+
+    # Outside the block above on purpose. That `except SystemExit` means
+    # "no ELF was found, retry with --allow-overflow"; a stale-ELF refusal
+    # raised inside it would be caught and rebuilt as though the ELF were
+    # missing, which is the opposite of what it is. Checked here so it covers
+    # both the normal and the recovery selection.
+    _assert_fresh(location, build_started)
 
     # nm resolution:
     #   fbuild-native ELF → fbuild auto-resolves via build_info_<board>.json,

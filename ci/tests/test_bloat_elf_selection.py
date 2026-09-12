@@ -14,6 +14,8 @@ FastLED#4384.
 
 from __future__ import annotations
 
+import os
+import tempfile
 import time
 import unittest
 from pathlib import Path
@@ -24,8 +26,6 @@ from ci.bloat import ElfLocation, _assert_fresh, find_elf
 def _touch(path: Path, mtime: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(b"\x7fELF")
-    import os
-
     os.utime(path, (mtime, mtime))
 
 
@@ -40,8 +40,6 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
     def test_the_newer_pio_elf_wins_over_a_stale_fbuild_one(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
-        import tempfile
-
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             fbuild_elf, pio_elf = self._layouts(root)
@@ -57,8 +55,6 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
     ) -> None:
         """The change is "newest", not "always prefer PIO"."""
 
-        import tempfile
-
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             fbuild_elf, pio_elf = self._layouts(root)
@@ -73,8 +69,6 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
     def test_a_missing_build_still_reports_where_it_looked(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
-        import tempfile
-
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(SystemExit) as caught:
                 find_elf("esp32s3", Path(tmp))
@@ -90,21 +84,31 @@ class TestFreshnessGuard(unittest.TestCase):
         return ElfLocation(elf=elf, fbuild_native=False)
 
     def test_without_build_nothing_is_asserted(self: "TestFreshnessGuard") -> None:
-        import tempfile
-
         with tempfile.TemporaryDirectory() as tmp:
             _assert_fresh(self._location(tmp, time.time() - 86400), None)
 
     def test_an_elf_newer_than_the_build_passes(self: "TestFreshnessGuard") -> None:
-        import tempfile
-
         with tempfile.TemporaryDirectory() as tmp:
             started = time.time() - 60
             _assert_fresh(self._location(tmp, time.time()), started)
 
-    def test_an_elf_older_than_the_build_is_refused(self: "TestFreshnessGuard") -> None:
-        import tempfile
+    def test_an_elf_rounded_just_below_the_build_still_passes(
+        self: "TestFreshnessGuard",
+    ) -> None:
+        """Coarse filesystem mtime must not read as stale.
 
+        `time.time()` is sub-microsecond; a filesystem may store mtimes to the
+        second (ext3, HFS+) or two seconds (FAT), so an ELF written moments
+        after the build began can carry a timestamp rounded below it. Refusing
+        that would turn this guard into a false alarm on exactly the fresh
+        build it is meant to accept.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp:
+            started = time.time()
+            _assert_fresh(self._location(tmp, started - 1.5), started)
+
+    def test_an_elf_older_than_the_build_is_refused(self: "TestFreshnessGuard") -> None:
         with tempfile.TemporaryDirectory() as tmp:
             location = self._location(tmp, time.time() - 5 * 86400)
             with self.assertRaises(SystemExit) as caught:
