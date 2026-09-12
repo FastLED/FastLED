@@ -384,4 +384,107 @@ FL_TEST_CASE("[#4347] uncorrelated drops keep the mean; correlation is the fault
     FL_CHECK_LT(fl::fabs(mean - whole_cycle), 0.05);
 }
 
+// ---------------------------------------------------------------------------
+// The other clause of the same contract sentence: "with explicit tests for
+// dropped submissions and irregular dwell." The drop half is above. This is
+// dwell.
+//
+// Dither correctness is a *time-weighted* mean over the cycle, so a phase held
+// twice as long counts twice. Dropping a frame removes its phase from the
+// average; holding one longer overweights it. The two are the same defect on
+// different axes, and neither is visible to a measurement that assumes every
+// frame is displayed for the same interval.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Time-weighted mean emitted code over one cycle.
+///
+/// The weight is chosen by the phase's own parity, not by position in the
+/// loop. Indexing by position is the mistake this helper exists to avoid: the
+/// cycle starts wherever the global counter happens to be, so a fixed array
+/// lands on whichever parity it lands on and the measurement silently
+/// reverses sign.
+///
+/// Equal weights reduce to `cycleSum / kDitherCycle`, which is what every
+/// measurement above assumes without saying so.
+double dwellWeightedMean(fl::u8 value, fl::u8 premixed, int hold_odd,
+                         int hold_even) {
+    double weighted = 0.0;
+    double total = 0.0;
+    for (int frame = 0; frame < kDitherCycle; ++frame) {
+        fl::detail::advanceDitherFrame();
+        const bool odd = (fl::detail::ditherFrame() & 0x01) != 0;
+        CRGB pixel(value, value, value);
+        ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+        adjustment.premixed = CRGB(premixed, premixed, premixed);
+        PixelController<RGB> pixels(&pixel, 1, adjustment, BINARY_DITHER);
+        const double emitted = static_cast<double>(pixels.loadAndScale0());
+        const double hold = static_cast<double>(odd ? hold_odd : hold_even);
+        weighted += emitted * hold;
+        total += hold;
+    }
+    return weighted / total;
+}
+
+} // namespace
+
+FL_TEST_CASE("[#4347] irregular dwell moves the mean the drop test measures") {
+    const fl::u8 kValue = 9;
+    const fl::u8 kPremixed = 64;
+
+    // The reference: every phase held equally, which is the undropped,
+    // even-dwell case the rest of this file measures.
+    const double even = dwellWeightedMean(kValue, kPremixed, 1, 1);
+    const double whole_cycle =
+        static_cast<double>(cycleSum(kValue, kPremixed)) / kDitherCycle;
+    FL_CHECK_LT(fl::fabs(even - whole_cycle), 0.05);
+
+    // Now hold the phases that carry the low half of the bit-reversed offsets
+    // three times as long. Nothing is dropped -- every phase still reaches the
+    // wire -- and the mean still moves, because the average is over time and
+    // not over frames.
+    const double heavy_low = dwellWeightedMean(kValue, kPremixed, 1, 3);
+    const double heavy_high = dwellWeightedMean(kValue, kPremixed, 3, 1);
+
+    // Straddles the even-dwell value, the same signature the drop test finds:
+    // a phase-correlated weighting displaces the mean rather than adding
+    // noise to it.
+    FL_CHECK_LT(heavy_low, even - 0.1);
+    FL_CHECK_GT(heavy_high, even + 0.1);
+
+    // 0.38 codes of swing, against the drop case's 0.75. That ratio is not a
+    // coincidence and is worth recording: dropping a parity gives the
+    // surviving phases 100% of the weight, while holding 3:1 gives them 75%,
+    // so the displacement from the even-dwell mean is half as far. Dwell is a
+    // weaker lever than dropping, reaching the same place by degrees.
+    //
+    // Which is the point of testing it separately. An implementation that
+    // advanced the phase on presentation would close the drop half of this
+    // contract sentence and leave this half exactly as it is, because dwell
+    // is about how long a presented frame stays up, not whether it was
+    // presented at all.
+    const double separation = heavy_high - heavy_low;
+    FL_CHECK_GT(separation, 0.3);
+    FL_CHECK_LT(separation, 0.5);
+}
+
+FL_TEST_CASE("[#4347] dwell that does not correlate with phase costs nothing") {
+    // The control, matching the drop test's: irregularity alone is harmless.
+    // A dwell pattern independent of the phase leaves the time-weighted mean
+    // where uniform dwell puts it, so what matters is correlation, not
+    // jitter.
+    const fl::u8 kValue = 9;
+    const fl::u8 kPremixed = 64;
+
+    const double even = dwellWeightedMean(kValue, kPremixed, 1, 1);
+
+    // Hold every phase for two units instead of one. The dwell is irregular
+    // against the frame clock -- each frame is twice as long as before -- and
+    // uniform against the phase, which is the distinction that matters.
+    const double irregular = dwellWeightedMean(kValue, kPremixed, 2, 2);
+
+    FL_CHECK_LT(fl::fabs(irregular - even), 0.35);
+}
+
 } // FL_TEST_FILE
