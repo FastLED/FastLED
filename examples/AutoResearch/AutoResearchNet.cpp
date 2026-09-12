@@ -773,9 +773,35 @@ void pollNetServer() {}
 
 namespace {
 
-// A stalled peer is one that has sent nothing for this long. Kept at the
-// old flat budget so a truly dead connection is reaped just as quickly.
-constexpr uint32_t kRpPeerStallMs = 2000;
+// A stalled peer is one that has sent nothing for this long.
+//
+// 6000, matching kRpHttpClientStallMs. This was left at 2000 when the client
+// side was raised (#4231) on the reasoning that a dead connection should be
+// reaped quickly -- but the argument that justified raising the client
+// applies to the server unchanged, because it is a property of the peer, not
+// of which side we are. The C6 services a request from its sketch main loop
+// and blocks up to 5000 ms doing it, so a gap of more than 2000 ms between
+// our reading its headers and its body arriving is ordinary, not a fault.
+//
+// Observed on the bench: `--net-peer` fails intermittently -- about one run
+// in three, on master as well as on any branch -- with the RP's server taking
+// complete headers and then none of a 4096-byte body:
+//
+//   POST /echo 4096-byte FNV-1a -> 408, received_bytes: 0
+//   {'lastTimeoutWasStall': True, 'lastTimeoutElapsedMs': 2006,
+//    'lastTimeoutBodyLength': 0, 'lastTimeoutExpectedBody': 4096,
+//    'lastTimeoutHeadersComplete': True}
+//
+// 2006 ms: the peer missed the budget by six milliseconds. The client-side
+// fix recorded five requests at 2706-3586 ms that the old value would have
+// failed, all under the peer's 5000 ms ceiling; this is the same distribution
+// seen from the other end.
+//
+// A truly dead connection is still reaped -- kRpPeerMaxRequestMs (10000) is
+// the absolute ceiling and is unchanged. The cost of this change is that a
+// dead peer now occupies the single-client server for up to 6 s rather than
+// 2 s before that ceiling applies. See FastLED#3899.
+constexpr uint32_t kRpPeerStallMs = 6000;
 // Absolute ceiling for one request, so a peer that dribbles a byte at a time
 // cannot occupy the single-client server forever.
 constexpr uint32_t kRpPeerMaxRequestMs = 10000;

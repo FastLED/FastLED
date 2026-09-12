@@ -36,6 +36,8 @@ from ci.autoresearch.phases import (
     _run_tests_or_special_mode,
     _run_watchdog_soak,
     _validate_test_rpc_response,
+    coroutine_exit_code,
+    kCoroutineUnsupportedExit,
     stop_autoresearch_watchdog,
 )
 from ci.rpc_client import RpcError, RpcTimeoutError
@@ -2755,7 +2757,13 @@ class TestRunTestsOrSpecialMode:
         with patch(f"{_PATCH_MOD}.RpcClient", return_value=mock_client):
             rc = asyncio.run(_run_tests_or_special_mode(ctx, qctx))
 
-        assert rc == 0
+        # This asserted 0 until FastLED#3832: a null backend runs no coroutine
+        # test, so exiting 0 recorded a passing criterion on the strength of
+        # nothing having run. The code must reach the caller intact, which is
+        # what this end-to-end path proves that the unit test of
+        # coroutine_exit_code cannot.
+        assert rc == kCoroutineUnsupportedExit
+        assert rc != 0
 
     def test_rp2350_watchdog_reacquires_active_environment_and_device(self) -> None:
         ctx = _make_ctx(
@@ -3198,3 +3206,41 @@ def test_parallel_validator_rejects_an_oversized_request_error() -> None:
         }
     )
     assert not _is_valid_rp_pio_parallel_result(refusal_with_flags)
+
+
+def test_coroutine_unsupported_is_not_reported_as_a_pass() -> None:
+    """A device with no coroutine backend must not exit 0.
+
+    RP2xxx selects the generic Arduino null coroutine backend, so
+    `bash autoresearch rp2350 --coroutine` runs zero tests and the device
+    answers `supported=False`. That used to return 0, which recorded a
+    passing coroutine criterion in FastLED#3832 on the strength of no test
+    having run -- and made a genuine regression in a real backend
+    indistinguishable from the absent one.
+
+    The three outcomes must stay three distinct codes.
+    """
+    unsupported = coroutine_exit_code({"supported": False, "backend": "null"})
+    assert unsupported != 0, "an absent capability is not a pass"
+
+    failed = coroutine_exit_code({"supported": True, "success": False})
+    assert failed != 0
+
+    # Distinct from each other too: "nothing ran" and "something broke" are
+    # different findings, and a caller must be able to tell them apart.
+    assert unsupported != failed
+
+    passed = coroutine_exit_code({"supported": True, "success": True})
+    assert passed == 0
+
+
+def test_coroutine_exit_code_defaults_trust_older_firmware() -> None:
+    """Omitted keys read as the optimistic value, not as breakage.
+
+    Firmware predating the `supported` flag answers with neither key. Such a
+    response that also reports `success` is a real pass and must stay one;
+    absent `success` is a failure, matching what the caller printed before
+    this mapping was extracted.
+    """
+    assert coroutine_exit_code({"success": True}) == 0
+    assert coroutine_exit_code({}) == 1

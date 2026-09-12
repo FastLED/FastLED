@@ -39,7 +39,13 @@ from ci.autoresearch.gpio import (
 )
 from ci.autoresearch.usb_power import absent_port_error, warn_selective_suspend
 from ci.debug_attached import run_cpp_lint
-from ci.rpc_client import RpcClient, RpcCrashError, RpcError, RpcTimeoutError
+from ci.rpc_client import (
+    RpcClient,
+    RpcCrashError,
+    RpcError,
+    RpcResponse,
+    RpcTimeoutError,
+)
 from ci.util.blocker_alert import blocker_alert
 from ci.util.crash_trace_decoder import CrashTraceDecoder
 from ci.util.global_interrupt_handler import (
@@ -3997,6 +4003,39 @@ async def _run_lpc_uart_dma_tests(ctx: RunContext) -> int:
     return 0 if result.returncode == 0 else 1
 
 
+# Exit status for `--coroutine` when the device reports no real coroutine
+# backend. Distinct from 0 (every test passed) and from 1 (a test failed),
+# because "the capability is absent" is neither. Returning 0 here is what let
+# RP2xxx record a passing coroutine criterion in #3832 while running zero
+# tests -- a criterion that cannot fail is not evidence, and a regression in a
+# real backend would look identical to this. No CI workflow invokes
+# `--coroutine`; it is a bench acceptance criterion, which is exactly where a
+# vacuous pass does its damage.
+kCoroutineUnsupportedExit = 2
+
+
+def coroutine_exit_code(response: RpcResponse | dict[str, Any]) -> int:
+    """Map a ``testCoroutineAll`` RPC response to a process exit status.
+
+    Three outcomes, three codes, because collapsing the first two is the
+    defect this exists to prevent:
+
+    * ``kCoroutineUnsupportedExit`` -- the device has no real coroutine
+      backend, so it ran no test and nothing here can regress.
+    * ``1`` -- tests ran and at least one failed.
+    * ``0`` -- tests ran and all passed.
+
+    ``supported`` and ``success`` both default to the optimistic value so an
+    older firmware that omits them is read the way it was written, not
+    reported as broken.
+    """
+    if response.get("supported", True) is False:
+        return kCoroutineUnsupportedExit
+    if response.get("success", False):
+        return 0
+    return 1
+
+
 async def _run_coroutine_tests(ctx: RunContext) -> int:
     """Run coroutine test suite via RPC."""
     upload_port = ctx.upload_port
@@ -4023,11 +4062,23 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
         print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
         print()
 
-        if response.get("supported", True) is False:
+        exit_code = coroutine_exit_code(response)
+
+        if exit_code == kCoroutineUnsupportedExit:
             backend = response.get("backend", "unknown")
             reason = response.get("reason", "no real coroutine backend")
-            print(f"RESULT: COROUTINE UNSUPPORTED (backend={backend}): {reason}")
-            return 0
+            print(
+                f"{Fore.YELLOW}RESULT: COROUTINE UNSUPPORTED"
+                f" (backend={backend}): {reason}{Style.RESET_ALL}"
+            )
+            print(
+                f"{Fore.YELLOW}Not a pass: the device ran no coroutine test at"
+                f" all, so nothing here can regress visibly. Exiting"
+                f" {kCoroutineUnsupportedExit}"
+                f" (unsupported), distinct from 1 (tests failed)."
+                f"{Style.RESET_ALL}"
+            )
+            return kCoroutineUnsupportedExit
 
         total = response.get("total", 0)
         passed_count = response.get("passed", 0)
@@ -4055,15 +4106,14 @@ async def _run_coroutine_tests(ctx: RunContext) -> int:
                         print(f"          {test_result['error']}")
 
         print()
-        if response.get("success", False):
+        if exit_code == 0:
             print(f"{Fore.GREEN}COROUTINE TEST PASSED ({total} tests){Style.RESET_ALL}")
-            return 0
         else:
             print(
                 f"{Fore.RED}COROUTINE TEST FAILED"
                 f" ({failed_count}/{total} failures){Style.RESET_ALL}"
             )
-            return 1
+        return exit_code
 
     except RpcTimeoutError:
         print()
@@ -4405,6 +4455,23 @@ def _validate_test_rpc_response(
 
 def _classify_test_failure(data: dict[str, Any]) -> tuple[str, str]:
     """Classify a failed test response using structured RPC evidence."""
+    # Checked before any capture evidence, because a driver that never
+    # transmitted makes that evidence meaningless. The RP UART backend
+    # refuses a chipset whose bit period needs a baud above its maximum and
+    # reports why in `rpUartLastError`; classifying that as `zero_capture`
+    # ("RX produced no raw edges or decodable bytes") states the consequence
+    # and buries the cause, so a declined capability reads as a wiring or
+    # capture fault. FastLED#3899 requires an unreachable path to be listed
+    # with the exact constraint, which is what the driver already supplied.
+    if data.get("rpUartStartAttempted") is False:
+        reason = data.get("rpUartLastError")
+        if isinstance(reason, str) and reason:
+            return ("driver_declined", reason)
+        return (
+            "driver_declined",
+            "the driver did not attempt transmission and gave no reason",
+        )
+
     patterns = data.get("patterns")
     if isinstance(patterns, list) and patterns:
         saw_pattern = False

@@ -325,3 +325,52 @@
   content, not state, and
   when commits are stranded rebuild them onto current master as a fresh PR
   rather than reopening the merged one.
+- `git fetch` before starting work, not before pushing. I root-caused the
+  `s16x16x4` 15x penalty in #4216 (rolled 4-lane loops defeating
+  scalar-replacement), fixed it, and measured it on hardware -- and only when
+  the cherry-pick conflicted did I discover #4299 had landed the same root
+  cause and a better fix (`FL_SIMD_LANE4`, which also covers `simd_riscv.hpp`)
+  nine hours earlier. My local `master` was clean but stale, so every check I
+  ran agreed with me. This is the third time this session I have rebuilt work
+  the remote already had. The cheap guard is not "check before pushing" -- by
+  then the work exists -- it is running this before reading the code, with the
+  paths you are about to touch spelled out:
+
+  ```bash
+  git fetch origin
+  git log --oneline HEAD..origin/master -- src/platforms/shared/simd_noop.hpp
+  ```
+
+  `HEAD..origin/master` lists what upstream has that you do not, and the
+  path filter narrows it to the files in question -- in the #4216 case that
+  one command would have printed the commit for #4299 and saved the whole
+  detour. Name real paths rather than a placeholder: without them the log is
+  the full upstream delta and you will skim past the one line that matters. The measurement was
+  still worth posting to the issue, because #4299 argued from instruction
+  counts and I had before/after on real silicon; salvage the part that is
+  genuinely yours rather than opening a duplicate PR.
+- A diagnostic field named after the subsystem you are testing may be sourced
+  from the other side of the loopback. Chasing the RP PIO capture ceiling in
+  #4371 I used `rpPioWordCount` as evidence about the RX DMA and wrote on the
+  issue that "the DMA is not the constraint", because the field read exactly
+  `8 * wire_bytes` in every row, passing and failing alike. It comes from
+  `fl::BusTraits<fl::Bus::FLEX_IO, N>::instance().lastWordCount()` -- the
+  **transmitter**. Eight words per byte is one TX word per bit, which is
+  precisely why it tracked byte count so cleanly and said nothing at all about
+  capture. The tell was there in the data: a number that is an exact linear
+  function of the input, with no variation between the cases you are trying to
+  tell apart, is usually not measuring the thing that separates them. Grep the
+  field back to where the response sets it before drawing a conclusion from it.
+  The pass/fail boundaries themselves were unaffected, which is the reason the
+  rest of that analysis survived the correction -- prefer evidence from the
+  behaviour you are measuring over evidence from a field that claims to explain
+  it.
+- Two constraints can hide each other completely. The same capture had an edge
+  pool bounding fast chipsets at 300 wire bytes and a fixed sample-time budget
+  bounding slow ones at 3.8 ms, and each ceiling is unreachable in the other's
+  regime -- so every 800 kHz part reported 100 LEDs, the one 400 kHz part
+  reported 63, and no single model fit. Separating them took constructing a
+  case where one variable was held equal: 192 wire bytes and 3072 phases passes
+  at 800 kHz and fails at 400 kHz. When measurements refuse to collapse into
+  one model, stop fitting curves and look for the input you have never varied
+  independently.

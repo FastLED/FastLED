@@ -255,11 +255,30 @@ class FbuildSerialAdapter:
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
                         break
-                    # Cap each inner read at 0.25s so we re-check
-                    # stop_event regularly -- otherwise a quiet serial
-                    # line lets read_lines(timeout=remaining) block for
-                    # minutes ignoring the cancel signal.
-                    inner = min(remaining, 0.25)
+                    # Cap each inner read so we re-check stop_event
+                    # regularly -- otherwise a quiet serial line lets
+                    # read_lines(timeout=remaining) block for minutes
+                    # ignoring the cancel signal.
+                    #
+                    # 0.05, not the 0.25 this used to be. A request/reply
+                    # costs two reads here: the first returns the ACK
+                    # promptly, the second waits for the result and blocks
+                    # the full cap when the device has not answered yet. So
+                    # the cap is paid once per RPC, on top of the round trip
+                    # rather than overlapping it. Measured on an RP2350W over
+                    # the fbuild monitor, 20 `ping` calls per point:
+                    #
+                    #   cap 0.005 -> 110.5 ms    cap 0.10 -> 119.9 ms
+                    #   cap 0.02  -> 110.1 ms    cap 0.25 -> 330.7 ms
+                    #   cap 0.05  -> 110.2 ms
+                    #
+                    # ~110 ms is the real round trip; the old cap was adding
+                    # ~220 ms of pure waiting to every call, which is 3x. The
+                    # curve is flat below 0.05 so there is nothing to gain
+                    # going smaller, and 0.05 still re-checks stop_event 20
+                    # times a second rather than 4 -- strictly more
+                    # responsive to cancellation than before.
+                    inner = min(remaining, 0.05)
                     for line in self._monitor.read_lines(timeout=inner):
                         loop.call_soon_threadsafe(queue.put_nowait, line)
                         if stop_event.is_set():

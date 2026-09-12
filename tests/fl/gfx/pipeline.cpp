@@ -417,11 +417,18 @@ FL_TEST_CASE("Streaming pipeline is inside A1's budget against the P5 reference"
     // joined the corpus (#4339): the budget below had been measured on three
     // non-default sources and not on the one a channel gets by default.
     // Adding it moved nothing -- worst dE2000 is still 0.395096 at
-    // `display_p3-rgb-05`, luminance still 3.66438e-04, and `below_floor`
-    // still 8 -- so the numbers pinned below are the same numbers, now
-    // covering the default.
+    // `display_p3-rgb-05`, luminance still 3.66438e-04 -- so the numbers
+    // pinned below are the same numbers, now covering the default.
+    //
+    // `below_floor` was 8 until #4370 snapped sub-epsilon solver residue to
+    // zero. Three of those eight were excluded here only because their
+    // reference asked for 1e-15 of light: nonzero, and below one Q16 unit, so
+    // `sub_ulp` fired. Zero is representable, so those three are now measured
+    // like any other vector rather than waved through -- and they meet the
+    // budget, which is why nothing below this moved. Fewer exclusions is the
+    // improvement, not a loss of coverage.
     FL_CHECK_EQ(kVectorCount, 76);
-    FL_CHECK_EQ(below_floor, 8);
+    FL_CHECK_EQ(below_floor, 5);
 
     // A1, above the floor. Measured worst: 0.3951 dE2000 at
     // `display_p3-rgb-05`, and 3.66e-04 in Y -- 0.037% against the Y = 1
