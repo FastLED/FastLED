@@ -295,81 +295,6 @@ FL_TEST_CASE("fl::task::run with ms") {
     }
 }
 
-FL_TEST_CASE("fl::task::await - an unresolvable promise returns, and returns an error") {
-    // The wait used to have no cap of any kind, so a promise nothing can
-    // resolve never returned to its caller. On a microcontroller that stops
-    // the sketch until the watchdog resets the board. FastLED#4369.
-    FL_SUBCASE("a promise that never resolves gives up inside its budget") {
-        auto promise = fl::task::Promise<int>::create();  // nothing will resolve it
-        const u32 budget_ms = 50;
-        const u32 start = fl::millis();
-        auto result = fl::task::await(promise, budget_ms);
-        const u32 elapsed = fl::millis() - start;
-
-        FL_CHECK(!result.ok());
-        FL_CHECK_EQ(result.error().message,
-                    "await timeout - promise did not complete");
-        // The point is that it returned at all. Bound the upper end loosely --
-        // the loop yields ~1 ms per turn and the scheduler decides how long
-        // that really takes -- but it must not be the old behaviour, which
-        // never came back.
-        FL_CHECK(elapsed < 5000u);
-    }
-
-    FL_SUBCASE("a zero budget still polls once before giving up") {
-        // A promise that is resolvable by update() alone must not be failed
-        // by a budget that has already expired: the deadline is checked after
-        // the poll, not before it.
-        auto promise = fl::task::Promise<int>::resolve(7);
-        auto result = fl::task::await(promise, 0);
-
-        FL_CHECK(result.ok());
-        FL_CHECK_EQ(result.value(), 7);
-    }
-
-    FL_SUBCASE("an already-resolved promise is unaffected by the budget") {
-        auto promise = fl::task::Promise<int>::resolve(42);
-        auto result = fl::task::await(promise, 1);
-
-        FL_CHECK(result.ok());
-        FL_CHECK_EQ(result.value(), 42);
-    }
-
-    FL_SUBCASE("an already-rejected promise still reports its own error") {
-        // The timeout error must not displace the promise's.
-        auto promise =
-            fl::task::Promise<int>::reject(fl::task::Error("Original error"));
-        auto result = fl::task::await(promise, 1);
-
-        FL_CHECK(!result.ok());
-        FL_CHECK_EQ(result.error().message, "Original error");
-    }
-
-    FL_SUBCASE("an invalid promise is rejected before the wait") {
-        fl::task::Promise<int> invalid_promise;
-        auto result = fl::task::await(invalid_promise, 1);
-
-        FL_CHECK(!result.ok());
-        FL_CHECK_EQ(result.error().message, "Invalid promise");
-    }
-
-    FL_SUBCASE("the budget is a bound, not a delay") {
-        // A resolvable promise must return as soon as it completes. If the
-        // deadline were waited on rather than checked, this would take the
-        // whole budget.
-        auto promise = fl::task::Promise<int>::create();
-        promise.complete_with_value(123);
-
-        const u32 start = fl::millis();
-        auto result = fl::task::await(promise, 5000);
-        const u32 elapsed = fl::millis() - start;
-
-        FL_CHECK(result.ok());
-        FL_CHECK_EQ(result.value(), 123);
-        FL_CHECK(elapsed < 1000u);
-    }
-}
-
 FL_TEST_CASE("fl::task::await_top_level - Basic Operations") {
     FL_SUBCASE("await_top_level resolved promise returns value") {
         auto promise = fl::task::Promise<int>::resolve(42);
@@ -716,6 +641,101 @@ fl::task::Promise<T> delayed_reject(const fl::task::Error& error, uint32_t delay
 
     fl::platforms::register_background_thread(fl::move(t));
     return p;
+}
+
+FL_TEST_CASE("fl::task::await - the wait is bounded") {
+    // The wait used to have no cap of any kind, so a promise nothing can
+    // resolve never returned to its caller. On a microcontroller that stops
+    // the sketch until the watchdog resets the board. FastLED#4369.
+    FL_SUBCASE("a promise that never resolves gives up inside its budget") {
+        auto promise = fl::task::Promise<int>::create();  // nothing will resolve it
+        const u32 budget_ms = 50;
+        const u32 start = fl::millis();
+        auto result = fl::task::await(promise, budget_ms);
+        const u32 elapsed = fl::millis() - start;
+
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message,
+                    "await timeout - promise did not complete");
+        // The point is that it returned at all. Bound the upper end loosely --
+        // the loop yields ~1 ms per turn and the scheduler decides how long
+        // that really takes -- but it must not be the old behaviour, which
+        // never came back.
+        FL_CHECK(elapsed < 5000u);
+    }
+
+    FL_SUBCASE("a pending promise resolved during the wait returns its value") {
+        // Reaches the polling loop, unlike the completed cases below, and
+        // proves the bound does not cost a legitimate wait its result.
+        auto promise = delayed_resolve<int>(99, 20);
+        auto result = fl::task::await(promise, 5000);
+
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 99);
+        fl::platforms::cleanup_background_threads();
+    }
+
+    FL_SUBCASE("a pending promise outliving its budget times out") {
+        // Same promise, a budget too small for it. The loop exits on the
+        // deadline rather than on completion.
+        auto promise = delayed_resolve<int>(99, 400);
+        const u32 start = fl::millis();
+        auto result = fl::task::await(promise, 20);
+        const u32 elapsed = fl::millis() - start;
+
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message,
+                    "await timeout - promise did not complete");
+        FL_CHECK(elapsed < 400u);
+        fl::platforms::cleanup_background_threads();
+    }
+
+    FL_SUBCASE("an already-completed promise returns whatever the budget") {
+        // Returns before the loop, so no budget applies -- including zero.
+        auto resolved = fl::task::Promise<int>::resolve(7);
+        auto result = fl::task::await(resolved, 0);
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 7);
+
+        auto resolved_again = fl::task::Promise<int>::resolve(42);
+        auto result_again = fl::task::await(resolved_again, 1);
+        FL_CHECK(result_again.ok());
+        FL_CHECK_EQ(result_again.value(), 42);
+    }
+
+    FL_SUBCASE("an already-rejected promise still reports its own error") {
+        // The timeout error must not displace the promise's.
+        auto promise =
+            fl::task::Promise<int>::reject(fl::task::Error("Original error"));
+        auto result = fl::task::await(promise, 1);
+
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Original error");
+    }
+
+    FL_SUBCASE("an invalid promise is rejected before the wait") {
+        fl::task::Promise<int> invalid_promise;
+        auto result = fl::task::await(invalid_promise, 1);
+
+        FL_CHECK(!result.ok());
+        FL_CHECK_EQ(result.error().message, "Invalid promise");
+    }
+
+    FL_SUBCASE("the budget is a bound, not a delay") {
+        // A resolvable promise must return as soon as it completes. If the
+        // deadline were waited on rather than checked, this would take the
+        // whole budget.
+        auto promise = fl::task::Promise<int>::create();
+        promise.complete_with_value(123);
+
+        const u32 start = fl::millis();
+        auto result = fl::task::await(promise, 5000);
+        const u32 elapsed = fl::millis() - start;
+
+        FL_CHECK(result.ok());
+        FL_CHECK_EQ(result.value(), 123);
+        FL_CHECK(elapsed < 1000u);
+    }
 }
 
 FL_TEST_CASE("await in coroutine - basic resolution") {
