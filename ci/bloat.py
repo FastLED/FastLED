@@ -61,6 +61,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -141,6 +142,29 @@ class ElfLocation:
     fbuild_native: bool
 
 
+def _assert_fresh(location: ElfLocation, build_started: float | None) -> None:
+    """Refuse to analyse an ELF older than the build that just ran.
+
+    `--build` promises "a fresh ELF"; without this the promise is unchecked,
+    and a layout the build did not write can be analysed instead while every
+    number looks plausible. FastLED#4384.
+    """
+
+    if build_started is None:
+        return
+    mtime = location.elf.stat().st_mtime
+    if mtime >= build_started:
+        return
+    age = build_started - mtime
+    raise SystemExit(
+        f"Bloat: --build ran, but the ELF selected for analysis predates it by "
+        f"{age / 3600:.1f} h:\n  {location.elf}\n"
+        "That is a stale artifact from another backend or an earlier build, so "
+        "the numbers would describe a binary this run did not produce. Remove "
+        "it, or build the layout it belongs to."
+    )
+
+
 def find_elf(board: str, build_root: Path) -> ElfLocation:
     """Auto-detect the firmware ELF for the given board.
 
@@ -153,24 +177,40 @@ def find_elf(board: str, build_root: Path) -> ElfLocation:
     """
     project_root = Path.cwd()
     fbuild_elf = project_root / ".fbuild" / "build" / board / "release" / "firmware.elf"
-    if fbuild_elf.is_file():
-        return ElfLocation(elf=fbuild_elf, fbuild_native=True)
-
     pio_fbuild_elf = (
         build_root / "pio" / board / ".fbuild" / "build" / "release" / "firmware.elf"
     )
-    if pio_fbuild_elf.is_file():
-        return ElfLocation(elf=pio_fbuild_elf, fbuild_native=True)
-
     candidates = [
         build_root / "pio" / board / ".pio" / "build" / board / "firmware.elf",
         build_root / board / "firmware.elf",
     ]
-    for c in candidates:
-        if c.is_file():
-            return ElfLocation(elf=c, fbuild_native=False)
 
-    paths = "\n  ".join(str(c) for c in [fbuild_elf, *candidates])
+    # Newest wins, with the documented order as the tie-break.
+    #
+    # It used to be priority alone, and that is how this command came to
+    # report five-day-old numbers for a change made minutes earlier: these
+    # layouts coexist under one board directory, `--build` writes the `.pio`
+    # one, and the `.fbuild` one outranked it whatever its age. Two runs
+    # across a real code change produced byte-identical output, including
+    # total_flash. FastLED#4384.
+    ranked = [
+        (fbuild_elf, True),
+        (pio_fbuild_elf, True),
+        (candidates[0], False),
+        (candidates[1], False),
+    ]
+    found = [
+        (path, native, path.stat().st_mtime)
+        for path, native in ranked
+        if path.is_file()
+    ]
+    if found:
+        newest = max(mtime for _, _, mtime in found)
+        for path, native, mtime in found:
+            if mtime == newest:
+                return ElfLocation(elf=path, fbuild_native=native)
+
+    paths = "\n  ".join(str(c) for c in [fbuild_elf, pio_fbuild_elf, *candidates])
     raise SystemExit(
         "Bloat: no firmware.elf found. Looked at:\n  "
         + paths
@@ -357,6 +397,7 @@ def main() -> int:
 
     assert_fbuild_has_symbols()
 
+    build_started: float | None = None
     if args.build:
         compile_script = "compile.bat" if os.name == "nt" else "./compile"
         if os.name != "nt" and not shutil.which("bash"):
@@ -369,10 +410,12 @@ def main() -> int:
             "--platformio",
         ]
         print(f"$ {' '.join(cmd)}")
+        build_started = time.time()
         subprocess.run(cmd, check=True)
 
     try:
         location = find_elf(args.board, Path(args.build_root))
+        _assert_fresh(location, build_started)
     except SystemExit:
         if not args.allow_overflow:
             raise
