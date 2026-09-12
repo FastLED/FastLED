@@ -61,6 +61,19 @@ struct PixelControllerVtable {
     pc->loadAndScaleRGBWW(rgbww, b0_out, b1_out, b2_out, b3_out, b4_out);
   }
 
+  // Order-free loads, bound only for the RGB instantiation (see
+  // RgbwLoadBinder). PixelIterator applies the colour order itself, so one
+  // PixelController<RGB> serves every order and the other five instantiations
+  // -- a full vtable set each -- are never referenced (FastLED#4402).
+  static void loadAndScaleRGBWUnordered(void* pixel_controller, const Rgbw& rgbw, u8* r_out, u8* g_out, u8* b_out, u8* w_out) FL_NO_EXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    pc->loadAndScaleRGBWUnordered(rgbw, r_out, g_out, b_out, w_out);
+  }
+  static void loadAndScaleRGBWWUnordered(void* pixel_controller, Rgbww rgbww, u8* r_out, u8* g_out, u8* b_out, u8* ww_out, u8* wc_out) FL_NO_EXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    pc->loadAndScaleRGBWWUnordered(rgbww, r_out, g_out, b_out, ww_out, wc_out);
+  }
+
   static void loadAndScaleRGB(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out) FL_NO_EXCEPT {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
     pc->loadAndScaleRGB(r_out, g_out, b_out);
@@ -145,6 +158,39 @@ struct WideLoadBinder<T, decltype(static_cast<void>(
 #endif
 // NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
 // NOTE: loadAndScale_WS2816_HDFunction removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
+typedef void (*loadAndScaleRGBWUnorderedFunction)(void* pixel_controller, const Rgbw& rgbw, u8* r_out, u8* g_out, u8* b_out, u8* w_out);
+typedef void (*loadAndScaleRGBWWUnorderedFunction)(void* pixel_controller, Rgbww rgbww, u8* r_out, u8* g_out, u8* b_out, u8* ww_out, u8* wc_out);
+
+namespace detail {
+/// `type` exists only when `B` is true: a self-contained enable_if so the
+/// binder below can key on a constant that only PixelController declares.
+template <bool B> struct OnlyIf {};
+template <> struct OnlyIf<true> { typedef void type; };
+}  // namespace detail
+
+/// Binds exactly one RGBW thunk and one RGBWW thunk per source type, and
+/// names only that one, so the other is never linked for that instantiation.
+///
+/// A `PixelController<RGB>` gets the order-free pair: PixelIterator permutes
+/// their output itself, which is how one instantiation serves all six colour
+/// orders. Anything else -- another order, used directly by a templated
+/// driver, or a colour-managed source with no `kColorOrder` at all -- keeps
+/// the fully ordered thunks it always had, and its bytes are untouched.
+template <typename T, typename = void>
+struct RgbwLoadBinder {
+    static loadAndScaleRGBWFunction ordered() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBW; }
+    static loadAndScaleRGBWWFunction orderedWW() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBWW; }
+    static loadAndScaleRGBWUnorderedFunction unordered() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWWUnorderedFunction unorderedWW() FL_NO_EXCEPT { return nullptr; }
+};
+template <typename T>
+struct RgbwLoadBinder<T, typename detail::OnlyIf<(T::kColorOrder == RGB)>::type> {
+    static loadAndScaleRGBWFunction ordered() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWWFunction orderedWW() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWUnorderedFunction unordered() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBWUnordered; }
+    static loadAndScaleRGBWWUnorderedFunction unorderedWW() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBWWUnordered; }
+};
+
 typedef void (*stepDitheringFunction)(void* pixel_controller);
 typedef void (*advanceDataFunction)(void* pixel_controller);
 typedef int (*sizeFunction)(void* pixel_controller);
@@ -191,8 +237,10 @@ class PixelIterator {
       // Btw, this pattern in C++ is called the "type-erasure pattern". It allows non virtual
       // polymorphism by leveraging the C++ template system to ensure type safety.
       typedef PixelControllerVtable<PixelControllerT> Vtable;
-      mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
-      mLoadAndScaleRGBWW = &Vtable::loadAndScaleRGBWW;
+      mLoadAndScaleRGBW = RgbwLoadBinder<PixelControllerT>::ordered();
+      mLoadAndScaleRGBWW = RgbwLoadBinder<PixelControllerT>::orderedWW();
+      mLoadAndScaleRGBWUnordered = RgbwLoadBinder<PixelControllerT>::unordered();
+      mLoadAndScaleRGBWWUnordered = RgbwLoadBinder<PixelControllerT>::unorderedWW();
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
 #if !FL_PLATFORM_HAS_TINY_MEMORY
       mLoadAndScaleRGB16 = WideLoadBinder<PixelControllerT>::get();
@@ -210,15 +258,53 @@ class PixelIterator {
     }
 
     bool has(int n) FL_NO_EXCEPT { return mHas(mPixelController, n); }
+    /// Wire colour order, applied here rather than by instantiating a
+    /// `PixelController` per order. Identity by default, so a templated driver
+    /// wrapping its own `PixelController<ORDER>` is unaffected: the bytes it
+    /// gets are the ones that controller already ordered (FastLED#4402).
+    void setColorOrder(EOrder order) FL_NO_EXCEPT {
+      // Same bit layout as RGB_BYTE(order, i) in pixel_controller.h.
+      for (int i = 0; i < 3; ++i) {
+        mOrder[i] = static_cast<u8>((static_cast<int>(order) >> (3 * (2 - i))) & 0x3);
+      }
+    }
+
     void loadAndScaleRGBW(u8 *b0_out, u8 *b1_out, u8 *b2_out, u8 *w_out) FL_NO_EXCEPT {
+      if (mLoadAndScaleRGBWUnordered != nullptr) {
+        // Source-order RGB plus W, then the same two steps the templated
+        // `loadAndScaleRGBW` takes: permute RGB, place W.
+        u8 c[3];
+        u8 w = 0;
+        mLoadAndScaleRGBWUnordered(mPixelController, mRgbw, &c[0], &c[1], &c[2], &w);
+        rgbw_partial_reorder(mRgbw.w_placement, c[mOrder[0]], c[mOrder[1]], c[mOrder[2]], w,
+                             b0_out, b1_out, b2_out, w_out);
+        return;
+      }
       mLoadAndScaleRGBW(mPixelController, mRgbw, b0_out, b1_out, b2_out, w_out);
     }
     void loadAndScaleRGBWW(u8 *b0_out, u8 *b1_out, u8 *b2_out,
                            u8 *b3_out, u8 *b4_out) FL_NO_EXCEPT {
+      if (mLoadAndScaleRGBWWUnordered != nullptr) {
+        u8 c[3];
+        u8 ww = 0;
+        u8 wc = 0;
+        mLoadAndScaleRGBWWUnordered(mPixelController, mRgbww, &c[0], &c[1], &c[2], &ww, &wc);
+        rgbww_partial_reorder(mRgbww.w_placement, c[mOrder[0]], c[mOrder[1]], c[mOrder[2]], ww, wc,
+                              b0_out, b1_out, b2_out, b3_out, b4_out);
+        return;
+      }
       mLoadAndScaleRGBWW(mPixelController, mRgbww, b0_out, b1_out, b2_out, b3_out, b4_out);
     }
     void loadAndScaleRGB(u8 *r_out, u8 *g_out, u8 *b_out) FL_NO_EXCEPT {
-      mLoadAndScaleRGB(mPixelController, r_out, g_out, b_out);
+      // The source's own order first (identity for PixelController<RGB>),
+      // then this iterator's. `loadAndScale<SLOT>` is per source channel --
+      // data, dither table and scale all indexed by the same channel -- so
+      // reordering after the fact is the same bytes.
+      u8 c[3];
+      mLoadAndScaleRGB(mPixelController, &c[0], &c[1], &c[2]);
+      *r_out = c[mOrder[0]];
+      *g_out = c[mOrder[1]];
+      *b_out = c[mOrder[2]];
     }
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     /// One pixel at the source's own precision, wire-ordered.
@@ -254,7 +340,12 @@ class PixelIterator {
 
     #if FASTLED_HD_COLOR_MIXING
     void loadRGBScaleAndBrightness(u8* c0, u8* c1, u8* c2, u8* brightness) FL_NO_EXCEPT {
-      mLoadRGBScaleAndBrightness(mPixelController, c0, c1, c2, brightness);
+      // Per-slot scale, so it takes the same permutation as the pixel.
+      u8 c[3];
+      mLoadRGBScaleAndBrightness(mPixelController, &c[0], &c[1], &c[2], brightness);
+      *c0 = c[mOrder[0]];
+      *c1 = c[mOrder[1]];
+      *c2 = c[mOrder[2]];
     }
 
     FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead") FL_NO_EXCEPT
@@ -517,9 +608,14 @@ class PixelIterator {
     loadAndScaleRGBWFunction mLoadAndScaleRGBW = nullptr;
     loadAndScaleRGBWWFunction mLoadAndScaleRGBWW = nullptr;
     loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
+    loadAndScaleRGBWUnorderedFunction mLoadAndScaleRGBWUnordered = nullptr;
+    loadAndScaleRGBWWUnorderedFunction mLoadAndScaleRGBWWUnordered = nullptr;
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     loadAndScaleRGB16Function mLoadAndScaleRGB16 = nullptr;
 #endif
+    // Wire byte i comes from source channel mOrder[i]. Identity unless
+    // setColorOrder() is called; PixelIteratorAny is the caller.
+    u8 mOrder[3] = {0, 1, 2};
     // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
     // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
     stepDitheringFunction mStepDithering = nullptr;

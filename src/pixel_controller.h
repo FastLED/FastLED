@@ -114,6 +114,10 @@ struct PixelController {
         kLanes = LANES,
         kMask = MASK
     };
+    /// The colour order this instantiation writes, as a value. Lets the
+    /// type-erased `PixelIterator` bind order-free loads only for the RGB
+    /// instantiation and permute at runtime (FastLED#4402).
+    static constexpr EOrder kColorOrder = RGB_ORDER;
 
     FASTLED_FORCE_INLINE fl::PixelIterator as_iterator(const Rgbw& rgbw) {
         return fl::PixelIterator(this, rgbw);
@@ -594,6 +598,67 @@ struct PixelController {
     // NOTE: loadAndScale_WS2816_HD() has been moved to src/fl/chipsets/encoders/ws2816.h
     // Use fl::loadAndScale_WS2816_HD<RGB_ORDER>(pixels, ...) instead
 
+    /// One source channel, loaded, dithered and scaled -- `loadAndScale<SLOT>`
+    /// with `RO(SLOT)` replaced by a runtime channel index. Same arithmetic,
+    /// same tables: `d[c]` and `premixed.raw[c]` are indexed by source channel
+    /// in both, which is what makes a colour order a pure permutation of these
+    /// three values (FastLED#4402).
+    FASTLED_FORCE_INLINE fl::u8 loadAndScaleChannel(fl::u8 c) {
+        const fl::u8 b = mData[c];
+        return fl::scale8(b ? fl::qadd8(b, d[c]) : 0, mColorAdjustment.premixed.raw[c]);
+    }
+
+    /// `loadAndScaleRGBW` before its wire reorder: RGB in source order plus W.
+    /// The templated `loadAndScaleRGBW` is this followed by the reorder, so
+    /// the two cannot drift; the type-erased path calls this directly and
+    /// applies its own order (FastLED#4402).
+    FASTLED_FORCE_INLINE void loadAndScaleRGBWUnordered(
+        const Rgbw& rgbw, fl::u8 *r_out, fl::u8 *g_out, fl::u8 *b_out,
+        fl::u8 *w_out) {
+#ifdef FL_IS_AVR
+        FL_UNUSED(rgbw);
+        // No RGBW conversion on AVR; W stays black, as in loadAndScaleRGBW.
+        *r_out = loadAndScaleChannel(0);
+        *g_out = loadAndScaleChannel(1);
+        *b_out = loadAndScaleChannel(2);
+        *w_out = 0;
+#else
+        const CRGB rgb(mData[0], mData[1], mData[2]);
+        *w_out = 0;
+        fl::rgb_2_rgbw(rgbw,
+                   rgb.r, rgb.g, rgb.b,
+                   mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,
+                   r_out, g_out, b_out, w_out);
+#endif
+    }
+
+    /// `loadAndScaleRGBWW` before its wire reorder. See loadAndScaleRGBWUnordered.
+    FASTLED_FORCE_INLINE void loadAndScaleRGBWWUnordered(
+        fl::Rgbww rgbww, fl::u8 *r_out, fl::u8 *g_out, fl::u8 *b_out,
+        fl::u8 *ww_out, fl::u8 *wc_out) {
+#ifdef FL_IS_AVR
+        FL_UNUSED(rgbww);
+        FL_WARN_F_ONCE("RGBWW colorimetric is not supported on AVR -- the warm "
+                     "and cool white channels will be black. Use an ESP32 / "
+                     "Teensy / RP2040 target for full RGBWW support.");
+        *r_out = loadAndScaleChannel(0);
+        *g_out = loadAndScaleChannel(1);
+        *b_out = loadAndScaleChannel(2);
+        *ww_out = 0;
+        *wc_out = 0;
+#else
+        const CRGB rgb(mData[0], mData[1], mData[2]);
+        *ww_out = 0;
+        *wc_out = 0;
+        fl::rgb_2_rgbww(rgbww,
+                        rgb.r, rgb.g, rgb.b,
+                        mColorAdjustment.premixed.r,
+                        mColorAdjustment.premixed.g,
+                        mColorAdjustment.premixed.b,
+                        r_out, g_out, b_out, ww_out, wc_out);
+#endif
+    }
+
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(
         const Rgbw& rgbw, fl::u8 *b0_out, fl::u8 *b1_out,
         fl::u8 *b2_out, fl::u8 *b3_out) {
@@ -616,13 +681,10 @@ struct PixelController {
         const fl::u8 b0_index = RGB_BYTE0(RGB_ORDER);  // Needed to re-order RGB back into led native order.
         const fl::u8 b1_index = RGB_BYTE1(RGB_ORDER);
         const fl::u8 b2_index = RGB_BYTE2(RGB_ORDER);
-        // Get the naive RGB data order in r,g,b order.
-        CRGB rgb(mData[0], mData[1], mData[2]);
+        // Source-order RGB after white extraction, then the wire reorder.
+        CRGB rgb;
         fl::u8 w = 0;
-        fl::rgb_2_rgbw(rgbw,
-                   rgb.r, rgb.g, rgb.b,  // Input colors
-                   mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
-                   &rgb.r, &rgb.g, &rgb.b, &w);
+        loadAndScaleRGBWUnordered(rgbw, &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
         fl::rgbw_partial_reorder(
             rgbw.w_placement,
@@ -663,15 +725,10 @@ struct PixelController {
         const fl::u8 b0_index = RGB_BYTE0(RGB_ORDER);
         const fl::u8 b1_index = RGB_BYTE1(RGB_ORDER);
         const fl::u8 b2_index = RGB_BYTE2(RGB_ORDER);
-        CRGB rgb(mData[0], mData[1], mData[2]);
+        CRGB rgb;
         fl::u8 ww = 0;
         fl::u8 wc = 0;
-        fl::rgb_2_rgbww(rgbww,
-                        rgb.r, rgb.g, rgb.b,
-                        mColorAdjustment.premixed.r,
-                        mColorAdjustment.premixed.g,
-                        mColorAdjustment.premixed.b,
-                        &rgb.r, &rgb.g, &rgb.b, &ww, &wc);
+        loadAndScaleRGBWWUnordered(rgbww, &rgb.r, &rgb.g, &rgb.b, &ww, &wc);
         fl::rgbww_partial_reorder(
             rgbww.w_placement,
             rgb.raw[b0_index],
