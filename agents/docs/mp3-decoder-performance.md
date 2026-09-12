@@ -136,10 +136,14 @@ exactly, by the bit-identical case in the same test file: it compares every
 decoded sample against the scalar kernels, which is a machine-independent
 comparison in a way a ratio of times is not.
 
-There is also no `codec_cpu_ledger.md`, despite
-`.github/workflows/mp3_cpu_audit.yml` path-filtering on it. It has never
-existed. Do not conclude "Helix was never profiled" from grepping it -- that
-mistake was made once already; `grep -c` on a missing file returns 0.
+There is no `codec_cpu_ledger.md` and there never has been. The store is
+`codec_cpu_trend.json`. Do not conclude "Helix was never profiled" from
+grepping the former -- that mistake was made once already; `grep -c` on a
+missing file returns 0.
+
+`.github/workflows/mp3_cpu_audit.yml` used to path-filter on the missing name
+as well, which is how the confusion started. It no longer does (#4155, item 1);
+both its `push` and `pull_request` filters list `codec_cpu_trend.json` alone.
 
 ## Historical Helix numbers
 
