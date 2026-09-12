@@ -5,6 +5,7 @@
 #include "fl/channels/all_drivers.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/data.h"
+#include "fl/channels/dither_frame.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/pipeline_binding.h"
@@ -503,5 +504,75 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
     }
 }
 #endif
+
+// C5: "Pipeline dithering and `BINARY_DITHER` are mutually exclusive per
+// channel." `ChannelOptions::setColorProfile` enforces half of that by setting
+// DISABLE_DITHER, but `mDitherMode` is a public field rather than a setter --
+// unlike `setLegacyCorrection`, which clears the profile and warns -- so a
+// caller can re-enable it after binding and reach the forbidden combination
+// through the type system.
+//
+// What makes that harmless is structural, and this file's own header says why:
+// the managed source reads `mController.mData` rather than `loadAndScale0/1/2`
+// because those fold in `mColorAdjustment`, whose `premixed` carries
+// brightness the pipeline also carries. Legacy dithering is applied inside
+// those same calls, so bypassing them for the brightness reason excludes the
+// dither as a consequence.
+//
+// Tested here rather than through `Channel::showLeds`, where the controller's
+// dither state sits several layers away. An attempt at that level could not be
+// made to fail under mutation: it could not distinguish "the managed path
+// ignores dither" from "dither was never armed in the harness".
+
+FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
+    CRGB leds[1] = {CRGB(200, 40, 9)};
+    const StreamingPipelineQ16 pipeline = makePipeline();
+
+    // A controller that *is* dithering: BINARY_DITHER, with a premixed scale
+    // low enough that the offsets are large -- `e[i]` is 256/s + 1, so a
+    // quarter-scale strip carries five codes of offset rather than two.
+    ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+    adjustment.premixed = CRGB(16, 16, 16);
+
+    fl::vector<int> managed_seen;
+    fl::vector<int> legacy_seen;
+    for (int frame = 0; frame < 8; ++frame) {
+        fl::detail::advanceDitherFrame();
+
+        PixelController<RGB> managed_ctrl(leds, 1, adjustment, BINARY_DITHER);
+        ColorManagedPixelSource source(managed_ctrl, RGB, pipeline);
+        // The 16-bit entry point, not the 8-bit one. Both read the raw pixel,
+        // but the 8-bit output quantizes a dither-scale input change away --
+        // measured: feeding the dithered value through it produces the same
+        // byte every frame, so a test built on it cannot fail when the read
+        // is wrong. The wide output has 256x the resolution and does move.
+        u16 m0, m1, m2;
+        source.loadAndScaleRGB16(&m0, &m1, &m2);
+
+        PixelController<RGB> legacy_ctrl(leds, 1, adjustment, BINARY_DITHER);
+        const u8 l0 = legacy_ctrl.loadAndScale0();
+
+        bool seen_m = false;
+        for (fl::size j = 0; j < managed_seen.size(); ++j) {
+            if (managed_seen[j] == static_cast<int>(m0)) { seen_m = true; }
+        }
+        if (!seen_m) { managed_seen.push_back(static_cast<int>(m0)); }
+
+        bool seen_l = false;
+        for (fl::size j = 0; j < legacy_seen.size(); ++j) {
+            if (legacy_seen[j] == static_cast<int>(l0)) { seen_l = true; }
+        }
+        if (!seen_l) { legacy_seen.push_back(static_cast<int>(l0)); }
+    }
+
+    // The legacy controller varies across the cycle. That is dithering
+    // working, and it is what stops the assertion below being a statement
+    // about a harness that never dithers anything.
+    FL_CHECK_GT((int)legacy_seen.size(), 1);
+
+    // The managed source does not. Same settings, same phases, one value: the
+    // raw read has no path to the offsets.
+    FL_CHECK_EQ((int)managed_seen.size(), 1);
+}
 
 }  // FL_TEST_FILE
