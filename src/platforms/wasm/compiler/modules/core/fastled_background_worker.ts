@@ -90,6 +90,8 @@ const workerState = {
   // Zero polling overhead - completely event-driven
   // Dictionary format: { "0": {strips: {...}, absMin: [...], absMax: [...]}, "1": {...} }
   screenMaps: {},
+  screenMapsDirty: false, // screenMaps changed and the main thread has not been told yet (main-thread rendering)
+  renderOnMainThread: false, // frames are posted to the main thread instead of drawn on an OffscreenCanvas
 
   // Audio sample queue - samples buffered here from onmessage, flushed to WASM at frame start
   audioSampleQueue: [],
@@ -276,11 +278,18 @@ async function handleInitialize(payload) {
     workerState.capabilities = payload.capabilities;
     workerState.frameRate = payload.frameRate || 60;
     workerState.urlParams = payload.urlParams || {}; // Store URL parameters from main thread
+    // When the browser cannot create WebGL2 on an OffscreenCanvas (WebKitGTK
+    // behind the Tauri viewer on Linux), the sketch still runs here — blocking
+    // calls must stay off the main thread — and each frame is posted back to
+    // the main thread, which draws it on the real canvas.
+    workerState.renderOnMainThread = !!payload.renderOnMainThread;
 
     workerLog('LOG', 'BACKGROUND_WORKER', 'URL parameters received from main thread', workerState.urlParams);
 
     // Validate OffscreenCanvas
-    if (!workerState.canvas || !(workerState.canvas instanceof OffscreenCanvas)) {
+    if (workerState.renderOnMainThread) {
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Main-thread rendering: no OffscreenCanvas, frames will be posted to the main thread');
+    } else if (!workerState.canvas || !(workerState.canvas instanceof OffscreenCanvas)) {
       throw new Error('Invalid OffscreenCanvas provided to worker');
     }
 
@@ -290,18 +299,20 @@ async function handleInitialize(payload) {
     await initializeFastLEDModule();
 
     // Set up graphics manager for OffscreenCanvas
-    await initializeGraphicsManager();
+    if (!workerState.renderOnMainThread) {
+      await initializeGraphicsManager();
+    }
 
     workerState.initialized = true;
 
     const result = {
       success: true,
       capabilities: workerState.capabilities,
-      canvas: {
+      canvas: workerState.canvas ? {
         width: workerState.canvas.width,
         height: workerState.canvas.height
-      },
-      contextType: 'webgl2'
+      } : null,
+      contextType: workerState.renderOnMainThread ? 'main_thread' : 'webgl2'
     };
 
     workerLog('LOG', 'BACKGROUND_WORKER', 'Worker initialized successfully', result);
@@ -548,6 +559,7 @@ async function handleStart(_payload) {
 
         // Update worker state and notify graphics manager
         workerState.screenMaps = screenMapData;
+        workerState.screenMapsDirty = true;
         if (workerState.graphicsManager && workerState.graphicsManager.updateScreenMap) {
           workerState.graphicsManager.updateScreenMap(screenMapData);
           workerLog('LOG', 'BACKGROUND_WORKER', 'ScreenMaps fetched and sent to graphics manager', {
@@ -760,6 +772,9 @@ async function handleStartRecording(payload) {
 
   try {
     // Check if canvas is available
+    if (workerState.renderOnMainThread) {
+      throw new Error('Frame capture is unavailable in main-thread rendering mode (no OffscreenCanvas WebGL2)');
+    }
     if (!workerState.canvas) {
       throw new Error('Canvas not available for frame capture');
     }
@@ -830,6 +845,7 @@ function handleScreenMapUpdate(payload) {
     // Cache the screenmap data (dictionary format)
     // This is sent from C++ only when screenmaps change (strip added, layout updated)
     workerState.screenMaps = payload.screenMapData;
+    workerState.screenMapsDirty = true;
 
     workerLog('LOG', 'BACKGROUND_WORKER', 'Screenmap cache updated', {
       screenMapCount: Object.keys(workerState.screenMaps || {}).length
@@ -961,6 +977,28 @@ function startAnimationLoop() {
 }
 
 /**
+ * Posts one frame to the main thread for rendering (no OffscreenCanvas mode).
+ * Pixel buffers are transferred, not copied; the screenmap dictionary rides
+ * along only when it changed since the last post.
+ * @param {Array} frameData - Strip data with pixel_data copies from extractFrameData()
+ */
+function postFrameToMainThread(frameData) {
+  const transfer = [];
+  for (const strip of frameData) {
+    if (strip.pixel_data && strip.pixel_data.buffer) {
+      transfer.push(strip.pixel_data.buffer);
+    }
+  }
+  const payload = {
+    frameData,
+    frameNumber: workerState.frameCount,
+    screenMaps: workerState.screenMapsDirty ? workerState.screenMaps : undefined
+  };
+  workerState.screenMapsDirty = false;
+  postMessage({ type: 'frame_data', payload }, /** @type {*} */ (transfer));
+}
+
+/**
  * Executes a single frame of the animation loop
  * @param {number} currentTime - Current timestamp
  */
@@ -989,14 +1027,19 @@ async function executeFrameLoop(currentTime) {
     const frameData = extractFrameData();
 
     if (frameData) {
-      // Render frame to OffscreenCanvas (automatically syncs to main thread canvas)
-      workerState.graphicsManager.updateCanvas(frameData);
+      if (workerState.renderOnMainThread) {
+        // No OffscreenCanvas here: hand the frame to the main thread to draw
+        postFrameToMainThread(frameData);
+      } else {
+        // Render frame to OffscreenCanvas (automatically syncs to main thread canvas)
+        workerState.graphicsManager.updateCanvas(frameData);
 
-      // Capture frame for main-thread recording if enabled
-      if (workerState.isCapturingFrames) {
-        captureAndTransferFrame().catch((err) => {
-          workerLog('ERROR', 'BACKGROUND_WORKER', 'Frame capture error', err);
-        });
+        // Capture frame for main-thread recording if enabled
+        if (workerState.isCapturingFrames) {
+          captureAndTransferFrame().catch((err) => {
+            workerLog('ERROR', 'BACKGROUND_WORKER', 'Frame capture error', err);
+          });
+        }
       }
 
       // Send lightweight performance telemetry to main thread
