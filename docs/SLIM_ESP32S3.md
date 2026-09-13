@@ -18,7 +18,7 @@ build_flags =
     ; since FastLED #2890 — no explicit flag needed.
 board_build.sdkconfig_defaults =
     sdkconfig.defaults
-    ${platformio.packages_dir}/framework-arduinoespressif32/tools/sdkconfig.defaults.esp32s3
+    <path-to-installed-framework-arduinoespressif32>/tools/sdkconfig.defaults.esp32s3
     ${PROJECT_LIBDEPS_DIR}/${PIOENV}/FastLED/tools/sdkconfig_for_smallest_fastled.defaults
 ```
 
@@ -110,7 +110,7 @@ The overlay file at [`../tools/sdkconfig_for_smallest_fastled.defaults`](../tool
 
 - **Stages 1+2 stack with `FASTLED_RMT_STATIC_ALLOCATION`** — they target different parts of the binary (the FL_WARN string pool vs. the dynamic RMT scaffolding). Combining all three is the smallest-build path.
 - **The sdkconfig overlay only fires if your project's `sdkconfig_defaults` references it.** Adding the overlay file to your library install is not enough; you have to list it under `board_build.sdkconfig_defaults`.
-- **`PROJECT_LIBDEPS_DIR` resolution varies by PIO project layout.** If the substitution above doesn't resolve, fall back to the absolute path to the installed FastLED package.
+- **`PROJECT_LIBDEPS_DIR` resolution varies by project layout.** If the substitution above doesn't resolve, fall back to the absolute path to the installed FastLED package.
 
 ## Measuring your build
 

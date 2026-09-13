@@ -106,7 +106,7 @@ meson.build (root)          → Source discovery, library compilation
 **Architecture Summary**:
 - **Root meson.build**: Discovers C++ sources from `src/` subdirectories, builds `libfastled.a`
 - **tests/meson.build**: Uses `organize_tests.py` to discover/categorize tests, creates executables
-- **examples/meson.build**: Registers PlatformIO compilation targets for Arduino examples
+- **examples/meson.build**: Registers fbuild board compilation targets for Arduino examples
 
 **If violations found**: Recommend refactoring similar to `tests/meson.build` (see git history)
 

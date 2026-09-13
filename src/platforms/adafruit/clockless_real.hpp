@@ -4,7 +4,7 @@
 /// Implementation of IAdafruitNeoPixelDriver
 /// 
 /// This file contains the actual Adafruit_NeoPixel integration, keeping the
-/// dependency isolated from header files to avoid PlatformIO LDF issues.
+/// dependency isolated from header files to avoid LDF issues.
 
 // IWYU pragma: begin_keep
 #include <Adafruit_NeoPixel.h>

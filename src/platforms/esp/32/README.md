@@ -38,7 +38,7 @@ Notes:
 FastLED supports the parallel I2S clockless driver on the following ESP32 targets in this tree:
 
 - ESP32 (classic, e.g., "ESP32Dev")
-  - Enable via build flags (PlatformIO `platformio.ini`):
+  - Enable via build flags (`platformio.ini`):
     ```ini
     [env:esp32dev]
     platform = espressif32
@@ -54,7 +54,7 @@ FastLED supports the parallel I2S clockless driver on the following ESP32 target
   - Constraints: all lanes use identical timing (same LED chipset); up to 24 lanes.
 
 - ESP32-S3
-  - Enable via build flags (PlatformIO `platformio.ini`):
+  - Enable via build flags (`platformio.ini`):
     ```ini
     [env:esp32s3]
     platform = espressif32
@@ -341,7 +341,7 @@ Multi-lane SPI requires DMA-capable memory for internal buffers:
 - **Large installations** (>500 LEDs/strip): **PSRAM strongly recommended**
 - ESP32-S3 EDMA enables PSRAM to be DMA-capable (automatic)
 
-**Enable PSRAM in PlatformIO:**
+**Enable PSRAM in `platformio.ini`:**
 ```ini
 [env:esp32s3]
 platform = espressif32
@@ -492,14 +492,14 @@ Behavioral differences and practical guidance:
 - I2S (parallel)
   - Also DMA‑driven; while frame data is being transferred to the peripheral, your loop can continue doing work. Use more DMA buffers (`FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4`) to improve resilience under interrupt load.
 
-Quick PlatformIO examples
+Quick `platformio.ini` examples
 
 - Select RMT4 (legacy path) — requires an ESP‑IDF 4.x platform; rejected at
   compile time on IDF 5.x and newer:
   ```ini
   [env:esp32dev_rmt4]
   ; IDF 4.4 — the release FastLED's esp32dev_idf44 CI job builds against
-  platform = https://github.com/platformio/platform-espressif32/archive/refs/tags/v4.4.0.zip
+  platform = espressif32@4.4.0
   board = esp32dev
   framework = arduino
   build_flags =

@@ -42,13 +42,12 @@ import argparse
 import collections
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -96,12 +95,16 @@ class Toolchain:
 
 
 def _toolchain() -> Toolchain:
-    found = list(Path.home().glob(".platformio/packages/**/bin/riscv32-esp-elf-g++"))
+    located = shutil.which("riscv32-esp-elf-g++")
+    found = [Path(located)] if located else []
+    if not found:
+        found = sorted(
+            Path.home().glob(".fbuild/*/cache/toolchains/**/bin/riscv32-esp-elf-g++")
+        )
     if not found:
         raise SystemExit(
-            "riscv32-esp-elf-g++ not found; install it with\n"
-            "  uv run pio pkg install -g -t "
-            "'espressif/toolchain-riscv32-esp@12.2.0+20230208'"
+            "riscv32-esp-elf-g++ not found; fbuild fetches it during a RISC-V "
+            "ESP32 build, e.g. `bash compile esp32c6 --examples Blink`"
         )
     gpp = str(found[0])
     return Toolchain(
@@ -140,8 +143,8 @@ def _compile(
     RunningProcess.run(
         [gpp, *includes, *flags, *extra, "-c", str(tu), "-o", str(obj)],
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -152,8 +155,8 @@ def _compile(
 def _exec_sections(objdump: str, obj: Path) -> list[str]:
     out = RunningProcess.run(
         [objdump, "-h", str(obj)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
         encoding="utf-8",
@@ -209,8 +212,8 @@ def _flatten(driver: str, objdump: str, obj: Path, isa: str) -> Path:
     RunningProcess.run(
         cmd,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -221,8 +224,8 @@ def _flatten(driver: str, objdump: str, obj: Path, isa: str) -> Path:
 def _sections(objdump: str, obj: Path) -> dict[str, int]:
     out = RunningProcess.run(
         [objdump, "-h", str(obj)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
         encoding="utf-8",
@@ -255,8 +258,8 @@ def _demangle(names: list[str]) -> dict[str, str]:
     out = RunningProcess.run(
         [tool],
         input="\n".join(names),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -267,8 +270,8 @@ def _demangle(names: list[str]) -> dict[str, str]:
 def _functions(objdump: str, obj: Path) -> dict[str, int]:
     out = RunningProcess.run(
         [objdump, "-t", str(obj)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
         encoding="utf-8",
@@ -327,8 +330,8 @@ class Disasm:
     def __init__(self, objdump: str, obj: Path, isa: str) -> None:
         out = RunningProcess.run(
             [objdump, "-d", str(obj)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             check=True,
             encoding="utf-8",
@@ -371,8 +374,8 @@ def _inline_stacks(addr2line: str, obj: Path, addrs: list[int]) -> list[list[str
     out = RunningProcess.run(
         [addr2line, "-a", "-f", "-i", "-C", "-e", str(obj)],
         input=inp,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
         encoding="utf-8",
@@ -881,27 +884,34 @@ def main(argv: list[str] | None = None) -> int:
             # +0 bytes for a change to them -- a wrong delta, silently. Shadow
             # every path the object is built from, and say so when a change
             # lands somewhere neither of them covers.
-            # noqa-SRC001 rationale: RunningProcess.run mangles a binary
-            # stdout capture -- measured 71,680 B of `git archive` output
-            # coming back as 71,435 B -- which truncates the tar below into
-            # an "unexpected EOF" (exit 2). The bytes have to be exact here.
-            tar = subprocess.run(  # noqa: SRC001 - binary stdout; see above
-                ["git", "archive", args.baseline, *SHADOW_PATHS],
+            # `git archive --output` to a file rather than capturing the
+            # archive in Python: RunningProcess.run mangles a binary stdout
+            # capture -- measured 71,680 B of `git archive` output coming
+            # back as 71,435 B -- which truncates the tar into an "unexpected
+            # EOF" (exit 2). The bytes have to be exact here.
+            tarball = Path(tmp) / "baseline.tar"
+            RunningProcess.run(
+                ["git", "archive", f"--output={tarball}", args.baseline, *SHADOW_PATHS],
                 cwd=ROOT,
                 check=True,
-                capture_output=True,
-            ).stdout
+            )
             RunningProcess.run(
-                ["tar", "-x", "-C", str(shadow), "--strip-components=1"],
-                input=tar,
+                [
+                    "tar",
+                    "-x",
+                    "-f",
+                    str(tarball),
+                    "-C",
+                    str(shadow),
+                    "--strip-components=1",
+                ],
                 check=True,
-                text=False,
             )
             changed = RunningProcess.run(
                 ["git", "diff", "--name-only", args.baseline, "--", "src"],
                 cwd=ROOT,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 encoding="utf-8",
                 errors="replace",

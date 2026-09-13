@@ -16,9 +16,10 @@ Windows.
 """
 
 import os
-import subprocess
 import sys
 import time
+
+from running_process import RunningProcess, TimeoutExpired
 
 # Import Docker command utilities from separate module to avoid circular imports
 from ci.util.docker_command import (
@@ -74,10 +75,11 @@ def _check_wsl2_docker_backend() -> tuple[bool, str]:
     """
     try:
         # Check if WSL is available
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["wsl", "--list", "--verbose"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
 
@@ -129,9 +131,10 @@ def _check_wsl2_docker_backend() -> tuple[bool, str]:
 
         return False, "docker-desktop WSL2 distribution not found"
 
-    except FileNotFoundError:
+    except (FileNotFoundError, RuntimeError):
+        # RunningProcess reports a missing executable as RuntimeError.
         return False, "WSL2 not installed (wsl command not found)"
-    except subprocess.TimeoutExpired:
+    except TimeoutExpired:
         return False, "WSL2 command timed out"
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
@@ -161,6 +164,20 @@ def _find_docker_desktop_executable() -> str | None:
     return None
 
 
+def _launch_detached_gui(executable: str) -> None:
+    """Launch a GUI application detached from this process (Windows only).
+
+    Docker Desktop must outlive the calling script, so it cannot be a
+    RunningProcess child (those are reaped when the handle is dropped).
+    os.startfile goes through ShellExecute, which is how a Windows GUI app is
+    launched detached.
+    """
+    startfile = getattr(os, "startfile", None)
+    if startfile is None:
+        raise OSError("detached GUI launch is only supported on Windows")
+    startfile(executable)
+
+
 def _kill_docker_desktop_windows() -> bool:
     """Kill Docker Desktop processes on Windows.
 
@@ -169,16 +186,20 @@ def _kill_docker_desktop_windows() -> bool:
     """
     try:
         # Kill Docker Desktop processes
-        subprocess.run(
+        RunningProcess.run(
             ["taskkill", "/F", "/IM", "Docker Desktop.exe"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
 
         # Also kill the com.docker.backend process
-        subprocess.run(
+        RunningProcess.run(
             ["taskkill", "/F", "/IM", "com.docker.backend.exe"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
 
@@ -216,11 +237,7 @@ def _restart_docker_desktop_windows() -> tuple[bool, str]:
     # Start Docker Desktop
     print("  Starting Docker Desktop...", flush=True)
     try:
-        subprocess.Popen(
-            [docker_path],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        _launch_detached_gui(docker_path)
 
         # Wait for Docker Desktop and WSL2 backend to start
         print(
@@ -286,11 +303,7 @@ def _start_docker_windows() -> tuple[bool, str]:
         if docker_path:
             try:
                 print("  Starting Docker Desktop...", flush=True)
-                subprocess.Popen(
-                    [docker_path],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
+                _launch_detached_gui(docker_path)
                 # Wait for Docker to start - Docker Desktop can take 60+ seconds
                 print("  Waiting for Docker Desktop to initialize...", flush=True)
                 # Try for up to 120 seconds (2 minutes)
@@ -340,9 +353,11 @@ def _start_docker_macos() -> tuple[bool, str]:
     """
     try:
         # Use `open -a` to launch Docker Desktop
-        subprocess.run(
+        RunningProcess.run(
             ["open", "-a", "Docker"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
         )
@@ -355,7 +370,7 @@ def _start_docker_macos() -> tuple[bool, str]:
             if (attempt + 1) % 10 == 0:
                 print(f"  Still waiting ({attempt + 1}s)...", flush=True)
         return False, "Docker Desktop did not start within 60 seconds"
-    except FileNotFoundError:
+    except (FileNotFoundError, RuntimeError):
         return (
             False,
             "Docker Desktop not found. Please install it from https://www.docker.com/products/docker-desktop",
@@ -376,10 +391,11 @@ def _start_docker_linux() -> tuple[bool, str]:
     try:
         # Try systemctl first (modern systems)
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["sudo", "systemctl", "start", "docker"],
                 capture_output=True,
-                text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=30,
                 check=False,
             )
@@ -390,15 +406,16 @@ def _start_docker_linux() -> tuple[bool, str]:
                     if is_docker_available():
                         return True, "Docker daemon started via systemctl"
                 return False, "Docker daemon started but is not responding"
-        except FileNotFoundError:
+        except (FileNotFoundError, RuntimeError):
             pass
 
         # Try service command (older systems)
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["sudo", "service", "docker", "start"],
                 capture_output=True,
-                text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=30,
                 check=False,
             )
@@ -409,7 +426,7 @@ def _start_docker_linux() -> tuple[bool, str]:
                     if is_docker_available():
                         return True, "Docker daemon started via service"
                 return False, "Docker daemon started but is not responding"
-        except FileNotFoundError:
+        except (FileNotFoundError, RuntimeError):
             pass
 
         return (

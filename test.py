@@ -409,7 +409,7 @@ def main() -> None:
         if args.no_interactive:
             os.environ["FASTLED_CI_NO_INTERACTIVE"] = "true"
             os.environ["GITHUB_ACTIONS"] = (
-                "true"  # This ensures all subprocess also run in non-interactive mode
+                "true"  # This ensures all child processes also run in non-interactive mode
             )
 
         # Handle --interactive flag
@@ -772,7 +772,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt as ki:  # noqa: KBI002
         # Top-level safety net: main() already handles cleanup.
         # Print the full exception chain then exit without propagating
-        # KeyboardInterrupt to parent processes (e.g. os.system() callers).
+        # KeyboardInterrupt to parent processes (e.g. shell callers).
         import traceback  # noqa: PLC0415
 
         traceback.print_exception(ki)

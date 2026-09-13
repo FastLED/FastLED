@@ -16,9 +16,10 @@ This enables reusing build orchestration logic (PCH, incremental compilation,
 parallel compilation) across different toolchains.
 """
 
-import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
+
+from running_process import RunningProcess
 
 
 class Toolchain(ABC):
@@ -215,10 +216,11 @@ class EmscriptenToolchain(Toolchain):
         """Get emscripten compiler version string."""
         try:
             emcc = self.find_compiler()
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [str(emcc), "--version"],
                 capture_output=True,
-                text=True,
+                encoding="utf-8",
+                errors="replace",
                 check=True,
                 timeout=10,
             )

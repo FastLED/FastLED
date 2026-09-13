@@ -195,7 +195,7 @@ def run_meson_build_and_test(
     build_optimizer = make_build_optimizer(build_dir) if use_streaming else None
 
     try:
-        with libfastled_build_lock():
+        with libfastled_build_lock(build_dir=build_dir):
             if use_streaming:
                 ctx = StreamingContext(
                     source_dir=source_dir,

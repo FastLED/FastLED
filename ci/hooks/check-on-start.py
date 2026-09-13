@@ -3,9 +3,10 @@
 
 import hashlib
 import json
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import CompletedProcess, RunningProcess
 
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -13,8 +14,8 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
 
 
-def run_cmd(cmd):
-    return subprocess.run(
+def run_cmd(cmd: list[str]) -> CompletedProcess[str]:
+    return RunningProcess.run(
         cmd,
         capture_output=True,
         text=True,

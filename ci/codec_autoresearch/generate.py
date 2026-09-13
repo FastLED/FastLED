@@ -18,13 +18,12 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -100,8 +99,8 @@ def measure(binary: Path, path: Path, frames: int) -> Fixture:
         [str(binary), str(path), str(frames)],
         cwd=ROOT,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",

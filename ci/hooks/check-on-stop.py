@@ -24,12 +24,14 @@ Exit codes:
 
 import hashlib
 import json
-import subprocess
 import sys
 import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import cast
+
+from running_process import PIPE, CompletedProcess, RunningProcess
 
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -80,11 +82,11 @@ class ChangeBuckets:
         return bool(self.files)
 
 
-def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+def run_cmd(cmd: list[str]) -> CompletedProcess[str]:
+    return RunningProcess.run(
         cmd,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         cwd=str(PROJECT_ROOT),
@@ -105,7 +107,7 @@ def extract_failed_tests(output: str) -> list[FailedTest]:
     return failed
 
 
-def report_failure(label: str, result: subprocess.CompletedProcess[str]) -> None:
+def report_failure(label: str, result: CompletedProcess[str]) -> None:
     print(f"{label}:", file=sys.stderr)
     if result.stdout.strip():
         print(result.stdout.strip(), file=sys.stderr)
@@ -362,14 +364,14 @@ def main() -> int:
     )
 
     lint_done = threading.Event()
-    lint_results: list[subprocess.CompletedProcess[str]] = []
-    test_proc_holder: list[subprocess.Popen[str]] = []
-    test_results: list[subprocess.CompletedProcess[str]] = []
+    lint_results: list[CompletedProcess[str]] = []
+    test_proc_holder: list[RunningProcess] = []
+    test_results: list[CompletedProcess[str]] = []
     lint_duration: list[float] = []
     test_duration: list[float] = []
-    # Signalled once the test subprocess has either been spawned and registered
-    # in test_proc_holder OR the thread has exited without spawning (e.g. Popen
-    # raised). The lint-failure cancellation path waits on this so it cannot
+    # Signalled once the test process has either been spawned and registered
+    # in test_proc_holder OR the thread has exited without spawning (e.g. the
+    # spawn raised). The lint-failure cancellation path waits on this so it cannot
     # race past the start of run_tests() and miss the spawned child.
     test_ready = threading.Event()
 
@@ -386,26 +388,26 @@ def main() -> int:
     def run_tests() -> None:
         t0 = time.perf_counter()
         try:
-            proc = subprocess.Popen(
-                ["uv", "run", "test.py", "--cpp"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
+            test_cmd = ["uv", "run", "test.py", "--cpp"]
+            proc = RunningProcess(
+                test_cmd,
+                capture=True,
+                stderr=PIPE,
                 encoding="utf-8",
                 errors="replace",
-                cwd=str(PROJECT_ROOT),
+                cwd=PROJECT_ROOT,
             )
             test_proc_holder.append(proc)
         finally:
             # Always signal readiness so the lint-failure cancellation path
-            # never blocks forever on a Popen that raised before producing a
+            # never blocks forever on a spawn that raised before producing a
             # process handle.
             test_ready.set()
-        stdout, stderr = proc.communicate()
+        returncode = cast(int, proc.wait())
+        stdout = str(proc.stdout)
+        stderr = str(proc.stderr)
         test_duration.append(time.perf_counter() - t0)
-        test_results.append(
-            subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
-        )
+        test_results.append(CompletedProcess(test_cmd, returncode, stdout, stderr))
 
     overall_start = time.perf_counter()
 
@@ -438,12 +440,12 @@ def main() -> int:
 
     if lint_result.returncode != 0:
         # Lint failed - cancel tests, report lint errors only.
-        # We must wait for run_tests() to publish the Popen handle (or finish
+        # We must wait for run_tests() to publish the process handle (or finish
         # without one) before killing, otherwise we can race past the start
         # of the thread and leak a `uv run test.py --cpp` child that keeps
         # running after the hook exits.
         if test_thread is not None:
-            # Bounded wait so a hung Popen cannot block the hook forever.
+            # Bounded wait so a hung spawn cannot block the hook forever.
             test_ready.wait(timeout=10)
         for proc in test_proc_holder:
             proc.kill()

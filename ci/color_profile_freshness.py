@@ -26,6 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from running_process import PIPE, RunningProcess
 from typeguard import typechecked
 
 from ci.color_profile_generator import SUPPORTED_SCHEMA_MAJOR, Artifact, load_artifacts
@@ -157,16 +158,15 @@ def fetch_remote_index() -> list[RemoteArtifact]:
     and so a transport failure has exactly one place to come from.
     """
 
-    import subprocess
-
-    # Raw `subprocess` rather than `RunningProcess`: this parses the child's
-    # stdout as JSON and, below, as base64. `RunningProcess` merges stderr
-    # into that stream and strips trailing newlines, either of which corrupts
-    # the parse. Explicit encoding because text mode otherwise falls back to
-    # the locale codec.
-    listing = subprocess.run(  # noqa: SRC001
+    # `stdout=PIPE, stderr=PIPE` rather than `capture_output=True`: this
+    # parses the child's stdout as JSON and, below, as base64, and
+    # `capture_output=True` would merge `gh`'s stderr progress into that
+    # stream and corrupt the parse. Explicit encoding because text mode
+    # otherwise falls back to the locale codec.
+    listing = RunningProcess.run(
         ["gh", "api", f"repos/{DATASHEETS_REPO}/contents/{DATASHEETS_PATH}"],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -178,7 +178,7 @@ def fetch_remote_index() -> list[RemoteArtifact]:
         name = record.get("name", "")
         if not name.endswith(".profile.json"):
             continue
-        blob = subprocess.run(  # noqa: SRC001
+        blob = RunningProcess.run(
             [
                 "gh",
                 "api",
@@ -186,7 +186,8 @@ def fetch_remote_index() -> list[RemoteArtifact]:
                 "-q",
                 ".content",
             ],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             encoding="utf-8",
             errors="replace",

@@ -34,13 +34,13 @@ from __future__ import annotations
 
 import argparse
 import re
+import shlex
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import PIPE, CompletedProcess, RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -191,13 +191,13 @@ class Attribution:
     functions: list[tuple[int, str]] = field(default_factory=_no_functions)
 
 
-def _run(command: list[str], cwd: Path = ROOT) -> subprocess.CompletedProcess[str]:
+def _run(command: list[str], cwd: Path = ROOT) -> CompletedProcess[str]:
     return RunningProcess.run(
         command,
         cwd=cwd,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -225,18 +225,18 @@ def materialise_baseline(ref: str, into: Path) -> Path:
     if not any(n == "minimp3.h" for n in names):
         raise SystemExit(f"{ref}:{VENDORED} has no minimp3.h")
     for name in names:
-        # noqa-SRC001 rationale: this blob is written back out verbatim by
-        # write_bytes. RunningProcess.run does not round-trip a binary stdout
+        # Shell redirect rather than a stdout capture: the blob must land
+        # byte-exact, and RunningProcess does not round-trip a binary stdout
         # capture even with text=False -- measured 71,680 B of `git archive`
         # returning as 71,435 B -- so the vendored source would be silently
         # corrupted.
-        blob = subprocess.run(  # noqa: SRC001 - binary stdout; see above
-            ["git", "show", f"{ref}:{VENDORED}/{name}"],
+        RunningProcess.run(
+            f"git show {shlex.quote(f'{ref}:{VENDORED}/{name}')}"
+            f" > {shlex.quote(str(shadow / name))}",
+            shell=True,
             cwd=ROOT,
             check=True,
-            capture_output=True,
         )
-        (shadow / name).write_bytes(blob.stdout)
     return into
 
 
@@ -314,8 +314,8 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
         ],
         cwd=ROOT,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -346,8 +346,8 @@ def callgrind(binary: Path, args: list[str], out: Path, top: int) -> Attribution
             [annotate, "--threshold=99", str(out)],
             cwd=ROOT,
             check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             encoding="utf-8",
             errors="replace",
@@ -434,8 +434,8 @@ def main(argv: list[str] | None = None) -> int:
                     [str(binary), relative],
                     cwd=ROOT,
                     check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stdout=PIPE,
+                    stderr=PIPE,
                     text=True,
                     encoding="utf-8",
                     errors="replace",

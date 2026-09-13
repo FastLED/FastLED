@@ -28,7 +28,7 @@ class InitResult(CompilerResult):
     sketch_build_defines: list[str] = field(default_factory=list)
 
     @property
-    def platformio_ini(self) -> Path:
+    def project_ini(self) -> Path:
         return self.build_dir / "platformio.ini"
 
 
@@ -87,22 +87,4 @@ class Compiler(ABC):
     @abstractmethod
     def cancel_all(self) -> None:
         """Cancel all currently running builds."""
-        pass
-
-    @abstractmethod
-    def check_usb_permissions(self) -> tuple[bool, str]:
-        """Check if USB device access is properly configured.
-
-        Returns:
-            Tuple of (has_access, status_message)
-        """
-        pass
-
-    @abstractmethod
-    def install_usb_permissions(self) -> bool:
-        """Install platform-specific USB permissions or equivalent.
-
-        Returns:
-            True if installation succeeded, False otherwise
-        """
         pass

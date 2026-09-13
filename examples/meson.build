@@ -8,10 +8,10 @@
 #    - Targets: ninja -C builddir examples-host, example-Blink, etc.
 #    - See: examples/host/meson.build
 #
-# 2. HARDWARE BOARD COMPILATION (PlatformIO-based):
+# 2. HARDWARE BOARD COMPILATION (fbuild-based):
 #    - Compiles examples for actual Arduino boards
 #    - Targets: example-blink-uno, examples-all-uno, etc.
-#    - Uses PlatformIO for cross-compilation
+#    - Uses fbuild for cross-compilation
 #
 # Meson targets:
 #   ninja -C builddir examples-host           - Compile ALL examples for host (fast!)
@@ -343,13 +343,13 @@ skipped_count = stub_incompatible_examples.length()
 message('Host-based example compilation: ' + example_count.to_string() + '/' + total_discovered.to_string() + ' examples (' + skipped_count.to_string() + ' platform-specific examples skipped)')
 
 # ============================================================================
-# HARDWARE BOARD COMPILATION (PlatformIO-based)
+# HARDWARE BOARD COMPILATION (fbuild-based)
 # ============================================================================
 
 # Find uv executable
 uv_exe = find_program('uv', required: false)
 if not uv_exe.found()
-    warning('uv not found - PlatformIO example compilation targets will not be available. Install with: pip install uv')
+    warning('uv not found - board example compilation targets will not be available. Install with: pip install uv')
     subdir_done()
 endif
 
@@ -402,7 +402,7 @@ foreach example : common_examples
     )
 endforeach
 
-message('PlatformIO example compilation targets configured:')
+message('Board example compilation targets configured:')
 message('  - Individual: example-<name>-<board> (e.g., example-blink-uno)')
 message('  - All examples: examples-all-<board> (e.g., examples-all-uno)')
 message('  - Single example, all boards: examples-<name>-all-boards (e.g., examples-blink-all-boards)')

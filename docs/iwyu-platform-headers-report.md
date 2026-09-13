@@ -255,7 +255,7 @@ bash lint --full
 uv run ci/ci-iwyu.py --verbose
 
 # Run IWYU on specific platform (if needed)
-uv run ci/ci-iwyu.py esp32dev  # Requires PlatformIO compilation
+uv run ci/ci-iwyu.py esp32dev  # Requires a board compile through fbuild
 ```
 
 ---
@@ -385,7 +385,7 @@ bash compile uno --check --examples DemoReel100
 
 **Trade-offs:**
 - ✅ **Pro**: Catches platform-specific include issues
-- ❌ **Con**: Much slower (requires full PlatformIO compilation for each platform)
+- ❌ **Con**: Much slower (requires a full board compile for each platform)
 - ❌ **Con**: Requires cross-compilation toolchains for each platform
 
 **Recommendation:** Not needed currently. Host-based IWYU is sufficient because:

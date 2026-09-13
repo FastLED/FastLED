@@ -419,7 +419,7 @@ impl FileContentChecker for IwyuPragmaPrivateChecker {
 // --- BareDigitSeparatorChecker ----------------------------------------------
 //
 // Bans C++14 digit separators (e.g. `999'999'999`) in src/. Some downstream
-// PlatformIO environments (LPC8xx in particular, see FastLED #3329) still
+// Some board environments (LPC8xx in particular, see FastLED #3329) still
 // default to `-std=gnu++11`. Under gnu++11 the compiler reads the single
 // quote as a character-literal delimiter, so a literal like `999'999'999`
 // becomes `'999'` + stray digits — fatal parse error. Keep src/ portable

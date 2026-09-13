@@ -36,9 +36,10 @@ Architecture:
 import argparse
 import hashlib
 import json
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emcc
@@ -58,12 +59,15 @@ PCH_METADATA = BUILD_DIR / "wasm_pch_metadata.json"
 def get_compiler_version(emcc: str) -> str:
     """Get emscripten compiler version string."""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [emcc, "--version"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             check=True,
             timeout=10,
+            encoding="utf-8",
+            errors="replace",
         )
         # Return first line which contains version info
         return result.stdout.split("\n")[0].strip()
@@ -356,7 +360,7 @@ def compile_pch(
         print(f"Command: {' '.join(cmd)}")
 
     # Run compilation
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
 
     if result.returncode != 0:
         print(f"✗ PCH compilation failed with return code {result.returncode}")

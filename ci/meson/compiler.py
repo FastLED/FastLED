@@ -1,9 +1,10 @@
 """Compiler detection and Meson executable resolution."""
 
 import os
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.timestamp_print import ts_print as _ts_print
@@ -23,29 +24,36 @@ def get_meson_executable() -> str:
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent.parent
 
-    # Platform-specific meson executable name
+    # Platform-specific meson executable name and venv layout
+    # (Scripts/ on Windows, bin/ everywhere else).
     is_windows = sys.platform.startswith("win") or os.name == "nt"
     meson_exe_name = "meson.exe" if is_windows else "meson"
-    venv_meson = project_root / ".venv" / "Scripts" / meson_exe_name
+    for scripts_dir in ("Scripts", "bin"):
+        venv_meson = project_root / ".venv" / scripts_dir / meson_exe_name
+        if venv_meson.exists():
+            return str(venv_meson)
 
-    if venv_meson.exists():
-        return str(venv_meson)
+    # Fallback to PATH resolution (will use system meson). Return the absolute
+    # path when it resolves so the mtime fast path in
+    # check_meson_version_compatibility() can skip the `meson --version`
+    # child process (~0.35 s on every warm `bash test <name>`).
+    import shutil
 
-    # Fallback to PATH resolution (will use system meson)
-    return "meson"
+    resolved = shutil.which(meson_exe_name)
+    return resolved if resolved else "meson"
 
 
 def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
     meson_exe = get_meson_executable()
     # Fast path: if get_meson_executable() returned an absolute venv path, it
-    # already confirmed the file exists - no need for a subprocess round-trip.
+    # already confirmed the file exists - no need for a process round-trip.
     meson_path = Path(meson_exe)
     if meson_path.is_absolute() and meson_path.exists():
         return True
     # Slow path: venv meson not found; verify the system-PATH "meson" works.
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [meson_exe, "--version"],
             capture_output=True,
             text=True,
@@ -54,7 +62,7 @@ def check_meson_installed() -> bool:
             timeout=5,
         )
         return result.returncode == 0
-    except (subprocess.SubprocessError, FileNotFoundError):
+    except (CalledProcessError, TimeoutExpired, FileNotFoundError, RuntimeError):
         return False
 
 
@@ -66,7 +74,7 @@ def get_meson_version() -> str:
         Version string (e.g., "1.10.1") or "unknown" on error
     """
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [get_meson_executable(), "--version"],
             capture_output=True,
             text=True,
@@ -77,7 +85,7 @@ def get_meson_version() -> str:
         if result.returncode == 0:
             return result.stdout.strip()
         return "unknown"
-    except (subprocess.SubprocessError, FileNotFoundError):
+    except (CalledProcessError, TimeoutExpired, FileNotFoundError, RuntimeError):
         return "unknown"
 
 
@@ -97,7 +105,7 @@ def check_meson_version_compatibility(build_dir: Path) -> tuple[bool, str]:
         - is_compatible: True if versions match or no stored version exists
         - message: Description of any incompatibility found
     """
-    # Fast path: skip meson --version subprocess when meson.exe hasn't changed
+    # Fast path: skip the meson --version process when meson.exe hasn't changed
     # since the build directory was last configured.
     # If meson.exe mtime < coredata.dat mtime, meson was installed BEFORE the
     # last configuration → same version must be in use → compatible.
@@ -169,7 +177,7 @@ def get_compiler_version(compiler_path: str) -> str:
         Version string (e.g., "clang version 21.1.5") or "unknown" on error
     """
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [compiler_path, "--version"],
             capture_output=True,
             text=True,

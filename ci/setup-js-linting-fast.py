@@ -17,7 +17,6 @@ import json
 import os
 import platform
 import shutil
-import subprocess
 import sys
 import tarfile
 import zipfile
@@ -25,6 +24,7 @@ from pathlib import Path
 
 # Import httpx for HTTP requests (dynamically managed by uv)
 import httpx
+from running_process import PIPE, CalledProcessError, RunningProcess
 
 from ci.util.js_tools_cache import repository_tools_dir
 
@@ -216,26 +216,30 @@ def setup_eslint():
 
         # On Windows, use shell=True to properly execute .cmd files
         if platform.system() == "Windows":
-            subprocess.run(
+            RunningProcess.run(
                 [str(npm_exe_abs), "install"],
                 cwd=TOOLS_DIR,
                 check=True,
-                capture_output=True,
-                text=True,
+                stdout=PIPE,
+                stderr=PIPE,
+                encoding="utf-8",
+                errors="replace",
                 shell=True,
                 env=env,
             )
         else:
-            subprocess.run(
+            RunningProcess.run(
                 [str(npm_exe_abs), "install"],
                 cwd=TOOLS_DIR,
                 check=True,
-                capture_output=True,
-                text=True,
+                stdout=PIPE,
+                stderr=PIPE,
+                encoding="utf-8",
+                errors="replace",
                 env=env,
             )
         # npm install succeeded
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         # Show stderr output for debugging
         print(f"npm install stderr: {e.stderr}")
         print(f"npm install stdout: {e.stdout}")

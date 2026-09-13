@@ -23,10 +23,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 from typing import Any, Optional, cast
+
+from running_process import PIPE, CalledProcessError, RunningProcess
 
 
 CODERABBIT_LOGINS = {"coderabbitai", "coderabbitai[bot]"}
@@ -141,9 +142,10 @@ _REPO_OVERRIDE: Optional[str] = None
 
 
 def _run_gh(args: list[str]) -> str:
-    result = subprocess.run(
+    result = RunningProcess.run(
         ["gh"] + args,
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -155,7 +157,7 @@ def _run_gh(args: list[str]) -> str:
 def _current_pr() -> Optional[int]:
     try:
         out = _run_gh(["pr", "view", "--json", "number"])
-    except subprocess.CalledProcessError:
+    except CalledProcessError:
         return None
     return int(json.loads(out)["number"])
 

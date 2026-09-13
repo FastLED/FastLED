@@ -18,14 +18,13 @@ import argparse
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tarfile
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess
 from typeguard import typechecked
 
 
@@ -246,6 +245,8 @@ def run_vector(binary: Path, bitstream: Path, reference: Path) -> VectorResult:
         capture_output=True,
         timeout=180,
         env=environment,
+        encoding="utf-8",
+        errors="replace",
     )
     combined = (result.stdout or "") + (result.stderr or "")
     if _SANITIZER_RE.search(combined):
@@ -415,7 +416,7 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:  # noqa: KBI002 - top-level handler, exits 130 cleanly
         print("CONFORMANCE:INTERRUPTED", file=sys.stderr)
         return 130
-    except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
+    except (OSError, RuntimeError, CalledProcessError, ValueError) as exc:
         print(f"codec conformance failed: {exc}", file=sys.stderr)
         return 1
     return 0

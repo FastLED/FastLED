@@ -122,7 +122,7 @@ static const fl::u32 kOffWakeIntCtrl = 0xFF8;
 // the SWM register offsets here: the user is expected to pre-configure pin
 // routing in board-setup code before calling FastLED.addLeds<>(). This is
 // consistent with how Arduino-style LPC845 sketches handle SWM setup today.
-// TODO(2841): provide an optional `fl::lpc::plu::set_data_pin(uint8_t pio)`
+// TODO(2841): provide an optional `fl::lpc::plu::set_data_pin(uint8_t pin)`
 // helper in a follow-up that programs PINASSIGN_PLU_IN[0] directly.
 
 // LUTn_TRUTH[n] write helper.

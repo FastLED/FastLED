@@ -14,9 +14,10 @@ Exit codes:
 
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -39,7 +40,7 @@ def _get_submodule_paths() -> list[str]:
         return _submodule_cache
     _submodule_cache = []
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 "git",
                 "config",
@@ -49,7 +50,8 @@ def _get_submodule_paths() -> list[str]:
                 r"^submodule\..*\.path$",
             ],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             cwd=str(PROJECT_ROOT),
         )
         if result.returncode == 0:
@@ -122,10 +124,10 @@ def main() -> int:
     # Always use --strict for Python files (pyright on single file is fast)
     cmd = ["uv", "run", "ci/lint.py", "--strict", file_path]
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         cmd,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         cwd=str(PROJECT_ROOT),

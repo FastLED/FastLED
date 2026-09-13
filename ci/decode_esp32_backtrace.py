@@ -17,16 +17,18 @@ Usage:
     cat crash.log | python decode_esp32_backtrace.py <elf_file> [--build-info <build_info.json>]
 
 Example:
-    python decode_esp32_backtrace.py .pio/build/dev/firmware.elf 0x42002a3c 0x42001234
+    python decode_esp32_backtrace.py .build/fbuild/esp32c6/.fbuild/build/release/firmware.elf 0x42002a3c 0x42001234
     python decode_esp32_backtrace.py firmware.elf --build-info build_info.json < crash.log
 """
 
 import json
 import re
-import subprocess
+import shutil
 import sys
 from pathlib import Path
 from typing import Any, Optional, cast
+
+from running_process import PIPE, CalledProcessError, RunningProcess
 
 
 def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
@@ -81,38 +83,41 @@ def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
         return None
 
 
+# Tool name prefixes for every ESP32 toolchain fbuild can install.
+_ESP_ADDR2LINE_NAMES = (
+    "riscv32-esp-elf-addr2line",
+    "xtensa-esp32-elf-addr2line",
+    "xtensa-esp32s2-elf-addr2line",
+    "xtensa-esp32s3-elf-addr2line",
+    "xtensa-esp-elf-addr2line",
+    "llvm-addr2line",
+)
+
+
+def _fbuild_toolchain_roots() -> list[Path]:
+    """Toolchain cache roots fbuild populates (``~/.fbuild/<profile>/cache/toolchains``)."""
+    root = Path.home() / ".fbuild"
+    if not root.is_dir():
+        return []
+    return sorted(p for p in root.glob("*/cache/toolchains") if p.is_dir())
+
+
 def find_addr2line() -> Optional[Path]:
-    """Find the ESP32 addr2line tool."""
-    # Common PlatformIO toolchain locations
-    home = Path.home()
+    """Find an ESP32 addr2line tool without build metadata.
 
-    # Try RISC-V (ESP32-C3, C6, etc.)
-    riscv_paths = [
-        home
-        / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line",
-        home
-        / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line.exe",
-    ]
+    Looks on PATH first, then inside fbuild's toolchain cache. Prefer passing
+    ``--build-info`` so the exact toolchain that linked the ELF is used.
+    """
+    for name in _ESP_ADDR2LINE_NAMES:
+        located = shutil.which(name)
+        if located:
+            return Path(located)
 
-    for path in riscv_paths:
-        if path.exists():
-            return path
-
-    # Try Xtensa (ESP32, ESP32-S2, ESP32-S3)
-    xtensa_paths = [
-        home
-        / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line",
-        home
-        / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line.exe",
-        home
-        / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line",
-        home
-        / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line.exe",
-    ]
-
-    for path in xtensa_paths:
-        if path.exists():
-            return path
+    for toolchain_root in _fbuild_toolchain_roots():
+        for name in _ESP_ADDR2LINE_NAMES:
+            for candidate in sorted(toolchain_root.glob(f"**/bin/{name}*")):
+                if candidate.is_file():
+                    return candidate
 
     return None
 
@@ -138,7 +143,11 @@ def decode_addresses(
 
     if not addr2line:
         print("Error: Could not find addr2line tool", file=sys.stderr)
-        print("Make sure PlatformIO ESP32 toolchain is installed", file=sys.stderr)
+        print(
+            "Make sure the ESP32 toolchain is installed (fbuild fetches it during "
+            "`bash compile <esp32 board>`)",
+            file=sys.stderr,
+        )
         print("Or provide --build-info with path to build_info.json", file=sys.stderr)
         return
 
@@ -154,7 +163,15 @@ def decode_addresses(
     cmd = [str(addr2line), "-e", str(elf_file), "-f", "-C"] + addresses
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = RunningProcess.run(
+            cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            errors="replace",
+        )
         print("\n=== Decoded Stack Trace ===")
 
         lines = result.stdout.strip().split("\n")
@@ -166,7 +183,7 @@ def decode_addresses(
                 print(f"{addr}: {func}")
                 print(f"         at {loc}")
 
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         print(f"Error running addr2line: {e}", file=sys.stderr)
 
 

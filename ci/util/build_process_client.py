@@ -12,7 +12,7 @@ Usage:
     from ci.util.build_process_client import register_build_process
 
     # Start a build process
-    proc = subprocess.Popen([...])
+    proc = RunningProcess([...])
 
     # Register it with the daemon for orphan cleanup
     register_build_process(proc.pid, example="Blink", project_dir="/path/to/project")
@@ -43,7 +43,7 @@ def register_build_process(
     the build process and all its children.
 
     Args:
-        root_pid: PID of the root build process (PlatformIO/scons)
+        root_pid: PID of the root build process (fbuild)
         example: Example name being built (for logging)
         project_dir: Project directory (for logging)
     """

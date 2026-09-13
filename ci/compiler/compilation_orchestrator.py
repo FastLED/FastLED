@@ -3,62 +3,22 @@ Compilation orchestration module.
 
 This module provides high-level orchestration for compiling examples across boards.
 It handles compilation workflow, result collection, and statistics reporting.
+Every board build runs through fbuild (``ci/compiler/board_compiler.py``).
 """
 
-import os
 import time
 from concurrent.futures import as_completed
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Optional
 
 from typeguard import typechecked
 
 from ci.boards import Board
+from ci.compiler.board_compiler import BoardCompiler
 from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import SketchResult
-from ci.compiler.pio import FastLEDPaths, PioCompiler
+from ci.compiler.path_manager import FastLEDPaths
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
-
-
-# fbuild is the only supported board build backend. The legacy PioCompiler
-# ``pio run`` path is retained as a *comparison-only* tool for users who
-# pass ``bash compile <board> --backend platformio`` explicitly. See
-# #3279 (Phase 3 deprecation) and #3274.
-BOARD_BUILDS_USE_FBUILD = True
-
-# Env var the CLI sets when the user passes ``--backend platformio`` (or
-# the ``--platformio`` / ``--pio`` shortcuts). Programmatic callers that
-# try to flip ``use_fbuild=False`` without that explicit user intent are
-# rejected by ``_assert_explicit_platformio_backend`` below.
-PLATFORMIO_BACKEND_OPT_IN_ENV = "FASTLED_BACKEND_PLATFORMIO_EXPLICIT"
-
-
-def _assert_explicit_platformio_backend() -> None:
-    """Reject programmatic ``use_fbuild=False`` flips without the explicit
-    ``--backend platformio`` CLI opt-in.
-
-    The PlatformIO ``pio run`` backend is a *comparison-only* tool kept
-    around so users can reproduce PlatformIO-native size / link behaviour
-    and diagnose fbuild gaps. Library / CI code MUST NOT silently route
-    around fbuild — every board build in production CI runs through
-    fbuild. If a new caller needs the PIO backend, the user must say so
-    on the command line so the choice is visible in CI logs.
-    """
-    if os.environ.get(PLATFORMIO_BACKEND_OPT_IN_ENV, "").lower() in (
-        "1",
-        "true",
-        "yes",
-        "on",
-    ):
-        return
-    raise RuntimeError(
-        "compile_board_examples(use_fbuild=False) requires the explicit "
-        "`bash compile <board> --backend platformio` CLI flag (which sets "
-        f"{PLATFORMIO_BACKEND_OPT_IN_ENV}=1). The PlatformIO `pio run` "
-        "backend is a comparison-only tool — production CI compiles ALL "
-        "boards via fbuild. See #3279 (Phase 3 deprecation) and #3274."
-    )
 
 
 @typechecked
@@ -79,47 +39,17 @@ def compile_board_examples(
     examples: list[str],
     defines: list[str],
     verbose: bool,
-    global_cache_dir: Optional[Path] = None,
     extra_packages: Optional[list[str]] = None,
     max_failures: Optional[int] = None,
     skip_filters: bool = False,
-    use_fbuild: Optional[bool] = None,
 ) -> BoardCompilationResult:
-    """Compile examples for a single board using PioCompiler.
-
-    Args:
-        use_fbuild: If None, uses BOARD_BUILDS_USE_FBUILD (default True,
-            i.e. fbuild). If True, uses fbuild. ``False`` is only honoured
-            when the user passed ``--backend platformio`` on the CLI (which
-            sets ``FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1``); programmatic
-            flips without that opt-in raise ``RuntimeError``. The PIO
-            ``pio run`` backend is a comparison-only tool — see #3279.
-    """
-    if use_fbuild is None:
-        use_fbuild = BOARD_BUILDS_USE_FBUILD
-
-    if not use_fbuild:
-        _assert_explicit_platformio_backend()
-
-    # Resolve global cache directory immediately for display
-    resolved_cache_dir = None
-    if global_cache_dir is not None:
-        # User specified a path - use it exactly as provided
-        resolved_cache_dir = global_cache_dir.resolve()
-    else:
-        # Default path ends with 'global_cache'
-        resolved_cache_dir = Path.home() / ".fastled" / "global_cache"
-
+    """Compile examples for a single board with fbuild via BoardCompiler."""
     print(f"\n{'=' * 60}")
     print(f"COMPILING BOARD: {board.board_name}")
     print(f"EXAMPLES: {', '.join(examples)}")
-    # Show cache directories in verbose mode only
     paths = FastLEDPaths(board.board_name)
     if verbose:
-        print(f"GLOBAL CACHE: {resolved_cache_dir}")
-        print(f"BUILD CACHE: {paths.build_cache_dir}")
-        print(f"CORE DIR: {paths.core_dir}")
-        print(f"PACKAGES DIR: {paths.packages_dir}")
+        print(f"BUILD DIR: {paths.build_dir}")
 
     # Apply filters based on @filter directives (unless skip_filters is True)
     if skip_filters:
@@ -150,22 +80,17 @@ def compile_board_examples(
             ok=True, sketch_results=[], skipped_examples=skipped_examples
         )
 
-    backend_label = "fbuild" if use_fbuild else "platformio (pio run)"
-    print(f"BUILD BACKEND: {backend_label}")
+    print("BUILD BACKEND: fbuild")
     print(f"{'=' * 60}")
 
     try:
-        # Create PioCompiler instance. CI compile is hermetic w.r.t. the
-        # repo-root platformio.ini — per-board flags live in ci/boards.py
-        # (#3274, sever in #3278, legacy opt-in parameter removed in
-        # #3279 Phase 4).
-        compiler = PioCompiler(
+        # CI compile is hermetic w.r.t. the repo-root platformio.ini —
+        # per-board flags live in ci/boards.py (#3274, #3278, #3279).
+        compiler = BoardCompiler(
             board=board,
             verbose=verbose,
-            global_cache_dir=resolved_cache_dir,
             additional_defines=defines,
             additional_libs=extra_packages,
-            use_fbuild=use_fbuild,
         )
 
         futures = compiler.build(examples)

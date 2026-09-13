@@ -118,7 +118,7 @@ def validate_test_artifact(
     try:
         dll_mtime = test_path.stat().st_mtime
     except OSError:
-        # stat() failure is non-fatal — let the subprocess loader
+        # stat() failure is non-fatal — let the child-process loader
         # surface whatever it actually sees on disk.
         return None
     if dll_mtime < build_start_time:
@@ -158,7 +158,7 @@ class StreamingContext:
 
 
 def _make_streaming_env(source_dir: Path, build_dir: Path) -> dict[str, str]:
-    """Build the environment dict for streamed test subprocesses.
+    """Build the environment dict for streamed test processes.
 
     Adds the fastled shared lib directory + clang toolchain runtime DLLs to
     PATH (Windows) or LD_LIBRARY_PATH (POSIX) so DLLs load without MSYS2.
@@ -400,7 +400,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             return result
 
     def _kill_active_procs() -> None:
-        """Kill all running test subprocesses (called on halt)."""
+        """Kill all running test processes (called on halt)."""
         with active_procs_lock:
             for p in list(active_procs):
                 try:

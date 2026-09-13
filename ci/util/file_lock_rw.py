@@ -313,7 +313,7 @@ def download_lock(artifact_dir: Path, timeout: float = 5.0) -> FileLock:
         FileLock context manager
 
     Example:
-        cache_dir = Path("~/.platformio/global_cache")
+        cache_dir = Path("~/.fastled/global_cache")
         artifact_dir = cache_dir / "toolchain-xyz"
 
         with download_lock(artifact_dir) as lock:

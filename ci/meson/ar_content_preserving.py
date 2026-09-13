@@ -51,10 +51,11 @@ Performance:
 import hashlib
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from running_process import RunningProcess
 
 
 def _hash_file(path: Path) -> str:
@@ -92,7 +93,7 @@ def main() -> None:
         # This handles cases like: ar_wrapper.py clang-tool-chain-ar --version
         ar_exe_probe = sys.argv[1]
         probe_args = sys.argv[2:]
-        result = subprocess.run([ar_exe_probe] + probe_args)
+        result = RunningProcess.run([ar_exe_probe] + probe_args)
         sys.exit(result.returncode)
 
     ar_exe = sys.argv[1]
@@ -102,14 +103,14 @@ def main() -> None:
 
     # If output doesn't exist yet, just run the archiver directly (first build)
     if not output.exists():
-        result = subprocess.run([ar_exe, flags, str(output)] + inputs)
+        result = RunningProcess.run([ar_exe, flags, str(output)] + inputs)
         sys.exit(result.returncode)
 
     # Output exists: hash it to check if new archive will have same content
     old_hash = _hash_file(output)
     if not old_hash:
         # Can't read existing archive - just run directly
-        result = subprocess.run([ar_exe, flags, str(output)] + inputs)
+        result = RunningProcess.run([ar_exe, flags, str(output)] + inputs)
         sys.exit(result.returncode)
 
     # Create new archive in a temp file so we can compare without clobbering output.
@@ -129,12 +130,12 @@ def main() -> None:
 
     try:
         # Run archiver to temp file (ar will create it fresh)
-        result = subprocess.run([ar_exe, flags, str(tmp_path)] + inputs)
+        result = RunningProcess.run([ar_exe, flags, str(tmp_path)] + inputs)
 
         if result.returncode != 0:
             # Archiver failed - fall back to direct output (preserves error semantics)
             tmp_path.unlink(missing_ok=True)
-            result2 = subprocess.run([ar_exe, flags, str(output)] + inputs)
+            result2 = RunningProcess.run([ar_exe, flags, str(output)] + inputs)
             sys.exit(result2.returncode)
 
         # Compare new archive content with existing
@@ -171,7 +172,7 @@ def main() -> None:
             file=sys.stderr,
         )
         tmp_path.unlink(missing_ok=True)
-        result = subprocess.run([ar_exe, flags, str(output)] + inputs)
+        result = RunningProcess.run([ar_exe, flags, str(output)] + inputs)
         sys.exit(result.returncode)
 
 

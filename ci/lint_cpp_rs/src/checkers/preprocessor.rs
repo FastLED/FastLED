@@ -155,7 +155,7 @@ impl FileContentChecker for BannedNamespaceChecker {
     }
 
     fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
-        let skip_patterns = [".build", ".pio", ".venv", "third_party", "vendor"];
+        let skip_patterns = [".build", ".venv", "third_party", "vendor"];
         if skip_patterns
             .iter()
             .any(|pattern| file_path.contains(pattern))

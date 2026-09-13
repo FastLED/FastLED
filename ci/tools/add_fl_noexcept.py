@@ -12,9 +12,10 @@ Usage:
 
 import argparse
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -93,16 +94,19 @@ def run_clang_query(scope: str) -> list[tuple[str, int]]:
         print(f"ERROR: clang-query not found at {CLANG_QUERY}")
         sys.exit(1)
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [str(CLANG_QUERY), tu, "--"] + compiler_args,
         input=query,
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         cwd=str(PROJECT_ROOT),
         timeout=300,
+        encoding="utf-8",
+        errors="replace",
     )
 
-    output = result.stdout + result.stderr
+    output = result.stdout + "\n" + result.stderr
 
     # Parse "file:line:col: note: "root" binds here" lines
     pattern = re.compile(r"(src[\\/]\S+):(\d+):\d+: note: .root. binds here")

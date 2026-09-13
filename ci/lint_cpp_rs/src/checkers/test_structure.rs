@@ -352,7 +352,6 @@ impl FileContentChecker for NamespaceIncludesChecker {
         let lower = normalized.to_ascii_lowercase();
         if [
             ".build",
-            ".pio",
             ".venv",
             "libdeps",
             "third_party",

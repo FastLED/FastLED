@@ -906,7 +906,7 @@
 
 // Seeed XIAO nRF52840 Plus and Sense Plus. The ArduinoCore-mbed 2.9.3
 // variants use TARGET_SEEED_XIAO_NRF52840_PLUS for both models; Seeed's
-// PlatformIO package uses SEEED_XIAO_NRF52840_PLUS. The external header and
+// platform package uses SEEED_XIAO_NRF52840_PLUS. The external header and
 // bottom-pad mappings are identical between them.
 #if defined(TARGET_SEEED_XIAO_NRF52840_PLUS) || \
     defined(SEEED_XIAO_NRF52840_PLUS) || \

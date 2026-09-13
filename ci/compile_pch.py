@@ -33,9 +33,10 @@ The script expects:
 
 import hashlib
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import RunningProcess
 
 
 def _find_depfile_separator(content: str) -> int:
@@ -350,7 +351,7 @@ def main() -> int:
                 # Continue with normal compilation
 
     # Run the compiler
-    result = subprocess.run(args, check=False)
+    result = RunningProcess.run(args, check=False)
 
     # Fix the depfile and save caching data if compilation succeeded
     if result.returncode == 0 and pch_output and depfile:

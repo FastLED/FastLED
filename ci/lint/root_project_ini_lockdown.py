@@ -18,7 +18,7 @@ no-op when:
   - we cannot determine a base (detached HEAD, no `origin/master`, etc.).
 
 Default mode is WARN (exit 0). Pass `--error` or set
-``FASTLED_LINT_ROOT_PLATFORMIO_ERROR=1`` to gate.
+``FASTLED_LINT_ROOT_INI_ERROR=1`` to gate.
 """
 
 from __future__ import annotations
@@ -26,18 +26,19 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Iterable, NamedTuple
 
+from running_process import PIPE, RunningProcess
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-ROOT_PIO_INI = PROJECT_ROOT / "platformio.ini"
+ROOT_PROJECT_INI = PROJECT_ROOT / "platformio.ini"
 
 # An added non-comment, non-blank, non-section-header line that requires
 # justification. Section headers like "[env:foo]" are scaffolding, not
-# semantic config, so they're exempt. PlatformIO uses both ";" and "#"
+# semantic config, so they're exempt. The ini format allows both ";" and "#"
 # as comment leaders; only ";" is canonical for this file.
 _SECTION_HEADER_RE = re.compile(r"^\s*\[[^\]]+\]\s*$")
 _JUSTIFICATION_RE = re.compile(r";\s*justification\s*:", re.IGNORECASE)
@@ -53,15 +54,18 @@ class Violation(NamedTuple):
 def _run(cmd: list[str]) -> tuple[int, str]:
     """Run a git command, return (returncode, stdout). Stderr is discarded."""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
             cwd=str(PROJECT_ROOT),
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
         return result.returncode, result.stdout
-    except (OSError, FileNotFoundError):
+    except (OSError, FileNotFoundError, RuntimeError):
+        # RunningProcess reports a missing executable as RuntimeError.
         return 1, ""
 
 
@@ -155,18 +159,18 @@ def _has_adjacent_justification(
 
 
 def _warn_only_from_env() -> bool:
-    """Resolve warn-only mode from FASTLED_LINT_ROOT_PLATFORMIO_ERROR.
+    """Resolve warn-only mode from FASTLED_LINT_ROOT_INI_ERROR.
 
     Returns True (warn-only) unless the env var is explicitly set to "1".
     Callers that have an explicit preference (e.g. `--error` CLI flag)
     should bypass this helper and pass their own bool to `check`.
     """
-    return os.environ.get("FASTLED_LINT_ROOT_PLATFORMIO_ERROR", "") != "1"
+    return os.environ.get("FASTLED_LINT_ROOT_INI_ERROR", "") != "1"
 
 
 def check(warn_only: bool) -> bool:
     """Run the lockdown check. Return True if clean (or warn-only mode)."""
-    if not ROOT_PIO_INI.exists():
+    if not ROOT_PROJECT_INI.exists():
         return True
 
     branch = _current_branch()
@@ -183,7 +187,9 @@ def check(warn_only: bool) -> bool:
         return True
 
     # Load full new file for adjacency lookups.
-    new_lines = ROOT_PIO_INI.read_text(encoding="utf-8", errors="replace").splitlines()
+    new_lines = ROOT_PROJECT_INI.read_text(
+        encoding="utf-8", errors="replace"
+    ).splitlines()
 
     violations: list[Violation] = []
     for line_no, raw in added:
@@ -221,7 +227,7 @@ def check(warn_only: bool) -> bool:
     print()
     print("=" * 80)
     print(
-        f"[root-platformio.ini-lockdown] {mode_label} mode — "
+        f"[root-project-ini-lockdown] {mode_label} mode — "
         f"{len(violations)} unjustified change(s) in platformio.ini:"
     )
     print("=" * 80)
@@ -244,8 +250,8 @@ def check(warn_only: bool) -> bool:
 
     if warn_only:
         print(
-            f"⚠️  root-platformio.ini-lockdown: {len(violations)} violation(s) "
-            "(warn-only — not failing CI). Set FASTLED_LINT_ROOT_PLATFORMIO_ERROR=1 "
+            f"⚠️  root-project-ini-lockdown: {len(violations)} violation(s) "
+            "(warn-only — not failing CI). Set FASTLED_LINT_ROOT_INI_ERROR=1 "
             "to gate, or pass --error."
         )
         return True

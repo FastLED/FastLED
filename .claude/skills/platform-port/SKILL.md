@@ -39,7 +39,7 @@ $ARGUMENTS
   table, and the tier-1/2/3 integration pattern.
 
 ### Build System Integration
-- PlatformIO board definition
+- fbuild board definition (`ci/boards.py`)
 - Meson build configuration
 - Compiler flags and linker scripts
 

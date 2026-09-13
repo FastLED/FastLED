@@ -35,11 +35,6 @@ singleton_elision_violations.json
 .DS_Store
 Thumbs.db
 
-# PlatformIO
-.pio/
-.pioenvs/
-.piolibdeps/
-.platformio/
 .vscode/c_cpp_properties.json
 # Per-developer IDE / language-server artifacts. clangd and VS Code drop
 # these into any directory they index (e.g. examples/AutoResearch/.clangd,
@@ -93,7 +88,6 @@ tmp.*
 
 .ccache/
 
-.pio_cache
 compile_commands.json
 
 # Voice detection calibration files (development-only, see src/fl/audio/TESTING.md)

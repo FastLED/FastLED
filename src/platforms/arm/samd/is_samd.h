@@ -12,7 +12,7 @@
 /// exact part and are supplied by the board manifest itself.
 ///
 /// `ARDUINO_ARCH_SAMD` is accepted as an *additional* way to recognize a SAMD
-/// board, never as a requirement. It is injected by PlatformIO's Arduino builder
+/// board, never as a requirement. It is injected by the IDE's Arduino builder
 /// script rather than by the board manifest, so build systems that consume the
 /// manifest directly (fbuild) never define it. Requiring it here meant an
 /// unmistakable `-D__SAMD21G18A__` was ignored and the build fell through to the

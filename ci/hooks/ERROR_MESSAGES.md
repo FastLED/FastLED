@@ -19,8 +19,7 @@ All error messages now include three parts:
 | `g++` | g++ is forbidden - G++ is NOT SUPPORTED by FastLED - project requires Clang 21.1.5. To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 g++ ... |
 | `gdb` | gdb is forbidden - use 'clang-tool-chain-lldb' instead (FastLED's LLDB wrapper). To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 gdb ... |
 | `lldb` | lldb is forbidden - use 'clang-tool-chain-lldb' instead (FastLED's LLDB wrapper). To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 lldb ... |
-| `pio` | pio is forbidden - use 'bash compile', 'bash debug', or 'bash autoresearch' instead. To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 pio ... |
-| `platformio` | platformio is forbidden - use 'bash compile', 'bash debug', or 'bash autoresearch' instead. To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 platformio ... |
+| legacy board build tool CLI | <tool> is forbidden - use 'bash compile', 'bash debug', or 'bash autoresearch' instead. To override this check, use: FL_AGENT_ALLOW_ALL_CMDS=1 <tool> ... |
 
 ## Pattern-Specific Error Messages
 
@@ -56,9 +55,8 @@ All error messages now include three parts:
 - `gdb` → Use `clang-tool-chain-lldb`
 - `lldb` → Use `clang-tool-chain-lldb`
 
-### PlatformIO → `bash compile` / `bash debug` / `bash autoresearch`
-- `pio` → Use `bash compile`, `bash debug`, or `bash autoresearch`
-- `platformio` → Use `bash compile`, `bash debug`, or `bash autoresearch`
+### Legacy board build tool → `bash compile` / `bash debug` / `bash autoresearch`
+- legacy board build tool CLI → Use `bash compile`, `bash debug`, or `bash autoresearch`
 
 ### Cache Management → `--clean` flags
 - `rm -rf .build` → Use `bash test --clean`

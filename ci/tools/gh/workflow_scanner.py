@@ -25,13 +25,12 @@ Features:
 import argparse
 import json
 import queue
-import subprocess
 import sys
 import threading
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 
 @dataclass
@@ -90,12 +89,15 @@ class WorkflowScanner:
     def _get_repo(self) -> str:
         """Get repository in owner/repo format."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "repo", "view", "--json", "nameWithOwner"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
@@ -128,12 +130,15 @@ class WorkflowScanner:
                 str(max_runs),
             ]
 
-            result = subprocess.run(
+            result = RunningProcess.run(
                 cmd,
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=30,
+                encoding="utf-8",
+                errors="replace",
             )
             runs = json.loads(result.stdout)
             return runs
@@ -154,12 +159,15 @@ class WorkflowScanner:
             List of JobInfo objects
         """
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "run", "view", run_id, "--json", "jobs"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=30,
+                encoding="utf-8",
+                errors="replace",
             )
             data = json.loads(result.stdout)
             jobs = data.get("jobs", [])
@@ -277,7 +285,7 @@ class WorkflowScanner:
                 )
                 error_blocks.append(error_block)
 
-        except subprocess.TimeoutExpired:
+        except TimeoutExpired:
             print(f"Timeout fetching logs for {job.job_name}", file=sys.stderr)
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)

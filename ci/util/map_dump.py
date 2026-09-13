@@ -1,5 +1,6 @@
-import subprocess
 from pathlib import Path
+
+from running_process import RunningProcess
 
 
 def map_dump(map_file: Path) -> None:
@@ -14,4 +15,4 @@ def map_dump(map_file: Path) -> None:
     ]
     for cmd in cmds:
         print("\nRunning command:", " ".join(cmd))
-        subprocess.run(cmd, check=False)
+        RunningProcess.run(cmd, check=False)

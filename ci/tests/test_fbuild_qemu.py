@@ -177,6 +177,8 @@ def test_fbuild_test_emu_esp32dev() -> None:
         capture_output=True,
         text=True,
         timeout=FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS,
+        encoding="utf-8",
+        errors="replace",
     )
     output = proc.stdout or ""
     assert proc.returncode == 0, (

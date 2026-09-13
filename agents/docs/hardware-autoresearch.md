@@ -378,9 +378,9 @@ to validate a driver, subsystem, or special mode:
 - `--object-fled` - Test ObjectFLED DMA driver (Teensy 4.x only)
 - `--flex-io` - Test FlexIO clockless on Teensy 4.x or PIO clockless on
   RP2040/RP2350
-- `--rp-pio-index {0,1,2}` - Select the RP PIO engine used by `--flex-io`;
+- `--rp-engine-index {0,1,2}` - Select the RP PIO engine used by `--flex-io`;
   PIO2 requires RP2350
-- `--rp-pio-both` - Select RP PIO0 and PIO1 together; requires
+- `--rp-engine-both` - Select RP PIO0 and PIO1 together; requires
   `--flex-io --parallel`
 - `--rp-spi-loopback` / `--rp-spi-index {0,1}` - Run RP2040/RP2350
   fixed-SPI DMA byte loopback on the selected SPI instance. The fixed pin
@@ -407,7 +407,7 @@ bash autoresearch --rmt
 bash autoresearch --spi
 bash autoresearch --uart
 bash autoresearch rp2350w --uart --rp-uart-index 0
-bash autoresearch rp2350w --flex-io --rp-pio-index 2
+bash autoresearch rp2350w --flex-io --rp-engine-index 2
 bash autoresearch rp2350w --rp-spi-loopback --rp-spi-index 0
 bash autoresearch esp32c6 --rmt --legacy --chipset ws2814 --strip-sizes 1,2,3,4
 bash autoresearch --lcd                       # ESP32-S3 LCD_CLOCKLESS
@@ -466,7 +466,7 @@ before debugging unrelated AutoResearch transport layers.
 - `--help` - See all options
 
 ### Build Backend
-`bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
+`bash autoresearch` uses fbuild for all board compiles. Do not use board-specific legacy-backend fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
 ### 🚨 Deploy Backend: fbuild ONLY
 
@@ -500,9 +500,9 @@ The only sanctioned pyserial touch is fbuild's own `PySerialAdapter` fallback in
 
 ### Synthesised `platformio.ini` (no root dependency)
 
-Since #3281, `bash autoresearch` synthesises its own `.build/pio/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/pio/<board>/` contains:
+Since #3281, `bash autoresearch` synthesises its own `.build/fbuild/<board>/platformio.ini` from `ci/boards.py` before launching fbuild — the same pattern `bash compile` already uses. **Root `./platformio.ini` is NOT consulted in the default path.** The staged tree under `.build/fbuild/<board>/` contains:
 
-- `platformio.ini` — generated from `Board.to_platformio_ini()` for the resolved board.
+- `platformio.ini` — generated from the resolved board's `ci/boards.py` entry.
 - `src/sketch/` — populated by copying `examples/AutoResearch/`.
 
 Board selection happens in this order:
@@ -511,14 +511,9 @@ Board selection happens in this order:
 3. `--lcd` / `--lcd-spi` / `--lcd-rgb` — implies `esp32s3` / `esp32p4`; synthesised immediately.
 4. Auto-detect from attached USB device — synthesis deferred until after `detect_attached_chip()`.
 
-**Legacy escape hatch (deprecated):** `--use-root-platformio-ini` re-enables the old behavior of reading root `./platformio.ini` instead of synthesising. It is not allowed for Teensy AutoResearch acceptance or any ObjectFLED/FlexIO bring-up run. Use only for non-Teensy diagnostic comparisons when you have local edits to root `./platformio.ini` that the synthesised file misses — in which case the correct fix is to move those edits into `ci/boards.py`.
 
 ```bash
-# Default (synthesised):
 bash autoresearch esp32c6 --parlio
-
-# Legacy (consumes root ./platformio.ini, deprecated):
-bash autoresearch esp32c6 --parlio --use-root-platformio-ini
 ```
 
 For Teensy 4.x validation, always use the synthesised fbuild path:
@@ -842,24 +837,3 @@ Adding a pin: append a row mapping its Teensy digital number to its FLEXIO1 inpu
 - **`flexioObjectFledTest`** — diagnostic RPC that drives a WS2812 pattern via `Bus::FLEX_IO` slot 0 and decodes the captured edge stream against `TIMING_WS2812B_V5`. The raw `ci/autoresearch/test_flexio_rx_objectfled.py` script is not an acceptance path; use it only when deliberately debugging outside a canonical run, and close it before `bash autoresearch`.
 
 `RxBackend::PLATFORM_DEFAULT` switching from FlexPWM to FlexIO on Teensy 4 is intentionally **deferred** to a follow-up PR — keeps the bench-validation surface small and the existing FlexPWM-based AutoResearch flows untouched until both backends are equally exercised.
-
-## Package Installation Daemon Management
-`bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
-
-**Commands:**
-- `bash daemon status` - Show daemon status and health
-- `bash daemon stop` - Stop the daemon gracefully
-- `bash daemon logs` - View daemon log file (last 50 lines)
-- `bash daemon logs-tail` - Follow daemon logs in real-time (Ctrl+C to exit)
-- `bash daemon start` - Start the daemon (usually automatic)
-- `bash daemon restart` - Stop and start the daemon
-- `bash daemon clean` - Remove all daemon state (force fresh start)
-
-**What is the daemon:**
-The package installation daemon is a singleton background process that ensures PlatformIO package installations complete atomically, even if an agent is interrupted mid-download. It prevents package corruption by:
-- Surviving agent termination (daemon continues independently)
-- Preventing concurrent package installations system-wide
-- Providing progress feedback to waiting clients
-- Auto-shutting down after 12 hours of inactivity
-
-**Note:** The daemon starts automatically when needed by `bash compile` or `bash debug`. Manual management is typically not required.

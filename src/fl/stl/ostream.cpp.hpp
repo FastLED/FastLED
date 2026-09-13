@@ -1,5 +1,6 @@
 #include "fl/stl/ostream.h"
 #include "fl/stl/charconv.h"
+#include "fl/gfx/crgb.h"
 
 namespace fl {
 
@@ -9,6 +10,13 @@ ostream cout;
 
 // FL_LINT_ALLOW_GLOBAL(stream manipulator tag `endl` — public API surface, empty struct, matches `hex`/`dec`/`oct` in ios.cpp.hpp)
 const endl_t endl;
+
+ostream& ostream::operator<<(const CRGB& rgb) FL_NO_EXCEPT {
+    string temp;
+    temp.append(rgb);
+    print(temp.c_str());
+    return *this;
+}
 
 // Numeric output operators with formatting support
 ostream& ostream::operator<<(fl::i8 n) {

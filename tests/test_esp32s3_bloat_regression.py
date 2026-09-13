@@ -51,12 +51,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from running_process import RunningProcess
 from typeguard import typechecked
 
 
@@ -223,7 +223,7 @@ def run_bloat(skip_build: bool) -> None:
         cmd.append("--build")
     cmd += ["--no-summary"]
     print(f"esp32s3-bloat-regression: invoking `{' '.join(cmd)}` ...", flush=True)
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
     if result.returncode != 0:
         print(
             f"esp32s3-bloat-regression: `bash bloat esp32s3` exited "

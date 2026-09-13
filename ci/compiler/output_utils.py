@@ -81,14 +81,21 @@ def copy_build_artifact(
 
     expected_ext = get_board_artifact_extension(board)
 
-    # Find the source artifact
-    # PlatformIO builds are in .build/pio/{board}/.pio/build/{board}/firmware.{ext}
-    artifact_dir = build_dir / ".pio" / "build" / board.board_name
-    source_artifact = artifact_dir / f"firmware{expected_ext}"
-
-    if not source_artifact.exists():
-        print(f"ERROR: Build artifact not found: {source_artifact}")
+    # fbuild writes .build/fbuild/{board}/.fbuild/build/<mode>/firmware.{ext}
+    # (and older fbuild versions .fbuild/build/{board}/<mode>/); take the
+    # newest link.
+    candidates = [
+        p
+        for p in (build_dir / ".fbuild" / "build").glob(f"**/firmware{expected_ext}")
+        if p.is_file()
+    ]
+    if not candidates:
+        print(
+            f"ERROR: Build artifact firmware{expected_ext} not found under "
+            f"{build_dir / '.fbuild' / 'build'}"
+        )
         return False
+    source_artifact = max(candidates, key=lambda p: p.stat().st_mtime)
 
     # Ensure output directory exists
     output_path_obj = Path(output_path)

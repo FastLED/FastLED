@@ -149,7 +149,7 @@ class BannerPrinter:
 
             Recommended actions:
               1. Wait for active installation to complete, then retry
-              2. Check daemon status: uv run python ci/util/pio_package_client.py --status
+              2. Check daemon status: fbuild daemon status
             ──────────────────────────────────────────────────────────
 
         Args:

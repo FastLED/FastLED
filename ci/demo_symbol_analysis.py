@@ -8,9 +8,10 @@ Demo script showing how to use the new generic symbol analysis functionality
 """
 
 import json
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 def run_symbol_analysis(board_name: str):
@@ -18,11 +19,14 @@ def run_symbol_analysis(board_name: str):
     print(f"Running symbol analysis for {board_name}...")
 
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [sys.executable, "ci/util/symbol_analysis.py", "--board", board_name],
             cwd=".",
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
         if result.returncode == 0:

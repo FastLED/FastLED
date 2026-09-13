@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-URL utility functions for PlatformIO and other tools.
+URL utility functions for download caches and other tools.
 
 This module provides utilities for working with URLs, particularly for
 sanitizing URLs to create filesystem-safe path names.

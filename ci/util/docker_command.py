@@ -6,7 +6,6 @@ It provides the basic functionality to find and execute the docker command.
 """
 
 import os
-import subprocess
 import sys
 from typing import Optional
 

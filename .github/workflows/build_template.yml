@@ -105,7 +105,7 @@ jobs:
       # tarball an unrelated board cached weeks ago against a pre-repo-
       # transfer URL. Result: fbuild sees the on-disk file, computes its
       # sha256, and compares against the OLD expected sha256 stored in
-      # cache metadata — mismatch, hard fail before pio/compile can even
+      # cache metadata — mismatch, hard fail before the compile can even
       # run. Deleting only the platform-tarball subtree is targeted:
       # unrelated caches (toolchain, cook artifacts, per-board build
       # artifacts) are untouched. Deleted entries are lazily re-populated
@@ -177,15 +177,15 @@ jobs:
           fi
         shell: bash
 
-      - name: Find platformio.ini file and print it out
+      - name: Find the synthesised platformio.ini and print it out
         if: always()
         continue-on-error: true
         run: |
-          platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
-          if [ -f "$platformio_ini" ]; then
-            echo "Found platformio.ini at: $platformio_ini"
+          project_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
+          if [ -f "$project_ini" ]; then
+            echo "Found platformio.ini at: $project_ini"
             echo "############################################"
-            cat "$platformio_ini"
+            cat "$project_ini"
             echo "############################################"
           else
             echo "platformio.ini not found"
@@ -245,8 +245,8 @@ jobs:
           echo "============================================"
 
           # Find build directory
-          if [ -d ".build/pio" ]; then
-            BUILD_DIR=".build/pio"
+          if [ -d ".build/fbuild" ]; then
+            BUILD_DIR=".build/fbuild"
           else
             BUILD_DIR=".build"
           fi

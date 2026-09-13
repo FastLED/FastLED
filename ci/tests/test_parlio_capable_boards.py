@@ -12,7 +12,7 @@ This test pins down both halves of that contract:
 
 1.  The ``parlio_capable=True`` set on the Board dataclass equals exactly
     ``{esp32c5, esp32c6, esp32h2, esp32p4}``.
-2.  The generated ``platformio.ini`` snippet for ``esp32s3`` does NOT contain
+2.  The generated ``project ini`` snippet for ``esp32s3`` does NOT contain
     ``CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM`` — guards against a regression of
     the #3276 bug.
 
@@ -62,12 +62,12 @@ class TestParlioCapableBoards(unittest.TestCase):
             "not be marked parlio_capable. See #3304.",
         )
 
-    def test_esp32s3_platformio_ini_omits_parlio_flags(self) -> None:
-        ini = ESP32_S3_DEVKITC_1.to_platformio_ini()
+    def test_esp32s3_project_ini_omits_parlio_flags(self) -> None:
+        ini = ESP32_S3_DEVKITC_1.to_project_ini()
         self.assertNotIn(
             "CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM",
             ini,
-            "esp32s3 platformio.ini contains a PARLIO IRAM flag — that's the "
+            "esp32s3 project ini contains a PARLIO IRAM flag — that's the "
             "#3276 bug. The flag must only be emitted on chips with "
             "parlio_capable=True (C5/C6/H2/P4).",
         )
@@ -80,20 +80,20 @@ class TestParlioCapableBoards(unittest.TestCase):
         for board in _all_boards():
             if not board.parlio_capable:
                 continue
-            ini = board.to_platformio_ini()
+            ini = board.to_project_ini()
             with self.subTest(board=board.board_name):
                 self.assertIn(
                     "CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
                     ini,
                     f"{board.board_name} is parlio_capable but its "
-                    "platformio.ini does not contain "
+                    "project ini does not contain "
                     "CONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1.",
                 )
                 self.assertIn(
                     "CONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
                     ini,
                     f"{board.board_name} is parlio_capable but its "
-                    "platformio.ini does not contain "
+                    "project ini does not contain "
                     "CONFIG_PARLIO_TX_ISR_CACHE_SAFE=1.",
                 )
 

@@ -43,55 +43,6 @@ def _load_wasm_build_module():
     return mod
 
 
-class TestLegacyCopyIsDisabled:
-    """Tests that _copy_templates_legacy raises an error since TypeScript
-    files cannot be served to browsers without Vite bundling."""
-
-    def test_legacy_copy_raises_runtime_error(self):
-        """_copy_templates_legacy must raise RuntimeError because raw .ts
-        files cannot be executed by browsers."""
-        mod = _load_wasm_build_module()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises(RuntimeError, match="no longer supported"):
-                mod._copy_templates_legacy(Path(tmpdir))
-
-    def test_legacy_copy_does_not_produce_any_files(self):
-        """_copy_templates_legacy must not silently produce broken output."""
-        mod = _load_wasm_build_module()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output = Path(tmpdir)
-            try:
-                mod._copy_templates_legacy(output)
-            except RuntimeError:
-                pass
-            # Verify no .ts files were copied before the error
-            ts_files = list(output.rglob("*.ts"))
-            assert len(ts_files) == 0, (
-                f"Legacy copy produced TypeScript files before raising: "
-                f"{[f.name for f in ts_files]}"
-            )
-
-    def test_copy_templates_does_not_silently_fall_back(self):
-        """copy_templates must raise RuntimeError (not silently produce broken
-        output) when node_modules is missing."""
-        mod = _load_wasm_build_module()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output = Path(tmpdir) / "output"
-            output.mkdir()
-            # Point PROJECT_ROOT to a fake tree without node_modules
-            fake_root = Path(tmpdir) / "fake_root"
-            compiler_dir = fake_root / "src" / "platforms" / "wasm" / "compiler"
-            compiler_dir.mkdir(parents=True)
-            # Temporarily override the module's PROJECT_ROOT
-            original_root = mod.PROJECT_ROOT
-            mod.PROJECT_ROOT = fake_root
-            try:
-                with pytest.raises(RuntimeError, match="node_modules not found"):
-                    mod.copy_templates(output)
-            finally:
-                mod.PROJECT_ROOT = original_root
-
-
 class TestViteIsMandatory:
     """Tests that the build system requires Vite for the TypeScript frontend.
     Since Vite is mandatory, .ts references in source files (Worker URLs,

@@ -18,9 +18,10 @@ Exit codes:
 """
 
 import json
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import RunningProcess, TimeoutExpired
 
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -30,10 +31,9 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent
 def run_cmd(cmd: list[str], timeout: int = 5) -> str:
     """Run a command and return stdout, or empty string on failure."""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
             capture_output=True,
-            text=True,
             encoding="utf-8",
             errors="replace",
             cwd=str(PROJECT_ROOT),
@@ -41,7 +41,7 @@ def run_cmd(cmd: list[str], timeout: int = 5) -> str:
         )
         if result.returncode == 0:
             return result.stdout.strip()
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
         pass
     return ""
 

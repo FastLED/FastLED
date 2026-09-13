@@ -24,8 +24,6 @@ exclude = [
     "**/.git",
     "**/.venv",
     "**/.build",
-    "**/.pio",
-    "**/.pio_cache",
     "**/build",
     "**/dist",
     "**/*.egg-info",

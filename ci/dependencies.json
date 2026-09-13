@@ -106,7 +106,7 @@
         "src/**/*.c"
       ],
       "tools": [
-        "platformio/Arduino toolchain"
+        "fbuild/Arduino toolchain"
       ],
       "test_command": "uv run test.py --examples"
     },

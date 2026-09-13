@@ -16,7 +16,7 @@ FastLED runs on 100+ microcontroller platforms. A change that seems simple can b
 - Platform-specific driver behavior (ESP32, Teensy, AVR, STM32, RP2040, nRF52...)
 - Public API compatibility (users pin to specific versions)
 - Timing-sensitive LED protocols (a single wrong bit ruins the strip)
-- Build-system portability (meson, PlatformIO, Arduino IDE all involved)
+- Build-system portability (meson, fbuild, Arduino IDE all involved)
 
 The contract documents what changes, what risks exist, and how to prove it works — before a line of code is written.
 

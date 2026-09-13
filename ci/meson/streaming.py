@@ -684,7 +684,7 @@ def stream_compile_and_run_tests(
         max_failures: Maximum number of test failures before halting (default: 10, 0 = unlimited).
     """
     # Pass test file filter to the callback via an attribute so it can
-    # inject it into the subprocess environment (os.environ is stale after
+    # inject it into the child-process environment (os.environ is stale after
     # _streaming_env was copied).
     if test_file_filter:
         setattr(test_callback, "_test_file_filter", test_file_filter)

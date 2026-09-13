@@ -10,7 +10,7 @@ from ci.autoresearch.staging import synthesise_autoresearch_project
 def test_autoresearch_staging_enables_objectfled_diagnostics(
     tmp_path: Path,
 ) -> None:
-    with patch("ci.compiler.pio._init_platformio_build") as mock_init:
+    with patch("ci.compiler.board_compiler.init_fbuild_project") as mock_init:
         mock_init.return_value = SimpleNamespace(success=True, output="")
 
         build_dir = synthesise_autoresearch_project(
@@ -19,7 +19,7 @@ def test_autoresearch_staging_enables_objectfled_diagnostics(
             verbose=False,
         )
 
-    assert build_dir == tmp_path / ".build" / "pio" / "teensy41"
+    assert build_dir == tmp_path / ".build" / "fbuild" / "teensy41"
     _, kwargs = mock_init.call_args
     assert kwargs["additional_defines"] == ["FASTLED_OBJECTFLED_DIAGNOSTICS=1"]
 
@@ -28,7 +28,7 @@ def test_autoresearch_staging_enables_objectfled_diagnostics(
 def test_rp2350_family_autoresearch_enables_target_bound_picotool_reset(
     tmp_path: Path, environment: str
 ) -> None:
-    with patch("ci.compiler.pio._init_platformio_build") as mock_init:
+    with patch("ci.compiler.board_compiler.init_fbuild_project") as mock_init:
         mock_init.return_value = SimpleNamespace(success=True, output="")
 
         synthesise_autoresearch_project(
@@ -44,7 +44,7 @@ def test_rp2350_family_autoresearch_enables_target_bound_picotool_reset(
 def test_rp2040_autoresearch_does_not_enable_picotool_reset(
     tmp_path: Path,
 ) -> None:
-    with patch("ci.compiler.pio._init_platformio_build") as mock_init:
+    with patch("ci.compiler.board_compiler.init_fbuild_project") as mock_init:
         mock_init.return_value = SimpleNamespace(success=True, output="")
 
         synthesise_autoresearch_project(

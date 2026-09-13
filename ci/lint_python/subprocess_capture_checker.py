@@ -21,49 +21,45 @@ this reads as "fine locally, hangs in CI".
 in memory and hands it back only at exit, so a long build shows nothing until
 it finishes -- and a hung child is indistinguishable from a slow one.
 
+This is a hard ban, not a ratchet: there is no baseline and no ``# noqa``
+escape. The migration finished in September 2026; every call site in the
+tree uses ``RunningProcess`` and this checker keeps it that way.
+
 Error codes
 -----------
 SRC001
     ``subprocess.run(...)``. Use ``RunningProcess.run()`` -- a drop-in
     replacement that streams instead of accumulating.
-
 SRC002
-    ``subprocess.Popen(...)``. The deadlock-prone API; see above.
-
+    ``subprocess.Popen(...)``. The deadlock-prone API; see above. Use
+    ``RunningProcess(...)`` (``get_next_line`` / ``wait`` / ``kill``) or
+    ``running_process.launch_detached`` for daemons.
 SRC003
-    ``subprocess.check_output`` / ``check_call`` / ``call``.
-
+    ``subprocess.check_output`` / ``check_call`` / ``call`` /
+    ``getoutput`` / ``getstatusoutput``.
 SRC004
     A capturing call in text mode with no explicit ``encoding=``. Python then
     decodes with the locale codec -- cp1252 on Windows -- so any non-ASCII
     child output either mojibakes or raises ``UnicodeDecodeError`` inside the
-    reader thread. In ``subprocess.run`` that surfaces as ``stdout is None``
-    and a downstream ``TypeError``, which is a confusing way to learn the
-    output was never readable. Pass ``encoding="utf-8"`` (usually with
-    ``errors="replace"``).
-
-SRC005
-    ``Popen(stdout=PIPE, stderr=PIPE)`` with no ``communicate()`` -- the exact
-    shape that hangs. Unlike the other codes this is held at **zero** rather
-    than ratcheted: it is a live deadlock, not a style preference. The
-    baseline deliberately contains no SRC005 entries, so a new one fails the
-    build immediately.
-
+    reader thread. Applies to ``RunningProcess`` too: pass
+    ``encoding="utf-8"`` (usually with ``errors="replace"``) whenever
+    ``capture_output=True`` / ``capture=True`` / ``stdout=PIPE`` is used in
+    text mode.
 SRC006
     ``os.system`` / ``os.popen``. Worse than subprocess: ``os.system`` returns
     no handle at all and ``os.popen`` gives a single undrainable pipe, so
     neither can be bounded, interrupted, or drained.
+SRC007
+    ``import subprocess``, ``from subprocess import ...`` or any other
+    reference to the module (``subprocess.PIPE``, ``subprocess.TimeoutExpired``
+    ...). Everything the stdlib module exports that a caller still needs --
+    ``PIPE``, ``DEVNULL``, ``STDOUT``, ``CompletedProcess``,
+    ``CalledProcessError``, ``TimeoutExpired``, ``CREATE_NEW_PROCESS_GROUP`` --
+    is re-exported by ``running_process``.
 
-Baseline
---------
-The repository predates this policy, so a per-file/per-code baseline of known
-violations is stored alongside this module. Counts may shrink freely; any
-increase fails. That makes the ban a ratchet: existing call sites migrate to
-``RunningProcess`` over time and no new ones can appear. Regenerate after an
-intentional migration with::
+Run directly::
 
-    uv run python ci/lint_python/subprocess_capture_checker.py ci test.py \
-        tests build.py mcp_server.py --exclude ci/tmp --update-baseline
+    uv run python ci/lint_python/subprocess_capture_checker.py . [--exclude ci/tmp]
 """
 
 from __future__ import annotations
@@ -72,15 +68,25 @@ import argparse
 import ast
 import re
 import sys
-from collections import Counter
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-DEFAULT_BASELINE = Path(__file__).resolve().parent / "subprocess_baseline.txt"
 
-# Regex pre-filter: quickly skip files with no subprocess usage at all.
-_SUBPROCESS_RE = re.compile(r"subprocess\s*\.|os\s*\.\s*(?:system|popen)\s*\(")
+# Directories that are never repository source.
+DEFAULT_EXCLUDES = (
+    ".git",
+    ".venv",
+    ".build",
+    ".cache",
+    "node_modules",
+    "__pycache__",
+    "ci/tmp",
+    "third_party",
+)
+
+# Regex pre-filter: quickly skip files that cannot contain a finding.
+_PREFILTER_RE = re.compile(r"subprocess|\b(?:system|popen)\s*\(|RunningProcess")
 
 _MESSAGES = {
     "SRC001": (
@@ -94,87 +100,131 @@ _MESSAGES = {
         "child never exits. Use `RunningProcess`, which drains concurrently."
     ),
     "SRC003": (
-        "SRC003 subprocess.check_output/check_call/call(...). Use "
+        "SRC003 subprocess.check_output/check_call/call/getoutput(...). Use "
         "`RunningProcess.run()` from `running_process`."
     ),
-    "SRC005": (
-        "SRC005 subprocess.Popen(stdout=PIPE, stderr=PIPE) with no "
-        "communicate() DEADLOCKS once either pipe fills. Use "
-        "`RunningProcess` (it drains both streams concurrently), or "
-        "`stderr=subprocess.STDOUT` to merge into one pipe."
+    "SRC004": (
+        "SRC004 capturing call in text mode without an explicit `encoding=`. "
+        "Python falls back to the locale codec (cp1252 on Windows), which "
+        'mojibakes or crashes on non-ASCII output. Pass encoding="utf-8" '
+        '(usually with errors="replace").'
     ),
     "SRC006": (
         "SRC006 os.system/os.popen shells out with no way to drain or bound "
         "the child. Use `RunningProcess`."
     ),
-    "SRC004": (
-        "SRC004 capturing subprocess call in text mode without an explicit "
-        "`encoding=`. Python falls back to the locale codec (cp1252 on Windows), "
-        'which mojibakes or crashes on non-ASCII output. Pass encoding="utf-8" '
-        '(usually with errors="replace").'
+    "SRC007": (
+        "SRC007 the stdlib `subprocess` module is banned; import "
+        "`RunningProcess` (and PIPE/DEVNULL/STDOUT/CalledProcessError/"
+        "TimeoutExpired/CompletedProcess) from `running_process` instead."
     ),
+}
+
+_SUBPROCESS_CALL_CODES = {
+    "run": "SRC001",
+    "Popen": "SRC002",
+    "check_output": "SRC003",
+    "check_call": "SRC003",
+    "call": "SRC003",
+    "getoutput": "SRC003",
+    "getstatusoutput": "SRC003",
 }
 
 
 class SubprocessVisitor(ast.NodeVisitor):
-    """AST visitor that finds discouraged stdlib subprocess usage."""
+    """AST visitor that finds banned process-spawning APIs."""
 
     def __init__(self, source_lines: list[str] | None = None) -> None:
         self.violations: list[tuple[int, str, str]] = []
         self.source_lines = source_lines or []
+        # Lines already reported for SRC007 so a `subprocess.run(...)` call
+        # yields SRC001 plus one SRC007, not two.
+        self._module_ref_lines: set[int] = set()
+        # Names bound to the banned modules in this file, so `import
+        # subprocess as sp` / `import os as o` are seen through.
+        self._subprocess_names: set[str] = {"subprocess"}
+        self._os_names: set[str] = {"os"}
+        # Bare names bound to os.system / os.popen by `from os import ...`.
+        self._os_spawn_names: set[str] = set()
+
+    # -- imports ----------------------------------------------------------
+
+    def visit_Import(self, node: ast.Import) -> None:  # noqa: N802
+        for alias in node.names:
+            if alias.name == "subprocess" or alias.name.startswith("subprocess."):
+                self._add_module_ref(node.lineno)
+                self._subprocess_names.add(alias.asname or alias.name.split(".")[0])
+            elif alias.name == "os":
+                self._os_names.add(alias.asname or "os")
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
+        module = node.module or ""
+        if module == "subprocess" or module.startswith("subprocess."):
+            self._add_module_ref(node.lineno)
+        elif module == "os":
+            spawn_names = [a for a in node.names if a.name in ("system", "popen")]
+            if spawn_names:
+                self._add(node.lineno, "SRC006")  # once per import line
+                for alias in spawn_names:
+                    self._os_spawn_names.add(alias.asname or alias.name)
+        self.generic_visit(node)
+
+    # -- attribute references (subprocess.PIPE, subprocess.TimeoutExpired) --
+
+    def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
+        if isinstance(node.value, ast.Name) and node.value.id in self._subprocess_names:
+            self._add_module_ref(node.lineno)
+        self.generic_visit(node)
+
+    # -- calls -------------------------------------------------------------
 
     def visit_Call(self, node: ast.Call) -> None:  # noqa: N802
-        # `os.system` / `os.popen` are spawn APIs too, and worse than
-        # subprocess: os.system gives no handle at all, os.popen gives one
-        # undrainable pipe. Neither can be bounded or interrupted.
-        if self._is_os_spawn(node) and not self._has_noqa(node.lineno):
+        if self._is_os_spawn(node):
             self._add(node.lineno, "SRC006")
             self.generic_visit(node)
             return
 
         attr = self._subprocess_attr(node)
-        if attr is None:
+        if attr is not None:
+            code = _SUBPROCESS_CALL_CODES.get(attr)
+            if code is not None:
+                self._add(node.lineno, code)
+            if self._captures_output(node) and self._is_stdlib_text_mode(node):
+                if not self._has_kwarg(node, "encoding"):
+                    self._add(node.lineno, "SRC004")
             self.generic_visit(node)
             return
 
-        if self._has_noqa(node.lineno):
-            self.generic_visit(node)
-            return
-
-        captures = self._captures_output(node)
-
-        if attr == "run":
-            self._add(node.lineno, "SRC001")
-        elif attr == "Popen":
-            self._add(node.lineno, "SRC002")
-            # SRC005 is the subset of SRC002 that actually deadlocks. Reported
-            # in addition to SRC002 so the broad convention rule can stay on
-            # its large baseline while this one is held at zero.
-            if self._is_undrained_dual_pipe(node):
-                self._add(node.lineno, "SRC005")
-        elif attr in ("check_output", "check_call", "call"):
-            self._add(node.lineno, "SRC003")
-
-        # The decode hazard only exists when the parent actually reads and
-        # decodes the stream. Byte-mode capture is unaffected.
-        if (
-            captures
-            and self._is_text_mode(node)
-            and not self._has_kwarg(node, "encoding")
-        ):
-            self._add(node.lineno, "SRC004")
+        # RunningProcess.run(...) / RunningProcess(...): text mode is the
+        # default, so a capture without encoding= is the same locale hazard.
+        if self._is_running_process_call(node) and self._captures_output(node):
+            if not self._is_explicit_bytes(node) and not self._has_kwarg(
+                node, "encoding"
+            ):
+                self._add(node.lineno, "SRC004")
 
         self.generic_visit(node)
+
+    # -- helpers -------------------------------------------------------------
 
     def _add(self, lineno: int, code: str) -> None:
         self.violations.append((lineno, code, _MESSAGES[code]))
 
+    def _add_module_ref(self, lineno: int) -> None:
+        if lineno in self._module_ref_lines:
+            return
+        self._module_ref_lines.add(lineno)
+        self._add(lineno, "SRC007")
+
     def _is_os_spawn(self, node: ast.Call) -> bool:
         """True for `os.system(...)` / `os.popen(...)`."""
         func = node.func
+        if isinstance(func, ast.Name):
+            return func.id in self._os_spawn_names
         if not isinstance(func, ast.Attribute):
             return False
-        if not (isinstance(func.value, ast.Name) and func.value.id == "os"):
+        if not (isinstance(func.value, ast.Name) and func.value.id in self._os_names):
             return False
         return func.attr in ("system", "popen")
 
@@ -183,94 +233,46 @@ class SubprocessVisitor(ast.NodeVisitor):
         func = node.func
         if not isinstance(func, ast.Attribute):
             return None
-        if not (isinstance(func.value, ast.Name) and func.value.id == "subprocess"):
+        if not (
+            isinstance(func.value, ast.Name) and func.value.id in self._subprocess_names
+        ):
             return None
         return func.attr
 
-    def _is_undrained_dual_pipe(self, node: ast.Call) -> bool:
-        """True for the exact shape that deadlocks.
-
-        `Popen(stdout=PIPE, stderr=PIPE)` where nothing ever calls
-        `.communicate()` on the result. With both pipes open the parent must
-        drain both concurrently; draining one and then waiting wedges the
-        moment the other fills its OS buffer (~64 KB on Linux, ~8 KB on
-        Windows). Measured on this repo: a child writing 20k lines to stderr
-        while the parent read only stdout never returned, while the same child
-        under `RunningProcess` finished in 0.3s.
-
-        `communicate()` is the stdlib's own correct drain (it selects/threads
-        over both), so its presence anywhere in the enclosing function clears
-        the call. That is deliberately generous: this rule is meant to be held
-        at zero, so a false positive is more expensive than a missed exotic
-        case, and the broader SRC002 still covers everything.
-
-        `stderr=subprocess.STDOUT` is safe and does NOT trigger: it merges
-        stderr into the single stdout pipe, leaving nothing undrained.
-        """
-        stdout_piped = False
-        stderr_piped = False
-        for kw in node.keywords:
-            if kw.arg == "stdout" and self._is_pipe(kw.value):
-                stdout_piped = True
-            elif kw.arg == "stderr" and self._is_pipe(kw.value):
-                stderr_piped = True
-        if not (stdout_piped and stderr_piped):
-            return False
-        return not self._function_calls_communicate(node)
-
-    def _function_calls_communicate(self, node: ast.Call) -> bool:
-        """True when `.communicate(` appears in the enclosing function body.
-
-        Scope is found by text search rather than AST parent links (ast nodes
-        carry no parent pointer): walk outward from the Popen line to the
-        nearest enclosing `def` and scan to the end of its indented block.
-        """
-        if not self.source_lines:
-            return False
-        index = node.lineno - 1
-        if index >= len(self.source_lines):
-            return False
-
-        # Walk up to the enclosing `def` / `async def`.
-        start = 0
-        def_indent = 0
-        for i in range(index, -1, -1):
-            stripped = self.source_lines[i].lstrip()
-            if stripped.startswith("def ") or stripped.startswith("async def "):
-                start = i
-                def_indent = len(self.source_lines[i]) - len(stripped)
-                break
-
-        # Walk down to the end of that block.
-        end = len(self.source_lines)
-        for i in range(start + 1, len(self.source_lines)):
-            line = self.source_lines[i]
-            if not line.strip():
-                continue
-            indent = len(line) - len(line.lstrip())
-            if indent <= def_indent and i > start:
-                end = i
-                break
-
-        return any(".communicate(" in line for line in self.source_lines[start:end])
+    def _is_running_process_call(self, node: ast.Call) -> bool:
+        """True for `RunningProcess(...)` and `RunningProcess.run(...)`."""
+        func = node.func
+        if isinstance(func, ast.Name):
+            return func.id == "RunningProcess"
+        if isinstance(func, ast.Attribute) and func.attr == "run":
+            return (
+                isinstance(func.value, ast.Name) and func.value.id == "RunningProcess"
+            )
+        return False
 
     def _captures_output(self, node: ast.Call) -> bool:
         """True when the call captures stdout/stderr through a pipe."""
         for kw in node.keywords:
-            if kw.arg == "capture_output" and self._is_true(kw.value):
+            if kw.arg in ("capture_output", "capture") and self._is_true(kw.value):
                 return True
             if kw.arg in ("stdout", "stderr") and self._is_pipe(kw.value):
                 return True
         return False
 
-    def _is_text_mode(self, node: ast.Call) -> bool:
-        """True when output is decoded to str rather than left as bytes."""
+    def _is_stdlib_text_mode(self, node: ast.Call) -> bool:
+        """stdlib calls decode only when asked (text=True / errors=)."""
         for kw in node.keywords:
             if kw.arg in ("text", "universal_newlines") and self._is_true(kw.value):
                 return True
-            # An explicit errors= without encoding= still implies text mode.
             if kw.arg == "errors":
                 return True
+        return False
+
+    def _is_explicit_bytes(self, node: ast.Call) -> bool:
+        """RunningProcess defaults to text; only text=False opts out."""
+        for kw in node.keywords:
+            if kw.arg == "text" and isinstance(kw.value, ast.Constant):
+                return kw.value.value is False
         return False
 
     def _has_kwarg(self, node: ast.Call, name: str) -> bool:
@@ -280,18 +282,10 @@ class SubprocessVisitor(ast.NodeVisitor):
         return isinstance(node, ast.Constant) and node.value is True
 
     def _is_pipe(self, node: ast.expr) -> bool:
-        """Check if node is subprocess.PIPE."""
-        if isinstance(node, ast.Attribute) and node.attr == "PIPE":
-            if isinstance(node.value, ast.Name) and node.value.id == "subprocess":
-                return True
-        return False
-
-    def _has_noqa(self, lineno: int) -> bool:
-        """Check if a line has a noqa comment."""
-        if not self.source_lines or lineno < 1 or lineno > len(self.source_lines):
-            return False
-        line = self.source_lines[lineno - 1]
-        return "noqa" in line and ("SRC0" in line or "noqa:" not in line)
+        """`PIPE`, `subprocess.PIPE` or `running_process.PIPE`."""
+        if isinstance(node, ast.Name):
+            return node.id == "PIPE"
+        return isinstance(node, ast.Attribute) and node.attr == "PIPE"
 
 
 def check_file(path: str, source: str) -> list[tuple[int, str, str]]:
@@ -303,7 +297,7 @@ def check_file(path: str, source: str) -> list[tuple[int, str, str]]:
 
     visitor = SubprocessVisitor(source.split("\n"))
     visitor.visit(tree)
-    return visitor.violations
+    return sorted(visitor.violations)
 
 
 def _rel_path(path: Path) -> str:
@@ -312,54 +306,6 @@ def _rel_path(path: Path) -> str:
         return path.resolve().relative_to(PROJECT_ROOT).as_posix()
     except ValueError:
         return path.as_posix()
-
-
-def _baseline_key(path: Path, code: str) -> str:
-    """Stable per-file/per-code key, independent of line numbers."""
-    return f"{_rel_path(path)}|{code}"
-
-
-def _key_file(key: str) -> str:
-    """The file portion of a baseline key."""
-    return key.rsplit("|", 1)[0]
-
-
-def load_baseline(path: Path = DEFAULT_BASELINE) -> Counter[str]:
-    """Load the checked-in baseline as key -> allowed count."""
-    baseline: Counter[str] = Counter()
-    if not path.exists():
-        return baseline
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        key, _, count = line.rpartition("|")
-        if not key:
-            continue
-        try:
-            baseline[key] = int(count)
-        except ValueError:
-            continue
-    return baseline
-
-
-def write_baseline(counts: Counter[str], path: Path = DEFAULT_BASELINE) -> None:
-    """Write a deterministic baseline for the current findings."""
-    lines = [
-        "# Known stdlib `subprocess` usages, per file and error code.",
-        "# Generated by ci/lint_python/subprocess_capture_checker.py.",
-        "#",
-        "# Format: <path>|<code>|<count>",
-        "#",
-        "# Counts may shrink freely -- migrating a call site to RunningProcess",
-        "# just lowers the number. Any INCREASE fails the linter, so new raw",
-        "# subprocess usage has to be deliberate. Regenerate with:",
-        "#   uv run python ci/lint_python/subprocess_capture_checker.py ci \\",
-        "#       --update-baseline",
-        "",
-    ]
-    lines.extend(f"{key}|{count}" for key, count in sorted(counts.items()))
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def collect_python_files(paths: list[str], excludes: list[str]) -> list[Path]:
@@ -380,109 +326,54 @@ def collect_python_files(paths: list[str], excludes: list[str]) -> list[Path]:
 
 
 def _is_excluded(path: Path, exclude_parts: list[str]) -> bool:
-    """Return True if any component of path matches an exclude pattern."""
-    path_str = path.as_posix()
-    return any(exc in path_str for exc in exclude_parts)
+    """True if any path component sequence matches an exclude pattern."""
+    parts = path.as_posix()
+    padded = f"/{parts}/"
+    return any(f"/{exc}/" in padded for exc in exclude_parts)
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Restrict raw stdlib subprocess use in favor of RunningProcess.",
-    )
-    parser.add_argument("paths", nargs="+", help="Files or directories to check")
-    parser.add_argument(
-        "--exclude", nargs="*", default=[], help="Substrings to exclude from file paths"
-    )
-    parser.add_argument(
-        "--baseline",
-        default=str(DEFAULT_BASELINE),
-        help="Path to the baseline file",
-    )
-    parser.add_argument(
-        "--update-baseline",
-        action="store_true",
-        help="Rewrite the baseline from the current findings",
-    )
-    args = parser.parse_args(argv)
-
-    files = collect_python_files(args.paths, args.exclude)
-
-    counts: Counter[str] = Counter()
-    detail: dict[str, list[str]] = {}
-    # Which files this invocation actually looked at. A baseline entry for a
-    # file outside this set says nothing about that file -- it was simply not
-    # examined -- so it must never be treated as fixed or dropped.
-    scanned: set[str] = set()
-    for path in files:
+def scan(paths: list[str], excludes: list[str]) -> list[str]:
+    """Return every finding as `path:line: message`."""
+    findings: list[str] = []
+    for path in collect_python_files(paths, excludes):
         try:
             source = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        scanned.add(_rel_path(path))
-        if not _SUBPROCESS_RE.search(source):
+        if not _PREFILTER_RE.search(source):
             continue
-        for line_no, code, message in check_file(str(path), source):
-            key = _baseline_key(path, code)
-            counts[key] += 1
-            detail.setdefault(key, []).append(f"{path}:{line_no}: {message}")
+        for line_no, _code, message in check_file(str(path), source):
+            findings.append(f"{_rel_path(path)}:{line_no}: {message}")
+    return findings
 
-    baseline_path = Path(args.baseline)
-    baseline = load_baseline(baseline_path)
 
-    if args.update_baseline:
-        # Merge rather than overwrite. Running with a narrow path list
-        # (`... check.py some_file.py --update-baseline`) would otherwise
-        # rewrite the whole file from that one file's findings and silently
-        # delete every other entry, turning the ratchet off everywhere.
-        merged = Counter(
-            {k: v for k, v in baseline.items() if _key_file(k) not in scanned}
-        )
-        merged.update(counts)
-        write_baseline(merged, baseline_path)
-        total = sum(merged.values())
-        kept = len(merged) - len(counts)
-        print(
-            f"Wrote baseline with {total} finding(s) across {len(merged)} entries "
-            f"({len(scanned)} file(s) rescanned, {kept} untouched entry(ies) kept)."
-        )
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Ban the stdlib subprocess module in favor of RunningProcess.",
+    )
+    parser.add_argument("paths", nargs="+", help="Files or directories to check")
+    parser.add_argument(
+        "--exclude",
+        nargs="*",
+        default=[],
+        help="Extra path components to exclude (in addition to the defaults)",
+    )
+    args = parser.parse_args(argv)
+
+    findings = scan(args.paths, [*DEFAULT_EXCLUDES, *args.exclude])
+    if not findings:
+        print("No stdlib subprocess usage found.")
         return 0
 
-    regressions = 0
-    for key, count in sorted(counts.items()):
-        allowed = baseline.get(key, 0)
-        if count <= allowed:
-            continue
-        # Report only the overflow so a file with a long-standing baseline
-        # does not spam every pre-existing line on an unrelated change.
-        for line in detail[key][allowed:]:
-            print(line)
-            regressions += 1
-
-    if regressions:
-        print(
-            f"\n{regressions} new raw-subprocess usage(s) beyond the baseline.\n"
-            "Use RunningProcess from `running_process`, or if this is genuinely "
-            "required, append `# noqa: SRC00x` on the call line with a comment "
-            "explaining why."
-        )
-        return 1
-
-    # Only files this run actually scanned can be said to have improved.
-    # Without the `scanned` filter a narrow invocation reports every baselined
-    # entry in the repo as "now gone", which is both wrong and an invitation
-    # to run --update-baseline and wipe them.
-    improved = sum(
-        max(0, allowed - counts.get(key, 0))
-        for key, allowed in baseline.items()
-        if _key_file(key) in scanned
+    for line in findings:
+        print(line)
+    print(
+        f"\n{len(findings)} banned process-spawning usage(s). The stdlib "
+        "`subprocess` module, `os.system` and `os.popen` are not allowed; use "
+        "`RunningProcess` from `running_process` (see "
+        "ci/lint_python/subprocess_capture_checker.py)."
     )
-    if improved:
-        print(
-            f"NOTE: {improved} baselined subprocess usage(s) are now gone. "
-            "Re-run with --update-baseline to lock in the improvement."
-        )
-    print(f"No new raw-subprocess usage. Baseline entries: {len(baseline)}")
-    return 0
+    return 1
 
 
 if __name__ == "__main__":

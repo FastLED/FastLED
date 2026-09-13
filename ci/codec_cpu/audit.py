@@ -597,6 +597,8 @@ def run_operation_audit(binary: Path) -> dict[str, dict[str, Any]]:
             check=True,
             text=True,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         counts: dict[str, dict[str, int]] = {}
         for match in _OPS_RE.finditer(result.stdout):
@@ -639,6 +641,8 @@ def run_host_stage_profile(binary: Path) -> dict[str, dict[str, float]]:
                 check=True,
                 text=True,
                 capture_output=True,
+                encoding="utf-8",
+                errors="replace",
             )
             frame_match = _RESULT_RE.search(result.stdout)
             if not frame_match or frame_match.group(1) != backend:
@@ -686,6 +690,8 @@ def run_cycle_profile(binary: Path) -> dict[str, float]:
                 check=True,
                 text=True,
                 capture_output=True,
+                encoding="utf-8",
+                errors="replace",
             )
             match = _RESULT_RE.search(result.stdout)
             if not match or match.group(1) != backend:
@@ -764,6 +770,8 @@ def run_callgrind_profile(binary: Path) -> dict[str, dict[str, Any]]:
             cwd=ROOT,
             check=True,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         data = parse_callgrind(output)
         annotation = RunningProcess.run(
@@ -779,6 +787,8 @@ def run_callgrind_profile(binary: Path) -> dict[str, dict[str, Any]]:
             check=True,
             text=True,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         functions = parse_callgrind_attribution(annotation.stdout)
         top = sorted(functions.items(), key=lambda item: item[1], reverse=True)[:20]
@@ -1286,23 +1296,25 @@ def _package_tool(package: str, executable: str) -> Path:
         located = shutil.which(name)
         if located:
             return Path(located)
-    package_roots = []
-    override = os.environ.get("PLATFORMIO_PACKAGES_DIR")
-    if override:
-        package_roots.append(Path(override))
-    package_roots.append(Path.home() / ".platformio" / "packages")
-    for root in package_roots:
+    # fbuild caches toolchains under ~/.fbuild/<profile>/cache/toolchains/
+    # <package>[-suffix]/<hash>/<version>/.../bin/. `package` is the prefix of
+    # the toolchain directory there (toolchain-xtensa-esp-elf,
+    # toolchain-gccarmnoneeabi-teensy, ...).
+    for toolchain_root in sorted(Path.home().glob(".fbuild/*/cache/toolchains")):
         for name in names:
-            candidate = root / package / "bin" / name
-            if candidate.exists():
-                return candidate
-    raise RuntimeError(f"missing tool {executable} from PlatformIO package {package}")
+            for candidate in sorted(toolchain_root.glob(f"{package}*/**/bin/{name}")):
+                if candidate.is_file():
+                    return candidate
+    raise RuntimeError(
+        f"missing tool {executable} from fbuild toolchain {package}; run an "
+        f"ESP32 build first (`bash compile <board> --examples Blink`)"
+    )
 
 
 def _target_tools(target: str) -> TargetTools:
     if target == "xtensa-esp32":
         prefix = "xtensa-esp32-elf"
-        package = "toolchain-xtensa-esp32"
+        package = "toolchain-xtensa-esp"
         flags: list[str] = [
             "-DFL_CODEC_CPU_CODEGEN_ESP_TYPES",
             "-D__thumb__",
@@ -1382,6 +1394,8 @@ def run_codegen_audit() -> dict[str, dict[str, dict[str, dict[str, int]]]]:
                 check=True,
                 text=True,
                 capture_output=True,
+                encoding="utf-8",
+                errors="replace",
             )
             report[backend][target] = {}
             for kernel in KERNELS:
@@ -1443,6 +1457,8 @@ def host_environment() -> dict[str, Any]:
         check=True,
         text=True,
         capture_output=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return {
         "platform": platform.platform(),

@@ -18,13 +18,6 @@ class WorkflowType(Enum):
     WASM = "wasm"
 
 
-class BuildBackend(Enum):
-    """Compilation backend selection (fbuild vs PlatformIO's `pio run`)."""
-
-    FBUILD = "fbuild"
-    PLATFORMIO = "platformio"
-
-
 @dataclass(frozen=True)
 class CompilationConfig:
     """Immutable compilation configuration with validation."""
@@ -47,7 +40,6 @@ class CompilationConfig:
     wasm_run: bool = False
 
     # Advanced options
-    global_cache_dir: Optional[Path] = None
     skip_filters: bool = (
         False  # True to skip @filter directives (override platform/memory constraints)
     )
@@ -55,9 +47,6 @@ class CompilationConfig:
 
     # Info options
     build_info: Optional[Path] = None  # Output file path for build info JSON
-
-    # Build backend selection (default fbuild; --backend=platformio forces `pio run`)
-    backend: BuildBackend = BuildBackend.FBUILD
 
     def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
@@ -141,7 +130,7 @@ class CompilationArgumentParser:
     def _create_parser(self) -> argparse.ArgumentParser:
         """Create argument parser with all options."""
         parser = argparse.ArgumentParser(
-            description="Compile FastLED examples for various boards using PioCompiler"
+            description="Compile FastLED examples for various boards with fbuild"
         )
 
         # Positional arguments
@@ -189,7 +178,7 @@ class CompilationArgumentParser:
         parser.add_argument(
             "--extra-packages",
             type=str,
-            help="Comma-separated list of extra PlatformIO library packages to install (e.g., 'OctoWS2811')",
+            help="Comma-separated list of extra lib_deps entries (e.g., 'OctoWS2811')",
         )
         parser.add_argument(
             "-v", "--verbose", action="store_true", help="Enable verbose output"
@@ -247,40 +236,12 @@ class CompilationArgumentParser:
             action="store_true",
             help="Disable parallel compilation (builds are already sequential, this is a no-op)",
         )
-        parser.add_argument(
-            "--global-cache",
-            type=str,
-            help="Override global PlatformIO cache directory path (for testing)",
-        )
-
-        # Build backend selection. fbuild is the ONLY supported production
-        # backend (#3279 Phase 3). ``--backend platformio`` is a
-        # comparison-only escape hatch for diagnosing fbuild gaps; do NOT
-        # rely on it for shipped builds.
-        parser.add_argument(
-            "--backend",
-            choices=[b.value for b in BuildBackend],
-            default=BuildBackend.FBUILD.value,
-            help="Select build backend. 'fbuild' (default) is the ONLY "
-            "supported production backend. 'platformio' is a "
-            "COMPARISON-ONLY tool — use only to compare fbuild output "
-            "and find gaps. Production CI compiles every board via "
-            "fbuild; flags added to root platformio.ini are NOT consumed "
-            "by CI (see #3274 / #3279).",
-        )
-        parser.add_argument(
-            "--platformio",
-            "--pio",
-            dest="platformio_backend",
-            action="store_true",
-            help="Shortcut for --backend=platformio. COMPARISON-ONLY: "
-            "use only to compare fbuild output and find gaps.",
-        )
+        # fbuild is the only board build backend; ``--fbuild`` is accepted
+        # for scripts that still pass it.
         parser.add_argument(
             "--fbuild",
-            dest="fbuild_backend",
             action="store_true",
-            help="Shortcut for --backend=fbuild (default, production backend).",
+            help="Accepted for compatibility; fbuild is the only backend.",
         )
 
         return parser
@@ -304,19 +265,6 @@ class CompilationArgumentParser:
             else []
         )
 
-        # Resolve build backend. Precedence (last wins among explicit flags):
-        #   --fbuild  -> fbuild
-        #   --platformio / --pio -> platformio
-        #   --backend=<value>  -> <value> (explicit takes precedence over shortcuts
-        #       only if also passed; argparse has no easy "was flag passed" signal
-        #       for choices with a default, so we honor the shortcut if set, else
-        #       the --backend value).
-        backend = BuildBackend(args.backend)
-        if getattr(args, "platformio_backend", False):
-            backend = BuildBackend.PLATFORMIO
-        if getattr(args, "fbuild_backend", False):
-            backend = BuildBackend.FBUILD
-
         return CompilationConfig(
             boards=boards,
             examples=examples,
@@ -328,13 +276,11 @@ class CompilationArgumentParser:
             log_failures=Path(args.log_failures) if args.log_failures else None,
             max_failures=args.max_failures if hasattr(args, "max_failures") else None,
             wasm_run=args.run,
-            global_cache_dir=Path(args.global_cache) if args.global_cache else None,
             skip_filters=skip_filters,
             no_parallel=args.no_parallel,
             build_info=Path(args.build_info)
             if hasattr(args, "build_info") and args.build_info
             else None,
-            backend=backend,
         )
 
     def _resolve_boards(self, board_spec: Optional[str]) -> list[Board]:

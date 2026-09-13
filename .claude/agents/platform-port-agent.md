@@ -22,7 +22,7 @@ Use WebSearch and WebFetch to gather:
 - GPIO register access speed and method
 - Clock speeds and timer resolution
 - RAM/Flash sizes
-- Existing Arduino/PlatformIO support
+- Existing Arduino core support
 
 ### 2. Create Porting Checklist
 
@@ -123,7 +123,7 @@ If the platform has hardware SPI:
 
 ### 7. Build System Integration (Step 5)
 
-**PlatformIO**: Add board to `platformio.ini` environments
+**fbuild**: Add the board to `ci/boards.py` (and a `platformio.ini` env if needed)
 **Meson**: Add platform detection in `meson.build`
 
 ### 8. Testing Strategy

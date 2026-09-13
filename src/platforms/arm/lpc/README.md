@@ -184,16 +184,16 @@ Build-time opt-ins (default off). Define before including `FastLED.h` or via bui
 
 ## Build system
 
-LPC8xx targets are built with [fbuild](https://github.com/FastLED/fbuild) (no PlatformIO upstream for `lpc845` / `lpc804`):
+LPC8xx targets are built with [fbuild](https://github.com/FastLED/fbuild) (no third-party platform package upstream for `lpc845` / `lpc804`):
 
 ```bash
 fbuild build lpc845 --examples Blink
 fbuild build lpc804 --examples Blink
 ```
 
-The fbuild assets (board JSON, linker script, SystemInit, vector table) live in `crates/fbuild-config/assets/boards/json/lpc8{04,45}.json` and `crates/fbuild-build/src/nxplpc/assets/` in the fbuild repo. The board-validation script ([fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421)) explicitly tallies these as fbuild-native (no PlatformIO upstream).
+The fbuild assets (board JSON, linker script, SystemInit, vector table) live in `crates/fbuild-config/assets/boards/json/lpc8{04,45}.json` and `crates/fbuild-build/src/nxplpc/assets/` in the fbuild repo. The board-validation script ([fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421)) explicitly tallies these as fbuild-native (no third-party upstream).
 
-For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own PlatformIO platform should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. The hold is documented in `fastled_arm_lpc.h` — attempting to build with only `FL_IS_ARM_LPC_11` or `FL_IS_ARM_LPC_15` set emits a clear `#error` pointing here.
+For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own platform package should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. The hold is documented in `fastled_arm_lpc.h` — attempting to build with only `FL_IS_ARM_LPC_11` or `FL_IS_ARM_LPC_15` set emits a clear `#error` pointing here.
 
 ## Detection scaffolds
 
@@ -219,7 +219,7 @@ The LPC roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) **c
 | **Stage 4.2** — LPC15xx clockless driver | **FastLED** | ✅ Shipped in [#2872](https://github.com/FastLED/FastLED/pull/2872) | Reuses LPC8xx fastpin + M3-compatible C++ clockless |
 | **Stage 4.3** — APA102 / SK9822 / WS2801 hardware SPI | **FastLED** | ✅ Shipped in [#2872](https://github.com/FastLED/FastLED/pull/2872) + CR fixes in [#2876](https://github.com/FastLED/FastLED/pull/2876) | `spi_arm_lpc.h` per UM11029 |
 | **Stage 4.4** — Multi-strip parallel output | **FastLED** | Blocked on Stage 2c hardware validation | [#2879](https://github.com/FastLED/FastLED/issues/2879) |
-| **Stage 4.5** — PlatformIO upstream donation | **PlatformIO** (3rd party) | Deferred (no user-facing PIO platform exists for nxplpc) | — |
+| **Stage 4.5** — Upstream platform-package donation | 3rd party | Deferred (no user-facing platform package exists for nxplpc) | — |
 | **Stage 4.6** — `fl::set_*` settings for LPC clock-speed / DMA-channel overrides | **FastLED** | Deferred (no concrete user requirement) | Reopen with a concrete user report; the build-time `F_CPU` override already covers the stable-clock case |
 
 **Distribution:** of the 15 items, **3 shipped** (Stage 4.1, 4.2, 4.3 — all in #2872 + #2876), **6 live in `FastLED/fbuild`** (folded into fbuild #456), **3 are hardware-gated** (FastLED #2880, FastLED #2879), **1 is a code-only FastLED follow-on** (#2878, the legacy LPC11xx fastpin), and **2 are deferred** (4.5 PIO donation, 4.6 settings — neither has a concrete requirement today).

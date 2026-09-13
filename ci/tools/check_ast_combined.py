@@ -1,6 +1,6 @@
 """Combined AST pass: run noexcept + array-param matchers in ONE clang-query session per TU.
 
-The two checks were independently dispatching clang-query subprocesses
+The two checks were independently dispatching clang-query child processes
 per TU, so a 25-TU "all" scope spawned 50 clang-query processes (25 for
 noexcept + 25 for array-param), each one re-parsing the same TU
 independently. Parsing is the bulk of clang-query's wall time; running
@@ -17,9 +17,10 @@ from __future__ import annotations
 
 import os
 import re
-import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
+
+from running_process import PIPE, RunningProcess
 
 from ci.tools.check_array_params import (
     ArrayParamHit,
@@ -96,15 +97,18 @@ def _run_combined_clang_query(
     clang_query: list[str], tu: str, file_regex: str
 ) -> tuple[list[NoexceptHit], list[ArrayParamHit]]:
     """Run a single clang-query session and route hits by binding name."""
-    result = subprocess.run(
+    result = RunningProcess.run(
         [*clang_query, tu, "--", *_COMPILER_ARGS],
         input=_build_combined_query(file_regex),
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         cwd=str(PROJECT_ROOT),
         timeout=300,
+        encoding="utf-8",
+        errors="replace",
     )
-    output = result.stdout + result.stderr
+    output = result.stdout + "\n" + result.stderr
     if result.returncode != 0:
         raise NoexceptCheckError(output.strip() or "clang-query failed")
     if (

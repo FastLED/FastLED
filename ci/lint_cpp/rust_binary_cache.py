@@ -21,10 +21,13 @@ import hashlib
 import os
 import platform
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
+
+from running_process import RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.util.paths import PROJECT_ROOT
 
@@ -248,29 +251,30 @@ def _stream_build_cmd(cmd: list[str], label: str, verbose: bool) -> _BuildStream
             flush=True,
         )
         print(
-            f"    cmd: {subprocess.list2cmdline(cmd)}",
+            f"    cmd: {list2cmdline(cmd)}",
             file=sys.stderr,
             flush=True,
         )
-    proc = subprocess.Popen(
+    # capture=True with stderr left at its default merges stderr into the
+    # combined stream, so line_iter() yields cargo's stdout and stderr in
+    # arrival order.
+    proc = RunningProcess(
         cmd,
-        cwd=str(PROJECT_ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,  # line-buffered
+        cwd=PROJECT_ROOT,
+        capture=True,
+        encoding="utf-8",
+        errors="replace",
     )
-    assert proc.stdout is not None
     prefix = f"    [{label}] "
     line_count = 0
-    for line in proc.stdout:
+    for line in proc.line_iter(timeout=None):
         stripped = line.rstrip()
         if stripped:
             line_count += 1
         # Preserve the raw line (cargo emits progress bars via \r; strip
         # trailing whitespace only, don't collapse internal spacing).
         print(f"{prefix}{stripped}", file=sys.stderr, flush=True)
-    returncode = proc.wait()
+    returncode = cast(int, proc.wait())
     return _BuildStreamResult(returncode=returncode, line_count=line_count)
 
 
@@ -285,11 +289,11 @@ def _run_build(verbose: bool = True) -> None:
 
     Streaming implementation
     ------------------------
-    Uses ``subprocess.Popen`` with ``stdout=PIPE``/``stderr=STDOUT`` and a
+    Uses a streaming ``RunningProcess`` (stderr merged into stdout) and a
     line-by-line reader loop so cargo output reaches ``sys.stderr`` as it
     is produced. This matters when the build is invoked from inside a
     ``concurrent.futures.ThreadPoolExecutor`` (as ``run_all_checkers.py``
-    does): earlier code used ``subprocess.run`` with inherited handles,
+    does): earlier code used a blocking run with inherited handles,
     but when the parent's stdout/stderr are indirectly captured (test
     runners, logging wrappers, CI harnesses), cargo's diagnostics
     disappear. The explicit stream + prefix makes every cargo line

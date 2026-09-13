@@ -2,7 +2,7 @@ name: esp32dev_idf5_component
 
 # Compile-smoke via ESP-IDF's genuine CMake/idf.py component build system
 # (framework="arduino, espidf" — CONFIG_AUTOSTART_ARDUINO=y runs the .ino
-# sketch from inside an IDF app_main), instead of PlatformIO's Arduino-only
+# sketch from inside an IDF app_main), instead of the Arduino-only
 # source-discovery build. Exercises the real idf_component_register() /
 # CMakeLists.txt path — the distribution mechanism #2121 (idf component
 # registry) depends on — and, combined with FastLED#3715's other changes

@@ -1,4 +1,4 @@
-"""Source and example management for FastLED PlatformIO builds."""
+"""Source and example management for FastLED board builds."""
 
 import filecmp
 import os
@@ -19,7 +19,7 @@ from ci.compiler.asset_scanner import (
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-_GENERATED_EXAMPLE_DIRS = frozenset({".build", ".fbuild", ".pio", "fastled_js"})
+_GENERATED_EXAMPLE_DIRS = frozenset({".build", ".fbuild", "fastled_js"})
 _GENERATED_EXAMPLE_FILES = frozenset({"compile_commands.json"})
 
 
@@ -183,12 +183,12 @@ __attribute__((weak)) int main() {{
 }}
 """
 
-    main_cpp_content = f"""// Auto-generated main.cpp stub for PlatformIO
+    main_cpp_content = f"""// Auto-generated main.cpp stub for the Arduino build
 // This file includes all .ino files from the sketch directory
 
 {include_lines}
 
-// main.cpp is required by PlatformIO but Arduino-style sketches
+// main.cpp is required by the project layout but Arduino-style sketches
 // use setup() and loop() functions which are called automatically
 // by the FastLED/Arduino framework
 //
@@ -224,7 +224,7 @@ def copy_example_source(
         if not example_path.exists():
             return CopyExampleResult(success=False, build_defines=[])
 
-    # Create src and sketch directories (PlatformIO requirement with sketch subdirectory)
+    # Create src and sketch directories (project layout with sketch subdirectory)
     src_dir = build_dir / "src"
     sketch_dir = src_dir / "sketch"
 
@@ -247,7 +247,7 @@ def copy_example_source(
 
         if file_path.is_file():
             # Skip .ino.cpp artifacts (preprocessed .ino files that would cause
-            # duplicate symbols when PlatformIO also compiles the .ino via main.cpp)
+            # duplicate symbols when the .ino is also compiled via main.cpp)
             if file_path.name.endswith(".ino.cpp"):
                 continue
             shutil.copy2(file_path, sketch_dir)

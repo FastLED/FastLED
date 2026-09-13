@@ -12,25 +12,20 @@ from ci.compiler.compiler import SketchResult
 from ci.debug_attached import parse_args as parse_debug_attached_args
 
 
-def test_compile_board_examples_always_uses_fbuild(
+def test_compile_board_examples_builds_through_board_compiler(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """compile_board_examples should always pass use_fbuild=True."""
-    captured: dict[str, bool] = {}
-    missing = object()
+    """compile_board_examples drives every build through BoardCompiler (fbuild)."""
+    captured: dict[str, Any] = {}
 
     monkeypatch.setattr(
         "ci.compiler.compilation_orchestrator.get_filtered_examples",
         lambda _board, examples: (examples, []),
     )
 
-    class FakePioCompiler:
+    class FakeBoardCompiler:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
-            use_fbuild = kwargs.get("use_fbuild", missing)
-            if use_fbuild is missing and len(args) >= 7:
-                use_fbuild = args[6]
-            assert use_fbuild is not missing, "PioCompiler use_fbuild argument missing"
-            captured["use_fbuild"] = bool(use_fbuild)
+            captured["kwargs"] = kwargs
 
         def build(self, examples: list[str]) -> list[Future[SketchResult]]:
             future: Future[SketchResult] = Future()
@@ -48,7 +43,7 @@ def test_compile_board_examples_always_uses_fbuild(
             pass
 
     monkeypatch.setattr(
-        "ci.compiler.compilation_orchestrator.PioCompiler", FakePioCompiler
+        "ci.compiler.compilation_orchestrator.BoardCompiler", FakeBoardCompiler
     )
 
     result = compile_board_examples(
@@ -59,7 +54,8 @@ def test_compile_board_examples_always_uses_fbuild(
     )
 
     assert result.ok is True
-    assert captured["use_fbuild"] is True
+    assert captured["kwargs"]["board"].board_name == "digispark-tiny"
+    assert captured["kwargs"]["additional_defines"] == []
 
 
 def test_autoresearch_always_selects_fbuild() -> None:
@@ -68,19 +64,8 @@ def test_autoresearch_always_selects_fbuild() -> None:
     assert isinstance(driver, FbuildDriver)
 
 
-def test_autoresearch_fbuild_install_packages_does_not_call_platformio(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_autoresearch_fbuild_install_packages_is_a_no_op() -> None:
     """fbuild AutoResearch lets fbuild resolve packages during deploy."""
-
-    def fail_if_called(*_args: Any, **_kwargs: Any) -> bool:
-        raise AssertionError("PlatformIO package helper should not be called")
-
-    monkeypatch.setattr(
-        "ci.util.pio_package_client.ensure_packages_installed",
-        fail_if_called,
-    )
-
     assert FbuildDriver().install_packages(Path("."), "esp32s3") is True
 
 

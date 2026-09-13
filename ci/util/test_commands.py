@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import subprocess
 import sys
 from typing import Any
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.util.test_types import TestArgs
 
@@ -39,21 +39,7 @@ def build_cpp_test_command(args: TestArgs) -> str:
     if args.check:
         cmd_list.append("--check")
 
-    return subprocess.list2cmdline(cmd_list)
-
-
-def make_pio_check_cmd() -> list[str]:
-    """Create the PlatformIO check command"""
-    return [
-        "pio",
-        "check",
-        "--skip-packages",
-        "--src-filters=+<src/>",
-        "--severity=medium",
-        "--fail-on-defect=high",
-        "--flags",
-        "--inline-suppr --enable=all --std=c++17",
-    ]
+    return list2cmdline(cmd_list)
 
 
 def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
@@ -76,6 +62,6 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
 def run_command(cmd: list[str], **kwargs: Any) -> None:
     """Run a command and handle errors"""
     try:
-        subprocess.run(cmd, check=True, **kwargs)
-    except subprocess.CalledProcessError as e:
+        RunningProcess.run(cmd, check=True, **kwargs)
+    except CalledProcessError as e:
         sys.exit(e.returncode)

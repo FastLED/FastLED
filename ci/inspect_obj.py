@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
 import os
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.paths import BUILD
@@ -19,10 +21,10 @@ def _list_builds() -> list[Path]:
 
 def _check_build(build: Path) -> bool:
     # 1. should contain a build_info.json file
-    # 2. should contain a .pio/build directory
+    # 2. should contain a .fbuild/build directory
     has_build_info = (build / "build_info.json").exists()
-    has_pio_build = (build / ".pio" / "build").exists()
-    return has_build_info and has_pio_build
+    has_fbuild_build = (build / ".fbuild" / "build").exists()
+    return has_build_info and has_fbuild_build
 
 
 def _prompt_build() -> Path:
@@ -50,8 +52,8 @@ def _prompt_build() -> Path:
 
 
 def _prompt_object_file(build: Path) -> Path:
-    # Look for object files in .pio/build directory
-    build_dir = build / ".pio" / "build"
+    # Look for object files in .fbuild/build directory
+    build_dir = build / ".fbuild" / "build"
     object_files: list[Path] = list(build_dir.rglob("*.o"))
 
     if not object_files:
@@ -111,8 +113,8 @@ def cli() -> None:
     cmd = [str(tools.objdump_path), "--syms", str(object_file)]
     if sys.platform == "win32":
         cmd = ["cmd", "/c"] + cmd
-    cmd_str = subprocess.list2cmdline(cmd)
-    subprocess.run(cmd, check=True)
+    cmd_str = list2cmdline(cmd)
+    RunningProcess.run(cmd, check=True)
     print("\nDone. Command used:", cmd_str)
 
 

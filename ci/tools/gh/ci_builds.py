@@ -20,12 +20,13 @@ Usage:
 import argparse
 import json
 import re
-import subprocess
 import sys
 import threading
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
+
+from running_process import PIPE, RunningProcess
 
 
 # ---------------------------------------------------------------------------
@@ -97,12 +98,15 @@ class BuildInfo:
 
 def _get_repo() -> str:
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["gh", "repo", "view", "--json", "nameWithOwner"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             check=True,
             timeout=10,
+            encoding="utf-8",
+            errors="replace",
         )
         data = json.loads(result.stdout)
         return data["nameWithOwner"]
@@ -157,7 +161,7 @@ def discover_builds(repo_root: Path) -> list[BuildInfo]:
 def _fetch_latest_run(workflow_file: str) -> Optional[dict[str, Any]]:
     """Fetch the latest run for a workflow file."""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 "gh",
                 "run",
@@ -169,10 +173,13 @@ def _fetch_latest_run(workflow_file: str) -> Optional[dict[str, Any]]:
                 "--limit",
                 "1",
             ],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             check=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
         runs = json.loads(result.stdout)
         return runs[0] if runs else None
@@ -216,12 +223,15 @@ def _fetch_error_logs(build: BuildInfo, repo: str) -> None:
 
     try:
         # Get failed jobs
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["gh", "run", "view", build.run_id, "--json", "jobs"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             check=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
         data = json.loads(result.stdout)
         jobs = data.get("jobs", [])
@@ -236,12 +246,15 @@ def _fetch_error_logs(build: BuildInfo, repo: str) -> None:
 
             # Fetch logs via API
             api_path = f"/repos/{repo}/actions/jobs/{job_id}/logs"
-            log_result = subprocess.run(
+            log_result = RunningProcess.run(
                 ["gh", "api", api_path],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=False,
                 timeout=60,
+                encoding="utf-8",
+                errors="replace",
             )
             if log_result.returncode != 0:
                 continue

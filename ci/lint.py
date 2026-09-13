@@ -12,9 +12,14 @@ import sys
 from pathlib import Path
 
 from ci.lint.args_parser import LintArgs, parse_lint_args
+from ci.lint.banned_build_tools import run_banned_build_tools_lint
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
+from ci.lint.root_project_ini_lockdown import (
+    _warn_only_from_env as _root_ini_warn_only_from_env,
+)
+from ci.lint.root_project_ini_lockdown import check as run_root_ini_lockdown_lint
 from ci.lint.stage_impls import (
     run_clang_tidy,
     run_cpp_lint,
@@ -29,13 +34,6 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
-from ci.lint_platformio.check_root_platformio_lockdown import (
-    _warn_only_from_env as _root_pio_warn_only_from_env,
-)
-from ci.lint_platformio.run_all_checkers import (
-    run_platformio_lint,
-    run_root_platformio_lockdown_lint,
-)
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
 
 
@@ -253,16 +251,16 @@ def create_stages(args: LintArgs) -> list[LintStage]:
             )
         )
 
-    # PlatformIO-internal-usage stage (issue #2701, warn-only by default).
-    # Runs whenever non-JS-only linting is invoked — repo hygiene check
-    # for build/CI scripts. Skipped via --skip-platformio-check.
-    if not args.js_only and not args.skip_platformio_check:
+    # Banned build tools: the old board build tool was purged (fbuild is the only
+    # board backend) and its name may not reappear anywhere in the tree.
+    # Always an error; no skip flag and no warn-only mode.
+    if not args.js_only:
         stages.append(
             LintStage(
-                name="platformio_internal_usage",
-                display_name="PLATFORMIO-INTERNAL-USAGE LINT",
-                run_fn=lambda: run_platformio_lint(),
-                timeout=30.0,
+                name="banned_build_tools",
+                display_name="BANNED BUILD TOOLS",
+                run_fn=lambda: run_banned_build_tools_lint(),
+                timeout=60.0,
             )
         )
         # Root ./platformio.ini lockdown: every diff line needs an adjacent
@@ -271,10 +269,10 @@ def create_stages(args: LintArgs) -> list[LintStage]:
         # unchanged against origin/master.
         stages.append(
             LintStage(
-                name="root_platformio_ini_lockdown",
-                display_name="ROOT-PLATFORMIO.INI LOCKDOWN",
-                run_fn=lambda: run_root_platformio_lockdown_lint(
-                    warn_only=_root_pio_warn_only_from_env()
+                name="root_project_ini_lockdown",
+                display_name="ROOT PROJECT INI LOCKDOWN",
+                run_fn=lambda: run_root_ini_lockdown_lint(
+                    warn_only=_root_ini_warn_only_from_env()
                 ),
                 timeout=10.0,
             )

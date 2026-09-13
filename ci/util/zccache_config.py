@@ -80,6 +80,8 @@ def show_zccache_stats() -> None:
                 timeout=10,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             )
             # session-stats may print to stdout or stderr
             output = (stats_result.stderr or "").strip() or (
@@ -101,6 +103,8 @@ def show_zccache_stats() -> None:
                 check=False,
                 timeout=10,
                 capture_output=True,
+                encoding="utf-8",
+                errors="replace",
             )
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -115,6 +119,8 @@ def show_zccache_stats() -> None:
             check=False,
             timeout=10,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode == 0:
             # Parse zccache status output format:

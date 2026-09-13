@@ -3,16 +3,27 @@
 Claude command /f - Finalize the codebase by running lint and test, fixing issues
 """
 
-import subprocess
-import sys
 import os
+import sys
 from pathlib import Path
+
+from running_process import PIPE, STDOUT, RunningProcess
+
 
 def run_command(cmd, description):
     """Run a command and return success status"""
     print(f"\n[RUN] {description}...")
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=Path.cwd(), encoding='utf-8', errors='replace')
+        result = RunningProcess.run(
+            cmd,
+            shell=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            cwd=Path.cwd(),
+            encoding="utf-8",
+            errors="replace",
+        )
         if result.returncode == 0:
             print(f"[PASS] {description} passed")
             if result.stdout.strip():
@@ -28,6 +39,7 @@ def run_command(cmd, description):
     except Exception as e:
         print(f"[FAIL] {description} failed with exception: {e}")
         return False
+
 
 def main():
     """Main finalization workflow"""
@@ -50,6 +62,7 @@ def main():
     else:
         print("\nSome checks failed. Please review the output above and fix issues.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

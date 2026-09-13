@@ -19,7 +19,7 @@ on:
       - 'library.properties'
       - 'pyproject.toml'
       - 'uv.lock'
-  # pull_request_target: DISABLED - Security vulnerability through PlatformIO pre-script execution
+  # pull_request_target: DISABLED - Security vulnerability through build pre-script execution
   # Running on pull_request_target allows execution of malicious Python code
   # Workflow still runs on push to master for validation
 
@@ -48,5 +48,14 @@ jobs:
         run: |
           pip install uv
 
-      - name: Build Root projectio
-        run: uv run platformio run
+      - name: Set up fbuild (install + cache)
+        uses: FastLED/fbuild/.github/actions/setup@main
+        with:
+          fbuild-version: latest
+          cache-key-extra: clone-and-compile-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml') }}
+
+      # A fresh clone must build the root project as-is: fbuild, the only
+      # board build backend, reads the root platformio.ini and builds its
+      # default_envs (esp32s3), exactly what this job validated before.
+      - name: Build root project with fbuild
+        run: fbuild build

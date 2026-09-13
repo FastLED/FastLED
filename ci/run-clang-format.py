@@ -19,21 +19,15 @@ import io
 import multiprocessing
 import os
 import signal
-import subprocess
 import sys
 import traceback
 from functools import partial
 from typing import Any, Generator, Optional, cast
 
-from running_process import RunningProcess
+from running_process import PIPE, CalledProcessError, RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
-
-
-try:
-    from subprocess import DEVNULL  # py3k
-except ImportError:
-    DEVNULL = open(os.devnull, "wb")  # type: ignore
 
 
 DEFAULT_EXTENSIONS = "c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx"
@@ -191,16 +185,15 @@ def run_clang_format_diff(args: Any, file: str) -> tuple[list[str], list[str]]:
     try:
         result = RunningProcess.run(
             invocation,
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
             encoding="utf-8",
             errors="replace",
         )
-    except OSError as exc:
+    except (OSError, RuntimeError) as exc:
+        # RunningProcess reports a missing executable as RuntimeError.
         raise DiffError(
-            "Command '{}' failed to start: {}".format(
-                subprocess.list2cmdline(invocation), exc
-            )
+            "Command '{}' failed to start: {}".format(list2cmdline(invocation), exc)
         )
     # keepends=True matches the old readlines() behavior exactly -- make_diff
     # feeds these straight to difflib, which expects newline-terminated lines.
@@ -213,7 +206,7 @@ def run_clang_format_diff(args: Any, file: str) -> tuple[list[str], list[str]]:
     if result.returncode:
         raise DiffError(
             "Command '{}' returned non-zero exit status {}".format(
-                subprocess.list2cmdline(invocation), result.returncode
+                list2cmdline(invocation), result.returncode
             ),
             errs,
         )
@@ -357,15 +350,22 @@ def main() -> int:
 
     version_invocation = [args.clang_format_executable, str("--version")]
     try:
-        subprocess.check_call(version_invocation, stdout=DEVNULL)
-    except subprocess.CalledProcessError as e:
+        # Output is captured and discarded (RunningProcess.run has no DEVNULL).
+        RunningProcess.run(
+            version_invocation,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+            check=True,
+        )
+    except CalledProcessError as e:
         print_trouble(parser.prog, str(e), use_colors=colored_stderr)
         return ExitStatus.TROUBLE
-    except OSError as e:
+    except (OSError, RuntimeError) as e:
         print_trouble(
             parser.prog,
             "Command '{}' failed to start: {}".format(
-                subprocess.list2cmdline(version_invocation), e
+                list2cmdline(version_invocation), e
             ),
             use_colors=colored_stderr,
         )

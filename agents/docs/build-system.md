@@ -10,7 +10,7 @@
 
 ### Board Build Backend: fbuild
 
-All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
+All board compiles use `fbuild`. Do not add board allowlists or legacy-backend fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
 
 ### 🚨 Deployment (flash / upload) is fbuild's job — ALWAYS
 
@@ -25,16 +25,14 @@ All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallb
 
 **What to do if you find a direct flash-tool call in FastLED code:** rip it out and route through `fbuild deploy`. Reference this section in the commit message.
 
-**`--backend platformio` is a comparison-only tool (#3279).** `bash compile <board> --backend platformio` (and the `--platformio` / `--pio` shortcuts) drives the legacy `PioCompiler` `pio run` backend. Use ONLY to compare fbuild output and find gaps in fbuild's flag / output reproduction. Production CI always uses fbuild — any binary you ship goes through fbuild. Programmatic callers are blocked unless they explicitly opt in via `FASTLED_BACKEND_PLATFORMIO_EXPLICIT=1`; the `--backend platformio` CLI flag is the supported path that sets this automatically. The PIO backend is retained as a diagnostic; do not build new functionality on top of it.
-
 ### Root `./platformio.ini` is a frozen surface (#3274)
 
-Root `./platformio.ini` is owned by `bash autoresearch` and `bash debug` (and raw `pio run`). CI compile, size-check, bloat, and regression tests consume `ci/boards.py` — NOT root `platformio.ini`. The two surfaces are orthogonal and must NOT be conflated.
+Root `./platformio.ini` is owned by `bash autoresearch` and `bash debug`. CI compile, size-check, bloat, and regression tests consume `ci/boards.py` — NOT root `platformio.ini`. The two surfaces are orthogonal and must NOT be conflated.
 
 Rules:
 
 - **No new CI code path may depend on `./platformio.ini`.** Reading, parsing, or importing it from anywhere under `ci/` (other than `ci/autoresearch/` and `ci/debug_attached.py`) is forbidden. See parent #3274.
-- **Every change to `./platformio.ini` requires justification.** Each added non-comment line must carry an adjacent `; justification: <reason>` comment plus `; added-in: PR-<NNN>` (or 40-char SHA). The `bash lint` stage `root_platformio_ini_lockdown` and the matching CodeRabbit rule (`.coderabbit.yaml` path: `platformio.ini`) enforce this.
+- **Every change to `./platformio.ini` requires justification.** Each added non-comment line must carry an adjacent `; justification: <reason>` comment plus `; added-in: PR-<NNN>` (or 40-char SHA). The `bash lint` root-ini lockdown stage and the matching CodeRabbit rule (`.coderabbit.yaml` path: `platformio.ini`) enforce this.
 - **When porting a flag from root → `ci/boards.py`, do NOT remove it from root.** Both surfaces independently need it (CI vs. local-dev). Removing from one because it's "now in the other" silently breaks the audience the file actually serves.
 - **Roadmap:** `bash autoresearch` is on a path to stop consuming this file entirely and synthesise its own `platformio.ini` from `ci/boards.py` prior to launch (see #3281). Once that lands, root `./platformio.ini` becomes append-only for `bash debug` use cases with a clear path to retirement. Any new functionality should plan for this — prefer extending `ci/boards.py` first and only touch root if `bash debug` truly needs it.
 
@@ -105,7 +103,7 @@ CXX=... meson setup builddir         # WRONG - use bash scripts
 rm -rf .build/meson-quick
 rm -rf .build/meson-debug
 rm -rf .build/meson-release
-rm -rf .build/pio
+rm -rf .build/fbuild
 rm -rf .fbuild
 
 # ❌ WRONG - Never combine cache deletion with commands
@@ -269,4 +267,4 @@ clang-tool-chain provides a uniform GNU-style build environment across all platf
 **Current Architecture** (after refactoring):
 - `meson.build` (root): Source discovery + library compilation (still has duplication - needs refactoring)
 - `tests/meson.build`: Uses `organize_tests.py` for test discovery (refactored)
-- `examples/meson.build`: PlatformIO target registration (clean)
+- `examples/meson.build`: fbuild board target registration (clean)

@@ -15,7 +15,6 @@ Usage:
 
 import _thread
 import argparse
-import subprocess
 import sys
 import threading
 import time
@@ -32,6 +31,7 @@ from rich.progress import (
     TextColumn,
 )
 from rich.table import Table
+from running_process import STDOUT, RunningProcess
 
 
 console = Console()
@@ -76,7 +76,7 @@ class StressTestResults:
                 self.other_errors += 1
 
 
-def start_server(config: StressTestConfig) -> subprocess.Popen[str]:
+def start_server(config: StressTestConfig) -> RunningProcess:
     """Start HTTP server in background."""
     runner_path = Path(".build/meson-quick/examples/example_runner.exe").absolute()
     dll_path = Path(".build/meson-quick/examples/example-Server.dll").absolute()
@@ -86,11 +86,13 @@ def start_server(config: StressTestConfig) -> subprocess.Popen[str]:
         console.print("  bash test Server --examples --build")
         sys.exit(1)
 
-    proc = subprocess.Popen(
+    proc = RunningProcess(
         [str(runner_path), str(dll_path)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
+        auto_run=True,
+        capture=True,
+        stderr=STDOUT,
+        encoding="utf-8",
+        errors="replace",
     )
 
     # Wait for server to start
@@ -321,7 +323,8 @@ def main() -> int:
         server_proc.terminate()
         try:
             server_proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
+        except TimeoutError:
+            # RunningProcess.wait(timeout=) already killed the process.
             server_proc.kill()
         console.print("[green]✓ Server stopped[/green]")
 

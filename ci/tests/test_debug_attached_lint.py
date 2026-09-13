@@ -15,7 +15,7 @@ def test_run_cpp_lint_uses_no_sync(monkeypatch: Any) -> None:
         calls.append({"cmd": cmd, **kwargs})
         return SimpleNamespace(returncode=0)
 
-    monkeypatch.setattr("ci.debug_attached.subprocess.run", fake_run)
+    monkeypatch.setattr("ci.debug_attached.RunningProcess.run", fake_run)
 
     assert run_cpp_lint()
 

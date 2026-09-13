@@ -9,26 +9,32 @@ This complements bin_bloat_analysis.py (which categorizes by name regex).
 from __future__ import annotations
 
 import re
-import subprocess
 from collections import defaultdict
 from pathlib import Path
 
+from running_process import PIPE, RunningProcess
 
-TC = Path("/Users/zacharyvorhies/.platformio/packages/toolchain-xtensa-esp-elf/bin")
+
+TC = Path("/Users/zacharyvorhies/.fbuild/packages/toolchain-xtensa-esp-elf/bin")
 NM = TC / "xtensa-esp32s3-elf-nm"
 ADDR2LINE = TC / "xtensa-esp32s3-elf-addr2line"
 READELF = TC / "xtensa-esp32s3-elf-readelf"
 
 ELF = Path(
-    "/Users/zacharyvorhies/dev/1/.build/pio/esp32s3/.fbuild/build/esp32s3/release/firmware.elf"
+    "/Users/zacharyvorhies/dev/1/.build/fbuild/esp32s3/.fbuild/build/esp32s3/release/firmware.elf"
 )
 
 
 def loadable_progbits_ranges() -> list[tuple[int, int, str]]:
     """Sections with LOAD flag — these are what get written into firmware.bin."""
-    out_objdump = subprocess.check_output(
-        [str(TC / "xtensa-esp32s3-elf-objdump"), "-h", str(ELF)], text=True
-    )
+    out_objdump = RunningProcess.run(
+        [str(TC / "xtensa-esp32s3-elf-objdump"), "-h", str(ELF)],
+        stdout=PIPE,
+        stderr=PIPE,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout
     ranges: list[tuple[int, int, str]] = []
     lines = out_objdump.splitlines()
     i = 0
@@ -58,9 +64,14 @@ def in_loaded(addr: int, ranges: list[tuple[int, int, str]]) -> str | None:
 
 
 def parse_nm() -> list[tuple[int, int, str, str]]:
-    out = subprocess.check_output(
-        [str(NM), "--print-size", "--size-sort", "--radix=d", str(ELF)], text=True
-    )
+    out = RunningProcess.run(
+        [str(NM), "--print-size", "--size-sort", "--radix=d", str(ELF)],
+        stdout=PIPE,
+        stderr=PIPE,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout
     syms: list[tuple[int, int, str, str]] = []
     for line in out.splitlines():
         parts = line.split(maxsplit=3)
@@ -77,12 +88,15 @@ def addr2line_batch(addrs: list[int]) -> dict[int, str]:
     if not addrs:
         return {}
     inp = "\n".join(f"0x{a:x}" for a in addrs)
-    proc = subprocess.run(
+    proc = RunningProcess.run(
         [str(ADDR2LINE), "-e", str(ELF)],
         input=inp,
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
+        encoding="utf-8",
+        errors="replace",
     )
     out_lines = proc.stdout.splitlines()
     res: dict[int, str] = {}

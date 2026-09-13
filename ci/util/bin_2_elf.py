@@ -5,14 +5,15 @@ Handles platform-specific binary formats for ESP32, Uno, and other platforms.
 """
 
 import json
-import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 def _run_command(command: list[str] | str, show_output: bool = False) -> str:
     """
-    Run a command using subprocess and capture the output.
+    Run a command and capture the output.
 
     Args:
         command (list or str): Command to run.
@@ -30,7 +31,9 @@ def _run_command(command: list[str] | str, show_output: bool = False) -> str:
     if show_output:
         print(f"Running command: {' '.join(command)}")
 
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = RunningProcess.run(
+        command, stdout=PIPE, stderr=PIPE, encoding="utf-8", errors="replace"
+    )
     if result.returncode != 0:
         if show_output:
             print(f"Command failed: {' '.join(command)}")

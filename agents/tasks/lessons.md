@@ -14,8 +14,8 @@
 
 - QEMU CI must use fbuild's native `test-emu` runner as the owner of the
   build, flash-image preparation, and emulation lifecycle. Do not repair or
-  extend PlatformIO-shaped merged-bin artifact plumbing while PlatformIO is
-  being phased out; retain only the minimum example staging fbuild requires.
+  extend legacy-backend merged-bin artifact plumbing now that the legacy
+  backend is gone; retain only the minimum example staging fbuild requires.
 
 - QEMU success markers must match the emulator's actual hardware model. For
   unmodeled LED peripherals, assert a real build, boot, and driver/channel
@@ -173,7 +173,7 @@
   needed a correction comment. Capture the result, read it, then write.
 - A test that asserts only an exit code can pass for a completely unrelated
   reason. My `--legacy` chipset-rejection test returned 1 from the
-  Teensy/`--use-root-platformio-ini` check and never reached the guard it was
+  Teensy/root-ini escape-hatch check and never reached the guard it was
   written for; my `--net-peer` summariser test checked call counts and would
   have passed with the summariser deleted. Assert on the *evidence* — the
   message text, the printed rows — and prove the assertion discriminates by

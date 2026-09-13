@@ -524,7 +524,7 @@ Currently, ESP32-P4 targets cannot be compiled in Windows MSys/Git Bash environm
 - Use WSL2 (Windows Subsystem for Linux)
 - Use Linux natively
 - Use Docker with ESP-IDF image
-- Use PlatformIO with proper environment setup
+- Use fbuild with proper environment setup
 
 This is an ESP-IDF limitation, not a FastLED issue.
 

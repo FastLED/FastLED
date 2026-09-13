@@ -31,7 +31,7 @@ bash autoresearch <environment> --upload-port <port> --timeout 120s
 For an external loopback, record the physical TX-to-RX jumper and add the
 driver-specific flag, for example `--flex-io --tx-pin <tx> --rx-pin <rx>`.
 Use the fbuild-backed AutoResearch JSON-RPC transport only. Do not substitute
-PlatformIO, direct flashing tools, raw pyserial, or a hand-maintained VID/PID
+another build tool, direct flashing tools, raw pyserial, or a hand-maintained VID/PID
 table for this workflow. Board identity comes from FastLED/boards via fbuild —
 see [usb-vid-pid-registry.md](usb-vid-pid-registry.md).
 

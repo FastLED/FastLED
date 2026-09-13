@@ -33,10 +33,10 @@ def main() -> int:
     else:
         root_build_dir = Path(".build")
 
-    # Support nested PlatformIO structure: .build/pio/<board>
-    nested_pio_dir = root_build_dir / "pio"
-    if nested_pio_dir.is_dir():
-        root_build_dir = nested_pio_dir
+    # Board builds live under .build/fbuild/<board>
+    nested_board_dir = root_build_dir / "fbuild"
+    if nested_board_dir.is_dir():
+        root_build_dir = nested_board_dir
 
     # Find the first board directory
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]

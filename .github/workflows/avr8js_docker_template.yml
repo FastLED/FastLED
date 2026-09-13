@@ -68,7 +68,7 @@ jobs:
         run: uv sync
 
       - name: "Build ${{ inputs.sketch }} for ${{ inputs.platform_display }}"
-        # Stage the sketch into .build/pio/<env>/ via ci-compile.py.
+        # Stage the sketch into .build/fbuild/<env>/ via ci-compile.py.
         # fbuild handles the actual compile and writes firmware.elf /
         # firmware.hex under .fbuild/build/<env>/release/.
         timeout-minutes: 8
@@ -103,7 +103,7 @@ jobs:
               sys.exit(1)
           mcu, freq = mcu_config[platform]
 
-          build_dir = Path('.build/pio/${{ inputs.platform }}')
+          build_dir = Path('.build/fbuild/${{ inputs.platform }}')
           elf_candidates = list(build_dir.rglob('firmware.elf'))
           if not elf_candidates:
               print(f'firmware.elf not found under {build_dir}')

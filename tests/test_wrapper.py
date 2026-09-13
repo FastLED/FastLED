@@ -11,11 +11,12 @@ If the test hangs (exceeds timeout), it:
 """
 
 import os
-import subprocess
 import sys
 import threading
 import time
 from pathlib import Path
+
+from running_process import STDOUT, EndOfStream, RunningProcess, TimeoutExpired
 
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -24,14 +25,16 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 DEFAULT_TIMEOUT = 20.0  # 20 seconds per test
 
 
-def _output_reader(proc, output_lines):
+def _output_reader(proc: RunningProcess, output_lines: list[str]) -> None:
     """Background thread that reads process output without blocking the main loop."""
     try:
-        for line in iter(proc.stdout.readline, ""):
-            if not line:
+        while True:
+            line = proc.get_next_line(timeout=None)
+            if isinstance(line, EndOfStream):
                 break
-            output_lines.append(line)
-            print(line, end="", flush=True)
+            text = line if isinstance(line, str) else line.decode("utf-8", "replace")
+            output_lines.append(text + "\n")
+            print(text, flush=True)
     except (ValueError, OSError):
         # Pipe closed or process terminated
         pass
@@ -61,12 +64,13 @@ def run_test_with_deadlock_detection(
 
     # Start the test process (runner.exe loads the test DLL)
     try:
-        proc = subprocess.Popen(
+        proc = RunningProcess(
             [runner_exe, test_dll],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,  # Line buffered
+            auto_run=True,
+            capture=True,
+            stderr=STDOUT,
+            encoding="utf-8",
+            errors="replace",
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
@@ -117,7 +121,7 @@ def run_test_with_deadlock_detection(
                 # Wait a moment for process to die
                 try:
                     proc.wait(timeout=2)
-                except subprocess.TimeoutExpired:
+                except (TimeoutError, TimeoutExpired):
                     # Force kill if still alive
                     proc.kill()
                     proc.wait()

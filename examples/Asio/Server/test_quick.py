@@ -1,9 +1,9 @@
 import os
-import subprocess
 import sys
 import time
 
 import httpx
+from running_process import STDOUT, RunningProcess
 
 
 # Get absolute paths
@@ -18,8 +18,13 @@ print(f"  Runner: {runner_path}")
 print(f"  DLL: {dll_path}")
 
 # Start server in background
-proc = subprocess.Popen(
-    [runner_path, dll_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+proc = RunningProcess(
+    [runner_path, dll_path],
+    auto_run=True,
+    capture=True,
+    stderr=STDOUT,
+    encoding="utf-8",
+    errors="replace",
 )
 
 # Wait for server to start
@@ -47,8 +52,12 @@ try:
 except Exception as e:
     print(f"\n✗ Error: {e}")
     # Print server output for debugging
-    output, _ = proc.communicate(timeout=1)
-    print(f"\nServer output:\n{output}")
+    proc.terminate()
+    try:
+        proc.wait(timeout=1)
+    except TimeoutError:
+        pass
+    print(f"\nServer output:\n{proc.stdout}")
     sys.exit(1)
 finally:
     proc.terminate()

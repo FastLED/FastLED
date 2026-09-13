@@ -14,11 +14,12 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 
 VALID_OWNER_TYPES = {"organization", "user"}
@@ -82,7 +83,15 @@ def graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
     for key, value in variables.items():
         cmd.extend(["-F", f"{key}={value}"])
 
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    result = RunningProcess.run(
+        cmd,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+        check=False,
+        encoding="utf-8",
+        errors="replace",
+    )
     if result.returncode != 0:
         print(f"GraphQL error (stderr): {result.stderr}", file=sys.stderr)
         raise SystemExit(f"GraphQL request failed: {result.returncode}")

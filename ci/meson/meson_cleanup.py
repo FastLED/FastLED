@@ -2,9 +2,10 @@
 """Build artifact cleanup and system LLVM tool detection."""
 
 import glob
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
 
 from ci.util.timestamp_print import ts_print as _ts_print
 
@@ -109,7 +110,7 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
     # Then try 'ld.lld' (Linux naming) as fallback
     for lld_cmd in ["lld", "ld.lld"]:
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [lld_cmd, "--version"],
                 capture_output=True,
                 text=True,
@@ -120,14 +121,14 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
             if result.returncode == 0:
                 has_lld = True
                 break
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except (CalledProcessError, TimeoutExpired, FileNotFoundError, RuntimeError):
             continue
 
     # Check for llvm-ar with thin archive support
     # Try unversioned first, then common versioned variants (llvm-ar-20, llvm-ar-19, etc.)
     for ar_cmd in ["llvm-ar", "llvm-ar-20", "llvm-ar-19", "llvm-ar-18"]:
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [ar_cmd, "--help"],
                 capture_output=True,
                 encoding="utf-8",
@@ -137,7 +138,7 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
             if result.returncode == 0 and "thin" in result.stdout.lower():
                 has_llvm_ar = True
                 break
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except (CalledProcessError, TimeoutExpired, FileNotFoundError, RuntimeError):
             continue
 
     return has_lld, has_llvm_ar

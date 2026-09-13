@@ -22,7 +22,7 @@ InlayHints:
 Hover:
   ShowAKA: true
 
-# Additional configuration to prevent PlatformIO conflicts
+# Additional configuration to prevent editor-extension conflicts
 Index:
   Background: Build
   

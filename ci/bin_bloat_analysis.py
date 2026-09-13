@@ -11,23 +11,22 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from running_process import PIPE, RunningProcess
 
-TOOLCHAIN = Path(
-    "/Users/zacharyvorhies/.platformio/packages/toolchain-xtensa-esp-elf/bin"
-)
+
+TOOLCHAIN = Path("/Users/zacharyvorhies/.fbuild/packages/toolchain-xtensa-esp-elf/bin")
 NM = TOOLCHAIN / "xtensa-esp32s3-elf-nm"
 ADDR2LINE = TOOLCHAIN / "xtensa-esp32s3-elf-addr2line"
 CXXFILT = TOOLCHAIN / "xtensa-esp32s3-elf-c++filt"
 READELF = TOOLCHAIN / "xtensa-esp32s3-elf-readelf"
 
 ELF = Path(
-    "/Users/zacharyvorhies/dev/1/.build/pio/esp32s3/.fbuild/build/esp32s3/release/firmware.elf"
+    "/Users/zacharyvorhies/dev/1/.build/fbuild/esp32s3/.fbuild/build/esp32s3/release/firmware.elf"
 )
 
 
@@ -61,7 +60,14 @@ class Symbol:
 
 
 def parse_sections() -> list[Section]:
-    out = subprocess.check_output([str(READELF), "-SW", str(ELF)], text=True)
+    out = RunningProcess.run(
+        [str(READELF), "-SW", str(ELF)],
+        stdout=PIPE,
+        stderr=PIPE,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout
     sections: list[Section] = []
     for line in out.splitlines():
         m = re.match(
@@ -91,10 +97,14 @@ def loaded_section_for(addr: int, sections: list[Section]) -> Section | None:
 
 def parse_nm_symbols() -> list[tuple[int, int, str, str]]:
     """Returns (addr, size, type, mangled_name)."""
-    out = subprocess.check_output(
+    out = RunningProcess.run(
         [str(NM), "--print-size", "--size-sort", "--radix=d", str(ELF)],
-        text=True,
-    )
+        stdout=PIPE,
+        stderr=PIPE,
+        check=True,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout
     syms: list[tuple[int, int, str, str]] = []
     for line in out.splitlines():
         parts = line.split(maxsplit=3)
@@ -114,12 +124,15 @@ def parse_nm_symbols() -> list[tuple[int, int, str, str]]:
 def batch_demangle(names: list[str]) -> dict[str, str]:
     if not names:
         return {}
-    proc = subprocess.run(
+    proc = RunningProcess.run(
         [str(CXXFILT)],
         input="\n".join(names),
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
+        encoding="utf-8",
+        errors="replace",
     )
     out_lines = proc.stdout.splitlines()
     return dict(zip(names, out_lines))
@@ -129,12 +142,15 @@ def batch_addr2line(addrs: list[int]) -> dict[int, str]:
     if not addrs:
         return {}
     inp = "\n".join(f"0x{a:x}" for a in addrs)
-    proc = subprocess.run(
+    proc = RunningProcess.run(
         [str(ADDR2LINE), "-e", str(ELF), "-f", "-C", "-s"],
         input=inp,
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=True,
+        encoding="utf-8",
+        errors="replace",
     )
     lines = proc.stdout.splitlines()
     # addr2line -f outputs two lines per addr: function, file:line

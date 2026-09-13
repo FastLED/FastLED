@@ -66,12 +66,30 @@ jobs:
             fi
           done
 
-      - name: Install project and MCU toolchains
+      - name: Install project
+        run: uv sync
+
+      - name: Set up fbuild (install + cache)
+        uses: FastLED/fbuild/.github/actions/setup@main
+        with:
+          fbuild-version: latest
+          cache-key-extra: mp3-cpu-audit-${{ hashFiles('pyproject.toml', 'ci/boards.py') }}
+
+      # The target-codegen audit needs the xtensa-esp32, riscv32-esp and
+      # arm-none-eabi cross compilers. fbuild fetches each toolchain into
+      # $FBUILD_CACHE_DIR/toolchains/ as a side effect of building a board
+      # that uses it; a Blink build per target is the cheapest way to get
+      # there. The bin/ directories then go on PATH so the audit's
+      # `shutil.which` lookup resolves them.
+      - name: Fetch MCU toolchains through fbuild
         run: |
-          uv sync
-          uv run pio pkg install -g -t 'espressif/toolchain-xtensa-esp32@8.4.0+2021r2-patch3'
-          uv run pio pkg install -g -t 'espressif/toolchain-riscv32-esp@12.2.0+20230208'
-          uv run pio pkg install -g -t 'platformio/toolchain-gccarmnoneeabi@1.120301.0'
+          set -euo pipefail
+          for board in esp32dev esp32c3 adafruit_feather_nrf52840_sense; do
+            ./compile "$board" --examples Blink --no-interactive
+          done
+          find "$FBUILD_CACHE_DIR/toolchains" -type d -name bin | while read -r bin_dir; do
+            echo "$bin_dir" >> "$GITHUB_PATH"
+          done
 
       # The fixed-point SIMD kernels must not be slower than the scalar ones
       # they replace (FastLED/FastLED#4055). That comparison lives in the codec

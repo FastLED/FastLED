@@ -2,6 +2,9 @@ import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from running_process import RunningProcess
+from running_process.command_render import list2cmdline
+
 
 if TYPE_CHECKING:
     from typeguard import typechecked
@@ -163,17 +166,15 @@ def main(argv: list[str] | None) -> int:
     # --check is the CI-friendly spelling; retain --run as its compatibility
     # alias for scripts that predate browser console validation.
     if run_browser_check:
-        import subprocess
-
         print("\nStep 2/2: Running Playwright tests...\n")
 
         # Pass the examples-relative path, not the bare name: ci.wasm_test
         # serves examples/<arg>/fastled_js, which is only the directory the
         # build wrote to when nested sketches keep their parent segments.
         test_cmd = [sys.executable, "-m", "ci.wasm_test", sketch_rel]
-        cmd_str = subprocess.list2cmdline(test_cmd)
+        cmd_str = list2cmdline(test_cmd)
         print(f"-> {cmd_str}")
-        test_result = subprocess.call(test_cmd)
+        test_result = RunningProcess.run(test_cmd).returncode
 
         if test_result != 0:
             print("WASM tests failed")

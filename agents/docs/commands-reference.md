@@ -11,14 +11,14 @@ failure on Windows, use WSL2 rather than Docker.
 
 ## fbuild (Default for Board Builds)
 
-The project uses `fbuild` as the build system for all board compiles. New board targets must take the fbuild path by default; do not add board allowlists or PlatformIO fallbacks for board compatibility issues. Fix those in fbuild instead.
+The project uses `fbuild` as the build system for all board compiles. New board targets must take the fbuild path by default; do not add board allowlists or legacy-backend fallbacks for board compatibility issues. Fix those in fbuild instead.
 
 File board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
 fbuild provides:
 - **Daemon-based compilation** — Background process handles builds, survives agent interrupts
 - **Cached toolchains/frameworks** — Downloads and caches ESP32 toolchain, Arduino framework
-- **Direct esptool integration** — Fast uploads without PlatformIO overhead
+- **Direct esptool integration** - Fast uploads with no extra tooling layer
 
 **Default behavior:**
 - **All boards**: fbuild is used by default
@@ -74,7 +74,7 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 All three modes use separate build directories (no cache conflicts, can coexist simultaneously).
 
 **Performance Notes:**
-- Host compilation is 60x+ faster than PlatformIO (2.2s vs 137s for single example)
+- Host compilation is 60x+ faster than a board build (2.2s vs 137s for single example)
 - All 80 examples compile in ~0.24s with PCH caching in quick/release modes
 - Examples execute with limited loop iterations (5 loops) for fast testing
 

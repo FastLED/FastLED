@@ -1156,12 +1156,33 @@ struct index_sequence {
     static constexpr fl::size size() FL_NO_EXCEPT { return sizeof...(Is); }
 };
 
-template <fl::size N, fl::size... Is>
-struct make_index_sequence_impl : make_index_sequence_impl<N - 1, N - 1, Is...> {};
+// Log-depth construction: build the sequence for N/2 and concatenate it with
+// itself shifted by N/2 (plus one extra index when N is odd). The naive
+// N-1 recursion instantiated 256 nested templates for the gamma LUT, which
+// cost ~50 ms of front-end time in every TU that included gamma_lut.h.
+template <typename S1, typename S2>
+struct index_sequence_concat;
 
-template <fl::size... Is>
-struct make_index_sequence_impl<0, Is...> {
-    using type = index_sequence<Is...>;
+template <fl::size... I1, fl::size... I2>
+struct index_sequence_concat<index_sequence<I1...>, index_sequence<I2...>> {
+    using type = index_sequence<I1..., (sizeof...(I1) + I2)...>;
+};
+
+template <fl::size N>
+struct make_index_sequence_impl {
+    using type = typename index_sequence_concat<
+        typename make_index_sequence_impl<N / 2>::type,
+        typename make_index_sequence_impl<N - N / 2>::type>::type;
+};
+
+template <>
+struct make_index_sequence_impl<0> {
+    using type = index_sequence<>;
+};
+
+template <>
+struct make_index_sequence_impl<1> {
+    using type = index_sequence<0>;
 };
 
 template <fl::size N>

@@ -13,7 +13,6 @@ Works with any platform (ESP32S3, UNO, etc.) that has build_info.json.
 
 import json
 import re
-import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
@@ -779,10 +778,13 @@ def find_board_build_info(
         if board_dir.exists() and (board_dir / build_info_filename).exists():
             return board_dir / build_info_filename, board_name
 
-        # 2) PlatformIO nested directory: .build/pio/<board>/build_info_{example}.json
-        pio_board_dir = build_dir / "pio" / board_name
-        if pio_board_dir.exists() and (pio_board_dir / build_info_filename).exists():
-            return pio_board_dir / build_info_filename, board_name
+        # 2) Board build directory: .build/fbuild/<board>/build_info_{example}.json
+        fbuild_board_dir = build_dir / "fbuild" / board_name
+        if (
+            fbuild_board_dir.exists()
+            and (fbuild_board_dir / build_info_filename).exists()
+        ):
+            return fbuild_board_dir / build_info_filename, board_name
 
         # Fallback to legacy build_info.json (for backward compatibility)
         if board_dir.exists() and (board_dir / "build_info.json").exists():
@@ -791,11 +793,14 @@ def find_board_build_info(
             )
             return board_dir / "build_info.json", board_name
 
-        if pio_board_dir.exists() and (pio_board_dir / "build_info.json").exists():
+        if (
+            fbuild_board_dir.exists()
+            and (fbuild_board_dir / "build_info.json").exists()
+        ):
             print(
                 f"Warning: Using legacy build_info.json (consider migrating to {build_info_filename})"
             )
-            return pio_board_dir / "build_info.json", board_name
+            return fbuild_board_dir / "build_info.json", board_name
 
         print(
             f"Error: Board '{board_name}' not found or missing {build_info_filename} (or build_info.json)"
@@ -813,10 +818,10 @@ def find_board_build_info(
             if build_info_file.exists():
                 available_boards.append((build_info_file, item.name))
 
-    # 2) Nested PlatformIO structure .build/pio/* - try example-specific first
-    pio_dir = build_dir / "pio"
-    if pio_dir.exists() and pio_dir.is_dir():
-        for item in pio_dir.iterdir():
+    # 2) Nested board structure .build/fbuild/* - try example-specific first
+    fbuild_dir = build_dir / "fbuild"
+    if fbuild_dir.exists() and fbuild_dir.is_dir():
+        for item in fbuild_dir.iterdir():
             if item.is_dir():
                 build_info_file = item / build_info_filename
                 if build_info_file.exists():
@@ -833,8 +838,8 @@ def find_board_build_info(
                     )
                     available_boards.append((build_info_file, item.name))
 
-        if pio_dir.exists() and pio_dir.is_dir():
-            for item in pio_dir.iterdir():
+        if fbuild_dir.exists() and fbuild_dir.is_dir():
+            for item in fbuild_dir.iterdir():
                 if item.is_dir():
                     build_info_file = item / "build_info.json"
                     if build_info_file.exists():
@@ -931,8 +936,8 @@ def main():
 
     nm_path = board_info["aliases"]["nm"]
     cppfilt_path = board_info["aliases"]["c++filt"]
-    # `prog_path` names the PlatformIO location, which an fbuild board never
-    # writes. Reading it directly is why this report came out with
+    # `prog_path` may name a location the build never wrote (older
+    # build_info files). Reading it directly is why this report came out with
     # `Total symbols: 0` on esp32dev while the build sat under `.fbuild/`
     # (FastLED#4402); the resolver checks there first.
     resolved_elf = resolve_firmware_elf(board_info, build_info_path.parent)

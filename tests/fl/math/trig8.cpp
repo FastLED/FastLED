@@ -5,6 +5,9 @@
 #include "test.h"
 #include "fl/math/trig8.h"
 #include "fl/stl/int.h"
+// The grouped sin32 tests below pull in the SIMD intrinsics headers; those
+// must be parsed before `using namespace fl` makes ::malloc ambiguous.
+#include "fl/math/sin32_simd.h"
 
 using namespace fl;
 

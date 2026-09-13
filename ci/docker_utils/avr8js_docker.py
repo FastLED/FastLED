@@ -10,12 +10,11 @@ Compatible with Windows (MSYS2/Git Bash) and Unix systems.
 """
 
 import platform
-import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 class DockerAVR8jsRunner:
@@ -65,6 +64,8 @@ class DockerAVR8jsRunner:
                 timeout=10,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             )
             return bool(result.stdout.strip())
         except (RuntimeError, FileNotFoundError):
@@ -72,7 +73,7 @@ class DockerAVR8jsRunner:
 
     def pull_image(self) -> None:
         """Pull Docker image from registry"""
-        subprocess.run(["docker", "pull", self.docker_image], check=True)
+        RunningProcess.run(["docker", "pull", self.docker_image], check=True)
 
     def run(
         self,
@@ -101,7 +102,7 @@ class DockerAVR8jsRunner:
             raise FileNotFoundError(f"Firmware not found: {elf_path}")
 
         # avr8js requires HEX file, not ELF
-        # PlatformIO generates both .elf and .hex in the same directory
+        # The build writes both .elf and .hex in the same directory
         hex_path = elf_path.with_suffix(".hex")
         if not hex_path.exists():
             raise FileNotFoundError(f"HEX file not found: {hex_path}")
@@ -159,10 +160,12 @@ class DockerAVR8jsRunner:
                 capture_output=True,
                 text=True,
                 timeout=timeout + 10,  # Add buffer to Docker timeout
+                encoding="utf-8",
+                errors="replace",
             )
 
             # Preserve legacy combined output by default; callers can request
-            # split stderr explicitly with stderr=subprocess.PIPE when needed.
+            # split stderr explicitly with stderr=PIPE when needed.
             output = result.stdout or ""
 
             print(f"{'-' * 70}")
@@ -245,7 +248,7 @@ class DockerAVR8jsRunner:
             print(f"Dockerfile: {dockerfile_path}")
             print()
 
-            result = subprocess.run(build_cmd)
+            result = RunningProcess.run(build_cmd)
             return result.returncode == 0
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
@@ -261,7 +264,9 @@ def main() -> None:
         print("Usage: python avr8js_docker.py <firmware.elf> [timeout]")
         print()
         print("Example:")
-        print("  python avr8js_docker.py .build/pio/uno/.pio/build/uno/firmware.elf 30")
+        print(
+            "  python avr8js_docker.py .build/fbuild/uno/.fbuild/build/release/firmware.elf 30"
+        )
         sys.exit(1)
 
     firmware_path = Path(sys.argv[1])

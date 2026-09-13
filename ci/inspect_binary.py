@@ -3,11 +3,12 @@
 import argparse
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 from ci.util.bin_2_elf import bin_to_elf
 from ci.util.elf import dump_symbol_sizes
@@ -31,17 +32,18 @@ def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:
     if not cpp_filt_path.exists():
         raise FileNotFoundError(f"cppfilt not found at '{cpp_filt_path}'")
     command = [str(cpp_filt_path), "-t", "-n"]
-    process = subprocess.Popen(
+    result = RunningProcess.run(
         command,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        input=input_text,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
-    stdout, stderr = process.communicate(input=input_text)
-    if process.returncode != 0:
-        raise RuntimeError(f"Error running c++filt: {stderr}")
-    return stdout
+    if result.returncode != 0:
+        raise RuntimeError(f"Error running c++filt: {result.stderr}")
+    return result.stdout
 
 
 def demangle_gnu_linkonce_symbols(cpp_filt_path: Path, map_text: str) -> str:
@@ -187,10 +189,10 @@ def main() -> int:
     else:
         root_build_dir = Path(".build")
 
-    # Support nested PlatformIO structure: .build/pio/<board>
-    nested_pio_dir = root_build_dir / "pio"
-    if nested_pio_dir.is_dir():
-        root_build_dir = nested_pio_dir
+    # Board builds live under .build/fbuild/<board>
+    nested_board_dir = root_build_dir / "fbuild"
+    if nested_board_dir.is_dir():
+        root_build_dir = nested_board_dir
 
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]
     if not board_dirs:
@@ -226,7 +228,7 @@ def main() -> int:
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
 
     # Resolve via the shared helper, not `prog_path` alone: on an fbuild board
-    # `prog_path` names a PlatformIO location that was never written, and every
+    # `prog_path` may name a location that was never written, and every
     # tool below then fails one at a time against it (FastLED#4402).
     resolved_elf = resolve_firmware_elf(board_info, board_dir)
     if resolved_elf is None:

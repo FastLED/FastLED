@@ -85,7 +85,6 @@ _SKIP_DIR_NAMES = frozenset(
         ".venv_new",
         "node_modules",
         "__pycache__",
-        ".pio",
         "emscripten",
         "bin",
     ]

@@ -134,7 +134,7 @@
 //            ATtinyxy4 0/1-series: 204=128B, 404/414=256/512B, 804=512B, 1604=1KB
 //            (intentionally excludes 2-series xy4: 424=512B, 824=1KB, 1624=2KB, 3224=3KB
 //            because 2KB+ variants fit sketches; if 424/824 were common we'd list them,
-//            but megaTinyCore/PlatformIO rarely targets them)
+//            but megaTinyCore rarely targets them)
 // ============================================================================
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \
     defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \

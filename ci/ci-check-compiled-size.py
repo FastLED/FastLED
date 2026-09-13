@@ -4,10 +4,12 @@
 import argparse
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
+
+from running_process import PIPE, CalledProcessError, CompletedProcess, RunningProcess
+from running_process.command_render import list2cmdline
 
 
 HERE = Path(__file__).resolve().parent
@@ -24,10 +26,17 @@ def run_command(
 ) -> Optional[str]:
     """Run a command and return its output."""
     actual_check = check if check is not None else False
-    cmd = cmd_list if not shell else subprocess.list2cmdline(cmd_list)
+    cmd = cmd_list if not shell else list2cmdline(cmd_list)
 
-    result: subprocess.CompletedProcess[str] = subprocess.run(
-        cmd, capture_output=capture_output, text=True, shell=shell, check=actual_check
+    result: CompletedProcess[str] = RunningProcess.run(
+        cmd,
+        stdout=PIPE if capture_output else None,
+        stderr=PIPE if capture_output else None,
+        text=True,
+        shell=shell,
+        check=actual_check,
+        encoding="utf-8",
+        errors="replace",
     )
 
     if not capture_output:
@@ -83,7 +92,7 @@ def main():
         ] + args.extra_args
         try:
             run_command(cmd_list, shell=True, capture_output=IS_GITHUB, check=True)
-        except subprocess.CalledProcessError:
+        except CalledProcessError:
             run_command(cmd_list, shell=True, capture_output=False, check=True)
 
     output = run_command(
@@ -99,12 +108,10 @@ def main():
         ],
         capture_output=True,
     )
-    # Echo it. `ci.compiled_size` reports which ELF it measured -- "measured
-    # fbuild ELF: <path>" or "no fbuild ELF found ...; falling through to pio
-    # size" -- and capturing without printing threw that away, so the log
-    # recorded a number with no way to tell which backend's binary produced it.
-    # Both write under `.build/pio/<board>/`, so the path is the only thing
-    # that distinguishes them (FastLED#4402).
+    # Echo it. `ci.compiled_size` reports which ELF it measured ("measured
+    # fbuild ELF: <path>"), and capturing without printing threw that away,
+    # so the log recorded a number with no way to tell which binary produced
+    # it (FastLED#4402).
     if output:
         print(output)
     size_match = re.search(r": *(\d+)", output)  # type: ignore

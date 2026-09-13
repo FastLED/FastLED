@@ -2,9 +2,10 @@
 
 import hashlib
 import json
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
 
 from ci.meson.compiler import get_meson_executable
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -80,7 +81,7 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     avoiding issues with target type filtering (tests are shared libraries, not
     executables, in the DLL-based test architecture).
 
-    Performance: the full ``meson introspect --tests`` subprocess (~700 ms) is
+    Performance: the full ``meson introspect --tests`` process (~700 ms) is
     expensive.  Results are cached in ``<build_dir>/.meson_introspect_tests_cache.json``
     and reused on subsequent runs as long as ``build.ninja`` has not changed.
     This saves ~700 ms per specific-test invocation (e.g., ``bash test alloca``).
@@ -103,12 +104,12 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
     test_names: list[str] | None = _load_introspect_tests_cache(build_dir)
 
     if test_names is None:
-        # Cache miss: run meson introspect subprocess
+        # Cache miss: run meson introspect
         try:
             # Query Meson for all registered tests (not targets)
             # --tests returns test registrations which have the correct names
             # regardless of whether the underlying target is exe, shared_library, etc.
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [get_meson_executable(), "introspect", str(build_dir), "--tests"],
                 capture_output=True,
                 text=True,
@@ -187,7 +188,13 @@ def get_fuzzy_test_candidates(build_dir: Path, test_name: str) -> list[str]:
             test_names = [t.get("name", "") for t in all_tests if t.get("name")]
             _save_introspect_tests_cache(build_dir, test_names)
 
-        except (subprocess.SubprocessError, json.JSONDecodeError, OSError) as e:
+        except (
+            CalledProcessError,
+            TimeoutExpired,
+            json.JSONDecodeError,
+            OSError,
+            RuntimeError,
+        ) as e:
             _ts_print(f"[MESON] Warning: Failed to get fuzzy test candidates: {e}")
             return []
 

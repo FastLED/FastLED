@@ -4,7 +4,7 @@ Package structure:
   runner.py       - Orchestrator: run(), main()
   args.py         - Args dataclass + parse_args()
   context.py      - RunContext, QuietContext, constants
-  build_driver.py - BuildDriver protocol, FbuildDriver, PlatformIODriver
+  build_driver.py - BuildDriver protocol, FbuildDriver
   gpio.py         - GPIO pretest, pin discovery
   phases.py       - Pipeline phase functions
   ble.py          - BLE autoresearch
@@ -17,7 +17,6 @@ from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import (
     BuildDriver,
     FbuildDriver,
-    PlatformIODriver,
     select_build_driver,
 )
 from ci.autoresearch.context import QuietContext, RunContext
@@ -29,7 +28,6 @@ __all__ = [
     "Args",
     "BuildDriver",
     "FbuildDriver",
-    "PlatformIODriver",
     "PinDiscoveryResult",
     "QuietContext",
     "RunContext",

@@ -10,12 +10,13 @@ bootstrap.
 import os
 import re
 import shutil
-import subprocess
 import sys
 import time
 import uuid
 from pathlib import Path
 from typing import Optional
+
+from running_process import RunningProcess
 
 from ci.meson.build_config import cleanup_build_artifacts, setup_meson_build
 from ci.meson.build_timer import BuildTimer
@@ -113,10 +114,11 @@ def _recover_stale_build(
             Path(sys.prefix) / "Scripts" / "ninja.EXE"
         )
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [ninja_exe, "-C", str(build_dir), "-t", "cleandead"],
                 capture_output=True,
-                text=True,
+                encoding="utf-8",
+                errors="replace",
                 timeout=60,
             )
             if result.returncode == 0:
@@ -395,7 +397,7 @@ def _start_zccache_session(build_dir: Path, build_mode: str) -> None:
     journal_path = build_dir / "zccache-session.jsonl"
 
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 zccache_bin,
                 "session-start",
@@ -406,7 +408,8 @@ def _start_zccache_session(build_dir: Path, build_mode: str) -> None:
                 str(journal_path),
             ],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
         if result.returncode == 0:

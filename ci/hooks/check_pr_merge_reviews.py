@@ -16,9 +16,10 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from typing import Any, cast
+
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -52,14 +53,14 @@ def _repo_at(path: str) -> str | None:
     origin, a URL shape this does not recognise).
     """
     try:
-        # noqa: SRC001 - RunningProcess.run merges stderr into stdout, and this
-        # parses stdout as a URL: one git warning on stderr would be spliced
-        # into the value and yield a wrong owner/repo, which is the class of
-        # bug this function exists to fix.
-        result = subprocess.run(  # noqa: SRC001
+        # stdout=PIPE/stderr=PIPE keeps the streams separate: this parses
+        # stdout as a URL, and one git warning on stderr spliced into the
+        # value would yield a wrong owner/repo, which is the class of bug
+        # this function exists to fix.
+        result = RunningProcess.run(
             ["git", "-C", path, "config", "--get", "remote.origin.url"],
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
             encoding="utf-8",
             errors="replace",
             timeout=10,
@@ -67,7 +68,8 @@ def _repo_at(path: str) -> str | None:
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
+        # RunningProcess reports a missing executable as RuntimeError.
         return None
     if result.returncode != 0:
         return None
@@ -136,19 +138,21 @@ def main() -> int:
         cmd.extend(["--repo", repo])
 
     try:
-        # noqa: SRC001 - the streams are used separately: stderr is forwarded to
-        # the user as the block reason, stdout is not. Merging them would put
-        # the checker's diagnostics into the wrong channel.
-        result = subprocess.run(  # noqa: SRC001
+        # The streams are used separately: stderr is forwarded to the user as
+        # the block reason, stdout is not. Merging them would put the
+        # checker's diagnostics into the wrong channel.
+        result = RunningProcess.run(
             cmd,
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
             timeout=30,
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
-    except (subprocess.TimeoutExpired, FileNotFoundError):
+    except (TimeoutExpired, FileNotFoundError, RuntimeError):
         return 0
 
     if result.returncode == 0:

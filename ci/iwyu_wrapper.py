@@ -14,9 +14,10 @@ Usage:
 """
 
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -79,11 +80,13 @@ def get_compiler_include_paths(compiler_path: str) -> list[str]:
     try:
         # Query compiler for its include paths
         # Using -E (preprocess only), -x c++ (C++ mode), -v (verbose), - (stdin)
-        result = subprocess.run(
+        result = RunningProcess.run(
             [fast_compiler, "-E", "-x", "c++", "-v", "-"],
             input="",
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
         )
 
@@ -219,7 +222,7 @@ def main():
     # Run IWYU
     # IWYU writes suggestions to stderr, actual errors to stderr
     # Exit code 0 = no suggestions, non-zero = suggestions or errors
-    iwyu_result = subprocess.run(iwyu_cmd)
+    iwyu_result = RunningProcess.run(iwyu_cmd)
 
     sys.exit(iwyu_result.returncode)
 

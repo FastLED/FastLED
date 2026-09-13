@@ -1,7 +1,13 @@
-"""Path management for FastLED PlatformIO builds."""
+"""Path management for FastLED fbuild board builds."""
 
 from pathlib import Path
 from typing import Optional
+
+
+# Directory under the project root that holds every board's fbuild project
+# (``.build/fbuild/<board>``). This is the single definition; tooling that
+# needs to find a board's build directory derives it from here.
+BOARD_BUILD_ROOT = Path(".build") / "fbuild"
 
 
 def resolve_project_root() -> Path:
@@ -16,6 +22,12 @@ def resolve_project_root() -> Path:
     raise RuntimeError("Could not find FastLED project root")
 
 
+def board_build_dir(board_name: str, project_root: Optional[Path] = None) -> Path:
+    """Project-local build directory for ``board_name``."""
+    root = project_root or resolve_project_root()
+    return root / BOARD_BUILD_ROOT / board_name
+
+
 class FastLEDPaths:
     """Centralized path management for FastLED board-specific directories and files."""
 
@@ -26,51 +38,17 @@ class FastLEDPaths:
 
         # Base FastLED directory
         self.fastled_root = self.home_dir / ".fastled"
-        # Initialize the optional cache directory override
-        self._global_platformio_cache_dir: Optional[Path] = None
 
     @property
     def build_dir(self) -> Path:
         """Project-local build directory for this board."""
-        return self.project_root / ".build" / "pio" / self.board_name
-
-    @property
-    def build_cache_dir(self) -> Path:
-        """Project-local build cache directory for this board."""
-        return self.build_dir / "build_cache"
+        return board_build_dir(self.board_name, self.project_root)
 
     @property
     def platform_lock_file(self) -> Path:
         """Platform-specific build lock file."""
         return self.build_dir.parent / f"{self.board_name}.lock"
 
-    @property
-    def global_package_lock_file(self) -> Path:
-        """Global package installation lock file."""
-        packages_lock_root = self.fastled_root / "pio" / "packages"
-        return packages_lock_root / f"{self.board_name}_global.lock"
-
-    @property
-    def core_dir(self) -> Path:
-        """PlatformIO core directory (build cache, platforms)."""
-        return self.fastled_root / "compile" / "pio" / self.board_name
-
-    @property
-    def packages_dir(self) -> Path:
-        """PlatformIO packages directory (toolchains, frameworks)."""
-        return self.home_dir / ".platformio" / "packages"
-
-    @property
-    def global_platformio_cache_dir(self) -> Path:
-        """Global PlatformIO package cache directory (shared across all boards)."""
-        if self._global_platformio_cache_dir is not None:
-            return self._global_platformio_cache_dir
-        return self.fastled_root / "platformio_cache"
-
     def ensure_directories_exist(self) -> None:
         """Create all necessary directories."""
         self.build_dir.mkdir(parents=True, exist_ok=True)
-        self.global_package_lock_file.parent.mkdir(parents=True, exist_ok=True)
-        self.core_dir.mkdir(parents=True, exist_ok=True)
-        self.packages_dir.mkdir(parents=True, exist_ok=True)
-        self.global_platformio_cache_dir.mkdir(parents=True, exist_ok=True)

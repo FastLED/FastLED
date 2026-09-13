@@ -241,7 +241,6 @@ dependencies = [
     # `uv run python ci/util/audit_usb_registry.py --lookup <VID:PID>` cannot
     # break out from under us. See agents/docs/usb-vid-pid-registry.md.
     "zstandard>=0.22.0",
-    "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
     "pyright>=1.1.373",
@@ -378,7 +377,7 @@ packages = ["ci"]
 allow-direct-references = true
 
 [tool.ruff]
-exclude = ["ci/tmp", "ci/wasm", "scripts", "native", "**/.fbuild", "**/.pio"]
+exclude = ["ci/tmp", "ci/wasm", "scripts", "native", "**/.fbuild"]
 
 [tool.ruff.lint]
 # Enable import sorting (replaces isort)
@@ -414,7 +413,7 @@ line-ending = "auto"
 [tool.isort]
 # Configure isort to use black-compatible formatting
 profile = "black"
-skip_glob = ["ci/tmp/*", "ci/wasm/*", "scripts/*", "native/*", "**/.fbuild/*", "**/.pio/*"]
+skip_glob = ["ci/tmp/*", "ci/wasm/*", "scripts/*", "native/*", "**/.fbuild/*"]
 
 [tool.pyright]
 include = ["ci", "ci/compiler"]
@@ -430,8 +429,6 @@ exclude = [
     "**/.git",
     "**/.venv",
     "**/.build",
-    "**/.pio",
-    "**/.pio_cache",
     "**/build",
     "**/dist",
     "**/*.egg-info",

@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import subprocess
 import sys
 import threading
 import time
@@ -89,7 +88,7 @@ def _active_rp2xxx_environment(environment: str | None) -> str | None:
 
 
 def _canonical_board_environment(environment: str | None) -> str | None:
-    """Resolve a real PlatformIO board alias to its registered CI environment."""
+    """Resolve a real board alias to its registered CI environment."""
     if not environment:
         return None
     from ci.boards import create_board
@@ -414,7 +413,7 @@ def _is_native_platform(environment: str | None) -> bool:
 
 
 def _build_environment_for_mode(ctx: RunContext) -> str | None:
-    """Return the PlatformIO/fbuild environment to compile for this run mode."""
+    """Return the fbuild environment to compile for this run mode."""
     environment = ctx.final_environment
     if not environment:
         return None
@@ -472,21 +471,6 @@ async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int
 # ============================================================
 # Phase A: Parse args and build commands
 # ============================================================
-
-
-def _is_teensy_environment(environment: str | None) -> bool:
-    return environment is not None and environment.lower() in ("teensy40", "teensy41")
-
-
-def _reject_teensy_root_platformio_ini(environment: str | None) -> bool:
-    if not _is_teensy_environment(environment):
-        return False
-    print(
-        f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
-        f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
-        f"from ci/boards.py instead.{Style.RESET_ALL}"
-    )
-    return True
 
 
 def _parse_args_and_build_commands(args: Args) -> RunContext | int:
@@ -559,17 +543,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             sys.exit(2)
 
     is_teensy4 = _is_teensy4_environment(final_environment)
-    is_teensy_specific_driver = (args.object_fled or args.flex_io) and (
-        is_teensy4 or final_environment is None
-    )
-
-    if args.use_root_platformio_ini and (is_teensy4 or is_teensy_specific_driver):
-        print(
-            f"{Fore.RED}❌ Error: --use-root-platformio-ini is not allowed for "
-            f"Teensy AutoResearch acceptance. Use the synthesized fbuild project "
-            f"from ci/boards.py instead.{Style.RESET_ALL}"
-        )
-        return 1
 
     # `--all` replaces the selection wholesale, so an explicit --bitbang
     # alongside it used to be silently dropped. Append rather than fold
@@ -661,7 +634,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         return 1
     if args.rp_pio_both and (not args.flex_io or not parallel_mode):
         print(
-            f"{Fore.RED}❌ --rp-pio-both requires --flex-io --parallel{Style.RESET_ALL}"
+            f"{Fore.RED}❌ --rp-engine-both requires --flex-io --parallel{Style.RESET_ALL}"
         )
         return 1
     if (
@@ -670,7 +643,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and _active_rp2xxx_environment(final_environment) not in RP2350_ENVIRONMENTS
     ):
         print(
-            f"{Fore.RED}❌ --rp-pio-index 2 requires an RP2350 target{Style.RESET_ALL}"
+            f"{Fore.RED}❌ --rp-engine-index 2 requires an RP2350 target{Style.RESET_ALL}"
         )
         return 1
     if parallel_mode:
@@ -905,13 +878,6 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if not args.legacy:
             print(
                 f"\u274c Error: --chipset {args.chipset} requires --legacy so AutoResearch exercises the public {selected_chipset}<PIN> template"
-            )
-            return 1
-        if args.use_root_platformio_ini:
-            print(
-                f"\u274c Error: --chipset {args.chipset} cannot use "
-                "--use-root-platformio-ini; the staged project is required "
-                "to bind the public template to the requested RMT driver"
             )
             return 1
         if args.legacy_mixed_timings or args.legacy_rgbw_small_counts:
@@ -1262,15 +1228,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
 
     # Resolve project root (always the user's invocation cwd) and build_dir.
     #
-    # Two code paths (#3281):
-    #
-    # 1. Default (``args.use_root_platformio_ini == False``): synthesise
-    #    ``.build/pio/<board>/platformio.ini`` from ``ci/boards.py`` if the
-    #    board is already known at parse time; otherwise defer synthesis to
-    #    :func:`_resolve_port_and_environment` after chip auto-detect.
-    # 2. Legacy (``args.use_root_platformio_ini == True``): read root
-    #    ``./platformio.ini``. The flag is deprecated and emits a warning at
-    #    parse time (see ci/autoresearch/args.py).
+    # Synthesise ``.build/fbuild/<board>/platformio.ini`` from ``ci/boards.py``
+    # if the board is already known at parse time (#3281); otherwise defer
+    # synthesis to :func:`_resolve_port_and_environment` after chip
+    # auto-detect.
     #
     # In the deferred-synthesis case we keep ``build_dir`` pointing at the
     # invocation cwd so the sketch source can still be located under
@@ -1278,15 +1239,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # is rewritten before fbuild is invoked.
     project_root = args.project_dir.resolve()
 
-    if args.use_root_platformio_ini:
-        build_dir = project_root
-        if not (build_dir / "platformio.ini").exists():
-            print(f"\u274c Error: platformio.ini not found in {build_dir}")
-            print(
-                "   Make sure you're running this from a PlatformIO project directory"
-            )
-            return 1
-    elif final_environment:
+    if final_environment:
         # Board known up-front \u2014 synthesise now so downstream callers (chip
         # auto-detect log lines, default_envs probes) see the staged file.
         from ci.autoresearch.staging import synthesise_autoresearch_project
@@ -1329,9 +1282,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # budget.
     #
     # For the synthesised path the staged tree lives under ``build_dir/src/sketch/``
-    # (populated by ``_init_platformio_build`` \u2192 ``copy_example_source``);
-    # for the legacy and deferred-synthesis paths the in-tree
-    # ``examples/AutoResearch/`` source applies.
+    # (populated by ``init_fbuild_project`` \u2192 ``copy_example_source``);
+    # for the deferred-synthesis path the in-tree ``examples/AutoResearch/``
+    # source applies.
     sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
         staged_sketch_path = build_dir / "src" / "sketch"
@@ -1422,7 +1375,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 print(f"\n{Fore.YELLOW}{'=' * 60}")
                 print(f"  Teensy not detected on USB.")
                 print(
-                    "  AutoResearch will not pre-upload stale .pio firmware "
+                    "  AutoResearch will not pre-upload stale firmware "
                     "during port detection."
                 )
                 print(
@@ -1493,73 +1446,40 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     ctx.upload_port = upload_port
 
     # Auto-detect environment from attached chip
-    detected_chip_type: str | None = None
     detected_environment: str | None = None
 
     if not ctx.final_environment and upload_port is not None:
         print("\U0001f50d Detecting attached chip type...")
         chip_result = detect_attached_chip(upload_port)
         if chip_result.ok and chip_result.environment:
-            detected_chip_type = chip_result.chip_type
             detected_environment = chip_result.environment
             ctx.final_environment = detected_environment
             print(
                 f"\u2705 Detected {chip_result.chip_type} \u2192 using environment '{ctx.final_environment}'"
             )
         if not ctx.final_environment:
-            # Fall back to <build_dir>/platformio.ini's `default_envs` value.
-            # In the legacy (--use-root-platformio-ini) path this reads root
-            # ./platformio.ini; in the synthesised path (#3281) this reads
-            # nothing if the board isn't already known (deferred synthesis
-            # hasn't run yet). That fallback is fine \u2014 we just don't have a
-            # platformio.ini to consult yet, so we bail with a clear error.
-            if args.use_root_platformio_ini:
-                from ci.util.pio_package_daemon import get_default_environment
-
-                default_env = get_default_environment(str(ctx.build_dir))
-                if default_env:
-                    ctx.final_environment = default_env
-                    error_msg = "Chip detection failed"
-                    print(
-                        f"\u26a0\ufe0f  {error_msg}, "
-                        f"using platformio.ini default: '{ctx.final_environment}'"
-                    )
-                else:
-                    print(
-                        "\u26a0\ufe0f  Chip detection failed and no default_envs in platformio.ini"
-                    )
-            else:
-                # Synthesised path with no env known and chip detect failed:
-                # there is no platformio.ini to fall back to and nothing
-                # downstream can recover. Fail fast with a clear error
-                # (CodeRabbit feedback, PR #3290) so callers don't silently
-                # proceed with an unset final_environment.
-                print(
-                    "\u274c Chip detection failed and no environment given. "
-                    "Pass a positional environment (e.g. `bash autoresearch esp32c6 ...`) "
-                    "or attach a recognisable device."
-                )
-                return 1
+            # No env known and chip detect failed: the staged project has
+            # not been synthesised yet, so there is nothing to fall back to
+            # and nothing downstream can recover. Fail fast with a clear
+            # error (CodeRabbit feedback, PR #3290) so callers don't
+            # silently proceed with an unset final_environment.
+            print(
+                "\u274c Chip detection failed and no environment given. "
+                "Pass a positional environment (e.g. `bash autoresearch esp32c6 ...`) "
+                "or attach a recognisable device."
+            )
+            return 1
         print()
 
     ctx.final_environment = _canonical_board_environment(ctx.final_environment)
     _normalize_deferred_driver_names(ctx)
 
-    if args.use_root_platformio_ini and _reject_teensy_root_platformio_ini(
-        ctx.final_environment
-    ):
-        return 1
-
-    # Deferred synthesis (#3281). When --use-root-platformio-ini is NOT set
-    # and the board wasn't known at parse time, the build_dir is still pointing
-    # at the project root. Now that chip auto-detect has resolved the
-    # environment we can synthesise .build/pio/<board>/platformio.ini and
-    # redirect build_dir so fbuild reads the synthesised file instead of root.
-    if (
-        not args.use_root_platformio_ini
-        and ctx.final_environment
-        and ctx.build_dir == args.project_dir.resolve()
-    ):
+    # Deferred synthesis (#3281). When the board wasn't known at parse time,
+    # the build_dir is still pointing at the project root. Now that chip
+    # auto-detect has resolved the environment we can synthesise
+    # .build/fbuild/<board>/platformio.ini and redirect build_dir so fbuild
+    # reads the synthesised file.
+    if ctx.final_environment and ctx.build_dir == args.project_dir.resolve():
         from ci.autoresearch.staging import synthesise_autoresearch_project
 
         # Same driver-gate defines as the parse-time synthesis path — the
@@ -1630,32 +1550,6 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                 f"board '{ctx.final_environment}': {e}"
             )
             return 1
-
-    # Platform mismatch warning (legacy path only \u2014 synthesised platformio.ini
-    # is generated from ci/boards.py, so `default_envs` always matches the
-    # detected board by construction and the warning would be noise).
-    if args.use_root_platformio_ini:
-        from ci.util.pio_package_daemon import get_default_environment
-
-        default_env = get_default_environment(str(ctx.build_dir))
-    else:
-        default_env = None
-    if detected_environment and default_env and detected_environment != default_env:
-        print(f"{Fore.YELLOW}{'=' * 60}")
-        print(f"{Fore.YELLOW}\u26a0\ufe0f  PLATFORM MISMATCH WARNING")
-        print(f"{Fore.YELLOW}{'=' * 60}")
-        print(
-            f"{Fore.YELLOW}Detected chip: {detected_chip_type} ({detected_environment})"
-        )
-        print(f"{Fore.YELLOW}platformio.ini default_envs: {default_env}")
-        print(
-            f"{Fore.YELLOW}Using detected environment '{detected_environment}' for this session."
-        )
-        print(
-            f"{Fore.YELLOW}To make this permanent, update platformio.ini: default_envs = {detected_environment}"
-        )
-        print(f"{Fore.YELLOW}{'=' * 60}{Style.RESET_ALL}")
-        print()
 
     # Select build driver
     ctx.build_driver = select_build_driver(
@@ -1803,38 +1697,7 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
             return 1
 
     # Wait for serial port to become available after upload
-    if upload_port and build_driver.name == "platformio":
-        print(
-            "\n\u23f3 Waiting for device to reboot and serial port to become available..."
-        )
-        port_ready = False
-        max_wait_time = 15.0
-        start_time = time.time()
-
-        while time.time() - start_time < max_wait_time:
-            if is_interrupted():
-                raise KeyboardInterrupt()
-            kill_port_users(upload_port)
-            # OS-level port-availability poll (never a raw pyserial open of
-            # the device \u2014 see the PYS001 ban).
-            if port_exists(upload_port):
-                port_ready = True
-                elapsed = time.time() - start_time
-                print(f"\u2705 Serial port available after {elapsed:.1f}s")
-                break
-            for _ in range(5):
-                if is_interrupted():
-                    raise KeyboardInterrupt()
-                time.sleep(0.1)
-
-        if not port_ready:
-            print(
-                f"{Fore.YELLOW}\u26a0\ufe0f  Port not available after {max_wait_time}s, proceeding anyway...{Style.RESET_ALL}"
-            )
-
-        kill_port_users(upload_port)
-        time.sleep(0.5)
-    elif upload_port and build_driver.name == "fbuild":
+    if upload_port:
         port_ready = False
         for _ in range(10):
             if is_interrupted():
@@ -3385,7 +3248,7 @@ def _build_and_deploy_nxplpc(
     ]
     if verbose:
         build_cmd.append("--verbose")
-    result = subprocess.run(build_cmd, env=env, cwd=str(build_dir))
+    result = RunningProcess.run(build_cmd, env=env, cwd=str(build_dir))
     if result.returncode != 0:
         print(
             f"{Fore.RED}❌ fbuild build failed (exit {result.returncode}){Style.RESET_ALL}"
@@ -3415,7 +3278,7 @@ def _build_and_deploy_nxplpc(
         deploy_cmd += ["--port", upload_port]
     if verbose:
         deploy_cmd.append("--verbose")
-    result = subprocess.run(deploy_cmd, env=env, cwd=str(build_dir))
+    result = RunningProcess.run(deploy_cmd, env=env, cwd=str(build_dir))
     if result.returncode != 0:
         print(
             f"{Fore.RED}❌ fbuild deploy failed (exit {result.returncode}){Style.RESET_ALL}"
@@ -3710,7 +3573,7 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
         "--rx-pin",
         str(rx_pin),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 
@@ -3756,7 +3619,7 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
         "--rx-pin",
         str(rx_pin),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 
@@ -3809,7 +3672,7 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
         "--rx-pin",
         str(rx_pin),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 
@@ -3870,7 +3733,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
         "--core-hz",
         str(core_hz),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 
@@ -4032,7 +3895,7 @@ async def _run_lpc_uart_clockless_tests(ctx: RunContext) -> int:
         "--rx-pin",
         str(rx_pin),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 
@@ -4085,7 +3948,7 @@ async def _run_lpc_uart_dma_tests(ctx: RunContext) -> int:
         "--baud-wire",
         str(baud),
     ]
-    result = subprocess.run(cmd)
+    result = RunningProcess.run(cmd)
     return 0 if result.returncode == 0 else 1
 
 

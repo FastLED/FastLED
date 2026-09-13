@@ -9,31 +9,27 @@ Usage:
     bash bloat esp32s3 --build          # also runs `bash compile` first
 
 What it does:
-    1. Locates the latest firmware.elf for the build, preferring the
-       fbuild-native layout `.fbuild/build/<board>/release/firmware.elf`
-       and falling back to the legacy PIO path
-       `.build/pio/<board>/.fbuild/build/release/firmware.elf`, then the
-       legacy `.build/pio/<board>/.pio/build/<board>/firmware.elf`.
-    2. Invokes `fbuild symbols` against it.
-        - For fbuild-native ELFs: `fbuild symbols` auto-locates the sibling
-          `build_info_<board>.json` (emitted by fbuild after every link)
-          and reads `nm_path` from it. This works for ANY architecture
-          fbuild can build — Xtensa, RISC-V, ARM Cortex-M — with zero
-          board-specific configuration here.
-        - For legacy PIO ELFs: we resolve the cross-`nm` via
-          PIO_NM_BY_ARCH + BOARD_CHIP_MAP and pass `--nm` explicitly.
+    1. Locates the newest firmware.elf fbuild produced for the board, in
+       either of the layouts fbuild writes:
+         - `.fbuild/build/<board>/release/firmware.elf` (standalone fbuild)
+         - `.build/fbuild/<board>/.fbuild/build/<release|debug>/firmware.elf`
+           (`bash compile <board>`)
+    2. Invokes `fbuild symbols` against it. `fbuild symbols` auto-locates
+       the sibling `build_info_<board>.json` (emitted by fbuild after every
+       link) and reads `nm_path` from it. This works for ANY architecture
+       fbuild can build — Xtensa, RISC-V, ARM Cortex-M — with zero
+       board-specific configuration here.
     3. Writes `report.json` and `report.md` to `.build/symbols/<board>/`.
     4. Parses the JSON, collapses each demangled name across all its
        (section, source) rows, and prints a `top-N` table to stdout.
 
 Why this script exists:
-    Running the analysis by hand wires you through the toolchain prefix,
-    the build output path, the `--nm` override, and the output directory
-    — easy to get wrong and easy to forget. This wrapper encapsulates the
-    convention; future agents only need `bash bloat <board>` to get a
-    useful report on disk.
+    Running the analysis by hand wires you through the build output path
+    and the output directory — easy to get wrong and easy to forget. This
+    wrapper encapsulates the convention; future agents only need
+    `bash bloat <board>` to get a useful report on disk.
 
-Lessons baked in (see CLAUDE.md > "Binary Size Analysis"):
+Lessons baked in (see agents/docs/binary-size-analysis.md):
     - The fbuild `symbols` subcommand requires fbuild >= 2.2.19 and the
       `build_info.json`-driven nm resolution requires fbuild >= 2.2.20
       (FastLED/fbuild#428). pyproject.toml pins a release that ships
@@ -59,87 +55,26 @@ import argparse
 import json
 import os
 import shutil
-import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from running_process import PIPE, STDOUT, CalledProcessError, RunningProcess
+
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-# Per-board cross-toolchain `nm` resolution for LEGACY PIO builds only.
-# fbuild-native builds (anything under `.fbuild/build/<board>/release/`)
-# auto-resolve `nm_path` via the sibling `build_info_<board>.json`
-# (FastLED/fbuild#428), so the lookup tables below are NOT consulted for
-# those builds.
-PIO_NM_BY_ARCH = {
-    # arch → (toolchain-package-dir, tool-prefix)
-    "xtensa": ("toolchain-xtensa-esp-elf", "xtensa-{board_chip}-elf"),
-    "riscv": ("toolchain-riscv32-esp-elf", "riscv32-esp-elf"),
-}
-
-# Board → chip-id used to construct the toolchain prefix. Add entries as
-# bloat analysis is needed on new PIO platforms. ARM and other fbuild-native
-# targets do NOT need entries here — they resolve via `build_info_<board>.json`.
-BOARD_CHIP_MAP = {
-    "esp32": ("xtensa", "esp32"),
-    "esp32s2": ("xtensa", "esp32s2"),
-    "esp32s3": ("xtensa", "esp32s3"),
-    "esp32c3": ("riscv", "esp32c3"),
-    "esp32c6": ("riscv", "esp32c6"),
-    "esp32h2": ("riscv", "esp32h2"),
-}
-
-
-def pio_packages_dir() -> Path:
-    """User-scoped PIO packages dir; works on Windows / Linux / macOS."""
-    home = Path.home()
-    candidate = home / ".platformio" / "packages"
-    if candidate.is_dir():
-        return candidate
-    raise SystemExit(
-        f"PlatformIO packages dir not found at {candidate}. "
-        "Run a PIO build first (`bash compile <board> --examples Blink`)."
-    )
-
-
-def resolve_pio_nm(board: str) -> Path:
-    """Locate the cross-toolchain `nm` for a PIO-layout build."""
-    if board not in BOARD_CHIP_MAP:
-        raise SystemExit(
-            f"Bloat: board '{board}' has no PIO nm mapping and the ELF "
-            "was found in the legacy PIO layout (not the fbuild-native "
-            f"`.fbuild/build/{board}/release/` path). Either rebuild "
-            "with fbuild (`fbuild build -e " + board + "`) so "
-            f"`build_info_{board}.json` is emitted and nm is auto-resolved, "
-            "or add a BOARD_CHIP_MAP entry in ci/bloat.py for the PIO "
-            f"toolchain. Known PIO boards: {', '.join(sorted(BOARD_CHIP_MAP))}."
-        )
-    arch, chip = BOARD_CHIP_MAP[board]
-    pkg_dir, prefix_tpl = PIO_NM_BY_ARCH[arch]
-    prefix = prefix_tpl.format(board_chip=chip)
-    bin_dir = pio_packages_dir() / pkg_dir / "bin"
-    nm = bin_dir / f"{prefix}-nm.exe"
-    if not nm.exists():
-        nm = bin_dir / f"{prefix}-nm"
-    if not nm.exists():
-        raise SystemExit(
-            f"Bloat: nm binary not found under {bin_dir}. Expected "
-            f"`{prefix}-nm[.exe]`. Has the toolchain been installed via PIO?"
-        )
-    return nm
+# Board build directory root used by `bash compile`; mirrors
+# `ci/compiler/path_manager.py::FastLEDPaths.build_dir`.
+BOARD_BUILD_SUBDIR = "fbuild"
 
 
 @dataclass
 class ElfLocation:
-    """Where an ELF was found and how its `nm` should be resolved."""
+    """Where an ELF was found."""
 
     elf: Path
-    # True when the ELF lives under `.fbuild/build/...` — in that case
-    # `fbuild symbols` will auto-resolve nm via the sibling build_info
-    # JSON, and we must NOT pass `--nm`.
-    fbuild_native: bool
 
 
 # See `_assert_fresh`: the coarsest common filesystem mtime granularity.
@@ -169,57 +104,44 @@ def _assert_fresh(location: ElfLocation, build_started: float | None) -> None:
     raise SystemExit(
         f"Bloat: --build ran, but the ELF selected for analysis predates it by "
         f"{age / 3600:.1f} h:\n  {location.elf}\n"
-        "That is a stale artifact from another backend or an earlier build, so "
-        "the numbers would describe a binary this run did not produce. Remove "
-        "it, or build the layout it belongs to."
+        "That is a stale artifact from an earlier build, so the numbers would "
+        "describe a binary this run did not produce. Remove it, or rebuild."
     )
+
+
+def elf_candidates(board: str, build_root: Path) -> list[Path]:
+    """Every location fbuild may have written `firmware.elf` for `board`."""
+    project_root = Path.cwd()
+    board_dir = build_root / BOARD_BUILD_SUBDIR / board / ".fbuild" / "build"
+    return [
+        project_root / ".fbuild" / "build" / board / "release" / "firmware.elf",
+        board_dir / "release" / "firmware.elf",
+        board_dir / "debug" / "firmware.elf",
+        board_dir / board / "release" / "firmware.elf",
+    ]
 
 
 def find_elf(board: str, build_root: Path) -> ElfLocation:
     """Auto-detect the firmware ELF for the given board.
 
-    Priority order:
-      1. `.fbuild/build/<board>/release/firmware.elf` (fbuild-native)
-      2. `<build_root>/pio/<board>/.fbuild/build/release/firmware.elf`
-         (current fbuild-through-PIO layout)
-      3. `<build_root>/pio/<board>/.pio/build/<board>/firmware.elf` (PIO)
-      4. `<build_root>/<board>/firmware.elf` (legacy fbuild layout, pre-#487)
+    Newest wins, with the order of `elf_candidates` as the tie-break.
+
+    It used to be priority alone, and that is how this command came to
+    report five-day-old numbers for a change made minutes earlier: several
+    layouts coexist under one board directory, and a fixed preference
+    outranked the one `--build` had just written whatever its age. Two runs
+    across a real code change produced byte-identical output, including
+    total_flash. FastLED#4384.
     """
-    project_root = Path.cwd()
-    fbuild_elf = project_root / ".fbuild" / "build" / board / "release" / "firmware.elf"
-    pio_fbuild_elf = (
-        build_root / "pio" / board / ".fbuild" / "build" / "release" / "firmware.elf"
-    )
-    candidates = [
-        build_root / "pio" / board / ".pio" / "build" / board / "firmware.elf",
-        build_root / board / "firmware.elf",
-    ]
-
-    # Newest wins, with the documented order as the tie-break.
-    #
-    # It used to be priority alone, and that is how this command came to
-    # report five-day-old numbers for a change made minutes earlier: these
-    # layouts coexist under one board directory, `--build` writes the `.pio`
-    # one, and the `.fbuild` one outranked it whatever its age. Two runs
-    # across a real code change produced byte-identical output, including
-    # total_flash. FastLED#4384.
-    ranked = [
-        (fbuild_elf, True),
-        (pio_fbuild_elf, True),
-        (candidates[0], False),
-        (candidates[1], False),
-    ]
-    found: list[tuple[Path, bool, float]] = []
-    for path, native in ranked:
-        if path.is_file():
-            found.append((path, native, path.stat().st_mtime))
+    candidates = elf_candidates(board, build_root)
+    found = [(path, path.stat().st_mtime) for path in candidates if path.is_file()]
     if found:
-        newest = max(mtime for _, _, mtime in found)
-        for path, native, mtime in found:
+        newest = max(mtime for _, mtime in found)
+        for path, mtime in found:
             if mtime == newest:
-                return ElfLocation(elf=path, fbuild_native=native)
+                return ElfLocation(elf=path)
 
-    paths = "\n  ".join(str(c) for c in [fbuild_elf, pio_fbuild_elf, *candidates])
+    paths = "\n  ".join(str(c) for c in candidates)
     raise SystemExit(
         "Bloat: no firmware.elf found. Looked at:\n  "
         + paths
@@ -232,18 +154,22 @@ def find_elf(board: str, build_root: Path) -> ElfLocation:
 def assert_fbuild_has_symbols() -> None:
     """Refuse to proceed if `fbuild symbols` isn't wired up."""
     try:
-        out = subprocess.check_output(
+        out = RunningProcess.run(
             ["fbuild", "symbols", "--help"],
-            stderr=subprocess.STDOUT,
+            stdout=PIPE,
+            stderr=STDOUT,
             text=True,
             timeout=15,
-        )
-    except FileNotFoundError as e:
+            check=True,
+            encoding="utf-8",
+            errors="replace",
+        ).stdout
+    except (FileNotFoundError, RuntimeError) as e:
         raise SystemExit(
             "Bloat: `fbuild` not on PATH. Run from a uv-managed shell "
             "(`uv run bash bloat <board>` or set the project venv)."
         ) from e
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         raise SystemExit(
             "Bloat: `fbuild symbols` rejected. Your installed fbuild "
             "doesn't carry the symbols subcommand. Reinstall project "
@@ -259,9 +185,7 @@ def assert_fbuild_has_symbols() -> None:
         )
 
 
-def run_fbuild_symbols(
-    location: ElfLocation, nm: Path | None, out_dir: Path, top: int
-) -> None:
+def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "fbuild",
@@ -272,11 +196,9 @@ def run_fbuild_symbols(
         "--top",
         str(top),
     ]
-    if nm is not None:
-        cmd.extend(["--nm", str(nm)])
     print(f"$ {' '.join(cmd)}")
     try:
-        subprocess.run(cmd, check=True)
+        RunningProcess.run(cmd, check=True)
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
@@ -291,11 +213,12 @@ def run_fbuild_build_bloat(board: str, example: str) -> int:
     FastLED/fbuild#594.
     """
     env = os.environ.copy()
+    # fbuild reads the sketch directory from this environment variable.
     env["PLATFORMIO_SRC_DIR"] = str(Path("examples") / example)
     cmd = ["fbuild", "build", "-e", board, "--bloat-analysis"]
-    print(f"$ {' '.join(cmd)}  (PLATFORMIO_SRC_DIR={env['PLATFORMIO_SRC_DIR']})")
+    print(f"$ {' '.join(cmd)}  (sketch={env['PLATFORMIO_SRC_DIR']})")
     try:
-        result = subprocess.run(cmd, env=env)
+        result = RunningProcess.run(cmd, env=env)
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
@@ -383,13 +306,13 @@ def main() -> int:
     parser.add_argument(
         "--build",
         action="store_true",
-        help="Run `bash compile <board> --examples <example> --platformio` "
-        "first to produce a fresh ELF.",
+        help="Run `bash compile <board> --examples <example>` first to "
+        "produce a fresh ELF.",
     )
     parser.add_argument(
         "--build-root",
         default=".build",
-        help="Build output root for legacy PIO layout (default: .build).",
+        help="Build output root (default: .build).",
     )
     parser.add_argument(
         "--allow-overflow",
@@ -411,16 +334,10 @@ def main() -> int:
         compile_script = "compile.bat" if os.name == "nt" else "./compile"
         if os.name != "nt" and not shutil.which("bash"):
             raise SystemExit("bash not on PATH; cannot --build")
-        cmd = [
-            compile_script,
-            args.board,
-            "--examples",
-            args.example,
-            "--platformio",
-        ]
+        cmd = [compile_script, args.board, "--examples", args.example]
         print(f"$ {' '.join(cmd)}")
         build_started = time.time()
-        subprocess.run(cmd, check=True)
+        RunningProcess.run(cmd, check=True)
 
     try:
         location = find_elf(args.board, Path(args.build_root))
@@ -447,31 +364,16 @@ def main() -> int:
     # both the normal and the recovery selection.
     _assert_fresh(location, build_started)
 
-    # nm resolution:
-    #   fbuild-native ELF → fbuild auto-resolves via build_info_<board>.json,
-    #                       so leave `nm = None` and don't pass `--nm`.
-    #   legacy PIO ELF    → fall back to the per-board PIO_NM_BY_ARCH lookup.
-    nm: Path | None
-    if location.fbuild_native:
-        nm = None
-    else:
-        nm = resolve_pio_nm(args.board)
-
     out_dir = Path(args.build_root) / "symbols" / args.board
 
     print(f"Board:   {args.board}")
     print(f"Example: {args.example}")
-    print(
-        f"ELF:     {location.elf}  ({'fbuild-native' if location.fbuild_native else 'legacy PIO'})"
-    )
-    if nm is None:
-        print("nm:      (auto-resolved by fbuild via build_info_<board>.json)")
-    else:
-        print(f"nm:      {nm}")
+    print(f"ELF:     {location.elf}")
+    print("nm:      (auto-resolved by fbuild via build_info_<board>.json)")
     print(f"Output:  {out_dir}")
     print()
 
-    run_fbuild_symbols(location=location, nm=nm, out_dir=out_dir, top=args.top)
+    run_fbuild_symbols(location=location, out_dir=out_dir, top=args.top)
 
     if not args.no_summary:
         print_summary(out_dir / "report.json", args.top)

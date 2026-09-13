@@ -1292,23 +1292,23 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("rpUartLastError", uart.lastError().c_str());
     }
     if (driver_name == "PIO0" || driver_name == "PIO1") {
-        auto& pio = driver_name == "PIO0"
+        auto& rp_pio = driver_name == "PIO0"
                         ? fl::BusTraits<fl::Bus::FLEX_IO, 0>::instance()
                         : fl::BusTraits<fl::Bus::FLEX_IO, 1>::instance();
-        response.set("rpPioActive", pio.isActive());
-        response.set("rpPioLastError", pio.lastError().c_str());
-        response.set("rpPioStartAttempted", pio.lastStartAttempted());
-        response.set("rpPioStartSucceeded", pio.lastStartSucceeded());
-        response.set("rpPioWordCount", static_cast<int64_t>(pio.lastWordCount()));
+        response.set("rpPioActive", rp_pio.isActive());
+        response.set("rpPioLastError", rp_pio.lastError().c_str());
+        response.set("rpPioStartAttempted", rp_pio.lastStartAttempted());
+        response.set("rpPioStartSucceeded", rp_pio.lastStartSucceeded());
+        response.set("rpPioWordCount", static_cast<int64_t>(rp_pio.lastWordCount()));
     }
     #if defined(FL_IS_RP2350)
     if (driver_name == "PIO2") {
-        auto& pio = fl::BusTraits<fl::Bus::FLEX_IO, 2>::instance();
-        response.set("rpPioActive", pio.isActive());
-        response.set("rpPioLastError", pio.lastError().c_str());
-        response.set("rpPioStartAttempted", pio.lastStartAttempted());
-        response.set("rpPioStartSucceeded", pio.lastStartSucceeded());
-        response.set("rpPioWordCount", static_cast<int64_t>(pio.lastWordCount()));
+        auto& rp_pio = fl::BusTraits<fl::Bus::FLEX_IO, 2>::instance();
+        response.set("rpPioActive", rp_pio.isActive());
+        response.set("rpPioLastError", rp_pio.lastError().c_str());
+        response.set("rpPioStartAttempted", rp_pio.lastStartAttempted());
+        response.set("rpPioStartSucceeded", rp_pio.lastStartSucceeded());
+        response.set("rpPioWordCount", static_cast<int64_t>(rp_pio.lastWordCount()));
     }
     #endif
 #endif

@@ -4,18 +4,19 @@
 """Run include-what-you-use on the project.
 
 Default mode (no board): parallel scan of all src/fl/ headers (~2 min).
-Board mode: run IWYU via PlatformIO on a specific board build.
+Board mode: run IWYU against fbuild's compile database for a board build.
 """
 
 import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+from running_process import PIPE, CalledProcessError, RunningProcess, TimeoutExpired
 
 from ci.iwyu_cache import IWYUCache, compute_source_tree_hash
 from ci.util.fbuild_adapter import get_compile_commands
@@ -116,8 +117,16 @@ def _scan_one_header(file_path_str: str) -> tuple[str, list[str]]:
         str(f),
     ]
     try:
-        result = subprocess.run(iwyu_cmd, capture_output=True, text=True, timeout=30)
-    except subprocess.TimeoutExpired:
+        result = RunningProcess.run(
+            iwyu_cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            timeout=30,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except TimeoutExpired:
         return ("", [])
 
     if result.returncode == 0:
@@ -197,8 +206,16 @@ def scan_single_file(file_path: str) -> tuple[str, list[str]]:
     ] + compiler_args
 
     try:
-        result = subprocess.run(iwyu_cmd, capture_output=True, text=True, timeout=60)
-    except subprocess.TimeoutExpired:
+        result = RunningProcess.run(
+            iwyu_cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            timeout=60,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except TimeoutExpired:
         return ("", [])
 
     if result.returncode == 0:
@@ -372,24 +389,28 @@ def check_iwyu_available() -> tuple[bool, str]:
     """Return (is_available, command_prefix)."""
     # System IWYU
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["include-what-you-use", "--version"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=10,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode == 0:
             return (True, "")
     except (
-        subprocess.CalledProcessError,
+        CalledProcessError,
         FileNotFoundError,
-        subprocess.TimeoutExpired,
+        RuntimeError,
+        TimeoutExpired,
     ):
         pass
 
     # clang-tool-chain-iwyu via uv
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 "uv",
                 "run",
@@ -397,16 +418,20 @@ def check_iwyu_available() -> tuple[bool, str]:
                 "-c",
                 "from clang_tool_chain.wrapper import iwyu_main",
             ],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=10,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode == 0:
             return (True, "uv run ")
     except (
-        subprocess.CalledProcessError,
+        CalledProcessError,
         FileNotFoundError,
-        subprocess.TimeoutExpired,
+        RuntimeError,
+        TimeoutExpired,
     ):
         pass
 
@@ -414,7 +439,7 @@ def check_iwyu_available() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
-# PlatformIO board mode (unchanged from original)
+# Board mode (compile-database driven)
 # ---------------------------------------------------------------------------
 
 
@@ -422,9 +447,8 @@ def _load_src_files_from_compile_db(compile_db: Path, project_root: Path) -> lis
     """Return the list of TUs in ``compile_db`` that live under ``<project_root>/src/``.
 
     Filters out third-party / framework translation units so we only analyze
-    FastLED's own code — matches the scope of the legacy
-    ``pio check --src-filters=+<src/>`` invocation (and the identically-named
-    helper in ``ci/ci-cppcheck.py``). Without this scoping, ESP32-class
+    FastLED's own code (same scoping as the identically-named helper in
+    ``ci/ci-cppcheck.py``). Without this scoping, ESP32-class
     compile DBs carry thousands of framework TUs whose aggregated argv
     overflows Windows' ``CreateProcess`` 32 KiB command-line limit.
 
@@ -462,9 +486,8 @@ def run_iwyu_against_compile_db(
 ) -> int:
     """Run IWYU against a ``compile_commands.json`` via ``clang-tool-chain-iwyu-tool``.
 
-    This is the fbuild-backend entry point — it drives IWYU off the compile
-    database fbuild emits (``fbuild build -e <env> --target compiledb``),
-    bypassing the PlatformIO project-tree assumption entirely. The same
+    Drives IWYU off the compile database fbuild emits
+    (``fbuild build -e <env> --target compiledb``). The same
     pattern generalizes to other ``clang-tool-chain-*`` wrappers: adding
     ``clang-tidy``, ``clang-format-check``, or ``clang-query`` is a ~10-LOC
     addition — wire the wrapper name, point it at ``compile_db.parent`` via
@@ -538,114 +561,22 @@ def run_iwyu_against_compile_db(
         f"using compile DB: {compile_db}"
     )
     try:
-        result = subprocess.run(cmd, check=True)
+        result = RunningProcess.run(cmd, check=True)
         return result.returncode
     except KeyboardInterrupt as ki:
         from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
         handle_keyboard_interrupt(ki)
         raise
-    except FileNotFoundError as e:
+    except (FileNotFoundError, RuntimeError) as e:
         print(
             "ERROR: fbuild IWYU mode requires `uv run clang-tool-chain-iwyu-tool`, "
             f"but the command could not be started: {e}",
             file=sys.stderr,
         )
         return 1
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         print(f"clang-tool-chain-iwyu-tool failed with return code {e.returncode}")
-        return e.returncode
-
-
-def find_platformio_project_dir(board_dir: Path) -> Path | None:
-    """Find a directory containing platformio.ini in the board's build directory."""
-    if not board_dir.exists():
-        return None
-    for subdir in board_dir.iterdir():
-        if subdir.is_dir():
-            if (subdir / "platformio.ini").exists():
-                print(f"Found platformio.ini in {subdir}")
-                return subdir
-    if (board_dir / "platformio.ini").exists():
-        print(f"Found platformio.ini directly in {board_dir}")
-        return board_dir
-    return None
-
-
-def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) -> int:
-    """Run IWYU on a PlatformIO project."""
-    print(f"Running include-what-you-use in {project_dir}")
-    os.chdir(str(project_dir))
-
-    mapping_args: list[str] = []
-    project_root = project_dir
-    while project_root.parent != project_root:
-        if (project_root / "ci" / "iwyu").exists():
-            break
-        project_root = project_root.parent
-
-    for name in ("fastled.imp", "stdlib.imp"):
-        p = project_root / "ci" / "iwyu" / name
-        if p.exists():
-            mapping_args.extend(["--mapping_file", str(p)])
-
-    if args.mapping_file:
-        for mapping in args.mapping_file:
-            mapping_args.extend(["--mapping_file", mapping])
-
-    iwyu_cmd = [
-        "include-what-you-use",
-        f"--max_line_length={args.max_line_length}",
-        "--quoted_includes_first",
-        "--no_comments",
-        "--verbose=3" if args.verbose else "--verbose=1",
-    ] + mapping_args
-
-    pio_cmd = [
-        "pio",
-        "check",
-        "--skip-packages",
-        "--src-filters=+<src/>",
-        "--tool=include-what-you-use",
-        "--flags",
-    ] + iwyu_cmd[1:]
-
-    try:
-        result = subprocess.run(pio_cmd)
-        return result.returncode
-    except subprocess.CalledProcessError as e:
-        print(f"PlatformIO IWYU check failed with return code {e.returncode}")
-        return e.returncode
-
-
-def apply_iwyu_fixes(source_dir: Path) -> int:
-    """Apply IWYU fixes using fix_includes tool."""
-    try:
-        subprocess.run(["fix_includes", "--help"], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print(
-            "Warning: fix_includes tool not found. Install IWYU tools to use --fix option."
-        )
-        return 1
-
-    cpp_files: list[Path] = []
-    for pattern in ("**/*.cpp", "**/*.h", "**/*.hpp"):
-        cpp_files.extend(source_dir.glob(pattern))
-    if not cpp_files:
-        print("No C++ files found to fix")
-        return 0
-
-    print(f"Applying IWYU fixes to {len(cpp_files)} files...")
-    cmd = ["fix_includes", "--update_comments", str(source_dir)]
-    try:
-        result = subprocess.run(cmd)
-        if result.returncode == 0:
-            print("IWYU fixes applied successfully")
-        else:
-            print(f"fix_includes failed with return code {result.returncode}")
-        return result.returncode
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to apply IWYU fixes: {e}")
         return e.returncode
 
 
@@ -811,15 +742,15 @@ def main() -> int:
                 print("✅ All src/fl/ headers pass IWYU")
         return 0
 
-    # --- Board mode: fbuild (preferred) or PlatformIO (legacy) ---
+    # --- Board mode: fbuild compile database ---
     build = _PROJECT_ROOT / ".build"
     if not build.exists():
         print(f"Build directory {build} not found")
-        print("Run a compilation first: ./compile [board] --examples [example]")
+        print("Run a compilation first: bash compile [board] --examples [example]")
         return 1
 
-    # Resolve board aliases to the canonical fbuild env / PIO build dir name.
-    # Must match ci-cppcheck.py so both tools see the same backend signal.
+    # Resolve board aliases to the canonical fbuild env / build dir name.
+    # Must match ci-cppcheck.py so both tools see the same build.
     try:
         from ci.boards import create_board
 
@@ -838,70 +769,33 @@ def main() -> int:
             f"Resolved board '{args.board}' to canonical name '{canonical_board_name}'"
         )
 
-    # fbuild-backed boards (esp32c2, esp32c6, …): drive IWYU off fbuild's
-    # compile_commands.json via clang-tool-chain-iwyu-tool. Bypasses the PIO
-    # project-tree assumption entirely — no platformio.ini required. See
-    # FastLED#2303.
-    if was_compiled_with_fbuild(_PROJECT_ROOT, build, canonical_board_name):
-        compile_db = get_compile_commands(canonical_board_name, build)
-        if compile_db is None:
-            print(
-                f"ERROR: could not obtain fbuild compile_commands.json for "
-                f"'{canonical_board_name}'. fbuild >= 2.1 should emit this "
-                f"via `fbuild build -e {canonical_board_name} --target "
-                f"compiledb`; verify the fbuild version and the env name. "
-                f"Tracking: FastLED#2303.",
-                file=sys.stderr,
-            )
-            return 1
-        result_code = run_iwyu_against_compile_db(compile_db, _PROJECT_ROOT, args)
-        if args.fix:
-            # IWYU-tool mode emits fixits to stdout only — `fix_includes` is a
-            # separate pass. For fbuild boards `--fix` is not wired up yet
-            # (tracked upstream); fail loudly rather than silently no-op.
-            print(
-                "NOTE: --fix is not yet supported for fbuild-backed boards; "
-                "IWYU was run in report-only mode — no changes were auto-fixed.",
-                file=sys.stderr,
-            )
-        return result_code
-
-    # PIO-backed boards: search both the modern layout
-    # (``.build/pio/<board>/``) and the legacy one (``.build/<board>/``).
-    # This matches ci-cppcheck.py's multi-layout resolver.
-    candidate_dirs = [
-        build / "pio" / canonical_board_name,
-        build / canonical_board_name,
-    ]
-    board_dir: Path | None = next((d for d in candidate_dirs if d.exists()), None)
-    if board_dir is None:
-        print(f"Board {args.board} not found in {build}")
-        print("Available boards:")
-        for d in build.iterdir():
-            if d.is_dir() and d.name != "pio":
-                print(f"  {d.name}")
-        pio_root = build / "pio"
-        if pio_root.exists():
-            for d in pio_root.iterdir():
-                if d.is_dir():
-                    print(f"  {d.name}")
+    if not was_compiled_with_fbuild(_PROJECT_ROOT, build, canonical_board_name):
+        print(f"No fbuild build found for board '{args.board}' in {build}")
+        print(f"Try running: bash compile {args.board} --examples Blink")
         return 1
 
-    project_dir = find_platformio_project_dir(board_dir)
-    if not project_dir:
-        print(f"No platformio.ini found in {board_dir} or its subdirectories")
-        print(f"Try running: ./compile {args.board} --examples Blink")
+    # Drive IWYU off fbuild's compile_commands.json via
+    # clang-tool-chain-iwyu-tool. See FastLED#2303.
+    compile_db = get_compile_commands(canonical_board_name, build)
+    if compile_db is None:
+        print(
+            f"ERROR: could not obtain fbuild compile_commands.json for "
+            f"'{canonical_board_name}'. fbuild should emit this via "
+            f"`fbuild build -e {canonical_board_name} --target compiledb`; "
+            f"verify the fbuild version and the env name. Tracking: FastLED#2303.",
+            file=sys.stderr,
+        )
         return 1
-
-    result_code = run_iwyu_on_platformio_project(project_dir, args)
-
-    if args.fix and result_code == 0:
-        src_dir = project_dir / "src"
-        if src_dir.exists():
-            fix_result = apply_iwyu_fixes(src_dir)
-            if fix_result != 0:
-                result_code = fix_result
-
+    result_code = run_iwyu_against_compile_db(compile_db, _PROJECT_ROOT, args)
+    if args.fix:
+        # IWYU-tool mode emits fixits to stdout only — `fix_includes` is a
+        # separate pass that is not wired up for board builds yet; fail
+        # loudly rather than silently no-op.
+        print(
+            "NOTE: --fix is not yet supported for board builds; "
+            "IWYU was run in report-only mode — no changes were auto-fixed.",
+            file=sys.stderr,
+        )
     return result_code
 
 

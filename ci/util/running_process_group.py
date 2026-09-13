@@ -11,7 +11,6 @@ to fully-buffered mode when stdout is not a TTY, which can cause multi-second de
 """
 
 import os
-import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -20,6 +19,7 @@ from enum import Enum
 from typing import Optional, cast
 
 from running_process import RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
@@ -309,7 +309,7 @@ class RunningProcessGroup:
                     failures: list[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(
-                            subprocess.list2cmdline(p.command)
+                            p.get_command_str()
                         )  # Track all active processes as failed
                         p.kill()
                         failures.append(
@@ -540,7 +540,7 @@ class RunningProcessGroup:
 
         for cmd in failed_processes:
             if isinstance(cmd, list):
-                cmd_str = subprocess.list2cmdline(cmd)
+                cmd_str = list2cmdline(cmd)
             else:
                 cmd_str = str(cmd)
             failures.append(

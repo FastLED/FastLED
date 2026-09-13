@@ -307,8 +307,8 @@ reviews:
       instructions: |
         ROOT `./platformio.ini` LOCKDOWN (#3274 / #3281 follow-up).
 
-        Root `./platformio.ini` is a frozen surface, owned only by `bash debug`
-        (and raw `pio run` if a user invokes it directly). CI compile,
+        Root `./platformio.ini` is a frozen surface, owned only by `bash debug`.
+        CI compile,
         size-check, bloat, regression tests, AND `bash autoresearch` all consume
         synthesised platformio.ini files derived from `ci/boards.py` — NOT this
         file. Any change here is HIGH severity unless every added/modified
@@ -339,9 +339,7 @@ reviews:
            reads, parses, or imports this file — flag as HIGH severity. CI
            compile and `bash autoresearch` must remain `ci/boards.py`-only.
            `ci/autoresearch/` is NOT a sanctioned reader after #3281; see parent
-           #3274. The only remaining exception is the `--use-root-platformio-ini`
-           legacy escape hatch in `ci/autoresearch/`, which is deprecated and
-           scheduled for removal.
+           #3274.
 
         4. **Bulk reformatting / no-op churn is forbidden.** Comment reflow,
            whitespace cleanup, or moving lines around without a behavioral change
@@ -350,11 +348,11 @@ reviews:
 
         FUTURE: `bash debug` is the last sanctioned consumer. A follow-up may
         migrate it off root too, at which point this file becomes a pure
-        no-CI-dependency reference for raw `pio run` invocations.
+        no-CI-dependency reference project file.
 
     - path: "**/platformio.ini"
       instructions: |
-        PlatformIO `build_flags` macro prefix rule (matches the `FL_*` vs `FASTLED_*`
+        `platformio.ini` `build_flags` macro prefix rule (matches the `FL_*` vs `FASTLED_*`
         rule applied to C/C++ sources):
 
         Any NEWLY ADDED `-D<NAME>...` build flag whose identifier starts with `FASTLED_`
@@ -375,7 +373,7 @@ reviews:
     - path: "**/meson.build"
       instructions: |
         Meson build macro prefix rule (matches the `FL_*` vs `FASTLED_*` rule applied
-        to C/C++ sources and PlatformIO):
+        to C/C++ sources and `platformio.ini`):
 
         Any NEWLY ADDED `-D<NAME>...` entry — typically inside
         `add_project_arguments`, `cpp_args`, `c_args`, `args:`, or
@@ -398,7 +396,7 @@ reviews:
     - path: "**/CMakeLists.txt"
       instructions: |
         CMake macro prefix rule (matches the `FL_*` vs `FASTLED_*` rule applied to
-        C/C++ sources and PlatformIO):
+        C/C++ sources and `platformio.ini`):
 
         Any NEWLY ADDED compile definition or flag — `add_compile_definitions(...)`,
         `target_compile_definitions(...)`, `add_definitions(-D...)`, or a raw

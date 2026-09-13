@@ -22,11 +22,11 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
+from running_process import PIPE, RunningProcess
 from typeguard import typechecked
 
 
@@ -67,14 +67,13 @@ def _select(defines: list[str]) -> tuple[str, str]:
         handle.write(_stub_source())
         path = Path(handle.name)
     try:
-        # `subprocess.run` and not `RunningProcess.run`: the latter merges
-        # stderr into stdout, and the preprocessor emits a "#pragma once in
-        # main file" warning on every invocation here -- merging it would put
-        # compiler chatter into the stream this parses.
-        completed = subprocess.run(  # noqa: SRC001
+        # stdout and stderr piped separately: the preprocessor emits a
+        # "#pragma once in main file" warning on every invocation here, and
+        # merging it would put compiler chatter into the stream this parses.
+        completed = RunningProcess.run(
             [compiler, "-E", "-P", "-nostdinc", "-undef", *defines, str(path)],
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
             encoding="utf-8",
             errors="replace",
             check=False,
@@ -95,6 +94,57 @@ def _select(defines: list[str]) -> tuple[str, str]:
     return selected, fallback
 
 
+def _gcc_version(compiler: Path) -> tuple[int, ...]:
+    """Parse `<compiler> --version` into a sortable tuple (0 on failure)."""
+
+    try:
+        text = RunningProcess.run(
+            [str(compiler), "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+            check=False,
+        ).stdout
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import (  # noqa: PLC0415 - lazy
+            handle_keyboard_interrupt,
+        )
+
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        return (0,)
+    match = re.search(r"(\d+)\.(\d+)\.(\d+)", text)
+    if match is None:
+        return (0,)
+    return tuple(int(part) for part in match.groups())
+
+
+def _cached_cross_compilers(name: str) -> list[Path]:
+    """Every `bin/<name>` under fbuild's toolchain cache, newest GCC first.
+
+    The cache holds one toolchain per board family; a board-specific one
+    (Teensy ships only Cortex-M4/M7 multilibs) cannot always compile for the
+    target under test, and a newer release supports every target an older
+    one does, so prefer the highest version.
+    """
+
+    root = Path.home() / ".fbuild"
+    if not root.is_dir():
+        return []
+    candidates = [p for p in root.rglob(f"bin/{name}") if p.is_file()]
+    # The RP2040/RP2350 (earlephilhower pico) toolchain is what these
+    # codegen expectations were written against; prefer it, then the newest
+    # GCC of whatever else fbuild has cached.
+    return sorted(
+        candidates,
+        key=lambda p: ("earlephilhower" in p.as_posix(), _gcc_version(p)),
+        reverse=True,
+    )
+
+
 @typechecked
 def _arm_cross_compiler() -> str | None:
     """An `arm-none-eabi-gcc`, if this machine has one."""
@@ -102,12 +152,9 @@ def _arm_cross_compiler() -> str | None:
     found = shutil.which("arm-none-eabi-gcc")
     if found is not None:
         return found
-    # PlatformIO and fbuild both keep one under the user's cache.
-    for root in (Path.home() / ".platformio" / "packages", Path.home() / ".fbuild"):
-        if not root.is_dir():
-            continue
-        for candidate in root.rglob("bin/arm-none-eabi-gcc"):
-            return str(candidate)
+    # fbuild keeps one under the user's cache.
+    for candidate in _cached_cross_compilers("arm-none-eabi-gcc"):
+        return str(candidate)
     return None
 
 
@@ -115,11 +162,11 @@ def _arm_cross_compiler() -> str | None:
 def _predefined(compiler: str, flags: list[str], macro: str) -> str:
     """`macro`'s value in `compiler`'s predefined set under `flags`, or ""."""
 
-    completed = subprocess.run(  # noqa: SRC001
+    completed = RunningProcess.run(
         [compiler, *flags, "-dM", "-E", "-x", "c", "-"],
         input="",
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         check=False,
@@ -178,7 +225,7 @@ class TestSimdDispatch(unittest.TestCase):
             raise unittest.SkipTest("no arm-none-eabi-gcc on this machine")
 
         # Verbatim from the Arduino-Pico core's `rp2350` branch,
-        # framework-arduinopico/tools/platformio-build.py.
+        # the framework-arduinopico core's build script.
         rp2350_flags = [
             "-mcpu=cortex-m33",
             "-mthumb",

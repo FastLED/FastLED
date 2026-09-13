@@ -15,17 +15,17 @@ USAGE
     uv run python tests/measure_esp32s3_opt_ins.py
     uv run python tests/measure_esp32s3_opt_ins.py --config stage2
     uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md
-    uv run python tests/measure_esp32s3_opt_ins.py --keep-platformio-ini-backup
+    uv run python tests/measure_esp32s3_opt_ins.py --keep-ini-backup
 
 Exits 0 on success. Exits 1 if any requested config's build / bloat
-run fails. Exits 2 on infrastructure failure (missing platformio.ini,
+run fails. Exits 2 on infrastructure failure (missing project ini,
 missing bash compile, etc.).
 
-The script's first action is to back up `platformio.ini` to
-`platformio.ini.bak` and install signal handlers so a Ctrl-C mid-run
-restores the file before exit. The build / bloat invocations go
-through the same `bash compile` / `bash bloat` wrappers the rest of
-the project uses; no direct `pio`/`platformio` calls.
+The script's first action is to back up the root `platformio.ini`
+(fbuild's project-file format) to `platformio.ini.bak` and install
+signal handlers so a Ctrl-C mid-run restores the file before exit. The
+build / bloat invocations go through the same `bash compile` /
+`bash bloat` wrappers the rest of the project uses.
 
 Run from the FastLED project root.
 """
@@ -37,15 +37,16 @@ import json
 import re
 import shutil
 import signal
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from running_process import STDOUT, RunningProcess
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PLATFORMIO_INI = PROJECT_ROOT / "platformio.ini"
-PLATFORMIO_INI_BACKUP = PROJECT_ROOT / "platformio.ini.bak"
+PROJECT_INI = PROJECT_ROOT / "platformio.ini"
+PROJECT_INI_BACKUP = PROJECT_ROOT / "platformio.ini.bak"
 REPORT_JSON = PROJECT_ROOT / ".build" / "symbols" / "esp32s3" / "report.json"
 OVERLAY_PATH = "tools/sdkconfig_for_smallest_fastled.defaults"
 
@@ -162,33 +163,33 @@ CONFIGS: dict[str, OptInConfig] = {
 }
 
 
-def backup_platformio_ini() -> None:
-    if not PLATFORMIO_INI.is_file():
+def backup_project_ini() -> None:
+    if not PROJECT_INI.is_file():
         print(
-            f"measure-opt-ins: platformio.ini not found at {PLATFORMIO_INI}",
+            f"measure-opt-ins: platformio.ini not found at {PROJECT_INI}",
             file=sys.stderr,
         )
         sys.exit(2)
-    shutil.copyfile(PLATFORMIO_INI, PLATFORMIO_INI_BACKUP)
+    shutil.copyfile(PROJECT_INI, PROJECT_INI_BACKUP)
 
 
-def restore_platformio_ini(keep_backup: bool) -> None:
-    if PLATFORMIO_INI_BACKUP.is_file():
-        shutil.copyfile(PLATFORMIO_INI_BACKUP, PLATFORMIO_INI)
+def restore_project_ini(keep_backup: bool) -> None:
+    if PROJECT_INI_BACKUP.is_file():
+        shutil.copyfile(PROJECT_INI_BACKUP, PROJECT_INI)
         if not keep_backup:
-            PLATFORMIO_INI_BACKUP.unlink()
+            PROJECT_INI_BACKUP.unlink()
 
 
-def patch_platformio_ini(cfg: OptInConfig) -> None:
+def patch_project_ini(cfg: OptInConfig) -> None:
     """Inject cfg's build_flags / overlay into the [env:esp32s3] block.
 
     This is a targeted regex patch — we don't fully re-parse INI
-    because PlatformIO's flavor of INI carries continuation lines and
+    because the project INI flavor carries continuation lines and
     `${var.x}` interpolations that configparser mangles. The regex
     target is the literal `[env:esp32s3]` header through the next
     `[env:` header (or EOF), which is well-defined in practice.
     """
-    text = PLATFORMIO_INI.read_text(encoding="utf-8")
+    text = PROJECT_INI.read_text(encoding="utf-8")
     block_re = re.compile(r"(\[env:esp32s3\][^\[]*?)(?=\n\[env:|\Z)", re.DOTALL)
     match = block_re.search(text)
     if not match:
@@ -220,15 +221,15 @@ def patch_platformio_ini(cfg: OptInConfig) -> None:
         else:
             block = block.rstrip() + "\n" + line
     new_text = text[: match.start()] + block + text[match.end() :]
-    PLATFORMIO_INI.write_text(new_text, encoding="utf-8")
+    PROJECT_INI.write_text(new_text, encoding="utf-8")
 
 
 def _run_compile_cmd(example: str) -> list[str]:
     """Pick the right compile entry point per platform.
 
-    On Linux/macOS: `bash compile esp32s3 --examples <example> --platformio`.
-    On Windows: `<PROJECT_ROOT>/compile.bat esp32s3 --examples <example>
-    --platformio` (absolute path — Windows subprocess.run does not
+    On Linux/macOS: `bash compile esp32s3 --examples <example>`.
+    On Windows: `<PROJECT_ROOT>/compile.bat esp32s3 --examples <example>`
+    (absolute path — Windows process spawning does not
     auto-resolve `.bat` files from the cwd argument). `bash` is not on
     PATH in a non-WSL Windows Python launched by `uv run`, and there is
     no `bash.exe` in the project; the project ships `compile.bat` for
@@ -236,7 +237,7 @@ def _run_compile_cmd(example: str) -> list[str]:
     """
     import os
 
-    args = ["esp32s3", "--examples", example, "--platformio"]
+    args = ["esp32s3", "--examples", example]
     if os.name == "nt":
         return [str(PROJECT_ROOT / "compile.bat"), *args]
     return ["bash", "compile", *args]
@@ -280,11 +281,16 @@ def _run_with_log(cmd: list[str], log_name: str) -> bool:
         flush=True,
     )
     with log_path.open("wb") as log_f:
-        proc = subprocess.Popen(
-            cmd, cwd=PROJECT_ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        proc = RunningProcess(
+            cmd,
+            cwd=PROJECT_ROOT,
+            auto_run=True,
+            capture=True,
+            stderr=STDOUT,
+            text=False,
         )
-        assert proc.stdout is not None
-        for chunk in iter(lambda: proc.stdout.read(4096), b""):
+        for line in proc.line_iter(timeout=None):
+            chunk = (line if isinstance(line, bytes) else line.encode("utf-8")) + b"\n"
             log_f.write(chunk)
             sys.stdout.buffer.write(chunk)
             sys.stdout.buffer.flush()
@@ -313,42 +319,32 @@ def archive_report(cfg: OptInConfig) -> Path:
     return dst
 
 
-_ELF_PATH = (
-    PROJECT_ROOT
-    / ".build"
-    / "pio"
-    / "esp32s3"
-    / ".pio"
-    / "build"
-    / "esp32s3"
-    / "firmware.elf"
-)
+_ELF_ROOT = PROJECT_ROOT / ".build" / "fbuild" / "esp32s3" / ".fbuild" / "build"
 
 
 def _force_relink() -> None:
-    """Delete the prior ELF so PIO's link step actually runs.
+    """Delete the prior ELF so the link step actually runs.
 
-    PIO's build cache returns cached .o files on consecutive runs with
+    The build cache returns cached .o files on consecutive runs with
     overlapping object hashes — that's the right speed/correctness
-    trade-off. But the link step decides whether to relink based on
-    object-file timestamps, NOT on platformio.ini / sdkconfig changes.
-    Switching configs that affect only sdkconfig (e.g. stage3 ↔
-    baseline) can therefore leave the previous config's ELF on disk
-    even after `bash compile` returns successfully — and the downstream
-    `bash bloat` step measures that stale ELF.
+    trade-off. But a link step that decides whether to relink based on
+    object-file timestamps, NOT on project ini / sdkconfig changes, can
+    leave the previous config's ELF on disk when switching configs that
+    affect only sdkconfig (e.g. stage3 ↔ baseline) — and the downstream
+    `bash bloat` step then measures that stale ELF.
 
     Deleting the ELF before each compile forces the link to run; the
     cached objects make the rebuild fast anyway. See #2940.
     """
-    if _ELF_PATH.is_file():
-        _ELF_PATH.unlink()
+    for elf in _ELF_ROOT.glob("**/firmware.elf"):
+        elf.unlink()
 
 
 def measure_one(cfg: OptInConfig, example: str) -> int | None:
     """Build + bloat one config; return total_flash or None on failure."""
     print(f"\n=== measure-opt-ins: config {cfg.name} ({cfg.label}) ===", flush=True)
-    restore_platformio_ini(keep_backup=True)
-    patch_platformio_ini(cfg)
+    restore_project_ini(keep_backup=True)
+    patch_project_ini(cfg)
     _force_relink()
     if not run_compile(example, cfg.name):
         print(f"measure-opt-ins: compile failed for {cfg.name}", file=sys.stderr)
@@ -415,7 +411,7 @@ def main() -> int:
         help="If set, write the Markdown comparison table to this path.",
     )
     parser.add_argument(
-        "--keep-platformio-ini-backup",
+        "--keep-ini-backup",
         action="store_true",
         help="Keep platformio.ini.bak around after the run (default: delete on success).",
     )
@@ -434,10 +430,10 @@ def main() -> int:
                 )
                 return 2
 
-    backup_platformio_ini()
+    backup_project_ini()
 
     def _restore_and_exit(*_: object) -> None:
-        restore_platformio_ini(keep_backup=args.keep_platformio_ini_backup)
+        restore_project_ini(keep_backup=args.keep_ini_backup)
         sys.exit(130)
 
     signal.signal(signal.SIGINT, _restore_and_exit)
@@ -454,7 +450,7 @@ def main() -> int:
             else:
                 results[name] = total
     finally:
-        restore_platformio_ini(keep_backup=args.keep_platformio_ini_backup)
+        restore_project_ini(keep_backup=args.keep_ini_backup)
 
     print()
     print("=== Measured comparison ===")
