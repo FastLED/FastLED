@@ -304,7 +304,7 @@ def _get_emcc_version_signature() -> str:
             errors="replace",
         )
         version_text = ((result.stdout or "") + (result.stderr or "")).strip()
-    except OSError:
+    except (OSError, RuntimeError):
         version_text = "ERROR"
 
     _cached_emcc_version_key = emcc
@@ -1095,7 +1095,7 @@ def _fast_compile(
 
     try:
         result = RunningProcess.run(cmd, cwd=str(PROJECT_ROOT))
-    except OSError:
+    except (OSError, RuntimeError):
         # Executable not found (e.g. stale cache with bad path) — fall back
         cache_file.unlink(missing_ok=True)
         cache_key_file.unlink(missing_ok=True)
@@ -1479,7 +1479,7 @@ def _fast_link(
     print("[WASM] Fast linking (wasm-ld only)...")
     try:
         result = RunningProcess.run(cmd, cwd=str(PROJECT_ROOT))
-    except OSError:
+    except (OSError, RuntimeError):
         # Executable not found (e.g. stale cache with bad path) — fall back
         _clear_link_cache(build_dir)
         return False

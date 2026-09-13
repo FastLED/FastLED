@@ -164,7 +164,7 @@ def assert_fbuild_has_symbols() -> None:
             encoding="utf-8",
             errors="replace",
         ).stdout
-    except FileNotFoundError as e:
+    except (FileNotFoundError, RuntimeError) as e:
         raise SystemExit(
             "Bloat: `fbuild` not on PATH. Run from a uv-managed shell "
             "(`uv run bash bloat <board>` or set the project venv)."

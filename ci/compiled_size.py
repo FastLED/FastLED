@@ -86,7 +86,7 @@ def _run_size_on_elf(size_tool: Path, elf: Path) -> int | None:
             encoding="utf-8",
             errors="replace",
         )
-    except (FileNotFoundError, OSError):
+    except (FileNotFoundError, OSError, RuntimeError):
         return None
     output = (result.stdout or "") + "\n" + (result.stderr or "")
     return _parse_size_tool_text(output)

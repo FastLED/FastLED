@@ -1297,11 +1297,12 @@ def _package_tool(package: str, executable: str) -> Path:
         if located:
             return Path(located)
     # fbuild caches toolchains under ~/.fbuild/<profile>/cache/toolchains/
-    # <package>/<hash>/<version>/bin/. `package` names the toolchain
-    # directory there.
+    # <package>[-suffix]/<hash>/<version>/.../bin/. `package` is the prefix of
+    # the toolchain directory there (toolchain-xtensa-esp-elf,
+    # toolchain-gccarmnoneeabi-teensy, ...).
     for toolchain_root in sorted(Path.home().glob(".fbuild/*/cache/toolchains")):
         for name in names:
-            for candidate in sorted(toolchain_root.glob(f"{package}/**/bin/{name}")):
+            for candidate in sorted(toolchain_root.glob(f"{package}*/**/bin/{name}")):
                 if candidate.is_file():
                     return candidate
     raise RuntimeError(
@@ -1313,7 +1314,7 @@ def _package_tool(package: str, executable: str) -> Path:
 def _target_tools(target: str) -> TargetTools:
     if target == "xtensa-esp32":
         prefix = "xtensa-esp32-elf"
-        package = "toolchain-xtensa-esp32"
+        package = "toolchain-xtensa-esp"
         flags: list[str] = [
             "-DFL_CODEC_CPU_CODEGEN_ESP_TYPES",
             "-D__thumb__",

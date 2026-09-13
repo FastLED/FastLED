@@ -63,6 +63,27 @@ class TestModuleReferencesAreBanned:
         assert _codes(src) == ["SRC007"]
 
 
+class TestAliases:
+    def test_import_as_alias_is_seen_through(self) -> None:
+        src = """
+        import subprocess as sp
+        sp.run(["ls"])
+        x = sp.PIPE
+        """
+        assert _codes(src) == ["SRC007", "SRC001", "SRC007", "SRC007"]
+
+    def test_os_alias_is_seen_through(self) -> None:
+        assert _codes("import os as o\no.system('ls')\n") == ["SRC006"]
+
+    def test_from_os_import_system(self) -> None:
+        src = """
+        from os import system as sh, popen
+        sh("ls")
+        popen("ls").read()
+        """
+        assert _codes(src) == ["SRC006", "SRC006", "SRC006"]
+
+
 class TestOsSpawns:
     def test_os_system_is_flagged(self) -> None:
         assert _codes("os.system('ls')\n") == ["SRC006"]

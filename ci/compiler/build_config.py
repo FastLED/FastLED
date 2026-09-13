@@ -115,6 +115,35 @@ def _resolve_tool_path(value: Any, extra_path: Optional[str] = None) -> Optional
     return None
 
 
+def _target_triple(flags: list[str]) -> Optional[str]:
+    """`--target=<triple>` / `-target <triple>` from a compile command, if any."""
+    for i, flag in enumerate(flags):
+        if flag.startswith("--target="):
+            return flag[len("--target=") :]
+        if flag in ("-target", "--target") and i + 1 < len(flags):
+            return flags[i + 1]
+    return None
+
+
+def _gnu_toolchain_bin_for_target(triple: Any) -> Optional[Path]:
+    """bin/ dir of an fbuild-cached GNU toolchain for ``triple`` (e.g.
+    ``xtensa-esp-elf``), found by its ``<triple>-gcc``; None when absent."""
+    if not isinstance(triple, str) or not triple:
+        return None
+    try:
+        for gcc in sorted(
+            Path.home().glob(f".fbuild/*/cache/toolchains/*/**/bin/{triple}-gcc")
+        ):
+            if gcc.is_file():
+                return gcc.parent
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except OSError:
+        return None
+    return None
+
+
 def insert_tool_aliases(
     meta_json: dict[str, dict[str, Any]], overwrite: bool = False
 ) -> None:
@@ -141,9 +170,19 @@ def insert_tool_aliases(
         if cc_path is not None:
             cc_base = cc_path.name
             if "clang" in cc_base:
-                use_llvm = True
-                tool_bin_dir = cc_path.parent
-                tool_suffix = cc_path.suffix if cc_path.suffix == ".exe" else ""
+                # fbuild drives the ESP32 family through a bare `clang
+                # --target=<triple>`; the matching GNU binutils (which can
+                # disassemble xtensa/riscv where host llvm-objdump cannot)
+                # live in fbuild's toolchain cache. Prefer those, fall back
+                # to the llvm-* tools next to clang.
+                gnu_bin = _gnu_toolchain_bin_for_target(env.get("target"))
+                if gnu_bin is not None:
+                    tool_bin_dir = gnu_bin
+                    tool_prefix = f"{env['target']}-"
+                else:
+                    use_llvm = True
+                    tool_bin_dir = cc_path.parent
+                    tool_suffix = cc_path.suffix if cc_path.suffix == ".exe" else ""
             elif "gcc" in cc_base:
                 tool_bin_dir = cc_path.parent
                 tool_prefix = cc_base.split("gcc")[0]
@@ -293,6 +332,7 @@ def _synthesize_build_info_from_compile_commands(
         "link_flags": [],
         "prog_path": str((out_dir / "firmware.elf").resolve()),
         "build_dir": str(out_dir.resolve()),
+        "target": _target_triple(cxx_args[1:]) or _target_triple(c_args[1:]),
         "source": "fbuild compile_commands.json",
     }
     return {board.board_name: env_block}

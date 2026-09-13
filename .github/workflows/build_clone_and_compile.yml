@@ -54,13 +54,8 @@ jobs:
           fbuild-version: latest
           cache-key-extra: clone-and-compile-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml') }}
 
-      # A fresh clone must build the root project as-is: every env in the
-      # root platformio.ini goes through fbuild, the only board build backend.
+      # A fresh clone must build the root project as-is: fbuild, the only
+      # board build backend, reads the root platformio.ini and builds its
+      # default_envs (esp32s3), exactly what this job validated before.
       - name: Build root project with fbuild
-        run: |
-          set -euo pipefail
-          for env in $(sed -nE 's/^\[env:([^]]+)\]/\1/p' platformio.ini); do
-            echo "::group::fbuild build --environment $env"
-            fbuild build --environment "$env"
-            echo "::endgroup::"
-          done
+        run: fbuild build

@@ -7,7 +7,7 @@ import os
 import sys
 from typing import Any, cast
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 from ci.lint_cpp.rust_binary_cache import ensure_rust_lint_binary
 from ci.util.check_files import CheckerResults
@@ -43,7 +43,8 @@ def run_rust_linter(files: list[str] | None) -> dict[str, CheckerResults]:
     result = RunningProcess.run(
         cmd,
         cwd=str(PROJECT_ROOT),
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         check=False,
         timeout=300,
         env=env,

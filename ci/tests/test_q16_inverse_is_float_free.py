@@ -18,6 +18,9 @@ name would make the check pass by disassembling nothing.
 from __future__ import annotations
 
 import re
+
+
+kSymbolHeader = re.compile(r"^[0-9a-f]+ <.+>:$")
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -282,7 +285,9 @@ def _helpers_called(objdump: str, obj: Path, symbol: str) -> set[str]:
             inside = True
             continue
         if inside:
-            if not line.strip():
+            # RunningProcess drops blank lines from captured output, so the
+            # next symbol header is the reliable end of this body.
+            if not line.strip() or kSymbolHeader.match(line):
                 break
             body.append(line)
     if not body:

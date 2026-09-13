@@ -403,6 +403,7 @@ def check_iwyu_available() -> tuple[bool, str]:
     except (
         CalledProcessError,
         FileNotFoundError,
+        RuntimeError,
         TimeoutExpired,
     ):
         pass
@@ -429,6 +430,7 @@ def check_iwyu_available() -> tuple[bool, str]:
     except (
         CalledProcessError,
         FileNotFoundError,
+        RuntimeError,
         TimeoutExpired,
     ):
         pass
@@ -566,7 +568,7 @@ def run_iwyu_against_compile_db(
 
         handle_keyboard_interrupt(ki)
         raise
-    except FileNotFoundError as e:
+    except (FileNotFoundError, RuntimeError) as e:
         print(
             "ERROR: fbuild IWYU mode requires `uv run clang-tool-chain-iwyu-tool`, "
             f"but the command could not be started: {e}",

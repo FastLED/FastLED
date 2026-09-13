@@ -86,7 +86,7 @@ DEFAULT_EXCLUDES = (
 )
 
 # Regex pre-filter: quickly skip files that cannot contain a finding.
-_PREFILTER_RE = re.compile(r"subprocess|os\s*\.\s*(?:system|popen)\s*\(|RunningProcess")
+_PREFILTER_RE = re.compile(r"subprocess|\b(?:system|popen)\s*\(|RunningProcess")
 
 _MESSAGES = {
     "SRC001": (
@@ -140,6 +140,12 @@ class SubprocessVisitor(ast.NodeVisitor):
         # Lines already reported for SRC007 so a `subprocess.run(...)` call
         # yields SRC001 plus one SRC007, not two.
         self._module_ref_lines: set[int] = set()
+        # Names bound to the banned modules in this file, so `import
+        # subprocess as sp` / `import os as o` are seen through.
+        self._subprocess_names: set[str] = {"subprocess"}
+        self._os_names: set[str] = {"os"}
+        # Bare names bound to os.system / os.popen by `from os import ...`.
+        self._os_spawn_names: set[str] = set()
 
     # -- imports ----------------------------------------------------------
 
@@ -147,18 +153,27 @@ class SubprocessVisitor(ast.NodeVisitor):
         for alias in node.names:
             if alias.name == "subprocess" or alias.name.startswith("subprocess."):
                 self._add_module_ref(node.lineno)
+                self._subprocess_names.add(alias.asname or alias.name.split(".")[0])
+            elif alias.name == "os":
+                self._os_names.add(alias.asname or "os")
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
         module = node.module or ""
         if module == "subprocess" or module.startswith("subprocess."):
             self._add_module_ref(node.lineno)
+        elif module == "os":
+            spawn_names = [a for a in node.names if a.name in ("system", "popen")]
+            if spawn_names:
+                self._add(node.lineno, "SRC006")  # once per import line
+                for alias in spawn_names:
+                    self._os_spawn_names.add(alias.asname or alias.name)
         self.generic_visit(node)
 
     # -- attribute references (subprocess.PIPE, subprocess.TimeoutExpired) --
 
     def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
-        if isinstance(node.value, ast.Name) and node.value.id == "subprocess":
+        if isinstance(node.value, ast.Name) and node.value.id in self._subprocess_names:
             self._add_module_ref(node.lineno)
         self.generic_visit(node)
 
@@ -205,9 +220,11 @@ class SubprocessVisitor(ast.NodeVisitor):
     def _is_os_spawn(self, node: ast.Call) -> bool:
         """True for `os.system(...)` / `os.popen(...)`."""
         func = node.func
+        if isinstance(func, ast.Name):
+            return func.id in self._os_spawn_names
         if not isinstance(func, ast.Attribute):
             return False
-        if not (isinstance(func.value, ast.Name) and func.value.id == "os"):
+        if not (isinstance(func.value, ast.Name) and func.value.id in self._os_names):
             return False
         return func.attr in ("system", "popen")
 
@@ -216,7 +233,9 @@ class SubprocessVisitor(ast.NodeVisitor):
         func = node.func
         if not isinstance(func, ast.Attribute):
             return None
-        if not (isinstance(func.value, ast.Name) and func.value.id == "subprocess"):
+        if not (
+            isinstance(func.value, ast.Name) and func.value.id in self._subprocess_names
+        ):
             return None
         return func.attr
 
