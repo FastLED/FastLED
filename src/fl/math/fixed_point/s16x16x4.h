@@ -5,7 +5,7 @@
 
 #include "fl/math/simd.h"
 #include "fl/math/fixed_point/s16x16.h"
-#include "fl/math/sin32.h"
+#include "fl/math/sin32_simd.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/align.h"
 // Pulled in at file scope, not through simd_ops.h below: that include sits

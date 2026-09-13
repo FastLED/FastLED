@@ -37,7 +37,6 @@ def find_sources_for_example(ino_file: Path, project_root: Path) -> list[str]:
     excluded_dirs: set[str] = {
         ".git",
         "__pycache__",
-        ".pio",
         ".vscode",
         "fastled_js",
         "build",

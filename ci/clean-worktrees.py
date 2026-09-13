@@ -23,12 +23,13 @@ import argparse
 import os
 import shutil
 import stat
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Callable
+
+from running_process import PIPE, CompletedProcess, RunningProcess
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -52,13 +53,13 @@ class RemovalResult:
     error: str  # empty on success
 
 
-def run_git(args: list[str], cwd: Path | None) -> subprocess.CompletedProcess[str]:
+def run_git(args: list[str], cwd: Path | None) -> CompletedProcess[str]:
     """Run a git command and return the completed process (no raise)."""
-    return subprocess.run(
+    return RunningProcess.run(
         ["git", *args],
         cwd=str(cwd) if cwd else None,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         check=False,
@@ -211,10 +212,10 @@ def remove_worktree(wt: Path) -> RemovalResult:
             method="failed",
             error=f"git remove failed and clud not on PATH: {err}",
         )
-    trash = subprocess.run(
+    trash = RunningProcess.run(
         [clud, "trash", "--cross-volume", str(wt)],
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         check=False,

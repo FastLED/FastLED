@@ -17,7 +17,6 @@ import base64
 import json
 import os
 import shutil
-import subprocess
 import tempfile
 import urllib.request
 from dataclasses import dataclass
@@ -25,6 +24,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from colorama import Fore, Style
+from running_process import RunningProcess
 
 
 if TYPE_CHECKING:
@@ -336,7 +336,7 @@ async def run_decode_autoresearch(decode_path: str) -> int:
             print(f"{Fore.RED}Error: 'uv' not found in PATH{Style.RESET_ALL}")
             return 1
 
-        result = subprocess.run(
+        result = RunningProcess.run(
             [uv_exe, "run", "test.py", "decode_file", "--cpp"],
             cwd=str(project_root),
         )

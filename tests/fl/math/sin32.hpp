@@ -1,4 +1,5 @@
 #include "fl/math/sin32.h"
+#include "fl/math/sin32_simd.h"
 #include "test.h"
 #include "fl/stl/int.h"
 

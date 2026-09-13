@@ -2,11 +2,11 @@
 
 The size-check CI workflow drives `ci/compiled_size.py` to read the
 firmware size that the just-finished `ci.ci-compile` invocation produced.
-fbuild is the default backend, but the historical `_run_pio_size` priority
-caused the size measurement to fall through to a *fresh* PlatformIO
-compile — which re-links without fbuild's `.eh_frame` stripping and
-inflates the reported size by ~169 KB on esp32dev. These tests pin the
-new priority order so a future refactor can't silently break it again.
+fbuild is the only backend; a historical fallback used to re-run a
+different compile and report a binary linked without fbuild's `.eh_frame`
+stripping, inflating the reported size by ~169 KB on esp32dev. These tests
+pin the priority order (ELF via the `size` alias first) so a future
+refactor can't silently break it again.
 """
 
 from pathlib import Path
@@ -36,7 +36,7 @@ def test_parse_size_tool_text_handles_empty_output() -> None:
     assert _parse_size_tool_text("error: no input file\n") is None
 
 
-def test_find_size_tool_uses_platformio_alias() -> None:
+def test_find_size_tool_uses_aliases_block() -> None:
     board_info = {"aliases": {"size": "/toolchain/bin/xtensa-size"}}
     assert _find_size_tool(board_info) == Path("/toolchain/bin/xtensa-size")
 
@@ -78,31 +78,30 @@ def test_find_fbuild_elf_probes_arm_layout_without_env_segment(
     fbuild_dir = tmp_path / ".fbuild" / "build" / "release"
     elf = _make_fake_elf(fbuild_dir / "firmware.elf")
 
-    board_info = {"prog_path": "stale.pio/build/lpc/firmware.elf"}
+    board_info = {"prog_path": "stale/build/lpc/firmware.elf"}
     assert _find_fbuild_elf(board_info, tmp_path) == elf
 
 
-def test_find_fbuild_elf_probes_pio_wrapper_layout_with_env_segment(
+def test_find_fbuild_elf_probes_layout_with_env_segment(
     tmp_path: Path,
 ) -> None:
-    """`PioCompiler._build_fbuild_sync` path (ESP32 / Arduino): the ELF lands
-    at `<build_dir>/.fbuild/build/<env>/release/firmware.elf`. This is the
-    layout `_artifacts_dir` reports for `use_fbuild=True` in `ci/compiler/pio.py`
-    — and the one that broke the first attempt at this fix when the probe
-    only looked at `<build_dir>/.fbuild/build/release/firmware.elf`.
+    """ESP32 / Arduino path: the ELF lands at
+    `<build_dir>/.fbuild/build/<env>/release/firmware.elf`. This is the
+    layout that broke the first attempt at this fix when the probe only
+    looked at `<build_dir>/.fbuild/build/release/firmware.elf`.
     """
     fbuild_dir = tmp_path / ".fbuild" / "build" / "esp32dev" / "release"
     elf = _make_fake_elf(fbuild_dir / "firmware.elf")
 
-    board_info = {"prog_path": "stale.pio/build/esp32dev/firmware.elf"}
+    board_info = {"prog_path": "stale/build/esp32dev/firmware.elf"}
     assert _find_fbuild_elf(board_info, tmp_path) == elf
 
 
 def test_find_fbuild_elf_returns_none_when_no_fbuild_artifact(tmp_path: Path) -> None:
-    """A pure PlatformIO build leaves `.fbuild/` absent — return None so the
-    caller falls through to `_run_pio_size`.
+    """No `.fbuild/` tree at all — return None so the caller falls through
+    to `prog_size`.
     """
-    board_info = {"prog_path": str(tmp_path / ".pio" / "build" / "x" / "firmware.elf")}
+    board_info = {"prog_path": str(tmp_path / "build" / "x" / "firmware.elf")}
     assert _find_fbuild_elf(board_info, tmp_path) is None
 
 

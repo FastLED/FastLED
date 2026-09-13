@@ -17,7 +17,7 @@
 #include "fl/stl/compiler_control.h"
 
 // This is used by fastled because we have extremely strict compiler settings.
-// Stock Arduino/Platformio does not need these.
+// Stock Arduino builds do not need these.
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-conversion)
 FL_DISABLE_WARNING(sign-conversion)

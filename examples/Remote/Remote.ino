@@ -22,6 +22,7 @@
 /// @see fl/remote/remote.h for full API documentation
 
 #include <FastLED.h>
+#include "fl/remote/remote.h"  // opt-in: no longer pulled in by FastLED.h
 
 #define NUM_LEDS 10
 #define DATA_PIN 3

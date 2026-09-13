@@ -20,10 +20,12 @@ Usage:
 """
 
 import argparse
-import subprocess
 import sys
 import time
 from pathlib import Path
+
+from running_process import RunningProcess
+from running_process.command_render import list2cmdline
 
 from ci.wasm_flags import get_sketch_compile_flags_dict
 from ci.wasm_tools import get_emcc
@@ -71,7 +73,7 @@ def ensure_library_built(
     if unity_chunks > 0:
         cmd.extend(["--unity-chunks", str(unity_chunks)])
 
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
     return result.returncode == 0
 
 
@@ -218,9 +220,9 @@ def compile_object(
 
     if verbose:
         print(f"Compiling {source_file.name}...")
-        print(f"Command: {subprocess.list2cmdline(cmd)}")
+        print(f"Command: {list2cmdline(cmd)}")
 
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
     return result.returncode == 0
 
 
@@ -352,9 +354,9 @@ def compile_wasm(
         )
 
         if verbose:
-            print(f"Link command: {subprocess.list2cmdline(link_cmd)}")
+            print(f"Link command: {list2cmdline(link_cmd)}")
 
-        result = subprocess.run(link_cmd, cwd=PROJECT_ROOT)
+        result = RunningProcess.run(link_cmd, cwd=PROJECT_ROOT)
         phase4_time = time.time() - phase4_start
 
         if result.returncode == 0:

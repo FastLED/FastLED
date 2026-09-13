@@ -12,6 +12,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"  // for uint32_t, uint8_t
+#include "fl/remote/remote.h"  // for fl::Remote (no longer provided by FastLED.h)
 #include "fl/channels/manager.h"  // for DriverInfo
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"

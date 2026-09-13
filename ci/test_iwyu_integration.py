@@ -6,7 +6,6 @@ This tests that the IWYU tool is properly integrated into the build system
 and can be invoked correctly.
 """
 
-import subprocess
 import sys
 import unittest
 from pathlib import Path

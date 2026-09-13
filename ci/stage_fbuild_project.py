@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Stage a FastLED example as an fbuild project without compiling it.
 
-fbuild currently consumes a PlatformIO-compatible project manifest, but this
-entrypoint never invokes PlatformIO. It only synthesizes that manifest and
-copies the selected sketch/library sources so a native fbuild command such as
+This entrypoint only synthesizes fbuild's project manifest and copies the
+selected sketch/library sources so a native fbuild command such as
 ``fbuild test-emu`` can own the complete build and emulator lifecycle.
 """
 
@@ -11,9 +10,9 @@ import argparse
 from pathlib import Path
 
 from ci.boards import create_board
+from ci.compiler.board_compiler import init_fbuild_project
 from ci.compiler.compiler import InitResult
-from ci.compiler.path_manager import FastLEDPaths, resolve_project_root
-from ci.compiler.pio import init_fbuild_project
+from ci.compiler.path_manager import FastLEDPaths, board_build_dir
 
 
 def stage_fbuild_project(
@@ -25,9 +24,7 @@ def stage_fbuild_project(
 ) -> InitResult:
     """Prepare one example for fbuild and return its staged project path."""
     board = create_board(board_name)
-    target_dir = build_dir or (
-        resolve_project_root() / ".build" / "fbuild" / board.board_name
-    )
+    target_dir = build_dir or board_build_dir(board.board_name)
     paths = FastLEDPaths(board.board_name)
     return init_fbuild_project(
         board=board,

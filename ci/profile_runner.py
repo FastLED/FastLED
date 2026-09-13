@@ -16,14 +16,20 @@ directly.
 import argparse
 import json
 import os
-import subprocess
 import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-from running_process import EndOfStream, RunningProcess
+from running_process import (
+    PIPE,
+    CalledProcessError,
+    EndOfStream,
+    ProcessInfo,
+    RunningProcess,
+    TimeoutExpired,
+)
 
 from ci.util.deadlock_detector import handle_hung_test
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -107,7 +113,7 @@ class ProfileRunner:
             print(f"Generating profiler for {self.target}...")
 
         try:
-            subprocess.run(
+            RunningProcess.run(
                 [
                     "uv",
                     "run",
@@ -118,7 +124,7 @@ class ProfileRunner:
                 check=True,
             )
             return True
-        except subprocess.CalledProcessError as e:
+        except CalledProcessError as e:
             print(f"Error generating profiler: {e}")
             return False
 
@@ -205,55 +211,49 @@ class ProfileRunner:
             env["LD_LIBRARY_PATH"] = dll_dir + os.pathsep + env["LD_LIBRARY_PATH"]
         else:
             env["LD_LIBRARY_PATH"] = dll_dir
-        # Raw Popen is deliberate here: the timeout path has to attach a
-        # debugger to a *live* PID before killing it, which neither
-        # subprocess.run nor RunningProcess.run expose. See the drain note
-        # below for why communicate() rather than a poll loop.
-        proc = subprocess.Popen(  # noqa: SRC002 - needs live PID on timeout
+        start_time = time.time()
+        hung_pid: list[int] = []
+
+        def _on_timeout(info: ProcessInfo) -> None:
+            # RunningProcess invokes this with the *live* PID before it kills
+            # the child, so the debugger gets a running process to inspect.
+            elapsed = time.time() - start_time
+            print(f"\n🚨 TIMEOUT EXCEEDED after {elapsed:.1f}s!")
+            print(f"📍 Attaching debugger to PID {info.pid}...")
+            hung_pid.append(info.pid)
+            handle_hung_test(info.pid, self.test_name, timeout_seconds)
+
+        # RunningProcess drains stdout and stderr concurrently, so a test
+        # emitting more than the ~64 KB pipe buffer never blocks in write()
+        # and gets misreported as hung.
+        proc = RunningProcess(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+            capture=True,
+            stderr=PIPE,
             # Test binaries print non-ASCII (arrows, box drawing) and this
             # runs on Windows, where the locale codec is cp1252.
             encoding="utf-8",
             errors="replace",
             env=env,
+            timeout=timeout_seconds,
+            on_timeout=_on_timeout,
         )
+        pid = proc.pid
 
-        start_time = time.time()
-
-        # communicate() drains stdout and stderr concurrently (reader threads
-        # on Windows, selectors on POSIX) and enforces the timeout itself.
-        #
-        # This previously polled in a sleep loop and only read the pipes after
-        # the child had already exited. Both pipes were left unattended, so a
-        # test emitting more than the ~64 KB pipe buffer blocked forever in
-        # write(); poll() then never returned, and the loop ran to the full
-        # timeout. The harness would report TIMEOUT and attach a debugger to a
-        # process that was not hung at all -- it was blocked on us not reading.
         try:
-            stdout, stderr = proc.communicate(timeout=timeout_seconds)
-        except subprocess.TimeoutExpired:
-            # The child is still alive here: communicate() does not kill on
-            # timeout, so the debugger gets a live process to inspect.
-            pid = proc.pid
-            elapsed = time.time() - start_time
-            print(f"\n🚨 TIMEOUT EXCEEDED after {elapsed:.1f}s!")
-            print(f"📍 Attaching debugger to PID {pid}...")
-
-            handle_hung_test(pid, self.test_name, timeout_seconds)
-
-            proc.kill()
-            proc.communicate()  # reap and close the pipes we opened
-
+            returncode = cast(int, proc.wait(timeout=timeout_seconds))
+        except TimeoutError:
+            # _on_timeout already ran and RunningProcess has killed and reaped
+            # the child.
             return RunWithTimeoutResult(
-                success=False, output="TIMEOUT", pid_if_timeout=pid
+                success=False,
+                output="TIMEOUT",
+                pid_if_timeout=hung_pid[0] if hung_pid else pid,
             )
 
-        output = stdout + stderr
+        output = str(proc.stdout) + str(proc.stderr)
         return RunWithTimeoutResult(
-            success=proc.returncode == 0, output=output, pid_if_timeout=None
+            success=returncode == 0, output=output, pid_if_timeout=None
         )
 
     def run_benchmark(self) -> bool:
@@ -318,11 +318,11 @@ class ProfileRunner:
                     )
                     print(summary)
 
-            except subprocess.TimeoutExpired:
+            except (TimeoutExpired, TimeoutError):
                 print("\n🚨 TIMEOUT EXCEEDED!")
                 return False
 
-            except subprocess.CalledProcessError as e:
+            except CalledProcessError as e:
                 print(f"ERROR: {e}")
                 return False
 
@@ -337,7 +337,7 @@ class ProfileRunner:
         print("\nAnalyzing results...")
 
         try:
-            subprocess.run(
+            RunningProcess.run(
                 [
                     "uv",
                     "run",
@@ -348,7 +348,7 @@ class ProfileRunner:
                 check=True,
             )
             return True
-        except subprocess.CalledProcessError as e:
+        except CalledProcessError as e:
             print(f"Error analyzing results: {e}")
             return False
 
@@ -362,7 +362,7 @@ class ProfileRunner:
             return False
 
         try:
-            subprocess.run(
+            RunningProcess.run(
                 [
                     "uv",
                     "run",
@@ -373,7 +373,7 @@ class ProfileRunner:
                 check=True,
             )
             return True
-        except subprocess.CalledProcessError as e:
+        except CalledProcessError as e:
             print(f"Error running callgrind: {e}")
             return False
 

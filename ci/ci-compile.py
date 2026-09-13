@@ -5,8 +5,7 @@ from __future__ import annotations
 """
 FastLED Example Compiler
 
-Streamlined compiler that uses the PioCompiler to build FastLED examples for various boards.
-This replaces the previous complex compilation system with a simpler approach using the Pio compiler.
+Builds FastLED examples for boards through ``BoardCompiler`` (fbuild).
 
 ESP32 QEMU builds use ``ci/stage_fbuild_project.py`` followed by fbuild's
 native ``test-emu`` command. This compiler does not assemble emulator images.
@@ -23,8 +22,8 @@ if TYPE_CHECKING:
 
 # handle_docker_compilation() removed in #2812 — compilation Docker has been
 # decommissioned. The niteris/fastled-compiler-* image family that wrapped
-# `bash compile --docker` was a stop-gap against PlatformIO self-poisoning;
-# fbuild does not self-poison and has been the default backend for some time.
+# `bash compile --docker` was a stop-gap against the previous backend
+# self-poisoning its package cache; fbuild does not.
 
 
 def _wasm_fast_path() -> int | None:
@@ -199,10 +198,8 @@ def main() -> int:
             log_failures=config.log_failures,
             max_failures=config.max_failures,
             wasm_run=config.wasm_run,
-            global_cache_dir=config.global_cache_dir,
             skip_filters=config.skip_filters,
             no_parallel=config.no_parallel,
-            backend=config.backend,
         )
 
     # The "auto-detect Docker availability + force --local on GitHub Actions"
@@ -241,7 +238,7 @@ def main() -> int:
         finally:
             sys.argv = saved_argv
 
-    # --- PlatformIO path: lazy-import heavy deps (~350ms) ---
+    # --- board path: lazy-import heavy deps (~350ms) ---
     from ci.compiler.board_example_utils import resolve_example_path
     from ci.compiler.compilation_orchestrator import (
         compile_board_examples,
@@ -294,25 +291,6 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(examples)} examples"
     )
 
-    # Signal the orchestrator that the user has explicitly opted into the
-    # PlatformIO comparison backend. Without this env var, any programmatic
-    # ``use_fbuild=False`` would be rejected by
-    # ``_assert_explicit_platformio_backend`` — see #3279 (Phase 3).
-    from ci.compiler.argument_parser import BuildBackend as _BuildBackend
-    from ci.compiler.compilation_orchestrator import (
-        PLATFORMIO_BACKEND_OPT_IN_ENV as _PLATFORMIO_OPT_IN,
-    )
-
-    if config.backend == _BuildBackend.PLATFORMIO:
-        os.environ[_PLATFORMIO_OPT_IN] = "1"
-        print(
-            yellow_text(
-                "⚠️  --backend platformio: PlatformIO `pio run` is a "
-                "comparison-only tool. Use ONLY to compare fbuild output "
-                "and find gaps; production CI always uses fbuild."
-            )
-        )
-
     compilation_errors: list[str] = []
     failed_example_names: list[str] = []
     failure_logs_dir: Optional[Path] = config.log_failures
@@ -320,18 +298,14 @@ def main() -> int:
 
     # Compile for each board
     for board in boards:
-        from ci.compiler.argument_parser import BuildBackend
-
         result = compile_board_examples(
             board=board,
             examples=examples,
             defines=defines,
             verbose=config.verbose,
-            global_cache_dir=config.global_cache_dir,
             extra_packages=config.extra_packages if config.extra_packages else None,
             max_failures=config.max_failures,
             skip_filters=config.skip_filters,
-            use_fbuild=(config.backend == BuildBackend.FBUILD),
         )
 
         if not result.ok:
@@ -384,9 +358,9 @@ def main() -> int:
                     str(config.output_path), sketch_name, board
                 )
                 if copy_validate_result.is_valid:
-                    # Find the build directory for this board
-                    project_root = Path(__file__).parent.parent.resolve()
-                    build_dir = project_root / ".build" / "pio" / board.board_name
+                    from ci.compiler.path_manager import board_build_dir
+
+                    build_dir = board_build_dir(board.board_name)
 
                     if not copy_build_artifact(
                         build_dir,
@@ -439,11 +413,14 @@ def main() -> int:
             import json
             import shutil
 
+            from ci.compiler.path_manager import board_build_dir
+
             board_name = boards[0].board_name
             example_name = examples[0]
-            # Build info is generated per-example at .build/pio/<board>/build_info_<example>.json
+            # Build info is generated per-example at
+            # .build/fbuild/<board>/build_info_<example>.json
             build_info_path = (
-                Path(".build") / "pio" / board_name / f"build_info_{example_name}.json"
+                board_build_dir(board_name) / f"build_info_{example_name}.json"
             )
 
             try:

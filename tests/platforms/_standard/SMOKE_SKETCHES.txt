@@ -3,7 +3,7 @@
 # This file is the canonical list of sketches that EVERY supported board must
 # compile in CI. The set is intentionally small and representative — one sketch
 # per "category" of FastLED feature surface, chosen to catch the most common
-# regression classes across all backends (fbuild, PlatformIO, arduino-cli):
+# regression classes across all backends (fbuild, arduino-cli):
 #
 #   Blink             — basic clockless one-pixel sanity (no APIs beyond
 #                       FastLED.addLeds + .show()). If this fails, the toolchain
@@ -33,9 +33,6 @@
 # live under tests/platforms/<board>/ as today.
 #
 # Consumed by: ci/standardized_smoke_sketches.py
-#
-# Part B (opt-in PlatformIO comparison job in build_template.yml) is deferred
-# to a follow-up PR; this manifest is the prerequisite that unblocks it.
 
 Blink
 XYMatrix

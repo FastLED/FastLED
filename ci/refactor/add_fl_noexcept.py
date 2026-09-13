@@ -20,10 +20,11 @@ Usage:
 
 import argparse
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -104,11 +105,13 @@ def _run_clang_query(
         f'isExpansionInFileMatching("{file_regex}"))'
     )
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [clang_query, tu, "--"] + _COMPILER_ARGS,
         input=query,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
         cwd=str(PROJECT_ROOT),
         timeout=300,
     )

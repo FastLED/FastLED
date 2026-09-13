@@ -15,11 +15,12 @@ Tests:
 
 import json
 import multiprocessing
-import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 from ci.util.dependency_loader import DependencyManifest
 
@@ -59,10 +60,10 @@ class CacheLintStressTest:
 
         script = scripts[cache_type]
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["uv", "run", "python", script, "check"],
-                capture_output=True,
-                text=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 encoding="utf-8",
                 errors="replace",
                 timeout=10,
@@ -90,10 +91,10 @@ class CacheLintStressTest:
 
         script = scripts[cache_type]
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["uv", "run", "python", script, "success"],
-                capture_output=True,
-                text=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 encoding="utf-8",
                 errors="replace",
                 timeout=10,
@@ -342,7 +343,7 @@ def test_cache_performance_all_caches(test: CacheLintStressTest) -> None:
         avg_time = elapsed / 10
         times[cache_type] = avg_time
 
-        # More relaxed limits: subprocess + uv overhead is significant
+        # More relaxed limits: process spawn + uv overhead is significant
         # C++ checks 1000+ files so can be slower
         limit = 1.0 if cache_type == "cpp" else 0.5
         if avg_time < limit:
@@ -360,10 +361,10 @@ def _concurrent_cache_check(
 ) -> None:
     """Worker function for concurrent cache check (must be module-level for Windows pickling)."""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["uv", "run", "python", "ci/python_lint_cache.py", "check"],
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
             encoding="utf-8",
             errors="replace",
             timeout=10,

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from running_process import PIPE, RunningProcess
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -76,12 +77,10 @@ def _make_repo(tmp_path: Any, name: str, origin: str) -> str:
     """A real git repo with an origin, so `_repo_at` is exercised rather than
     mocked. The hook shells out to `git config`; a fake would not prove it
     parses what git actually prints."""
-    import subprocess
-
     path = tmp_path / name
     path.mkdir()
-    subprocess.run(["git", "init", "-q"], cwd=path, check=True)  # noqa: SRC001
-    subprocess.run(["git", "remote", "add", "origin", origin], cwd=path, check=True)  # noqa: SRC001
+    RunningProcess.run(["git", "init", "-q"], cwd=path, check=True)
+    RunningProcess.run(["git", "remote", "add", "origin", origin], cwd=path, check=True)
     return str(path)
 
 
@@ -150,12 +149,11 @@ def test_addressor_crash_exits_2_not_1(tmp_path: Any) -> None:
     number that does not exist in the resolved repo all blocked the merge
     while claiming there were review comments to address.
     """
-    import subprocess
     import sys as _sys
 
     addressor = REPO_ROOT / "ci" / "tools" / "coderabbit_addressor.py"
     # A PR number that cannot exist drives `gh api` to fail inside the check.
-    result = subprocess.run(  # noqa: SRC001
+    result = RunningProcess.run(
         [
             _sys.executable,
             str(addressor),
@@ -164,8 +162,8 @@ def test_addressor_crash_exits_2_not_1(tmp_path: Any) -> None:
             "--repo",
             "FastLED/FastLED",
         ],
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         timeout=120,

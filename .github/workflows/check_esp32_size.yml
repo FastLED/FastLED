@@ -34,8 +34,8 @@ jobs:
       # FROZEN SIZE THRESHOLD — DO NOT RAISE TO MAKE CI GREEN.
       #
       # #3870 established that the reported 402252-byte Blink result was the
-      # comparison-only PlatformIO ELF: compiled_size could not find the
-      # fbuild size tool because PlatformIO metadata stores it at
+      # comparison-only legacy-backend ELF: compiled_size could not find the
+      # fbuild size tool because the legacy build metadata stored it at
       # aliases.size, not size_path. The production fbuild ELF is 337355 B
       # with Arduino-ESP32 3.3.11, so Blink is deliberately re-baselined by
       # 10 KB to 340000. Apa102 remains at 330000 after its templated addLeds

@@ -54,6 +54,8 @@ def _assert_guard_skips_poisonous_i2s_header(
         capture_output=True,
         text=True,
         timeout=120,
+        encoding="utf-8",
+        errors="replace",
     )
     assert proc.returncode == 0, (
         f"{platform} preprocessing failed with exit code {proc.returncode}:\n"

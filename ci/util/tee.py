@@ -1,5 +1,5 @@
 """
-StreamTee utility for capturing subprocess output to both file and console.
+StreamTee utility for capturing child-process output to both file and console.
 
 This module provides a thread-safe way to capture compilation output to log files
 while simultaneously displaying it to the console. Inspired by the OutputCollector
@@ -15,7 +15,7 @@ class StreamTee:
     """
     Thread-safe output capture to both file and console.
 
-    Captures subprocess output (stdout + stderr merged) to a file while
+    Captures child-process output (stdout + stderr merged) to a file while
     optionally echoing to console. Designed for capturing compilation errors.
 
     Example:

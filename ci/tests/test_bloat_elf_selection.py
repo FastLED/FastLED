@@ -1,9 +1,10 @@
 """`bash bloat` must analyse the ELF the build produced, not an older one.
 
-`find_elf` used to pick by a fixed layout priority and ignore mtime. The
-layouts coexist under one board directory -- `--build` writes the `.pio` one
-while the `.fbuild` one outranked it -- so a stale artifact could be analysed
-with no indication anything was wrong.
+`find_elf` used to pick by a fixed layout priority and ignore mtime. Several
+fbuild layouts coexist under one board directory (`release/` next to
+`debug/`, the standalone `.fbuild/build/<board>/` tree next to the
+`bash compile` one), so a stale artifact could be analysed with no
+indication anything was wrong.
 
 That is how the command reported five-day-old numbers for a change made
 minutes earlier: two runs across a real code change produced byte-identical
@@ -35,48 +36,46 @@ def _touch(path: Path, mtime: float) -> None:
 @typechecked
 @dataclass(frozen=True, slots=True)
 class Layouts:
-    """The two ELF layouts that coexist under one board directory."""
+    """Two fbuild ELF layouts that coexist under one board directory."""
 
-    fbuild: Path
-    pio: Path
+    release: Path
+    debug: Path
 
 
 class TestFindElfPrefersTheNewest(unittest.TestCase):
     def _layouts(self: "TestFindElfPrefersTheNewest", root: Path) -> Layouts:
-        """The two that coexist in practice, and did here."""
+        board = root / "fbuild" / "esp32s3" / ".fbuild" / "build"
+        return Layouts(
+            release=board / "release" / "firmware.elf",
+            debug=board / "debug" / "firmware.elf",
+        )
 
-        fbuild = root / "pio" / "esp32s3" / ".fbuild" / "build" / "release"
-        pio = root / "pio" / "esp32s3" / ".pio" / "build" / "esp32s3"
-        return Layouts(fbuild=fbuild / "firmware.elf", pio=pio / "firmware.elf")
-
-    def test_the_newer_pio_elf_wins_over_a_stale_fbuild_one(
+    def test_the_newer_debug_elf_wins_over_a_stale_release_one(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             layouts = self._layouts(root)
             now = time.time()
-            _touch(layouts.fbuild, now - 5 * 86400)
-            _touch(layouts.pio, now)
+            _touch(layouts.release, now - 5 * 86400)
+            _touch(layouts.debug, now)
 
-            # Priority alone would return the fbuild one, which is the bug.
-            self.assertEqual(find_elf("esp32s3", root).elf, layouts.pio)
+            # Priority alone would return the release one, which is the bug.
+            self.assertEqual(find_elf("esp32s3", root).elf, layouts.debug)
 
-    def test_the_newer_fbuild_elf_still_wins_when_it_is_newer(
+    def test_the_newer_release_elf_still_wins_when_it_is_newer(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
-        """The change is "newest", not "always prefer PIO"."""
+        """The rule is "newest", not "always prefer debug"."""
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             layouts = self._layouts(root)
             now = time.time()
-            _touch(layouts.pio, now - 5 * 86400)
-            _touch(layouts.fbuild, now)
+            _touch(layouts.debug, now - 5 * 86400)
+            _touch(layouts.release, now)
 
-            location = find_elf("esp32s3", root)
-            self.assertEqual(location.elf, layouts.fbuild)
-            self.assertTrue(location.fbuild_native)
+            self.assertEqual(find_elf("esp32s3", root).elf, layouts.release)
 
     def test_a_missing_build_still_reports_where_it_looked(
         self: "TestFindElfPrefersTheNewest",
@@ -84,7 +83,9 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(SystemExit) as caught:
                 find_elf("esp32s3", Path(tmp))
-            self.assertIn("no firmware.elf found", str(caught.exception))
+            message = str(caught.exception)
+            self.assertIn("no firmware.elf found", message)
+            self.assertIn(str(Path(tmp) / "fbuild" / "esp32s3"), message)
 
 
 class TestFreshnessGuard(unittest.TestCase):
@@ -93,7 +94,7 @@ class TestFreshnessGuard(unittest.TestCase):
     def _location(self: "TestFreshnessGuard", tmp: str, mtime: float) -> ElfLocation:
         elf = Path(tmp) / "firmware.elf"
         _touch(elf, mtime)
-        return ElfLocation(elf=elf, fbuild_native=False)
+        return ElfLocation(elf=elf)
 
     def test_without_build_nothing_is_asserted(self: "TestFreshnessGuard") -> None:
         with tempfile.TemporaryDirectory() as tmp:

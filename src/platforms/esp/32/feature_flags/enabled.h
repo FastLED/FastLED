@@ -114,7 +114,7 @@ FL_EXTERN_C_END
 // so we keep it because "RMT" is specific to ESP32
 // Auto-detect RMT5 based on ESP-IDF version if not explicitly defined
 #if defined(FL_IS_ESP_32C2)
-// The esp32c2 PlatformIO env currently passes -DFASTLED_RMT5=1; force the unsupported backend off.
+// The esp32c2 board env currently passes -DFASTLED_RMT5=1; force the unsupported backend off.
 #undef FASTLED_RMT5
 #define FASTLED_RMT5 0
 #elif !defined(FASTLED_RMT5)

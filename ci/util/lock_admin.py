@@ -213,8 +213,8 @@ Examples:
     parser.add_argument(
         "--cache-dir",
         type=Path,
-        default=Path.home() / ".platformio" / "global_cache",
-        help="Cache directory (default: ~/.platformio/global_cache)",
+        default=Path.home() / ".fastled" / "global_cache",
+        help="Cache directory (default: ~/.fastled/global_cache)",
     )
 
     parser.add_argument(

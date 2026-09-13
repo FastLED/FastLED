@@ -1,13 +1,30 @@
-"""Build configuration for FastLED PlatformIO builds."""
+"""Build configuration and build metadata for fbuild-driven board builds.
+
+Two responsibilities:
+
+1. ``apply_board_specific_config`` writes the per-board project ini that
+   fbuild consumes (``<build_dir>/platformio.ini`` — the file name is the
+   project format fbuild reads).
+2. ``generate_build_info_json_from_existing_build`` writes
+   ``build_info[_<example>].json`` next to it. That file is what the size,
+   symbol, ELF-inspection and MCP tooling read (``prog_path``, ``aliases``,
+   ``cc_flags`` ...). It used to come from a separate project-metadata
+   query that cost 4.3 s per example on top of an fbuild build that already
+   had every fact. Now it comes from fbuild's own outputs, in this order:
+
+   - ``build_info_<env>.json`` that fbuild emits after a link when it knows
+     the toolchain (AVR, ARM, RP2040 today), or
+   - synthesis from ``.fbuild/build/<mode>/compile_commands.json`` and the
+     linked ``firmware.elf`` for every other board (the ESP32 family builds
+     with the LLVM toolchain and gets ``llvm-*`` aliases).
+"""
 
 import json
+import shlex
+import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional
 
-from running_process import EndOfStream, RunningProcess
-
-from ci.compiler.build_utils import get_utf8_env
-from ci.util.create_build_dir import insert_tool_aliases
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
@@ -30,198 +47,327 @@ def _get_project_root() -> Path:
     return _PROJECT_ROOT
 
 
-# NOTE: ``get_root_platformio_build_flags`` was deleted in #3279 Phase 4.
-#
-# The function read root ``platformio.ini`` so that
-# ``ci/compiler/pio.py::_init_platformio_build`` could either merge those
-# flags into the synthesised env (legacy #2664 behaviour) or detect them
-# for the ``FASTLED_FAIL_ON_ROOT_MERGE`` tripwire (#3278). Phase 2 of
-# #3274 made the merge opt-in and Phase 4 confirmed no production caller
-# ever opted in — every CI site passed ``merge_root_platformio=False``
-# and the ``PioCompiler`` constructor default was ``False``.
-#
-# The tripwire-only probe moved to ``ci/compiler/pio.py`` as a private
-# helper (``_probe_root_platformio_build_flags``) co-located with its
-# sole caller. Removing the public function here completes the Phase 4
-# cleanup and shrinks the API surface ``build_config`` exposes to the
-# rest of the codebase.
+# ---------------------------------------------------------------------------
+# Tool aliases
+# ---------------------------------------------------------------------------
+
+# Binutils names as the readers expect them in ``aliases`` (ci/util/tools.py,
+# ci/inspect_elf.py, ci/symbol_analysis_runner.py, mcp_server.py).
+_TOOL_NAMES = [
+    "gcc",
+    "g++",
+    "ar",
+    "objcopy",
+    "objdump",
+    "size",
+    "nm",
+    "ld",
+    "as",
+    "ranlib",
+    "strip",
+    "c++filt",
+    "readelf",
+    "addr2line",
+]
+
+# LLVM spellings for the same tools, used when the compiler is clang.
+_LLVM_TOOL_NAMES = {
+    "gcc": "clang",
+    "g++": "clang++",
+    "ar": "llvm-ar",
+    "objcopy": "llvm-objcopy",
+    "objdump": "llvm-objdump",
+    "size": "llvm-size",
+    "nm": "llvm-nm",
+    "ld": "ld.lld",
+    "as": "llvm-as",
+    "ranlib": "llvm-ranlib",
+    "strip": "llvm-strip",
+    "c++filt": "llvm-cxxfilt",
+    "readelf": "llvm-readelf",
+    "addr2line": "llvm-addr2line",
+}
 
 
-def _override_prog_path_for_fbuild(
-    build_dir: Path, data: dict[str, dict[str, Any]], board: "Board"
-) -> None:
-    """If fbuild produced a fresher ELF than PlatformIO's `prog_path`,
-    rewrite the path to point at the fbuild artifact so symbol/size
-    analysis reads the build we just produced — not whatever an older
-    `pio run` left in `.pio/build/<env>/`.
+def _resolve_tool_path(value: Any, extra_path: Optional[str] = None) -> Optional[Path]:
+    """Turn a compiler path from build metadata into an existing absolute path.
 
-    fbuild emits to `.fbuild/build/<env>/<release|debug>/firmware.elf`,
-    where the subdir is picked by build mode (`fbuild build` defaults to
-    `release/`; `fbuild build --quick` lands in `debug/`). We probe both
-    candidates and pick whichever ELF is newer — that way `--quick`
-    builds get the same staleness override the default mode does.
-
-    No-op when the fbuild directory is absent (pure PlatformIO build),
-    when the PIO ELF is newer than all fbuild candidates (PIO was the
-    active backend), or when the metadata blob has no recognisable
-    environment entry.
+    Accepts absolute paths, paths relative to the cwd, and bare names that
+    resolve on PATH (fbuild invokes the ESP32 LLVM toolchain as plain
+    ``clang``).
     """
-    fbuild_root = build_dir / ".fbuild" / "build"
-    if not fbuild_root.is_dir():
-        return
+    if not value:
+        return None
+    try:
+        candidate = Path(str(value))
+        if candidate.is_absolute() and candidate.exists():
+            return candidate
+        if candidate.exists():
+            return candidate.resolve()
+        which_result = shutil.which(candidate.name or str(candidate), path=extra_path)
+        if which_result:
+            return Path(which_result)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception:
+        return None
+    return None
 
-    if not data:
-        return
 
-    env_name = board.board_name if board.board_name in data else next(iter(data), None)
-    if env_name is None:
-        return
-    env = data[env_name]
+def insert_tool_aliases(
+    meta_json: dict[str, dict[str, Any]], overwrite: bool = False
+) -> None:
+    """Fill ``aliases`` (nm, objdump, c++filt, size, ld ...) for each env.
 
-    # fbuild lays out artifacts under <env>/<release|debug>/firmware.elf.
-    # `fbuild build`           -> release/
-    # `fbuild build --release` -> release/
-    # `fbuild build --quick`   -> debug/
-    # Pick whichever variant is newer so users running --quick still get
-    # a fresh staleness override (Closes #2852).
-    fbuild_elf_candidates = [
-        fbuild_root / env_name / "release" / "firmware.elf",
-        fbuild_root / env_name / "debug" / "firmware.elf",
+    The toolchain bin directory and prefix are derived from ``cc_path``
+    (``arm-none-eabi-gcc`` -> ``arm-none-eabi-``; ``clang`` -> ``llvm-*``).
+    Existing aliases are kept unless ``overwrite`` is set, so fbuild's own
+    values win when it emitted them.
+    """
+    for board in meta_json.keys():
+        env = meta_json[board]
+        aliases: dict[str, Optional[str]] = {}
+        existing = env.get("aliases")
+        if isinstance(existing, dict) and not overwrite:
+            aliases.update({k: v for k, v in existing.items() if v})
+
+        cc_path = _resolve_tool_path(env.get("cc_path"))
+        tool_bin_dir: Optional[Path] = None
+        tool_prefix = ""
+        tool_suffix = ""
+        use_llvm = False
+
+        if cc_path is not None:
+            cc_base = cc_path.name
+            if "clang" in cc_base:
+                use_llvm = True
+                tool_bin_dir = cc_path.parent
+                tool_suffix = cc_path.suffix if cc_path.suffix == ".exe" else ""
+            elif "gcc" in cc_base:
+                tool_bin_dir = cc_path.parent
+                tool_prefix = cc_base.split("gcc")[0]
+                tool_suffix = cc_path.suffix
+
+        for tool in _TOOL_NAMES:
+            if aliases.get(tool):
+                continue
+            name = (
+                _LLVM_TOOL_NAMES[tool] if use_llvm else f"{tool_prefix}{tool}"
+            ) + tool_suffix
+            resolved: Optional[str] = None
+            if tool_bin_dir is not None and (tool_bin_dir / name).exists():
+                resolved = str(tool_bin_dir / name)
+            else:
+                which_result = shutil.which(name)
+                resolved = str(Path(which_result)) if which_result else None
+            aliases[tool] = resolved
+
+        env["aliases"] = aliases
+
+
+# ---------------------------------------------------------------------------
+# build_info.json from fbuild outputs
+# ---------------------------------------------------------------------------
+
+
+def _fbuild_output_dir(build_dir: Path) -> Optional[Path]:
+    """Newest of ``.fbuild/build/{release,debug}`` that holds a firmware.elf."""
+    root = build_dir / ".fbuild" / "build"
+    candidates = [
+        d for d in (root / "release", root / "debug") if (d / "firmware.elf").exists()
     ]
-    existing = [c for c in fbuild_elf_candidates if c.exists()]
-    if not existing:
-        return
-    fbuild_elf = max(existing, key=lambda p: p.stat().st_mtime)
+    if not candidates:
+        return None
+    return max(candidates, key=lambda d: (d / "firmware.elf").stat().st_mtime)
 
-    current_prog_raw = env.get("prog_path")
-    if isinstance(current_prog_raw, str) and current_prog_raw:
-        current_prog = Path(current_prog_raw)
-        # Only override when fbuild's ELF is strictly newer (or PIO's is
-        # missing). A successful `pio run` that beats the most recent
-        # fbuild run should win.
-        if current_prog.exists():
-            try:
-                if current_prog.stat().st_mtime >= fbuild_elf.stat().st_mtime:
-                    return
-            except OSError:
-                pass
 
-    fbuild_elf_str = str(fbuild_elf.resolve())
-    env["prog_path"] = fbuild_elf_str
-    fbuild_bin = fbuild_elf.with_suffix(".bin")
-    if fbuild_bin.exists() and "prog_size" in env:
-        try:
-            env["prog_size"] = fbuild_bin.stat().st_size
-        except OSError:
-            pass
-    print(
-        f"  Pointed prog_path at fbuild artifact: {fbuild_elf_str} "
-        f"(was {current_prog_raw!r})"
+class CompileArgs(NamedTuple):
+    """A compile command split into its flag, define and include parts."""
+
+    flags: list[str]
+    defines: list[str]
+    includes: list[str]
+
+
+def _split_compile_args(args: list[str]) -> CompileArgs:
+    """Split a compile command into flags, defines and includes."""
+    flags: list[str] = []
+    defines: list[str] = []
+    includes: list[str] = []
+    skip_next = False
+    for i, arg in enumerate(args):
+        if skip_next:
+            skip_next = False
+            continue
+        if arg.startswith("-D") and len(arg) > 2:
+            defines.append(arg[2:])
+        elif arg == "-D" and i + 1 < len(args):
+            defines.append(args[i + 1])
+            skip_next = True
+        elif arg.startswith("-I") and len(arg) > 2:
+            includes.append(arg[2:])
+        elif arg == "-I" and i + 1 < len(args):
+            includes.append(args[i + 1])
+            skip_next = True
+        elif arg in ("-o", "-MF", "-MQ", "-MT") and i + 1 < len(args):
+            skip_next = True
+        elif arg in ("-c", "-MMD", "-MD") or arg.endswith(
+            (".c", ".cpp", ".cc", ".cxx", ".ino", ".S", ".s")
+        ):
+            continue
+        else:
+            flags.append(arg)
+    return CompileArgs(flags, defines, includes)
+
+
+def _entry_args(entry: dict[str, Any]) -> list[str]:
+    if isinstance(entry.get("arguments"), list):
+        return [str(a) for a in entry["arguments"]]
+    command = entry.get("command")
+    if isinstance(command, str) and command:
+        return shlex.split(command)
+    return []
+
+
+def _synthesize_build_info_from_compile_commands(
+    build_dir: Path, board: "Board", out_dir: Path
+) -> Optional[dict[str, dict[str, Any]]]:
+    """Derive a build_info env block from fbuild's compile_commands.json + ELF."""
+    cc_json = out_dir / "compile_commands.json"
+    if not cc_json.exists():
+        return None
+    try:
+        entries = json.loads(cc_json.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(entries, list) or not entries:
+        return None
+
+    c_entry: Optional[dict[str, Any]] = None
+    cxx_entry: Optional[dict[str, Any]] = None
+    for entry in entries:
+        file_name = str(entry.get("file", ""))
+        if cxx_entry is None and file_name.endswith((".cpp", ".cc", ".cxx", ".ino")):
+            cxx_entry = entry
+        elif c_entry is None and file_name.endswith(".c"):
+            c_entry = entry
+        if c_entry is not None and cxx_entry is not None:
+            break
+    primary = cxx_entry or c_entry or entries[0]
+    primary_args = _entry_args(primary)
+    if not primary_args:
+        return None
+
+    cxx_args = _entry_args(cxx_entry) if cxx_entry else primary_args
+    c_args = _entry_args(c_entry) if c_entry else primary_args
+    c_parts = _split_compile_args(c_args[1:])
+    cxx_parts = _split_compile_args(cxx_args[1:])
+    cc_flags, defines, includes = c_parts.flags, c_parts.defines, c_parts.includes
+    cxx_flags, cxx_defines, cxx_includes = (
+        cxx_parts.flags,
+        cxx_parts.defines,
+        cxx_parts.includes,
     )
+    for d in cxx_defines:
+        if d not in defines:
+            defines.append(d)
+    for inc in cxx_includes:
+        if inc not in includes:
+            includes.append(inc)
+
+    cc_path = _resolve_tool_path(c_args[0]) or Path(c_args[0])
+    cxx_path = _resolve_tool_path(cxx_args[0]) or Path(cxx_args[0])
+
+    env_block: dict[str, Any] = {
+        "board": board.board_name,
+        "env": board.board_name,
+        "platform": getattr(board, "platform", None),
+        "cc_path": str(cc_path),
+        "cxx_path": str(cxx_path),
+        "cc_flags": cc_flags,
+        "cxx_flags": cxx_flags,
+        "defines": sorted(set(defines)),
+        "includes": includes,
+        "libs": [],
+        "link_flags": [],
+        "prog_path": str((out_dir / "firmware.elf").resolve()),
+        "build_dir": str(out_dir.resolve()),
+        "source": "fbuild compile_commands.json",
+    }
+    return {board.board_name: env_block}
 
 
 def generate_build_info_json_from_existing_build(
     build_dir: Path, board: "Board", example: Optional[str] = None
 ) -> bool:
-    """Generate build_info.json from an existing PlatformIO build.
+    """Write ``build_info[_<example>].json`` for a finished fbuild build.
 
     Args:
-        build_dir: Build directory containing the PlatformIO project
-        board: Board configuration
-        example: Optional example name for generating example-specific build_info_{example}.json
+        build_dir: Project directory fbuild built (holds the project ini and
+            ``.fbuild/build/``)
+        board: Board configuration (``board_name`` is the fbuild env)
+        example: Optional example name; when given the file is
+            ``build_info_<example>.json``, otherwise ``build_info.json``
 
     Returns:
-        True if build_info.json was successfully generated
+        True if the file was written
     """
     try:
-        # Use existing project to get metadata with streaming output
-        # This prevents the process from appearing to stall during library resolution
-        metadata_cmd = ["pio", "project", "metadata", "--json-output"]
-
-        print("Generating build metadata (resolving library dependencies)...")
-
-        metadata_proc = RunningProcess(
-            metadata_cmd,
-            cwd=build_dir,
-            auto_run=True,
-            timeout=None,  # No global timeout - rely on per-line timeout instead
-            env=get_utf8_env(),
-        )
-
-        # Stream output while collecting it for JSON parsing
-        # Show progress indicators for long-running operations
-        # Use per-line timeout of 15 minutes - some packages take a long time to download
-        metadata_lines: list[str] = []
-        while line := metadata_proc.get_next_line(timeout=900):
-            if isinstance(line, EndOfStream):
-                break
-            line_str = str(line)
-            metadata_lines.append(line_str)
-            # Show progress for library resolution operations (not JSON output)
-            # JSON output will be a single line starting with '{'
-            if not line_str.strip().startswith("{"):
-                # This is a progress message from PlatformIO
-                stripped = line_str.strip()
-                if any(
-                    keyword in stripped
-                    for keyword in [
-                        "Resolving",
-                        "Installing",
-                        "Downloading",
-                        "Checking",
-                    ]
-                ):
-                    print(f"  {stripped}")
-
-        metadata_proc.wait()
-
-        if metadata_proc.returncode != 0:
-            # Note: RunningProcess merges stderr into stdout
+        out_dir = _fbuild_output_dir(build_dir)
+        if out_dir is None:
             print(
-                f"Warning: Failed to get metadata for build_info.json (exit code {metadata_proc.returncode})"
+                f"Warning: no fbuild firmware.elf under {build_dir / '.fbuild' / 'build'}; "
+                "build_info.json not written"
             )
             return False
 
-        # Parse and save the metadata
-        try:
-            metadata_output = "".join(metadata_lines)
-            data = json.loads(metadata_output)
+        data: Optional[dict[str, dict[str, Any]]] = None
+        fbuild_info = build_dir / f"build_info_{board.board_name}.json"
+        if fbuild_info.exists():
+            try:
+                loaded = json.loads(fbuild_info.read_text())
+                if isinstance(loaded, dict) and loaded:
+                    data = loaded
+                    source = fbuild_info.name
+            except (OSError, json.JSONDecodeError) as e:
+                print(f"Warning: ignoring unreadable {fbuild_info.name}: {e}")
 
-            # When the build was driven by fbuild (which writes its ELF to
-            # `<build_dir>/.fbuild/build/<env>/release/firmware.elf`), the
-            # `prog_path` we just got from `pio project metadata` still
-            # points at the PlatformIO output path under `.pio/build/<env>/`.
-            # That `.pio/` ELF is whatever an older `pio run` left there
-            # (often empty or stale), so downstream symbol/size analysis
-            # would silently analyze the wrong binary. Detect the fresher
-            # fbuild ELF and rewrite `prog_path` to it so the consumers
-            # (ci/symbol_analysis_runner.py, ci/inspect_elf.py,
-            # ci/compiled_size.py firmware.bin fallback) see the build we
-            # just made.
-            _override_prog_path_for_fbuild(build_dir, data, board)
-
-            # Add tool aliases for symbol analysis and debugging
-            insert_tool_aliases(data)
-
-            # Save to build_info.json (example-specific if example provided)
-            if example:
-                build_info_filename = f"build_info_{example}.json"
-            else:
-                build_info_filename = "build_info.json"
-            build_info_path = build_dir / build_info_filename
-            with open(build_info_path, "w") as f:
-                json.dump(data, f, indent=4, sort_keys=True)
-
-            print(f"✅ Generated {build_info_filename} at {build_info_path}")
-            return True
-
-        except json.JSONDecodeError as e:
-            print(f"Warning: Failed to parse metadata JSON for build_info.json: {e}")
+        if data is None:
+            data = _synthesize_build_info_from_compile_commands(
+                build_dir, board, out_dir
+            )
+            source = "compile_commands.json"
+        if data is None:
+            print(
+                f"Warning: neither {fbuild_info.name} nor {out_dir / 'compile_commands.json'} "
+                "available; build_info.json not written"
+            )
             return False
 
-    except TimeoutError:
-        print("Warning: Timeout generating build_info.json (no output for 900s)")
-        return False
+        # Point every env at the ELF we just linked (fbuild's own file may
+        # name firmware.hex/.bin, which the symbol tools cannot read).
+        elf = out_dir / "firmware.elf"
+        for env in data.values():
+            env["prog_path"] = str(elf.resolve())
+            fw_bin = out_dir / "firmware.bin"
+            if fw_bin.exists():
+                try:
+                    env["prog_size"] = fw_bin.stat().st_size
+                except OSError:
+                    pass
+
+        insert_tool_aliases(data)
+
+        build_info_filename = (
+            f"build_info_{example}.json" if example else "build_info.json"
+        )
+        build_info_path = build_dir / build_info_filename
+        with open(build_info_path, "w") as f:
+            json.dump(data, f, indent=4, sort_keys=True)
+        print(f"Generated {build_info_filename} from {source} at {build_info_path}")
+        return True
+
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
@@ -230,64 +376,38 @@ def generate_build_info_json_from_existing_build(
         return False
 
 
+# ---------------------------------------------------------------------------
+# Project ini
+# ---------------------------------------------------------------------------
+
+
 def apply_board_specific_config(
     board: "Board",
-    platformio_ini_path: Path,
+    project_ini_path: Path,
     example: str,
     paths: "FastLEDPaths",
     additional_defines: Optional[list[str]] = None,
     additional_include_dirs: Optional[list[str]] = None,
     additional_libs: Optional[list[str]] = None,
 ) -> bool:
-    """Apply board-specific build configuration from Board class."""
+    """Write the board's project ini for fbuild from the Board class.
+
+    fbuild resolves platforms, frameworks and toolchains itself (into
+    ``~/.fbuild``), so the ini carries the declared URLs untouched.
+    """
     # Use provided paths object (which may have overrides)
     paths.ensure_directories_exist()
 
     project_root = _get_project_root()
 
-    # Generate platformio.ini content using the enhanced Board method
-    config_content = board.to_platformio_ini(
+    config_content = board.to_project_ini(
         additional_defines=additional_defines,
         additional_include_dirs=additional_include_dirs,
         additional_libs=additional_libs,
-        include_platformio_section=True,
-        core_dir=str(paths.core_dir),
-        packages_dir=str(paths.packages_dir),
         project_root=str(project_root),
-        build_cache_dir=str(paths.build_cache_dir),
     )
 
-    # Apply PlatformIO cache optimization to speed up builds
-    try:
-        from ci.compiler.platformio_cache import PlatformIOCache
-        from ci.compiler.platformio_ini import PlatformIOIni
-
-        # Parse the generated INI content
-        pio_ini = PlatformIOIni.parseString(config_content)
-
-        # Set up global PlatformIO cache
-        cache = PlatformIOCache(paths.global_platformio_cache_dir)
-
-        # Optimize by downloading and caching packages, replacing URLs with local file:// paths
-        pio_ini.optimize(cache)
-
-        # Use the optimized content
-        config_content = str(pio_ini)
-        print(
-            f"Applied PlatformIO cache optimization using cache directory: {paths.global_platformio_cache_dir}"
-        )
-
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception as e:
-        # Graceful fallback to original URLs on cache failures
-        print(
-            f"Warning: PlatformIO cache optimization failed, using original URLs: {e}"
-        )
-        # config_content remains unchanged (original URLs)
-
-    platformio_ini_path.write_text(config_content)
+    project_ini_path.write_text(config_content)
 
     # Log applied configurations for debugging
     if board.build_flags:

@@ -15,7 +15,6 @@ Key features:
 
 import datetime
 import os
-import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -23,12 +22,13 @@ from typing import Any
 import psutil
 import serial.tools.list_ports
 from psutil import Process
+from running_process import PIPE, RunningProcess, TimeoutExpired
 from serial.tools.list_ports_common import ListPortInfo
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
-# Mapping from detected ESP chip type to PlatformIO environment
+# Mapping from detected ESP chip type to fbuild environment
 CHIP_TO_ENVIRONMENT: dict[str, str] = {
     "ESP32-S3": "esp32s3",
     "ESP32-C6": "esp32c6",
@@ -45,7 +45,7 @@ NO_WIFI_ENVIRONMENTS: set[str] = {"esp32h2", "esp32p4"}
 
 
 def environment_has_wifi(environment: str) -> bool:
-    """Check if a PlatformIO environment has WiFi hardware."""
+    """Check if a board environment has WiFi hardware."""
     return environment.lower() not in NO_WIFI_ENVIRONMENTS
 
 
@@ -323,7 +323,7 @@ def kill_port_users(port: str) -> None:
     Safety features:
         - Never kills current process or any parent process
         - Never kills Python processes (could be agent backend)
-        - Only kills known serial tools (pio, esptool, miniterm, etc.)
+        - Only kills known serial tools (esptool, miniterm, etc.)
         - Logs all actions for auditing
 
     Args:
@@ -351,12 +351,8 @@ def kill_port_users(port: str) -> None:
     # Kill dedicated serial tools AND orphaned Python serial processes
     # (but protect agent backend: clud, claude, node.exe, etc.)
     safe_serial_exes = [
-        "pio.exe",
-        "pio",
         "esptool.exe",
         "esptool",
-        "platformio.exe",
-        "platformio",
         "miniterm.exe",
         "miniterm",
         "putty.exe",
@@ -386,8 +382,6 @@ def kill_port_users(port: str) -> None:
     ]
 
     cmdline_patterns = [
-        "pio monitor",
-        "pio device monitor",
         "device monitor",
         "miniterm",
         "esptool",
@@ -488,7 +482,7 @@ class ChipDetectionResult:
     Attributes:
         ok: True if chip was detected, False otherwise
         chip_type: Detected chip type (e.g., "ESP32-S3", "ESP32-C6")
-        environment: Suggested PlatformIO environment (e.g., "esp32s3", "esp32c6")
+        environment: Suggested board environment (e.g., "esp32s3", "esp32c6")
         error_message: Optional error description if detection failed
     """
 
@@ -509,7 +503,7 @@ def _probe_chip_with_reset_mode(
     fails.
     """
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [
                 "uv",
                 "run",
@@ -524,11 +518,13 @@ def _probe_chip_with_reset_mode(
                 reset_mode,
                 "chip-id",
             ],
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
         )
-    except subprocess.TimeoutExpired:
+    except TimeoutExpired:
         return (
             None,
             f"esptool --before {reset_mode} timed out after {timeout:.1f}s",
@@ -568,7 +564,7 @@ def detect_attached_chip(port: str, timeout: float = 7.0) -> ChipDetectionResult
     """Detect ESP chip type using esptool.
 
     Uses esptool with auto chip detection to identify the connected ESP device.
-    This allows automatic selection of the correct PlatformIO environment.
+    This allows automatic selection of the correct board environment.
 
     FastLED #3446: previously hardcoded at 3.0 s with one reset strategy.
     That budget undershoots the CP210x worst-case auto-reset path (slow
@@ -649,7 +645,7 @@ def detect_attached_chip(port: str, timeout: float = 7.0) -> ChipDetectionResult
 
 
 def chip_to_environment(chip_type: str) -> str | None:
-    """Map an ESP chip type to a PlatformIO environment name.
+    """Map an ESP chip type to a board environment name.
 
     Handles chip variants like "ESP32-S3 (QFN56)" by matching the base chip type.
 
@@ -657,7 +653,7 @@ def chip_to_environment(chip_type: str) -> str | None:
         chip_type: Chip type string from esptool (e.g., "ESP32-S3", "ESP32-C6 (QFN40)")
 
     Returns:
-        PlatformIO environment name (e.g., "esp32s3") or None if no mapping found
+        Board environment name (e.g., "esp32s3") or None if no mapping found
     """
     # Normalize chip type for comparison
     chip_upper = chip_type.upper()
@@ -676,7 +672,7 @@ def chip_to_environment(chip_type: str) -> str | None:
 
 
 def environment_to_chip(environment: str) -> str | None:
-    """Map a PlatformIO environment name to its base ESP chip type."""
+    """Map a board environment name to its base ESP chip type."""
     env_lower = environment.lower()
     for chip_type, env in CHIP_TO_ENVIRONMENT.items():
         if env.lower() == env_lower:

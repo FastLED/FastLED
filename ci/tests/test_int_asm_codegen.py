@@ -25,12 +25,11 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
 
 import pytest
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -109,7 +108,7 @@ def _find(compiler: str) -> str | None:
     found = shutil.which(compiler)
     if found:
         return found
-    for candidate in Path.home().glob(f".platformio/packages/**/bin/{compiler}"):
+    for candidate in Path.home().glob(f".fbuild/**/bin/{compiler}"):
         return str(candidate)
     return None
 
@@ -139,8 +138,8 @@ def _emit(
             str(asm),
         ],
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",

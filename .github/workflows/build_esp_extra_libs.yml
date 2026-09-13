@@ -41,10 +41,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Platformio Latest
-        run: |
-          pip install platformio
+      - name: Set up fbuild (install + cache)
+        uses: FastLED/fbuild/.github/actions/setup@main
+        with:
+          fbuild-version: latest
+          cache-key-extra: kitchensink-${{ hashFiles('ci/kitchensink/platformio.ini', 'library.json') }}
 
-      - name: Run Native Build
-        run: |
-          cd ci/kitchensink && pio run
+      # The kitchensink project pulls AsyncTCP, ESPAsyncWebServer, ArduinoJson,
+      # OTA and mDNS alongside FastLED (symlinked in through src_dir) so the
+      # library-selection path is exercised against real third-party deps.
+      - name: Build kitchensink project with fbuild
+        run: fbuild ci/kitchensink build

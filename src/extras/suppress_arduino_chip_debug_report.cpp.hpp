@@ -23,7 +23,7 @@
 //
 // USAGE (one option):
 //
-//   1. PlatformIO — in platformio.ini:
+//   1. fbuild (or any platformio.ini-based project) — in platformio.ini:
 //        build_flags = -DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1
 //
 //   2. Arduino IDE — in a `build_opt.h` or compiler.cpp.extra_flags

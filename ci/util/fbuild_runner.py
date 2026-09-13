@@ -35,7 +35,13 @@ from pathlib import Path
 from typing import IO, Any, cast
 
 from fbuild import Daemon, connect_daemon
-from running_process import EndOfStream, RunningProcess
+from running_process import (
+    CalledProcessError,
+    EndOfStream,
+    RunningProcess,
+    TimeoutExpired,
+)
+from running_process.command_render import list2cmdline
 from typeguard import typechecked
 
 from ci.util.cpu_count import cpu_count
@@ -109,7 +115,7 @@ def get_fbuild_executable() -> str | None:
     return shutil.which("fbuild")
 
 
-def fbuild_subprocess_env() -> dict[str, str]:
+def fbuild_child_env() -> dict[str, str]:
     """Build an env dict with the venv's Scripts dir prepended to PATH.
 
     Why this exists (#2853): fbuild internally shells out to helper tools
@@ -149,7 +155,7 @@ def ensure_fbuild_daemon() -> None:
 def _kill_quietly(proc: Any) -> None:
     """Best-effort kill of a RunningProcess, ignoring teardown failures.
 
-    Used on the timeout and interrupt paths: subprocess.run() reaped the child
+    Used on the timeout and interrupt paths: RunningProcess.run() reaped the child
     for us, RunningProcess does not, and a still-running board build keeps the
     fbuild daemon lock held after this function returns (FastLED#3441).
     """
@@ -217,16 +223,15 @@ def _fbuild_supports_subcommand(subcommand: str) -> bool:
     other required args. The old probe silently disabled compile-many on
     every CI run and forced the legacy serial fallback path.
     """
-    import subprocess
-
     fbuild_exe = get_fbuild_executable()
     if fbuild_exe is None:
         return False
     try:
-        proc = subprocess.run(
+        proc = RunningProcess.run(
             [fbuild_exe, subcommand, "--help"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=15,
             check=False,
         )
@@ -235,7 +240,13 @@ def _fbuild_supports_subcommand(subcommand: str) -> bool:
 
         handle_keyboard_interrupt(ki)
         raise
-    except (FileNotFoundError, subprocess.SubprocessError, OSError):
+    except (
+        FileNotFoundError,
+        CalledProcessError,
+        TimeoutExpired,
+        OSError,
+        RuntimeError,
+    ):
         return False
     return proc.returncode == 0
 
@@ -343,9 +354,9 @@ def run_fbuild_compile(
     quiet: bool = False,
     log_file: IO[str] | None = None,
 ) -> FbuildCommandResult:
-    """Compile the project using fbuild CLI subprocess.
+    """Compile the project using the fbuild CLI.
 
-    Uses ``fbuild build`` as a subprocess so that Ctrl+C terminates it
+    Uses ``fbuild build`` as a child process so that Ctrl+C terminates it
     immediately (the Rust binary handles SIGINT natively).
 
     Args:
@@ -360,10 +371,6 @@ def run_fbuild_compile(
     Returns:
         Result containing success flag, return code, and captured output
     """
-    import subprocess
-
-    from running_process import RunningProcess
-
     if environment is None:
         raise ValueError("environment must be specified for fbuild compilation")
 
@@ -390,7 +397,7 @@ def run_fbuild_compile(
     if clean:
         cmd.append("-c")
 
-    print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
+    print(f"Running: {list2cmdline(cmd)}", file=out)
     print(file=out)
 
     t0 = time.monotonic()
@@ -400,7 +407,9 @@ def run_fbuild_compile(
             timeout=int(timeout),
             auto_run=False,
             capture=True,
-            env=fbuild_subprocess_env(),
+            encoding="utf-8",
+            errors="replace",
+            env=fbuild_child_env(),
         )
         process.start()
         returncode = cast(
@@ -416,7 +425,7 @@ def run_fbuild_compile(
         print("\nKeyboardInterrupt: Stopping compilation")
         handle_keyboard_interrupt(ki)
         raise
-    except subprocess.TimeoutExpired:
+    except (TimeoutExpired, TimeoutError):
         elapsed = time.monotonic() - t0
         message = f"BUILD FAIL timeout after {elapsed:.1f}s"
         print(message, file=out)
@@ -453,10 +462,6 @@ def _run_fbuild_batch_command(
     log_file: IO[str] | None,
 ) -> FbuildCompileManyResult:
     """Compile many sketches with one batched ``fbuild`` invocation."""
-    import subprocess
-
-    from running_process import RunningProcess
-
     if not sketch_project_dirs:
         raise ValueError("sketch_project_dirs must not be empty")
 
@@ -487,7 +492,7 @@ def _run_fbuild_batch_command(
         cmd.append("-v")
     cmd.extend(str(path) for path in sketch_project_dirs)
 
-    print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
+    print(f"Running: {list2cmdline(cmd)}", file=out)
     print(file=out)
 
     t0 = time.monotonic()
@@ -497,7 +502,9 @@ def _run_fbuild_batch_command(
             timeout=int(timeout),
             auto_run=False,
             capture=True,
-            env=fbuild_subprocess_env(),
+            encoding="utf-8",
+            errors="replace",
+            env=fbuild_child_env(),
         )
         process.start()
         returncode = cast(
@@ -529,7 +536,7 @@ def _run_fbuild_batch_command(
         print(f"\nKeyboardInterrupt: Stopping {command_name}")
         handle_keyboard_interrupt(ki)
         raise
-    except subprocess.TimeoutExpired:
+    except (TimeoutExpired, TimeoutError):
         elapsed = time.monotonic() - t0
         message = f"BUILD FAIL timeout after {elapsed:.1f}s"
         print(message, file=out)
@@ -700,8 +707,6 @@ def run_fbuild_deploy(
         Structured result with success and the post-deploy application port
         when fbuild reports one.
     """
-    import subprocess
-
     out = _get_output(quiet, log_file)
     print("=" * 60, file=out)
     print("DEPLOYING (fbuild)", file=out)
@@ -739,28 +744,29 @@ def run_fbuild_deploy(
                 env[name] = "0"
                 force_restart_daemon = True
     if force_restart_daemon:
-        subprocess.run(
+        RunningProcess.run(
             [fbuild_exe, "daemon", "stop"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             env=env,
             check=False,
         )
 
     t0 = time.monotonic()
     try:
-        print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
+        print(f"Running: {list2cmdline(cmd)}", file=out)
         print(file=out)
         # Stream fbuild's output line-by-line instead of buffering it until the
         # process exits (FastLED#3441). A board build can run for minutes, and
-        # with subprocess.run(stdout=PIPE) none of the compile progress -- or
+        # with a buffered RunningProcess.run() none of the compile progress -- or
         # the actual failure, for a failing build -- appeared until after the
         # wait. `out` is already the quiet/log_file-aware sink from
         # _get_output(), so writing lines to it preserves both destinations.
         #
         # RunningProcess is the repo's standard streaming runner (see
-        # ci/compiler/pio.py); it also gives us the timeout and interrupt
-        # handling this function relied on subprocess.run for.
+        # ci/compiler/board_compiler.py); it also gives us the timeout and interrupt
+        # handling this function relied on a buffered run for.
         proc = RunningProcess(
             cmd,
             timeout=int(timeout),
@@ -827,11 +833,11 @@ def run_fbuild_deploy(
         _kill_quietly(locals().get("proc"))
         handle_keyboard_interrupt(ki)
         raise
-    except subprocess.TimeoutExpired:
-        # running_process.TimeoutExpired subclasses subprocess.TimeoutExpired,
-        # so this still catches the streaming runner's timeout.
+    except (TimeoutExpired, TimeoutError):
+        # RunningProcess.wait() raises the builtin TimeoutError on timeout,
+        # while RunningProcess.run() raises TimeoutExpired; catch both.
         elapsed = time.monotonic() - t0
-        # subprocess.run() reaped the child on timeout; RunningProcess does
+        # RunningProcess.run() reaps the child on timeout; a streaming RunningProcess does
         # not, so kill it explicitly or a multi-minute board build keeps
         # running (and keeps holding the fbuild daemon lock) after we return.
         _kill_quietly(locals().get("proc"))

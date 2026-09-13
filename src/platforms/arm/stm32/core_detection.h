@@ -125,7 +125,6 @@
 // Detection: __STM32F1__, __STM32F4__ (double underscores), or STM32_MCU_SERIES
 // Source: https://github.com/rogerclarkmelbourne/Arduino_STM32
 // Status: "break/fix level only", "adequate for hobby use, but cannot be recommended for anything serious"
-// Source: https://community.platformio.org/t/stm32-core-confusion/21430
 #elif defined(__STM32F1__) || defined(__STM32F4__) || defined(STM32_MCU_SERIES)
   #define FL_IS_STM32_LIBMAPLE
 

@@ -87,8 +87,8 @@ Some LED strips have different color orderings. Try these if colors are wrong:
 ### 4. Compile and Upload
 
 ```bash
-# Using PlatformIO
-pio run -e adafruit_feather_m4 -t upload
+# Using fbuild
+fbuild deploy -e adafruit_feather_m4
 
 # Or using FastLED build system
 uv run ci/ci-compile.py adafruit_feather_m4 --examples SpecialDrivers/Adafruit/SAMD_SingleSPI

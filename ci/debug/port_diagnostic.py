@@ -2,10 +2,15 @@
 """Diagnostic script to identify processes holding a serial port open.
 
 This script helps diagnose port locking issues by:
-1. Listing all processes that may be holding a serial port
+1. Listing all processes that have the serial port open as a file handle
 2. Showing process tree (parent/child relationships)
-3. Checking which processes match debug_attached.py kill patterns
+3. Checking which processes match the `kill_port_users` patterns used by
+   ci/debug_attached.py and `bash autoresearch`
 4. Reporting PIDs, process names, command lines, and open files
+
+Flashing and monitoring go through `fbuild deploy` / `fbuild monitor`, so
+the usual holder of a wedged port is a stale fbuild daemon or monitor, an
+esptool child it spawned, or a terminal emulator left attached.
 
 Usage:
     uv run python ci/debug/port_diagnostic.py COM4
@@ -14,6 +19,7 @@ Usage:
 
 import argparse
 import sys
+from dataclasses import dataclass, field
 from typing import Any, cast
 
 import psutil
@@ -44,86 +50,76 @@ def get_process_tree(proc: psutil.Process) -> list[psutil.Process]:
     return tree
 
 
+@dataclass
+class KillPatternMatch:
+    """Which of the port-cleanup patterns a process trips."""
+
+    patterns: list[str] = field(default_factory=lambda: list[str]())
+
+    @property
+    def matches(self) -> bool:
+        return bool(self.patterns)
+
+
+# Executables that commonly hold a serial port open.
+_SERIAL_EXES = (
+    "fbuild",
+    "fbuild.exe",
+    "fbuild-daemon",
+    "python.exe",
+    "python3.exe",
+    "python",
+    "esptool.exe",
+    "esptool.py",
+    "esptool",
+    "miniterm.exe",
+    "miniterm.py",
+    "miniterm",
+    "putty.exe",
+    "putty",
+    "teraterm.exe",
+    "teraterm",
+    "screen",
+    "minicom",
+    "picocom",
+)
+
+_CMDLINE_PATTERNS = (
+    "fbuild monitor",
+    "fbuild deploy",
+    "fbuild debug",
+    "device monitor",
+    "miniterm",
+    "esptool",
+)
+
+
 def check_matches_kill_patterns(
     proc_name: str, cmdline: list[str] | None, port_name: str
-) -> tuple[bool, list[str]]:
-    """Check if process matches debug_attached.py kill patterns.
-
-    Returns:
-        Tuple of (matches, list of matching patterns)
-    """
-    matches: list[str] = []
+) -> KillPatternMatch:
+    """Check if a process matches the port-cleanup patterns."""
+    result = KillPatternMatch()
     proc_name_lower = proc_name.lower()
+    cmdline_lower = " ".join(cmdline).lower() if cmdline else ""
 
-    # Check Phase 1: pio.exe processes
-    if proc_name_lower in ["pio.exe", "pio"]:
-        matches.append("Phase 1: pio.exe process")
+    if "fbuild" in proc_name_lower or "fbuild" in cmdline_lower:
+        result.patterns.append("fbuild process (daemon / deploy / monitor)")
 
-    # Check Phase 2: esptool processes
-    if cmdline:
-        cmdline_str = " ".join(cmdline).lower()
-        if "esptool" in cmdline_str or "esptool.exe" in proc_name_lower:
-            matches.append("Phase 2: esptool process")
+    if "esptool" in cmdline_lower or "esptool" in proc_name_lower:
+        result.patterns.append("esptool process")
 
-    # Check Phase 3: Python PlatformIO processes
-    if "python" in proc_name_lower and cmdline:
-        cmdline_str = " ".join(cmdline)
-        cmdline_lower = cmdline_str.lower()
-
-        # Would skip due to clud protection?
+    if "python" in proc_name_lower and cmdline_lower:
         if "clud" in cmdline_lower:
-            matches.append("Phase 3: PROTECTED (clud)")
-        elif "pio" in cmdline_lower:
-            is_pio_command = any(
-                keyword in cmdline_lower
-                for keyword in ["pio.exe", "tool-scons", "platformio"]
-            )
-            if is_pio_command:
-                is_fastled8 = (
-                    "fastled8" in cmdline_lower or ".platformio" in cmdline_lower
-                )
-                if is_fastled8:
-                    matches.append("Phase 3: Python PlatformIO process")
-                else:
-                    matches.append("Phase 3: SKIPPED (not fastled8)")
+            result.patterns.append("PROTECTED (clud)")
+        elif "debug_attached" in cmdline_lower or "autoresearch" in cmdline_lower:
+            result.patterns.append("FastLED device script")
 
-    # Check kill_process_using_port patterns
-    serial_exes = [
-        "python.exe",
-        "python3.exe",
-        "python",
-        "pio.exe",
-        "pio",
-        "esptool.exe",
-        "esptool.py",
-        "esptool",
-        "platformio.exe",
-        "platformio",
-        "miniterm.exe",
-        "miniterm.py",
-        "miniterm",
-        "putty.exe",
-        "putty",
-        "teraterm.exe",
-        "teraterm",
-    ]
+    if any(exe in proc_name_lower for exe in _SERIAL_EXES) and cmdline_lower:
+        patterns = (*_CMDLINE_PATTERNS, port_name.lower())
+        if any(pattern in cmdline_lower for pattern in patterns):
+            result.patterns.append("kill_process_using_port: Serial port user")
 
-    cmdline_patterns = [
-        "pio monitor",
-        "pio device monitor",
-        "device monitor",
-        "miniterm",
-        "esptool",
-        port_name.lower(),
-    ]
-
-    if any(exe in proc_name_lower for exe in serial_exes):
-        if cmdline:
-            cmdline_str = " ".join(cmdline).lower()
-            if any(pattern in cmdline_str for pattern in cmdline_patterns):
-                matches.append("kill_process_using_port: Serial port user")
-
-    return len(matches) > 0, matches
+    return result
 
 
 def find_processes_with_open_files(
@@ -186,12 +182,11 @@ def diagnose_port(port_name: str) -> None:
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
                 print(f"    Open files: {', '.join(files)}")
 
-                # Check if it matches kill patterns
-                matches, patterns = check_matches_kill_patterns(
+                match = check_matches_kill_patterns(
                     proc_info["name"], proc_info["cmdline"], port_name
                 )
-                if matches:
-                    print(f"    ✅ Would be killed by: {', '.join(patterns)}")
+                if match.matches:
+                    print(f"    ✅ Would be killed by: {', '.join(match.patterns)}")
                 else:
                     print("    ❌ NOT matched by any kill pattern")
                 print()
@@ -203,7 +198,7 @@ def diagnose_port(port_name: str) -> None:
         print()
 
     # Step 2: List all processes that match kill patterns
-    print("[2] All processes matching debug_attached.py kill patterns:")
+    print("[2] All processes matching port-cleanup kill patterns:")
     print("-" * 80)
 
     found_any = False
@@ -213,17 +208,17 @@ def diagnose_port(port_name: str) -> None:
                 dict[str, Any],
                 proc.as_dict(attrs=["pid", "name", "cmdline", "ppid"]),  # type: ignore[misc]
             )
-            matches, patterns = check_matches_kill_patterns(
+            match = check_matches_kill_patterns(
                 proc_info["name"], proc_info["cmdline"], port_name
             )
 
-            if matches:
+            if match.matches:
                 found_any = True
                 print(
                     f"  PID {proc_info['pid']}: {proc_info['name']} (Parent: {proc_info['ppid']})"
                 )
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
-                print(f"    Patterns: {', '.join(patterns)}")
+                print(f"    Patterns: {', '.join(match.patterns)}")
 
                 # Show process tree
                 tree = get_process_tree(proc)
@@ -255,9 +250,8 @@ def diagnose_port(port_name: str) -> None:
 
     serial_keywords = [
         "python",
-        "pio",
+        "fbuild",
         "esptool",
-        "platformio",
         "miniterm",
         "putty",
         "teraterm",
@@ -278,12 +272,11 @@ def diagnose_port(port_name: str) -> None:
                 print(f"  PID {proc_info['pid']}: {proc_info['name']}")
                 print(f"    Command: {format_cmdline(proc_info['cmdline'])}")
 
-                # Check if it matches kill patterns
-                matches, patterns = check_matches_kill_patterns(
+                match = check_matches_kill_patterns(
                     proc_info["name"], proc_info["cmdline"], port_name
                 )
-                if matches:
-                    print(f"    ✅ Would be killed by: {', '.join(patterns)}")
+                if match.matches:
+                    print(f"    ✅ Would be killed by: {', '.join(match.patterns)}")
                 else:
                     print("    ❌ NOT matched by any kill pattern")
                 print()
@@ -302,7 +295,7 @@ def diagnose_port(port_name: str) -> None:
     if processes_with_files:
         print("✅ Found processes with port open as file handle")
         all_matched = all(
-            check_matches_kill_patterns(proc.name(), proc.cmdline(), port_name)[0]
+            check_matches_kill_patterns(proc.name(), proc.cmdline(), port_name).matches
             for proc, _ in processes_with_files
         )
         if all_matched:
@@ -316,10 +309,11 @@ def diagnose_port(port_name: str) -> None:
         print("   The port may be locked at the driver level even after process kill")
         print()
         print("   Recommendations:")
-        print("   1. Increase retry delay in debug_attached.py (currently 3s)")
-        print("   2. Add explicit port availability check before upload retry")
-        print("   3. Consider using pyserial to explicitly close port before kill")
-        print("   4. Try killing all Python processes (not just fastled8)")
+        print("   1. `fbuild daemon status` / `fbuild daemon stop` to release a")
+        print("      port held by a stale daemon monitor session")
+        print("   2. Increase retry delay in debug_attached.py (currently 3s)")
+        print("   3. Add explicit port availability check before upload retry")
+        print("   4. Power-cycle the device if the port stays locked at driver level")
 
 
 def main() -> int:

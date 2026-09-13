@@ -10,7 +10,6 @@ configurations and examples.
 """
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
 

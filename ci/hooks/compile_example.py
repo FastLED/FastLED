@@ -13,9 +13,10 @@ Exit codes:
 
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -69,10 +70,10 @@ def main() -> int:
     example_name = os.path.basename(example_dir)
     print(f"Compiling example: {example_name}", file=sys.stderr)
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         ["fastled", "--just-compile", "--no-interactive", example_dir],
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         cwd=str(PROJECT_ROOT),

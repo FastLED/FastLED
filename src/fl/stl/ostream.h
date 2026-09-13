@@ -2,7 +2,6 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
-#include "fl/gfx/crgb.h"  // IWYU pragma: keep
 #include "fl/stl/move.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"  // IWYU pragma: keep
@@ -12,6 +11,8 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+
+struct CRGB;
 
 class ostream {
 public:
@@ -56,12 +57,9 @@ public:
         return *this;
     }
 
-    ostream& operator<<(const CRGB& rgb) FL_NO_EXCEPT {
-        string temp;
-        temp.append(rgb);
-        print(temp.c_str());
-        return *this;
-    }
+    // Defined out-of-line in ostream.cpp.hpp so this header does not pull in
+    // crgb.h (and through it ease.h, the fixed-point types and sin32).
+    ostream& operator<<(const CRGB& rgb) FL_NO_EXCEPT;
 
     // Generic integer handler using SFINAE - handles all multi-byte integer types
     // (including unsigned long on Windows) by casting to the appropriate fl:: type.

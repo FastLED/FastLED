@@ -22,6 +22,7 @@
 #include "fl/log/log.h"  // for FL_WARN
 #include "fl/stl/assert.h"  // for FL_ASSERT
 #include "fl/audio/audio_manager.h"  // for AudioManager
+#include "fl/ui/audio.h"  // for UIAudio (CFastLED::add(UIAudio&))
 #include "hsv2rgb.h"  // for CRGB
 #include "fl/stl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep

@@ -19,10 +19,11 @@ import argparse
 import hashlib
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +103,9 @@ def run_ffmpeg(ffmpeg: str, args: list[str], desc: str = "") -> None:
     cmd = [ffmpeg, "-y", "-hide_banner", "-loglevel", "error", *args]
     if desc:
         print(f"  {desc}...")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = RunningProcess.run(
+        cmd, stdout=PIPE, stderr=PIPE, text=True, encoding="utf-8", errors="replace"
+    )
     if result.returncode != 0:
         print(f"  FAILED: {' '.join(cmd)}", file=sys.stderr)
         print(f"  stderr: {result.stderr}", file=sys.stderr)
@@ -416,7 +419,7 @@ def verify_ogg(ffmpeg: str, path: Path) -> dict[str, str | int | float]:  # noqa
     if not ffprobe:
         return {"error": "ffprobe not found"}
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [
             ffprobe,
             "-v",
@@ -426,8 +429,11 @@ def verify_ogg(ffmpeg: str, path: Path) -> dict[str, str | int | float]:  # noqa
             "-show_streams",
             str(path),
         ],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode != 0:
         return {"error": result.stderr[:200]}

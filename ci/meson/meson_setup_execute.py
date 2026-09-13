@@ -11,12 +11,11 @@ construction, the skip-setup branch, and the actual ``meson setup`` call.
 import os
 import platform
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 from typing import NamedTuple, Optional, cast
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
 
 from ci.meson.compiler import (
     get_compiler_version,
@@ -56,13 +55,15 @@ def _resolve_xcode_tool(tool: str) -> str:
             ["xcrun", "--find", tool],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
-    except (subprocess.SubprocessError, OSError) as error:
+    except (CalledProcessError, TimeoutExpired, OSError, RuntimeError) as error:
         raise RuntimeError(f"Unable to resolve Xcode tool {tool!r}: {error}") from error
 
     if result.returncode != 0:
@@ -82,13 +83,15 @@ def _resolve_xcode_sdk_root() -> str:
             ["xcrun", "--sdk", "macosx", "--show-sdk-path"],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
-    except (subprocess.SubprocessError, OSError) as error:
+    except (CalledProcessError, TimeoutExpired, OSError, RuntimeError) as error:
         raise RuntimeError(f"Unable to resolve the macOS SDK root: {error}") from error
 
     if result.returncode != 0:
@@ -107,7 +110,7 @@ def detect_compiler_and_cache(
     """Detect clang-tool-chain wrappers + zccache + version strings.
 
     Caches the compiler and zccache version strings via marker mtimes so we
-    skip the ~3.6s subprocess unless the binary itself has changed.
+    skip the ~3.6s probe process unless the binary itself has changed.
     """
     in_docker = os.environ.get("FASTLED_DOCKER", "0") == "1"
 
@@ -490,17 +493,18 @@ def _get_zccache_meson_configure_path() -> Optional[ZccacheCapability]:
         # The wrapper-equipped binary prints "Cache-aware `meson setup`..." at
         # the top; a passthrough binary forwards to real meson which prints
         # "usage: meson [-h]..." instead.
-        result = subprocess.run(
+        result = RunningProcess.run(
             [str(venv_zccache), "meson", "configure", "--help"],
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise ki
-    except (subprocess.SubprocessError, OSError):
+    except (CalledProcessError, TimeoutExpired, OSError, RuntimeError):
         return None
     if "Cache-aware" not in result.stdout:
         return None

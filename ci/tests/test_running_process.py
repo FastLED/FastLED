@@ -5,7 +5,6 @@ This test executes a trivial Python command via `uv run python -c` and verifies:
 - The streamed output contains the expected line
 """
 
-import subprocess
 import time
 import unittest
 from contextlib import nullcontext
@@ -14,7 +13,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-from running_process import EndOfStream, RunningProcess
+from running_process import PIPE, EndOfStream, RunningProcess
 
 from ci.util.running_process_group import (
     ProcessExecutionConfig,
@@ -231,6 +230,8 @@ class TestRunningProcessAdditional(unittest.TestCase):
             timeout=30,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
         self.assertEqual(result.returncode, 0)
@@ -258,7 +259,9 @@ class TestRunningProcessAdditional(unittest.TestCase):
             timeout=30,
             capture_output=True,
             text=True,
-            stderr=subprocess.PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
         )
 
         self.assertEqual(result.returncode, 0)

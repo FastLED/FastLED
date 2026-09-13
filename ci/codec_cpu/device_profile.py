@@ -19,13 +19,12 @@ import argparse
 import json
 import re
 import statistics
-import subprocess
 import sys
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,8 +53,8 @@ def _kill_stale_daemon() -> None:
     looking for a stuck process rather than at credentials."""
     found = RunningProcess.run(
         ["pgrep", "-x", "fbuild-daemon"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -64,8 +63,8 @@ def _kill_stale_daemon() -> None:
         # Output is discarded, so only the exit status matters here.
         RunningProcess.run(
             ["kill", pid],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             encoding="utf-8",
             errors="replace",
@@ -129,8 +128,8 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
         proc = RunningProcess.run(
             ["sg", "dialout", "-c", f"bash -c '{inner}'"],
             cwd=ROOT,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=timeout,
             encoding="utf-8",
@@ -139,7 +138,7 @@ def run_once(board: str, timeout: int) -> Measurement | str | None:
     except KeyboardInterrupt:  # noqa: KBI002 - guard so the TimeoutExpired
         # handler below cannot swallow Ctrl-C; re-raises unchanged.
         raise
-    except subprocess.TimeoutExpired:
+    except TimeoutExpired:
         print("  the run itself hung; treating as a transport failure", file=sys.stderr)
         return TRANSPORT_FAILURE
     # Explicit separator: RunningProcess.run strips the trailing newline

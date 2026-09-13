@@ -15,9 +15,10 @@ Usage:
 
 import re
 import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -97,11 +98,13 @@ def _find_missing_noexcept(clang_query: str) -> list[tuple[str, int, str]]:
         f'isExpansionInFileMatching("{_FILE_REGEX}"))'
     )
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [clang_query, _TU, "--"] + _COMPILER_ARGS,
         input=query,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
         cwd=str(PROJECT_ROOT),
         timeout=300,
     )

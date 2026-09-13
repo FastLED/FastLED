@@ -11,10 +11,10 @@ Never fails the workflow. This reports status.
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
 
+from running_process import PIPE, RunningProcess
 from typeguard import typechecked
 
 
@@ -51,9 +51,9 @@ def build_body(report_text: str) -> str:
 
 @typechecked
 def find_existing(repo: str) -> int | None:
-    # Raw `subprocess`: `gh` writes progress to stderr, and
-    # `RunningProcess` merges it into the stdout this parses.
-    result = subprocess.run(  # noqa: SRC001
+    # `stdout=PIPE, stderr=PIPE`: `gh` writes progress to stderr, and
+    # `capture_output=True` would merge it into the stdout this parses.
+    result = RunningProcess.run(
         [
             "gh",
             "issue",
@@ -69,7 +69,8 @@ def find_existing(repo: str) -> int | None:
             "--limit",
             "20",
         ],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -98,9 +99,7 @@ def main(argv: list[str]) -> int:
 
     number = find_existing(repo)
     if number is None:
-        # Raw `subprocess`: `gh` writes progress to stderr, and
-        # `RunningProcess` merges it into the stdout this parses.
-        subprocess.run(  # noqa: SRC001
+        RunningProcess.run(
             [
                 "gh",
                 "issue",
@@ -118,7 +117,7 @@ def main(argv: list[str]) -> int:
             timeout=120,
         )
     else:
-        subprocess.run(  # noqa: SRC001
+        RunningProcess.run(
             ["gh", "issue", "edit", str(number), "--repo", repo, "--body", body],
             check=False,
             timeout=120,

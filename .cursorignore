@@ -5,11 +5,6 @@
 build/
 out/
 
-# PlatformIO
-.pio/
-.pioenvs/
-.piolibdeps/
-.platformio/
 
 # Cache directories
 .cache/

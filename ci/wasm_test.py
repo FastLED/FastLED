@@ -5,7 +5,6 @@ import multiprocessing
 import os
 import socket
 import socketserver
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -13,6 +12,7 @@ from pathlib import Path
 from playwright.async_api import ConsoleMessage, Response, async_playwright
 from rich.console import Console
 from rich.panel import Panel
+from running_process import RunningProcess
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.wasm_build import resolve_example_dir
@@ -56,7 +56,7 @@ def parse_args():
 def install_playwright_browsers():
     console.print("[dim]Installing Playwright browsers...[/dim]")
     try:
-        subprocess.run(
+        RunningProcess.run(
             [sys.executable, "-m", "playwright", "install", "chromium"],
             check=False,
         )

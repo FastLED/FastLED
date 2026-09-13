@@ -12,12 +12,12 @@ Also provides zccache binary discovery for the compiler cache integration.
 
 import os
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+from running_process import RunningProcess
 from typeguard import typechecked
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -275,7 +275,7 @@ def get_zccache_version(zccache_path: Optional[str] = None) -> str:
     if not zccache_path:
         return ""
     try:
-        result = subprocess.run(
+        result = RunningProcess.run(
             [zccache_path, "--version"],
             capture_output=True,
             text=True,

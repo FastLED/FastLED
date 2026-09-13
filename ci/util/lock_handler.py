@@ -10,10 +10,11 @@ terminates them to enable cleanup of corrupted package directories.
 """
 
 import platform
-import subprocess
 import time
 from pathlib import Path
 from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 
 try:
@@ -255,17 +256,21 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
                         print("  Trying Windows-specific removal...")
                         try:
                             if path.is_dir():
-                                result = subprocess.run(
+                                result = RunningProcess.run(
                                     ["cmd", "/c", "rmdir", "/S", "/Q", str(path)],
-                                    capture_output=True,
-                                    text=True,
+                                    stdout=PIPE,
+                                    stderr=PIPE,
+                                    encoding="utf-8",
+                                    errors="replace",
                                     timeout=30,
                                 )
                             else:
-                                result = subprocess.run(
+                                result = RunningProcess.run(
                                     ["cmd", "/c", "del", "/F", "/Q", str(path)],
-                                    capture_output=True,
-                                    text=True,
+                                    stdout=PIPE,
+                                    stderr=PIPE,
+                                    encoding="utf-8",
+                                    errors="replace",
                                     timeout=30,
                                 )
 

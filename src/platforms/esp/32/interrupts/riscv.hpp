@@ -869,7 +869,7 @@ extern void riscv_critical_isr(void) FL_NO_EXCEPT;  // Optional assembly handler
  *      - Uses esp_intr_alloc() with ESP_INTR_FLAG_LEVEL7 | ESP_INTR_FLAG_IRAM
  *      - Uses ETS_FROM_CPU_INTR0_SOURCE (software interrupt source)
  *      - Binary size: 285,218 bytes flash (21.8%), 11,660 bytes RAM (3.6%)
- *      - Compilation environment: ESP-IDF via PlatformIO
+ *      - Compilation environment: ESP-IDF (Arduino framework board build)
  *    IMPLICATION: ESP-IDF toolchain accepts Level 7 interrupt registration code
  *    NOTE: Runtime behavior not yet validated (QEMU infrastructure blocked)
  *

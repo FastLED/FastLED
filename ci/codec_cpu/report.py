@@ -23,13 +23,12 @@ from __future__ import annotations
 
 import argparse
 import re
-import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import PIPE, RunningProcess
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -60,8 +59,8 @@ def _run(command: list[str], label: str, logs: Path, quiet: bool = True):
     proc = RunningProcess.run(
         command,
         cwd=ROOT,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",

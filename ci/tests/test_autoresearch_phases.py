@@ -169,11 +169,6 @@ def _make_args(**overrides) -> Args:
         rp_pio_index=1,
         rp_pio_both=False,
         test_fault_emit=False,
-        # Default existing-test behavior: use the legacy root-platformio.ini
-        # path so the ``fake_project_dir`` fixture's hand-written ini is the
-        # one read. Tests that exercise the new synthesised-ini path (#3281)
-        # override this explicitly.
-        use_root_platformio_ini=True,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -248,7 +243,7 @@ def _make_ctx(**overrides) -> RunContext:
 
 @pytest.fixture
 def fake_project_dir(tmp_path: Path) -> Path:
-    """Create a minimal PlatformIO project structure."""
+    """Create a minimal project structure with a root platformio.ini."""
     (tmp_path / "platformio.ini").write_text("[env:esp32s3]\n")
     (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
     return tmp_path
@@ -315,7 +310,6 @@ class TestParseArgsAndBuildCommands:
             parlio=False,
             environment_positional="teensy40",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -337,7 +331,6 @@ class TestParseArgsAndBuildCommands:
             contaminate_tx_mux=True,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -358,7 +351,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -390,7 +382,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -424,7 +415,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -456,7 +446,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -514,18 +503,6 @@ class TestParseArgsAndBuildCommands:
         )
         assert _parse_args_and_build_commands(args) == 1
 
-    def test_ws2814_rejects_root_platformio_ini(self, fake_project_dir: Path) -> None:
-        args = _make_args(
-            parlio=False,
-            rmt=True,
-            legacy=True,
-            chipset="ws2814",
-            environment_positional="esp32c6",
-            project_dir=fake_project_dir,
-            use_root_platformio_ini=True,
-        )
-        assert _parse_args_and_build_commands(args) == 1
-
     def test_ws2814_esp32c6_rmt_legacy_canonical_command(
         self, fake_project_dir: Path
     ) -> None:
@@ -537,7 +514,6 @@ class TestParseArgsAndBuildCommands:
             strip_sizes="1,2,3,4",
             environment_positional="esp32c6",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -581,7 +557,6 @@ class TestParseArgsAndBuildCommands:
             tx_pin=0,
             environment_positional="esp32c6",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -606,7 +581,6 @@ class TestParseArgsAndBuildCommands:
             strip_sizes="1,4",
             environment_positional="esp32s3",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -766,7 +740,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -785,7 +758,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -802,7 +774,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -820,7 +791,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -838,7 +808,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -856,7 +825,6 @@ class TestParseArgsAndBuildCommands:
             rx_pin=8,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         result = _parse_args_and_build_commands(args)
         assert result == 1
@@ -876,7 +844,6 @@ class TestParseArgsAndBuildCommands:
             spi=True,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -895,7 +862,6 @@ class TestParseArgsAndBuildCommands:
             flex_io=True,
             environment_positional="teensy41",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -929,7 +895,6 @@ class TestParseArgsAndBuildCommands:
             flex_io=True,
             environment_positional=environment,
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -997,7 +962,6 @@ class TestParseArgsAndBuildCommands:
             rp_uart_index=uart_index,
             environment_positional=environment,
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -1040,7 +1004,6 @@ class TestParseArgsAndBuildCommands:
             parallel=True,
             environment_positional=environment,
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -1175,7 +1138,6 @@ class TestParseArgsAndBuildCommands:
             upload_port="COM17",
             peer_upload_port="COM9",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=True,
         )
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
@@ -1233,7 +1195,6 @@ class TestParseArgsAndBuildCommands:
             rp_spi_loopback=True,
             environment_positional="rp2040",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -1320,13 +1281,6 @@ class TestParseArgsAndBuildCommands:
         assert isinstance(result, int)
         assert result == 1
 
-    def test_missing_platformio_ini(self, tmp_path: Path) -> None:
-        # No platformio.ini in tmp_path
-        args = _make_args(project_dir=tmp_path)
-        result = _parse_args_and_build_commands(args)
-        assert isinstance(result, int)
-        assert result == 1
-
     def test_staged_project_dir_uses_src_sketch(
         self, staged_project_dir: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
@@ -1347,27 +1301,25 @@ class TestParseArgsAndBuildCommands:
         assert "LCD_CLOCKLESS" in result.drivers
 
     # ============================================================
-    # #3281: synthesised .build/pio/<board>/platformio.ini path
+    # #3281: synthesised .build/fbuild/<board>/platformio.ini path
     # ============================================================
 
     def test_synthesised_path_calls_staging_when_board_known(
         self, tmp_path: Path
     ) -> None:
-        """When the board is known up-front and the legacy flag is OFF,
-        ``_parse_args_and_build_commands`` should synthesise the staged
-        ``.build/pio/<board>/`` project and use it as ``build_dir`` — NO
-        root ``./platformio.ini`` is required."""
+        """When the board is known up-front, ``_parse_args_and_build_commands``
+        should synthesise the staged ``.build/fbuild/<board>/`` project and
+        use it as ``build_dir`` — NO root ``./platformio.ini`` is required."""
         # Note: NO platformio.ini in tmp_path on purpose. The synthesis path
         # must NOT require one to exist.
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
 
-        fake_build_dir = tmp_path / ".build" / "pio" / "esp32s3"
+        fake_build_dir = tmp_path / ".build" / "fbuild" / "esp32s3"
         fake_build_dir.mkdir(parents=True)
 
         args = _make_args(
             environment_positional="esp32s3",
             project_dir=tmp_path,
-            use_root_platformio_ini=False,
         )
 
         with patch(
@@ -1400,12 +1352,11 @@ class TestParseArgsAndBuildCommands:
         canonical_environment: str,
     ) -> None:
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
-        fake_build_dir = tmp_path / ".build" / "pio" / canonical_environment
+        fake_build_dir = tmp_path / ".build" / "fbuild" / canonical_environment
         fake_build_dir.mkdir(parents=True)
         args = _make_args(
             environment_positional=requested_environment,
             project_dir=tmp_path,
-            use_root_platformio_ini=False,
         )
 
         with patch(
@@ -1425,16 +1376,14 @@ class TestParseArgsAndBuildCommands:
 
     def test_synthesised_path_defers_when_board_unknown(self, tmp_path: Path) -> None:
         """When the board is NOT known up-front (no positional, no --env,
-        no --lcd*) and the legacy flag is OFF, parse-time synthesis must NOT
-        happen — synthesis is deferred to ``_resolve_port_and_environment``
-        after chip auto-detect."""
+        no --lcd*), parse-time synthesis must NOT happen — synthesis is
+        deferred to ``_resolve_port_and_environment`` after chip auto-detect."""
         # No platformio.ini in tmp_path — synthesised path must tolerate that.
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
 
         args = _make_args(
             environment_positional=None,
             project_dir=tmp_path,
-            use_root_platformio_ini=False,
         )
 
         with patch(
@@ -1448,46 +1397,6 @@ class TestParseArgsAndBuildCommands:
         # finds examples/AutoResearch/.
         assert result.build_dir == tmp_path.resolve()
         assert result.final_environment is None
-
-    def test_legacy_flag_still_requires_root_platformio_ini(
-        self, tmp_path: Path
-    ) -> None:
-        """With ``--use-root-platformio-ini`` set, the legacy
-        ``platformio.ini`` existence check still fires and a missing file is
-        an error — proving the escape hatch keeps the old behavior."""
-        # No platformio.ini in tmp_path.
-        args = _make_args(
-            project_dir=tmp_path,
-            use_root_platformio_ini=True,
-        )
-        result = _parse_args_and_build_commands(args)
-        assert isinstance(result, int)
-        assert result == 1
-
-    def test_teensy_root_platformio_ini_rejected_up_front(
-        self, fake_project_dir: Path
-    ) -> None:
-        args = _make_args(
-            environment_positional="teensy41",
-            object_fled=True,
-            parlio=False,
-            project_dir=fake_project_dir,
-            use_root_platformio_ini=True,
-        )
-        result = _parse_args_and_build_commands(args)
-        assert result == 1
-
-    def test_teensy_specific_driver_rejects_root_platformio_without_env(
-        self, fake_project_dir: Path
-    ) -> None:
-        args = _make_args(
-            object_fled=True,
-            parlio=False,
-            project_dir=fake_project_dir,
-            use_root_platformio_ini=True,
-        )
-        result = _parse_args_and_build_commands(args)
-        assert result == 1
 
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)
@@ -1514,7 +1423,7 @@ class TestResolvePortAndEnvironment:
 
     def test_auto_detected_rp_normalizes_uart_driver_name(self, tmp_path: Path) -> None:
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
-        staged_dir = tmp_path / ".build" / "pio" / "rp2350w"
+        staged_dir = tmp_path / ".build" / "fbuild" / "rp2350w"
         staged_dir.mkdir(parents=True)
         args = _make_args(
             upload_port=None,
@@ -1523,7 +1432,6 @@ class TestResolvePortAndEnvironment:
             uart=True,
             rp_uart_index=1,
             project_dir=tmp_path,
-            use_root_platformio_ini=False,
         )
         ctx = _parse_args_and_build_commands(args)
         assert isinstance(ctx, RunContext)
@@ -1574,10 +1482,6 @@ class TestResolvePortAndEnvironment:
             patch(f"{_PATCH_MOD}.auto_detect_upload_port") as auto_detect,
             patch(
                 f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
-            ),
-            patch(
-                "ci.util.pio_package_daemon.get_default_environment",
-                return_value=None,
             ),
         ):
             rc = asyncio.run(_resolve_port_and_environment(ctx))
@@ -1659,7 +1563,7 @@ class TestResolvePortAndEnvironment:
         self, tmp_path: Path
     ) -> None:
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
-        staged_dir = tmp_path / ".build" / "pio" / "esp32c6"
+        staged_dir = tmp_path / ".build" / "fbuild" / "esp32c6"
         staged_dir.mkdir(parents=True)
         args = _make_args(
             upload_port=None,
@@ -1669,7 +1573,6 @@ class TestResolvePortAndEnvironment:
             legacy=True,
             chipset="ws2814",
             project_dir=tmp_path,
-            use_root_platformio_ini=False,
         )
         ctx = _make_ctx(
             args=args,
@@ -1713,42 +1616,12 @@ class TestResolvePortAndEnvironment:
             extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
         )
 
-    def test_teensy_auto_detect_rejects_root_platformio_ini(self) -> None:
-        ctx = _make_ctx(upload_port=None, final_environment=None)
-        ctx.args = _make_args(
-            upload_port=None,
-            parlio=False,
-            all=True,
-            use_root_platformio_ini=True,
-        )
-        mock_port_result = MagicMock(ok=True, selected_port="COM8")
-        mock_chip_result = MagicMock(
-            ok=True, chip_type="Teensy 4.1", environment="teensy41"
-        )
-        with (
-            patch(
-                f"{_PATCH_MOD}.auto_detect_upload_port",
-                return_value=mock_port_result,
-            ),
-            patch(
-                f"{_PATCH_MOD}.detect_attached_chip",
-                return_value=mock_chip_result,
-            ),
-        ):
-            rc = asyncio.run(_resolve_port_and_environment(ctx))
-        assert rc == 1
-        assert ctx.final_environment == "teensy41"
-
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)
         ctx.args = _make_args(upload_port="/dev/ttyUSB0")
         with (
             patch(
                 f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
-            ),
-            patch(
-                "ci.util.pio_package_daemon.get_default_environment",
-                return_value=None,
             ),
         ):
             rc = asyncio.run(_resolve_port_and_environment(ctx))
@@ -3101,7 +2974,6 @@ class TestRunTestsOrSpecialMode:
             parlio=False,
             environment_positional="teensy40",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -3128,7 +3000,6 @@ class TestRunTestsOrSpecialMode:
                 parlio=False,
                 environment_positional="teensy40",
                 project_dir=fake_project_dir,
-                use_root_platformio_ini=False,
             )
             with patch(
                 "ci.autoresearch.staging.synthesise_autoresearch_project",
@@ -3138,9 +3009,8 @@ class TestRunTestsOrSpecialMode:
                 with contextlib.redirect_stdout(buffer):
                     result = _parse_args_and_build_commands(args)
             assert result == 1, chipset
-            # Assert on the reason, not just the code. Without this the test
-            # passed on the unrelated --use-root-platformio-ini rejection and
-            # never reached the guard it was written for.
+            # Assert on the reason, not just the code, so the test cannot pass
+            # on an unrelated rejection.
             assert "has no legacy template" in buffer.getvalue(), chipset
 
     def test_non_legacy_still_accepts_those_chipsets(
@@ -3154,7 +3024,6 @@ class TestRunTestsOrSpecialMode:
             parlio=False,
             environment_positional="teensy40",
             project_dir=fake_project_dir,
-            use_root_platformio_ini=False,
         )
         with patch(
             "ci.autoresearch.staging.synthesise_autoresearch_project",

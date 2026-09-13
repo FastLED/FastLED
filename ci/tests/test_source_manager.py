@@ -5,7 +5,7 @@ import pytest
 from ci.compiler.source_manager import CopyExampleResult, copy_example_source
 
 
-@pytest.mark.parametrize("generated_dir", [".build", ".fbuild", ".pio", "fastled_js"])
+@pytest.mark.parametrize("generated_dir", [".build", ".fbuild", "fastled_js"])
 def test_copy_example_source_skips_generated_directories(
     tmp_path: Path, generated_dir: str
 ) -> None:

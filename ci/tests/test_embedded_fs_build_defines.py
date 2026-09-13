@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 from ci.boards import create_board
+from ci.compiler.board_compiler import BoardCompiler, init_fbuild_project
 from ci.compiler.compiler import InitResult
 from ci.compiler.path_manager import FastLEDPaths
-from ci.compiler.pio import PioCompiler, init_fbuild_project
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,6 @@ def test_asset_requirement_reaches_generated_compile_configuration(
     paths = FastLEDPaths("esp8266", project_root=tmp_path)
     paths.home_dir = tmp_path / "home"
     paths.fastled_root = paths.home_dir / ".fastled"
-    paths._global_platformio_cache_dir = tmp_path / "pio-cache"
 
     result = init_fbuild_project(
         board=create_board("esp8266"),
@@ -51,7 +50,7 @@ def test_compiler_seeds_owned_defines_from_first_sketch(
     additional_defines: list[str],
     expected_managed: list[str],
 ) -> None:
-    compiler = object.__new__(PioCompiler)
+    compiler = object.__new__(BoardCompiler)
     compiler.initialized = False
     compiler.board = create_board("esp8266")
     compiler.verbose = False
@@ -60,11 +59,10 @@ def test_compiler_seeds_owned_defines_from_first_sketch(
     compiler.additional_defines = additional_defines
     compiler.additional_include_dirs = None
     compiler.additional_libs = None
-    compiler.use_fbuild = True
     compiler._sketch_build_defines = []
 
     monkeypatch.setattr(
-        "ci.compiler.pio._init_platformio_build",
+        "ci.compiler.board_compiler.init_fbuild_project",
         lambda *_args, **_kwargs: InitResult(
             success=True,
             output="",

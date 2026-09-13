@@ -333,9 +333,23 @@ class BuildLock:
         self.release()
 
 
+def libfastled_lock_name(build_dir: "Path | str | None" = None) -> str:
+    """Lock name for a libfastled build.
+
+    Keyed by build directory so that quick, debug and release builds (which
+    live in different meson build dirs and cannot corrupt each other) no
+    longer serialize on one global lock. ``None`` keeps the historical
+    global name.
+    """
+    if build_dir is None:
+        return "libfastled_build"
+    return f"libfastled_build:{Path(build_dir).name}"
+
+
 @contextmanager
 def libfastled_build_lock(
     timeout: float = LOCK_TIMEOUT_S,
+    build_dir: "Path | str | None" = None,
 ) -> Generator[BuildLock, None, None]:
     """
     Context manager for acquiring libfastled build lock.
@@ -358,7 +372,7 @@ def libfastled_build_lock(
 
     from ci.util.timestamp_print import ts_print
 
-    lock = BuildLock("libfastled_build")
+    lock = BuildLock(libfastled_lock_name(build_dir))
 
     lock_start = _time.time()
     if not lock.acquire(timeout=timeout):

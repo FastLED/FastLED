@@ -9,13 +9,13 @@ import contextlib
 import errno
 import os
 import platform as platform_mod
-import subprocess
 import tempfile
 import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 from colorama import Fore, Style
+from running_process import PIPE, CompletedProcess, RunningProcess, TimeoutExpired
 
 from ci.rpc_client import RpcClient, RpcError, RpcTimeoutError
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
@@ -47,9 +47,7 @@ class HostWifiManager(ABC):
         """Return the SSID the host is currently connected to, or None."""
 
     @abstractmethod
-    def _run_connect(
-        self, ssid: str, password: str
-    ) -> subprocess.CompletedProcess[str]:
+    def _run_connect(self, ssid: str, password: str) -> CompletedProcess[str]:
         """Run the platform-specific connect command. Subclasses implement this."""
 
     @abstractmethod
@@ -72,7 +70,7 @@ class HostWifiManager(ABC):
             time.sleep(5)
             print(f"  {Fore.GREEN}Connected to '{ssid}'{Style.RESET_ALL}")
             return True
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+        except (TimeoutExpired, FileNotFoundError, OSError) as e:
             print(f"  {Fore.RED}WiFi connection error: {e}{Style.RESET_ALL}")
             return False
 
@@ -85,7 +83,7 @@ class HostWifiManager(ABC):
         try:
             self._run_restore(original_ssid)
             print(f"  WiFi restored to '{original_ssid}'")
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+        except (TimeoutExpired, FileNotFoundError, OSError) as e:
             print(
                 f"  {Fore.YELLOW}Warning: Failed to restore WiFi: {e}{Style.RESET_ALL}"
             )
@@ -98,11 +96,14 @@ class _WindowsWifiManager(HostWifiManager):
 
     def get_current_ssid(self) -> str | None:
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["netsh", "wlan", "show", "interfaces"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             if result.returncode == 0:
                 for line in result.stdout.splitlines():
@@ -113,19 +114,20 @@ class _WindowsWifiManager(HostWifiManager):
                             ssid = parts[1].strip()
                             if ssid:
                                 return ssid
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        except (TimeoutExpired, FileNotFoundError, OSError):
             pass
         return None
 
-    def _run_connect(
-        self, ssid: str, password: str
-    ) -> subprocess.CompletedProcess[str]:
+    def _run_connect(self, ssid: str, password: str) -> CompletedProcess[str]:
         # First try connecting if profile already exists
-        result = subprocess.run(
+        result = RunningProcess.run(
             ["netsh", "wlan", "connect", f"ssid={ssid}", f"name={ssid}"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=15,
+            encoding="utf-8",
+            errors="replace",
         )
         if result.returncode == 0:
             return result
@@ -161,28 +163,37 @@ class _WindowsWifiManager(HostWifiManager):
             profile_path = f.name
 
         try:
-            subprocess.run(
+            RunningProcess.run(
                 ["netsh", "wlan", "add", "profile", f"filename={profile_path}"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["netsh", "wlan", "connect", f"ssid={ssid}", f"name={ssid}"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=15,
+                encoding="utf-8",
+                errors="replace",
             )
         finally:
             os.unlink(profile_path)
         return result
 
     def _run_restore(self, ssid: str) -> None:
-        subprocess.run(
+        RunningProcess.run(
             ["netsh", "wlan", "connect", f"ssid={ssid}", f"name={ssid}"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=15,
+            encoding="utf-8",
+            errors="replace",
         )
 
 
@@ -193,40 +204,47 @@ class _MacOSWifiManager(HostWifiManager):
 
     def get_current_ssid(self) -> str | None:
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [
                     "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport",
                     "-I",
                 ],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             if result.returncode == 0:
                 for line in result.stdout.splitlines():
                     line = line.strip()
                     if line.startswith("SSID:"):
                         return line.split(":", 1)[1].strip()
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        except (TimeoutExpired, FileNotFoundError, OSError):
             pass
         return None
 
-    def _run_connect(
-        self, ssid: str, password: str
-    ) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
+    def _run_connect(self, ssid: str, password: str) -> CompletedProcess[str]:
+        return RunningProcess.run(
             ["networksetup", "-setairportnetwork", "en0", ssid, password],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
 
     def _run_restore(self, ssid: str) -> None:
-        subprocess.run(
+        RunningProcess.run(
             ["networksetup", "-setairportnetwork", "en0", ssid],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
 
 
@@ -237,36 +255,43 @@ class _LinuxWifiManager(HostWifiManager):
 
     def get_current_ssid(self) -> str | None:
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["nmcli", "-t", "-f", "active,ssid", "dev", "wifi"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             if result.returncode == 0:
                 for line in result.stdout.splitlines():
                     if line.startswith("yes:"):
                         return line.split(":", 1)[1]
-        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        except (TimeoutExpired, FileNotFoundError, OSError):
             pass
         return None
 
-    def _run_connect(
-        self, ssid: str, password: str
-    ) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
+    def _run_connect(self, ssid: str, password: str) -> CompletedProcess[str]:
+        return RunningProcess.run(
             ["nmcli", "device", "wifi", "connect", ssid, "password", password],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
 
     def _run_restore(self, ssid: str) -> None:
-        subprocess.run(
+        RunningProcess.run(
             ["nmcli", "device", "wifi", "connect", ssid],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=30,
+            encoding="utf-8",
+            errors="replace",
         )
 
 

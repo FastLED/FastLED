@@ -3,7 +3,7 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 #!/usr/bin/env python3
 """
-WARNING: sys.stdout.flush() causes blocking issues on Windows with QEMU/subprocess processes!
+WARNING: sys.stdout.flush() causes blocking issues on Windows with QEMU/child processes!
 Use conditional flushing: `if os.name != 'nt': sys.stdout.flush()` to avoid Windows blocking
 while maintaining real-time output visibility on Unix systems.
 """
@@ -20,7 +20,6 @@ if os.name == "nt":
 
 import queue
 import re
-import subprocess
 import sys
 import threading
 import time
@@ -30,7 +29,8 @@ from queue import Queue
 # Import for type annotation only
 from typing import TYPE_CHECKING, Callable, Optional
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess, TimeoutExpired
+from running_process.command_render import list2cmdline
 
 
 if TYPE_CHECKING:
@@ -119,7 +119,7 @@ def get_test_counts() -> TestCounts:
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
-        except (subprocess.SubprocessError, RuntimeError):
+        except (CalledProcessError, TimeoutExpired, TimeoutError, RuntimeError):
             # If counting fails, use 0 as fallback
             python_count = 0
 
@@ -568,7 +568,7 @@ def create_unit_test_process(
     if args.debug:
         compile_cmd.append("--debug")
 
-    # subprocess.run(compile_cmd, check=True)
+    # RunningProcess.run(compile_cmd, check=True)
 
     # Then run the tests using our new test runner
     test_cmd = ["uv", "run", "python", "-m", "ci.run_tests"]
@@ -652,7 +652,7 @@ def create_python_test_process(
     if run_slow:
         cmd.append("--runslow")
 
-    cmd_str = subprocess.list2cmdline(cmd)
+    cmd_str = list2cmdline(cmd)
 
     return RunningProcess(
         cmd_str,
@@ -1190,7 +1190,7 @@ def _handle_process_completion(
     proc = proc_state.process
     cmd = proc_state.command
     if isinstance(cmd, list):
-        cmd = subprocess.list2cmdline(cmd)
+        cmd = list2cmdline(cmd)
 
     try:
         returncode = proc.wait()
@@ -1418,7 +1418,7 @@ def _handle_stuck_processes(
             proc.kill()  # This now kills the entire process tree
 
             # Track this as a failure
-            failed_processes.append(subprocess.list2cmdline(proc.command))
+            failed_processes.append(list2cmdline(proc.command))
 
             active_processes.remove(proc)
             monitor.stop_monitoring(proc)
@@ -1976,7 +1976,7 @@ def runner(
             all_timings.insert(0, meson_test_timing)  # Put unit tests first
         if all_timings:
             # Show zccache statistics only when actual compilation occurred.
-            # Skip when all tests were fingerprint-cached (no subprocess compilation ran).
+            # Skip when all tests were fingerprint-cached (no compilation process ran).
             # timings is non-empty when at least one process (examples, python, wasm) ran.
             # meson_test_timing.skipped=False when meson tests actually compiled+ran.
             _did_compile = bool(timings) or (

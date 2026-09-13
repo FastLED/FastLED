@@ -1,5 +1,5 @@
 ---
-description: Automatically diagnose and fix PlatformIO board upload/monitor issues
+description: Automatically diagnose and fix board upload/monitor issues
 ---
 
 Automatically run the three-phase device workflow (Compile → Upload → Monitor), diagnose any failures, and apply fixes.

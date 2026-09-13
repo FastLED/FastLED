@@ -53,7 +53,7 @@ def test_rp2350w_selects_the_pico_2_w_board_profile() -> None:
     )
     assert board.defines is None
 
-    ini = board.to_platformio_ini()
+    ini = board.to_project_ini()
     assert "[env:rp2350w]" in ini
     assert "board = rpipico2w" in ini
     assert "board_build.core = earlephilhower" in ini

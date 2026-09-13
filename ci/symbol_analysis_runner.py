@@ -32,10 +32,10 @@ def main():
     # Build list of all paths to check (in priority order)
     build_info_filename = f"build_info_{args.example}.json"
     paths_to_check = [
+        Path(".build") / "fbuild" / args.board / build_info_filename,
         Path(".build") / args.board / build_info_filename,
-        Path(".build") / "pio" / args.board / build_info_filename,
+        Path(".build") / "fbuild" / args.board / "build_info.json",
         Path(".build") / args.board / "build_info.json",
-        Path(".build") / "pio" / args.board / "build_info.json",
     ]
 
     # Find first existing path

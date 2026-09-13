@@ -251,7 +251,7 @@ def discover_examples_all(examples_dir: Path) -> None:
         cpp_sources: list[str] = []
 
         # First, check for .cpp files in the example root directory
-        # Exclude .ino.cpp files (PlatformIO preprocessed intermediates)
+        # Exclude .ino.cpp files (preprocessed sketch intermediates)
         for cpp_file in example_root.glob("*.cpp"):
             if cpp_file.name.endswith(".ino.cpp"):
                 continue

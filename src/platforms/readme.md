@@ -377,7 +377,7 @@ Check each platform’s `led_sysdefs_*` header for the recommended PROGMEM and i
 
 ### Common feature defines
 
-These are commonly available across multiple platforms. Pass them as build defines (e.g., `build_flags` in PlatformIO), and define them prior to including `FastLED.h`.
+These are commonly available across multiple platforms. Pass them as build defines (e.g., `build_flags` in `platformio.ini`), and define them prior to including `FastLED.h`.
 
 - `FASTLED_USE_PROGMEM` — Control PROGMEM usage (enabled on AVR, typically disabled elsewhere)
 - `FASTLED_ALLOW_INTERRUPTS` — Allow interrupts during `show()` (platform defaults vary)

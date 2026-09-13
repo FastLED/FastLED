@@ -5,12 +5,12 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 """
 Build Process Tracking and Cleanup Module
 
-This module manages tracking of PlatformIO build processes and their entire
+This module manages tracking of board build processes and their entire
 process trees. When client processes die, orphaned build trees are automatically
 cleaned up to prevent file locking issues.
 
 Key features:
-- Track root PlatformIO process + all children (scons, gcc, ld, esptool, etc.)
+- Track root build process + all children (gcc, ld, esptool, etc.)
 - Detect dead client processes
 - Kill entire process trees recursively using psutil
 - Thread-safe operations for daemon use
@@ -33,7 +33,7 @@ class ProcessTreeInfo:
 
     Attributes:
         client_pid: PID of the client that initiated the build
-        root_pid: PID of the root PlatformIO process
+        root_pid: PID of the root build process
         child_pids: List of all child PIDs (updated periodically)
         request_id: Build request ID
         project_dir: Project directory being built
@@ -141,7 +141,7 @@ class BuildProcessTracker:
 
         Args:
             client_pid: PID of client that initiated build
-            root_pid: PID of root PlatformIO process
+            root_pid: PID of root build process
             request_id: Build request ID (optional)
             project_dir: Project directory (optional)
         """

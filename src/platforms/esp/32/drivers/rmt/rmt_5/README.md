@@ -785,7 +785,7 @@ void loop() {
 // Higher priority levels (4+) require assembly ISR handlers (not yet implemented)
 ```
 
-#### Example 5: PlatformIO Build Flags
+#### Example 5: `platformio.ini` Build Flags
 
 ```ini
 # platformio.ini

@@ -18,15 +18,16 @@ Exit codes:
 import json
 import os
 import platform
-import subprocess
 import sys
+
+from running_process import RunningProcess, TimeoutExpired
 
 
 def notify_windows(title: str, message: str) -> None:
     """Send notification on Windows via PowerShell."""
     # Try BurntToast first (rich toast notification)
     try:
-        subprocess.run(
+        RunningProcess.run(
             [
                 "powershell",
                 "-NoProfile",
@@ -38,48 +39,56 @@ def notify_windows(title: str, message: str) -> None:
                 f"}}",
             ],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=5,
         )
         return
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
         pass
 
     # Fallback: simple beep
     try:
-        subprocess.run(
+        RunningProcess.run(
             ["powershell", "-NoProfile", "-Command", "[console]::beep(800,300)"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=3,
         )
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
         pass
 
 
 def notify_macos(title: str, message: str) -> None:
     """Send notification on macOS via osascript."""
     try:
-        subprocess.run(
+        RunningProcess.run(
             [
                 "osascript",
                 "-e",
                 f'display notification "{message}" with title "{title}"',
             ],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=5,
         )
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
         pass
 
 
 def notify_linux(title: str, message: str) -> None:
     """Send notification on Linux via notify-send."""
     try:
-        subprocess.run(
+        RunningProcess.run(
             ["notify-send", title, message, "--expire-time=5000"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=5,
         )
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+    except (TimeoutExpired, FileNotFoundError, OSError, RuntimeError):
         pass
 
 

@@ -2316,7 +2316,6 @@ uv run mcp_server.py
 **Example output for UNO:**
 ```
 📋 Platform Defines for UNO:
-  PLATFORMIO=60118
   ARDUINO_AVR_UNO
   F_CPU=16000000L
   ARDUINO_ARCH_AVR
@@ -2659,7 +2658,7 @@ uv run mcp_server.py
 
 3. **"Tool not found"** (nm, c++filt, etc.)
    - **Solution:** The platform toolchain isn't installed or configured properly
-   - **Check:** Verify PlatformIO platform installation: `uv run pio platform list`
+   - **Check:** Build the board once so fbuild fetches its toolchain: `bash compile <board> --examples Blink`
 
 4. **"No symbols found"**
    - **Solution:** The ELF file may be stripped or compilation failed

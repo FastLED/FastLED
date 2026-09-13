@@ -16,10 +16,11 @@ Usage:
 from __future__ import annotations
 
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
+
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 from ci.decode_esp32_backtrace import (
     extract_addresses_from_crash_log,
@@ -193,7 +194,7 @@ class CrashTraceDecoder:
                 / "build"
                 / self._environment
                 / "firmware.elf",
-                self._build_dir / ".pio" / "build" / self._environment / "firmware.elf",
+                self._build_dir / ".fbuild" / "build" / "release" / "firmware.elf",
             ]
 
         for p in elf_candidates:
@@ -219,7 +220,7 @@ class CrashTraceDecoder:
         if build_info_path.exists():
             self._addr2line = find_addr2line_from_build_info(build_info_path)
 
-        # Fall back to PlatformIO toolchain search.
+        # Fall back to a toolchain search on PATH / known cache roots.
         if not self._addr2line:
             self._addr2line = find_addr2line()
 
@@ -262,12 +263,19 @@ class CrashTraceDecoder:
         ] + addresses
 
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=10, check=False
+            result = RunningProcess.run(
+                cmd,
+                stdout=PIPE,
+                stderr=PIPE,
+                encoding="utf-8",
+                errors="replace",
+                timeout=10,
+                check=False,
             )
-        except subprocess.TimeoutExpired:
+        except TimeoutExpired:
             return self._format_banner(["(addr2line timed out)"])
-        except FileNotFoundError:
+        except (FileNotFoundError, RuntimeError):
+            # RunningProcess reports a missing executable as RuntimeError.
             return self._format_banner([f"(addr2line not found at {self._addr2line})"])
 
         if result.returncode != 0:

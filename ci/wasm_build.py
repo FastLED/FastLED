@@ -29,10 +29,11 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 from ci.wasm_flags import get_link_flags, get_sketch_compile_flags
 from ci.wasm_tools import run_emcc
@@ -294,7 +295,14 @@ def _get_emcc_version_signature() -> str:
         return _cached_emcc_version_value
 
     try:
-        result = subprocess.run([emcc, "--version"], capture_output=True, text=True)
+        result = RunningProcess.run(
+            [emcc, "--version"],
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
         version_text = ((result.stdout or "") + (result.stderr or "")).strip()
     except OSError:
         version_text = "ERROR"
@@ -334,7 +342,7 @@ def _link_environment_fingerprint_matches(build_dir: Path, mode: str) -> bool:
 # changes (additions/removals at the top level rebump the mtime). For
 # deeper-tree changes that don't bump src/'s own mtime, the cache may be
 # stale but the next interpreter invocation rebuilds it. Cross-process
-# callers (one Python subprocess per build) pay the walk once and skip
+# callers (one Python process per build) pay the walk once and skip
 # subsequent calls within the same process. Reset for tests via
 # _src_file_list_hash_reset_for_tests().
 _src_file_list_hash_cache: dict[str, tuple[float, int, str]] = {}
@@ -455,11 +463,14 @@ def _recover_stale_wasm_build(build_dir: Path, mode: str) -> bool:
             Path(sys.prefix) / "Scripts" / "ninja.EXE"
         )
         try:
-            subprocess.run(
+            RunningProcess.run(
                 [ninja_exe, "-C", str(build_dir), "-t", "cleandead"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 timeout=60,
+                encoding="utf-8",
+                errors="replace",
             )
             print("[WASM] Cleaned stale Ninja outputs")
         except Exception as e:
@@ -501,7 +512,7 @@ def _recover_stale_wasm_build(build_dir: Path, mode: str) -> bool:
             str(build_dir),
             f"-Dbuild_mode={mode}",
         ]
-        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
         if result.returncode == 0:
             _normalize_meson_private_paths(build_dir)
             print("[WASM] Self-healing reconfiguration complete")
@@ -717,7 +728,7 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
             f"-Dbuild_mode={mode}",
         ]
         print(f"[WASM] Reconfiguring meson (mode: {mode})...")
-        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
         if result.returncode != 0:
             print(f"[WASM] Meson reconfiguration failed (rc {result.returncode})")
             return False
@@ -746,7 +757,7 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
         cmd.insert(2, "--reconfigure")
 
     print(f"[WASM] Configuring meson (mode: {mode})...")
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
     if result.returncode != 0:
         print(f"[WASM] Meson setup failed with return code {result.returncode}")
         return False
@@ -795,7 +806,15 @@ def build_library(
         cmd.append("-v")
 
     print("[WASM] Building libfastled.a...")
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+    result = RunningProcess.run(
+        cmd,
+        cwd=PROJECT_ROOT,
+        stdout=PIPE,
+        stderr=PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     if result.returncode != 0:
         # Print captured output so the user sees what happened
         if result.stdout:
@@ -810,7 +829,7 @@ def build_library(
             print("[WASM] Stale build state detected, auto-recovering...")
             if _recover_stale_wasm_build(build_dir, mode):
                 print("[WASM] Retrying build after recovery...")
-                retry = subprocess.run(cmd, cwd=PROJECT_ROOT)
+                retry = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
                 if retry.returncode == 0:
                     _save_library_fingerprint(build_dir)
                     print(
@@ -832,7 +851,7 @@ def build_library(
                     library_archive.unlink()
                 except OSError:
                     pass
-                retry = subprocess.run(cmd, cwd=PROJECT_ROOT)
+                retry = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
                 if retry.returncode == 0:
                     _save_library_fingerprint(build_dir)
                     print("[WASM] Library build successful (after archive cleanup)")
@@ -863,7 +882,7 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
         raise FileNotFoundError(f"Example not found: {ino_file}")
 
     # Discover additional .cpp files in the example directory tree (sorted for determinism)
-    excluded_dirs = {".build", ".fbuild", ".pio", ".vscode", "build", "fastled_js"}
+    excluded_dirs = {".build", ".fbuild", ".vscode", "build", "fastled_js"}
     extra_cpps = sorted(
         f
         for f in example_dir.rglob("*.cpp")
@@ -984,7 +1003,7 @@ def build_sketch_pch(
             from ci.wasm_tools import get_emar
 
             emar = get_emar()
-            subprocess.run(
+            RunningProcess.run(
                 [emar, "r", str(library_archive), str(pch_codegen_o)],
                 cwd=str(PROJECT_ROOT),
                 check=False,
@@ -998,7 +1017,7 @@ def build_sketch_pch(
 def _parse_clang_from_verbose(stderr_text: str) -> list[str] | None:
     """Parse the clang command from emcc verbose stderr output.
 
-    emcc with EMCC_VERBOSE=1 prints subprocess commands to stderr.
+    emcc with EMCC_VERBOSE=1 prints the child compiler commands to stderr.
     We look for the clang invocation that has -c (compile mode).
     """
     import shlex
@@ -1075,7 +1094,7 @@ def _fast_compile(
         print(f"[WASM] Fast compile cmd: {cmd[:3]}...({len(cmd)} args)")
 
     try:
-        result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+        result = RunningProcess.run(cmd, cwd=str(PROJECT_ROOT))
     except OSError:
         # Executable not found (e.g. stale cache with bad path) — fall back
         cache_file.unlink(missing_ok=True)
@@ -1098,7 +1117,7 @@ def _intercept_emcc_compile(
     """Run emcc compile with verbose output to capture clang command.
 
     Runs emcc normally but with EMCC_VERBOSE=1 and EM_FORCE_RESPONSE_FILES=0
-    so the full clang subprocess command is printed to stderr. We parse it
+    so the full clang child command is printed to stderr. We parse it
     and save a template for future fast compiles via _fast_compile().
 
     Returns the emcc exit code.
@@ -1111,13 +1130,18 @@ def _intercept_emcc_compile(
     env["EMCC_VERBOSE"] = "1"
     env["EM_FORCE_RESPONSE_FILES"] = "0"
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [emcc] + emcc_args,
         cwd=str(PROJECT_ROOT),
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         env=env,
+        encoding="utf-8",
+        errors="replace",
     )
+    if result.stdout:
+        print(result.stdout)
 
     if result.returncode != 0:
         if result.stderr:
@@ -1225,7 +1249,7 @@ def compile_sketch(
     if native_emcc is not None:
         if verbose:
             print(f"[WASM] Using native emcc: {native_emcc}")
-        result = subprocess.run(
+        result = RunningProcess.run(
             [native_emcc] + emcc_args,
             cwd=str(PROJECT_ROOT),
         )
@@ -1252,7 +1276,7 @@ def compile_sketch(
 def _parse_wasm_ld_from_verbose(stderr_text: str) -> list[str] | None:
     """Parse the wasm-ld command from emcc verbose stderr output.
 
-    emcc with EMCC_VERBOSE=1 prints subprocess commands as:
+    emcc with EMCC_VERBOSE=1 prints the child commands as:
       /path/to/wasm-ld.exe arg1 arg2 ...
     """
     import shlex
@@ -1295,7 +1319,7 @@ def _intercept_emcc_link(
     mode: str,
     library_archive: Path | None = None,
 ) -> int:
-    """Run emcc link as subprocess with verbose output to capture wasm-ld command.
+    """Run emcc link as a child process with verbose output to capture wasm-ld command.
 
     Uses EMCC_VERBOSE=1 to make emcc print the wasm-ld command to stderr,
     then saves it (with placeholders) for future fast re-linking via _fast_link().
@@ -1316,13 +1340,18 @@ def _intercept_emcc_link(
     env["EMCC_TEMP_DIR"] = str(emcc_tmp)
     env["EM_FORCE_RESPONSE_FILES"] = "0"  # ensure full command, no @file
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [emcc] + emcc_args,
         cwd=cwd,
-        stderr=subprocess.PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         env=env,
+        encoding="utf-8",
+        errors="replace",
     )
+    if result.stdout:
+        print(result.stdout)
 
     if result.returncode != 0:
         # Print captured stderr so user sees the error
@@ -1449,7 +1478,7 @@ def _fast_link(
 
     print("[WASM] Fast linking (wasm-ld only)...")
     try:
-        result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+        result = RunningProcess.run(cmd, cwd=str(PROJECT_ROOT))
     except OSError:
         # Executable not found (e.g. stale cache with bad path) — fall back
         _clear_link_cache(build_dir)

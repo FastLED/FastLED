@@ -1,10 +1,9 @@
 """Locate the firmware ELF a build actually produced.
 
-Two build backends write to one board directory and they do not agree on where
-the ELF goes. PlatformIO leaves it at `prog_path` from `build_info.json`
-(`<build_dir>/.pio/build/<env>/firmware.elf`); fbuild writes under
-`<build_dir>/.fbuild/build/...` and leaves `prog_path` pointing at the
-PlatformIO location or at a `.bin`.
+`build_info.json` carries a `prog_path`, but it is not always the ELF that
+fbuild actually linked: fbuild writes under `<build_dir>/.fbuild/build/...`
+and older or hand-written build_info files may point `prog_path` at a stale
+location or at a `.bin`.
 
 `ci/compiled_size.py` learned this and got it right. The binary-size
 diagnostics did not: `ci/inspect_binary.py`, `ci/inspect_elf.py` and
@@ -41,7 +40,7 @@ def find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
            - `<build_dir>/.fbuild/build/<env>/release/firmware.elf`
 
     Returns None when no fbuild artifact is present, which is the signal that
-    the build was driven by PlatformIO and `prog_path` is authoritative.
+    `prog_path` is authoritative.
     """
 
     prog_path_raw = board_info.get("prog_path")
@@ -71,8 +70,8 @@ def find_fbuild_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
 def resolve_firmware_elf(board_info: dict[str, Any], build_dir: Path) -> Path | None:
     """The ELF a diagnostic should read, fbuild artifact first.
 
-    Falls back to `prog_path` so PlatformIO-driven builds keep working
-    unchanged, and returns None when neither exists rather than handing back a
+    Falls back to `prog_path` so build_info files that name the ELF directly
+    keep working, and returns None when neither exists rather than handing back a
     path that every tool downstream will fail on one at a time.
     """
 

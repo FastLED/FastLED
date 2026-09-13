@@ -5,16 +5,17 @@ emits ``compile_commands.json`` into the fbuild release dir without
 performing a full compile. Static-analysis entry points
 (``ci/ci-cppcheck.py``, ``ci/ci-iwyu.py``) can feed that database to
 ``cppcheck --project=``, ``clang-tool-chain-iwyu-tool -p``, etc., so
-they no longer depend on a PlatformIO project tree.
+they no longer depend on a staged project tree.
 
 See FastLED#2301 / #2302 / #2303 for background.
 """
 
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
+
+from running_process import CalledProcessError, RunningProcess
 
 from ci.util.fbuild_runner import get_fbuild_executable
 
@@ -24,13 +25,13 @@ def _candidate_fbuild_release_dirs(
 ) -> list[Path]:
     """Candidate locations where fbuild may have written artifacts.
 
-    FastLED compiles fbuild with ``build_dir=<repo>/.build/pio/<board>/`` (see
-    ``ci/compiler/pio.py::_artifacts_dir``), so fbuild's output lives at
-    ``.build/pio/<board>/.fbuild/build/<env>/release/`` — except when the
+    FastLED compiles fbuild with ``build_dir=<repo>/.build/fbuild/<board>/``
+    (see ``ci/compiler/path_manager.py``), so fbuild's output lives at
+    ``.build/fbuild/<board>/.fbuild/build/<env>/release/`` — except when the
     FastLED orchestrator invokes fbuild without an explicit ``-e <env>``
     (the common case for boards where the fbuild env name matches the
     build_dir's board name), in which case fbuild collapses the ``<env>``
-    segment and emits to ``.build/pio/<board>/.fbuild/build/release/``
+    segment and emits to ``.build/fbuild/<board>/.fbuild/build/release/``
     directly. The latter is what every current LPC8xx CI workflow produces.
     The standalone CLI (``fbuild <repo> build --target compiledb``) instead
     emits ``<repo>/.fbuild/build/<env>/release/`` — we treat all variants as
@@ -47,12 +48,17 @@ def _candidate_fbuild_release_dirs(
     Returned in preference order (first hit wins).
     """
     return [
-        build_root / "pio" / board_name / ".fbuild" / "build" / board_name / "release",
+        build_root
+        / "fbuild"
+        / board_name
+        / ".fbuild"
+        / "build"
+        / board_name
+        / "release",
         # FastLED-CI-orchestrated builds where fbuild collapses the <env>
-        # segment. See #3264 — without this, every LPC8xx CI build falls
-        # through to `pio check`, which then fails for boards the PIO
-        # platform doesn't register (e.g. `lpc804`).
-        build_root / "pio" / board_name / ".fbuild" / "build" / "release",
+        # segment. See #3264 — without this, every LPC8xx CI build had no
+        # compile database to hand to the static analyzers.
+        build_root / "fbuild" / board_name / ".fbuild" / "build" / "release",
         project_root / ".fbuild" / "build" / board_name / "release",
         build_root / ".fbuild" / "build" / board_name / "release",
     ]
@@ -64,7 +70,7 @@ def fbuild_release_dir(project_root: Path, build_root: Path, board_name: str) ->
     Prefers the first of the candidate locations in
     :func:`_candidate_fbuild_release_dirs` that already exists, and falls back
     to the FastLED-orchestrated layout
-    (``.build/pio/<board>/.fbuild/build/<env>/release/``) when none do — so
+    (``.build/fbuild/<board>/.fbuild/build/<env>/release/``) when none do — so
     callers can still materialize artifacts there via
     :func:`ensure_compile_commands`.
     """
@@ -83,7 +89,7 @@ def was_compiled_with_fbuild(
     Probes every candidate release dir from
     :func:`_candidate_fbuild_release_dirs` — fbuild's ESP32 / AVR / Teensy
     orchestrators populate this directory during compile, so its presence is
-    the canonical fbuild-vs-PIO backend signal for post-compile tooling.
+    the canonical signal for post-compile tooling that a build happened.
     """
     return any(
         cand.exists()
@@ -111,7 +117,7 @@ def ensure_compile_commands(
     :func:`_candidate_fbuild_release_dirs`), returns it immediately. Otherwise
     shells out to ``fbuild <project_root> build -e <env> --target compiledb``
     and returns the resulting path. Returns ``None`` if fbuild isn't on PATH
-    or the subprocess fails.
+    or the fbuild process fails.
 
     Args:
         project_root: FastLED repo root (the directory fbuild resolves
@@ -140,7 +146,7 @@ def ensure_compile_commands(
         )
         return None
     try:
-        subprocess.run(
+        RunningProcess.run(
             [
                 fbuild_exe,
                 str(project_root),
@@ -161,7 +167,7 @@ def ensure_compile_commands(
 
         handle_keyboard_interrupt(ki)
         raise
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+    except (CalledProcessError, FileNotFoundError, RuntimeError) as exc:
         print(
             f"ensure_compile_commands: failed to generate fbuild compile DB "
             f"for '{board_name}': {exc}",

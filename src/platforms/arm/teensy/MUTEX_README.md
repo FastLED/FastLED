@@ -16,7 +16,7 @@ FreeRTOS provides preemptive multitasking where the scheduler can interrupt a ru
 
 **Installation:**
 ```bash
-# Arduino Library Manager or PlatformIO
+# Arduino Library Manager or `lib_deps` in platformio.ini
 # Search for: "FreeRTOS" or "Arduino_FreeRTOS_ARM"
 ```
 
@@ -40,7 +40,7 @@ TeensyThreads uses cooperative multitasking where threads explicitly yield contr
 
 **Installation:**
 ```bash
-# Arduino Library Manager or PlatformIO
+# Arduino Library Manager or `lib_deps` in platformio.ini
 # Search for: "TeensyThreads"
 # GitHub: https://github.com/ftrias/TeensyThreads
 ```
@@ -287,7 +287,7 @@ FastLED's atomic operations automatically use appropriate memory barriers on all
 **Problem:** Threading library not installed or not in library search path.
 
 **Solution:**
-1. Verify the threading library is properly installed via Arduino Library Manager or PlatformIO
+1. Verify the threading library is properly installed via Arduino Library Manager or `lib_deps` in platformio.ini
 2. Check that the library path is in your compiler's include search paths
 3. Try a simple test sketch that includes the threading library to verify installation
 

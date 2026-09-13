@@ -44,7 +44,7 @@
 - `bash bloat <board>` — Per-symbol flash/RAM bloat report (see `agents/docs/binary-size-analysis.md`)
 
 **NEVER use:** `uv run python test.py` — use `bash test` or `uv run test.py`
-**FORBIDDEN:** `--no-fingerprint` (use `bash test --clean`), bare `pio`/`platformio`, bare `meson`/`ninja`/`clang++`
+**FORBIDDEN:** `--no-fingerprint` (use `bash test --clean`), the PlatformIO tool (banned repo-wide, lint enforced — fbuild is the only board build backend), bare `meson`/`ninja`/`clang++`
 
 See `agents/docs/commands-reference.md` for Docker, fbuild, WASM, profiling, example compilation, and override mechanism.
 See `agents/docs/build-system.md` for full command execution rules and forbidden patterns.

@@ -35,10 +35,11 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 import unittest
 import warnings
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -50,7 +51,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # between two build roots. Pinning one of those spellings meant this file
 # silently found nothing whenever the other was produced.
 kBuildRoots = (
-    PROJECT_ROOT / ".build" / "pio" / "attiny85",
+    PROJECT_ROOT / ".build" / "fbuild" / "attiny85",
     PROJECT_ROOT / ".build" / "attiny85",
 )
 
@@ -158,13 +159,12 @@ class TestTinyLinksNoFloat(unittest.TestCase):
                     "toolchain that produced the ELF should provide it."
                 )
             self.skipTest("avr-nm not found; build attiny85 to fetch the toolchain")
-        # `subprocess.run` and not `RunningProcess.run`: the latter merges
-        # stderr into stdout, and a symbol table is not something to parse out
-        # of a merged stream.
-        completed = subprocess.run(  # noqa: SRC001
+        # stdout and stderr piped separately: a symbol table is not something
+        # to parse out of a merged stream.
+        completed = RunningProcess.run(
             [nm, str(elf)],
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
             encoding="utf-8",
             errors="replace",
             check=False,

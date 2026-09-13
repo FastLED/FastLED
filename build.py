@@ -9,9 +9,10 @@ and are no longer accepted by `bash compile`.
 """
 
 import argparse
-import os
 import sys
 from typing import List
+
+from running_process import RunningProcess
 
 
 def main() -> int:
@@ -59,7 +60,7 @@ def main() -> int:
             print(f"Command: {command}")
         print()
 
-        result = os.system(command)
+        result = RunningProcess.run(command, shell=True).returncode
 
         if result != 0:
             print(f"❌ Failed: {platform} (exit code {result})")

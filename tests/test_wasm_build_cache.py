@@ -35,9 +35,9 @@ def test_fast_link_invalidates_cache_when_js_glue_fingerprint_changes(
     def fail_run(*args, **kwargs):
         nonlocal called
         called = True
-        raise AssertionError("subprocess.run should not be reached on JS mismatch")
+        raise AssertionError("RunningProcess.run should not be reached on JS mismatch")
 
-    monkeypatch.setattr(wasm_build.subprocess, "run", fail_run)
+    monkeypatch.setattr(wasm_build.RunningProcess, "run", fail_run)
     monkeypatch.setattr(wasm_build, "_compute_js_glue_fingerprint", lambda: "fresh-js")
     monkeypatch.setattr(
         wasm_build, "_compute_link_environment_fingerprint", lambda mode: "current-env"
@@ -84,10 +84,12 @@ def test_fast_link_invalidates_cache_when_link_environment_changes(
     def fail_run(*args, **kwargs):
         nonlocal called
         called = True
-        raise AssertionError("subprocess.run should not be reached on env mismatch")
+        raise AssertionError("RunningProcess.run should not be reached on env mismatch")
 
-    monkeypatch.setattr(wasm_build.subprocess, "run", fail_run)
-    monkeypatch.setattr(wasm_build, "_compute_js_glue_fingerprint", lambda: "current-js")
+    monkeypatch.setattr(wasm_build.RunningProcess, "run", fail_run)
+    monkeypatch.setattr(
+        wasm_build, "_compute_js_glue_fingerprint", lambda: "current-js"
+    )
     monkeypatch.setattr(
         wasm_build, "_compute_link_environment_fingerprint", lambda mode: "fresh-env"
     )
@@ -138,8 +140,10 @@ def test_fast_link_uses_cache_when_fingerprints_match(
         commands.append(cmd)
         return Result()
 
-    monkeypatch.setattr(wasm_build.subprocess, "run", fake_run)
-    monkeypatch.setattr(wasm_build, "_compute_js_glue_fingerprint", lambda: "current-js")
+    monkeypatch.setattr(wasm_build.RunningProcess, "run", fake_run)
+    monkeypatch.setattr(
+        wasm_build, "_compute_js_glue_fingerprint", lambda: "current-js"
+    )
     monkeypatch.setattr(
         wasm_build, "_compute_link_environment_fingerprint", lambda mode: "current-env"
     )
@@ -168,10 +172,10 @@ def test_link_environment_fingerprint_changes_when_emcc_version_changes(
             self.stdout = text
             self.stderr = ""
 
-    def fake_run(cmd, capture_output=None, text=None):
+    def fake_run(cmd, **kwargs):
         return Result(next(versions))
 
-    monkeypatch.setattr(wasm_build.subprocess, "run", fake_run)
+    monkeypatch.setattr(wasm_build.RunningProcess, "run", fake_run)
 
     first = wasm_build._compute_link_environment_fingerprint("quick")
     monkeypatch.setattr(wasm_build, "_cached_emcc_version_time", 0.0)

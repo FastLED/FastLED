@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
 from pytest import MonkeyPatch
+from running_process import RunningProcess
 
 from ci import wasm_flags
 
@@ -56,7 +56,7 @@ def test_rglob_outputs_forward_slashes(tmp_path: Path) -> None:
     nested.mkdir(parents=True)
     (nested / "demo.cpp").write_text("int demo = 0;\n", encoding="utf-8")
 
-    result = subprocess.run(
+    result = RunningProcess.run(
         [
             sys.executable,
             str(wasm_flags.PROJECT_ROOT / "ci" / "meson" / "rglob.py"),
@@ -65,7 +65,8 @@ def test_rglob_outputs_forward_slashes(tmp_path: Path) -> None:
         ],
         check=True,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
     assert "\\" not in result.stdout

@@ -1,16 +1,17 @@
 import json
-import subprocess
 import threading
 import time
 import unittest
 from pathlib import Path
 
 import pytest
+from running_process import CalledProcessError, RunningProcess
 
 
 # OPTIMIZED: Disabled by default to avoid expensive imports during test discovery
 _ENABLED = True
 
+from ci.util.firmware_elf import resolve_firmware_elf
 from ci.util.paths import PROJECT_ROOT
 from ci.util.symbol_analysis import (
     SymbolInfo,
@@ -32,30 +33,30 @@ ELF_FILE = UNO / "firmware.elf"
 # Prefer example-specific build_info_Blink.json, fall back to build_info.json
 def _find_uno_build_info() -> Path:
     """Find UNO build_info file in standard locations."""
-    # Try new PIO layout with example-specific file
-    candidate = PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info_Blink.json"
-    if candidate.exists():
-        return candidate
-    # Try new PIO layout with legacy file
-    candidate = PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info.json"
-    if candidate.exists():
-        return candidate
-    # Try legacy layout (for old test structure)
-    candidate = (
-        PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
-    )
-    if candidate.exists():
-        return candidate
-    # Default to PIO layout (will be created if needed)
-    return PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info_Blink.json"
+    board_dir = PROJECT_ROOT / ".build" / "fbuild" / "uno"
+    for name in ("build_info_Blink.json", "build_info.json"):
+        candidate = board_dir / name
+        if candidate.exists():
+            return candidate
+    # Default to the `bash compile` layout (will be created if needed)
+    return board_dir / "build_info_Blink.json"
 
 
 BUILD_INFO_PATH = _find_uno_build_info()
 
 
-PLATFORMIO_PATH = Path.home() / ".platformio"
-PLATFORMIO_PACKAGES_PATH = PLATFORMIO_PATH / "packages"
-TOOLCHAIN_AVR = PLATFORMIO_PACKAGES_PATH / "toolchain-atmelavr"
+def _toolchain_present(build_info_path: Path) -> bool:
+    """True when the `nm` the build_info names is on disk."""
+    if not build_info_path.exists():
+        return False
+    try:
+        data = json.loads(build_info_path.read_text())
+        board_info = data[next(iter(data))]
+        nm = board_info["aliases"]["nm"]
+    except (KeyError, StopIteration, ValueError, TypeError):
+        return False
+    return isinstance(nm, str) and Path(nm).exists()
+
 
 # Global lock to prevent multiple threads from running compilation simultaneously
 _compilation_lock = threading.Lock()
@@ -76,11 +77,10 @@ def init() -> None:
             f"Thread {threading.current_thread().ident}: Checking for Uno build in: {uno_build}"
         )
         print(f"BUILD_INFO_PATH: {BUILD_INFO_PATH}")
-        print(f"TOOLCHAIN_AVR: {TOOLCHAIN_AVR}")
         print(f"BUILD_INFO_PATH exists: {BUILD_INFO_PATH.exists()}")
-        print(f"TOOLCHAIN_AVR exists: {TOOLCHAIN_AVR.exists()}")
+        print(f"toolchain present: {_toolchain_present(BUILD_INFO_PATH)}")
 
-        if not BUILD_INFO_PATH.exists() or not TOOLCHAIN_AVR.exists():
+        if not _toolchain_present(BUILD_INFO_PATH):
             print("Uno build not found. Running compilation...")
             print(f"Working directory: {PROJECT_ROOT}")
             try:
@@ -88,28 +88,26 @@ def init() -> None:
                     "Starting compilation command: uv run python-m ci.ci-compile uno --examples Blink"
                 )
                 start_time = time.time()
-                result = subprocess.run(
+                result = RunningProcess.run(
                     "uv run python -m ci.ci-compile uno --examples Blink",
                     shell=True,
                     check=True,
                     cwd=str(PROJECT_ROOT),
                     capture_output=True,
-                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
                 )
                 end_time = time.time()
                 print(
                     f"Compilation completed successfully in {end_time - start_time:.2f} seconds."
                 )
-                print(f"STDOUT: {result.stdout}")
-                if result.stderr:
-                    print(f"STDERR: {result.stderr}")
+                # capture_output merges stderr into stdout.
+                print(f"OUTPUT: {result.stdout}")
                 _compilation_done = True
-            except subprocess.CalledProcessError as e:
+            except CalledProcessError as e:
                 print(f"Error during compilation (returncode: {e.returncode}): {e}")
                 if e.stdout:
-                    print(f"STDOUT: {e.stdout}")
-                if e.stderr:
-                    print(f"STDERR: {e.stderr}")
+                    print(f"OUTPUT: {e.stdout}")
                 raise
         else:
             print("Uno build found, skipping compilation.")
@@ -195,23 +193,11 @@ class TestSymbolAnalysis(unittest.TestCase):
         cppfilt_path = self.board_info["aliases"]["c++filt"]
         elf_file = self.board_info["prog_path"]
 
-        # If the ELF file from build_info doesn't exist, try the actual build location
+        # If the ELF file from build_info doesn't exist, try the fbuild location
         if not Path(elf_file).exists():
-            # Fallback to the actual ELF file location
-            actual_elf_file = (
-                PROJECT_ROOT
-                / ".build"
-                / "fled"
-                / "examples"
-                / "uno"
-                / "Blink"
-                / ".pio"
-                / "build"
-                / "uno"
-                / "firmware.elf"
-            )
-            if actual_elf_file.exists():
-                elf_file = str(actual_elf_file)
+            resolved = resolve_firmware_elf(self.board_info, BUILD_INFO_PATH.parent)
+            if resolved is not None:
+                elf_file = str(resolved)
                 print(f"Using actual ELF file location: {elf_file}")
 
         # Verify the ELF file exists
@@ -480,23 +466,11 @@ class TestSymbolAnalysis(unittest.TestCase):
         # Run full analysis on actual build
         elf_file = self.board_info["prog_path"]
 
-        # If the ELF file from build_info doesn't exist, try the actual build location
+        # If the ELF file from build_info doesn't exist, try the fbuild location
         if not Path(elf_file).exists():
-            # Fallback to the actual ELF file location
-            actual_elf_file = (
-                PROJECT_ROOT
-                / ".build"
-                / "fled"
-                / "examples"
-                / "uno"
-                / "Blink"
-                / ".pio"
-                / "build"
-                / "uno"
-                / "firmware.elf"
-            )
-            if actual_elf_file.exists():
-                elf_file = str(actual_elf_file)
+            resolved = resolve_firmware_elf(self.board_info, BUILD_INFO_PATH.parent)
+            if resolved is not None:
+                elf_file = str(resolved)
                 print(f"Using actual ELF file location: {elf_file}")
 
         nm_path = self.board_info["aliases"]["nm"]

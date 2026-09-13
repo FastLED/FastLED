@@ -191,9 +191,6 @@
         "editor.defaultFormatter": "ms-vscode.cpptools",
         "debug.defaultDebuggerType": "cppdbg"
     },
-    // Disable PlatformIO auto-detection for .ino files in FastLED project
-    "platformio.disableToolchainAutoInstaller": true,
-    
     // Disable Java language support and popups
     "java.enabled": false,
     "java.jdt.ls.enabled": false,
@@ -288,13 +285,6 @@
     "extensions.ignoreRecommendations": true,
     "C_Cpp.disabled": true,
     
-    // Keep PlatformIO UI/icons but disable all automatic behaviors
-    "platformio-ide.autoRebuildAutocompleteIndex": false,
-    "platformio-ide.activateProjectOnTextEditorChange": false,
-    "platformio-ide.autoOpenPlatformIOIniFile": false,
-    "platformio-ide.autoPreloadEnvTasks": false,
-    "platformio-ide.autoCloseSerialMonitor": false,
-    "platformio-ide.disablePIOHomeStartup": true,
     "C_Cpp.default.compileCommands": "builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
 }

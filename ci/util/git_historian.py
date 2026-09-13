@@ -11,7 +11,6 @@ parallel searches and keeping results compact.
 
 import re
 import shlex
-import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -47,10 +46,13 @@ def _run(cmd: str, timeout: float = 3.0) -> str:
 def _have(cmd: str) -> bool:
     """Check if a command is available."""
     try:
-        result = subprocess.run(
+        # Output is captured (and discarded) rather than sent to DEVNULL:
+        # RunningProcess.run() only supports inherit or PIPE for stdout.
+        result = RunningProcess.run(
             [cmd, "--version"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=1.0,
             check=False,
         )

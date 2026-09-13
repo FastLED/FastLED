@@ -9,7 +9,7 @@ even though ``platforms/pin.h`` has an ``#elif defined(FL_IS_SAMD)`` branch and
 ``platforms/arm/samd/pin_samd.hpp`` exists.
 
 The cause was in ``is_samd.h``: the family gates required ``ARDUINO_ARCH_SAMD``
-*and* a CPU macro. PlatformIO's Arduino builder script injects
+*and* a CPU macro. The classic Arduino builder script injects
 ``ARDUINO_ARCH_<ARCH>``; the board manifest does not. A build system that reads
 the manifest directly -- fbuild, which is what ``bash compile samd21`` now uses
 -- therefore never defines it, and detection threw away the unambiguous part
@@ -32,8 +32,8 @@ from running_process import RunningProcess
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC = REPO_ROOT / "src"
 
-# Exactly what the PlatformIO board manifests for the three CI boards define.
-# Fetched from platformio/platform-atmelsam -> boards/*.json "build.extra_flags".
+# Exactly what the board manifests for the three CI boards define.
+# Fetched from the upstream platform-atmelsam boards/*.json "build.extra_flags".
 # Note the absence of ARDUINO_ARCH_SAMD in every one of them.
 BOARD_MANIFEST_FLAGS = {
     "samd21 (adafruit_feather_m0)": [
@@ -155,7 +155,7 @@ def test_part_macros_select_the_right_family() -> None:
 
 
 def test_arduino_arch_samd_still_recognized_on_its_own() -> None:
-    """Kept as an alternative, so PlatformIO-driven builds are unaffected.
+    """Kept as an alternative, so builds that inject ARDUINO_ARCH_SAMD are unaffected.
 
     Matches is_nrf52.h and is_apollo3.h, which also treat ARDUINO_ARCH_* as one
     alternative among several rather than a requirement.

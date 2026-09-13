@@ -63,18 +63,19 @@ Prefer `@dataclass` over tuples and dicts for function return types:
   ```
 - **Why:** on Windows, hand-rolled pyserial request/response loops drop replies (~one per session) — `in_waiting` under-reports, a pre-write `reset_input_buffer()` races the reply, byte-at-a-time reads straddle the port timeout. Silicon-diagnosed 2026-07-04 on the LPC845 SPI/UART benches: the firmware answered every RPC; pyserial lost them. The only sanctioned pyserial touch is fbuild's own `PySerialAdapter` fallback inside `ci/util/serial_interface.py` (selected only via an explicit `use_pyserial=True`). Full rationale: `agents/docs/hardware-autoresearch.md` → "Device serial: fbuild's Rust monitor ONLY".
 
-## Process Execution - No bare subprocess
-- **NEVER use `subprocess.run()` or `subprocess.Popen()` directly** — use `RunningProcess.run()` instead
-- `RunningProcess` (from the `running_process` package) wraps subprocess with proper timeout handling, streaming, and interrupt propagation
-- `subprocess` is problematic: missing real-time output streaming, inconsistent timeout behavior, and no integration with the project's interrupt handling
+## Process Execution - the stdlib subprocess module is banned
+- **The stdlib `subprocess` module may not appear anywhere in the tree** — no `import subprocess`, no `subprocess.run()` / `Popen()` / `check_output()`, no `subprocess.PIPE` or `subprocess.TimeoutExpired`, and no `os.system()` / `os.popen()`. `bash lint` enforces this with `ci/lint_python/subprocess_capture_checker.py`; there is no baseline and no `# noqa` escape.
+- `RunningProcess` (from the `running_process` package) is the one way to spawn a child: it drains stdout and stderr concurrently, streams output while the child runs, honours timeouts, and propagates KeyboardInterrupt.
+- Everything a caller still needs from the stdlib is re-exported by the package: `from running_process import RunningProcess, PIPE, DEVNULL, STDOUT, CompletedProcess, CalledProcessError, TimeoutExpired, CREATE_NEW_PROCESS_GROUP, EndOfStream`. Long-lived daemons use `running_process.launch_detached()`.
+- A capturing call in text mode must name its encoding (`encoding="utf-8", errors="replace"`); the lint reports SRC004 otherwise. `capture_output=True` merges stderr into `.stdout`; pass `stdout=PIPE, stderr=PIPE` when the two streams must stay separate.
 - **Correct:**
   ```python
   from running_process import RunningProcess
-  result = RunningProcess.run(["git", "status"], check=False, timeout=10, capture_output=True, text=True)
+  result = RunningProcess.run(["git", "status"], check=False, timeout=10, capture_output=True, encoding="utf-8", errors="replace")
   print(result.stdout)
+
+  proc = RunningProcess(["fbuild", "build"], auto_run=False, capture=True, encoding="utf-8")
+  proc.start()
+  proc.wait(echo=True)
   ```
-- **Wrong:**
-  ```python
-  import subprocess
-  result = subprocess.run(["git", "status"], capture_output=True, text=True)
-  ```
+- **Wrong:** any use of the stdlib module — `import subprocess`, `subprocess.run(...)`, `subprocess.Popen(...)`, `os.system(...)`.

@@ -1,9 +1,9 @@
 import os
-import subprocess
 import sys
 import time
 
 import httpx
+from running_process import RunningProcess
 
 
 # Get absolute paths
@@ -21,4 +21,4 @@ print("  curl http://localhost:8080/status")
 print()
 
 # Run server in foreground (no stdout capture)
-subprocess.run([runner_path, dll_path])
+RunningProcess.run([runner_path, dll_path])

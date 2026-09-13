@@ -198,7 +198,12 @@
 
 #include "fl/audio/input.h"
 #include "fl/audio/audio_processor.h"
-#include "fl/ui/ui.h"  // for UIAudio (needed for CFastLED::add(UIAudio&) overload)
+
+// CFastLED::add(UIAudio&) only needs the name, which audio_manager.h forward
+// declares; the full UI headers (and the JSON UI they pull in on host/wasm)
+// are provided to sketches by the convenience block at the bottom of this
+// file, not to every library TU.
+#include "fl/audio/audio_manager.h"
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
@@ -235,8 +240,8 @@
 // Default example pins; must follow platforms.h so board pin tables win.
 #include "platforms/default_pins.h"
 
-// PlatformIO Library Dependency Finder (LDF) hint headers
-// These headers use #if 0 blocks to hint library dependencies to PlatformIO's LDF scanner
+// Library Dependency Finder (LDF) hint headers
+// These headers use #if 0 blocks to hint library dependencies to the LDF scanner
 // without actually compiling the code. This works around LDF's limitation of scanning
 // headers without evaluating preprocessor paths.
 #include "platforms/ldf_headers.h"
@@ -1967,13 +1972,18 @@ extern CFastLED FastLED;
 
 #include "fl/math/math.h"  // fl::clamp, fl::map_range, fl::min, fl::max, etc.
 
-#include "fl/log/log.h"
-#include "fl/log/log.h"  // FL_WARN_F("time now: %s", millis()), FL_WARN_F_IF(condition, "time now: %s", millis());"
-#include "fl/log/log.h"  // FL_PRINT_F("message%s", value), FL_LOG_*() category-specific logging
+#include "fl/log/log.h"  // FL_WARN_F("time now: %s", millis()), FL_WARN_F_IF(...), FL_PRINT_F(...), FL_LOG_*() category-specific logging
 #include "fl/system/serial.h"  // Arduino-compatible Serial API: fl::Serial.print(), fl::Serial.read(), etc.
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/stl/sstream.h"  // fl::sstream for string stream operations
+
+// The remote RPC system (fl/remote/remote.h) is opt-in: it pulls the JSON
+// parser, the RPC server and the scheduler (57 headers) into every sketch
+// that includes FastLED.h. Sketches that use it include it directly, or
+// define FL_INCLUDE_REMOTE before including FastLED.h.
+#if defined(FL_INCLUDE_REMOTE)
 #include "fl/remote/remote.h"  // Remote RPC system for JSON-based function calls
+#endif
 
 // provides:
 //   fl::vector<T> - Standard heap vector

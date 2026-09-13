@@ -415,7 +415,7 @@ _db_cache: dict[str, LockDatabase] = {}
 def get_lock_database(lock_path: Path | None = None) -> LockDatabase:
     """Resolve which DB file to use based on the lock path.
 
-    - Paths under ~/.fastled/ or ~/.platformio/ -> ~/.fastled/locks.db
+    - Paths under ~/.fastled/ or ~/.fbuild/ -> ~/.fastled/locks.db
     - Everything else -> <project_root>/.cache/locks.db
 
     Env override: FASTLED_LOCK_DB_PATH (for test isolation)
@@ -433,13 +433,13 @@ def get_lock_database(lock_path: Path | None = None) -> LockDatabase:
     else:
         home = Path.home()
         fastled_dir = home / ".fastled"
-        platformio_dir = home / ".platformio"
+        fbuild_dir = home / ".fbuild"
 
         use_global = False
         if lock_path is not None:
             try:
                 lock_str = str(lock_path.resolve())
-                if str(fastled_dir) in lock_str or str(platformio_dir) in lock_str:
+                if str(fastled_dir) in lock_str or str(fbuild_dir) in lock_str:
                     use_global = True
             except (OSError, ValueError):
                 pass

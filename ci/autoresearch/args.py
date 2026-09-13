@@ -148,11 +148,6 @@ class Args:
     tight_timing_iterations: int
     tight_timing_max_overhead_us: int
 
-    # Legacy escape hatch (#3281): consume root ./platformio.ini instead of
-    # synthesising .build/pio/<board>/platformio.ini from ci/boards.py.
-    # Emits a deprecation warning when set. Slated for removal one release
-    # cycle after #3281 lands.
-    use_root_platformio_ini: bool
     watchdog_soak: bool = False
     mp3: bool = False
 
@@ -246,7 +241,7 @@ See Also:
         parser.add_argument(
             "environment_positional",
             nargs="?",
-            help="PlatformIO environment to build (e.g., esp32s3, esp32dev). If omitted, auto-detects from attached device.",
+            help="Board environment to build (e.g., esp32s3, esp32dev). If omitted, auto-detects from attached device.",
         )
 
         # Driver selection flags
@@ -343,14 +338,16 @@ See Also:
             ),
         )
         driver_group.add_argument(
-            "--rp-pio-index",
+            "--rp-engine-index",
+            dest="rp_pio_index",
             type=int,
             choices=(0, 1, 2),
             default=1,
             help="RP PIO engine for --flex-io; PIO2 requires RP2350 (default: 1).",
         )
         driver_group.add_argument(
-            "--rp-pio-both",
+            "--rp-engine-both",
+            dest="rp_pio_both",
             action="store_true",
             help="RP2040/RP2350: select PIO0 and PIO1 together (requires --flex-io --parallel).",
         )
@@ -579,7 +576,7 @@ See Also:
             "--env",
             "-e",
             dest="environment",
-            help="PlatformIO environment to build (optional, auto-detect if not provided)",
+            help="Board environment to build (optional, auto-detect if not provided)",
         )
         parser.add_argument(
             "--verbose",
@@ -624,7 +621,7 @@ See Also:
             "-d",
             type=Path,
             default=Path.cwd(),
-            help="PlatformIO project directory (default: current directory)",
+            help="Project directory (default: current directory)",
         )
 
         # Pattern overrides (for advanced usage)
@@ -844,21 +841,6 @@ See Also:
             help="Maximum allowed max(show()+wait()-wire_time) overhead for --tight-timing (default: 2000us).",
         )
 
-        # Legacy root platformio.ini escape hatch (#3281). Default flow
-        # synthesises .build/pio/<board>/platformio.ini from ci/boards.py,
-        # matching `bash compile`. This flag re-enables the legacy
-        # consume-root-./platformio.ini behavior for one release cycle.
-        parser.add_argument(
-            "--use-root-platformio-ini",
-            action="store_true",
-            help=(
-                "[DEPRECATED, #3281] Use root ./platformio.ini instead of "
-                "synthesising .build/pio/<board>/platformio.ini from "
-                "ci/boards.py. Legacy escape hatch; will be removed in a "
-                "future release."
-            ),
-        )
-
         parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
@@ -866,14 +848,6 @@ See Also:
             print(
                 f"warning: {flag} is deprecated and has no effect; "
                 "fbuild is always used for board builds.",
-                file=sys.stderr,
-            )
-
-        if parsed.use_root_platformio_ini:
-            # Deprecation telemetry, per issue #3281.
-            print(
-                "DEPRECATION: --use-root-platformio-ini will be removed in a "
-                "future release. See #3281.",
                 file=sys.stderr,
             )
 
@@ -978,5 +952,4 @@ See Also:
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
             tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
-            use_root_platformio_ini=parsed.use_root_platformio_ini,
         )

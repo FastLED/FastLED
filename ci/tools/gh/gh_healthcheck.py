@@ -24,11 +24,12 @@ Features:
 import argparse
 import json
 import re
-import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Optional
+
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 
 @dataclass
@@ -75,9 +76,9 @@ class HealthChecker:
             suggestion="Check includes and namespace usage",
         ),
         ErrorPattern(
-            pattern=r"PlatformIO command failed.*platform.*show.*returned non-zero",
+            pattern=r"(?:fbuild|build error).*platform.*(?:not found|failed to resolve)",
             category="Platform Resolution",
-            description="PlatformIO cannot resolve platform",
+            description="fbuild cannot resolve platform",
             suggestion="Platform may be deprecated or unavailable",
         ),
         ErrorPattern(
@@ -109,12 +110,15 @@ class HealthChecker:
     def _get_repo(self) -> str:
         """Get repository in owner/repo format."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "repo", "view", "--json", "nameWithOwner"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
@@ -140,8 +144,15 @@ class HealthChecker:
                 "1",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, check=True, timeout=30
+            result = RunningProcess.run(
+                cmd,
+                stdout=PIPE,
+                stderr=PIPE,
+                text=True,
+                check=True,
+                timeout=30,
+                encoding="utf-8",
+                errors="replace",
             )
             runs = json.loads(result.stdout)
             return runs[0] if runs else None
@@ -155,7 +166,7 @@ class HealthChecker:
     def get_run_info(self, run_id: str) -> Optional[dict[str, Any]]:
         """Get detailed run information."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [
                     "gh",
                     "run",
@@ -164,10 +175,13 @@ class HealthChecker:
                     "--json",
                     "displayTitle,status,conclusion,createdAt,headBranch,event,jobs",
                 ],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=30,
+                encoding="utf-8",
+                errors="replace",
             )
             return json.loads(result.stdout)
         except KeyboardInterrupt as ki:
@@ -191,12 +205,15 @@ class HealthChecker:
             api_path = f"/repos/{self.repo}/actions/jobs/{job_id}/logs"
             cmd = ["gh", "api", api_path]
 
-            result = subprocess.run(
+            result = RunningProcess.run(
                 cmd,
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=False,  # Don't raise on error
                 timeout=30,  # Shorter timeout
+                encoding="utf-8",
+                errors="replace",
             )
 
             if result.returncode != 0:
@@ -205,7 +222,7 @@ class HealthChecker:
             # Only keep last N lines (where errors usually are)
             lines = result.stdout.splitlines()
             return lines[-max_lines:] if len(lines) > max_lines else lines
-        except subprocess.TimeoutExpired:
+        except TimeoutExpired:
             print(f"⚠️  Timeout fetching logs for job {job_id}", file=sys.stderr)
             return []
         except KeyboardInterrupt as ki:
@@ -417,7 +434,7 @@ class HealthChecker:
             print("     Consider using conditional includes: #if __has_include(...)")
 
         if has_platform_errors:
-            print("  2. PlatformIO platform resolution failures detected")
+            print("  2. Platform resolution failures detected")
             print("     Platform may be deprecated - consider upgrading or removing")
 
         if failed_jobs == 1:

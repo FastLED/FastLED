@@ -102,6 +102,8 @@ def fetch_issues(repo: str) -> list[Issue]:
         timeout=120,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode != 0:
         raise RuntimeError(
@@ -152,6 +154,8 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
         timeout=60,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     label_output = _output(label_result)
     if label_result.returncode != 0 and "already exists" not in label_output:
@@ -172,6 +176,8 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
         timeout=60,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if result.returncode != 0:
         raise RuntimeError(f"failed to label #{number}: {_output(result)}")
@@ -192,6 +198,8 @@ def defer_issue(repo: str, number: int, reason: str | None) -> None:
             timeout=60,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         # The label is already applied at this point, so the defer itself stuck.
         # Report the missing comment loudly instead of printing a success line

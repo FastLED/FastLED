@@ -1,6 +1,6 @@
 ---
 name: fix-board
-description: Automatically diagnose and fix PlatformIO board upload/monitor issues. Runs three-phase device workflow (Compile, Upload, Monitor) and applies fixes.
+description: Automatically diagnose and fix board upload/monitor issues. Runs three-phase device workflow (Compile, Upload, Monitor) and applies fixes.
 disable-model-invocation: true
 context: fork
 agent: fix-board-agent

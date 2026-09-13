@@ -11,7 +11,6 @@ exact scenario that occurs when users Ctrl+C or kill processes.
 """
 
 import os
-import subprocess
 import sys
 import tempfile
 import time
@@ -19,11 +18,46 @@ import unittest
 from pathlib import Path
 
 import pytest
+from running_process import EndOfStream, RunningProcess
 
 from ci.util.build_lock import BuildLock
 from ci.util.file_lock_rw import FileLock, is_lock_stale, is_process_alive
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.lock_database import LockDatabase
+
+
+def _spawn_lock_holder(script_args: list[str]) -> RunningProcess:
+    """Spawn a lock-holder script with its output streamed line by line."""
+    return RunningProcess(
+        [sys.executable, *script_args], capture=True, encoding="utf-8", errors="replace"
+    )
+
+
+def _await_handshake(proc: RunningProcess) -> int:
+    """Read `PID:<n>` then `READY` from the child and return the child's PID.
+
+    RunningProcess feeds the child's stderr into the same line queue as its
+    stdout, so anything that is not a protocol line is skipped rather than
+    failing the handshake. A child that exits (or prints FAILED) before
+    completing the handshake fails the test with a clear message.
+    """
+    pid: int | None = None
+    while True:
+        try:
+            line = proc.get_next_line(timeout=30.0)
+        except TimeoutError:
+            raise AssertionError(f"child handshake timed out (pid={pid})") from None
+        if isinstance(line, EndOfStream):
+            raise AssertionError(f"child exited before handshake completed (pid={pid})")
+        text = str(line).strip()
+        if pid is None:
+            if text.startswith("PID:"):
+                pid = int(text.split(":")[1].strip())
+            continue
+        if text == "READY":
+            return pid
+        if text == "FAILED":
+            raise AssertionError(f"child {pid} failed to acquire the lock")
 
 
 class TestRealStaleLockScenario(unittest.TestCase):
@@ -107,30 +141,12 @@ with FileLock(lock_path, operation="real_test_scenario"):
         script_path = self._create_lock_holder_script()
 
         # Spawn child process that holds lock
-        proc = subprocess.Popen(
-            [sys.executable, str(script_path), str(self.lock_path)],
-            stdout=subprocess.PIPE,
-            # DEVNULL, not PIPE: this test never reads stderr, and an
-            # un-drained second pipe deadlocks the child once it fills
-            # (SRC005). Discarding matches the existing behaviour exactly --
-            # the output was already going nowhere.
-            stderr=subprocess.DEVNULL,
-            text=True,
-            bufsize=1,  # Line buffered
-        )
+        proc = _spawn_lock_holder([str(script_path), str(self.lock_path)])
 
         try:
-            # Read the PID from child process
-            pid_line = proc.stdout.readline()
-            self.assertTrue(
-                pid_line.startswith("PID:"), f"Expected PID line, got: {pid_line}"
-            )
-            child_pid = int(pid_line.split(":")[1].strip())
+            # Read the PID from the child, then wait for "READY" (lock acquired)
+            child_pid = _await_handshake(proc)
             print(f"\n[TEST] Child process PID: {child_pid}")
-
-            # Wait for "READY" signal (lock acquired)
-            ready_line = proc.stdout.readline()
-            self.assertEqual(ready_line.strip(), "READY", "Lock not acquired by child")
             print(f"[TEST] Child acquired lock successfully")
 
             # Give it a moment for DB to be fully written
@@ -171,7 +187,7 @@ with FileLock(lock_path, operation="real_test_scenario"):
             try:
                 proc.wait(timeout=5.0)
                 print(f"[TEST] Process terminated (exit code: {proc.returncode})")
-            except subprocess.TimeoutExpired:
+            except TimeoutError:
                 print(f"[TEST] WARNING: Process did not terminate within 5 seconds")
                 proc.kill()  # Force kill wrapper
                 proc.wait()
@@ -334,24 +350,11 @@ else:
         script_path.write_text(script_content)
 
         # Spawn child process
-        proc = subprocess.Popen(
-            [sys.executable, str(script_path)],
-            stdout=subprocess.PIPE,
-            # DEVNULL, not PIPE: this test never reads stderr, and an
-            # un-drained second pipe deadlocks the child once it fills
-            # (SRC005). Discarding matches the existing behaviour exactly --
-            # the output was already going nowhere.
-            stderr=subprocess.DEVNULL,
-            text=True,
-            bufsize=1,
-        )
+        proc = _spawn_lock_holder([str(script_path)])
 
         try:
             # Get PID and wait for ready
-            pid_line = proc.stdout.readline()
-            child_pid = int(pid_line.split(":")[1].strip())
-            ready_line = proc.stdout.readline()
-            self.assertEqual(ready_line.strip(), "READY")
+            child_pid = _await_handshake(proc)
             print(f"[TEST] Child PID {child_pid} acquired BuildLock")
 
             time.sleep(0.2)
@@ -430,24 +433,11 @@ else:
 
             # Create and kill process holding lock
             script_path = self._create_lock_holder_script()
-            proc = subprocess.Popen(
-                [sys.executable, str(script_path), str(self.lock_path)],
-                stdout=subprocess.PIPE,
-                # DEVNULL, not PIPE: this test never reads stderr, and an
-                # un-drained second pipe deadlocks the child once it fills
-                # (SRC005). Discarding matches the existing behaviour exactly --
-                # the output was already going nowhere.
-                stderr=subprocess.DEVNULL,
-                text=True,
-                bufsize=1,
-            )
+            proc = _spawn_lock_holder([str(script_path), str(self.lock_path)])
 
             try:
                 # Wait for lock acquisition
-                pid_line = proc.stdout.readline()
-                child_pid = int(pid_line.split(":")[1].strip())
-                ready_line = proc.stdout.readline()
-                self.assertEqual(ready_line.strip(), "READY")
+                child_pid = _await_handshake(proc)
                 print(f"[TEST] Child PID {child_pid} acquired lock")
 
                 time.sleep(0.2)

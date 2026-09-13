@@ -40,7 +40,7 @@ def find_include_dirs_for_example(ino_file: Path, project_root: Path) -> list[st
         include_dirs.append(str(example_dir))
 
     # Excluded directory names
-    excluded_dirs = {".git", "__pycache__", ".pio", ".vscode", "fastled_js", "build"}
+    excluded_dirs = {".git", "__pycache__", ".vscode", "fastled_js", "build"}
 
     # Check for header files in subdirectories
     for subdir in example_dir.iterdir():

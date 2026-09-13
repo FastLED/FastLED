@@ -4,7 +4,8 @@
 # FastLED Stage 3 / #2895 — opt-in ESP-IDF sdkconfig overlay for users who
 # want to drop ~10-15 KB of release-build flash on a typical ESP32 LED strip.
 #
-# USAGE — in your platformio.ini, layer this on top of your own defaults:
+# USAGE — in your project's `platformio.ini` (fbuild's project-file format),
+# layer this on top of your own defaults:
 #
 #   [env:esp32s3]
 #   platform = espressif32
@@ -12,11 +13,9 @@
 #   framework = arduino
 #   board_build.sdkconfig_defaults =
 #       sdkconfig.defaults
-#       ${platformio.packages_dir}/framework-arduinoespressif32/tools/sdkconfig.defaults.esp32s3
-#       ${PROJECT_LIBDEPS_DIR}/${PIOENV}/FastLED/tools/sdkconfig_for_smallest_fastled.defaults
+#       <path-to-FastLED>/tools/sdkconfig_for_smallest_fastled.defaults
 #
-# (The exact path under `PROJECT_LIBDEPS_DIR` depends on how PIO resolves
-# library installs in your project. Substitute the absolute path if needed.)
+# (Substitute the absolute path to your FastLED checkout or library install.)
 #
 # Each line below is grounded against the top-25 symbol table in #2886.
 # Conservative entries are uncommented; situational ones live below the

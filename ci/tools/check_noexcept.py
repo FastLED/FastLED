@@ -22,11 +22,12 @@ import argparse
 import os
 import re
 import shutil
-import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+
+from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -316,10 +317,11 @@ def _run_clang_query(
     clang_query: list[str], tu: str, file_regex: str
 ) -> list[NoexceptHit]:
     """Run clang-query and return filtered missing-FL_NO_EXCEPT hits."""
-    result = subprocess.run(
+    result = RunningProcess.run(
         [*clang_query, tu, "--", *_COMPILER_ARGS],
         input=build_query(file_regex),
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         # See check_array_params._run_clang_query: text=True without an
         # explicit encoding decodes clang-query's UTF-8 output with the
@@ -329,7 +331,7 @@ def _run_clang_query(
         cwd=str(PROJECT_ROOT),
         timeout=300,
     )
-    output = result.stdout + result.stderr
+    output = result.stdout + "\n" + result.stderr
     if result.returncode != 0:
         raise NoexceptCheckError(output.strip() or "clang-query failed")
     if (
@@ -376,7 +378,7 @@ def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
         if not (PROJECT_ROOT / tu).exists():
             raise NoexceptCheckError(f"translation unit not found: {tu}")
 
-    # The "all" scope dispatches 3 independent clang-query subprocesses
+    # The "all" scope dispatches 3 independent clang-query child processes
     # (platforms / fl / third_party). Each parses its own TU - they share
     # no state and can run concurrently. Sequential wall was ~17s on a
     # cold AST run; parallel is ~max(per-TU) instead of sum.

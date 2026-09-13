@@ -23,7 +23,6 @@
 
 # Build artifacts
 **/.build
-**/.pio
 **/build
 **/dist
 **/*.o

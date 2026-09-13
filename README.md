@@ -181,12 +181,6 @@ badge before, so the breakage was not visible from this page.
 ### Quality Gates
 [![arduino_library_lint](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml) [![iwyu](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/iwyu.yml) [![bloat_regression_esp32s3](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/bloat_regression_esp32s3.yml)
 
-### Informational Checks
-[![backend_flag_drift_teensy40](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/backend_flag_drift_teensy40.yml) [![nightly_fbuild_pio_parity](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/nightly_fbuild_pio_parity.yml)
-
-*These two set `continue-on-error: true`; a red badge here reports drift and does
-not block merges.*
-
 ### Header Compilation Performance
 
 [![Header Compilation Performance](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml)

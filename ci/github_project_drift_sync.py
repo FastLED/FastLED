@@ -26,15 +26,17 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from typing import Any
 
+from running_process import PIPE, RunningProcess
+
 
 def run_gh(args: list[str]) -> str:
-    result = subprocess.run(
+    result = RunningProcess.run(
         ["gh", *args],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
         text=True,
         check=False,
         encoding="utf-8",

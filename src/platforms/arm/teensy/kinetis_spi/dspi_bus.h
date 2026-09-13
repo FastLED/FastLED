@@ -7,7 +7,7 @@
 /// so FastLED's SdFat transport does not depend on the Arduino `SPI` library.
 ///
 /// Why this exists: the Teensyduino `SPI` library is only *compiled* when the
-/// PlatformIO library finder selects it from an unconditional sketch-level
+/// library finder selects it from an unconditional sketch-level
 /// `#include <SPI.h>`. FastLED cannot add that include (it breaks the host
 /// example build, which has no `SPI.h`), so `SPIClass::begin`,
 /// `SPIClass::transfer`, the global `SPI` object and

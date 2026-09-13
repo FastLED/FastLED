@@ -69,9 +69,9 @@ _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 // C:\Users\niteris\AppData\Local\Temp\ccGpqhqm.s:1422: Error: illegal opcode or for mcu avr25
 // lto-wrapper.exe: fatal error: avr-g++ returned 1 exit status
 // compilation terminated.
-// c:/users/niteris/.platformio/packages/toolchain-atmelavr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/ld.exe: error: lto-wrapper failed
+// <toolchain-atmelavr>/avr/bin/ld.exe: error: lto-wrapper failed
 // collect2.exe: error: ld returned 1 exit status
-// *** [.pio\build\attiny4313\firmware.elf] Error 1
+// *** [.build/attiny4313/firmware.elf] Error 1
 
 #define MAX_PIN 19
 
@@ -112,7 +112,7 @@ _FL_DEFPIN(18, 7, B); // PB7 (XTAL2/PCINT15)
 // C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:1563: Error: illegal opcode or for mcu avr25
 // lto-wrapper.exe: fatal error: avr-g++ returned 1 exit status
 // compilation terminated.
-// c:/users/niteris/.platformio/packages/toolchain-atmelavr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/ld.exe: error: lto-wrapper failed
+// <toolchain-atmelavr>/avr/bin/ld.exe: error: lto-wrapper failed
 // collect2.exe: error: ld returned 1 exit status
 
 _FL_DEFPIN(0, 0, B); // PB0 (MOSI/AIN0/OC0A/PCINT0)

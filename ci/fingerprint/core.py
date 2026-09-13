@@ -21,11 +21,12 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
+
+from running_process import PIPE, CalledProcessError, CompletedProcess, RunningProcess
 
 
 # ==============================================================================
@@ -343,7 +344,7 @@ def _find_zccache_fp() -> str:
 
 def _run_zccache(
     args: list[str], *, check: bool = False, timeout: float = 60.0
-) -> subprocess.CompletedProcess[str]:
+) -> CompletedProcess[str]:
     """Run a zccache fingerprint CLI command.
 
     Tries the daemon-backed ``zccache fp`` first (<1ms on cache hit).
@@ -352,7 +353,7 @@ def _run_zccache(
     Args:
         args: Arguments after ``fp`` / the binary name.
         check: If True, raise on non-zero exit.
-        timeout: Subprocess timeout in seconds.
+        timeout: Child-process timeout in seconds.
 
     Returns:
         CompletedProcess with captured stdout/stderr.
@@ -361,27 +362,31 @@ def _run_zccache(
     zccache_bin = _find_zccache()
     if zccache_bin:
         cmd = [zccache_bin, "fp"] + args
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
-            capture_output=True,
-            text=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding="utf-8",
+            errors="replace",
             check=False,
             timeout=timeout,
         )
         # exit 0 (run) or 1 (skip) are valid; exit 2+ means daemon error
         if result.returncode in (0, 1):
             if check and result.returncode not in (0, 1):
-                raise subprocess.CalledProcessError(
+                raise CalledProcessError(
                     result.returncode, cmd, result.stdout, result.stderr
                 )
             return result
 
     # Fallback to standalone: ``zccache-fp <args>``
     cmd = [_find_zccache_fp()] + args
-    return subprocess.run(
+    return RunningProcess.run(
         cmd,
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
         check=check,
         timeout=timeout,
     )

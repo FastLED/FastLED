@@ -50,6 +50,8 @@ class TestMesonNativeToolchain(unittest.TestCase):
         run.assert_called_once_with(
             ["xcrun", "--find", "clang"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             text=True,
             timeout=10,
             check=False,
@@ -82,6 +84,8 @@ class TestMesonNativeToolchain(unittest.TestCase):
         run.assert_called_once_with(
             ["xcrun", "--sdk", "macosx", "--show-sdk-path"],
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
             text=True,
             timeout=10,
             check=False,

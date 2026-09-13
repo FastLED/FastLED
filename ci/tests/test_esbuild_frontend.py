@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 from pathlib import Path
+from typing import Any
 
 
 def test_frontend_dependency_hash_tracks_both_manifests(
@@ -35,12 +36,12 @@ def test_frontend_dependencies_run_npm_ci_once_per_manifest_hash(
 
     calls: list[tuple[list[str], str]] = []
 
-    def fake_run(args: list[str], cwd: str):
-        calls.append((args, cwd))
+    def fake_run(args: list[str], **kwargs: Any):
+        calls.append((args, str(kwargs["cwd"])))
         (tmp_path / "node_modules").mkdir(exist_ok=True)
         return type("Result", (), {"returncode": 0})()
 
-    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    monkeypatch.setattr(module.RunningProcess, "run", fake_run)
     module.ensure_frontend_dependencies()
     module.ensure_frontend_dependencies()
     lockfile.write_text('{"lockfileVersion":3,"changed":true}', encoding="utf-8")

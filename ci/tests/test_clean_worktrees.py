@@ -7,12 +7,13 @@ unpushed commits.
 
 import importlib.util
 import os
-import subprocess
 import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import ModuleType
+
+from running_process import PIPE, RunningProcess
 
 
 def _load_helper() -> ModuleType:
@@ -29,9 +30,16 @@ def _load_helper() -> ModuleType:
 
 
 def _git(args: list[str], cwd: Path) -> str:
-    return subprocess.check_output(
-        ["git", *args], cwd=str(cwd), text=True, encoding="utf-8", errors="replace"
-    )
+    # stdout and stderr piped separately so callers get git's stdout alone.
+    return RunningProcess.run(
+        ["git", *args],
+        cwd=str(cwd),
+        check=True,
+        stdout=PIPE,
+        stderr=PIPE,
+        encoding="utf-8",
+        errors="replace",
+    ).stdout
 
 
 def _init_repo(root: Path) -> None:
@@ -93,10 +101,12 @@ class TestClassifyWorktree(unittest.TestCase):
         parent.mkdir()
         _init_repo(parent)
         origin = self.tmp / "origin.git"
-        subprocess.check_call(
+        RunningProcess.run(
             ["git", "init", "--bare", str(origin)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            check=True,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         _git(["remote", "add", "origin", str(origin)], parent)
         _git(["push", "-u", "origin", "master"], parent)

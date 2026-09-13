@@ -8,12 +8,11 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess
 from typeguard import typechecked
 
 
@@ -238,6 +237,8 @@ def print_report(
             check=True,
             text=True,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         table_total = 0
         for line in result.stdout.splitlines():
@@ -263,6 +264,8 @@ def print_report(
                 check=True,
                 text=True,
                 capture_output=True,
+                encoding="utf-8",
+                errors="replace",
             )
             fields = size_result.stdout.splitlines()[1].split()
             text_bytes, data_bytes, bss_bytes = map(int, fields[:3])
@@ -350,7 +353,13 @@ def run_watermark(
     ]
     RunningProcess.run(command, check=True)
     result = RunningProcess.run(
-        [str(binary)], cwd=ROOT, check=True, text=True, capture_output=True
+        [str(binary)],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
     )
     print_captured(result.stdout)
     metrics: dict[tuple[str, str], int] = {}
@@ -380,6 +389,8 @@ def run_watermark(
             cwd=ROOT,
             check=True,
             capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
         process_peak = 0
         for line in massif.read_text(encoding="utf-8").splitlines():
@@ -426,6 +437,8 @@ def profile_metrics(binary: Path) -> dict[tuple[str, str], int]:
         check=True,
         text=True,
         capture_output=True,
+        encoding="utf-8",
+        errors="replace",
     )
     print_captured(result.stdout)
     metrics = parse_profile_output(result.stdout)
@@ -540,7 +553,7 @@ def main(argv: list[str] | None = None) -> int:
             metrics.update(run_watermark(objects, hook_peaks))
             if args.check:
                 check_ledger(metrics, tables)
-    except (OSError, RuntimeError, subprocess.CalledProcessError, ValueError) as exc:
+    except (OSError, RuntimeError, CalledProcessError, ValueError) as exc:
         print(f"codec memory audit failed: {exc}", file=sys.stderr)
         return 1
     return 0

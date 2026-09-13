@@ -9,7 +9,6 @@ Discovers and runs test executables in parallel with clean output handling.
 
 import argparse
 import os
-import subprocess
 import sys
 import tempfile
 import threading
@@ -19,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from running_process import RunningProcess
+from running_process import RunningProcess, TimeoutExpired
 
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.test_exceptions import TestExecutionFailedException, TestFailureInfo
@@ -150,15 +149,15 @@ def _dump_post_mortem_stack_trace(
 
         print(f"Running post-mortem stack trace analysis: {' '.join(gdb_command)}")
 
-        gdb_process = subprocess.Popen(
+        gdb_result = RunningProcess.run(
             gdb_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
+            capture_output=True,  # stderr merged into stdout
+            encoding="utf-8",
+            errors="replace",
             cwd=_PROJECT_ROOT,
+            timeout=60,  # 1 minute timeout for GDB
         )
-
-        gdb_output, _ = gdb_process.communicate(timeout=60)  # 1 minute timeout for GDB
+        gdb_output = gdb_result.stdout
 
         # Clean up GDB script
         os.unlink(gdb_script_path)
@@ -168,9 +167,10 @@ def _dump_post_mortem_stack_trace(
         else:
             return "GDB completed but produced no output"
 
-    except subprocess.TimeoutExpired:
+    except TimeoutExpired:
         return "GDB analysis timed out after 60 seconds"
-    except FileNotFoundError:
+    except (FileNotFoundError, RuntimeError):
+        # RunningProcess reports a missing executable as RuntimeError.
         return "GDB not found - install GDB to enable stack trace analysis"
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)

@@ -75,7 +75,7 @@ build environment you actually need to support.
 
 ### Tier 1 — Toolchain provides it (preferred)
 
-The board's Arduino core or PlatformIO platform places the CMSIS header on
+The board's Arduino core or platform package places the CMSIS header on
 the include path automatically. Just `#include <LPC845.h>` (or the
 appropriate header) from `led_sysdefs_<arch>_<vendor>.h` and use the
 vendor's typedef'd peripheral pointers (`LPC_SCT->CONFIG`, `GPIOA->BSRR`,
@@ -94,7 +94,7 @@ vendor's typedef'd peripheral pointers (`LPC_SCT->CONFIG`, `GPIOA->BSRR`,
 
 If the toolchain's include path is unreliable (e.g. the Arduino core only
 exposes the active variant directory, like the NXP `ArduinoCore-LPC8xx`
-PlatformIO binding does), copy the vendor header into
+core does), copy the vendor header into
 `src/platforms/<arch>/<vendor>/cmsis/<chip>.h`. License headers stay intact;
 add a one-line `README.md` next to it citing the upstream URL and the
 commit SHA the copy is from. Update the platform's `led_sysdefs_*.h` to

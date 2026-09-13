@@ -24,11 +24,12 @@ Features:
 import argparse
 import json
 import re
-import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Optional
+
+from running_process import PIPE, RunningProcess, TimeoutExpired
 
 
 class GitHubDebugger:
@@ -91,12 +92,15 @@ class GitHubDebugger:
     def _get_repo(self) -> str:
         """Get repository in owner/repo format."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "repo", "view", "--json", "nameWithOwner"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
@@ -110,7 +114,7 @@ class GitHubDebugger:
     def get_run_info(self) -> dict[str, str]:
         """Get basic run information."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [
                     "gh",
                     "run",
@@ -119,10 +123,13 @@ class GitHubDebugger:
                     "--json",
                     "displayTitle,status,conclusion,createdAt",
                 ],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             return json.loads(result.stdout)
         except KeyboardInterrupt as ki:
@@ -135,12 +142,15 @@ class GitHubDebugger:
     def get_failed_jobs(self) -> list[dict[str, str]]:
         """Get list of failed jobs."""
         try:
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "run", "view", self.run_id, "--json", "jobs"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=10,
+                encoding="utf-8",
+                errors="replace",
             )
             data = json.loads(result.stdout)
             jobs = data.get("jobs", [])
@@ -174,7 +184,7 @@ class GitHubDebugger:
         """
         try:
             # List artifacts for this run
-            result = subprocess.run(
+            result = RunningProcess.run(
                 [
                     "gh",
                     "api",
@@ -182,10 +192,13 @@ class GitHubDebugger:
                     "--jq",
                     '.artifacts[] | select(.name | startswith("build-summary")) | .name',
                 ],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 check=True,
                 timeout=15,
+                encoding="utf-8",
+                errors="replace",
             )
 
             artifact_names = [
@@ -203,7 +216,7 @@ class GitHubDebugger:
 
             for name in artifact_names:
                 try:
-                    subprocess.run(
+                    RunningProcess.run(
                         [
                             "gh",
                             "run",
@@ -214,10 +227,13 @@ class GitHubDebugger:
                             "-D",
                             str(download_dir),
                         ],
-                        capture_output=True,
+                        stdout=PIPE,
+                        stderr=PIPE,
                         text=True,
                         check=True,
                         timeout=30,
+                        encoding="utf-8",
+                        errors="replace",
                     )
                 except KeyboardInterrupt as ki:
                     handle_keyboard_interrupt(ki)
@@ -276,9 +292,10 @@ class GitHubDebugger:
 
         try:
             # Download logs using gh run view
-            result = subprocess.run(
+            result = RunningProcess.run(
                 ["gh", "run", "view", self.run_id, "--log"],
-                capture_output=True,
+                stdout=PIPE,
+                stderr=PIPE,
                 text=True,
                 encoding="utf-8",
                 errors="replace",
@@ -293,7 +310,7 @@ class GitHubDebugger:
             print(f"Log downloaded successfully ({len(result.stdout)} bytes)\n")
             return log_file
 
-        except subprocess.TimeoutExpired:
+        except TimeoutExpired:
             print("Error: Log download timed out", file=sys.stderr)
             return None
         except KeyboardInterrupt as ki:

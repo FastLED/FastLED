@@ -39,8 +39,8 @@ ALL AGENTS MUST FOLLOW THESE COMMAND EXECUTION PATTERNS:
 **Python Code:**
 ```python
 # tmp.py
-import subprocess
-result = subprocess.run(['git', 'status'], capture_output=True, text=True)
+from running_process import RunningProcess
+result = RunningProcess.run(['git', 'status'], capture_output=True, encoding='utf-8', errors='replace')
 print(result.stdout)
 ```
 Then run: `uv run tmp.py`
@@ -71,12 +71,19 @@ uv run mcp_server.py
 import asyncio
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Union
+
+from running_process import (
+    PIPE,
+    STDOUT,
+    CalledProcessError,
+    RunningProcess,
+    TimeoutExpired,
+)
 
 
 try:
@@ -1935,7 +1942,6 @@ async def esp32_symbol_analysis(
 ) -> CallToolResult:
     """Run ESP32 symbol analysis to identify optimization opportunities for binary size reduction."""
     import json
-    import subprocess
     from pathlib import Path
 
     board = arguments.get("board", "auto")
@@ -2053,9 +2059,17 @@ async def esp32_symbol_analysis(
         # Run nm command to get symbols
         cmd = [nm_path, "--print-size", "--size-sort", "--radix=d", elf_file]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = RunningProcess.run(
+                cmd,
+                stdout=PIPE,
+                stderr=PIPE,
+                text=True,
+                check=True,
+                encoding="utf-8",
+                errors="replace",
+            )
             nm_output = result.stdout
-        except subprocess.CalledProcessError as e:
+        except CalledProcessError as e:
             return CallToolResult(
                 content=[
                     TextContent(
@@ -2085,12 +2099,15 @@ async def esp32_symbol_analysis(
                     # Demangle symbol if possible
                     try:
                         cmd_demangle = ["echo", mangled_name, "|", cppfilt_path]
-                        demangle_result = subprocess.run(
+                        demangle_result = RunningProcess.run(
                             f'echo "{mangled_name}" | "{cppfilt_path}"',
                             shell=True,
-                            capture_output=True,
+                            stdout=PIPE,
+                            stderr=PIPE,
                             text=True,
                             check=True,
+                            encoding="utf-8",
+                            errors="replace",
                         )
                         demangled_name = demangle_result.stdout.strip()
                         if demangled_name == mangled_name:
@@ -2589,11 +2606,14 @@ async def run_fastled_web_compiler(
     # Install playwright browsers
     result_text += "📦 Installing Playwright browsers...\n"
     try:
-        install_result = subprocess.run(
+        install_result = RunningProcess.run(
             [sys.executable, "-m", "playwright", "install", "chromium"],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             cwd=project_root,
+            encoding="utf-8",
+            errors="replace",
         )
         if install_result.returncode != 0:
             result_text += (
@@ -2615,11 +2635,14 @@ async def run_fastled_web_compiler(
         os.chdir(example_dir)
 
         # Run fastled command
-        compile_result = subprocess.run(
+        compile_result = RunningProcess.run(
             ["fastled", "--just-compile", "."],
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
             timeout=300,  # 5 minute timeout
+            encoding="utf-8",
+            errors="replace",
         )
 
         if compile_result.returncode != 0:
@@ -2789,7 +2812,7 @@ async def run_fastled_web_compiler(
 
         return CallToolResult(content=[TextContent(type="text", text=result_text)])
 
-    except subprocess.TimeoutExpired:
+    except TimeoutExpired:
         return CallToolResult(
             content=[
                 TextContent(
@@ -2864,18 +2887,20 @@ async def git_historian(
 async def run_command(cmd: list[str], cwd: Path) -> str:
     """Run a shell command and return its output."""
     try:
-        process = await asyncio.create_subprocess_exec(
-            *cmd,
+        # Run the blocking RunningProcess call off the event loop thread.
+        result = await asyncio.to_thread(
+            RunningProcess.run,
+            cmd,
             cwd=cwd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT,
+            stdout=PIPE,
+            stderr=STDOUT,
+            encoding="utf-8",
+            errors="replace",
         )
+        stdout = result.stdout or ""
 
-        stdout_bytes, _ = await process.communicate()
-        stdout = stdout_bytes.decode("utf-8", errors="replace") if stdout_bytes else ""
-
-        if process.returncode != 0:
-            return f"Command failed with exit code {process.returncode}:\n{stdout}"
+        if result.returncode != 0:
+            return f"Command failed with exit code {result.returncode}:\n{stdout}"
 
         return stdout
     except Exception as e:

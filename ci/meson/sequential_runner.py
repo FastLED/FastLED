@@ -336,7 +336,7 @@ def _resolve_test_command(
 def _make_direct_test_env(
     source_dir: Path, build_dir: Path, build_mode: str
 ) -> dict[str, str]:
-    """Build env for the direct test subprocess (PATH/LD_LIBRARY_PATH + ASAN)."""
+    """Build env for the direct test process (PATH/LD_LIBRARY_PATH + ASAN)."""
     test_env = os.environ.copy()
     fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
     if os.name == "nt":

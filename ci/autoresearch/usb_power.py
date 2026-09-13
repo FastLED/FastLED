@@ -65,7 +65,13 @@ def _run(cmd: list[str]) -> str:
         # streams to the console and leaves result.stdout empty, silently
         # disabling every check in this module.
         result = RunningProcess.run(
-            cmd, cwd=None, check=False, timeout=30, capture_output=True
+            cmd,
+            cwd=None,
+            check=False,
+            timeout=30,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)

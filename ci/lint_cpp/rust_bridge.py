@@ -47,6 +47,8 @@ def run_rust_linter(files: list[str] | None) -> dict[str, CheckerResults]:
         check=False,
         timeout=300,
         env=env,
+        encoding="utf-8",
+        errors="replace",
     )
 
     if result.stderr:

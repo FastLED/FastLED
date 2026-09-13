@@ -22,7 +22,6 @@ class LintArgs:
     run_tidy: bool = False
     use_rust_cpp_lint: bool = True
     iwyu_fix: bool = False
-    skip_platformio_check: bool = False
     skip_meson: bool = False
     files: list[str] = field(default_factory=lambda: list[str]())
 
@@ -129,12 +128,6 @@ Examples:
     )
 
     parser.add_argument(
-        "--skip-platformio-check",
-        action="store_true",
-        help="Skip the PlatformIO-internal-usage checker (issue #2701, warn-only).",
-    )
-
-    parser.add_argument(
         "--skip-meson",
         action="store_true",
         help="Skip the meson_linting stage (useful when no meson.build files changed)",
@@ -170,7 +163,6 @@ Examples:
         run_tidy=args.tidy,
         use_rust_cpp_lint=args.rust,
         iwyu_fix=args.fix,
-        skip_platformio_check=args.skip_platformio_check,
         skip_meson=args.skip_meson,
         files=files,
     )

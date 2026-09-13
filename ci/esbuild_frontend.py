@@ -4,12 +4,12 @@ import hashlib
 import os
 import shutil
 import stat
-import subprocess
 import sys
 import tarfile
 from pathlib import Path
 
 import httpx
+from running_process import RunningProcess
 
 
 ESBUILD_VERSION = "0.28.0"
@@ -132,7 +132,9 @@ def ensure_frontend_dependencies() -> None:
     ):
         return
 
-    result = subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=str(FRONTEND_DIR))
+    result = RunningProcess.run(
+        ["npm", "ci", "--ignore-scripts"], cwd=str(FRONTEND_DIR)
+    )
     if result.returncode != 0:
         raise RuntimeError(f"npm ci failed with exit code {result.returncode}")
     marker.write_text(f"{dependency_hash}\n", encoding="utf-8")
@@ -158,7 +160,7 @@ def _has_required_static_dist_assets(dist_dir: Path) -> bool:
 
 def _run_esbuild(args: list[str]) -> None:
     esbuild = install_esbuild()
-    result = subprocess.run(
+    result = RunningProcess.run(
         [
             str(esbuild),
             *args,

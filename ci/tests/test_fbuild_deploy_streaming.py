@@ -1,6 +1,6 @@
 """Regression tests for streaming fbuild deploy output (FastLED#3441).
 
-Before this, run_fbuild_deploy() used subprocess.run(stdout=PIPE) and printed
+Before this, run_fbuild_deploy() used a blocking run with piped stdout and printed
 everything only after the child exited, so a multi-minute board build looked
 stalled and a failing build hid its error until the wait was over.
 

@@ -1,4 +1,4 @@
-"""Build utility functions for FastLED PlatformIO builds."""
+"""Build utility functions for FastLED board builds."""
 
 import os
 from pathlib import Path
@@ -9,59 +9,12 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 def get_utf8_env() -> dict[str, str]:
     """Get environment with UTF-8 encoding to prevent Windows CP1252 encoding errors.
 
-    PlatformIO outputs Unicode characters (checkmarks, etc.) that fail on Windows
+    Build tools print Unicode characters (checkmarks, etc.) that fail on Windows
     when using the default CP1252 console encoding. This ensures UTF-8 is used.
-
-    Note: This function inherits Git Bash environment variables. For PlatformIO
-    operations that must run via CMD (e.g., ESP32-C6 compilation), use
-    get_pio_execution_env() instead.
     """
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8:replace"
     env["PYTHONUTF8"] = "1"
-    return env
-
-
-def get_pio_execution_env() -> dict[str, str]:
-    """Get environment suitable for PlatformIO execution.
-
-    On Windows Git Bash: Returns clean environment without Git Bash indicators
-    (strips MSYSTEM, TERM, SHELL, etc.) to prevent ESP-IDF toolchain errors.
-
-    On other platforms: Returns UTF-8 environment (same as get_utf8_env()).
-
-    This function solves the ESP-IDF v5.5.x incompatibility with Git Bash:
-        "ERROR: MSys/Mingw is not supported. Please follow the getting started guide"
-
-    Returns:
-        Environment dict suitable for running PlatformIO commands
-    """
-    import os
-
-    from ci.util.windows_cmd_runner import get_clean_windows_env, should_use_cmd_runner
-
-    if should_use_cmd_runner():
-        # Windows Git Bash: Use clean environment without Git Bash indicators
-        env = get_clean_windows_env()
-    else:
-        # Linux/Mac or native Windows shell: Use UTF-8 environment
-        env = get_utf8_env()
-
-    # Verify PLATFORMIO_SRC_DIR is preserved (debugging)
-    if "PLATFORMIO_SRC_DIR" in os.environ and "PLATFORMIO_SRC_DIR" not in env:
-        # This should never happen - log error for debugging
-        import sys
-
-        print(
-            "⚠️  WARNING: PLATFORMIO_SRC_DIR was set but not preserved in subprocess environment!",
-            file=sys.stderr,
-        )
-        print(
-            f"   Parent process has: PLATFORMIO_SRC_DIR={os.environ['PLATFORMIO_SRC_DIR']}",
-            file=sys.stderr,
-        )
-        print("   This is a bug in get_pio_execution_env()", file=sys.stderr)
-
     return env
 
 

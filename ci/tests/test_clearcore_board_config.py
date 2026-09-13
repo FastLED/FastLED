@@ -17,7 +17,7 @@ def test_clearcore_board_profile_selects_the_fbuild_native_target() -> None:
     assert board.framework == "arduino"
     assert board.defines == ["FASTLED_USES_ARDUINO_AUDIO_INPUT=0"]
 
-    ini = board.to_platformio_ini()
+    ini = board.to_project_ini()
     assert "[env:clearcore]" in ini
     assert "platform = atmelsam" in ini
     assert "board = clearcore" in ini

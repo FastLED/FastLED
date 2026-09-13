@@ -22,10 +22,10 @@ inside an open `fl` namespace, so failing standalone is its contract.
 from __future__ import annotations
 
 import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
+from running_process import PIPE, RunningProcess
 from typeguard import typechecked
 
 
@@ -86,9 +86,9 @@ def test_header_compiles_as_the_only_include(header: str, tmp_path: Path) -> Non
     source = tmp_path / "only_include.cpp"
     source.write_text(f'#include "{header}"\n', encoding="utf-8")
 
-    # `subprocess.run` and not `RunningProcess.run`: the latter merges stderr
-    # into stdout, and the diagnostics being reported here arrive on stderr.
-    completed = subprocess.run(  # noqa: SRC001
+    # stdout and stderr piped separately: the diagnostics reported here
+    # arrive on stderr.
+    completed = RunningProcess.run(
         [
             _compiler(),
             "-fsyntax-only",
@@ -97,8 +97,8 @@ def test_header_compiles_as_the_only_include(header: str, tmp_path: Path) -> Non
             "-std=gnu++17",
             str(source),
         ],
-        capture_output=True,
-        text=True,
+        stdout=PIPE,
+        stderr=PIPE,
         encoding="utf-8",
         errors="replace",
         check=False,

@@ -40,12 +40,13 @@ Performance:
 import argparse
 import hashlib
 import json
-import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from running_process import PIPE, RunningProcess
 
 from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emar, get_emcc, get_wasm_ld
@@ -288,11 +289,14 @@ def compile_object(
             print(f"  Command: {' '.join(cmd)}")
 
         # Run compilation
-        result = subprocess.run(
+        result = RunningProcess.run(
             cmd,
             cwd=PROJECT_ROOT,
-            capture_output=True,
+            stdout=PIPE,
+            stderr=PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
 
         if result.returncode != 0:
@@ -341,7 +345,7 @@ def ensure_pch_built(build_mode: str, verbose: bool = False) -> int:
     if verbose:
         cmd.append("--verbose")
 
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
 
     if result.returncode != 0:
         print(f"✗ PCH build/check failed with return code {result.returncode}")
@@ -380,7 +384,7 @@ def ensure_unity_files_generated(unity_chunks: int, verbose: bool = False) -> in
     if verbose:
         cmd.append("--verbose")
 
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
 
     if result.returncode != 0:
         print(f"✗ Unity file generation failed with return code {result.returncode}")
@@ -446,7 +450,7 @@ def create_thin_archive(
     if verbose:
         print(f"Command: {' '.join(cmd)}")
 
-    result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
 
     if result.returncode != 0:
         print(f"✗ Archive creation failed with return code {result.returncode}")
@@ -798,7 +802,7 @@ def build_library(
                     f"Partial link command: wasm-ld -r @{response_file.name} -o {partial_object}"
                 )
 
-            result = subprocess.run(partial_link_cmd, cwd=PROJECT_ROOT)
+            result = RunningProcess.run(partial_link_cmd, cwd=PROJECT_ROOT)
             if result.returncode != 0:
                 print(f"✗ Partial linking failed with return code {result.returncode}")
                 return result.returncode
