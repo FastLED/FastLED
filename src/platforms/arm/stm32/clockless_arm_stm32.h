@@ -17,7 +17,7 @@
     #include <stm32_def.h>
     // IWYU pragma: end_keep
 #else
-    // Libmaple or other cores without CMSIS - use our definitions
+    // Reuse already included CMSIS (e.g. Zephyr); otherwise use libmaple fallback.
     #include "platforms/arm/stm32/cm3_regs.h"
 #include "fl/stl/noexcept.h"
 
@@ -185,8 +185,12 @@ protected:
         const u32 t1t2t3_clocks = t1t2_clocks + t3_clocks;
 
         // Get access to the clock if available (Cortex-M3/M4/M7/M33)
-#if defined(CoreDebug) && defined(DWT)
+#if defined(DCB) && defined(DWT)
+        DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;
+#elif defined(CoreDebug) && defined(DWT)
         CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
+#endif
+#if defined(DWT)
         DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
         DWT->CYCCNT = 0;
 #endif

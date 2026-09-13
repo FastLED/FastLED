@@ -16,7 +16,7 @@ FastLED supports multiple STM32 Arduino cores:
 - `fastpin_arm_stm32.h`, `fastpin_arm_stm_legacy.h`, `fastpin_arm_stm_new.h`: Pin helpers/variants.
 - `clockless_arm_stm32.h`: Clockless driver for STM32.
 - `armpin.h`: Generic ARM pin template utilities.
-- `cm3_regs.h`: CM3 register helpers (used by Roger Clark core).
+- `cm3_regs.h`: Tier-3 legacy libmaple/Roger Clark fallback for cores without CMSIS. Existing vendor CMSIS definitions take precedence, including CMSIS 6 on the Zephyr-based Uno Q. Comparator member names avoid STM32 HAL macros; the clockless driver uses CMSIS 6 `DCB` or older `CoreDebug` to enable tracing.
 - `led_sysdefs_arm_stm32.h`: System defines for STM32.
 
 Notes:
