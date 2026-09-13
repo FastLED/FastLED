@@ -11,7 +11,10 @@
 
 #include "fl/stl/stdint.h"
 
-#ifndef CoreDebug_BASE
+// CMSIS 6 uses DCB instead of CoreDebug and need not define CoreDebug_BASE.
+// A CMSIS core marker also excludes cores without DWT (e.g. Cortex-M0).
+// Only legacy cores without CMSIS need the register definitions below.
+#if !defined(__CORTEX_M) && !defined(CoreDebug_BASE) && !defined(DWT_BASE)
 
 // CMSIS-style register access qualifiers
 #ifndef __I
@@ -54,19 +57,19 @@ typedef struct
     __IO fl::u32 LSUCNT;                  /*!< Offset: 0x014 (R/W)  LSU Count Register                        */
     __IO fl::u32 FOLDCNT;                 /*!< Offset: 0x018 (R/W)  Folded-instruction Count Register         */
     __I  fl::u32 PCSR;                    /*!< Offset: 0x01C (R/ )  Program Counter Sample Register           */
-    __IO fl::u32 COMP0;                   /*!< Offset: 0x020 (R/W)  Comparator Register 0                     */
+    __IO fl::u32 DWT_COMP0;               /*!< Offset: 0x020 (R/W)  CMSIS COMP0; avoids HAL COMP0 macro        */
     __IO fl::u32 MASK0;                   /*!< Offset: 0x024 (R/W)  Mask Register 0                           */
     __IO fl::u32 FUNCTION0;               /*!< Offset: 0x028 (R/W)  Function Register 0                       */
           fl::u32 RESERVED0[1];
-    __IO fl::u32 COMP1;                   /*!< Offset: 0x030 (R/W)  Comparator Register 1                     */
+    __IO fl::u32 DWT_COMP1;               /*!< Offset: 0x030 (R/W)  CMSIS COMP1; avoids HAL COMP1 macro        */
     __IO fl::u32 MASK1;                   /*!< Offset: 0x034 (R/W)  Mask Register 1                           */
     __IO fl::u32 FUNCTION1;               /*!< Offset: 0x038 (R/W)  Function Register 1                       */
           fl::u32 RESERVED1[1];
-    __IO fl::u32 COMP2;                   /*!< Offset: 0x040 (R/W)  Comparator Register 2                     */
+    __IO fl::u32 DWT_COMP2;               /*!< Offset: 0x040 (R/W)  CMSIS COMP2; avoids HAL COMP2 macro        */
     __IO fl::u32 MASK2;                   /*!< Offset: 0x044 (R/W)  Mask Register 2                           */
     __IO fl::u32 FUNCTION2;               /*!< Offset: 0x048 (R/W)  Function Register 2                       */
           fl::u32 RESERVED2[1];
-    __IO fl::u32 COMP3;                   /*!< Offset: 0x050 (R/W)  Comparator Register 3                     */
+    __IO fl::u32 DWT_COMP3;               /*!< Offset: 0x050 (R/W)  CMSIS COMP3; avoids HAL COMP3 macro        */
     __IO fl::u32 MASK3;                   /*!< Offset: 0x054 (R/W)  Mask Register 3                           */
     __IO fl::u32 FUNCTION3;               /*!< Offset: 0x058 (R/W)  Function Register 3                       */
 } DWT_Type;
@@ -78,4 +81,4 @@ typedef struct
 #define DWT_CTRL_CYCCNTENA_Pos              0                                          /*!< DWT CTRL: CYCCNTENA Position */
 #define DWT_CTRL_CYCCNTENA_Msk             (0x1UL << DWT_CTRL_CYCCNTENA_Pos)           /*!< DWT CTRL: CYCCNTENA Mask */
 
-#endif // CoreDebug_BASE
+#endif // No vendor CMSIS core definitions
