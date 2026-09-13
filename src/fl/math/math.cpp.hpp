@@ -75,49 +75,130 @@ double ceil_impl_double(double value) {
     return static_cast<double>(i + (value != static_cast<double>(i) ? 1 : 0));
 }
 
-// Standalone exp implementation using Taylor series
-// e^x ≈ 1 + x + x²/2! + x³/3! + x⁴/4! + ...
-float exp_impl_float(float value) {
-    if (value > 10.0f)
-        return 22026.465794806718f; // e^10 approx
-    if (value < -10.0f)
-        return 0.0000453999297625f; // e^-10 approx
+// exp: range reduction + short polynomial, libm-grade on every target, and
+// the only exp implementation (no libm path).
+//
+// e^x = 2^k * e^r with k = round(x / ln2) and |r| <= ln2/2 = 0.3466. On that
+// interval a degree-6 minimax polynomial (float) / fdlibm's rational form
+// (double) is accurate to the last bit, and 2^k is an exponent-field write with no
+// rounding. The previous implementation evaluated a ten-term series at the
+// raw x and clamped at +-10: exact for |x| <= 1, 3 % off at 5, 54 % off at 10,
+// and wrong by orders of magnitude beyond (#4288).
+//
+// Cost matters on cores without an FPU, where every float operation and
+// every conversion is a library call, so the surrounding work is integer:
+// range checks read the exponent bits, k comes from the "magic number"
+// rounding trick instead of float->int->float conversions, and type punning
+// goes through a union rather than fl::memcpy (an out-of-line byte loop).
+//
+// Reduction uses the Cody-Waite split of ln2 (ln2_hi has trailing zero
+// bits so k * ln2_hi is exact for every k in range). Constants are the
+// fdlibm/musl values.
+namespace detail {
 
-    // For negative values, use exp(x) = 1/exp(-x) to keep the Taylor series
-    // input non-negative where it converges well with limited terms.
-    if (value < 0.0f) {
-        return 1.0f / exp_impl_float(-value);
-    }
+union FloatBits { float f; u32 u; i32 i; };
+union DoubleBits { double f; u64 u; i64 i; };
 
-    float result = 1.0f;
-    float term = 1.0f;
-    for (int i = 1; i < 10; ++i) {
-        term *= value / static_cast<float>(i);
-        result += term;
-    }
-    return result;
+// p * 2^k built from the exponent field. k is split in two so each half is
+// a normal float, and p is scaled by the halves in turn: the intermediate
+// stays finite for k = 128 (p < 1) and the only rounding, for subnormal
+// results, happens once in the final multiply.
+inline float scale_pow2_(float p, int k) FL_NO_EXCEPT {
+    const int a = k / 2;
+    const int b = k - a;
+    FloatBits fa, fb;
+    fa.u = static_cast<u32>(a + 127) << 23;
+    fb.u = static_cast<u32>(b + 127) << 23;
+    return (p * fa.f) * fb.f;
 }
 
-double exp_impl_double(double value) {
-    if (value > 10.0)
-        return 22026.465794806718; // e^10 approx
-    if (value < -10.0)
-        return 0.0000453999297625; // e^-10 approx
-
-    // For negative values, use exp(x) = 1/exp(-x) to keep the Taylor series
-    // input non-negative where it converges well with limited terms.
-    if (value < 0.0) {
-        return 1.0 / exp_impl_double(-value);
-    }
-
-    double result = 1.0;
-    double term = 1.0;
-    for (int i = 1; i < 10; ++i) {
-        term *= value / static_cast<double>(i);
-        result += term;
-    }
-    return result;
+inline double scale_pow2_(double p, int k) FL_NO_EXCEPT {
+    const int a = k / 2;
+    const int b = k - a;
+    DoubleBits fa, fb;
+    fa.u = static_cast<u64>(a + 1023) << 52;
+    fb.u = static_cast<u64>(b + 1023) << 52;
+    return (p * fa.f) * fb.f;
 }
+
+inline float exp_reduced_(float x) FL_NO_EXCEPT {
+    FloatBits xb;
+    xb.f = x;
+    const u32 ax = xb.u & 0x7fffffffu;
+    if (ax >= 0x42b17218u) {           // |x| >= 88.7228, or NaN
+        if (ax > 0x7f800000u) return x;  // NaN
+        if ((xb.u >> 31) == 0u) {        // overflow -> +inf
+            FloatBits inf;
+            inf.u = 0x7f800000u;
+            return inf.f;
+        }
+        if (ax >= 0x42cff1b5u) return 0.0f;  // x <= -103.972: underflow
+    }
+    // k = round(x / ln2) via the 1.5 * 2^23 magic constant: adding it puts
+    // the integer in the low mantissa bits, so no float<->int conversions.
+    const float kMagic = 12582912.0f;
+    FloatBits t;
+    t.f = x * 1.44269504088896341f + kMagic;
+    const int k = t.i - 0x4b400000;
+    const float kf = t.f - kMagic;
+    const float r = (x - kf * 6.9314575195e-01f) - kf * 1.4286067653e-06f;
+    // e^r = 1 + r + r^2 * P(r), P minimax on |r| <= ln2/2: worst case 1 ulp.
+    float p = 1.393364297e-03f;
+    p = p * r + 8.363175565e-03f;
+    p = p * r + 4.166646498e-02f;
+    p = p * r + 1.666657700e-01f;
+    p = p * r + 5.000000013e-01f;
+    p = (p * r * r) + r + 1.0f;
+    return scale_pow2_(p, k);
+}
+
+inline double exp_reduced_(double x) FL_NO_EXCEPT {
+    // AVR builds double as 32 bits: the float path is the double path there,
+    // and the 64-bit bit patterns below would read past the value.
+    if (sizeof(double) == sizeof(float)) {
+        return static_cast<double>(exp_reduced_(static_cast<float>(x)));
+    }
+    DoubleBits xb;
+    xb.f = x;
+    const u64 ax = xb.u & 0x7fffffffffffffffull;
+    if (ax >= 0x40862e42fefa39efull) {          // |x| >= 709.7827, or NaN
+        if (ax > 0x7ff0000000000000ull) return x;  // NaN
+        if ((xb.u >> 63) == 0u) {                  // overflow -> +inf
+            DoubleBits inf;
+            inf.u = 0x7ff0000000000000ull;
+            return inf.f;
+        }
+        if (ax >= 0x40874910d52d3052ull) return 0.0;  // x <= -745.133: underflow
+    }
+    const double kMagic = 6755399441055744.0;  // 1.5 * 2^52
+    DoubleBits t;
+    t.f = x * 1.44269504088896338700e+00 + kMagic;
+    const int k = static_cast<int>(t.i - 0x4338000000000000ll);
+    const double kd = t.f - kMagic;
+    // fdlibm e_exp: e^r = 1 + 2r/(2 - c(r)) with c a degree-5 polynomial in
+    // r^2. Five multiply-adds and one division reach < 1 ulp, half the work of
+    // a Taylor series of the same accuracy; that matters on cores that do
+    // double in software.
+    const double hi = x - kd * 6.93147180369123816490e-01;
+    const double lo = kd * 1.90821492927058770002e-10;
+    const double r = hi - lo;
+    const double r2 = r * r;
+    const double c = r - r2 * (1.66666666666666019037e-01 +
+                              r2 * (-2.77777777770155933842e-03 +
+                                   r2 * (6.61375632143793436117e-05 +
+                                        r2 * (-1.65339022054652515390e-06 +
+                                             r2 * 4.13813679705723846039e-08))));
+    const double p = 1.0 - ((lo - (r * c) / (2.0 - c)) - hi);
+    return scale_pow2_(p, k);
+}
+
+}  // namespace detail
+
+// exp takes the range-reduced form on every target, including ones with
+// libm: it is within 2 ulp of libm, cheaper than a libm call, and gives the
+// same answers everywhere, so audio goldens do not depend on the host.
+float exp_impl_float(float value) FL_NO_EXCEPT { return detail::exp_reduced_(value); }
+double exp_impl_double(double value) FL_NO_EXCEPT { return detail::exp_reduced_(value); }
 
 // =============================================================================
 // Libm-free trig / sqrt / log / pow implementations

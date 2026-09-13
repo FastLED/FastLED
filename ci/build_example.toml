@@ -34,6 +34,7 @@ compiler_flags = [
     "-fno-exceptions",
     "-fno-rtti",
     "-Werror=unused-result",  # Treat ignored FL_NODISCARD return values as errors
+    "-Werror=self-assign-overloaded",  # `a = a` on a class type is a bug, not a no-op
 ]
 
 defines = [
