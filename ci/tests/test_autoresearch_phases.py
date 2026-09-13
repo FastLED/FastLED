@@ -111,6 +111,7 @@ def _make_args(**overrides) -> Args:
         simd=False,
         coroutine=False,
         ieee754=False,
+        math=False,
         rpc_smoke=False,
         perf_wave2d=None,
         environment=None,
@@ -216,6 +217,7 @@ def _make_ctx(**overrides) -> RunContext:
         simd_test_mode=False,
         coroutine_test_mode=False,
         ieee754_test_mode=False,
+        math_test_mode=False,
         rpc_smoke_mode=False,
         perf_wave2d_grid=None,
         net_server_mode=False,
@@ -1985,6 +1987,7 @@ class TestRunBuildDeploy:
             final_environment="lpc845brk",
             upload_port=None,
             ieee754_test_mode=True,
+            math_test_mode=False,
         )
         qctx = QuietContext(quiet=False)
         rc = asyncio.run(_run_build_deploy(ctx, qctx))
