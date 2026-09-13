@@ -1,3 +1,23 @@
+# 2026-09-12, PR #4409 (issue #4402 follow-up): -6245 B, 342709 -> 336464.
+#
+# A reduction, locked in by the ratchet. `PixelIteratorAny` held a variant of
+# six `PixelController<EOrder>` instantiations and visited it, so every
+# sketch linked six full type-erasure vtable sets -- loadAndScaleRGBW 300 B,
+# loadAndScaleRGBWW 227 B, loadAndScaleRGB 116 B, ctor 60 B, dither/advance/
+# has/size ~100 B -- plus a 127 B visit thunk each, of which the sketch used
+# one order. It now holds one `PixelController<RGB>` and `PixelIterator`
+# applies the colour order as a three-byte permutation. A colour order is a
+# pure permutation: `loadByte`, `dither` and `scale` all index by source
+# channel, and the RGBW/RGBWW loads reorder after computing in source order.
+#
+# Proven against the legacy path, still in the tree: byte-for-byte across all
+# six orders for RGB, RGBW at every W placement, RGBWW and the HD per-slot
+# scale, with binary dither on and lopsided per-channel scales. Templated
+# drivers wrapping their own `PixelController<ORDER>` keep identity and the
+# thunks they always had; their bytes are untouched.
+#
+# esp32dev Blink measured the same way: 339,955 -> 334,147 B (-5,808).
+#
 # 2026-09-12, PR #4407 (issue #4402): -182 B, 342891 -> 342709.
 #
 # A reduction, locked in by the ratchet. `writeHD108` was two complete loops
@@ -140,4 +160,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-342709
+336464

@@ -50,7 +50,8 @@ jobs:
       # brightness handling, which computed a constant header. Left here as the
       # record that this ceiling has been tested against a real regression and
       # held. Follow-ups: #4403 (-52 B), #4404 (diagnostics), and the one-loop
-      # HD108 encoder that landed after them.
+      # HD108 encoder that landed after them (#4407), then one PixelController
+      # per channel instead of six (#4402 follow-up).
       #
       # The value here is mirror-locked by `ci/lint/check_size_thresholds.py`:
       # changing this number without updating the frozen-list constant in that
