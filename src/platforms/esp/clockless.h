@@ -29,7 +29,12 @@ namespace fl {
 // Define platform-default ClocklessController alias for ESP32
 // Multiple driver types are available (ClocklessIdf4/ClocklessIdf5, ClocklessSPI, ClocklessI2S)
 // This alias selects the preferred default for backward compatibility
-#if defined(FASTLED_ESP32_I2S) && !ESP_IDF_VERSION_6_OR_HIGHER
+// FASTLED_ESP32_I2S_DRIVER_AVAILABLE is set by platforms/esp/32/core/fastled_esp32.h, and
+// only where that header actually included the I2S driver: FASTLED_ESP32_I2S requested, not
+// ESP-IDF 6.0+, and not FASTLED_INTERNAL. Testing it here rather than restating those
+// conditions keeps the include and the alias from drifting apart, which is what left
+// FastLED's own unity builds naming an undeclared ClocklessI2S.
+#if defined(FASTLED_ESP32_I2S_DRIVER_AVAILABLE)
   // I2S driver requested explicitly (not available on ESP-IDF 6.0+)
   template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
   using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;

@@ -40,6 +40,11 @@
 #else
 #ifndef FASTLED_INTERNAL
 #include "platforms/esp/32/drivers/i2s/clockless_i2s_esp32.h"
+// Record that ClocklessI2S is actually visible in this translation unit, so the
+// ClocklessController alias in platforms/esp/clockless.h cannot select a type whose
+// header was skipped. Note the driver header deliberately #errors when included under
+// FASTLED_INTERNAL, so it cannot simply be included here unconditionally.
+#define FASTLED_ESP32_I2S_DRIVER_AVAILABLE 1
 #endif
 #endif // ESP_IDF_VERSION_6_OR_HIGHER
 #endif // FASTLED_ESP32_I2S
