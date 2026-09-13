@@ -36,6 +36,7 @@ def _make_ctx(
         simd_test_mode=False,
         coroutine_test_mode=False,
         ieee754_test_mode=False,
+        math_test_mode=False,
         perf_wave2d_grid=None,
         net_server_mode=False,
         net_client_mode=False,

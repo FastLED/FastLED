@@ -48,13 +48,16 @@ FL_TEST_CASE("fft tester 512") {
     // Test expectations for different precision modes
     // Each mode has slightly different numerical results due to internal precision
 #if FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16
+    // Re-pinned for the accurate fl::exp (#4288): the constant-Q band centres
+    // now sit where fmin*exp(m*i/(bands-1)) says, and the top band reaches the
+    // requested fmax, so counts move between neighbouring bands.
     // Fixed16 precision (default) - CQ_OCTAVE octave-wise path
     // With improved 7-tap halfband decimation filter (-45dB stopband)
     // fastMag produces integer magnitudes (u16 → float)
     // Golden values for 90-14080 Hz range
     const float expected_output[16] = {
-        5.00,      0.00,      3.00,      6.00,      1.00,     21.00,      3.00,     46.00,
-        9.00,     12.00,      4.00,      6.00,      5.00,      2.00,      1.00,      1.00};
+             5.00,      0.00,      3.00,      6.00,      1.00,     21.00,      9.00,     47.00,
+            10.00,     12.00,      4.00,      8.00,      4.00,      1.00,      0.00,      1.00};
     const float tolerance = 0.1; // Strict tolerance
 #elif FASTLED_FFT_PRECISION == FASTLED_FFT_FLOAT
     // Float/double precision - needs regeneration with new frequency range.
@@ -107,13 +110,16 @@ FL_TEST_CASE("fft tester 256") {
     // Test expectations for different precision modes
     // Each mode has slightly different numerical results due to internal precision
 #if FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16
+    // Re-pinned for the accurate fl::exp (#4288): the constant-Q band centres
+    // now sit where fmin*exp(m*i/(bands-1)) says, and the top band reaches the
+    // requested fmax, so counts move between neighbouring bands.
     // Fixed16 precision (default) - CQ_OCTAVE octave-wise path
     // With improved 7-tap halfband decimation filter (-45dB stopband)
     // fastMag produces integer magnitudes (u16 → float)
     // Golden values for 90-14080 Hz range
     const float expected_output[16] = {
-        0.00,      2.00,      1.00,     11.00,      1.00,     13.00,      4.00,     44.00,
-       20.00,    350.00,     37.00,     26.00,     18.00,     10.00,      2.00,      2.00};
+             0.00,      2.00,      1.00,     11.00,      1.00,     13.00,      4.00,     23.00,
+            16.00,    341.00,     37.00,     32.00,     16.00,      1.00,      1.00,      4.00};
     const float tolerance = 0.1; // Strict tolerance
 #elif FASTLED_FFT_PRECISION == FASTLED_FFT_FLOAT
     // Float/double precision - needs regeneration with new frequency range.
@@ -163,20 +169,23 @@ FL_TEST_CASE("fft tester 256 with 64 bands") {
     // Test expectations for different precision modes
     // Each mode has slightly different numerical results due to internal precision
 #if FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16
+    // Re-pinned for the accurate fl::exp (#4288): the constant-Q band centres
+    // now sit where fmin*exp(m*i/(bands-1)) says, and the top band reaches the
+    // requested fmax, so counts move between neighbouring bands.
     // Fixed16 precision (default) - CQ_NAIVE path (AUTO resolves to CQ_NAIVE for 64 bands)
     // fastMag produces integer magnitudes (u16 → float)
     // Golden values for 90-14080 Hz range
     const float expected_output[64] = {
-        0.00,      2.00,      2.00,      1.00,      2.00,      3.00,      4.00,
-        5.00,      1.00,      1.00,      3.00,      2.00,      2.00,      0.00,
-        0.00,      5.00,      6.00,      6.00,      2.00,      3.00,      1.00,
-        2.00,      3.00,      5.00,      4.00,      7.00,     13.00,     11.00,
-       12.00,     18.00,     17.00,     15.00,     19.00,     23.00,     23.00,
-      151.00,    430.00,    720.00,    241.00,    120.00,     75.00,     53.00,
-       37.00,     10.00,     59.00,     42.00,     37.00,     35.00,     27.00,
-       23.00,     21.00,     23.00,      1.00,      3.00,      3.00,      1.00,
-        1.00,      1.00,      0.00,      2.00,      1.00,      1.00,      3.00,
-        4.00};
+             0.00,      2.00,      2.00,      1.00,      2.00,      3.00,      4.00,
+             5.00,      1.00,      1.00,      3.00,      2.00,      2.00,      0.00,
+             0.00,      5.00,      6.00,      6.00,      2.00,      3.00,      1.00,
+             2.00,      3.00,      5.00,      4.00,      7.00,     13.00,     11.00,
+            12.00,     19.00,     17.00,     15.00,     18.00,     24.00,     23.00,
+           149.00,    445.00,    710.00,    226.00,    114.00,     71.00,     54.00,
+            32.00,     10.00,     53.00,     47.00,     32.00,     34.00,     28.00,
+            22.00,     16.00,     23.00,      4.00,      1.00,      2.00,      1.00,
+             0.00,      1.00,      4.00,      3.00,      4.00,      1.00,      0.00,
+             1.00};
     const float tolerance = 0.1; // Strict tolerance
 #elif FASTLED_FFT_PRECISION == FASTLED_FFT_FLOAT
     // Float/double precision - needs regeneration with new frequency range.
@@ -824,8 +833,11 @@ FL_TEST_CASE("Binning adversarial - LOG_REBIN vs CQ_OCTAVE peak agreement") {
         FL_CHECK_LE(diff, 2);
     }
     // Known issue: LOG_REBIN vs CQ bin grid mismatch causes disagreements.
+    // This bound records the extent of that mismatch, not a requirement: it
+    // went 3 -> 4 when fl::exp became accurate (#4288) and the CQ centres
+    // moved to where the formula says they are.
     FL_WARN("Cross-mode disagreements: " << disagreements << " of 8 frequencies");
-    FL_CHECK_LE(disagreements, 3);
+    FL_CHECK_LE(disagreements, 4);
 }
 
 // --- 3. Monotonicity sweep ---

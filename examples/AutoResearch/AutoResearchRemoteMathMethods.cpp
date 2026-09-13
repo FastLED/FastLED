@@ -41,6 +41,7 @@
 #include "AutoResearchParlioStream.h"
 #include "AutoResearchFlexIo.h"
 #include "AutoResearchIeee754.h"
+#include "AutoResearchMathExp.h"
 #include "AutoResearchMp3.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -230,6 +231,32 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
         response.set("first_failure", r.first_failure ? r.first_failure : "");
         response.set("expected_bits", static_cast<int64_t>(r.expected_bits));
         response.set("actual_bits", static_cast<int64_t>(r.actual_bits));
+        return response;
+    });
+
+    // Register "mathExpBenchmark" - fl::exp accuracy (ulp vs libm) and speed
+    // (fl::expf/exp vs the toolchain's expf/exp) on this core. #4288.
+    remote.bind("mathExpBenchmark", [](const fl::json& args) -> fl::json {
+        fl::u32 iters = 20000;
+        const fl::json config = args.is_array() && args.size() > 0 ? args[0] : args;
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<fl::u32>(config["iterations"].as_int().value());
+        }
+        const auto r = autoresearch::math_exp::run(iters);
+        fl::json response = fl::json::object();
+        response.set("success", r.success);
+        response.set("iterations", static_cast<int64_t>(r.iterations));
+        response.set("accuracy_points", static_cast<int64_t>(r.accuracy_points));
+        response.set("worst_ulp_float", static_cast<double>(r.worst_ulp_float));
+        response.set("worst_x_float", static_cast<double>(r.worst_x_float));
+        response.set("worst_ulp_double", r.worst_ulp_double);
+        response.set("worst_x_double", r.worst_x_double);
+        response.set("fl_expf_us", static_cast<int64_t>(r.fl_expf_us));
+        response.set("libm_expf_us", static_cast<int64_t>(r.libm_expf_us));
+        response.set("fl_exp_us", static_cast<int64_t>(r.fl_exp_us));
+        response.set("libm_exp_us", static_cast<int64_t>(r.libm_exp_us));
+        response.set("large_memory", static_cast<int64_t>(r.large_memory));
+        response.set("sink", static_cast<double>(r.sink));
         return response;
     });
 

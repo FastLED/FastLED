@@ -531,6 +531,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     simd_test_mode = args.simd
     coroutine_test_mode = args.coroutine
     ieee754_test_mode = args.ieee754
+    math_test_mode = args.math
     mp3_test_mode = args.mp3
     rpc_smoke_mode = args.rpc_smoke
     watchdog_soak_mode = args.watchdog_soak
@@ -697,6 +698,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             or simd_test_mode
             or coroutine_test_mode
             or ieee754_test_mode
+            or math_test_mode
             or mp3_test_mode
             or rpc_smoke_mode
             or net_server_mode
@@ -725,6 +727,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         or simd_test_mode
         or coroutine_test_mode
         or ieee754_test_mode
+        or math_test_mode
         or mp3_test_mode
         or rpc_smoke_mode
     ):
@@ -776,6 +779,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not simd_test_mode
         and not coroutine_test_mode
         and not ieee754_test_mode
+        and not math_test_mode
         and not mp3_test_mode
         and not rpc_smoke_mode
         and not watchdog_soak_mode
@@ -1360,6 +1364,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         simd_test_mode=simd_test_mode,
         coroutine_test_mode=coroutine_test_mode,
         ieee754_test_mode=ieee754_test_mode,
+        math_test_mode=math_test_mode,
         mp3_test_mode=mp3_test_mode,
         rpc_smoke_mode=rpc_smoke_mode,
         watchdog_soak_mode=watchdog_soak_mode,
@@ -1990,6 +1995,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         print(
             "\n\U0001f4cc IEEE754 codec mode: skipping pin discovery and GPIO pre-test"
         )
+    elif ctx.math_test_mode:
+        print("\n\U0001f4cc Math mode: skipping pin discovery and GPIO pre-test")
     elif ctx.mp3_test_mode:
         print("\n\U0001f4cc MP3 codec mode: skipping pin discovery and GPIO pre-test")
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
@@ -2084,6 +2091,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.coroutine_test_mode:
         pass
     elif ctx.ieee754_test_mode:
+        pass
+    elif ctx.math_test_mode:
         pass
     elif ctx.mp3_test_mode:
         pass
@@ -2794,6 +2803,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if ctx.ieee754_test_mode:
         return await _run_ieee754_tests(ctx)
 
+    if ctx.math_test_mode:
+        return await _run_math_tests(ctx)
+
     if ctx.mp3_test_mode:
         return await _run_mp3_tests(ctx)
 
@@ -2970,6 +2982,80 @@ async def _run_perf_wave2d_tests(ctx: RunContext) -> int:
     except Exception as e:
         print()
         print(f"{Fore.RED}WAVE2D PERF ERROR: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        if client is not None:
+            await client.close()
+
+
+async def _run_math_tests(ctx: RunContext) -> int:
+    """fl::exp accuracy and speed against the toolchain libm, on device (#4288)."""
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    serial_iface = ctx.serial_iface
+
+    print()
+    print("=" * 60)
+    print("MATH BENCH MODE: fl::exp vs libm")
+    print("=" * 60)
+    print()
+
+    client: RpcClient | None = None
+    try:
+        print("   Connecting to device...", end="", flush=True)
+        client = RpcClient(upload_port, timeout=60.0, serial_interface=serial_iface)
+        await client.connect(boot_wait=1.0, drain_boot=True)
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+        print("   Sending mathExpBenchmark RPC...", end="", flush=True)
+        response = await client.send_and_match(
+            "mathExpBenchmark", match_key="success", retries=2
+        )
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+        print()
+
+        data = response.data
+        print(json.dumps(data, indent=2))
+        print()
+
+        iters = max(int(data.get("iterations", 0)), 1)
+        rows = [
+            ("fl::expf", "fl_expf_us"),
+            ("libm expf", "libm_expf_us"),
+            ("fl::exp (double)", "fl_exp_us"),
+            ("libm exp (double)", "libm_exp_us"),
+        ]
+        print("   ns per call:")
+        for label, key in rows:
+            us = float(data.get(key, 0))
+            print(f"     {label:<18} {1000.0 * us / iters:8.1f}")
+        print(
+            f"   worst error: {float(data.get('worst_ulp_float', 0)):.2f} ulp (float),"
+            f" {float(data.get('worst_ulp_double', 0)):.2f} ulp (double)"
+            f" over {int(data.get('accuracy_points', 0))} points"
+        )
+        print()
+
+        if data.get("success", False):
+            print(
+                f"{Fore.GREEN}MATH BENCH PASSED (fl::exp within 2 ulp of libm){Style.RESET_ALL}"
+            )
+            return 0
+        print(
+            f"{Fore.RED}MATH BENCH FAILED (fl::exp error exceeds 2 ulp){Style.RESET_ALL}"
+        )
+        return 1
+
+    except RpcTimeoutError:
+        print()
+        print(f"{Fore.RED}MATH BENCH TIMEOUT{Style.RESET_ALL}")
+        return 1
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}MATH BENCH ERROR: {e}{Style.RESET_ALL}")
         return 1
     finally:
         if client is not None:

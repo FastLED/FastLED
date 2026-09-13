@@ -414,6 +414,7 @@ flags = [
     
     # Enhanced Warning Detection
     "-Wextra",                                  # Enable extra warning checks beyond -Wall
+    "-Werror=self-assign-overloaded",           # `a = a` on a class type is a bug, not a no-op
     
     # Type Safety and Conversion Warnings
     "-Wconversion",                             # Warn about implicit type conversions

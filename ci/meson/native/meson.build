@@ -71,6 +71,7 @@ endif
 # Add Clang-specific warnings (unused-private-field is Clang-only, not available in GCC)
 if cpp_compiler.get_id() == 'clang'
   base_warnings += ['-Werror=unused-private-field']
+  base_warnings += ['-Werror=self-assign-overloaded']  # `a = a` on a class type is a bug, not a no-op
 endif
 
 # Group 3: Optimization and code generation flags (mode-dependent)
@@ -154,6 +155,10 @@ test_specific_args = [
   '-DFASTLED_USE_JSON_UI=1',
   '-DDOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS',
 ]
+if cpp_compiler.get_id() == 'clang'
+  # Tests self-assign on purpose to exercise operator= (e.g. string_type_erased.cpp).
+  test_specific_args += ['-Wno-self-assign-overloaded']
+endif
 
 # Profile test-specific compilation flags
 # Stack trace preservation for debugger attachment (deadlock detector)

@@ -1812,8 +1812,10 @@ FL_TEST_CASE("FFT adversarial - zero leakage at distance 3 (LOG_REBIN)") {
     // the u16 fastMag output. After rebinning, distant bins accumulate a few
     // units of energy from this noise. With the wider frequency range
     // (90-14080 Hz), more FFT bins are grouped per output bin, slightly
-    // raising the quantization floor. Threshold of 5 accounts for this.
-    const float noiseFloor = 5.0f;
+    // raising the quantization floor. The top output bin now spans its full
+    // width to fmax (accurate fl::exp, #4288) and collects one more count of
+    // this noise, so the threshold is 6.
+    const float noiseFloor = 6.0f;
 
     fl::audio::fft::Args args(N, bands, fmin, fmax, sampleRate, fl::audio::fft::Mode::LOG_REBIN);
     fl::audio::fft::Impl fft(args);

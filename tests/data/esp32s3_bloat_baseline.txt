@@ -1,3 +1,12 @@
+# 2026-09-13, PR #4411 (issue #4288): +10 B, 336464 -> 336474.
+#
+# fl::exp is now a range-reduced polynomial on every target instead of a
+# clamped Taylor series. Blink does not call exp, so the 10 B is layout
+# drift from the changed fl::math translation unit, not a new symbol; the
+# analysis-side callers (constant-Q kernel, Gaussian windows) get the
+# corrected values. Measured with `bash bloat esp32s3 --build` on top of
+# #4409 (the same +10 B was measured against the previous baseline).
+#
 # 2026-09-12, PR #4409 (issue #4402 follow-up): -6245 B, 342709 -> 336464.
 #
 # A reduction, locked in by the ratchet. `PixelIteratorAny` held a variant of
@@ -160,4 +169,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-336464
+336474

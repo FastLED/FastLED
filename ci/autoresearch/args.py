@@ -29,6 +29,7 @@ class Args:
     simd: bool
     coroutine: bool
     ieee754: bool
+    math: bool
     rpc_smoke: bool
     # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
     # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
@@ -381,6 +382,11 @@ See Also:
             "--coroutine",
             action="store_true",
             help="Test coroutine/task creation, stop, and await (no LED drivers needed)",
+        )
+        driver_group.add_argument(
+            "--math",
+            action="store_true",
+            help="Run on-device fl::exp accuracy (ulp vs libm) and speed benchmark (#4288)",
         )
         driver_group.add_argument(
             "--ieee754",
@@ -912,6 +918,7 @@ See Also:
             simd=parsed.simd,
             coroutine=parsed.coroutine,
             ieee754=parsed.ieee754,
+            math=parsed.math,
             mp3=parsed.mp3,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,
