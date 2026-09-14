@@ -15,11 +15,11 @@ from __future__ import annotations
 import json
 import os
 import sys
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
-
-from running_process import PIPE, RunningProcess
 
 
 VALID_OWNER_TYPES = {"organization", "user"}
@@ -77,26 +77,46 @@ class Config:
         )
 
 
+GRAPHQL_URL = "https://api.github.com/graphql"
+
+
 def graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
-    """Execute a GitHub GraphQL query via the gh CLI."""
-    cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
-    for key, value in variables.items():
-        cmd.extend(["-F", f"{key}={value}"])
+    """Execute a GitHub GraphQL query over HTTPS with ``GH_TOKEN``.
 
-    result = RunningProcess.run(
-        cmd,
-        stdout=PIPE,
-        stderr=PIPE,
-        text=True,
-        check=False,
-        encoding="utf-8",
-        errors="replace",
+    Uses only the standard library on purpose. This script runs in the
+    ``pull_request_target`` project-automation job, which checks out ``ci/``
+    with a bare ``setup-python`` and installs nothing; spawning the ``gh`` CLI
+    needed a process library that job does not have (it broke when the repo
+    banned stdlib ``subprocess``), and adding a package install to a
+    secret-bearing job is the wrong trade.
+    """
+    token = os.environ.get("GH_TOKEN", "")
+    if not token:
+        raise SystemExit("GH_TOKEN is required for GitHub GraphQL requests")
+
+    body = json.dumps({"query": query, "variables": variables}).encode("utf-8")
+    request = urllib.request.Request(
+        GRAPHQL_URL,
+        data=body,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "fastled-project-sync",
+        },
     )
-    if result.returncode != 0:
-        print(f"GraphQL error (stderr): {result.stderr}", file=sys.stderr)
-        raise SystemExit(f"GraphQL request failed: {result.returncode}")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            payload = response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        print(f"GraphQL HTTP error {error.code}: {detail}", file=sys.stderr)
+        raise SystemExit(f"GraphQL request failed: HTTP {error.code}")
+    except urllib.error.URLError as error:
+        raise SystemExit(f"GraphQL request failed: {error.reason}")
 
-    data: dict[str, Any] = json.loads(result.stdout)
+    data: dict[str, Any] = json.loads(payload)
     if "errors" in data:
         print(
             f"GraphQL errors: {json.dumps(data['errors'], indent=2)}", file=sys.stderr

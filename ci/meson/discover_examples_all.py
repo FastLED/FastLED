@@ -62,8 +62,11 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
     # Expression-based filter: "(platform is native)" or similar
     # Pattern: (platform is <value>) or (memory is <value>)
     # Use findall to handle OR expressions like "(platform is esp32) or (platform is native)"
+    # `plat` / `mem` are accepted aliases in ci/compiler/sketch_filter.py;
+    # accept them here too, or the stub build silently skips every example
+    # spelled `(mem is large)` (10 examples before #4415).
     platform_matches = re.findall(
-        r"\(\s*platform\s+is\s+(\w+)\s*\)", filter_str, re.IGNORECASE
+        r"\(\s*plat(?:form)?\s+is\s+(\w+)\s*\)", filter_str, re.IGNORECASE
     )
     if platform_matches:
         platform_values = [m.lower() for m in platform_matches]
@@ -75,7 +78,7 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
         return True, f"Platform-specific (@filter:{filter_str})"
 
     # Memory filters don't exclude STUB builds
-    if re.search(r"\(\s*memory\s+is\s+\w+\s*\)", filter_str, re.IGNORECASE):
+    if re.search(r"\(\s*mem(?:ory)?\s+is\s+\w+\s*\)", filter_str, re.IGNORECASE):
         return False, ""
 
     # Board filters don't exclude STUB builds

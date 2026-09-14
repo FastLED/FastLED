@@ -47,14 +47,19 @@ class Compiler(ABC):
         pass
 
     @abstractmethod
-    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
+    def build(
+        self, examples: list[str], max_failures: int | None = None
+    ) -> list[Future[SketchResult]]:
         """Build a list of examples with proper resource management.
 
         Args:
             examples: List of example names or paths to compile
+            max_failures: Stop building further examples once this many have
+                failed. None builds every example.
 
         Returns:
             List of Future objects containing SketchResult for each example
+            that was attempted
         """
         pass
 

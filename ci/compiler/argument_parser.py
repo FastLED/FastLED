@@ -143,7 +143,12 @@ class CompilationArgumentParser:
         parser.add_argument(
             "positional_examples",
             type=str,
-            help="Examples to compile (positional arguments after board name)",
+            help=(
+                "Examples to compile (positional arguments after board name). "
+                "'all' compiles every example; 'smoke' compiles "
+                "tests/platforms/_standard/SMOKE_SKETCHES.txt plus examples "
+                "changed against GITHUB_BASE_REF / FASTLED_SMOKE_BASE_REF."
+            ),
             nargs="*",
         )
 
@@ -335,6 +340,15 @@ class CompilationArgumentParser:
         if requested_all:
             # Remove 'all' keyword and discover all examples
             examples = self._discover_all_examples()
+        elif "smoke" in examples:
+            # Reduced PR set: the smoke manifest plus examples the PR changes
+            # (ci/compiler/smoke_examples.py, #4415). Any other names given
+            # alongside the keyword are kept.
+            from ci.compiler.smoke_examples import resolve_smoke_examples
+
+            extra = [ex for ex in examples if ex != "smoke"]
+            examples = resolve_smoke_examples(project_root=self.project_root)
+            examples.extend(ex for ex in extra if ex not in examples)
 
         # Apply exclusions
         if hasattr(args, "exclude_examples") and args.exclude_examples:

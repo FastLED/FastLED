@@ -31,13 +31,23 @@ def test_live_manifest_exists() -> None:
 
 
 def test_live_manifest_contains_canonical_sketches() -> None:
-    """The four canonical sketches from #2411 must be present.
+    """The evidence-picked smoke sketches from #4415 must be present.
 
-    If a future change replaces one of these, this test should be updated in
-    the same commit so the contract change is explicit.
+    Each one was the only example to catch a real defect in 90 days of CI
+    history. If a future change replaces one of these, update this test in the
+    same commit so the contract change is explicit.
     """
     names = load_smoke_sketches(None)
-    expected = {"Blink", "XYMatrix", "Apa102", "AudioFftParity"}
+    expected = {
+        "Blink",
+        "Apa102HD",
+        "AutoResearch",
+        "Audio",
+        "Fx/FxSdCard",
+        "SpecialDrivers/Adafruit/AdafruitBridge",
+        "RGBWColorimetric",
+        "RX",
+    }
     missing = expected - set(names)
     assert not missing, (
         f"Canonical smoke sketches missing from manifest: {sorted(missing)}. "

@@ -1,3 +1,16 @@
+# 2026-09-14, PR #4418 (issue #4415): +53,979 B, 336474 -> 390453.
+#
+# A measurement change, not code growth. This gate builds Blink through
+# `bash bloat esp32s3 --build`. Until #4412 that command forced the legacy
+# build backend; #4412 removed that backend, so the gate now builds with
+# fbuild, the backend every other board and CI job already uses. The same
+# source measures 336,465 B through the legacy backend and 390,453 B through
+# fbuild 2.5.23 (xtensa-esp-elf-gcc 14.2.0, arduino-esp32 3.3.11). CI measured
+# 390,453 B on all four runs since #4412 (27dac2b9, 1b2585e4, da8dc224,
+# b2a89dbe) and 336,465 B on every legacy-backend run before it, so the step
+# is exactly the backend switch. The 54 KB difference between the two backends' Blink
+# images is worth chasing in fbuild, but it is not a FastLED regression.
+#
 # 2026-09-13, PR #4411 (issue #4288): +10 B, 336464 -> 336474.
 #
 # fl::exp is now a range-reduced polynomial on every target instead of a
@@ -169,4 +182,4 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-336474
+390453
