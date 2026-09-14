@@ -347,7 +347,7 @@ class CompilationArgumentParser:
             from ci.compiler.smoke_examples import resolve_smoke_examples
 
             extra = [ex for ex in examples if ex != "smoke"]
-            examples = resolve_smoke_examples()
+            examples = resolve_smoke_examples(project_root=self.project_root)
             examples.extend(ex for ex in extra if ex not in examples)
 
         # Apply exclusions

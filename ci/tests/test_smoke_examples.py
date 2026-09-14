@@ -80,6 +80,40 @@ def test_base_ref_env_precedence(monkeypatch: pytest.MonkeyPatch) -> None:
     assert smoke_examples.base_ref_from_env() == "master"
 
 
+def test_parser_resolves_smoke_from_its_own_project_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`smoke` reads the manifest of the checkout the parser was given.
+
+    Resolving from this file's repository instead would pick the wrong
+    manifest and then fail validation against the parser's examples dir.
+    """
+    import argparse
+
+    from ci.compiler.argument_parser import CompilationArgumentParser
+
+    monkeypatch.delenv("GITHUB_BASE_REF", raising=False)
+    monkeypatch.delenv("FASTLED_SMOKE_BASE_REF", raising=False)
+    manifest = tmp_path / "tests" / "platforms" / "_standard" / "SMOKE_SKETCHES.txt"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text("OnlyInTmp\n", encoding="utf-8")
+    sketch = tmp_path / "examples" / "OnlyInTmp" / "OnlyInTmp.ino"
+    sketch.parent.mkdir(parents=True)
+    sketch.write_text("void setup() {}\nvoid loop() {}\n", encoding="utf-8")
+
+    parser = CompilationArgumentParser(tmp_path)
+    args = argparse.Namespace(
+        positional_examples=["smoke"],
+        examples=None,
+        exclude_examples=None,
+        shard_index=None,
+        shard_count=None,
+    )
+    examples, _ = parser._resolve_examples(args)
+
+    assert examples == ["OnlyInTmp"]
+
+
 # --- stub filter aliases --------------------------------------------------------
 
 
