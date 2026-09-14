@@ -15,18 +15,21 @@ ROOT = Path(__file__).resolve().parents[2]
 SHARD_COUNT = 3
 
 
-def test_esp32s3_workflow_names_each_shard_explicitly() -> None:
+def test_esp32s3_workflow_is_one_job_smoke_on_prs_all_on_master() -> None:
+    """The esp32s3 gate is a single serial job again (#4414).
+
+    Pull requests build the smoke set and master builds every example
+    (#4415). A matrix would reintroduce per-shard framework warm-up and the
+    cache-save race between shards, so this pins the shape.
+    """
     workflow_path = ROOT / ".github/workflows/build_esp32s3.yml"
     workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
     build_job = workflow["jobs"]["build"]
 
-    assert build_job["name"] == (
-        f"ESP32-S3 examples shard ${{{{ matrix.shard_index }}}} ({SHARD_COUNT} total)"
-    )
-    assert build_job["strategy"]["matrix"]["shard_index"] == list(range(SHARD_COUNT))
+    assert build_job["name"] == "ESP32-S3 examples"
+    assert "strategy" not in build_job
     assert build_job["with"]["args"] == (
-        "esp32s3 all --shard-index ${{ matrix.shard_index }} "
-        f"--shard-count {SHARD_COUNT}"
+        "esp32s3 ${{ github.event_name == 'pull_request' && 'smoke' || 'all' }}"
     )
 
 
