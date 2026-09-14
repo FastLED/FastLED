@@ -295,7 +295,9 @@ class BoardCompiler(Compiler):
         sys.stdout.write("      → Executor shutdown complete\n")
         sys.stdout.flush()
 
-    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
+    def build(
+        self, examples: list[str], max_failures: int | None = None
+    ) -> list[Future[SketchResult]]:
         """Build a list of examples.
 
         Runs synchronously on the main thread so that Ctrl+C / SIGINT is
@@ -305,9 +307,11 @@ class BoardCompiler(Compiler):
         """
         if not examples:
             return []
-        return self._build_fbuild(examples)
+        return self._build_fbuild(examples, max_failures)
 
-    def _build_fbuild(self, examples: list[str]) -> list[Future[SketchResult]]:
+    def _build_fbuild(
+        self, examples: list[str], max_failures: int | None = None
+    ) -> list[Future[SketchResult]]:
         """Build examples using fbuild, preferring ``ci`` when available.
 
         compile-many / ``fbuild ci`` are gated behind ``FASTLED_USE_FBUILD_CI``
@@ -347,7 +351,7 @@ class BoardCompiler(Compiler):
                 "are unavailable in the installed fbuild; falling back to "
                 "the serial loop."
             )
-        return self._build_fbuild_sync(examples)
+        return self._build_fbuild_sync(examples, max_failures)
 
     def _compile_many_project_dir(self, example: str, index: int) -> Path:
         """Return the staged project directory for one compile-many sketch."""
@@ -573,11 +577,29 @@ class BoardCompiler(Compiler):
 
         return futures
 
-    def _build_fbuild_sync(self, examples: list[str]) -> list[Future[SketchResult]]:
-        """Build examples one at a time with fbuild on the main thread."""
+    def _build_fbuild_sync(
+        self, examples: list[str], max_failures: int | None = None
+    ) -> list[Future[SketchResult]]:
+        """Build examples one at a time with fbuild on the main thread.
+
+        Stops before the next example once ``max_failures`` builds have
+        failed. The caller only sees results after this returns, so the
+        threshold has to be enforced here: checking it afterwards let a
+        broken fbuild daemon fail all 81 remaining examples at 33 s each and
+        run a CI job into its 45-minute timeout (#4415).
+        """
         futures: list[Future[SketchResult]] = []
+        failures = 0
 
         for example in examples:
+            failures = sum(1 for f in futures if not f.result().success)
+            if max_failures is not None and failures >= max_failures:
+                remaining = len(examples) - len(futures)
+                print(
+                    f"\nReached failure threshold ({failures} failures, "
+                    f"max={max_failures}); skipping {remaining} remaining example(s)."
+                )
+                break
             if not self.initialized:
                 init_result = self._internal_init_build_no_lock(example)
                 if not init_result.success:

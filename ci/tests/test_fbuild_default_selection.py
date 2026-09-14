@@ -27,7 +27,9 @@ def test_compile_board_examples_builds_through_board_compiler(
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             captured["kwargs"] = kwargs
 
-        def build(self, examples: list[str]) -> list[Future[SketchResult]]:
+        def build(
+            self, examples: list[str], max_failures: int | None = None
+        ) -> list[Future[SketchResult]]:
             future: Future[SketchResult] = Future()
             future.set_result(
                 SketchResult(

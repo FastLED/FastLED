@@ -93,7 +93,7 @@ def compile_board_examples(
             additional_libs=extra_packages,
         )
 
-        futures = compiler.build(examples)
+        futures = compiler.build(examples, max_failures=max_failures)
 
         # Wait for completion and collect results
         results: list[SketchResult] = []
