@@ -345,7 +345,7 @@ dependencies = [
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
     "static-ffmpeg>=2.7",
-    "fastled>=2.0.9",
+    "fastled>=2.0.20",
     # Cap below 4.10.10: that release regressed its wheel tags from
     # `cp310-abi3` (installable on 3.10+) to `cp311-cp311` (3.11 only), so
     # every CI job on CPython 3.12 falls back to the sdist, and the sdist
