@@ -89,6 +89,11 @@ class RoomListener {
     /// Poll the Processor and refresh sense(). Call once per frame.
     void update(fl::u32 nowMs);
 
+    /// Not listening this frame. Eases every signal toward calm at its
+    /// normal release rate, consumes any event edges so they cannot fire on
+    /// resume, and keeps the clock running so resuming does not snap.
+    void rest(fl::u32 nowMs);
+
     const RoomSense &sense() const { return mSense; }
 
     /// Which regime currently dominates, for logs only.
@@ -97,7 +102,10 @@ class RoomListener {
     ListenerTuning tuning;
 
   private:
+    /// Advance the frame clock; returns a bounded dt in ms.
+    float stepClock(fl::u32 nowMs);
     void deriveBlend(float dtMs);
+    void blendFrom(float presenceTarget, float grooveConf, float dtMs);
     void deriveEnergy(float dtMs);
     void deriveRhythm(fl::u32 nowMs);
     void deriveMood(float dtMs);

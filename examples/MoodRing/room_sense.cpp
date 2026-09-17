@@ -22,6 +22,11 @@ constexpr float kTransientReleaseMs = 160.0f;
 constexpr float kBandAttackMs = 30.0f;
 constexpr float kBandReleaseMs = 250.0f;
 
+// Longest frame the followers are allowed to see. A stall (or a pause in
+// listening) must not turn into alpha == 1 and snap every follower to its
+// target; it should just play out as one slow frame.
+constexpr float kMaxFrameMs = 100.0f;
+
 // Mood moves slowly on purpose. A palette that flips every second reads as
 // noise, not feeling.
 constexpr float kMoodMs = 4000.0f;
@@ -82,10 +87,14 @@ void RoomListener::begin() {
     mProcessor->onHiHat([self]() { self->mLastHiHatMs = fl::millis(); });
 }
 
-void RoomListener::update(fl::u32 nowMs) {
-    const float dtMs =
-        (mLastMs == 0) ? 16.0f : static_cast<float>(nowMs - mLastMs);
+float RoomListener::stepClock(fl::u32 nowMs) {
+    float dtMs = (mLastMs == 0) ? 16.0f : static_cast<float>(nowMs - mLastMs);
     mLastMs = nowMs;
+    return clampf(dtMs, 0.0f, kMaxFrameMs);
+}
+
+void RoomListener::update(fl::u32 nowMs) {
+    const float dtMs = stepClock(nowMs);
 
     if (!mProcessor) {
         mSense = RoomSense{};
@@ -134,19 +143,23 @@ void RoomListener::deriveEnergy(float dtMs) {
 
 void RoomListener::deriveBlend(float dtMs) {
     fl::audio::Processor &p = *mProcessor;
+    // Groove confidence: tempo AND beat have to agree.
+    const float conf = p.getTempoConfidence() * p.getBeatConfidence();
+    blendFrom(p.isSilent() ? 0.0f : 1.0f, conf, dtMs);
+}
 
+void RoomListener::blendFrom(float presenceTarget, float grooveConf,
+                             float dtMs) {
     // Presence: fast attack so one clap wakes the ring, slow release so a
     // breath between phrases does not drop it into calm.
-    const float presenceTarget = p.isSilent() ? 0.0f : 1.0f;
     mSense.presence =
         mPresence.update(presenceTarget, dtMs, tuning.presenceAttackMs,
                          tuning.presenceReleaseMs);
 
-    // Groove confidence: tempo AND beat have to agree. Slow both ways: a
-    // beat has to prove itself, and one dropped bar should not lose it.
-    const float conf = p.getTempoConfidence() * p.getBeatConfidence();
-    mSense.grooveConfidence = mGroove.update(conf, dtMs, tuning.grooveAttackMs,
-                                             tuning.grooveReleaseMs);
+    // Slow both ways: a beat has to prove itself, and one dropped bar
+    // should not lose it.
+    mSense.grooveConfidence = mGroove.update(
+        grooveConf, dtMs, tuning.grooveAttackMs, tuning.grooveReleaseMs);
 
     // Blend. smoothstep between exit and enter is the whole "hysteresis".
     const float g = smoothstepf(tuning.grooveExit, tuning.grooveEnter,
@@ -192,6 +205,35 @@ void RoomListener::deriveEvents() {
     e.kick = edge(mLastKickMs, mSeenKickMs);
     e.snare = edge(mLastSnareMs, mSeenSnareMs);
     e.hihat = edge(mLastHiHatMs, mSeenHiHatMs);
+}
+
+void RoomListener::rest(fl::u32 nowMs) {
+    const float dtMs = stepClock(nowMs);
+
+    // Everything audio-driven eases to zero at its own release rate, so
+    // switching listening off is a fade, not a cut. Mood is left where it
+    // was: the palette has no reason to move.
+    mSense.low = mLow.update(0.0f, dtMs, kBandAttackMs, kBandReleaseMs);
+    mSense.mid = mMid.update(0.0f, dtMs, kBandAttackMs, kBandReleaseMs);
+    mSense.high = mHigh.update(0.0f, dtMs, kBandAttackMs, kBandReleaseMs);
+    const float fast =
+        mEnergyFast.update(0.0f, dtMs, kEnergyFastMs, kEnergyFastMs);
+    const float slow =
+        mEnergySlow.update(0.0f, dtMs, kEnergySlowMs, kEnergySlowMs);
+    mSense.energy = fast;
+    mSense.trend = clampf((fast - slow) * 4.0f, -1.0f, 1.0f);
+    mSense.punch =
+        mPunch.update(0.0f, dtMs, kTransientAttackMs, kTransientReleaseMs);
+    mSense.shimmer =
+        mShimmer.update(0.0f, dtMs, kTransientAttackMs, kTransientReleaseMs);
+    mSense.beatPhase = 0.0f;
+
+    blendFrom(0.0f, 0.0f, dtMs);
+
+    // Consume edges that landed while resting so they cannot fire on resume,
+    // and publish none.
+    deriveEvents();
+    mSense.events = RoomEvents{};
 }
 
 const char *RoomListener::regimeName() const {

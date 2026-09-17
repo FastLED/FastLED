@@ -53,20 +53,19 @@ void MoodPainter::draw(const RoomSense &s, fl::u32 nowMs, fl::span<CRGB> out) {
         wrapTurns(mHueDrift + kHueDriftTurnsPerSecCalm * s.calm * dtSec);
     const MoodPalette pal = paletteFor(s, mHueDrift);
 
-    // Render only the layers that will be visible. A layer at zero weight
-    // keeps its clocks but skips its pixels.
+    // Every layer renders every frame, even at zero weight, so its
+    // envelopes, grains and phase correction keep running. Skipping a layer
+    // would freeze a half-finished flash and replay it when the layer
+    // returned. The pixel loops are cheap at ring scale.
     RingCanvas breath(mBufBreath);
     RingCanvas flow(mBufFlow);
     RingCanvas groove(mBufGroove);
     breath.clear();
     flow.clear();
     groove.clear();
-    if (s.calm * tuning.breathGain > 0.002f)
-        mBreath.render(s, pal, dtSec, breath);
-    if (s.flow * tuning.flowGain > 0.002f)
-        mFlow.render(s, pal, dtSec, flow);
-    if (s.groove * tuning.grooveGain > 0.002f)
-        mGroove.render(s, pal, dtSec, groove);
+    mBreath.render(s, pal, dtSec, breath);
+    mFlow.render(s, pal, dtSec, flow);
+    mGroove.render(s, pal, dtSec, groove);
 
     mixLayers(s);
 

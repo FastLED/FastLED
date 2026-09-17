@@ -187,11 +187,13 @@ void loop() {
 
     applyUiTuning();
 
-    // Listen, then paint. With listening off the sense stays at its
-    // default, which is a fully calm ring: the sketch degrades to a slow
-    // ambient lamp rather than going dark.
+    // Listen, then paint. With listening off every signal eases to calm at
+    // its normal release rate, so the sketch fades into a slow ambient lamp
+    // rather than cutting or going dark.
     if (listen.value()) {
         gListener->update(now);
+    } else {
+        gListener->rest(now);
     }
     const mood_ring::RoomSense &sense = gListener->sense();
     gPainter.draw(sense, now, leds);
