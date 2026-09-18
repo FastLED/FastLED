@@ -32,6 +32,10 @@ namespace fl {
 // also keeps `options.h` cheap for every translation unit that includes it.
 void installColorPipelineHooks() FL_NO_EXCEPT;
 
+// Emits the ProfileClearedByLegacy warning event through the pipeline hooks,
+// so a sketch that never binds a profile does not link the event machinery.
+void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT;
+
 
 #ifndef FL_COLOR_PROFILE_RUNTIME
 #define FL_COLOR_PROFILE_RUNTIME (!FL_PLATFORM_HAS_TINY_MEMORY)
@@ -284,8 +288,7 @@ private:
 #if FL_COLOR_PROFILE_RUNTIME
         if (hasColorProfile() && !mWarnedProfileCleared) {
             FL_WARN_F("Legacy correction/temperature clears color profile");
-            ChannelEvents::instance().onColorProfileWarning(
-                ColorProfileEvent{-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
+            notifyColorProfileClearedByLegacy();
             mWarnedProfileCleared = true;
         }
 #endif

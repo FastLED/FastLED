@@ -82,6 +82,16 @@ struct ColorPipelineHooks {
     /// functions, and naming either from `Channel` keeps their translation
     /// units -- and what they pull in -- alive in every build.
     void (*setFlux)(StreamingPipelineQ16*, u8 brightness);
+
+    /// Fires `ChannelEvents::onColorProfileWarning(ProfileClearedByLegacy)`.
+    /// Null until installed.
+    ///
+    /// A legacy setter (`setCorrection`, `setTemperature`) can only clear a
+    /// profile that was bound, and binding installs these hooks. Emitting
+    /// the event directly from `ChannelOptions` instead kept the event list's
+    /// invoke path -- `fl::vector`, `malloc`/`realloc`/`free`, a sort --
+    /// alive in every sketch that calls `setCorrection`: ~8.3 KB on AVR.
+    void (*notifyProfileClearedByLegacy)();
 };
 
 /// The installed hooks. Both pointers are null in a program that never binds

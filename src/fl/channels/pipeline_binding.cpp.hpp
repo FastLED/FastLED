@@ -2,6 +2,7 @@
 
 #include "fl/channels/pipeline_binding.h"
 
+#include "fl/channels/channel_events.h"
 #include "fl/channels/color_managed_source.h"
 #include "fl/stl/new.h"
 
@@ -50,13 +51,18 @@ void destroyColorPipelineIterator(void* source_storage,
         ->~ColorManagedPixelSource();
 }
 
+void notifyColorPipelineProfileClearedByLegacy() FL_NO_EXCEPT {
+    ChannelEvents::instance().onColorProfileWarning(
+        ColorProfileEvent{-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
+}
+
 }  // namespace
 
 ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
     // Not a function-local static with a non-trivial constructor: this is a
     // zero-initialized aggregate, so there is no guard variable and no
     // Teensy 3.x `__cxa_guard` conflict.
-    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr};
+    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr, nullptr};
     return hooks;
 }
 
@@ -66,6 +72,16 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.makeIterator = &makeColorPipelineIterator;
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.setFlux = &setColorPipelineFlux;
+    hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
+}
+
+void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT {
+    // Null unless a profile was ever bound, and nothing can have been
+    // cleared in that case either.
+    void (*notify)() = colorPipelineHooks().notifyProfileClearedByLegacy;
+    if (notify != nullptr) {
+        notify();
+    }
 }
 
 }  // namespace fl
