@@ -13,6 +13,7 @@
 #endif
 #include "fl/stl/int.h"           // fl::u32, fl::u8
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
+#include "fl/channels/pipeline_binding.h"  // colorPipelineHooks (#4344)
 #include "fl/stl/singleton.h"    // fl::Singleton
 #include "fl/gfx/rgbw.h"     // fl::Rgbw, fl::rgb_2_rgbw
 // POWER MANAGEMENT
@@ -350,6 +351,20 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 	                                max_power_mW);
 }
 
+fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
+    const fl::span<const CRGB> leds(controller.leds(),
+                                    static_cast<fl::size>(controller.size()));
+    // Through the pipeline hook, which exists whenever a pipeline does; naming
+    // the estimator directly would link the colour pipeline into sketches that
+    // limit power but never bind a profile.
+    const fl::StreamingPipelineQ16* pipeline = controller.colorPipeline();
+    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    if (pipeline != nullptr && hooks.unscaledPowerMilliwatts != nullptr) {
+        return hooks.unscaledPowerMilliwatts(*pipeline, leds, controller.getRgbw());
+    }
+    return calculate_unscaled_power_mW(leds, controller.getRgbw());
+}
+
 // sets brightness to
 //  - no more than target_brightness
 //  - no more than max_mW milliwatts
@@ -363,8 +378,9 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
     CLEDController *pCur = CLEDController::head();
 	while(pCur) {
         const fl::u32 count = pCur->size();
-        const fl::u32 unscaled_mW = calculate_unscaled_power_mW(
-            fl::span<const CRGB>(pCur->leds(), count), pCur->getRgbw());
+        // Through its RGBW conversion, and for a bound colour profile the
+        // solved drives rather than the source (#4344).
+        const fl::u32 unscaled_mW = controller_unscaled_power_mW(*pCur);
         const fl::u32 dark_mW = fixed_power_mW(count);
         fixed_mW += dark_mW;
         controllable_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;

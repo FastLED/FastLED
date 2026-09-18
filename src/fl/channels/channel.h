@@ -212,6 +212,10 @@ public:
 #endif
     }
     Chromaticity targetWhite() const FL_NO_EXCEPT { return mSettings.targetWhite(); }
+
+    /// The installed streaming pipeline, or null on the legacy path. The power
+    /// limiter charges its solved drives rather than the source (#4344).
+    const StreamingPipelineQ16* colorPipeline() const FL_NO_EXCEPT override;
     bool isEnabled() const FL_NO_EXCEPT { return const_cast<Channel*>(this)->getEnabled(); }
     bool hasColorProfileFallback() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME

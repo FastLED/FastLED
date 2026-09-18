@@ -33,6 +33,8 @@
 
 namespace fl {
 
+struct StreamingPipelineQ16;  // fl/gfx/pipeline.h; only a pointer is named here
+
 class CLEDController {
 protected:
     friend class CFastLED;
@@ -354,6 +356,15 @@ public:
     /// How many Lanes does this controller manage?
     /// @returns 1 for a non-Parallel controller
     virtual int lanes() FL_NO_EXCEPT { return 1; }
+
+    /// The streaming colour pipeline this controller's output runs through,
+    /// or null when its output is the legacy (unmanaged) path.
+    ///
+    /// Read by the power limiter, which must charge the drives a managed
+    /// controller actually emits rather than its source pixels (#4344). A
+    /// plain accessor, not the estimate itself: the estimate lives in the
+    /// power module and so links only into sketches that limit power.
+    virtual const StreamingPipelineQ16* colorPipeline() const FL_NO_EXCEPT;
 
     /// Pointer to the CRGB array for this controller
     /// @returns CLEDController::mLeds.data()

@@ -999,6 +999,14 @@ u8 Channel::getDither() {
     return CPixelLEDController<RGB>::getDither();
 }
 
+const StreamingPipelineQ16* Channel::colorPipeline() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+    return mPipeline.get();
+#else
+    return nullptr;
+#endif
+}
+
 Rgbw Channel::getRgbw() const {
     return CPixelLEDController<RGB>::getRgbw();
 }

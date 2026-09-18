@@ -5,6 +5,7 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/color_managed_source.h"
 #include "fl/stl/new.h"
+#include "power_mgt.h"
 
 namespace fl {
 
@@ -51,6 +52,50 @@ void destroyColorPipelineIterator(void* source_storage,
         ->~ColorManagedPixelSource();
 }
 
+u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
+                                         span<const CRGB> leds,
+                                         const Rgbw& rgbw) FL_NO_EXCEPT {
+    // Demand at full brightness: a copy of the pipeline at unity flux, so the
+    // frame's brightness and the limiter's own previous scalar are not folded
+    // into the number the limiter is about to scale.
+    StreamingPipelineQ16 unity = pipeline;
+    setPipelineFluxQ16(&unity, FluxScalar::unity());
+
+    // The power model is 8-bit, so each solved drive is rounded to its 8-bit
+    // equivalent here and charged through the same estimator every other
+    // controller uses -- same per-emitter mW, same response exponent, same
+    // idle draw, same RGBW conversion. This buffer exists only for the
+    // estimate; nothing here reaches the output path.
+    // Summing per chunk truncates each chunk's per-emitter total separately:
+    // under 3 mW low per 32 pixels, well inside the model's own precision.
+    enum { kChunk = 32 };
+    CRGB chunk[kChunk];
+    u32 total = 0;
+    fl::size filled = 0;
+    for (fl::size i = 0; i < leds.size(); ++i) {
+        i32 drives[3];
+        processPixelQ16(unity, leds[i].r, leds[i].g, leds[i].b, drives);
+        for (int c = 0; c < 3; ++c) {
+            i32 d = drives[c];
+            if (d < 0) {
+                d = 0;
+            }
+            if (d > 65536) {
+                d = 65536;
+            }
+            chunk[filled].raw[c] = static_cast<u8>((d * 255 + 32768) >> 16);
+        }
+        if (++filled == kChunk) {
+            total += calculate_unscaled_power_mW(span<const CRGB>(chunk, filled), rgbw);
+            filled = 0;
+        }
+    }
+    if (filled != 0) {
+        total += calculate_unscaled_power_mW(span<const CRGB>(chunk, filled), rgbw);
+    }
+    return total;
+}
+
 void notifyColorPipelineProfileClearedByLegacy() FL_NO_EXCEPT {
     ChannelEvents::instance().onColorProfileWarning(
         ColorProfileEvent{-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
@@ -62,7 +107,7 @@ ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
     // Not a function-local static with a non-trivial constructor: this is a
     // zero-initialized aggregate, so there is no guard variable and no
     // Teensy 3.x `__cxa_guard` conflict.
-    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
     return hooks;
 }
 
@@ -73,6 +118,7 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.setFlux = &setColorPipelineFlux;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
+    hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
 }
 
 void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT {
