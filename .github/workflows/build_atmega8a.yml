@@ -24,4 +24,9 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: atmega8a all
+      # TwinkleFox does not fit 8KB of flash on an ATmega8: it links at
+      # ~9.1KB (1100 B over). It fits the ATtiny85 at 7.85KB only because
+      # FL_IS_AVR_LIMITED compiles out colour correction and dithering there
+      # and the ATtiny has no UART core; the ATmega8 keeps both. Keep the rest
+      # of the sweep.
+      args: atmega8a all --exclude-examples TwinkleFox
