@@ -244,9 +244,11 @@ body {
 }
 
 h1 {
-    font-size: 6em;
-    margin-top: 10vh;
-    margin-bottom: 40px;
+    /* Scale with the window, capped at the original 6em on wide screens. A
+       fixed 6em dominated a viewer-sized window (zackees/fastled-wasm#268). */
+    font-size: clamp(2rem, 5vw, 6em);
+    margin-top: clamp(12px, 4vh, 10vh);
+    margin-bottom: clamp(12px, 2vh, 40px);
     text-align: center;
     font-weight: 300;
     letter-spacing: 1px;
@@ -298,6 +300,10 @@ h1 {
 }
 
 #main-container {
+    /* width: 100% plus padding overflowed every window narrower than
+       max-width + 40px and pushed the controls off screen
+       (zackees/fastled-wasm#268). */
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
