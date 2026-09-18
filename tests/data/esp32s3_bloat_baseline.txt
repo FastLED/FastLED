@@ -195,4 +195,11 @@
 # profile saves ~8.3 KB on AVR (uno ColorPalette 14.80 KB -> 6.47 KB). A sketch
 # that binds a profile installs the hook and still links the event machinery,
 # so it sees no reduction.
-390472
+#
+# -7,706 B (390472 -> 382766): fbuild 2.5.24 (FastLED/fbuild#1434) links the
+# Arduino core as libFrameworkArduino.a instead of loose objects (so unused core
+# files and their constructors are no longer linked whole), drops
+# -fno-omit-frame-pointer on Xtensa, and maps the framework root out of
+# __FILE__. No FastLED code changed; claimed so the slack cannot hide the next
+# regression.
+382766

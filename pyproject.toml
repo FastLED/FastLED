@@ -5,10 +5,25 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.23. It carries hardened USB/deploy recovery, current
+    # Pin to fbuild 2.5.24. It carries hardened USB/deploy recovery, current
     # esptool probing, and the accumulated library/build fixes below.
     #
     # Pin history:
+    #   2.5.24 -- unblocks three CI jobs that went red when FastLED moved to
+    #              fbuild (#4412):
+    #              - clone and compile: .ino conversion hoisted Sailboat's
+    #                `#if defined(FL_IS_TEENSY)` `#include <Audio.h>` out of
+    #                its #if (FastLED/fbuild#1440).
+    #              - esp_extra_libs: a relative project dir left downloaded
+    #                libraries with -I paths that pointed nowhere
+    #                (FastLED/fbuild#1441); core-bundled lib_deps (FS,
+    #                ArduinoOTA, ESPmDNS) went to the registry
+    #                (FastLED/fbuild#1442); a pioarduino 51.x pin failed on a
+    #                404 toolchain URL (FastLED/fbuild#1446).
+    #              - ThingPlusMatter_mgm240s: silabs-core's declared
+    #                submodules are filled or excused (FastLED/fbuild#1439).
+    #              Also honors `platform = <release URL>` pins for ESP32 and
+    #              matches the legacy backend's ESP32-S3 size (FastLED/fbuild#1434).
     #   2.5.23 -- restores the five SAMD boards. samd-core was fetched from
     #              GitHub's auto-generated source archive, which omits
     #              submodules by design; tag 1.7.16 declares two under
@@ -234,7 +249,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.23",
+    "fbuild==2.5.24",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
