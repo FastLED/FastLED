@@ -22,6 +22,7 @@ from running_process import RunningProcess
 
 from ci.meson.build_config import perform_ninja_maintenance, setup_meson_build
 from ci.meson.compiler import check_meson_installed, get_meson_executable
+from ci.meson.mtime_stabilizer import restore_executable_bits
 from ci.meson.sanitizer_env import setup_sanitizer_env
 from ci.meson.test_execution import MesonTestResult
 from ci.util.build_lock import libfastled_build_lock
@@ -269,6 +270,23 @@ def run_examples(
     Returns:
         MesonTestResult with success status, duration, and test counts
     """
+    # zccache can serve example_runner from its link cache without the exec
+    # bit; restore it before `meson test` spawns it (FastLED#4205).
+    try:
+        restore_executable_bits(build_dir, verbose=verbose)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except OSError as exc:
+        _ts_print(f"Execution failed: {exc}", file=sys.stderr)
+        return MesonTestResult(
+            success=False,
+            duration=0.0,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
+
     # Build command
     cmd = [get_meson_executable(), "test", "-C", str(build_dir), "--print-errorlogs"]
 
