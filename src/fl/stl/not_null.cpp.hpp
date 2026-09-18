@@ -22,6 +22,7 @@ namespace detail {
 // Called when a nullptr is detected during construction or assignment
 // Platform-specific implementation to avoid circular dependencies
 void not_null_assert_failed(const char* message) {
+    FL_UNUSED(message);  // FL_ASSERT compiles to nothing in some builds
     FL_ASSERT(false, message);
 }
 

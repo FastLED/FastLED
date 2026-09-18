@@ -80,12 +80,12 @@ FL_TEST_CASE("MP3 codec allocations report accounting tags") {
     {
         Mp3Minimp3Decoder decoder;
         FL_REQUIRE(decoder.init());
-        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::DecoderState), 0);
-        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::Scratch), 0);
-        FL_CHECK_GT(hook.allocations(), 1);
+        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::DecoderState), 0u);
+        FL_CHECK_GT(hook.tagged(Mp3MemoryTag::Scratch), 0u);
+        FL_CHECK_GT(hook.allocations(), 1u);
     }
     FL_CHECK_EQ(hook.current(), 0);
-    FL_CHECK_GT(hook.peak(), 0);
+    FL_CHECK_GT(hook.peak(), 0u);
     {
         auto stream = fl::make_shared<fl::memorybuf>(16);
         fl::Mp3Decoder decoder;
@@ -499,7 +499,7 @@ FL_TEST_CASE("MP3 public minimp3 stream discovers large free-format frames") {
         frames[i] = cursor;
         FL_REQUIRE_EQ(probe.decodeFrame(&cursor, &remaining), 0);
         frame_sizes[i] = static_cast<fl::size>(cursor - frames[i]);
-        FL_REQUIRE_GT(frame_sizes[i], 4);
+        FL_REQUIRE_GT(frame_sizes[i], 4u);
     }
 
     constexpr fl::size large_frame_size = 1200;
@@ -829,7 +829,7 @@ FL_TEST_CASE("Mp3Minimp3Decoder - Decode real MP3 file") {
 
     // Read entire file into buffer
     fl::size file_size = file.size();
-    FL_CHECK_GT(file_size, 0);
+    FL_CHECK_GT(file_size, 0u);
 
     fl::vector<fl::u8> mp3_data;
     mp3_data.resize(file_size);
@@ -892,7 +892,7 @@ FL_TEST_CASE("Mp3Minimp3Decoder - Convert to fl::audio::AudioSamples from real f
     fl::vector<fl::audio::Sample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
 
     // Verify we got samples
-    FL_CHECK_GT(samples.size(), 0);
+    FL_CHECK_GT(samples.size(), 0u);
 
     // Verify samples have valid data
     bool has_non_zero = false;

@@ -200,7 +200,7 @@ FL_TEST_CASE("minimp3 stage dynamic range stays inside the fixed-point headroom"
         printf("[stage-range] %-10s max=%.6g over %zu samples\n",
                kStageNames[stage], static_cast<double>(sink.maxAbs(stage)),
                sink.samples(stage));
-        FL_CHECK_GT(sink.samples(stage), 0);
+        FL_CHECK_GT(sink.samples(stage), 0u);
     }
 }
 

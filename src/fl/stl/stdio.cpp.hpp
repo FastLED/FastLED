@@ -6,7 +6,9 @@ bool float_is_finite(float value) FL_NO_EXCEPT {
     if (value != value) {
         return false;
     }
-    return value > -3.5e38f && value < 3.5e38f;
+    // FLT_MAX, spelled out. The old bound, 3.5e38f, overflows float to
+    // infinity, so the check only worked because of that overflow.
+    return value >= -3.40282347e38f && value <= 3.40282347e38f;
 }
 
 fl::string format_float_scientific(float value, int precision) FL_NO_EXCEPT {

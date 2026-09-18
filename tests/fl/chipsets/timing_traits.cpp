@@ -267,14 +267,14 @@ FL_TEST_CASE("OSTW2020C1E uses the verified WS2812-compatible protocol") {
     // OptoSupply VER A.0 specifies an 800 Kbps, GRB/MSB-first stream with
     // T0H=220-380ns, T1H=580-1000ns, T0L=580-1600ns, T1L=220-420ns,
     // and reset >280us. These are the actual pulses produced by this timing.
-    FL_CHECK_GE(timing.t1_ns, 220);
-    FL_CHECK_LE(timing.t1_ns, 380);
-    FL_CHECK_GE(timing.t1_ns + timing.t2_ns, 580);
-    FL_CHECK_LE(timing.t1_ns + timing.t2_ns, 1000);
-    FL_CHECK_GE(timing.t2_ns + timing.t3_ns, 580);
-    FL_CHECK_LE(timing.t2_ns + timing.t3_ns, 1600);
-    FL_CHECK_GE(timing.t3_ns, 220);
-    FL_CHECK_LE(timing.t3_ns, 420);
+    FL_CHECK_GE(timing.t1_ns, 220u);
+    FL_CHECK_LE(timing.t1_ns, 380u);
+    FL_CHECK_GE(timing.t1_ns + timing.t2_ns, 580u);
+    FL_CHECK_LE(timing.t1_ns + timing.t2_ns, 1000u);
+    FL_CHECK_GE(timing.t2_ns + timing.t3_ns, 580u);
+    FL_CHECK_LE(timing.t2_ns + timing.t3_ns, 1600u);
+    FL_CHECK_GE(timing.t3_ns, 220u);
+    FL_CHECK_LE(timing.t3_ns, 420u);
 
     // The datasheet requires reset low for more than 280us, so the named
     // controller rounds the inter-frame wait up instead of using WS2812's

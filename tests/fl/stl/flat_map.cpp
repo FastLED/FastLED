@@ -351,7 +351,7 @@ FL_TEST_CASE("flat_map: reserve") {
     fl::flat_map<int, int> m;
     m.reserve(100);
 
-    FL_CHECK_GE(m.capacity(), 100);
+    FL_CHECK_GE(m.capacity(), 100u);
 }
 
 FL_TEST_CASE("flat_map: with string keys") {

@@ -15,10 +15,10 @@ using namespace fl;
 namespace test_tm1908 {
 
 FL_TEST_CASE("TM1908 - timing and encoder match the vendor protocol") {
-    FL_CHECK_EQ(TIMING_TM1908::T1, 240);
-    FL_CHECK_EQ(TIMING_TM1908::T2, 240);
-    FL_CHECK_EQ(TIMING_TM1908::T3, 350);
-    FL_CHECK_EQ(TIMING_TM1908::RESET, 80);
+    FL_CHECK_EQ(TIMING_TM1908::T1, 240u);
+    FL_CHECK_EQ(TIMING_TM1908::T2, 240u);
+    FL_CHECK_EQ(TIMING_TM1908::T3, 350u);
+    FL_CHECK_EQ(TIMING_TM1908::RESET, 80u);
     FL_CHECK(encoder_for<TIMING_TM1908>() ==
              ClocklessEncoder::CLOCKLESS_ENCODER_TM1908);
 

@@ -290,7 +290,7 @@ FL_TEST_CASE("SPI chipset - mock driver integration") {
 
     // Verify data was transmitted
     FL_CHECK_GT(mockEngine->mTransmitCount, 0);
-    FL_CHECK_GT(mockEngine->mLastTransmittedData.size(), 0);
+    FL_CHECK_GT(mockEngine->mLastTransmittedData.size(), 0u);
 
     // APA102 format: 4-byte start frame + (4 bytes per LED) + end frame
     size_t minExpectedSize = 4 + (4 * NUM_LEDS);
@@ -350,7 +350,7 @@ FL_TEST_CASE("SPI chipset - APA102HD mock driver integration") {
     FL_CHECK_GT(mockEngine->mTransmitCount, 0);
 
     const auto& data = mockEngine->mLastTransmittedData;
-    FL_CHECK_GT(data.size(), 0);
+    FL_CHECK_GT(data.size(), 0u);
 
     // APA102 wire format: 4-byte start frame + (4 bytes per LED) [+ optional end frame]
     // Start frame: 0x00 0x00 0x00 0x00

@@ -1239,7 +1239,7 @@ FL_TEST_CASE("fl::snprintf documented malformed format behavior") {
             for (fl::size i = 0; i < len; ++i) {
                 exact[i] = fmt[i];
             }
-            exact[len] = ' ';
+            exact[len] = '\0';
 
             fl::snprintf(buf, sizeof(buf), exact.data());
             // Bounded, NUL-terminated output is all that is guaranteed; the

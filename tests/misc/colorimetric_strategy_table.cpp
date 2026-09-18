@@ -9333,7 +9333,7 @@ FL_TEST_CASE("colorimetric strategy harness: issue strategies are registered") {
 
 FL_TEST_CASE("colorimetric strategy harness: subsets are non-empty") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     const ErrorStats ok_stats = evaluate_strategy(
         kStrategies[kClosedFormIndex], kStrategies[kClosedFormIndex],
         p, Reference::ClosedForm, RowFilter::OkOnly);
@@ -9347,7 +9347,7 @@ FL_TEST_CASE("colorimetric strategy harness: subsets are non-empty") {
 
 FL_TEST_CASE("colorimetric strategy harness: closed-form baseline is exact") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     const ErrorStats stats = evaluate_strategy(
         kStrategies[kClosedFormIndex], kStrategies[kClosedFormIndex],
         p, Reference::ClosedForm, RowFilter::All);
@@ -9358,7 +9358,7 @@ FL_TEST_CASE("colorimetric strategy harness: closed-form baseline is exact") {
 
 FL_TEST_CASE("colorimetric strategy harness: scores frozen fixture drift") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
     const ErrorStats stats =
         evaluate_closed_form_fixture_lock(
             kStrategies[kClosedFormIndex], p, RowFilter::All);
@@ -9368,7 +9368,7 @@ FL_TEST_CASE("colorimetric strategy harness: scores frozen fixture drift") {
 
 FL_TEST_CASE("colorimetric strategy comparison table") {
     DiodeProfile p = kRgbwDefaultProfile;
-    set_input_gamut(&p, InputGamut::Native);
+    set_input_gamut(p, InputGamut::Native);
 
     ErrorStats cf_stats[kStrategyCount];
     ErrorStats target_stats[kStrategyCount];

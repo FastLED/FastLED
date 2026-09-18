@@ -18,7 +18,7 @@ FL_TEST_CASE("MP4 parser - parse test.mp4") {
     FL_REQUIRE(handle.is_open());
 
     fl::size file_size = handle.size();
-    FL_CHECK_GT(file_size, 0);
+    FL_CHECK_GT(file_size, 0u);
 
     fl::vector<fl::u8> file_data(file_size);
     fl::size bytes_read = handle.read(file_data.data(), file_size);
@@ -33,8 +33,8 @@ FL_TEST_CASE("MP4 parser - parse test.mp4") {
     if (track.isValid) {
         FL_CHECK_EQ(track.width, 2);
         FL_CHECK_EQ(track.height, 2);
-        FL_CHECK_GT(track.sps.size(), 0);
-        FL_CHECK_GT(track.pps.size(), 0);
+        FL_CHECK_GT(track.sps.size(), 0u);
+        FL_CHECK_GT(track.pps.size(), 0u);
         FL_CHECK_EQ(track.profile, 66); // Baseline profile
         FL_CHECK_EQ(track.level, 10);   // Level 1.0
 
@@ -64,7 +64,7 @@ FL_TEST_CASE("MP4 parser - extract NAL units") {
     FL_REQUIRE(track.isValid);
 
     fl::vector<fl::u8> annexB = fl::extractH264NalUnits(file_data, track, &error);
-    FL_CHECK_GT(annexB.size(), 0);
+    FL_CHECK_GT(annexB.size(), 0u);
 
     // Annex B stream should start with start code 0x00000001
     FL_REQUIRE(annexB.size() >= 4);

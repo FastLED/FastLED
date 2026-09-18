@@ -12,9 +12,9 @@ ChannelEngineRpUart::ChannelEngineRpUart(
     : mPeripheral(fl::move(peripheral)), mUartIndex(uart_index),
       mCurrentChannel(0), mLatchStartUs(0), mLatchDurationUs(0),
       mActive(false), mLatchPending(false), mFailed(false),
+      mLastWireTiming{0, 0, 0, 0, nullptr},
       mLastStartAttempted(false), mLastStartSucceeded(false),
-      mLastEncodedSize(0), mLastActualBaud(0),
-      mLastWireTiming{0, 0, 0, 0, nullptr} {}
+      mLastEncodedSize(0), mLastActualBaud(0) {}
 
 ChannelEngineRpUart::~ChannelEngineRpUart() {
     releaseInFlight();
