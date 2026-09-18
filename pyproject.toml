@@ -23,7 +23,7 @@ dependencies = [
     #              - ThingPlusMatter_mgm240s: silabs-core's declared
     #                submodules are filled or excused (FastLED/fbuild#1439).
     #              Also honors `platform = <release URL>` pins for ESP32 and
-    #              matches PlatformIO's ESP32-S3 size (FastLED/fbuild#1434).
+    #              matches the legacy backend's ESP32-S3 size (FastLED/fbuild#1434).
     #   2.5.23 -- restores the five SAMD boards. samd-core was fetched from
     #              GitHub's auto-generated source archive, which omits
     #              submodules by design; tag 1.7.16 declares two under
