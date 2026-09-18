@@ -96,8 +96,7 @@ class TestComparison(unittest.TestCase):
         self.assertTrue(all(f.kind == "schema_drift" for f in findings))
 
     def test_findings_are_ordered_deterministically(self: "TestComparison") -> None:
-        # The scheduled workflow writes these into a standing issue; an
-        # unstable order would churn that issue on every run.
+        # A stable order keeps two runs of the report diffable.
         remote = _as_remote("1.0")
         remote.append(RemoteArtifact("zz/5050/none/r1", "1.0", "z.json"))
         remote.append(RemoteArtifact("aa/5050/none/r1", "1.0", "a.json"))
@@ -212,17 +211,3 @@ class TestTheDocsStateTheExemption(unittest.TestCase):
         claude = (REPO_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
         self.assertIn("agents/docs/color-profile-artifacts.md", claude)
         self.assertIn("status, not errors", claude)
-
-    def test_the_workflow_is_not_a_commit_gate(
-        self: "TestTheDocsStateTheExemption",
-    ) -> None:
-        import yaml
-
-        path = REPO_ROOT / ".github" / "workflows" / "color_profile_freshness.yml"
-        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
-        # `on` parses as the boolean True in YAML 1.1, which is why this
-        # looks up both spellings rather than assuming one.
-        triggers = workflow.get("on", workflow.get(True))
-        self.assertIn("schedule", triggers)
-        self.assertNotIn("push", triggers)
-        self.assertNotIn("pull_request", triggers)

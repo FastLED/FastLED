@@ -54,10 +54,9 @@ never made.
 Deliberately outside `bash lint`: a check that can fail because DNS blinked
 has no business gating a commit.
 
-A weekly workflow (`.github/workflows/color_profile_freshness.yml`) runs it
-and keeps **one** standing issue current. One issue, edited in place — a new
-issue per run turns a weekly informational check into a notification stream,
-and the first thing anyone does with that is mute it.
+Nothing runs it on a schedule. Run it by hand when reviewing profiles. The
+weekly workflow that kept a standing tracking issue (FastLED#4417) was removed
+at the maintainer's request.
 
 ## What the generator will refuse, and why that is correct
 
