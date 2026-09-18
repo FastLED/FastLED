@@ -67,9 +67,10 @@ namespace fl {
 namespace net {
 namespace http {
 
-FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> prom)
+FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> prom) FL_NO_EXCEPT
     : mState(DNS_LOOKUP)
     , mPromise(prom)
+    , mOptions(opts.options())
     , mParsedUrl(url)
     , mHostname()
     , mPort(80)
@@ -191,10 +192,22 @@ void FetchRequest::handle_connecting() {
             return;
         }
 
-        // Connected! Build HTTP request
-        mRequestBuffer = "GET " + mPath + " HTTP/1.1\r\n";
+        // Connected! Build the HTTP request from the caller's options. This
+        // used to hardcode a bare GET, so fetch_post() and custom headers and
+        // bodies were silently dropped on native targets.
+        mRequestBuffer = mOptions.method.empty() ? fl::string("GET") : mOptions.method;
+        mRequestBuffer += " " + mPath + " HTTP/1.1\r\n";
         mRequestBuffer += "Host: " + mHostname + "\r\n";
+        for (const auto& header : mOptions.headers) {
+            mRequestBuffer += header.first + ": " + header.second + "\r\n";
+        }
+        if (!mOptions.body.empty()) {
+            mRequestBuffer += "Content-Length: ";
+            mRequestBuffer.append(static_cast<u32>(mOptions.body.size()));
+            mRequestBuffer += "\r\n";
+        }
         mRequestBuffer += "Connection: close\r\n\r\n";
+        mRequestBuffer += mOptions.body;
 
         mBytesSent = 0;
         mState = SENDING;
