@@ -38,6 +38,14 @@ void xyzAt(float x, float y, float luminance, i32 (&out)[3]) {
     out[2] = q16(xyz[2]);
 }
 
+/// P7's stated hue tolerance, in `hueDivergence` units -- the sine of the
+/// hue angle between target and mapped chroma, so 0.005 is about 0.29
+/// degrees. One bound for all three mappers and the allocators, in gamut and
+/// under compression; the value and why it is enough are in
+/// docs/color-pipeline-contracts.md, "Stated tolerances (P7)". Every hue
+/// check in this file uses it, so the document and the tests cannot drift.
+constexpr float kHueTolerance = 0.005f;
+
 }  // namespace
 
 FL_TEST_CASE("Gamut map leaves an in-gamut target completely alone") {
@@ -206,7 +214,7 @@ FL_TEST_CASE("Gamut map preserves hue while compressing chroma") {
         // vanish exactly as a correct mapping does, so the drift check below
         // cannot see it on its own.
         FL_CHECK_GT(ax * bx + ay * by, 0.0f);
-        FL_CHECK_LT(cross / scale, 0.005f);
+        FL_CHECK_LT(cross / scale, kHueTolerance);
         FL_REQUIRE_GT(control_scale, 1e-6f);
         FL_CHECK_LT(fl::fabsf(ax * cy - ay * cx) / control_scale, 0.001f);
         // And chroma must not have grown.
@@ -1328,7 +1336,7 @@ FL_TEST_CASE("RGBW mapper preserves hue while compressing chroma") {
         // each emitter's XYZ column (FastLED#4303) removed it. Measured
         // across the five, worst divergence is now 0.0000.
         const float divergence = hueDivergence(target_lab, mapped_lab);
-        FL_CHECK_LT(divergence, 0.005f);
+        FL_CHECK_LT(divergence, kHueTolerance);
         FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
         if (!in_gamut) {
             ++compressed;
@@ -1461,7 +1469,7 @@ FL_TEST_CASE("a drive the solve puts out of range is refused, not clamped") {
     xyzToOklabQ16(xyz, target_lab);
     xyzToOklabQ16(produced_q16, produced_lab);
     // Measured 0.0000, against the 0.026 this case was written to record.
-    FL_CHECK_LT(hueDivergence(target_lab, produced_lab), 0.005f);
+    FL_CHECK_LT(hueDivergence(target_lab, produced_lab), kHueTolerance);
 }
 
 FL_TEST_CASE("the allocator is accurate across the plane, not just at one point") {
@@ -1532,7 +1540,7 @@ FL_TEST_CASE("the allocator is accurate across the plane, not just at one point"
     // Measured: worst 0.0034, and nothing above 0.005 at all -- against
     // 0.0197 with 6 above 0.005 and 2 above 0.010 before the fix. The
     // orange-yellow region that used to be wrong is not wrong any more.
-    FL_CHECK_LT(worst, 0.005f);
+    FL_CHECK_LT(worst, kHueTolerance);
     FL_CHECK_EQ(above_005, 0);
     FL_CHECK_EQ(above_010, 0);
     // Bounded below, because a grid measuring nothing would also report
@@ -1653,7 +1661,7 @@ FL_TEST_CASE("the two-white allocator never clamps a drive the solve put out of 
     // Worst OKLab hue divergence 0.00096, against the single-white path's
     // 0.0197 before that fix and 0.0034 after. Bounded below too: a run
     // measuring nothing would also report zero.
-    FL_CHECK_LT(worst, 0.005f);
+    FL_CHECK_LT(worst, kHueTolerance);
     FL_CHECK_GT(worst, 0.0f);
 }
 
@@ -1775,7 +1783,7 @@ FL_TEST_CASE("RGBWW mapper preserves hue while compressing chroma") {
         i32 mapped_lab[3];
         xyzToOklabQ16(xyz, target_lab);
         xyzToOklabQ16(mapped_xyz, mapped_lab);
-        FL_CHECK_LT(hueDivergence(target_lab, mapped_lab), 0.02f);
+        FL_CHECK_LT(hueDivergence(target_lab, mapped_lab), kHueTolerance);
         FL_CHECK(chromaDidNotGrow(target_lab, mapped_lab));
         if (!in_gamut) {
             ++compressed;
@@ -2012,7 +2020,7 @@ FL_TEST_CASE("RGBW keeps the lightness above its own, higher cap") {
     // hue-preserving mapper promises. `hueDivergence` returns 1.0 for a
     // neutral result and for an anti-parallel one, so this bound catches a
     // collapse to grey and a 180-degree rotation as well as a drift.
-    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
+    FL_CHECK_LT(hueDivergence(lab, emitted), kHueTolerance);
 }
 
 FL_TEST_CASE("RGBW walks down to what it can reach, not to its cap") {
@@ -2092,7 +2100,7 @@ FL_TEST_CASE("RGBWW keeps the lightness above its own cap") {
     FL_CHECK_LT(fl::fabsf(toFloat(emitted[0]) - requested), 0.01f);
     FL_CHECK_GT(toFloat(emitted[0]), cap + 0.05f);
 
-    FL_CHECK_LT(hueDivergence(lab, emitted), 0.01f);
+    FL_CHECK_LT(hueDivergence(lab, emitted), kHueTolerance);
 }
 
 FL_TEST_CASE("RGBWW walks down to what it can reach, not to its cap") {

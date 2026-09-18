@@ -143,6 +143,37 @@ white-allocation boundaries. A named color space by itself is not an algorithm.
 Iterative optimization may run at profile/LUT construction, never per pixel in
 the embedded output path. RGBW/RGBWW feasibility includes all emitters.
 
+### Stated tolerances (P7)
+
+The objective, the luminance/chroma tradeoff and the tie-breaks are the
+executable reference in `ci/color_gamut_study.py`, derived in
+[color-gamut-algorithm-selection.md](color-gamut-algorithm-selection.md). The
+numerical tolerances the embedded mappers are held to are these. Each is
+asserted in `tests/fl/gfx/gamut_map.cpp` on all three mappers (RGB, RGBW,
+RGBWW) unless the row says otherwise.
+
+| property | tolerance | worst measured |
+|---|---|---|
+| in-gamut target preserved | drives identical to the unmapped solve, which is within 0.002 of the requested drive | identical |
+| neutral ramp stays neutral (RGBW, RGBWW) | xy within 0.002 of the rendering white | within bound |
+| hue, in gamut and under compression | `hueDivergence` < **0.005** (`kHueTolerance`) | below 0.002 at every mapper case; 0.0034 across the 283 in-gamut targets of the allocator plane sweep |
+| continuity (RGB) | one input step moves summed drive < 1.5 codes at 8 bits | 1.03 codes (neutral luminance ramp); 0.80 across the hull boundary |
+| continuity across the neutral cap | < 0.02 summed drive (about five 8-bit codes) | 1 to 3 codes |
+| continuity through the hull boundary (RGBWW) | output step < one input step (0.05 in Y) | within bound |
+
+**The hue tolerance.** `hueDivergence` is the sine of the angle between
+target and mapped OKLab chroma. It returns 1 for a collapse to grey or a 180°
+rotation, so a small value cannot hide either. 0.005 is about 0.29° of hue. At
+chroma 0.4, above any display-class primary, that displaces the colour by
+0.002 in OKLab. The ΔE<sub>OK</sub> just-noticeable difference that
+[CSS Color 4 gamut mapping](https://www.w3.org/TR/css-color-4/#gamut-mapping)
+uses is 0.02, so the displacement is a tenth of one JND.
+
+Until #4313, the allocator measured 0.026 at one RGBW target. That is five
+times this bound, and it was a defect: a feasibility slack sized in drive
+units and paid in colour units. It was not a property of the mapping. A value
+at that scale is exactly what this bound exists to fail.
+
 ## Power and presentation (R3, R4, R8)
 
 The managed implementation uses two-pass streaming over stable frame inputs:
