@@ -8,6 +8,7 @@
 #include "test.h"
 
 #include "fl/net/http/fetch.h"
+#include "fl/net/http/fetch_request.h"
 #include "fl/stl/asio/http/server.h"
 #include "fl/task/executor.h"
 
@@ -60,6 +61,45 @@ FL_TEST_CASE("fetch_post sends its method, headers and body") {
     FL_CHECK_EQ(seen, fl::string("POST|abc|hello body"));
     FL_CHECK_EQ(result.value().text(), fl::string("POST|abc|hello body"));
     server.stop();
+}
+
+FL_TEST_CASE("build_http_request: method, headers, then framing from the body") {
+    fl::net::http::RequestOptions options("POST");
+    options.headers["X-Tag"] = "abc";
+    options.body = "hello";
+    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/p", "h.example"),
+                fl::string("POST /p HTTP/1.1\r\n"
+                           "Host: h.example\r\n"
+                           "X-Tag: abc\r\n"
+                           "Content-Length: 5\r\n"
+                           "Connection: close\r\n\r\n"
+                           "hello"));
+}
+
+FL_TEST_CASE("build_http_request: a caller cannot send its own framing headers") {
+    // Content-Length / Transfer-Encoding (any case) would duplicate or
+    // contradict the framing derived from the body; Host and Connection are
+    // written by FetchRequest too.
+    fl::net::http::RequestOptions options("POST");
+    options.headers["content-length"] = "999";
+    options.headers["Transfer-Encoding"] = "chunked";
+    options.headers["HOST"] = "evil.example";
+    options.headers["Connection"] = "keep-alive";
+    options.body = "abc";
+    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/", "h.example"),
+                fl::string("POST / HTTP/1.1\r\n"
+                           "Host: h.example\r\n"
+                           "Content-Length: 3\r\n"
+                           "Connection: close\r\n\r\n"
+                           "abc"));
+}
+
+FL_TEST_CASE("build_http_request: empty method and body give a bare GET") {
+    fl::net::http::RequestOptions options("");
+    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/", "h.example"),
+                fl::string("GET / HTTP/1.1\r\n"
+                           "Host: h.example\r\n"
+                           "Connection: close\r\n\r\n"));
 }
 
 FL_TEST_CASE("fetch_get still sends a plain GET") {

@@ -6,6 +6,7 @@
 #include "fl/stl/url.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/is_platform.h"
 
 // Forward declaration for hostent (platform-specific type)
 struct hostent;
@@ -13,6 +14,16 @@ struct hostent;
 namespace fl {
 namespace net {
 namespace http {
+
+namespace detail {
+/// The HTTP/1.1 request FetchRequest sends: `options.method` (GET when
+/// empty) on the request line, Host, the caller's headers, Content-Length for
+/// a non-empty body, Connection: close, then the body. The caller's Host,
+/// Connection, Content-Length and Transfer-Encoding are dropped: FetchRequest
+/// owns those, and a second copy would duplicate or contradict the framing.
+fl::string build_http_request(const RequestOptions& options, const fl::string& path,
+                              const fl::string& host) FL_NO_EXCEPT;
+}  // namespace detail
 
 /// @brief Non-blocking HTTP request state machine
 ///
@@ -65,7 +76,14 @@ private:
     fl::string mPath;
 
     // Socket state
-    int mSocketFd;
+#ifdef FL_IS_WIN
+    // Winsock's SOCKET is UINT_PTR. Holding it in an int truncated the handle
+    // on 64-bit Windows and made the `< 0` failure check always false.
+    using SocketHandle = fl::uptr;
+#else
+    using SocketHandle = int;
+#endif
+    SocketHandle mSocketFd;
     ::hostent* mDnsResult;  // Use global namespace to avoid conflict
 
     // Send/receive buffers
