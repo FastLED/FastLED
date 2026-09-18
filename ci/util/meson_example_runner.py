@@ -272,7 +272,20 @@ def run_examples(
     """
     # zccache can serve example_runner from its link cache without the exec
     # bit; restore it before `meson test` spawns it (FastLED#4205).
-    restore_executable_bits(build_dir, verbose=verbose)
+    try:
+        restore_executable_bits(build_dir, verbose=verbose)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except OSError as exc:
+        _ts_print(f"Execution failed: {exc}", file=sys.stderr)
+        return MesonTestResult(
+            success=False,
+            duration=0.0,
+            num_tests_run=0,
+            num_tests_passed=0,
+            num_tests_failed=0,
+        )
 
     # Build command
     cmd = [get_meson_executable(), "test", "-C", str(build_dir), "--print-errorlogs"]
