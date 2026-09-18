@@ -24,36 +24,71 @@ Env vars (set by the workflow):
 
 from __future__ import annotations
 
+import _thread
 import json
 import os
 import sys
+import urllib.error
+import urllib.request
 from typing import Any
 
-from running_process import PIPE, RunningProcess
+
+GITHUB_API = "https://api.github.com"
 
 
-def run_gh(args: list[str]) -> str:
-    result = RunningProcess.run(
-        ["gh", *args],
-        stdout=PIPE,
-        stderr=PIPE,
-        text=True,
-        check=False,
-        encoding="utf-8",
-        errors="replace",
+def _request(url: str, *, data: bytes | None) -> Any:
+    """Call the GitHub API over HTTPS with ``GH_TOKEN``; exit on any failure.
+
+    Uses only the standard library on purpose, like ``github_project_sync.py``:
+    the drift-sync job checks out ``ci/`` with a bare ``setup-python`` and
+    installs nothing. Spawning the ``gh`` CLI needed a process library that job
+    does not have (it broke when the repo banned stdlib ``subprocess``), and a
+    package install in a secret-bearing job is the wrong trade.
+    """
+    token = os.environ.get("GH_TOKEN", "")
+    if not token:
+        raise SystemExit("GH_TOKEN is required for GitHub API requests")
+    request = urllib.request.Request(
+        url,
+        data=data,
+        method="POST" if data is not None else "GET",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "fastled-project-drift-sync",
+        },
     )
-    if result.returncode != 0:
-        print(f"FAIL: gh {' '.join(args)}: {result.stderr}", file=sys.stderr)
-        sys.exit(1)
-    return result.stdout or ""
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            payload = response.read().decode("utf-8", errors="replace")
+    except KeyboardInterrupt:
+        print(f"Cancelled during request to {url}", file=sys.stderr)
+        _thread.interrupt_main()
+        raise
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        print(f"FAIL: {url}: HTTP {error.code}: {detail}", file=sys.stderr)
+        raise SystemExit(1)
+    except urllib.error.URLError as error:
+        print(f"FAIL: {url}: {error.reason}", file=sys.stderr)
+        raise SystemExit(1)
+    return json.loads(payload) if payload.strip() else None
 
 
 def graphql(query: str, **variables: Any) -> dict[str, Any]:
-    cmd = ["api", "graphql", "-f", f"query={query}"]
-    for k, v in variables.items():
-        cmd.extend(["-F", f"{k}={v}"])
-    out = run_gh(cmd)
-    return json.loads(out)  # type: ignore[no-any-return]
+    """Run a GraphQL query; exit on transport or GraphQL errors.
+
+    Exiting on ``errors`` matches ``gh api graphql``, which this replaced and
+    which exits non-zero when the response carries them. Callers that tolerate
+    a failed mutation catch the ``SystemExit``.
+    """
+    body = json.dumps({"query": query, "variables": variables}).encode("utf-8")
+    data: dict[str, Any] = _request(f"{GITHUB_API}/graphql", data=body)
+    if "errors" in data:
+        print(f"FAIL: GraphQL errors: {json.dumps(data['errors'])}", file=sys.stderr)
+        raise SystemExit(1)
+    return data
 
 
 def resolve_project_node_id(owner: str, number: int) -> str:
@@ -258,27 +293,32 @@ def fetch_content_created_at(content_id: str) -> str | None:
 def fetch_repo_items(
     owner: str, repo: str, include_closed: bool
 ) -> list[tuple[str, int, str]]:
-    """Return [(node_id, number, kind), ...] for issues+PRs in the repo."""
+    """Return [(node_id, number, kind), ...] for issues+PRs in the repo.
+
+    The REST issues endpoint lists pull requests too, marked by a
+    ``pull_request`` key. Newest first, capped at 1000 of each kind, as the
+    ``gh issue list`` / ``gh pr list --limit 1000`` calls it replaced were.
+    """
+    limit = 1000
+    state = "all" if include_closed else "open"
     out: list[tuple[str, int, str]] = []
-    state_flag = "all" if include_closed else "open"
-    for kind, cmd in [("issue", "issue"), ("pr", "pr")]:
-        raw = run_gh(
-            [
-                cmd,
-                "list",
-                "--repo",
-                f"{owner}/{repo}",
-                "--state",
-                state_flag,
-                "--limit",
-                "1000",
-                "--json",
-                "id,number",
-            ]
+    counts = {"issue": 0, "pr": 0}
+    page = 1
+    while counts["issue"] < limit or counts["pr"] < limit:
+        items = _request(
+            f"{GITHUB_API}/repos/{owner}/{repo}/issues"
+            f"?state={state}&per_page=100&page={page}",
+            data=None,
         )
-        items = json.loads(raw) if raw.strip() else []
+        if not items:
+            break
         for i in items:
-            out.append((str(i["id"]), int(i["number"]), kind))
+            kind = "pr" if "pull_request" in i else "issue"
+            if counts[kind] >= limit:
+                continue
+            counts[kind] += 1
+            out.append((str(i["node_id"]), int(i["number"]), kind))
+        page += 1
     return out
 
 
