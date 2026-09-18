@@ -46,7 +46,6 @@
     #define SOCKET_ERROR_WOULD_BLOCK WSAEWOULDBLOCK
     #define GET_SOCKET_ERROR() WSAGetLastError()
     #define CLOSE_SOCKET(s) closesocket(s)
-    #define INVALID_SOCKET_HANDLE INVALID_SOCKET
 #else
     // IWYU pragma: begin_keep
     #include <sys/socket.h>
@@ -62,7 +61,6 @@
     #define SOCKET_ERROR_WOULD_BLOCK EWOULDBLOCK
     #define GET_SOCKET_ERROR() errno
     #define CLOSE_SOCKET(s) close(s)
-    #define INVALID_SOCKET_HANDLE (-1)
 #endif
 
 namespace fl {
@@ -70,6 +68,13 @@ namespace net {
 namespace http {
 
 namespace {
+
+// The value socket() returns on failure: INVALID_SOCKET on Winsock, -1 on POSIX.
+#ifdef FL_IS_WIN
+constexpr fl::uptr kInvalidSocketHandle = static_cast<fl::uptr>(INVALID_SOCKET);
+#else
+constexpr int kInvalidSocketHandle = -1;
+#endif
 
 // ASCII case-insensitive equality; HTTP header names are case-insensitive.
 bool header_name_equals(const fl::string& name, const char* reserved) FL_NO_EXCEPT {
@@ -86,6 +91,17 @@ bool header_name_equals(const fl::string& name, const char* reserved) FL_NO_EXCE
     return i == name.size() && reserved[i] == '\0';
 }
 
+// CR or LF would end the current request line or header and let the rest of
+// the field be read as a new one.
+bool has_line_break(const fl::string& field) FL_NO_EXCEPT {
+    for (fl::size i = 0; i < field.size(); ++i) {
+        if (field[i] == '\r' || field[i] == '\n') {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Headers FetchRequest writes itself: Host, Connection, and the body framing.
 bool is_reserved_request_header(const fl::string& name) FL_NO_EXCEPT {
     return header_name_equals(name, "host") ||
@@ -98,8 +114,16 @@ bool is_reserved_request_header(const fl::string& name) FL_NO_EXCEPT {
 
 namespace detail {
 
-fl::string build_http_request(const RequestOptions& options, const fl::string& path,
-                              const fl::string& host) FL_NO_EXCEPT {
+bool build_http_request(const RequestOptions& options, const fl::string& path,
+                        const fl::string& host, fl::string* out) FL_NO_EXCEPT {
+    if (has_line_break(options.method) || has_line_break(path) || has_line_break(host)) {
+        return false;
+    }
+    for (const auto& header : options.headers) {
+        if (has_line_break(header.first) || has_line_break(header.second)) {
+            return false;
+        }
+    }
     fl::string request = options.method.empty() ? fl::string("GET") : options.method;
     request += " " + path + " HTTP/1.1\r\n";
     request += "Host: " + host + "\r\n";
@@ -116,7 +140,8 @@ fl::string build_http_request(const RequestOptions& options, const fl::string& p
     }
     request += "Connection: close\r\n\r\n";
     request += options.body;
-    return request;
+    *out = request;
+    return true;
 }
 
 }  // namespace detail
@@ -130,7 +155,7 @@ FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::
     , mHostname()
     , mPort(80)
     , mPath("/")
-    , mSocketFd(INVALID_SOCKET_HANDLE)
+    , mSocketFd(kInvalidSocketHandle)
     , mDnsResult(nullptr)
     , mRequestBuffer()
     , mResponseBuffer()
@@ -192,7 +217,7 @@ void FetchRequest::handle_dns_lookup() {
 
     // Create socket
     mSocketFd = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSocketFd == INVALID_SOCKET_HANDLE) {
+    if (mSocketFd == kInvalidSocketHandle) {
         complete_error("Failed to create socket");
         return;
     }
@@ -251,7 +276,10 @@ void FetchRequest::handle_connecting() {
         // Connected! Build the HTTP request from the caller's options. This
         // used to hardcode a bare GET, so fetch_post() and custom headers and
         // bodies were silently dropped on native targets.
-        mRequestBuffer = detail::build_http_request(mOptions, mPath, mHostname);
+        if (!detail::build_http_request(mOptions, mPath, mHostname, &mRequestBuffer)) {
+            complete_error("Invalid request: CR or LF in the method, path, host or a header");
+            return;
+        }
 
         mBytesSent = 0;
         mState = SENDING;
@@ -404,9 +432,9 @@ void FetchRequest::complete_error(const char* message) {
 }
 
 void FetchRequest::close_socket() {
-    if (mSocketFd != INVALID_SOCKET_HANDLE) {
+    if (mSocketFd != kInvalidSocketHandle) {
         CLOSE_SOCKET(mSocketFd);
-        mSocketFd = INVALID_SOCKET_HANDLE;
+        mSocketFd = kInvalidSocketHandle;
     }
 }
 

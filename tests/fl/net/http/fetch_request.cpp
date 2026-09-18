@@ -38,6 +38,16 @@ fl::task::PromiseResult<fl::net::http::Response> pump(
     return fl::task::PromiseResult<fl::net::http::Response>(promise.error());
 }
 
+// build_http_request's output, or "<rejected>" when it refuses the request.
+fl::string built(const fl::net::http::RequestOptions& options, const char* path,
+                 const char* host) {
+    fl::string out;
+    if (!fl::net::http::detail::build_http_request(options, path, host, &out)) {
+        return fl::string("<rejected>");
+    }
+    return out;
+}
+
 }  // namespace
 
 FL_TEST_CASE("fetch_post sends its method, headers and body") {
@@ -67,7 +77,7 @@ FL_TEST_CASE("build_http_request: method, headers, then framing from the body") 
     fl::net::http::RequestOptions options("POST");
     options.headers["X-Tag"] = "abc";
     options.body = "hello";
-    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/p", "h.example"),
+    FL_CHECK_EQ(built(options, "/p", "h.example"),
                 fl::string("POST /p HTTP/1.1\r\n"
                            "Host: h.example\r\n"
                            "X-Tag: abc\r\n"
@@ -86,7 +96,7 @@ FL_TEST_CASE("build_http_request: a caller cannot send its own framing headers")
     options.headers["HOST"] = "evil.example";
     options.headers["Connection"] = "keep-alive";
     options.body = "abc";
-    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/", "h.example"),
+    FL_CHECK_EQ(built(options, "/", "h.example"),
                 fl::string("POST / HTTP/1.1\r\n"
                            "Host: h.example\r\n"
                            "Content-Length: 3\r\n"
@@ -96,10 +106,34 @@ FL_TEST_CASE("build_http_request: a caller cannot send its own framing headers")
 
 FL_TEST_CASE("build_http_request: empty method and body give a bare GET") {
     fl::net::http::RequestOptions options("");
-    FL_CHECK_EQ(fl::net::http::detail::build_http_request(options, "/", "h.example"),
+    FL_CHECK_EQ(built(options, "/", "h.example"),
                 fl::string("GET / HTTP/1.1\r\n"
                            "Host: h.example\r\n"
                            "Connection: close\r\n\r\n"));
+}
+
+FL_TEST_CASE("build_http_request: CR or LF in any field refuses the request") {
+    // CWE-93: a line break would end the request line or a header and let
+    // the rest of the field be read as a new header.
+    {
+        fl::net::http::RequestOptions options("GET\r\nX-Injected: 1");
+        FL_CHECK_EQ(built(options, "/", "h.example"), fl::string("<rejected>"));
+    }
+    {
+        fl::net::http::RequestOptions options("GET");
+        options.headers["X-Ok\nX-Injected"] = "1";
+        FL_CHECK_EQ(built(options, "/", "h.example"), fl::string("<rejected>"));
+    }
+    {
+        fl::net::http::RequestOptions options("GET");
+        options.headers["X-Tag"] = "a\r\nX-Injected: 1";
+        FL_CHECK_EQ(built(options, "/", "h.example"), fl::string("<rejected>"));
+    }
+    {
+        fl::net::http::RequestOptions options("GET");
+        FL_CHECK_EQ(built(options, "/a\r\nX-Injected: 1", "h.example"),
+                    fl::string("<rejected>"));
+    }
 }
 
 FL_TEST_CASE("fetch_get still sends a plain GET") {

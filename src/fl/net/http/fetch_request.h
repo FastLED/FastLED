@@ -21,8 +21,12 @@ namespace detail {
 /// a non-empty body, Connection: close, then the body. The caller's Host,
 /// Connection, Content-Length and Transfer-Encoding are dropped: FetchRequest
 /// owns those, and a second copy would duplicate or contradict the framing.
-fl::string build_http_request(const RequestOptions& options, const fl::string& path,
-                              const fl::string& host) FL_NO_EXCEPT;
+///
+/// Returns false, leaving `out` untouched, when the method, path, host or any
+/// header name or value contains CR or LF: those would let a caller inject
+/// request lines or headers (CWE-93).
+bool build_http_request(const RequestOptions& options, const fl::string& path,
+                        const fl::string& host, fl::string* out) FL_NO_EXCEPT;
 }  // namespace detail
 
 /// @brief Non-blocking HTTP request state machine
