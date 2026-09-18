@@ -191,7 +191,8 @@
 # +5 B (390467 -> 390472): ColorPipelineHooks gains one function pointer,
 # notifyProfileClearedByLegacy, so setCorrection()/setTemperature() stop
 # referencing the colour-profile event list directly. Blink pays the pointer;
-# every sketch that calls setCorrection saves ~8.3 KB on AVR (uno ColorPalette
-# 14.80 KB -> 6.47 KB) because the event machinery is now only linked when a
-# profile is actually bound.
+# a sketch that calls setCorrection()/setTemperature() WITHOUT binding a colour
+# profile saves ~8.3 KB on AVR (uno ColorPalette 14.80 KB -> 6.47 KB). A sketch
+# that binds a profile installs the hook and still links the event machinery,
+# so it sees no reduction.
 390472
