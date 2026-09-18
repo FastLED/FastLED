@@ -182,4 +182,9 @@
 # showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
 # only ever spent where flash is not the binding constraint. On a target
 # that does compile it in, 305 B is 0.089% of the image.
-390453
+#
+# +14 B (390453 -> 390467), FastLED#1567: CFastLED::show() and showColor()
+# now record the requested and applied brightness around the power limiter
+# (two byte stores each), so getLastShowBrightness() / isPowerLimited() can
+# tell a headless sketch that the limit bound. That is the entire change.
+390467
