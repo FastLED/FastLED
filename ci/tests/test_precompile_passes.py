@@ -19,6 +19,8 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
+from typeguard import typechecked
+
 from ci.compile_pch import hash_input_files
 from ci.meson.compile import (
     _precompile_passes_can_be_skipped,
@@ -27,6 +29,7 @@ from ci.meson.compile import (
 )
 
 
+@typechecked
 @dataclass(slots=True)
 class _PchLayout:
     build_dir: Path
