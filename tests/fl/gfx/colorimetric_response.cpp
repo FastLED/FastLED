@@ -447,6 +447,19 @@ FL_TEST_CASE("[#4194] invert3x3 accepts a finite matrix of wildly mixed scale") 
 
 #include "tests/fl/gfx/colorimetric_response_profiles.hpp"
 
+FL_TEST_CASE("The floating alias and the enum lookup resolve to the pinned profile") {
+    namespace gp = fl::generated_profiles;
+    // C8.3: the alias and the enum name an identity; both must be the pinned
+    // object itself, not a copy, so a binary built against the alias still
+    // traces to exactly one artifact.
+    FL_CHECK(&gp::FIXTURE_RGB_NONE == &gp::FIXTURE_RGB_NONE_SYNTHETIC_R1);
+    FL_CHECK(&gp::generated_profile_of<gp::GeneratedProfile::FIXTURE_RGB_NONE>::value ==
+             &gp::FIXTURE_RGB_NONE_SYNTHETIC_R1);
+    FL_CHECK_EQ(gp::kGeneratedProfileCount, 1);
+    FL_CHECK(fl::string(gp::FIXTURE_RGB_NONE.id) ==
+             fl::string("fixture/rgb/none/synthetic-r1"));
+}
+
 FL_TEST_CASE("The generated profile header carries the artifact's numbers") {
     using fl::generated_profiles::FIXTURE_RGB_NONE_SYNTHETIC_R1;
     const auto& profile = FIXTURE_RGB_NONE_SYNTHETIC_R1;

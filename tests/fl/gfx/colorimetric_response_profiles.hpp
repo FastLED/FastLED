@@ -21,7 +21,21 @@ constexpr colorimetric_response::EmitterProfile FIXTURE_RGB_NONE_SYNTHETIC_R1 = 
     0.212600f, 0.715200f, 0.072200f,
     "measured", "synthetic-r1");
 // native code depth: 8
-// floating alias candidate: FIXTURE_RGB_NONE
+
+// Floating aliases (C8.3): best-available report per identity.
+// Pinned symbols above never move; these may, in a reviewed PR.
+constexpr const colorimetric_response::EmitterProfile& FIXTURE_RGB_NONE = FIXTURE_RGB_NONE_SYNTHETIC_R1;
+
+// Profile enum: one enumerator per identity, resolving to its alias.
+enum class GeneratedProfile : u8 {
+    FIXTURE_RGB_NONE,
+};
+
+template <GeneratedProfile Id> struct generated_profile_of;
+template <> struct generated_profile_of<GeneratedProfile::FIXTURE_RGB_NONE> {
+    static constexpr const colorimetric_response::EmitterProfile& value = FIXTURE_RGB_NONE;
+};
+constexpr u8 kGeneratedProfileCount = 1;
 
 // Catalogued, and deliberately not generated. Each of these
 // is a real part whose published optical data cannot support an

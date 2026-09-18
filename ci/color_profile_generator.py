@@ -274,6 +274,65 @@ def alias_name(profile_id: str) -> str:
     return symbol_name("/".join(segments[:-1]))
 
 
+# Provenance preference for a floating alias: a measurement outranks a
+# datasheet derivation of the same part (A2); unknown kinds rank last.
+_PROVENANCE_RANK: dict[str, int] = {"measured": 2, "datasheet_derived": 1}
+
+
+@typechecked
+def _report_revision(report_id: str) -> int:
+    """The trailing ``rN`` revision of a report ID, or -1 when it has none."""
+
+    digits = ""
+    for character in reversed(report_id):
+        if character.isdigit():
+            digits = character + digits
+        else:
+            break
+    if digits and report_id[: -len(digits)].endswith("r"):
+        return int(digits)
+    return -1
+
+
+@dataclass(frozen=True, order=True, slots=True)
+class _AliasRank:
+    """Field order is comparison order: provenance, then revision, then ID."""
+
+    provenance: int
+    revision: int
+    report: str
+
+
+@typechecked
+def _alias_preference(admission: "Admission") -> _AliasRank:
+    payload = admission.artifact.payload
+    provenance = payload.get("provenance")
+    kind = str(provenance.get("kind", "")) if isinstance(provenance, dict) else ""
+    report = admission.artifact.profile_id.split("/")[-1]
+    return _AliasRank(_PROVENANCE_RANK.get(kind, 0), _report_revision(report), report)
+
+
+@typechecked
+def choose_aliases(admissions: list["Admission"]) -> dict[str, "Admission"]:
+    """The profile each floating alias resolves to (C8.3), keyed by alias symbol.
+
+    Bare aliases float to the best-available report of an identity: a
+    measured artifact beats a datasheet-derived one, then the highest ``rN``
+    revision wins, then the report ID breaks any remaining tie so the choice
+    is deterministic. Versioned pin symbols never move; only aliases do, and
+    because the generated header is regenerated only in a reviewed PR, an
+    alias advancing is a visible one-line diff.
+    """
+
+    chosen: dict[str, Admission] = {}
+    for admission in admissions:
+        alias = alias_name(admission.artifact.profile_id)
+        current = chosen.get(alias)
+        if current is None or _alias_preference(admission) > _alias_preference(current):
+            chosen[alias] = admission
+    return dict(sorted(chosen.items()))
+
+
 @typechecked
 def render_header(
     admissions: list[Admission],
@@ -310,6 +369,11 @@ def render_header(
 
     for admission in admissions:
         lines.extend(_render_profile(admission))
+        lines.append("")
+
+    aliases = choose_aliases(admissions)
+    if aliases:
+        lines.extend(_render_aliases_and_enum(aliases))
         lines.append("")
 
     if refusals:
@@ -375,9 +439,46 @@ def _render_profile(admission: Admission) -> list[str]:
         report = str(provenance.get("report_id", "unknown"))
     lines.append(f'    "{kind}", "{report}");')
     lines.append(f"// native code depth: {depth}")
+    return lines
+
+
+@typechecked
+def _render_aliases_and_enum(aliases: dict[str, "Admission"]) -> list[str]:
+    """Floating aliases, the profile enum and its compile-time lookup (C8.3).
+
+    The enum names identities, not reports, so a sketch written against an
+    enumerator keeps compiling as its alias advances; a pinned sketch names
+    the versioned symbol instead.
+    """
+
+    lines: list[str] = []
+    lines.append("// Floating aliases (C8.3): best-available report per identity.")
+    lines.append("// Pinned symbols above never move; these may, in a reviewed PR.")
+    for alias, admission in aliases.items():
+        lines.append(
+            f"constexpr const colorimetric_response::EmitterProfile& {alias} = "
+            f"{symbol_name(admission.artifact.profile_id)};"
+        )
+    lines.append("")
     lines.append(
-        f"// floating alias candidate: {alias_name(admission.artifact.profile_id)}"
+        "// Profile enum: one enumerator per identity, resolving to its alias."
     )
+    lines.append("enum class GeneratedProfile : u8 {")
+    for alias in aliases:
+        lines.append(f"    {alias},")
+    lines.append("};")
+    lines.append("")
+    lines.append("template <GeneratedProfile Id> struct generated_profile_of;")
+    for alias in aliases:
+        lines.append(
+            f"template <> struct generated_profile_of<GeneratedProfile::{alias}> {{"
+        )
+        lines.append(
+            "    static constexpr const colorimetric_response::EmitterProfile& value = "
+            f"{alias};"
+        )
+        lines.append("};")
+    lines.append(f"constexpr u8 kGeneratedProfileCount = {len(aliases)};")
     return lines
 
 
