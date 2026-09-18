@@ -54,7 +54,14 @@ void ColorManagedPixelSource::loadAndScaleRGBWW(Rgbww rgbww, u8* b0_out,
 // exist, and the compile fails there and nowhere else.
 void ColorManagedPixelSource::loadRGBScaleAndBrightness(
     u8* c0, u8* c1, u8* c2, u8* brightness) FL_NO_EXCEPT {
-    mController.loadRGBScaleAndBrightness(c0, c1, c2, brightness);
+    // Full scale: the drives already carry brightness as C4's flux scalar, so
+    // the controller's brightness here would dim the strip a second time
+    // through the 5-bit field. B1's conservative treatment -- SK9822, and any
+    // chip without current-vs-chromaticity data -- holds the field fixed.
+    *c0 = 255;
+    *c1 = 255;
+    *c2 = 255;
+    *brightness = 255;
 }
 #endif
 

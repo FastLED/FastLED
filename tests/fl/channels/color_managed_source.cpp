@@ -200,6 +200,45 @@ FL_TEST_CASE("Brightness is applied once, by the pipeline") {
     }
 }
 
+#if FASTLED_HD_COLOR_MIXING
+FL_TEST_CASE("[#4042] B1: a managed HD strip does not dim twice through the 5-bit field") {
+    // APA102-HD and SK9822-HD take a colour triple from the RGB range and a
+    // per-strip brightness from `loadRGBScaleAndBrightness`, mapped to the
+    // 5-bit field. On a managed channel the triple is the pipeline's drives,
+    // which already carry brightness as C4's flux scalar -- so reporting the
+    // controller's brightness here as well dimmed the strip twice: a quarter
+    // of the light at half brightness, a sixteenth at a quarter.
+    //
+    // B1's conservative treatment holds the field fixed (SK9822, and unknown
+    // chips); the pipeline is the only amplitude stage. So the managed source
+    // reports full scale whatever the controller was told.
+    CRGB leds[1] = {CRGB(200, 120, 60)};
+    const StreamingPipelineQ16 pipeline = makePipeline();
+
+    ColorAdjustment dim;
+    dim.premixed = CRGB(64, 64, 64);
+    dim.color = CRGB(0xff, 0xc0, 0x80);
+    dim.brightness = 64;
+
+    PixelController<RGB> controller(leds, 1, dim, DISABLE_DITHER);
+    ColorManagedPixelSource source(controller, RGB, pipeline);
+    u8 c0 = 0, c1 = 0, c2 = 0, brightness = 0;
+    source.loadRGBScaleAndBrightness(&c0, &c1, &c2, &brightness);
+    FL_CHECK_EQ(brightness, 255);
+    // And no colour scale either: legacy correction is cleared on binding,
+    // and a scale here would be a second, per-channel amplitude stage.
+    FL_CHECK_EQ(c0, 255);
+    FL_CHECK_EQ(c1, 255);
+    FL_CHECK_EQ(c2, 255);
+
+    // Control: the legacy controller does report the dimming, so the checks
+    // above are about the managed source, not a harness that never dims.
+    u8 l0 = 0, l1 = 0, l2 = 0, legacy_brightness = 0;
+    controller.loadRGBScaleAndBrightness(&l0, &l1, &l2, &legacy_brightness);
+    FL_CHECK_EQ(legacy_brightness, 64);
+}
+#endif
+
 FL_TEST_CASE("Black and white land on the ends of the byte range") {
     CRGB leds[2] = {CRGB(0, 0, 0), CRGB(255, 255, 255)};
     const StreamingPipelineQ16 pipeline = makePipeline();
