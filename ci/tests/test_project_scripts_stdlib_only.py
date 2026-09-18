@@ -42,7 +42,7 @@ def top_level_imports(path: Path) -> set[str]:
 
 
 class ProjectScriptsStdlibOnlyTest(unittest.TestCase):
-    def test_imports_are_stdlib_only(self) -> None:
+    def test_imports_are_stdlib_only(self: ProjectScriptsStdlibOnlyTest) -> None:
         stdlib = set(sys.stdlib_module_names) | {"__future__"}
         for script in BARE_PYTHON_SCRIPTS:
             with self.subTest(script=script.name):

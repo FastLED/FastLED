@@ -24,6 +24,7 @@ Env vars (set by the workflow):
 
 from __future__ import annotations
 
+import _thread
 import json
 import os
 import sys
@@ -35,7 +36,7 @@ from typing import Any
 GITHUB_API = "https://api.github.com"
 
 
-def _request(url: str, *, data: bytes | None = None) -> Any:
+def _request(url: str, *, data: bytes | None) -> Any:
     """Call the GitHub API over HTTPS with ``GH_TOKEN``; exit on any failure.
 
     Uses only the standard library on purpose, like ``github_project_sync.py``:
@@ -61,6 +62,10 @@ def _request(url: str, *, data: bytes | None = None) -> Any:
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
             payload = response.read().decode("utf-8", errors="replace")
+    except KeyboardInterrupt:
+        print(f"Cancelled during request to {url}", file=sys.stderr)
+        _thread.interrupt_main()
+        raise
     except urllib.error.HTTPError as error:
         detail = error.read().decode("utf-8", errors="replace")
         print(f"FAIL: {url}: HTTP {error.code}: {detail}", file=sys.stderr)
@@ -302,7 +307,8 @@ def fetch_repo_items(
     while counts["issue"] < limit or counts["pr"] < limit:
         items = _request(
             f"{GITHUB_API}/repos/{owner}/{repo}/issues"
-            f"?state={state}&per_page=100&page={page}"
+            f"?state={state}&per_page=100&page={page}",
+            data=None,
         )
         if not items:
             break
