@@ -724,6 +724,8 @@ class CFastLED {
 	fl::u32 mNMinMicros;    ///< minimum µs between frames, used for capping frame rates
 	fl::u32 mNPowerData;    ///< max power use parameter
 	power_func mPPowerFunc;  ///< function for overriding brightness when using FastLED.show();
+	fl::u8  mLastRequestedScale;  ///< brightness the last show()/showColor() was asked for
+	fl::u8  mLastShownScale;      ///< brightness the last show()/showColor() applied, after the power limiter
 	static fl::vector<fl::ChannelPtr>& channels(); ///< stored ChannelPtrs to keep them alive
 
 public:
@@ -1646,6 +1648,17 @@ public:
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts the max power draw desired, in milliwatts
 	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) { mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW); mNPowerData = milliwatts; }
+
+	/// Brightness the most recent show() / showColor() actually applied,
+	/// after the power limiter set by setMaxPowerInMilliWatts(). Equal to the
+	/// requested brightness when no limit is set or the limit did not bind.
+	/// 255 before the first frame.
+	fl::u8 getLastShowBrightness() const;
+
+	/// True if the power limiter lowered the brightness of the most recent
+	/// show() / showColor() below what it was asked for. Lets a sketch with no
+	/// serial console react to hitting its power budget.
+	bool isPowerLimited() const;
 
 	/// @name Power Model Configuration
 	/// Configure LED power consumption for accurate power management

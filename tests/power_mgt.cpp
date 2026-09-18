@@ -912,4 +912,62 @@ FL_TEST_CASE("R3 - and conservatism costs between 1.37x and 129x of the budget")
     FL_CHECK_GT(worst_ratio_milli, 100000); // two orders, not a rounding effect
 }
 
+// ---------------------------------------------------------------------------
+// #1567: a sketch with no serial console must be able to tell that the power
+// limiter lowered the brightness it asked for.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// Restores the global brightness and power limit a case changes.
+struct ScopedShowSettings {
+    ScopedShowSettings() : brightness(FastLED.getBrightness()) {}
+    ~ScopedShowSettings() {
+        FastLED.clear(ClearFlags::POWER_SETTINGS);
+        FastLED.setBrightness(brightness);
+    }
+    fl::u8 brightness;
+};
+
+} // namespace
+
+FL_TEST_CASE("Power limiter - show() reports the brightness it applied") {
+    ScopedDefaultPowerModel model_guard;
+    ScopedShowSettings settings_guard;
+    const int kCount = 60;
+    CRGB leds[kCount];
+    for (int i = 0; i < kCount; ++i) {
+        leds[i] = CRGB(255, 255, 255);
+    }
+    RegisteredController controller;
+    controller.setLeds(leds, kCount);
+
+    FastLED.setBrightness(200);
+
+    // No limiter: what was asked for is what was shown.
+    FastLED.show();
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 200);
+    FL_CHECK_FALSE(FastLED.isPowerLimited());
+
+    // A budget well under the demand of 60 white pixels binds.
+    FastLED.setMaxPowerInMilliWatts(500);
+    FastLED.show();
+    const fl::u8 expected = calculate_max_brightness_for_power_mW(200, 500);
+    FL_REQUIRE_LT(int(expected), 200);
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), expected);
+    FL_CHECK(FastLED.isPowerLimited());
+    // The requested brightness itself is left alone.
+    FL_CHECK_EQ(FastLED.getBrightness(), 200);
+
+    // showColor() goes through the same limiter and reports the same way.
+    FastLED.showColor(CRGB(255, 255, 255));
+    FL_CHECK(FastLED.isPowerLimited());
+
+    // A budget over demand clears the flag again on the next frame.
+    FastLED.setMaxPowerInMilliWatts(1000000u);
+    FastLED.show();
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 200);
+    FL_CHECK_FALSE(FastLED.isPowerLimited());
+}
+
 } // FL_TEST_FILE

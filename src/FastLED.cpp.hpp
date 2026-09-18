@@ -108,6 +108,8 @@ CFastLED::CFastLED() {
 	mNFPS = 0;
 	mPPowerFunc = nullptr;
 	mNPowerData = 0xFFFFFFFF;
+	mLastRequestedScale = 255;
+	mLastShownScale = 255;
 	mNMinMicros = 0;
 }
 
@@ -184,6 +186,8 @@ void CFastLED::clear(ClearFlags flags) {
 	if (clearFlag(ClearFlags::POWER_SETTINGS)) {
 		FastLED.mPPowerFunc = nullptr;      // No power limiting function
 		FastLED.mNPowerData = 0xFFFFFFFF;   // No power limit (max value)
+		FastLED.mLastRequestedScale = 255;
+		FastLED.mLastShownScale = 255;
 	}
 
 	// Reset BRIGHTNESS - reset global brightness to 255 (full brightness)
@@ -294,16 +298,26 @@ static void throttleToMaxRefreshRate(fl::u32 minMicros) FL_NO_EXCEPT {
 	}
 }
 
+fl::u8 CFastLED::getLastShowBrightness() const {
+	return mLastShownScale;
+}
+
+bool CFastLED::isPowerLimited() const {
+	return mLastShownScale < mLastRequestedScale;
+}
+
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
 	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
 
+	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
 	if(mPPowerFunc) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
+	mLastShownScale = scale;
 
 
 	int length = 0;
@@ -374,10 +388,12 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
 
+	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
 	if(mPPowerFunc) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
+	mLastShownScale = scale;
 
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
