@@ -53,7 +53,9 @@ const DiodeProfile kRgbwDefaultProfile = {
 
 
 namespace {
-inline u8 min3(u8 a, u8 b, u8 c) {
+// Not named min3: ArduinoCore-zephyr's <zephyr/sys/util.h> defines min3() as
+// a function-like macro, which would expand this declaration (#4416).
+inline u8 rgbw_min3(u8 a, u8 b, u8 c) FL_NO_EXCEPT {
     if (a < b) {
         if (a < c) {
             return a;
@@ -86,7 +88,7 @@ void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g,
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
-    u8 min_component = min3(r, g, b);
+    u8 min_component = rgbw_min3(r, g, b);
     *out_r = r - min_component;
     *out_g = g - min_component;
     *out_b = b - min_component;
@@ -101,7 +103,7 @@ void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r,
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
     *out_b = scale8(b, b_scale);
-    *out_w = min3(*out_r, *out_g, *out_b);
+    *out_w = rgbw_min3(*out_r, *out_g, *out_b);
 }
 
 void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r,
@@ -124,7 +126,7 @@ void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r,
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
-    u8 min_component = min3(r, g, b);
+    u8 min_component = rgbw_min3(r, g, b);
     u8 w;
     bool is_min = true;
     if (min_component <= 84) {
