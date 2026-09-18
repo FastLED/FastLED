@@ -97,8 +97,8 @@ static void validateMp4(const fl::vector<fl::u8>& data) {
     if (track.isValid) {
         FL_CHECK_GT(track.width, 0);
         FL_CHECK_GT(track.height, 0);
-        FL_CHECK_GT(track.sps.size(), 0);
-        FL_CHECK_GT(track.pps.size(), 0);
+        FL_CHECK_GT(track.sps.size(), 0u);
+        FL_CHECK_GT(track.pps.size(), 0u);
         FL_MESSAGE("MP4: " << track.width << "x" << track.height
                    << " profile=" << (int)track.profile
                    << " level=" << (int)track.level);
@@ -114,7 +114,7 @@ static void validateMp4(const fl::vector<fl::u8>& data) {
 
     if (track.isValid) {
         fl::vector<fl::u8> annexB = fl::extractH264NalUnits(data, track, &error);
-        FL_CHECK_GT(annexB.size(), 0);
+        FL_CHECK_GT(annexB.size(), 0u);
     }
 
     // Attempt frame decoding (mirrors validateMpeg/validateGif pattern)
@@ -231,14 +231,14 @@ static void validateJpeg(const fl::vector<fl::u8>& data) {
         FL_MESSAGE("JPEG: " << frame->getWidth() << "x" << frame->getHeight());
     } else {
         FL_MESSAGE("JPEG decoder not supported on this platform");
-        FL_CHECK_GE(data.size(), 2);
+        FL_CHECK_GE(data.size(), 2u);
         FL_CHECK_EQ(data[0], 0xFF);
         FL_CHECK_EQ(data[1], 0xD8);
     }
 }
 
 static void validateMp3(const fl::vector<fl::u8>& data) {
-    FL_CHECK_GT(data.size(), 0);
+    FL_CHECK_GT(data.size(), 0u);
     fl::third_party::Mp3Minimp3Decoder decoder;
     FL_CHECK(decoder.init());
     int frames_decoded = 0;

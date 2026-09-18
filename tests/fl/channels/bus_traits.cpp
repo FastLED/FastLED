@@ -88,14 +88,14 @@ FL_TEST_CASE("FastLED.addLeds<WS2812, ..., fl::Bus::BIT_BANG> clockless variant 
     static CRGB leds[8];
     auto& ctrl = FastLED.addLeds<WS2812, 2, GRB, fl::Bus::BIT_BANG>(leds, 8);
     (void)ctrl;
-    FL_CHECK(&fl::BusTraits<fl::Bus::BIT_BANG>::instance() != nullptr);
+    FL_CHECK(fl::BusTraits<fl::Bus::BIT_BANG>::instancePtr() != nullptr);
 }
 
 FL_TEST_CASE("FastLED.addLeds<APA102, ..., fl::Bus::BIT_BANG> SPI variant compiles") {
     static CRGB leds[8];
     auto& ctrl = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::BIT_BANG>(leds, 8);
     (void)ctrl;
-    FL_CHECK(&fl::BusTraits<fl::Bus::BIT_BANG>::instance() != nullptr);
+    FL_CHECK(fl::BusTraits<fl::Bus::BIT_BANG>::instancePtr() != nullptr);
 }
 
 FL_TEST_CASE("FastLED.addLeds default-AUTO call sites compile") {

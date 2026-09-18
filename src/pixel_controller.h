@@ -136,6 +136,16 @@ struct PixelController {
         copy(other);
     }
 
+    /// Copy assignment, through the same copy() as the copy constructor.
+    /// The implicit one would copy mLenRemaining verbatim while the copy
+    /// constructor rewinds it to mLen, so the two copy paths disagreed.
+    PixelController& operator=(const PixelController & other) {
+        if (this != &other) {
+            copy(other);
+        }
+        return *this;
+    }
+
     template<EOrder RGB_ORDER_OTHER>
     PixelController(const PixelController<RGB_ORDER_OTHER, LANES, MASK> & other) {
         copy(other);

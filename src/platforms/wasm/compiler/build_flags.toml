@@ -415,6 +415,7 @@ flags = [
     # Enhanced Warning Detection
     "-Wextra",                                  # Enable extra warning checks beyond -Wall
     "-Werror=self-assign-overloaded",           # `a = a` on a class type is a bug, not a no-op
+    "-Werror=deprecated-copy-with-user-provided-copy",  # copy ctor and implicit copy assignment can disagree
     
     # Type Safety and Conversion Warnings
     "-Wconversion",                             # Warn about implicit type conversions

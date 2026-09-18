@@ -45,6 +45,7 @@ base_defines = shared_defines + [
 base_warnings = [
   '-Wall',
   '-Wextra',
+  '-Werror',                   # Every warning in the host build (library, unit tests, examples) is an error
   '-Wno-deprecated-register',
   '-Wno-backslash-newline-escape',
   '-Wno-narrowing',
@@ -571,6 +572,7 @@ fastled_pch = custom_target('fastled_pch',
     meson.project_source_root() / 'ci/compile_pch.py',
     cpp_compiler.cmd_array(),
     '-c',                            # Suppress linker step (MinGW driver adds link job without -c)
+    '-Wno-unused-command-line-argument',  # ...so drivers that add no link job report -c as unused
     '-x', 'c++-header',
     '@INPUT@',
     '-o', '@OUTPUT@',

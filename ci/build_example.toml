@@ -35,6 +35,7 @@ compiler_flags = [
     "-fno-rtti",
     "-Werror=unused-result",  # Treat ignored FL_NODISCARD return values as errors
     "-Werror=self-assign-overloaded",  # `a = a` on a class type is a bug, not a no-op
+    "-Werror=deprecated-copy-with-user-provided-copy",  # copy ctor and implicit copy assignment can disagree
 ]
 
 defines = [

@@ -41,6 +41,7 @@ test_pch = custom_target('test_pch',
     meson.project_source_root() / 'ci/compile_pch.py',
     cpp_compiler.cmd_array(),
     '-c',                          # Suppress linker step (MinGW driver adds link job without -c)
+    '-Wno-unused-command-line-argument',  # ...so drivers that add no link job report -c as unused
     '-x', 'c++-header',           # Treat input as C++ header
     test_pch_input_abs,            # Canonical absolute forward-slash spelling
     '-o', '@OUTPUT@',              # test_pch.h.pch

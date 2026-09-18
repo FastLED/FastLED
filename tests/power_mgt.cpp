@@ -388,7 +388,7 @@ FL_TEST_CASE("Power limiter - zero brightness still draws the dark current") {
         static_cast<fl::u32>(get_power_model().dark_mW) * kCount;
     FL_CHECK_EQ(true_demand_mW(fl::span<const CRGB>(leds, kCount), 0),
                 baseline_mW);
-    FL_CHECK_GT(baseline_mW, 0);
+    FL_CHECK_GT(baseline_mW, 0u);
 }
 
 FL_TEST_CASE("Power limiter - a budget under the baseline turns the strip off") {

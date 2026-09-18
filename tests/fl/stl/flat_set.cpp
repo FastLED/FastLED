@@ -285,7 +285,7 @@ FL_TEST_CASE("flat_set: reserve") {
     fl::flat_set<int> s;
     s.reserve(100);
 
-    FL_CHECK_GE(s.capacity(), 100);
+    FL_CHECK_GE(s.capacity(), 100u);
 }
 
 FL_TEST_CASE("flat_set: with string elements") {

@@ -407,7 +407,7 @@ FL_TEST_CASE("MPEG1 frame data validation") {
         FL_CHECK_EQ(frame.getWidth(), 2);
         FL_CHECK_EQ(frame.getHeight(), 2);
         FL_CHECK_EQ(frame.getFormat(), fl::PixelFormat::RGB888);
-        FL_CHECK_GE(frame.getTimestamp(), 0); // Should have valid timestamp (may be 0 for first frame)
+        FL_CHECK_GE(frame.getTimestamp(), 0u); // Should have valid timestamp (may be 0 for first frame)
     }
 
     FL_SUBCASE("Pixel data integrity") {
@@ -485,7 +485,7 @@ FL_TEST_CASE("MPEG1 multi-frame sequence validation") {
         }
     }
 
-    FL_CHECK_GT(decoded_frames.size(), 0);
+    FL_CHECK_GT(decoded_frames.size(), 0u);
     bool valid_result = (result == fl::DecodeResult::EndOfStream) || (result == fl::DecodeResult::Success);
     FL_CHECK(valid_result);
 
@@ -620,12 +620,12 @@ FL_TEST_CASE("MPEG1 audio extraction") {
 
             // Verify audio sample properties
             FL_CHECK(sample.isValid());
-            FL_CHECK_GT(sample.size(), 0);
-            FL_CHECK_GE(sample.timestamp(), 0);
+            FL_CHECK_GT(sample.size(), 0u);
+            FL_CHECK_GE(sample.timestamp(), 0u);
 
             // Verify PCM data is accessible
             const auto& pcm = sample.pcm();
-            FL_CHECK_GT(pcm.size(), 0);
+            FL_CHECK_GT(pcm.size(), 0u);
         };
 
         fl::string error_msg;
@@ -769,12 +769,12 @@ FL_TEST_CASE("MPEG1 audio extraction") {
 
             // Verify audio sample properties
             FL_CHECK(sample.isValid());
-            FL_CHECK_GT(sample.size(), 0);
-            FL_CHECK_GE(sample.timestamp(), 0);
+            FL_CHECK_GT(sample.size(), 0u);
+            FL_CHECK_GE(sample.timestamp(), 0u);
 
             // Verify PCM data is accessible
             const auto& pcm = sample.pcm();
-            FL_CHECK_GT(pcm.size(), 0);
+            FL_CHECK_GT(pcm.size(), 0u);
         };
 
         fl::string error_msg;

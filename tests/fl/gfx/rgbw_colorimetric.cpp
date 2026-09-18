@@ -529,8 +529,13 @@ FL_TEST_CASE("set_input_gamut: null profile is a no-op") {
     // Defensive guard so caller code that passes a nullptr by mistake
     // doesn't fault; consistent with set_rgbw_colorimetric_profile(nullptr)
     // semantics.
+    // Exercises the deprecated pointer overload on purpose: the null guard
+    // is what is under test.
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(deprecated-declarations)
     set_input_gamut(nullptr, InputGamut::Rec709);
     set_input_gamut(nullptr, InputGamut::Native);
+    FL_DISABLE_WARNING_POP
     // No assertions — just verify the calls don't crash.
 }
 
