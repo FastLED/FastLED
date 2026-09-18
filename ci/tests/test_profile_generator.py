@@ -19,6 +19,7 @@ from ci.color_profile_generator import (
     TOPOLOGY_CHANNELS,
     Admission,
     Refusal,
+    _render_aliases_and_enum,  # noqa: PLC2701
     admit,
     alias_name,
     choose_aliases,
@@ -263,6 +264,17 @@ class TestFloatingAliases(unittest.TestCase):
             choose_aliases([a, b])["FIXTURE_RGB_NONE"],
             choose_aliases([b, a])["FIXTURE_RGB_NONE"],
         )
+
+    def test_the_enum_refuses_more_identities_than_u8_holds(
+        self: "TestFloatingAliases",
+    ) -> None:
+        one = _fixture_variant("lab-r1", "measured")
+        at_limit = {f"ID_{i}": one for i in range(255)}
+        rendered = _render_aliases_and_enum(at_limit)
+        self.assertIn("constexpr u8 kGeneratedProfileCount = 255;", rendered)
+        over = {f"ID_{i}": one for i in range(256)}
+        with self.assertRaisesRegex(ValueError, "u8 range"):
+            _render_aliases_and_enum(over)
 
     def test_the_header_emits_alias_enum_and_lookup_for_the_pin(
         self: "TestFloatingAliases",

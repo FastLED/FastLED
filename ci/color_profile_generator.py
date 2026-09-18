@@ -294,6 +294,7 @@ def _report_revision(report_id: str) -> int:
     return -1
 
 
+@typechecked
 @dataclass(frozen=True, order=True, slots=True)
 class _AliasRank:
     """Field order is comparison order: provenance, then revision, then ID."""
@@ -442,6 +443,9 @@ def _render_profile(admission: Admission) -> list[str]:
     return lines
 
 
+_MAX_GENERATED_PROFILES = 255
+
+
 @typechecked
 def _render_aliases_and_enum(aliases: dict[str, "Admission"]) -> list[str]:
     """Floating aliases, the profile enum and its compile-time lookup (C8.3).
@@ -451,6 +455,13 @@ def _render_aliases_and_enum(aliases: dict[str, "Admission"]) -> list[str]:
     the versioned symbol instead.
     """
 
+    # The enum's underlying type is u8, so an ID stays one byte on AVR; past
+    # 255 identities the count would wrap and the enumerators overflow it.
+    if len(aliases) > _MAX_GENERATED_PROFILES:
+        raise ValueError(
+            f"{len(aliases)} profile identities exceed GeneratedProfile's u8 "
+            f"range ({_MAX_GENERATED_PROFILES}); widen the enum's underlying type"
+        )
     lines: list[str] = []
     lines.append("// Floating aliases (C8.3): best-available report per identity.")
     lines.append("// Pinned symbols above never move; these may, in a reviewed PR.")
