@@ -22,9 +22,13 @@ inline float clampf(float v, float lo, float hi) {
 
 /// Linear-light float pixel, nominal range [0, 1], may exceed 1 before clip.
 struct RGBf {
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
+    float r;
+    float g;
+    float b;
+    // Explicit ctors: C++11 forbids brace-init of a struct that has
+    // default member initializers.
+    RGBf() : r(0.0f), g(0.0f), b(0.0f) {}
+    RGBf(float r_, float g_, float b_) : r(r_), g(g_), b(b_) {}
 };
 
 RGBf toRGBf(CRGB c);

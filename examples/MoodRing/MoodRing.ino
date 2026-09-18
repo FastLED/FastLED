@@ -43,6 +43,7 @@
 #endif
 
 #include "fl/audio/audio_processor.h"
+#include "fl/stl/stdio.h"
 #include "fl/ui/ui.h"
 
 #include "auto_brightness.h"
@@ -131,13 +132,13 @@ void setup() {
         gProcessor = FastLED.add(input);
         if (gProcessor) {
             gAutoPump = true;
-            printf("MoodRing: audio routed via FastLED.add() (auto-pump)\n");
+            fl::printf("MoodRing: audio routed via FastLED.add() (auto-pump)\n");
         }
     }
     if (!gProcessor) {
         gProcessor = fl::make_shared<fl::audio::Processor>();
         gAutoPump = false;
-        printf("MoodRing: audio using manual pump (fallback)\n");
+        fl::printf("MoodRing: audio using manual pump (fallback)\n");
     }
 
     gListener = fl::make_shared<mood_ring::RoomListener>(gProcessor);
@@ -165,13 +166,13 @@ static void applyUiTuning() {
 }
 
 static void printSense(const mood_ring::RoomSense &s) {
-    printf("MoodRing %s c/f/g=%.2f/%.2f/%.2f pres=%.2f en=%.2f tr=%+.2f "
-           "punch=%.2f shim=%.2f bands=%.2f/%.2f/%.2f bpm=%.0f conf=%.2f "
-           "warm=%.2f ar=%.2f pulses=%d\n",
-           gListener->regimeName(), s.calm, s.flow, s.groove, s.presence,
-           s.energy, s.trend, s.punch, s.shimmer, s.low, s.mid, s.high, s.bpm,
-           s.grooveConfidence, s.warmth, s.arousal,
-           gPainter.activePulseCount());
+    fl::printf("MoodRing %s c/f/g=%.2f/%.2f/%.2f pres=%.2f en=%.2f tr=%+.2f "
+               "punch=%.2f shim=%.2f bands=%.2f/%.2f/%.2f bpm=%.0f conf=%.2f "
+               "warm=%.2f ar=%.2f pulses=%d\n",
+               gListener->regimeName(), s.calm, s.flow, s.groove, s.presence,
+               s.energy, s.trend, s.punch, s.shimmer, s.low, s.mid, s.high, s.bpm,
+               s.grooveConfidence, s.warmth, s.arousal,
+               gPainter.activePulseCount());
 }
 
 void loop() {
@@ -203,7 +204,7 @@ void loop() {
     const char *regime = gListener->regimeName();
     if (regime != sLastRegime) {
         sLastRegime = regime;
-        printf("MoodRing: regime -> %s\n", regime);
+        fl::printf("MoodRing: regime -> %s\n", regime);
     }
     if (debugPrint.value()) {
         static fl::u32 sFrame = 0;
