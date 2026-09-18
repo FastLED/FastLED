@@ -154,6 +154,17 @@
 #endif
 
 // ============================================================================
+// FL_IS_AVR_ATMEGA_TINY_MEMORY - classic ATmega parts with <=1KB SRAM and
+// 8KB flash. Same budget as the ATtiny85, so they belong in the same tier:
+// without it an ATmega8 compiles the colour-profile runtime and its event
+// lists, and ColorPalette / Fire2012 link at ~14KB against 8KB of flash.
+//   ATmega8/8A = 1KB SRAM, 8KB flash
+// ============================================================================
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega8A__)
+#define FL_IS_AVR_ATMEGA_TINY_MEMORY
+#endif
+
+// ============================================================================
 // FL_IS_AVR_ATTINY_NO_UART - ATtiny chips without UART hardware (only USI)
 // ============================================================================
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \

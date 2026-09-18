@@ -18,7 +18,8 @@
 //                                    select modern tinyAVR 0/1-series with
 //                                    <=1KB SRAM — see FL_IS_AVR_ATTINY_TINY_MEMORY
 //                                    in is_avr.h; 2-series parts with 2KB+ are
-//                                    excluded)
+//                                    excluded; ATmega8/8A via
+//                                    FL_IS_AVR_ATMEGA_TINY_MEMORY)
 //   FL_PLATFORM_HAS_LARGE_MEMORY  — 1 on the "high" tier (Apollo3, nRF52,
 //                                   SAMD21, generic ARM)
 //   FL_PLATFORM_HAS_HUGE_MEMORY   — 1 on the "huge" tier (ESP32, Teensy
@@ -69,7 +70,7 @@
   #endif
   #define FL_PLATFORM_HAS_TINY_MEMORY_OVERRIDDEN 1
 #else
-  #if defined(FL_IS_AVR_ATTINY_TINY_MEMORY)
+  #if defined(FL_IS_AVR_ATTINY_TINY_MEMORY) || defined(FL_IS_AVR_ATMEGA_TINY_MEMORY)
     #define FL_PLATFORM_HAS_TINY_MEMORY 1
   #else
     #define FL_PLATFORM_HAS_TINY_MEMORY 0
