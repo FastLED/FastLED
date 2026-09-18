@@ -202,4 +202,13 @@
 # -fno-omit-frame-pointer on Xtensa, and maps the framework root out of
 # __FILE__. No FastLED code changed; claimed so the slack cannot hide the next
 # regression.
-382766
+#
+# +40 B (382766 -> 382806), #4432: PixelController gained an explicit copy
+# assignment through the same copy() as its copy constructor (the implicit one
+# copied mLenRemaining while the copy constructor rewinds it to mLen, and the
+# pair tripped -Wdeprecated-copy-with-user-provided-copy under the new
+# -Werror). Measured by symbol diff of esp32s3 Blink before/after: the whole
+# +40 B is in fl::Channel::showPixels, where ReorderingPixelIteratorAny copies
+# the controller. Behaviour there is unchanged (a fresh controller has
+# mLenRemaining == mLen); the bytes are copy()'s field-by-field code.
+382806
