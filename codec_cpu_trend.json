@@ -4,42 +4,42 @@
       "codegen": {
         "cortex-m0plus": {
           "dct32": {
-            "inner_loop_instructions": 881,
-            "instructions": 959
+            "inner_loop_instructions": 878,
+            "instructions": 957
           },
           "polyphase": {
-            "inner_loop_instructions": 110,
-            "instructions": 263
+            "inner_loop_instructions": 136,
+            "instructions": 265
           }
         },
         "cortex-m4": {
           "dct32": {
-            "inner_loop_instructions": 512,
-            "instructions": 531
+            "inner_loop_instructions": 510,
+            "instructions": 528
           },
           "polyphase": {
-            "inner_loop_instructions": 55,
+            "inner_loop_instructions": 67,
             "instructions": 115
           }
         },
         "riscv32-esp": {
           "dct32": {
             "inner_loop_instructions": 0,
-            "instructions": 91
+            "instructions": 81
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 90
+            "instructions": 88
           }
         },
         "xtensa-esp32": {
           "dct32": {
-            "inner_loop_instructions": 1013,
-            "instructions": 1028
+            "inner_loop_instructions": 912,
+            "instructions": 925
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 243
+            "instructions": 208
           }
         }
       },
@@ -187,18 +187,18 @@
       "codegen": {
         "cortex-m0plus": {
           "dct32": {
-            "inner_loop_instructions": 298,
-            "instructions": 325
+            "inner_loop_instructions": 296,
+            "instructions": 323
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 173
+            "instructions": 171
           }
         },
         "cortex-m4": {
           "dct32": {
-            "inner_loop_instructions": 264,
-            "instructions": 280
+            "inner_loop_instructions": 280,
+            "instructions": 286
           },
           "polyphase": {
             "inner_loop_instructions": 0,
@@ -208,7 +208,7 @@
         "riscv32-esp": {
           "dct32": {
             "inner_loop_instructions": 0,
-            "instructions": 47
+            "instructions": 44
           },
           "polyphase": {
             "inner_loop_instructions": 0,
@@ -217,12 +217,12 @@
         },
         "xtensa-esp32": {
           "dct32": {
-            "inner_loop_instructions": 144,
-            "instructions": 160
+            "inner_loop_instructions": 157,
+            "instructions": 171
           },
           "polyphase": {
             "inner_loop_instructions": 0,
-            "instructions": 105
+            "instructions": 107
           }
         }
       },
