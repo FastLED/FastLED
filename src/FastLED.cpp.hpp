@@ -298,6 +298,14 @@ static void throttleToMaxRefreshRate(fl::u32 minMicros) FL_NO_EXCEPT {
 	}
 }
 
+fl::u8 CFastLED::getLastShowBrightness() const {
+	return mLastShownScale;
+}
+
+bool CFastLED::isPowerLimited() const {
+	return mLastShownScale < mLastRequestedScale;
+}
+
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
 	onBeginFrame();

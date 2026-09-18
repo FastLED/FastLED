@@ -1653,12 +1653,12 @@ public:
 	/// after the power limiter set by setMaxPowerInMilliWatts(). Equal to the
 	/// requested brightness when no limit is set or the limit did not bind.
 	/// 255 before the first frame.
-	fl::u8 getLastShowBrightness() const { return mLastShownScale; }
+	fl::u8 getLastShowBrightness() const;
 
 	/// True if the power limiter lowered the brightness of the most recent
 	/// show() / showColor() below what it was asked for. Lets a sketch with no
 	/// serial console react to hitting its power budget.
-	bool isPowerLimited() const { return mLastShownScale < mLastRequestedScale; }
+	bool isPowerLimited() const;
 
 	/// @name Power Model Configuration
 	/// Configure LED power consumption for accurate power management
