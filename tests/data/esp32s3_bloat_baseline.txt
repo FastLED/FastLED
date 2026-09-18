@@ -187,4 +187,12 @@
 # now record the requested and applied brightness around the power limiter
 # (two byte stores each), so getLastShowBrightness() / isPowerLimited() can
 # tell a headless sketch that the limit bound. That is the entire change.
-390467
+#
+# +5 B (390467 -> 390472): ColorPipelineHooks gains one function pointer,
+# notifyProfileClearedByLegacy, so setCorrection()/setTemperature() stop
+# referencing the colour-profile event list directly. Blink pays the pointer;
+# a sketch that calls setCorrection()/setTemperature() WITHOUT binding a colour
+# profile saves ~8.3 KB on AVR (uno ColorPalette 14.80 KB -> 6.47 KB). A sketch
+# that binds a profile installs the hook and still links the event machinery,
+# so it sees no reduction.
+390472
