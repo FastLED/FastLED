@@ -1160,12 +1160,15 @@ struct index_sequence {
 // itself shifted by N/2 (plus one extra index when N is odd). The naive
 // N-1 recursion instantiated 256 nested templates for the gamma LUT, which
 // cost ~50 ms of front-end time in every TU that included gamma_lut.h.
-template <typename S1, typename S2>
+// No short names like S1/I1 here: board variants define pin names as
+// macros (the SparkFun XRP's pins_arduino.h defines S1..S4), which would
+// expand inside these declarations.
+template <typename LhsSeq, typename RhsSeq>
 struct index_sequence_concat;
 
-template <fl::size... I1, fl::size... I2>
-struct index_sequence_concat<index_sequence<I1...>, index_sequence<I2...>> {
-    using type = index_sequence<I1..., (sizeof...(I1) + I2)...>;
+template <fl::size... Lhs, fl::size... Rhs>
+struct index_sequence_concat<index_sequence<Lhs...>, index_sequence<Rhs...>> {
+    using type = index_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>;
 };
 
 template <fl::size N>
