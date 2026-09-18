@@ -36,7 +36,7 @@ public:
     /// @param url URL to fetch
     /// @param opts Fetch options (method, headers, etc.)
     /// @param promise Promise to resolve when complete
-    FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> promise);
+    FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> promise) FL_NO_EXCEPT;
 
     /// @brief Destructor - closes socket if still open
     ~FetchRequest() FL_NO_EXCEPT;
@@ -56,6 +56,7 @@ public:
 private:
     State mState;
     fl::task::Promise<Response> mPromise;
+    RequestOptions mOptions;  // method, headers and body to send
 
     // Parsed URL
     fl::url mParsedUrl;
