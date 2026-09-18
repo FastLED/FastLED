@@ -211,4 +211,11 @@
 # +40 B is in fl::Channel::showPixels, where ReorderingPixelIteratorAny copies
 # the controller. Behaviour there is unchanged (a fresh controller has
 # mLenRemaining == mLen); the bytes are copy()'s field-by-field code.
-382806
+#
+# +23 B (382806 -> 382829), #4438: the power limiter charges a colour-managed
+# channel for its solved drives (#4344). CLEDController gains one virtual,
+# colorPipeline() (a vtable slot per controller class plus a null-returning
+# base), and the limiter's per-controller estimate becomes a call through
+# controller_unscaled_power_mW(). The estimator itself is reached through
+# ColorPipelineHooks, so it does not link into a sketch that binds no profile.
+382829
