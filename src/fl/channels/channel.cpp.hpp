@@ -432,7 +432,11 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         // an ordinary unbound channel, not an exceptional path.
         StreamingPipelineQ16 pipeline;
         if (hooks.build(mSettings.mColorProfile, &pipeline)) {
+#if FL_COLOR_PIPELINE_SHARED
+            mPipeline = fl::make_shared<StreamingPipelineQ16>(pipeline);
+#else
             mPipeline = fl::make_unique<StreamingPipelineQ16>(pipeline);
+#endif
         } else if (options.hasColorProfile()) {
             // R6: a profile outside the numerical bounds must "fail
             // explicitly" and "not become native-drive input". A binding that
@@ -704,11 +708,21 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // it -- and reading it rather than `ColorAdjustment::brightness` keeps
     // this working when FASTLED_HD_COLOR_MIXING is off, where that field
     // does not exist.
+    //
+    // `pipeline_ref` is this frame's own reference, held until the encode
+    // below returns: a reconfiguration while it runs replaces `mPipeline`
+    // without freeing the one being encoded through (#4440). Small tiers
+    // encode synchronously and keep single ownership.
+#if FL_COLOR_PIPELINE_SHARED
+    const ColorPipelineStorage pipeline_ref = mPipeline;
+    StreamingPipelineQ16* const pipeline_mut = pipeline_ref.get();
+#else
+    StreamingPipelineQ16* const pipeline_mut = mPipeline.get();
+#endif
     const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
-    const StreamingPipelineQ16* pipeline = mPipeline.get();
-    if (pipeline != nullptr && flux_hooks.setFlux != nullptr) {
-        flux_hooks.setFlux(mPipeline.get(),
-                           pixels.mColorAdjustment.premixed.r);
+    const StreamingPipelineQ16* pipeline = pipeline_mut;
+    if (pipeline_mut != nullptr && flux_hooks.setFlux != nullptr) {
+        flux_hooks.setFlux(pipeline_mut, pixels.mColorAdjustment.premixed.r);
     }
 #else
     const StreamingPipelineQ16* pipeline = nullptr;
@@ -999,13 +1013,11 @@ u8 Channel::getDither() {
     return CPixelLEDController<RGB>::getDither();
 }
 
-const StreamingPipelineQ16* Channel::colorPipeline() const FL_NO_EXCEPT {
-#if FL_COLOR_PROFILE_RUNTIME
-    return mPipeline.get();
-#else
-    return nullptr;
-#endif
+#if FL_COLOR_PIPELINE_SHARED
+fl::shared_ptr<StreamingPipelineQ16> Channel::colorPipeline() const FL_NO_EXCEPT {
+    return mPipeline;
 }
+#endif
 
 Rgbw Channel::getRgbw() const {
     return CPixelLEDController<RGB>::getRgbw();

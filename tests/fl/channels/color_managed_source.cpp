@@ -448,7 +448,7 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
     // profile would install them and make a naive assertion here vacuous.
     // Each leg therefore clears them first; that is what makes this a test
     // of the binding path rather than of the test order.
-    const ColorPipelineHooks kCleared = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    const ColorPipelineHooks kCleared = {};
     auto restore = fl::make_scope_exit([]() { installColorPipelineHooks(); });
 
     {

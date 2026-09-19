@@ -41,6 +41,18 @@ void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT;
 #define FL_COLOR_PROFILE_RUNTIME (!FL_PLATFORM_HAS_TINY_MEMORY)
 #endif
 
+/// Shared ownership of a channel's colour pipeline, the controller accessor
+/// that hands it out, and the power limiter's managed-channel estimate
+/// (#4344, #4440). Large-memory tiers only: on the tiny and low tiers (AVR
+/// Uno/Nano, ESP8266, Teensy LC/3.x, STM32F1, ...) all of it compiles out --
+/// no vtable slot, no estimator, no control block -- and a managed channel
+/// there is charged for its source pixels, as before #4344. Those tiers have
+/// no asynchronous show, so the pipeline is only ever read synchronously,
+/// where a raw pointer is provably safe.
+#ifndef FL_COLOR_PIPELINE_SHARED
+#define FL_COLOR_PIPELINE_SHARED (FL_COLOR_PROFILE_RUNTIME && FL_PLATFORM_HAS_LARGE_MEMORY)
+#endif
+
 /// Optional channel configuration parameters
 /// All fields have sensible defaults and can be overridden as needed.
 ///

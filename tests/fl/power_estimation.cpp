@@ -5,6 +5,7 @@
 #include "fl/channels/cled_controller.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/options.h"
+#include "fl/channels/pipeline_binding.h"
 #include "fl/chipsets/chipset_timing_config.h"
 
 using namespace fl;
@@ -547,5 +548,39 @@ FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {
     const CRGB source(40, 40, 40);
     ManagedStrip strip(source, nullptr);
     FL_REQUIRE_FALSE(strip.channel->isColorManaged());
+    FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
+}
+
+FL_TEST_CASE("[#4440] a reader's pipeline outlives the channel dropping it") {
+    // The estimate and the frame encode each hold the pipeline while they
+    // walk the strip. Reconfiguring the channel in the meantime -- here, to
+    // unmanaged -- must drop only the channel's reference. With a single
+    // owner this was a use-after-free, which the --debug (ASAN) run of this
+    // case is there to catch.
+    const CRGB source(40, 40, 40);
+    const EmitterProfile dim = deviceWithLuminance(0.10f);
+    ManagedStrip strip(source, &dim);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    const fl::shared_ptr<StreamingPipelineQ16> held = strip.channel->colorPipeline();
+    FL_REQUIRE(held);
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    FL_REQUIRE(hooks.unscaledPowerMilliwatts != nullptr);
+    const fl::span<const CRGB> leds(strip.leds, kStripLen);
+    const fl::u32 before = hooks.unscaledPowerMilliwatts(*held, leds, Rgbw());
+
+    ChannelOptions unmanaged;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    strip.channel->applyConfig(
+        ChannelConfig(4, timing, fl::span<CRGB>(strip.leds, kStripLen), RGB, unmanaged));
+
+    // The channel let go ...
+    FL_CHECK_FALSE(strip.channel->isColorManaged());
+    FL_CHECK_FALSE(strip.channel->colorPipeline());
+    // ... and the reader is now the sole owner of a pipeline that still works
+    // and still gives the same answer.
+    FL_CHECK_EQ(held.use_count(), 1);
+    FL_CHECK_EQ(hooks.unscaledPowerMilliwatts(*held, leds, Rgbw()), before);
+    // And the channel's own estimate is back to the source charge.
     FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
 }

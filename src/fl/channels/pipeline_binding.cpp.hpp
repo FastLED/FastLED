@@ -52,6 +52,7 @@ void destroyColorPipelineIterator(void* source_storage,
         ->~ColorManagedPixelSource();
 }
 
+#if FL_COLOR_PIPELINE_SHARED
 u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
                                          span<const CRGB> leds,
                                          const Rgbw& rgbw) FL_NO_EXCEPT {
@@ -95,6 +96,7 @@ u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
     }
     return total;
 }
+#endif  // FL_COLOR_PIPELINE_SHARED
 
 void notifyColorPipelineProfileClearedByLegacy() FL_NO_EXCEPT {
     ChannelEvents::instance().onColorProfileWarning(
@@ -107,7 +109,7 @@ ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
     // Not a function-local static with a non-trivial constructor: this is a
     // zero-initialized aggregate, so there is no guard variable and no
     // Teensy 3.x `__cxa_guard` conflict.
-    static ColorPipelineHooks hooks = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    static ColorPipelineHooks hooks = {};
     return hooks;
 }
 
@@ -118,7 +120,9 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.setFlux = &setColorPipelineFlux;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
+#if FL_COLOR_PIPELINE_SHARED
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
+#endif
 }
 
 void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT {

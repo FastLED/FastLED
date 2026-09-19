@@ -354,14 +354,20 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     const fl::span<const CRGB> leds(controller.leds(),
                                     static_cast<fl::size>(controller.size()));
+#if FL_COLOR_PIPELINE_SHARED
     // Through the pipeline hook, which exists whenever a pipeline does; naming
     // the estimator directly would link the colour pipeline into sketches that
-    // limit power but never bind a profile.
-    const fl::StreamingPipelineQ16* pipeline = controller.colorPipeline();
+    // limit power but never bind a profile. `pipeline` is this estimate's own
+    // reference, so reconfiguring the controller mid-pass cannot free the
+    // pipeline it is walking (#4440).
+    const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = controller.colorPipeline();
     const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
-    if (pipeline != nullptr && hooks.unscaledPowerMilliwatts != nullptr) {
+    if (pipeline && hooks.unscaledPowerMilliwatts != nullptr) {
         return hooks.unscaledPowerMilliwatts(*pipeline, leds, controller.getRgbw());
     }
+#endif
+    // Below the large-memory tier only this is compiled: a managed channel
+    // there is charged for its source (FL_COLOR_PIPELINE_SHARED).
     return calculate_unscaled_power_mW(leds, controller.getRgbw());
 }
 

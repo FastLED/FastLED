@@ -18,6 +18,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 #include "fl/spi_bus.h"
+#include "fl/stl/shared_ptr.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -33,7 +34,7 @@
 
 namespace fl {
 
-struct StreamingPipelineQ16;  // fl/gfx/pipeline.h; only a pointer is named here
+struct StreamingPipelineQ16;  // fl/gfx/pipeline.h; only a shared_ptr is named here
 
 class CLEDController {
 protected:
@@ -357,6 +358,7 @@ public:
     /// @returns 1 for a non-Parallel controller
     virtual int lanes() FL_NO_EXCEPT { return 1; }
 
+#if FL_COLOR_PIPELINE_SHARED
     /// The streaming colour pipeline this controller's output runs through,
     /// or null when its output is the legacy (unmanaged) path.
     ///
@@ -364,7 +366,13 @@ public:
     /// controller actually emits rather than its source pixels (#4344). A
     /// plain accessor, not the estimate itself: the estimate lives in the
     /// power module and so links only into sketches that limit power.
-    virtual const StreamingPipelineQ16* colorPipeline() const FL_NO_EXCEPT;
+    ///
+    /// A shared reference, not a raw pointer (#4440): the caller holds the
+    /// pipeline alive for as long as it uses it, even if the controller is
+    /// reconfigured meanwhile. Compiled out below the large-memory tier
+    /// (FL_COLOR_PIPELINE_SHARED), so small parts carry no vtable slot.
+    virtual fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT;
+#endif
 
     /// Pointer to the CRGB array for this controller
     /// @returns CLEDController::mLeds.data()

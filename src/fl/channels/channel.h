@@ -151,9 +151,20 @@ public:
     /// Named because it is a decision, not an implementation detail: holding
     /// a `StreamingPipelineQ16` inline charges every channel 88 bytes for a
     /// pipeline most of them never bind. A static assertion in the tests
-    /// holds this to pointer size so the inline form cannot come back
+    /// holds this to two pointers so the inline form cannot come back
     /// unnoticed.
+    ///
+    /// Shared, not unique (#4440): a reader -- the frame encode, the power
+    /// estimate -- takes its own reference for as long as it uses the
+    /// pipeline, so reconfiguring the channel mid-use drops only the
+    /// channel's reference instead of freeing the pipeline under the reader.
+#if FL_COLOR_PIPELINE_SHARED
+    using ColorPipelineStorage = fl::shared_ptr<StreamingPipelineQ16>;
+#else
+    // Small tiers: sync-only readers, so single ownership is provably safe
+    // and saves the control block (FL_COLOR_PIPELINE_SHARED).
     using ColorPipelineStorage = fl::unique_ptr<StreamingPipelineQ16>;
+#endif
 #endif
 
     /// @brief Show the LEDs with optional brightness scaling
@@ -213,9 +224,12 @@ public:
     }
     Chromaticity targetWhite() const FL_NO_EXCEPT { return mSettings.targetWhite(); }
 
+#if FL_COLOR_PIPELINE_SHARED
     /// The installed streaming pipeline, or null on the legacy path. The power
-    /// limiter charges its solved drives rather than the source (#4344).
-    const StreamingPipelineQ16* colorPipeline() const FL_NO_EXCEPT override;
+    /// limiter charges its solved drives rather than the source (#4344), and
+    /// holds this reference while it does (#4440).
+    fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override;
+#endif
     bool isEnabled() const FL_NO_EXCEPT { return const_cast<Channel*>(this)->getEnabled(); }
     bool hasColorProfileFallback() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME

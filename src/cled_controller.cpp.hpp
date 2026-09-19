@@ -115,9 +115,11 @@ void CLEDController::removeFromList(CLEDController* controller) {
     }
 }
 
-const fl::StreamingPipelineQ16* CLEDController::colorPipeline() const FL_NO_EXCEPT {
-    return nullptr;
+#if FL_COLOR_PIPELINE_SHARED
+fl::shared_ptr<fl::StreamingPipelineQ16> CLEDController::colorPipeline() const FL_NO_EXCEPT {
+    return fl::shared_ptr<fl::StreamingPipelineQ16>();
 }
+#endif
 
 ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) {
     // *premixed = getAdjustment(brightness);
