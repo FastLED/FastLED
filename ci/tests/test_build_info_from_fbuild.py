@@ -12,6 +12,7 @@ from pathlib import Path
 
 from ci.boards import create_board
 from ci.compiler.build_config import (
+    _gnu_toolchain_bin_for_target,
     generate_build_info_json_from_existing_build,
     insert_tool_aliases,
 )
@@ -135,3 +136,51 @@ def test_insert_tool_aliases_llvm_names(tmp_path: Path) -> None:
     assert aliases["nm"] == str(bin_dir / "llvm-nm")
     assert aliases["c++filt"] == str(bin_dir / "llvm-cxxfilt")
     assert aliases["ld"] == str(bin_dir / "ld.lld")
+
+
+def _fake_gnu_toolchain(home: Path, mode: str, release: str) -> Path:
+    """A `<triple>-gcc` under fbuild's per-mode toolchain cache."""
+    root = (
+        home
+        / ".fbuild"
+        / mode
+        / "cache"
+        / "toolchains"
+        / "toolchain-xtensa-esp-elf"
+        / "164cda8d219cc6bd"
+        / f"xtensa-esp-elf-14.2.0_{release}"
+    )
+    bin_dir = root / "bin"
+    bin_dir.mkdir(parents=True)
+    (bin_dir / "xtensa-esp-elf-gcc").write_text("")
+    return root
+
+
+def test_gnu_toolchain_is_the_one_the_build_used(tmp_path: Path) -> None:
+    """`dev` sorts before `prod`; the build's own include path must win (#4468)."""
+    _fake_gnu_toolchain(tmp_path, "dev", "20251107")
+    prod = _fake_gnu_toolchain(tmp_path, "prod", "20260121")
+    used = [str(prod / "xtensa-esp-elf" / "include"), "-Os"]
+
+    got = _gnu_toolchain_bin_for_target("xtensa-esp-elf", used, home=tmp_path)
+
+    assert got == prod / "bin"
+
+
+def test_gnu_toolchain_falls_back_without_a_hint(tmp_path: Path) -> None:
+    dev = _fake_gnu_toolchain(tmp_path, "dev", "20251107")
+
+    assert _gnu_toolchain_bin_for_target("xtensa-esp-elf", [], home=tmp_path) == (
+        dev / "bin"
+    )
+    assert _gnu_toolchain_bin_for_target("riscv32-esp-elf", [], home=tmp_path) is None
+
+
+def test_gnu_toolchain_matches_a_sysroot_operand(tmp_path: Path) -> None:
+    _fake_gnu_toolchain(tmp_path, "dev", "20251107")
+    prod = _fake_gnu_toolchain(tmp_path, "prod", "20260121")
+    used = [f"--sysroot={prod / 'xtensa-esp-elf'}"]
+
+    got = _gnu_toolchain_bin_for_target("xtensa-esp-elf", used, home=tmp_path)
+
+    assert got == prod / "bin"
