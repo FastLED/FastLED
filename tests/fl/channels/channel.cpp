@@ -1215,14 +1215,20 @@ FL_TEST_CASE("[#4034] unbound SPI chipsets emit their legacy frames exactly") {
          bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 200, 100, 50, 0xFF, 0xFF, 0xFF, 0xFF})},
         {"APA102 at half", SpiEncoder::apa102(), 128,
          bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 100, 50, 25, 0xFF, 0xFF, 0xFF, 0xFF})},
+        {"SK9822 at full brightness", SpiEncoder::sk9822(), 255,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 200, 100, 50, 0xFF, 0xFF, 0xFF, 0xFF})},
         {"SK9822 at half", SpiEncoder::sk9822(), 128,
          bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 100, 50, 25, 0xFF, 0xFF, 0xFF, 0xFF})},
         // Raw bytes, latched by the clock pausing.
+        {"WS2801 at full brightness", SpiEncoder::ws2801(), 255, bytes({200, 100, 50})},
         {"WS2801 at half", SpiEncoder::ws2801(), 128, bytes({100, 50, 25})},
         // 0x80 | (v >> 1), with the low bit forced on for lit values below 254;
         // then (n * 3 + 63) / 64 zero latch bytes.
+        {"LPD8806 at full brightness", SpiEncoder::lpd8806(), 255, bytes({0xE5, 0xB3, 0x99, 0x00})},
         {"LPD8806 at half", SpiEncoder::lpd8806(), 128, bytes({0xB3, 0x99, 0x8D, 0x00})},
         // Four zero bytes, then 1rrrrrgggggbbbbb from the top five bits of each.
+        {"LPD6803 at full brightness", SpiEncoder::lpd6803(), 255,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xE5, 0x86})},
         {"LPD6803 at half", SpiEncoder::lpd6803(), 128,
          bytes({0x00, 0x00, 0x00, 0x00, 0xB0, 0xC3})},
     };
