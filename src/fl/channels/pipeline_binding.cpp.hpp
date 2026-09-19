@@ -103,29 +103,6 @@ u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
 bool encodeColorPipelineManagedSpi(PixelIterator& pixels,
                                    vector_psram<u8>* out, SpiChipset chip,
                                    const CLEDController& controller) FL_NO_EXCEPT {
-    // Non-HD APA102/SK9822: the field is held at 31 on a managed channel,
-    // whatever FASTLED_USE_GLOBAL_BRIGHTNESS says (#4457). That build option
-    // derives a strip-wide field from the first pixel and rescales only that
-    // pixel's codes -- a second shaping stage on drives the pipeline already
-    // solved, and it dims every other pixel by field/31. B1's conservative
-    // treatment is a fixed field; with the option off this is exactly the
-    // path the encoder takes anyway, so default output is unchanged.
-    switch (chip) {
-        case SpiChipset::APA102:
-        case SpiChipset::DOTSTAR:
-        case SpiChipset::HD107: {
-            auto range = makeScaledPixelRangeRGB(&pixels);
-            encodeAPA102(range.first, range.second, fl::back_inserter(*out), 31);
-            return true;
-        }
-        case SpiChipset::SK9822: {
-            auto range = makeScaledPixelRangeRGB(&pixels);
-            encodeSK9822(range.first, range.second, fl::back_inserter(*out), 31);
-            return true;
-        }
-        default:
-            break;
-    }
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     switch (chip) {
         case SpiChipset::LPD8806:
@@ -139,6 +116,24 @@ bool encodeColorPipelineManagedSpi(PixelIterator& pixels,
     }
 #endif
 #if FASTLED_HD_COLOR_MIXING && !FL_PLATFORM_HAS_TINY_MEMORY
+    // Non-HD APA102/SK9822: the field is held at 31 on a managed channel,
+    // whatever FASTLED_USE_GLOBAL_BRIGHTNESS says (#4457). That option
+    // derives a strip-wide field from the first pixel and rescales only that
+    // pixel -- a second shaping stage on drives the pipeline already solved,
+    // dimming every other pixel by field/31. B1's conservative treatment is a
+    // fixed field. Through the wide writer the HD path already links, pinned
+    // at 31: same framing, one quantization from the 16-bit drive, and no new
+    // encoder instantiation in sketches that bind no profile.
+    switch (chip) {
+        case SpiChipset::APA102:
+        case SpiChipset::DOTSTAR:
+        case SpiChipset::HD107:
+        case SpiChipset::SK9822:
+            pixels.writeFiveBitWide(fl::back_inserter(*out), 31);
+            return true;
+        default:
+            break;
+    }
     // The profile is read here rather than by the caller, so the accessor
     // links only with the hook.
     const EmitterProfile* profile = controller.emitterProfile();
