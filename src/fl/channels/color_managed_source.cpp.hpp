@@ -1,8 +1,23 @@
 // ok no header - implementation for fl/channels/color_managed_source.h
 
 #include "fl/channels/color_managed_source.h"
+#include "fl/channels/dither_frame.h"
 
 namespace fl {
+
+namespace {
+
+// One threshold per frame of the eight-frame cycle, in 1/256 of a code, in
+// bit-reversed order (0, 4, 2, 6, 1, 5, 3, 7) so that however many frames of
+// the eight carry the extra code, they are spread across the cycle rather than
+// bunched. Each sits in the middle of its 1/8 band, so a fraction f of a code
+// is rounded up on ceil((f - 16) / 32) of the eight frames: the cycle's mean
+// is within 1/16 of a code of the exact value. Eight frames is the cycle
+// BINARY_DITHER already runs, so this adds no new cadence (see
+// docs/color-ws2812-shaping-paths.md).
+constexpr u8 kTemporalDitherThresholds[8] = {16, 144, 80, 208, 48, 176, 112, 240};
+
+}  // namespace
 
 void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
                                              u8* b2_out) FL_NO_EXCEPT {
@@ -10,8 +25,22 @@ void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
         i32 drives[3];
         processPixelQ16(mPipeline, raw[0], raw[1], raw[2], drives);
         u8 channels[3];
-        for (int i = 0; i < 3; ++i) {
-            channels[i] = quantize(drives[i]);
+        if (temporalDitherEnabled()) {
+            // The phase is the frame's, offset by the pixel's position, so
+            // any eight neighbours cover the whole cycle in every frame: a
+            // uniform strip's total light does not pulse. All three channels
+            // share it, so a neutral pixel is neutral in every frame.
+            const int position = mController.mLen - mController.mLenRemaining;
+            const u8 phase = static_cast<u8>(
+                (detail::ditherFrame() + (position & 7)) & 7);
+            const u8 threshold = kTemporalDitherThresholds[phase];
+            for (int i = 0; i < 3; ++i) {
+                channels[i] = quantizeDithered(drives[i], threshold);
+            }
+        } else {
+            for (int i = 0; i < 3; ++i) {
+                channels[i] = quantize(drives[i]);
+            }
         }
         *b0_out = channels[mSlot0];
         *b1_out = channels[mSlot1];
@@ -64,6 +93,30 @@ void ColorManagedPixelSource::loadRGBScaleAndBrightness(
     *brightness = 255;
 }
 #endif
+
+bool ColorManagedPixelSource::temporalDitherEnabled() const FL_NO_EXCEPT {
+        return (mController.e[0] | mController.e[1] | mController.e[2]) != 0;
+}
+
+u8 ColorManagedPixelSource::quantizeDithered(i32 drive,
+                                             u8 threshold) FL_NO_EXCEPT {
+        if (drive <= 0) {
+            return 0;
+        }
+        if (drive >= 65536) {
+            return 255;
+        }
+        // drive * 255 < 2^24: the exact code in 16.16, split into its integer
+        // part and its whole 16-bit fraction. Compared at full width, so the
+        // cycle's mean is within 1/16 of a code exactly; truncating the
+        // fraction to eight bits first would add up to 1/256 on top.
+        const u32 exact = static_cast<u32>(drive) * 255u;
+        const u32 base = exact >> 16;
+        const u32 fraction = exact & 0xFFFFu;
+        const u32 code =
+            base + (fraction > (static_cast<u32>(threshold) << 8) ? 1u : 0u);
+        return static_cast<u8>(code > 255u ? 255u : code);
+}
 
 u8 ColorManagedPixelSource::quantize(i32 drive) FL_NO_EXCEPT {
         if (drive <= 0) {

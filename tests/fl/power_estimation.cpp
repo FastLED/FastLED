@@ -622,13 +622,19 @@ FL_TEST_CASE("[#4342] a dithering controller is charged the reserve; others are 
     FL_CHECK_EQ(controller_dither_reserve_mW(*plain.channel), 0u);
 
 #if FL_COLOR_PIPELINE_SHARED
-    // A managed channel's source never dithers (C5), even with the mode
-    // forced back on after binding.
+    // A managed channel binds with dither off, and is reserved nothing. With
+    // BINARY_DITHER it runs the pipeline's temporal dither, at most one code
+    // above the rounded code its estimate charges, on any channel of a lit
+    // pixel: one code on all three.
     const EmitterProfile dim = deviceWithLuminance(0.10f);
     ManagedStrip managed(source, &dim);
     FL_REQUIRE(managed.channel->isColorManaged());
-    managed.channel->setDither(BINARY_DITHER);
     FL_CHECK_EQ(controller_dither_reserve_mW(*managed.channel), 0u);
+    managed.channel->setDither(BINARY_DITHER);
+    const PowerModelRGB model = get_power_model();
+    const fl::u32 per_led = static_cast<fl::u32>(model.red_mW) + model.green_mW + model.blue_mW;
+    FL_CHECK_EQ(controller_dither_reserve_mW(*managed.channel),
+                (per_led * kStripLen + 255) / 256);
 #endif
 }
 

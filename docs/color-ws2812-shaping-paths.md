@@ -409,10 +409,30 @@ Building it. Section 5's comparison is answered: independent RGB gamma is out,
 value-only shaping survives and takes about a third, and temporal dithering is
 worth the state it costs.
 
+## Temporal dithering, built (P8, C5)
+
+A colour-managed channel with `BINARY_DITHER` now dithers the pipeline's drive instead of taking the legacy offsets. Both use one mode switch, so a channel runs one dither or the other and never both: C5's exclusion by construction. The implementation is `ColorManagedPixelSource::quantizeDithered` in `src/fl/channels/color_managed_source.cpp.hpp`.
+
+- **What it emits.** Each channel emits `floor(x)` or `floor(x) + 1` of the exact 8-bit code `x`. It is `floor(x) + 1` on the frames whose threshold the fraction of `x` exceeds. The eight thresholds sit mid-band in bit-reversed order, so however many of the eight frames carry the extra code, they are spread across the cycle.
+- **Accuracy.** The cycle's mean is within **1/16 of a code** of `x`. Rounding, the path with dither off, misses by up to half a code.
+- **Cadence.** Eight frames is the cycle `BINARY_DITHER` already runs, gated the same way: `show()` turns it off below `FL_DITHER_ENABLE_MIN_REFRESH_HZ`. So the cadence question above is unchanged, not new.
+- **Flicker, per pixel.** The amplitude is one code. The phase is offset by pixel position, so any eight neighbours cover the whole cycle in every frame, and a uniform strip's total light is the same in each frame. All three channels share the phase, so equal drives give equal codes in every frame.
+- **State.** Stateless per pixel: only the shared frame counter. That keeps it inside the TINY-tier limit to "stateless/temporal forms", and no error-diffusion buffer is needed.
+- **Default: off.** `setColorProfile` still selects `DISABLE_DITHER`, so a managed channel dithers only when asked to.
+- **Power.** The limiter reserves one code on every channel of every lit pixel for a managed channel that dithers (#4342).
+
+`tests/fl/channels/color_managed_source.cpp` pins it, and each case was checked to fail under mutation:
+
+| case | what it checks | caught when |
+|---|---|---|
+| effective step | mean within 1/16 of a code | dither is disabled |
+| amplitude | floor or floor + 1 in every frame | dither is disabled |
+| uniform strip | constant total light per frame | the per-pixel phase offset is removed |
+| `DISABLE_DITHER` | the rounded code, every frame | — |
+
 ## Not covered
 
-Temporal dithering, which is stateful and needs the frame cadence P6 wires up;
-it is a separate P8 deliverable. The gamma LUT paths are not scored here
+The frame counter advances when a frame is attempted, not when it is presented (#4347, R8). The gamma LUT paths are not scored here
 either — they are shaping *strategies* rather than fixed paths, and scoring
 them requires the strategy-space definition that the section-5 comparison
 proper has to settle.

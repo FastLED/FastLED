@@ -89,7 +89,8 @@ class ColorManagedPixelSource {
                                    u8* brightness) FL_NO_EXCEPT;
 #endif
 
-    /// Dithering stays with the controller; P8 owns it.
+    /// The legacy offsets are the wrapped controller's to toggle; this source
+    /// never reads them (C5). Its own dither is temporal, below.
     void stepDithering() FL_NO_EXCEPT { mController.stepDithering(); }
 
     void advanceData() FL_NO_EXCEPT { mController.advanceData(); }
@@ -102,6 +103,19 @@ class ColorManagedPixelSource {
     /// This is the single final quantization B3 asks for: nothing upstream
     /// of it is 8-bit, and nothing downstream re-quantizes.
     static u8 quantize(i32 drive) FL_NO_EXCEPT;
+
+    /// `quantize` with the pipeline's temporal dither (P8, C5): `floor(x)` or
+    /// `floor(x) + 1` of the exact code `x`, chosen so an eight-frame cycle
+    /// averages to `x` within 1/16 of a code. `threshold` is this frame's
+    /// point in the cycle, from `kTemporalDitherThresholds`.
+    static u8 quantizeDithered(i32 drive, u8 threshold) FL_NO_EXCEPT;
+
+    /// True when the channel asked for dither this frame. `BINARY_DITHER` on
+    /// a managed channel selects this temporal form instead of the legacy
+    /// offsets -- one dither per channel, which is C5's exclusion -- and the
+    /// same gates apply: the wrapped controller's offsets are non-zero only
+    /// for `BINARY_DITHER`, a lit scale, and a refresh rate `show()` allows.
+    bool temporalDitherEnabled() const FL_NO_EXCEPT;
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     /// `quantize` onto the 16-bit wire. Same clamps, same rounding, 65535

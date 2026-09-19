@@ -14,6 +14,8 @@
 #include "fl/stl/scope_exit.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/span.h"
+#include "fl/stl/vector.h"
+#include "fl/math/math.h"
 #include "fl/stl/int.h"
 #include "test.h"
 
@@ -562,6 +564,118 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
 // dither state sits several layers away. An attempt at that level could not be
 // made to fail under mutation: it could not distinguish "the managed path
 // ignores dither" from "dither was never armed in the harness".
+
+namespace {
+
+/// The exact 8-bit code a drive asks for, as a real number.
+double exactCode(i32 drive) {
+    if (drive <= 0) { return 0.0; }
+    if (drive >= 65536) { return 255.0; }
+    return static_cast<double>(drive) * 255.0 / 65536.0;
+}
+
+/// One frame of a managed source over `leds`, at the current dither phase.
+void managedFrame(CRGB* leds, int count, const StreamingPipelineQ16& pipeline,
+                  EDitherMode mode, u8 premixed, fl::vector<CRGB>* out) {
+    ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+    adjustment.premixed = CRGB(premixed, premixed, premixed);
+    PixelController<RGB> controller(leds, count, adjustment, mode);
+    ColorManagedPixelSource source(controller, RGB, pipeline);
+    out->clear();
+    while (source.has(1)) {
+        CRGB c;
+        source.loadAndScaleRGB(&c.r, &c.g, &c.b);
+        out->push_back(c);
+        source.advanceData();
+    }
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#4042] C5: BINARY_DITHER on a managed channel is a temporal dither on the drive") {
+    // Effective step: over the eight-frame cycle, the mean code tracks the
+    // exact code the drive asks for within 1/16 of a code, where rounding is
+    // off by up to half a code. And each frame emits floor or floor + 1 of
+    // the exact code -- one code of amplitude, never the legacy offsets.
+    const StreamingPipelineQ16 pipeline = makePipeline();
+    double worst_dithered = 0.0;
+    double worst_rounded = 0.0;
+    for (int src = 1; src < 256; src += 3) {
+        CRGB led[1] = {CRGB(static_cast<u8>(src), static_cast<u8>(src / 2),
+                            static_cast<u8>(255 - src))};
+        i32 drives[3];
+        processPixelQ16(pipeline, led[0].r, led[0].g, led[0].b, drives);
+
+        double sum[3] = {0.0, 0.0, 0.0};
+        fl::vector<CRGB> frame;
+        for (int f = 0; f < 8; ++f) {
+            fl::detail::advanceDitherFrame();
+            managedFrame(led, 1, pipeline, BINARY_DITHER, 255, &frame);
+            for (int i = 0; i < 3; ++i) {
+                const double exact = exactCode(drives[i]);
+                const int code = frame[0].raw[i];
+                FL_CHECK_GE(code, static_cast<int>(exact));
+                FL_CHECK_LE(code, static_cast<int>(exact) + 1);
+                sum[i] += code;
+            }
+        }
+        fl::vector<CRGB> plain;
+        managedFrame(led, 1, pipeline, DISABLE_DITHER, 255, &plain);
+        for (int i = 0; i < 3; ++i) {
+            const double exact = exactCode(drives[i]);
+            const double dithered_err = fl::fabs(sum[i] / 8.0 - exact);
+            const double rounded_err = fl::fabs(plain[0].raw[i] - exact);
+            if (dithered_err > worst_dithered) { worst_dithered = dithered_err; }
+            if (rounded_err > worst_rounded) { worst_rounded = rounded_err; }
+        }
+    }
+    FL_CHECK_LE(worst_dithered, 1.0 / 16.0 + 1e-9);
+    // The control: without dither the same drives miss by up to half a code,
+    // so the bound above is the dither's doing.
+    FL_CHECK_GT(worst_rounded, 0.4);
+}
+
+FL_TEST_CASE("[#4042] C5: the temporal dither does not pulse a uniform strip") {
+    // Flicker. Eight identical pixels take eight different phases in every
+    // frame, so the strip's total light is the same in each frame of the
+    // cycle; only the position of the extra codes moves.
+    const StreamingPipelineQ16 pipeline = makePipeline();
+    CRGB leds[8];
+    for (int i = 0; i < 8; ++i) { leds[i] = CRGB(37, 90, 5); }
+    int first_total = -1;
+    bool any_pixel_toggled = false;
+    fl::vector<CRGB> frame;
+    fl::vector<CRGB> previous;
+    for (int f = 0; f < 8; ++f) {
+        fl::detail::advanceDitherFrame();
+        managedFrame(leds, 8, pipeline, BINARY_DITHER, 255, &frame);
+        int total = 0;
+        for (int p = 0; p < 8; ++p) {
+            total += frame[p].r + frame[p].g + frame[p].b;
+            if (!previous.empty() && !(frame[p] == previous[p])) {
+                any_pixel_toggled = true;
+            }
+        }
+        if (first_total < 0) { first_total = total; }
+        FL_CHECK_EQ(total, first_total);
+        previous = frame;
+    }
+    // Not vacuous: individual pixels do change across the cycle.
+    FL_CHECK(any_pixel_toggled);
+}
+
+FL_TEST_CASE("[#4042] C5: a managed channel without BINARY_DITHER rounds, every frame") {
+    const StreamingPipelineQ16 pipeline = makePipeline();
+    CRGB led[1] = {CRGB(37, 90, 5)};
+    fl::vector<CRGB> first;
+    managedFrame(led, 1, pipeline, DISABLE_DITHER, 255, &first);
+    fl::vector<CRGB> frame;
+    for (int f = 0; f < 8; ++f) {
+        fl::detail::advanceDitherFrame();
+        managedFrame(led, 1, pipeline, DISABLE_DITHER, 255, &frame);
+        FL_CHECK(frame[0] == first[0]);
+    }
+}
 
 FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
     CRGB leds[1] = {CRGB(200, 40, 9)};
