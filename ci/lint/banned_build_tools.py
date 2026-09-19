@@ -53,6 +53,9 @@ ALLOWED_PATHS: frozenset[str] = frozenset(
         # Enforcement: the shell hook that blocks the commands, this lint,
         # and its tests must spell the words out.
         "ci/hooks/check_forbidden_commands.py",
+        # The one sanctioned invocation: registry publishing of a release
+        # (CLAUDE.md, "One exception to the PlatformIO ban"). Publish only.
+        "ci/release.py",
         "ci/lint/banned_build_tools.py",
         "ci/tests/test_banned_build_tools.py",
     }

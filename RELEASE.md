@@ -2,6 +2,14 @@
 
 *Pushing a fastled release, the short version, last updated May 2024*
 
+## Release helper script
+
+`bash release` automates the checks and the registry publish (see `ci/release.py`):
+
+  * `bash release check` -- every in-tree version string agrees, and the tree is exactly one step ahead of the newest tag.
+  * `bash release status` -- what the newest tag, GitHub Releases, the Arduino index and the package registry each have.
+  * `bash release publish X.Y.Z` -- packs the *tagged* tree and validates it; add `--yes` to upload it to the package registry. Uploading needs the registry auth token in the environment (the variable is named in `ci/release.py`), from an account in the `fastled` registry organization.
+
 ## Example
 
 https://github.com/FastLED/FastLED/commit/4444758ffaf853ba4f8deb973532548c9c1ee231
