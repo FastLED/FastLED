@@ -229,4 +229,11 @@
 # +2 B (382945 -> 382947), #4440 review follow-up: showPixels copies the
 # shared pipeline and sets flux on the frame-local copy, so the shared object
 # is never written after it is built.
-382947
+#
+# +53 B (382947 -> 383000), #4453: the colour-managed APA102-HD joint
+# code/field solve (P8 B1). The solve, the per-chip semantics table and the
+# profile read all sit behind ColorPipelineHooks::encodeHdWide, so a sketch
+# that binds no profile links none of them; what remains in every Channel
+# sketch is Channel::showPixels's managed check and the indirect call (+36 B by
+# symbol diff) and the hook table's extra pointer (+4 B), plus alignment.
+383000
