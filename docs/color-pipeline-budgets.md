@@ -73,5 +73,5 @@ The one name the pattern matches is `CLEDController::staticEmitterProfile()`. It
 
 ## What this does not cover
 
-- **Bind-time float.** The per-pixel path is fixed point end to end (#4315 measures it reaching no float runtime). The derivation that runs once per profile, `buildRgbSolveMatrixQ16`, still inverts in float. On the tiers where the pipeline exists that is soft-float code linked once per sketch, not per pixel. A float-free route (`buildRgbSolveMatrixFromQ16`, #4305/#4312) exists and nothing routes to it yet. Tracked on #4043.
+- **Bind time is float-free too (#4458).** Binding a profile no longer reaches the soft-float runtime. The profile's floats are converted through their IEEE-754 bits (`q16FromFloatBits`), and the source matrix, the Bradford adaptation and the device solve are derived in s16.16. `ci/tests/test_q16_inverse_is_float_free.py` proves it on Cortex-M0+ and Cortex-M33 without an FPU. The A1 case is unchanged: 0.3951 dE2000 worst above the floor, luminance 3.8e-4. On an ESP32 the platform links the float runtime anyway, so the saving there is only code the pipeline no longer calls.
 - **Measured profiles.** The budgets above use the `WS2812B` placeholder profile. A measured profile has the same shape, so it costs the same; P10 supplies measured ones.

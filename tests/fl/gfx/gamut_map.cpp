@@ -384,54 +384,33 @@ FL_TEST_CASE("Gamut map rejects a profile that cannot make a neutral") {
     FL_CHECK_FALSE(buildGamutMapQ16(outside, &map));
 }
 
-FL_TEST_CASE("Gamut map survives a profile bright enough to overflow the scale") {
-    // The neutral scale is 2^32 / largest_neutral_drive. `EmitterProfile`
-    // accepts luminances up to 1e6, and a profile that reaches D65 on a
-    // drive of one or two raw units puts that at or past i32's range --
-    // exactly 2^31 at largest == 2 -- where narrowing is
-    // implementation-defined and the bound it produces is nonsense.
-    // Luminances chosen so the D65 solve lands on drives of one and two raw
-    // units -- the case that puts 2^32 / largest at exactly 2^31. A uniform
-    // huge luminance does not reach it: every drive rounds to zero and the
-    // neutral check rejects the profile first, which is how the first
-    // version of this test managed to assert nothing at all.
+FL_TEST_CASE("Gamut map refuses a profile bright enough to overflow the scale") {
+    // This fixture was built to reach the neutral-scale overflow: luminances
+    // chosen so the D65 solve lands on drives of one and two raw units, where
+    // 2^32 / largest is exactly 2^31. The float build accepted it and the
+    // gamut map had to clamp that scale before narrowing it.
+    //
+    // Since FastLED#4458 the device solve is derived in s16.16. An emitter
+    // column this bright is about 2e9 in s16.16, and the inverse's
+    // determinant would overflow its 64-bit accumulator, so the build
+    // refuses the profile instead of producing a scale to clamp. These
+    // luminances are 2,000-23,000 times the source white; a real part is
+    // within a factor of ten. The clamp stays in the gamut map as defence in
+    // depth, but no profile reaches it through the Q16 build, and this case
+    // now pins the refusal: clean, and on every build.
     EmitterProfile blazing = rgbDevice();
     blazing.lum_r = 6966.4768f;
     blazing.lum_g = 23435.6736f;
     blazing.lum_b = 2365.8496f;
 
-    // Pin that this fixture really does reach the overflow case, so the
-    // test cannot go quiet if the solve or the constants move.
     EmitterSolveMatrixQ16 probe;
-    FL_REQUIRE(buildRgbSolveMatrixQ16(blazing, &probe));
-    const i32 d65[3] = {62289, 65536, 71372};
-    i32 neutral[3];
-    solveRgbDrivesQ16(probe, d65, neutral);
-    i32 largest = 0;
-    for (int i = 0; i < 3; ++i) {
-        FL_REQUIRE_GT(neutral[i], 0);
-        if (neutral[i] > largest) {
-            largest = neutral[i];
-        }
-    }
-    // 2^32 / 2 is 2^31 -- one past i32.
-    FL_REQUIRE_LE(largest, 2);
-
+    FL_CHECK_FALSE(buildRgbSolveMatrixQ16(blazing, &probe));
     GamutMapQ16 map;
-    FL_REQUIRE(buildGamutMapQ16(blazing, &map));
-    // Whatever comes back must be a sane lightness, not a wrapped one.
-    FL_CHECK_GT(map.max_neutral_lightness, 0);
-    FL_CHECK_LE(map.max_neutral_lightness, kOklabQ16MaxMagnitude);
+    FL_CHECK_FALSE(buildGamutMapQ16(blazing, &map));
 
-    // And the mapper must still return usable drives through it.
-    i32 xyz[3];
-    xyzAt(0.70f, 0.28f, 0.5f, xyz);
-    i32 drives[3];
-    mapAndSolveDrivesQ16(map, xyz, drives);
-    for (int i = 0; i < 3; ++i) {
-        FL_CHECK_GE(drives[i], 0);
-        FL_CHECK_LE(drives[i], kFullDrive);
-    }
+    // Vacuity guard: the same device at ordinary luminance still builds, so
+    // the refusal is about the luminance, not the fixture.
+    FL_CHECK(buildGamutMapQ16(rgbDevice(), &map));
 }
 
 FL_TEST_CASE("Gamut map moves smoothly enough to animate") {
@@ -661,8 +640,16 @@ FL_TEST_CASE("RGBW lightness bound is the brighter one the white emitter buys") 
                 0.002f);
 
     // And that neutral must actually be reachable, while 5% brighter is not.
+    // Reachability is checked 0.01% inside the computed bound: the s16.16
+    // device solve (FastLED#4458) moves the boundary by a rounding step, and
+    // exactly-on-the-edge is a question of which side the last bit falls.
+    const i32 just_inside[3] = {
+        q16(0.9504559f * 2.398271526f * 0.9999f),
+        q16(1.0f * 2.398271526f * 0.9999f),
+        q16(1.0890578f * 2.398271526f * 0.9999f),
+    };
     i32 drives[4];
-    FL_CHECK(allocateEmitterDrivesQ16(rgbw.allocation, expected_neutral, drives));
+    FL_CHECK(allocateEmitterDrivesQ16(rgbw.allocation, just_inside, drives));
     const i32 too_bright[3] = {
         static_cast<i32>(expected_neutral[0] * 1.05f),
         static_cast<i32>(expected_neutral[1] * 1.05f),
@@ -1058,63 +1045,31 @@ FL_TEST_CASE("RGBWW mapper rejects a degenerate profile") {
 }
 
 
-FL_TEST_CASE("White-emitter builds survive a profile bright enough to overflow") {
-    // The three-emitter build clamps `2^32 / largest_neutral_drive` before
-    // narrowing it, because `EmitterProfile` accepts luminances up to 1e6 and
-    // a profile reaching D65 on one or two raw units of drive puts that at
-    // 2^31. Both white builds compute the same quantity, and neither clamped
-    // it: `optimistic` starts at `kOklabQ16MaxMagnitude`, so for such a
-    // profile the bisection is skipped and the unclamped value is narrowed
-    // directly -- implementation-defined, and the stored bound meaningless.
-    //
-    // Same fixture as the three-emitter case, for the same reason: a uniform
-    // huge luminance does not reach the overflow, because every drive rounds
-    // to zero and the neutral check rejects the profile first.
+FL_TEST_CASE("White-emitter builds refuse a profile bright enough to overflow") {
+    // The same overflow fixture as the three-emitter case above, and the same
+    // change: both white builds used to accept it and clamp
+    // `2^32 / largest_neutral_drive` before narrowing. Since FastLED#4458 the
+    // device solve they share is derived in s16.16 and refuses a profile this
+    // bright (its inverse would overflow), so neither build gets as far as
+    // the scale. The clamps remain as defence in depth; this pins that both
+    // builds refuse cleanly.
     EmitterProfile blazing = rgbDevice();
     blazing.lum_r = 6966.4768f;
     blazing.lum_g = 23435.6736f;
     blazing.lum_b = 2365.8496f;
 
-    // Pin that the fixture really does reach the overflow case.
-    EmitterSolveMatrixQ16 probe;
-    FL_REQUIRE(buildRgbSolveMatrixQ16(blazing, &probe));
-    i32 neutral[3];
-    const i32 d65[3] = {62289, 65536, 71372};
-    solveRgbDrivesQ16(probe, d65, neutral);
-    i32 largest = 0;
-    for (int i = 0; i < 3; ++i) {
-        FL_REQUIRE_GT(neutral[i], 0);
-        if (neutral[i] > largest) {
-            largest = neutral[i];
-        }
-    }
-    FL_REQUIRE_LE(largest, 2);
-
-    // Both bound checks are conditional, because a build is allowed to
-    // reject this profile outright. Counting them is what stops the test
-    // passing while asserting nothing at all: if both builds ever started
-    // refusing the fixture, the clamp regression coverage would vanish in
-    // silence -- the same vacuity the `exercised` counter above had.
-    int built = 0;
-
     GamutMapRgbwQ16 one;
-    if (buildGamutMapRgbwQ16(blazing, kWhiteD65,
-                             WhiteAllocationPolicy::WhitePreferred, &one)) {
-        ++built;
-        // A sane, positive bound rather than a narrowed 2^31.
-        FL_CHECK_GT(one.max_neutral_lightness, 0);
-        FL_CHECK_LE(one.max_neutral_lightness, kOklabQ16MaxMagnitude);
-    }
-
+    FL_CHECK_FALSE(buildGamutMapRgbwQ16(blazing, kWhiteD65,
+                                        WhiteAllocationPolicy::WhitePreferred, &one));
     GamutMapRgbwwQ16 two;
-    if (buildGamutMapRgbwwQ16(blazing, kWhiteD65, kWhiteD50Map,
-                              WhiteAllocationPolicy::WhitePreferred, &two)) {
-        ++built;
-        FL_CHECK_GT(two.max_neutral_lightness, 0);
-        FL_CHECK_LE(two.max_neutral_lightness, kOklabQ16MaxMagnitude);
-    }
+    FL_CHECK_FALSE(buildGamutMapRgbwwQ16(blazing, kWhiteD65, kWhiteD50Map,
+                                         WhiteAllocationPolicy::WhitePreferred, &two));
 
-    FL_CHECK_GT(built, 0);
+    // And both build at ordinary luminance, so the refusal is the luminance.
+    FL_CHECK(buildGamutMapRgbwQ16(rgbDevice(), kWhiteD65,
+                                  WhiteAllocationPolicy::WhitePreferred, &one));
+    FL_CHECK(buildGamutMapRgbwwQ16(rgbDevice(), kWhiteD65, kWhiteD50Map,
+                                   WhiteAllocationPolicy::WhitePreferred, &two));
 }
 
 
@@ -1739,7 +1694,11 @@ FL_TEST_CASE("a neutral request stays neutral whatever the device white is") {
             xyzToOklabQ16(produced_q16, lab);
             const float a = toFloat(lab[1]);
             const float b = toFloat(lab[2]);
-            FL_CHECK_LT(fl::sqrtf(a * a + b * b), 1.0e-04f);
+            // 2e-4 OKLab chroma, from 1e-4: since FastLED#4458 the device
+            // solve is derived in s16.16 from the profile's bits, and the
+            // measured worst sits between the two. Still two orders under the
+            // contracts' stated neutral tolerance (xy within 0.002).
+            FL_CHECK_LT(fl::sqrtf(a * a + b * b), 2.0e-04f);
             ++measured;
         }
     }

@@ -464,8 +464,32 @@ FL_TEST_CASE("the float-free build lands close to the float one") {
         as_float.xy_b[0] = xy[4]; as_float.xy_b[1] = xy[5];
         as_float.lum_r = 1.0f; as_float.lum_g = 1.0f; as_float.lum_b = 1.0f;
 
+        // The float derivation, reproduced here: `buildRgbSolveMatrixQ16`
+        // itself now routes through the Q16 build (FastLED#4458), so it can
+        // no longer stand for the float arm of this comparison.
         EmitterSolveMatrixQ16 from_float = {};
-        FL_REQUIRE(buildRgbSolveMatrixQ16(as_float, &from_float));
+        {
+            float columns[3][3];
+            colorimetric_response::xyY_to_XYZ(xy[0], xy[1], 1.0f, columns[0]);
+            colorimetric_response::xyY_to_XYZ(xy[2], xy[3], 1.0f, columns[1]);
+            colorimetric_response::xyY_to_XYZ(xy[4], xy[5], 1.0f, columns[2]);
+            const float emitter[3][3] = {
+                {columns[0][0], columns[1][0], columns[2][0]},
+                {columns[0][1], columns[1][1], columns[2][1]},
+                {columns[0][2], columns[1][2], columns[2][2]},
+            };
+            float inverse[3][3];
+            FL_REQUIRE(colorimetric_response::invert3x3(emitter, inverse));
+            for (int row = 0; row < 3; ++row) {
+                for (int col = 0; col < 3; ++col) {
+                    from_float.m[row][col] = q16(inverse[row][col]);
+                }
+            }
+        }
+        // And the float-profile entry point is now exactly the Q16 build of
+        // the same values, converted by their bits.
+        EmitterSolveMatrixQ16 routed = {};
+        FL_REQUIRE(buildRgbSolveMatrixQ16(as_float, &routed));
 
         EmitterChromaticitiesQ16 as_q16 = {};
         as_q16.xy_r[0] = q16(xy[0]); as_q16.xy_r[1] = q16(xy[1]);
@@ -475,6 +499,11 @@ FL_TEST_CASE("the float-free build lands close to the float one") {
 
         EmitterSolveMatrixQ16 from_q16 = {};
         FL_REQUIRE(buildRgbSolveMatrixFromQ16(as_q16, &from_q16));
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                FL_CHECK_EQ(routed.m[row][col], from_q16.m[row][col]);
+            }
+        }
 
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 3; ++col) {
@@ -561,4 +590,41 @@ FL_TEST_CASE("the float-free build refuses what the float one refuses") {
     FL_CHECK(!buildRgbSolveMatrixFromQ16(collinear, &matrix));
 }
 
+
+FL_TEST_CASE("[#4458] q16FromFloatBits matches round-to-nearest float scaling") {
+    // The bind path converts profile floats through their IEEE-754 bits so it
+    // links no soft-float helper. It must give the same s16.16 the float
+    // quantizers did -- round to nearest, halves away from zero -- across
+    // chromaticity-sized, luminance-sized and negative values.
+    auto reference = [](float v) -> i32 {
+        const double scaled = static_cast<double>(v) * 65536.0;
+        return static_cast<i32>(scaled >= 0.0 ? scaled + 0.5 : scaled - 0.5);
+    };
+    int checked = 0;
+    for (int n = -200000; n <= 200000; n += 7) {
+        const float v = static_cast<float>(n) / 3001.0f;  // about -66.6 .. 66.6
+        i32 got = 0;
+        FL_REQUIRE(q16FromFloatBits(v, &got));
+        FL_CHECK_EQ(got, reference(v));
+        ++checked;
+    }
+    const float spot[] = {0.0f, -0.0f, 0.3127f, 0.329f, 0.64f, 0.06f, 1.0f,
+                          0.5f / 65536.0f, 1.5f / 65536.0f, 1e-30f, 32767.99f};
+    for (float v : spot) {
+        i32 got = 0;
+        FL_REQUIRE(q16FromFloatBits(v, &got));
+        FL_CHECK_EQ(got, reference(v));
+    }
+    FL_CHECK_GT(checked, 50000);
+}
+
+FL_TEST_CASE("[#4458] q16FromFloatBits refuses what s16.16 cannot hold") {
+    i32 out = 0;
+    FL_CHECK_FALSE(q16FromFloatBits(numeric_limits<float>::quiet_NaN(), &out));
+    FL_CHECK_FALSE(q16FromFloatBits(numeric_limits<float>::infinity(), &out));
+    FL_CHECK_FALSE(q16FromFloatBits(-numeric_limits<float>::infinity(), &out));
+    FL_CHECK_FALSE(q16FromFloatBits(32768.0f, &out));
+    FL_CHECK_FALSE(q16FromFloatBits(-40000.0f, &out));
+    FL_CHECK_FALSE(q16FromFloatBits(1.0f, nullptr));
+}
 }  // FL_TEST_FILE

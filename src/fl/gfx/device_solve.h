@@ -82,7 +82,26 @@ bool buildRgbSolveMatrixFromQ16(const EmitterChromaticitiesQ16& profile,
 /// generous enough to be safe would reject real parts.
 bool invert3x3Q16(const i32 (&in)[3][3], i32 (&out)[3][3]) FL_NO_EXCEPT;
 
+/// s16.16 of a float, rounded to nearest, computed from its IEEE-754 bits
+/// with integer arithmetic only -- no soft-float helper on a part without an
+/// FPU (FastLED#4458). False for NaN, infinity or |value| >= 32768.
+bool q16FromFloatBits(float value, i32* out) FL_NO_EXCEPT;
+
+namespace detail {
+/// The s16.16 building blocks the bind-time builders share.
+i64 roundedDivideQ16(i64 numerator, i64 denominator) FL_NO_EXCEPT;
+/// XYZ of chromaticity `xy` at luminance `luminance`, all s16.16; false for a
+/// non-positive or out-of-simplex chromaticity or a non-positive luminance.
+bool xyzColumnQ16(const i32 (&xy)[2], i32 luminance, i64 (&column)[3]) FL_NO_EXCEPT;
+/// One s16.16 matrix row against a vector, rounded and saturated.
+i32 dotRowQ16(const i32 (&row)[3], const i32 (&v)[3]) FL_NO_EXCEPT;
+}  // namespace detail
+
 /// Invert the emitter matrix for a three-emitter profile.
+///
+/// The profile stores float; its fields are converted by their bits
+/// (`q16FromFloatBits`) and the build is `buildRgbSolveMatrixFromQ16`, so
+/// this links no float runtime either (FastLED#4458).
 ///
 /// False when the emitter chromaticities are non-finite, degenerate, or
 /// collinear, any of which makes the matrix singular and the solve

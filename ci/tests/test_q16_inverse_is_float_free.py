@@ -44,10 +44,20 @@ kQ16BuildSymbol = (
     "_ZN2fl26buildRgbSolveMatrixFromQ16ERKNS_"
     "24EmitterChromaticitiesQ16EPNS_21EmitterSolveMatrixQ16E"
 )
-kFloatPathSymbol = (
+# The float-profile entry point. It used to derive in float; since
+# FastLED#4458 it converts the profile by its bits and routes to the Q16 build.
+kProfileBuildSymbol = (
     "_ZN2fl22buildRgbSolveMatrixQ16ERKNS_"
     "21colorimetric_response14EmitterProfileEPNS_21EmitterSolveMatrixQ16E"
 )
+
+# A deliberately float function compiled into each object under test, so the
+# walk has something it must find: if it stopped finding helpers here, every
+# "reaches none" below would mean the traversal broke, not that code is clean.
+kFloatControlSource = """
+extern "C" float flFloatControl(float a, float b) { return a * b + a / b - (float)(int)a; }
+"""
+kFloatControlSymbol = "flFloatControl"
 
 
 @dataclass(frozen=True)
@@ -271,7 +281,10 @@ def _helpers_called(objdump: str, obj: Path, symbol: str) -> set[str]:
     # stdout and stderr piped separately so objdump's warnings stay out of
     # the disassembly this parses.
     completed = RunningProcess.run(
-        [objdump, "-d", "--no-show-raw-insn", str(obj)],
+        # `-r`: in an unlinked object a call's real target is in the
+        # relocation record on the next line; the printed `<name>` can be
+        # whatever sits at address zero (see `_disassembly`).
+        [objdump, "-d", "-r", "--no-show-raw-insn", str(obj)],
         stdout=PIPE,
         stderr=PIPE,
         encoding="utf-8",
@@ -303,6 +316,8 @@ kBindSymbol = (
 )
 
 kPipelineSource = """
+#include "fl/gfx/chromatic_adaptation.cpp.hpp"
+#include "fl/gfx/colorimetric_response.cpp.hpp"
 #include "fl/gfx/device_solve.cpp.hpp"
 #include "fl/gfx/flux_scalar.cpp.hpp"
 #include "fl/gfx/gamut_map.cpp.hpp"
@@ -374,7 +389,7 @@ def compiled_pipeline(
     core = target.core
     tmp_path = tmp_path_factory.mktemp(f"pipeline_{core.replace('+', '_')}")
     source = tmp_path / "pipeline_tu.cpp"
-    source.write_text(kPipelineSource, encoding="utf-8")
+    source.write_text(kPipelineSource + kFloatControlSource, encoding="utf-8")
     obj = tmp_path / "pipeline_tu.o"
     RunningProcess.run(
         [
@@ -486,26 +501,38 @@ def test_the_per_pixel_path_reaches_no_float_runtime(
 
 
 @typechecked
-def test_the_bind_path_is_where_the_float_still_is(
+def test_the_bind_path_reaches_no_float_runtime(
     compiled_pipeline: CompiledPipeline,
 ) -> None:
-    """Control for the case above, and a statement of what remains.
+    """FastLED#4458: binding a profile is float-free too.
 
-    If the walk reported nothing for both, it would prove the traversal
-    stopped rather than that the pipeline is clean. `buildStreamingPipelineQ16`
-    is in the same object and derives its matrices in float, so it must show
-    the helpers the per-pixel path does not.
-
-    That float is confined to bind time is P9 item 2's remaining work rather
-    than a defect here -- `buildRgbSolveMatrixFromQ16` is the float-free
-    counterpart, and nothing routes to it yet.
+    `buildStreamingPipelineQ16` converts the profile's floats by their bits
+    and derives the source matrix, the Bradford adaptation and the device
+    solve in s16.16. The object includes `chromatic_adaptation` and
+    `colorimetric_response`, so nothing the walk needs to follow is outside it.
     """
 
     helpers = _reachable_helpers(
         compiled_pipeline.tools.objdump, compiled_pipeline.obj, kBindSymbol
     )
-    assert len(helpers) >= 8, (
-        f"expected the bind path to reach the soft-float runtime on "
+    assert helpers == set(), (
+        f"the bind path reaches the float runtime on "
+        f"{compiled_pipeline.core}: {sorted(helpers)}"
+    )
+
+
+@typechecked
+def test_the_pipeline_walk_still_finds_float(
+    compiled_pipeline: CompiledPipeline,
+) -> None:
+    """Control for the two cases above: a float function in the same object
+    must show helpers, or their silence proves nothing."""
+
+    helpers = _reachable_helpers(
+        compiled_pipeline.tools.objdump, compiled_pipeline.obj, kFloatControlSymbol
+    )
+    assert len(helpers) >= 3, (
+        f"expected the float control to reach the soft-float runtime on "
         f"{compiled_pipeline.core}, found {sorted(helpers)}"
     )
 
@@ -519,7 +546,10 @@ def compiled(tmp_path_factory: pytest.TempPathFactory) -> tuple[ArmTools, Path]:
 
     tmp_path = tmp_path_factory.mktemp("q16_float_free")
     source = tmp_path / "device_solve_tu.cpp"
-    source.write_text('#include "fl/gfx/device_solve.cpp.hpp"\n', encoding="utf-8")
+    source.write_text(
+        '#include "fl/gfx/device_solve.cpp.hpp"\n' + kFloatControlSource,
+        encoding="utf-8",
+    )
     obj = tmp_path / "device_solve_tu.o"
     RunningProcess.run(
         [
@@ -598,37 +628,41 @@ def test_the_q16_build_reaches_no_float_runtime(
 
 
 @typechecked
+def test_the_profile_entry_point_reaches_no_float_runtime(
+    compiled: tuple[ArmTools, Path],
+) -> None:
+    """`buildRgbSolveMatrixQ16(EmitterProfile)` takes float fields but now
+    converts them by their bits and routes to the Q16 build (FastLED#4458)."""
+
+    tools, obj = compiled
+    helpers = _reachable_helpers(tools.objdump, obj, kProfileBuildSymbol)
+    assert helpers == set(), (
+        f"buildRgbSolveMatrixQ16 reaches the float runtime: {sorted(helpers)}"
+    )
+
+
+@typechecked
 def test_following_calls_is_what_makes_that_meaningful(
     compiled: tuple[ArmTools, Path],
 ) -> None:
-    """Control for the case above.
-
-    `buildRgbSolveMatrixQ16` is the float path and calls into
-    `colorimetric_response` helpers. Reachability has to find those; if it
-    reported nothing here, the clean result above would mean the traversal
-    stopped, not that the chain is clean.
-    """
+    """Control for the cases above: reachability has to find the helpers the
+    float control calls, or a clean result would mean the traversal stopped."""
 
     tools, obj = compiled
-    helpers = _reachable_helpers(tools.objdump, obj, kFloatPathSymbol)
-    assert len(helpers) >= 8, (
-        f"expected the float path to reach the soft-float runtime, found {sorted(helpers)}"
+    helpers = _reachable_helpers(tools.objdump, obj, kFloatControlSymbol)
+    assert len(helpers) >= 3, (
+        f"expected the float control to reach the soft-float runtime, found {sorted(helpers)}"
     )
 
 
 @typechecked
 def test_the_float_path_alongside_it_does(compiled: tuple[ArmTools, Path]) -> None:
-    """Positive control.
-
-    `buildRgbSolveMatrixQ16` is in the same object and does its work in float.
-    If this stops finding helpers, the check above has stopped being able to
-    find them either, and its silence means nothing.
-
-    Measured on GCC 16.1 for cortex-m0plus at -Os: 11 distinct helpers.
-    """
+    """Positive control on a single body: the float control's own disassembly
+    names soft-float helpers. If it stopped, the checks above could not find
+    them either."""
 
     tools, obj = compiled
-    helpers = _helpers_called(tools.objdump, obj, kFloatPathSymbol)
-    assert len(helpers) >= 8, (
-        f"expected the float path to call the soft-float runtime, found {sorted(helpers)}"
+    helpers = _helpers_called(tools.objdump, obj, kFloatControlSymbol)
+    assert len(helpers) >= 3, (
+        f"expected the float control to call the soft-float runtime, found {sorted(helpers)}"
     )

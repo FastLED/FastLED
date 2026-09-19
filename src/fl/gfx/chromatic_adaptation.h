@@ -28,6 +28,9 @@ namespace detail {
 /// its own cannot be bisected when its budget misses.
 extern const float kBradford[3][3];
 extern const float kBradfordInverse[3][3];
+/// The same two in s16.16, which the bind-time build uses (FastLED#4458).
+extern const i32 kBradfordQ16[3][3];
+extern const i32 kBradfordInverseQ16[3][3];
 
 } // namespace detail
 
