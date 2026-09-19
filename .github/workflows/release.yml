@@ -1,0 +1,93 @@
+name: release
+
+# Merging the release PR (`bash release prepare --pr`) is the release. This
+# workflow turns the version on master into a tag and a GitHub release:
+#   - the tag is what the Arduino index picks up
+#   - the package registry's crawler reads the version from library.json on
+#     master, and packages the tag of the same name -- so the tag must exist
+#     as soon as master shows the version
+# Safe to re-run: an existing tag or release is left alone.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'library.properties'
+      - 'library.json'
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # create the tag and the release
+  actions: write    # dispatch the docs build
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the check compares against every release tag
+
+      - name: Read the version on master
+        id: v
+        run: |
+          VERSION=$(sed -n 's/^version=//p' library.properties)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            echo "tagged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tagged=false" >> "$GITHUB_OUTPUT"
+          fi
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Nothing to do
+        if: steps.v.outputs.released == 'true'
+        run: echo "${{ steps.v.outputs.version }} is already released."
+
+      - name: Install uv
+        if: steps.v.outputs.released == 'false'
+        run: pip install uv
+
+      # An untagged version on master that is not a valid release fails here,
+      # loudly: that is the state the registry crawler would publish as-is.
+      - name: Check the tree is a valid release
+        if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
+        run: PYTHONPATH=. uv run ci/release.py check --releasing
+
+      - name: Extract the release notes
+        if: steps.v.outputs.released == 'false'
+        run: PYTHONPATH=. uv run ci/release.py notes "${{ steps.v.outputs.version }}" > "$RUNNER_TEMP/notes.md"
+
+      - name: Tag and create the GitHub release
+        if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
+        run: |
+          gh release create "${{ steps.v.outputs.version }}" \
+            --target "$GITHUB_SHA" \
+            --title "FastLED ${{ steps.v.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+
+      - name: Create the GitHub release for an existing tag
+        if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'true'
+        run: |
+          gh release create "${{ steps.v.outputs.version }}" \
+            --verify-tag \
+            --title "FastLED ${{ steps.v.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+
+      # Events raised with the workflow token do not trigger other workflows,
+      # so the docs build is dispatched rather than left to `on: release`.
+      - name: Rebuild the docs
+        if: steps.v.outputs.released == 'false'
+        run: gh workflow run docs2.yml --ref master
