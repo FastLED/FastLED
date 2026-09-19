@@ -108,9 +108,16 @@ struct ColorPipelineHooks {
     /// dim emitters (#4344, #4156 R3). Evaluated at unity flux, so brightness
     /// and power limiting scale the result the same way they scale any other
     /// controller's demand.
+    ///
+    /// The drives are charged through `estimate`, the power limiter's own
+    /// estimator, which the caller in power_mgt passes in. Naming it here
+    /// would link the limiter and its tables into every build that can bind
+    /// a profile, power limiting or not (#4472).
 #if FL_COLOR_PIPELINE_SHARED
+    using PowerEstimator = u32 (*)(span<const CRGB> leds, const Rgbw& rgbw);
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
-                                   span<const CRGB> leds, const Rgbw& rgbw);
+                                   span<const CRGB> leds, const Rgbw& rgbw,
+                                   PowerEstimator estimate);
 #endif
 
     /// Chipset-specific quantization of a colour-managed SPI channel's wide
