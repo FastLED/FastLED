@@ -709,13 +709,22 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // this working when FASTLED_HD_COLOR_MIXING is off, where that field
     // does not exist.
     //
-    // `pipeline_ref` is this frame's own reference, held until the encode
-    // below returns: a reconfiguration while it runs replaces `mPipeline`
-    // without freeing the one being encoded through (#4440). Small tiers
-    // encode synchronously and keep single ownership.
+    // The shared pipeline is never written after it is built (#4440): this
+    // frame takes a reference, copies it, and sets flux on the copy, so a
+    // concurrent reader -- the power estimate copies the same pipeline --
+    // never sees a half-written flux, and a reconfiguration replaces
+    // `mPipeline` without touching what this frame encodes through. Small
+    // tiers encode synchronously and keep single ownership, mutated in place.
 #if FL_COLOR_PIPELINE_SHARED
-    const ColorPipelineStorage pipeline_ref = mPipeline;
-    StreamingPipelineQ16* const pipeline_mut = pipeline_ref.get();
+    StreamingPipelineQ16 frame_pipeline;
+    StreamingPipelineQ16* pipeline_mut = nullptr;
+    {
+        const ColorPipelineStorage pipeline_ref = mPipeline;
+        if (pipeline_ref) {
+            frame_pipeline = *pipeline_ref;
+            pipeline_mut = &frame_pipeline;
+        }
+    }
 #else
     StreamingPipelineQ16* const pipeline_mut = mPipeline.get();
 #endif

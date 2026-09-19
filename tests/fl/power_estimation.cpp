@@ -508,6 +508,9 @@ struct ManagedStrip {
 
 }  // namespace
 
+// Managed-channel estimation exists only where FL_COLOR_PIPELINE_SHARED is
+// on; below the large-memory tier a managed channel charges its source.
+#if FL_COLOR_PIPELINE_SHARED
 FL_TEST_CASE("[#4344] a managed channel's demand is its solved drives, not its source") {
     const CRGB source(40, 40, 40);
     const EmitterProfile dim = deviceWithLuminance(0.10f);
@@ -544,6 +547,8 @@ FL_TEST_CASE("[#4344] the limiter now dims a managed channel the source said wou
     FL_CHECK_LT(int(calculate_max_brightness_for_power_mW(255, budget)), 255);
 }
 
+#endif  // FL_COLOR_PIPELINE_SHARED
+
 FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {
     const CRGB source(40, 40, 40);
     ManagedStrip strip(source, nullptr);
@@ -551,6 +556,7 @@ FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {
     FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
 }
 
+#if FL_COLOR_PIPELINE_SHARED
 FL_TEST_CASE("[#4440] a reader's pipeline outlives the channel dropping it") {
     // The estimate and the frame encode each hold the pipeline while they
     // walk the strip. Reconfiguring the channel in the meantime -- here, to
@@ -584,3 +590,4 @@ FL_TEST_CASE("[#4440] a reader's pipeline outlives the channel dropping it") {
     // And the channel's own estimate is back to the source charge.
     FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
 }
+#endif  // FL_COLOR_PIPELINE_SHARED
