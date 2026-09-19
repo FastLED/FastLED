@@ -167,6 +167,21 @@ reported distinctly: an **absent** declaration resolves to `NoDefaultTuple`,
 a **partial** one to `IncompleteForFormat`. Neither is *malformed* — the caller
 decides whether it cares, rather than treating the file as corrupt.
 
+### Playback with and without colour management (B6)
+
+**Without colour management (the default)** a `.fled` file plays exactly as it always has. Its RGB8 values reach the strip as bytes: colour order applied, scaled by brightness and legacy correction, and nothing else. `video.color` is carried and validated but changes no output. Existing files look the same on existing sketches; `tests/fl/channels/channel.cpp` pins the unbound output byte for byte on clockless and SPI chipsets.
+
+**With colour management** (a channel with `setColorProfile`), each pixel is interpreted through the channel's **source profile**: decoded to linear light, mapped into the strip's gamut, and solved per emitter. The same file therefore looks different, and should.
+
+- **Why.** An LED's light is roughly proportional to its drive, while a display-encoded `.fled` stores sRGB-encoded values. Legacy playback sends an sRGB value of 128 as roughly half drive. It means about 22% of full light, so mid-tones play too bright and desaturated. Colour-managed playback decodes the transfer and renders the light the value asks for.
+- **What to set.** The source profile is not taken from the file today. A colour-managed channel uses `FastLED.defaultSourceProfile()`, which is `SourceProfile::linearSrgb()` unless changed. The default tuple of the display-encoded formats is `{bt709, srgb}`, so to play such a file colour-accurately, tell FastLED so:
+
+  ```cpp
+  FastLED.setDefaultSourceProfile(fl::SourceProfile::srgbBt709());
+  ```
+
+  For a file whose `video.color` declares other primaries or transfer, pick the matching profile: `displayP3()`, `bt2020()`, `bt709()`, or `custom(...)` built from `Video::videoColor()`. Wiring the declared tuple to the source profile automatically is tracked in FastLED#4460.
+
 ### Declaration verdicts vs. consumer policy
 
 Rejecting a *declaration* is not the same as refusing a *file*:

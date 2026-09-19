@@ -12,6 +12,7 @@
 #include "fl/channels/manager.h"
 #include "fl/channels/options.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "fl/chipsets/spi.h"
 #include "fl/gfx/fill.h"
 #include "fl/math/screenmap.h"
 #include "fl/math/xymap.h"
@@ -1190,6 +1191,70 @@ FL_TEST_CASE("[#4034] an unbound channel emits the legacy bytes exactly") {
             FL_CHECK_EQ((int)driver->last[0], cases[i].expect[0]);
             FL_CHECK_EQ((int)driver->last[1], cases[i].expect[1]);
             FL_CHECK_EQ((int)driver->last[2], cases[i].expect[2]);
+        }
+    }
+}
+
+FL_TEST_CASE("[#4034] unbound SPI chipsets emit their legacy frames exactly") {
+    // The same criterion across the clocked chipsets, whose encoders the
+    // colour pipeline also reaches (#4453's joint solve, #4456's narrow-wire
+    // path). Expected frames are derived by hand from each protocol, not
+    // captured from the code under test: source CRGB(200, 100, 50) in channel
+    // order RGB, scaled by scale8 (FASTLED_SCALE8_FIXED: (v * (b + 1)) >> 8)
+    // to (100, 50, 25) at brightness 128.
+    struct Case {
+        const char* name;
+        SpiEncoder encoder;
+        u8 brightness;
+        fl::vector<u8> expect;
+    };
+    auto bytes = [](fl::initializer_list<u8> list) { return fl::vector<u8>(list); };
+    const Case cases[] = {
+        // Start frame, 0xE0 | field 31, three codes, one all-ones end dword.
+        {"APA102 at full brightness", SpiEncoder::apa102(), 255,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 200, 100, 50, 0xFF, 0xFF, 0xFF, 0xFF})},
+        {"APA102 at half", SpiEncoder::apa102(), 128,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 100, 50, 25, 0xFF, 0xFF, 0xFF, 0xFF})},
+        {"SK9822 at full brightness", SpiEncoder::sk9822(), 255,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 200, 100, 50, 0xFF, 0xFF, 0xFF, 0xFF})},
+        {"SK9822 at half", SpiEncoder::sk9822(), 128,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xFF, 100, 50, 25, 0xFF, 0xFF, 0xFF, 0xFF})},
+        // Raw bytes, latched by the clock pausing.
+        {"WS2801 at full brightness", SpiEncoder::ws2801(), 255, bytes({200, 100, 50})},
+        {"WS2801 at half", SpiEncoder::ws2801(), 128, bytes({100, 50, 25})},
+        // 0x80 | (v >> 1), with the low bit forced on for lit values below 254;
+        // then (n * 3 + 63) / 64 zero latch bytes.
+        {"LPD8806 at full brightness", SpiEncoder::lpd8806(), 255, bytes({0xE5, 0xB3, 0x99, 0x00})},
+        {"LPD8806 at half", SpiEncoder::lpd8806(), 128, bytes({0xB3, 0x99, 0x8D, 0x00})},
+        // Four zero bytes, then 1rrrrrgggggbbbbb from the top five bits of each.
+        {"LPD6803 at full brightness", SpiEncoder::lpd6803(), 255,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xE5, 0x86})},
+        {"LPD6803 at half", SpiEncoder::lpd6803(), 128,
+         bytes({0x00, 0x00, 0x00, 0x00, 0xB0, 0xC3})},
+    };
+
+    for (fl::size i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        FL_SUBCASE(cases[i].name) {
+            auto& mgr = ChannelManager::instance();
+            mgr.clearAllDrivers();
+            auto driver = fl::make_shared<CapturingDriver>();
+            mgr.addDriver(9300, driver);
+            auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+            CRGB leds[1] = {CRGB(200, 100, 50)};
+            ChannelOptions options;
+            options.mDitherMode = DISABLE_DITHER;
+            ChannelConfig config(SpiChipsetConfig{5, 6, cases[i].encoder},
+                                 fl::span<CRGB>(leds, 1), RGB, options);
+            ChannelPtr ch = Channel::create(config);
+            FL_REQUIRE(ch != nullptr);
+            FL_CHECK_FALSE(ch->hasColorProfile());
+            ch->showLeds(cases[i].brightness);
+
+            FL_REQUIRE_EQ(driver->last.size(), cases[i].expect.size());
+            for (fl::size b = 0; b < cases[i].expect.size(); ++b) {
+                FL_CHECK_EQ((int)driver->last[b], (int)cases[i].expect[b]);
+            }
         }
     }
 }
