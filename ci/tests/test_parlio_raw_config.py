@@ -22,6 +22,8 @@ def test_parlio_raw_tx_sets_the_edge_field_the_idf_has() -> None:
 
     assert "setParlioRawTxEdge(cfg, 0);" in source
     assert "-> decltype(cfg.shift_edge, void())" in source
+    # SHIFT_EDGE_POS is 0; the cast is exact so a change of edge fails here.
+    assert "cfg.shift_edge = static_cast<decltype(cfg.shift_edge)>(0);" in source
     assert "cfg.sample_edge = PARLIO_SAMPLE_EDGE_POS;" in source
     assert "shift_edge = PARLIO_SAMPLE_EDGE_POS" not in source
     assert "sample_edge = PARLIO_SHIFT_EDGE_POS" not in source
