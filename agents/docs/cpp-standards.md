@@ -482,6 +482,55 @@ class CFastLED {
 2. If the parameter is `const T*` AND the storage is `const T*`, flag as HIGH severity (pointer storage = use-after-scope).
 3. If the parameter is `const T*` but the storage is `T` and the body copies on non-null + resets on null, that's the allowed nullable-reset shape — no violation.
 
+## Long-Lived Pointers Are `fl::shared_ptr` (Lifetime Must Be Owned, Not Assumed)
+
+**Core Principle**: A pointer that is **stored**, or **held across anything that could free its target**, MUST be an `fl::shared_ptr<T>` reference that its holder owns. It must never be a raw `T*` or a `.get()` taken from someone else's `unique_ptr`. Then the memory cannot be freed out from under a reader that is still using it. The owner only drops *its* reference; the reader keeps the object alive until it lets go.
+
+**"Long-lived" means any of these:**
+- stored in a member, a static, a singleton, a queue, or a callback/closure;
+- held across an async boundary: a driver or DMA callback, an ISR, another task or core, `fl::task`, a deferred or queued job;
+- held across a call that can reconfigure or destroy the owner, such as `applyConfig`, `setColorProfile`, `clear*`, or removing a channel or controller;
+- returned from a virtual or public accessor, where the caller decides how long to keep it.
+
+**Rules**:
+1. ✅ **Owners hold `fl::shared_ptr<T>`** (built with `fl::make_shared`). An owner that replaces or clears its object resets *its* pointer and nothing else.
+2. ✅ **A reader takes its own `fl::shared_ptr<T>` copy for as long as it uses the object**. Examples: a frame encode, a power-estimate pass, an async transmission. A local `const fl::shared_ptr<T> ref = mThing;` at the top of the scope is the idiom.
+3. ✅ **Accessors that hand out a long-lived object return `fl::shared_ptr<T>`**, not `T*`.
+4. ✅ **Allowed exception: a raw pointer or reference in synchronous code where you can *prove* the target outlives the use.** Examples:
+   - a function parameter `const T&` that the callee does not store;
+   - `ref.get()` passed down a call chain while the caller's `shared_ptr` `ref` is still in scope;
+   - a pointer into an object whose owner is on the same stack frame and cannot be reconfigured during the call.
+
+   If the proof depends on "nothing else runs meanwhile", and anything in the call could reconfigure the owner, the exception does not apply.
+5. ❌ **NEVER store `unique_ptr::get()` or a raw `T*` to an object someone else can reset**, and never return one from a virtual.
+6. **Zero cost on small-memory targets.** Small means the tiny and low tiers, i.e. `!FL_PLATFORM_HAS_LARGE_MEMORY`: AVR Uno/Nano, ATtiny, ESP8266, Teensy LC/3.x, STM32F1 and similar.
+   - Put the `shared_ptr` storage, the per-use reference and any virtual accessor behind a feature gate that is off there. The colour pipeline's gate is `FL_COLOR_PIPELINE_SHARED` (`src/fl/channels/options.h`).
+   - Those tiers have no async show, so they keep single ownership (`unique_ptr`) with sync-only readers (rule 4) and pay neither RAM nor flash: no vtable slot, no control block.
+   - Verify with `bash compile uno --examples Blink`: flash and RAM must match master byte for byte.
+
+**Example (#4440):**
+```cpp
+// Owner (large-memory tiers; small tiers keep unique_ptr + sync-only readers)
+using ColorPipelineStorage = fl::shared_ptr<StreamingPipelineQ16>;   // was unique_ptr
+mPipeline = fl::make_shared<StreamingPipelineQ16>(pipeline);          // reconcile replaces it
+
+// Reader: holds its own reference for the whole encode
+const ColorPipelineStorage pipeline_ref = mPipeline;
+encode(pipeline_ref.get());   // OK: raw pointer below a live shared_ptr (rule 4)
+
+// Accessor: callers own what they get; compiled out on small tiers
+#if FL_COLOR_PIPELINE_SHARED
+virtual fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT;
+#endif
+```
+
+**Why**: before #4440, `Channel` owned its colour pipeline through a `unique_ptr`. It handed raw `.get()` pointers to the frame encode and the power estimate, and `reconcileColorProfile()` began with `mPipeline.reset()`. Any reconfiguration while a reader was in flight freed the pipeline underneath it. A reader holding a raw pointer has no way to keep its target alive; a reader holding a `shared_ptr` does by construction.
+
+**Check Process**:
+1. For every new member, static, or queued field of pointer type, ask who can free the target. If it is anyone but the holder, it must be `fl::shared_ptr`.
+2. For every `.get()` whose result outlives the statement, confirm that a `shared_ptr` owned by the same scope is alive for the whole use.
+3. For every accessor or virtual returning `T*` to a heap object, change it to return `fl::shared_ptr<T>` unless rule 4 provably applies to every caller.
+
 ## In-Place Profile Mutation Bumps a Version (Cache Invalidation Contract)
 
 **Core Principle**: If `set_X(T* obj, ...)` writes into the fields of a caller-owned `*obj`, and any subsystem caches values *derived from* `*obj` keyed only on `(obj_ptr, ...)`, then the setter MUST bump `obj->mCacheVersion` (or call `obj->invalidate()`) and the cache key MUST include that version. Otherwise the cache returns stale data the next time the same pointer is passed in.

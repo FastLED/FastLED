@@ -493,10 +493,10 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 	const fl::u32 dark_mW_per_led = get_power_model().dark_mW;
 	CLEDController::visitControllers([&](const CLEDController* controller, fl::span<const CRGB> leds) {
 		if (!leds.empty()) {
-			// Through the controller's own RGBW setting, so an RGBW strip is
-			// charged for the diode it actually lights (#4156 R3).
-			const fl::u32 unscaled_mW =
-			    calculate_unscaled_power_mW(leds, controller->getRgbw());
+			// The controller's own estimate: its RGBW setting, so an RGBW strip
+			// is charged for the diode it actually lights, and for a bound
+			// colour profile the solved drives rather than the source (#4344).
+			const fl::u32 unscaled_mW = controller_unscaled_power_mW(*controller);
 			const fl::u32 dark_mW = dark_mW_per_led * static_cast<fl::u32>(leds.size());
 			fixed_power_mW += dark_mW;
 			controllable_power_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;

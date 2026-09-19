@@ -13,6 +13,7 @@
 
 #include "fl/channels/color_managed_source.h"
 #include "fl/channels/color_profile.h"
+#include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/gfx/eorder.h"
 #include "fl/gfx/pipeline.h"
@@ -92,6 +93,20 @@ struct ColorPipelineHooks {
     /// invoke path -- `fl::vector`, `malloc`/`realloc`/`free`, a sort --
     /// alive in every sketch that calls `setCorrection`: ~8.3 KB on AVR.
     void (*notifyProfileClearedByLegacy)();
+
+    /// Unscaled (full-brightness) power demand of `leds` as the pipeline will
+    /// drive them, in mW, including idle draw. Null until installed.
+    ///
+    /// The limiter must charge the drives the strip actually lights, not the
+    /// source triple the sketch wrote: for a bound profile the two differ by
+    /// whatever the solve does, in either direction, and by up to 4.45x on
+    /// dim emitters (#4344, #4156 R3). Evaluated at unity flux, so brightness
+    /// and power limiting scale the result the same way they scale any other
+    /// controller's demand.
+#if FL_COLOR_PIPELINE_SHARED
+    u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
+                                   span<const CRGB> leds, const Rgbw& rgbw);
+#endif
 };
 
 /// The installed hooks. Both pointers are null in a program that never binds

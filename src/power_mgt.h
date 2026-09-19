@@ -4,6 +4,7 @@
 
 #include "pixeltypes.h"
 #include "fl/gfx/rgbw.h"
+#include "fl/channels/cled_controller.h"  // IWYU pragma: keep  (controller_unscaled_power_mW)
 
 /// @file power_mgt.h
 /// Functions to limit the power used by FastLED
@@ -303,6 +304,15 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 /// @param rgbw the controller's RGBW setting; an inactive one delegates to
 ///        the three-emitter overload
 fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw);
+
+/// One controller's demand at full brightness, in mW, including idle draw --
+/// the quantity the limiter sums and scales.
+///
+/// A controller whose output runs through a colour pipeline is charged for the
+/// drives the pipeline solves, not for its source pixels: the two differ in
+/// either direction, by up to 4.45x on dim emitters (#4344, #4156 R3). Any
+/// other controller is charged through its RGBW conversion, as before.
+fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
 
 /// Applies the configured power-scaling response to a total power value.
 ///

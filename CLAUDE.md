@@ -108,6 +108,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 ### Code Standards
 - **C++**: See `agents/docs/cpp-standards.md` (span convention, DMA patterns, naming, macros)
 - **C++ public settings**: New global setters MUST go on `CFastLED` (`FastLED.setX()`), not as bare `fl::set_*` free functions — see `agents/docs/cpp-standards.md` → "Public Settings Pattern"
+- **C++ pointer lifetime**: Long-lived pointers (stored, returned from an accessor, or held across async/reconfiguration) MUST be `fl::shared_ptr`; a raw pointer is OK only in sync code where the target provably outlives the use. Compile it out on small-memory tiers (`!FL_PLATFORM_HAS_LARGE_MEMORY`) — see `agents/docs/cpp-standards.md` → "Long-Lived Pointers Are `fl::shared_ptr`"
 - **JavaScript**: Run `bash lint --js` after modifying JS files
 
 ### Code Review Rule

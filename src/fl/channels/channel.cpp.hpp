@@ -432,7 +432,11 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         // an ordinary unbound channel, not an exceptional path.
         StreamingPipelineQ16 pipeline;
         if (hooks.build(mSettings.mColorProfile, &pipeline)) {
+#if FL_COLOR_PIPELINE_SHARED
+            mPipeline = fl::make_shared<StreamingPipelineQ16>(pipeline);
+#else
             mPipeline = fl::make_unique<StreamingPipelineQ16>(pipeline);
+#endif
         } else if (options.hasColorProfile()) {
             // R6: a profile outside the numerical bounds must "fail
             // explicitly" and "not become native-drive input". A binding that
@@ -704,11 +708,30 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // it -- and reading it rather than `ColorAdjustment::brightness` keeps
     // this working when FASTLED_HD_COLOR_MIXING is off, where that field
     // does not exist.
+    //
+    // The shared pipeline is never written after it is built (#4440): this
+    // frame takes a reference, copies it, and sets flux on the copy, so a
+    // concurrent reader -- the power estimate copies the same pipeline --
+    // never sees a half-written flux, and a reconfiguration replaces
+    // `mPipeline` without touching what this frame encodes through. Small
+    // tiers encode synchronously and keep single ownership, mutated in place.
+#if FL_COLOR_PIPELINE_SHARED
+    StreamingPipelineQ16 frame_pipeline;
+    StreamingPipelineQ16* pipeline_mut = nullptr;
+    {
+        const ColorPipelineStorage pipeline_ref = mPipeline;
+        if (pipeline_ref) {
+            frame_pipeline = *pipeline_ref;
+            pipeline_mut = &frame_pipeline;
+        }
+    }
+#else
+    StreamingPipelineQ16* const pipeline_mut = mPipeline.get();
+#endif
     const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
-    const StreamingPipelineQ16* pipeline = mPipeline.get();
-    if (pipeline != nullptr && flux_hooks.setFlux != nullptr) {
-        flux_hooks.setFlux(mPipeline.get(),
-                           pixels.mColorAdjustment.premixed.r);
+    const StreamingPipelineQ16* pipeline = pipeline_mut;
+    if (pipeline_mut != nullptr && flux_hooks.setFlux != nullptr) {
+        flux_hooks.setFlux(pipeline_mut, pixels.mColorAdjustment.premixed.r);
     }
 #else
     const StreamingPipelineQ16* pipeline = nullptr;
@@ -998,6 +1021,12 @@ CRGB Channel::getTemperature() {
 u8 Channel::getDither() {
     return CPixelLEDController<RGB>::getDither();
 }
+
+#if FL_COLOR_PIPELINE_SHARED
+fl::shared_ptr<StreamingPipelineQ16> Channel::colorPipeline() const FL_NO_EXCEPT {
+    return mPipeline;
+}
+#endif
 
 Rgbw Channel::getRgbw() const {
     return CPixelLEDController<RGB>::getRgbw();

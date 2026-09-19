@@ -3,6 +3,10 @@
 #include "FastLED.h"
 #include "power_mgt.h"
 #include "fl/channels/cled_controller.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/options.h"
+#include "fl/channels/pipeline_binding.h"
+#include "fl/chipsets/chipset_timing_config.h"
 
 using namespace fl;
 
@@ -470,3 +474,120 @@ FL_TEST_CASE("[#4344] the error's direction is set by emitter luminance alone") 
     FL_CHECK_LT(at_100, charged);
     FL_CHECK_GT(at_10, charged);
 }
+
+// ---------------------------------------------------------------------------
+// #4344 fixed: a colour-managed channel charges its solved drives.
+//
+// The cases above measure the gap. These pin that the limiter no longer has
+// it: `controller_unscaled_power_mW()` on a managed channel is the drives' demand,
+// and the limiter acts on that number rather than on the source array.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+/// A strip of `kStripLen` copies of `source`, on a channel bound to a device
+/// whose emitters share `luminance` (nullptr profile = unmanaged).
+struct ManagedStrip {
+    CRGB leds[kStripLen];
+    ChannelPtr channel;
+
+    ManagedStrip(CRGB source, const EmitterProfile* profile) {
+        for (int i = 0; i < kStripLen; ++i) {
+            leds[i] = source;
+        }
+        ChannelOptions options;
+        if (profile != nullptr) {
+            FL_REQUIRE(options.setColorProfile(*profile, SourceProfile::linearSrgb()));
+        }
+        auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+        channel = Channel::create(
+            ChannelConfig(4, timing, fl::span<CRGB>(leds, kStripLen), RGB, options));
+        FL_REQUIRE(channel != nullptr);
+    }
+};
+
+}  // namespace
+
+// Managed-channel estimation exists only where FL_COLOR_PIPELINE_SHARED is
+// on; below the large-memory tier a managed channel charges its source.
+#if FL_COLOR_PIPELINE_SHARED
+FL_TEST_CASE("[#4344] a managed channel's demand is its solved drives, not its source") {
+    const CRGB source(40, 40, 40);
+    const EmitterProfile dim = deviceWithLuminance(0.10f);
+    ManagedStrip strip(source, &dim);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    const fl::u32 estimated = controller_unscaled_power_mW(*strip.channel);
+    const fl::u32 drawn = powerOfStrip(solvedDrives(source, 0.10f));
+    const fl::u32 source_charge = powerOfStrip(source);
+
+    // The estimator charges in chunks, so its per-chunk truncation can differ
+    // from a single sum by under 1 mW per emitter per chunk.
+    const fl::u32 slack = 3u * static_cast<fl::u32>((kStripLen + 31) / 32);
+    const fl::u32 gap = estimated > drawn ? estimated - drawn : drawn - estimated;
+    FL_CHECK_LE(gap, slack);
+    // The number the limiter used to see, which under-charged this device.
+    FL_CHECK_GT(estimated, source_charge + slack);
+}
+
+FL_TEST_CASE("[#4344] the limiter now dims a managed channel the source said would fit") {
+    const CRGB source(40, 40, 40);
+    const EmitterProfile dim = deviceWithLuminance(0.10f);
+    ManagedStrip strip(source, &dim);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    const fl::u32 source_charge = powerOfStrip(source);
+    const fl::u32 drawn = controller_unscaled_power_mW(*strip.channel);
+    FL_REQUIRE_GT(drawn, source_charge);
+
+    // A budget the source array fits inside but the solved drives do not.
+    // Charging the source, the limiter left brightness at 255 and the strip
+    // drew over budget; charging the drives, it has to come down.
+    const fl::u32 budget = (source_charge + drawn) / 2;
+    FL_CHECK_LT(int(calculate_max_brightness_for_power_mW(255, budget)), 255);
+}
+
+#endif  // FL_COLOR_PIPELINE_SHARED
+
+FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {
+    const CRGB source(40, 40, 40);
+    ManagedStrip strip(source, nullptr);
+    FL_REQUIRE_FALSE(strip.channel->isColorManaged());
+    FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
+}
+
+#if FL_COLOR_PIPELINE_SHARED
+FL_TEST_CASE("[#4440] a reader's pipeline outlives the channel dropping it") {
+    // The estimate and the frame encode each hold the pipeline while they
+    // walk the strip. Reconfiguring the channel in the meantime -- here, to
+    // unmanaged -- must drop only the channel's reference. With a single
+    // owner this was a use-after-free, which the --debug (ASAN) run of this
+    // case is there to catch.
+    const CRGB source(40, 40, 40);
+    const EmitterProfile dim = deviceWithLuminance(0.10f);
+    ManagedStrip strip(source, &dim);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    const fl::shared_ptr<StreamingPipelineQ16> held = strip.channel->colorPipeline();
+    FL_REQUIRE(held);
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    FL_REQUIRE(hooks.unscaledPowerMilliwatts != nullptr);
+    const fl::span<const CRGB> leds(strip.leds, kStripLen);
+    const fl::u32 before = hooks.unscaledPowerMilliwatts(*held, leds, Rgbw());
+
+    ChannelOptions unmanaged;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    strip.channel->applyConfig(
+        ChannelConfig(4, timing, fl::span<CRGB>(strip.leds, kStripLen), RGB, unmanaged));
+
+    // The channel let go ...
+    FL_CHECK_FALSE(strip.channel->isColorManaged());
+    FL_CHECK_FALSE(strip.channel->colorPipeline());
+    // ... and the reader is now the sole owner of a pipeline that still works
+    // and still gives the same answer.
+    FL_CHECK_EQ(held.use_count(), 1);
+    FL_CHECK_EQ(hooks.unscaledPowerMilliwatts(*held, leds, Rgbw()), before);
+    // And the channel's own estimate is back to the source charge.
+    FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
+}
+#endif  // FL_COLOR_PIPELINE_SHARED
