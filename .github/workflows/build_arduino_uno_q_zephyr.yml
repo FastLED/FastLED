@@ -21,9 +21,13 @@ on:
       - '.github/workflows/build_arduino_uno_q_zephyr.yml'
       - 'library.properties'
   # Safe on pull_request: arduino-cli compiles C++ only and runs no repo scripts.
+  # Same paths as push: the collisions this guards against (#4408, #4416) came
+  # from generic headers meeting Zephyr's macros, not from the STM32 platform
+  # directory, so any src/ change can break this target. One cached sketch.
   pull_request:
     paths:
-      - 'src/platforms/arm/stm32/**'
+      - 'src/**'
+      - 'examples/Blink/**'
       - '.github/workflows/build_arduino_uno_q_zephyr.yml'
       - 'library.properties'
 
