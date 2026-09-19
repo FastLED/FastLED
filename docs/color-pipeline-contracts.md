@@ -359,7 +359,7 @@ with brightness already applied as C4's flux scalar.
 | TM1812 RGBWW | 8-bit | legacy path (#4198) | legacy | |
 | WS2816, MY9221 | — | not on the Channel path (legacy `addLeds<>` only) | — | |
 
-**Where §6 is met.** Every encoder that embeds a shaping stage skips it on a managed channel. Nothing on the managed path applies a second gamma after the device solve.
+**Where §6 is met.** Every encoder that embeds a gamma or expansion stage skips it on a managed channel, and none of those modes applies a second gamma after the device solve. **One exception** is not covered by that statement: APA102/SK9822 under `FASTLED_USE_GLOBAL_BRIGHTNESS`. There, `encodeAPA102_AutoBrightness` still runs on a managed channel and re-derives a strip-wide 5-bit field from the drives. Until it is reviewed against B1, that build option is outside §6.
 
 **Where B3 is not.** LPD8806 and LPD6803 have wires narrower than 8 bits. The pipeline rounds each drive to 8 bits, and the encoder then quantizes again, truncating in LPD6803's case. That is two quantizations where B3 asks for one. A native-width managed quantizer would fix it: `quantize` to 7 or 5 bits directly. It is recorded here rather than fixed because neither chipset has a managed-path test yet.
 
