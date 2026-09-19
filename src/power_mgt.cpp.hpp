@@ -384,7 +384,11 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = controller.colorPipeline();
     const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
     if (pipeline && hooks.unscaledPowerMilliwatts != nullptr) {
-        return hooks.unscaledPowerMilliwatts(*pipeline, leds, controller.getRgbw());
+        // The estimator is passed in so the pipeline side never names it (#4472).
+        fl::u32 (*const estimate)(fl::span<const CRGB>, const fl::Rgbw&) =
+            &calculate_unscaled_power_mW;
+        return hooks.unscaledPowerMilliwatts(*pipeline, leds, controller.getRgbw(),
+                                             estimate);
     }
 #endif
     // Below the large-memory tier only this is compiled: a managed channel
