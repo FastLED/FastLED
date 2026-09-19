@@ -1,29 +1,27 @@
 """FastLED release helper. Run through the wrapper: ``bash release <command>``.
 
 Commands:
-  status          What the newest tag, GitHub, the Arduino index and the
-                  PlatformIO registry each have. Read-only.
-  check           Every in-tree version string agrees, and the tree is exactly
-                  one step ahead of the newest tag. Read-only.
-  publish <tag>   Publish a tagged release to the PlatformIO registry. Packs and
-                  validates only, unless --yes is given.
+  status   What the newest tag, GitHub, the Arduino index and the PlatformIO
+           registry each have. Read-only.
+  check    The in-tree version strings are in a releasable state. Read-only.
 
-This file is the one place the PlatformIO tool may be invoked (CLAUDE.md,
-"One exception to the PlatformIO ban"), and only for its registry-publish
-subcommand. It is fetched on demand with uvx, so it is not a project dependency.
+How a version reaches each registry -- nothing here uploads anything:
+  * Arduino indexes git tags.
+  * The PlatformIO registry's legacy crawler publishes whatever version
+    library.json / library.properties show on the DEFAULT BRANCH. No tag or
+    GitHub release is needed to trigger it; a tag named after the version only
+    decides which tree gets packaged (without one it packages the branch).
 
-Publishing needs PLATFORMIO_AUTH_TOKEN: a token from an account that belongs to
-the ``fastled`` organization on the registry (``account token`` subcommand of the
-tool, after logging in). Without --yes no credentials are needed.
+So master must never show a version that is not tagged: the crawler would ship
+unreleased master under that number. ``check`` enforces that. The release PR is
+the one place the version moves ahead (``check --releasing``), and its merge
+commit has to be tagged straight away.
 """
 
 import argparse
 import json
-import os
 import re
 import sys
-import tarfile
-import tempfile
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,12 +31,8 @@ from running_process import RunningProcess
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-REGISTRY_OWNER = "fastled"
 REGISTRY_URL = "https://api.registry.platformio.org/v3/packages/fastled/library/FastLED"
 ARDUINO_INDEX_URL = "https://downloads.arduino.cc/libraries/library_index.json.gz"
-AUTH_TOKEN_ENV = "PLATFORMIO_AUTH_TOKEN"
-# uvx fetches the tool into its own cache; nothing is added to pyproject.toml.
-PUBLISH_TOOL = ["uvx", "--from", "platformio", "pio"]
 
 _TAG_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
@@ -104,10 +98,22 @@ def tree_version_sites(root: Path) -> list[VersionSite]:
     else:
         sites.append(VersionSite("src/FastLED.h", "missing"))
 
-    notes = (root / "release_notes.md").read_text(encoding="utf-8")
-    m = re.search(r"^FastLED (\d+\.\d+\.\d+)", notes, re.MULTILINE)
-    sites.append(VersionSite("release_notes.md", m.group(1) if m else "missing"))
     return sites
+
+
+@dataclass(frozen=True)
+class NotesHeading:
+    version: str  # X.Y.Z, or "missing"
+    is_next_release: bool  # heading carries the "(Next Release)" marker
+
+
+def notes_heading(root: Path) -> NotesHeading:
+    """The first ``FastLED X.Y.Z`` heading in release_notes.md."""
+    notes = (root / "release_notes.md").read_text(encoding="utf-8")
+    m = re.search(r"^FastLED (\d+\.\d+\.\d+)(.*)$", notes, re.MULTILINE)
+    if m is None:
+        return NotesHeading("missing", False)
+    return NotesHeading(m.group(1), "(Next Release)" in m.group(2))
 
 
 def _git(args: list[str], root: Path) -> str:
@@ -191,108 +197,73 @@ def cmd_status(root: Path) -> int:
     return 0
 
 
-def cmd_check(root: Path) -> int:
+def check_tree(
+    sites: list[VersionSite],
+    notes: NotesHeading,
+    newest_tag: Version | None,
+    releasing: bool,
+) -> list[str]:
+    """Every reason the tree is not in a releasable state; empty means OK."""
+    if len({s.value for s in sites}) != 1:
+        return ["version strings disagree"]
+    try:
+        tree = Version.parse(sites[0].value)
+    except ValueError:
+        return [f"not an X.Y.Z version: {sites[0].value!r}"]
+
+    problems: list[str] = []
+    if releasing:
+        # Release PR: notes are final and the version moves exactly one step.
+        if notes.version != str(tree) or notes.is_next_release:
+            problems.append(
+                f"release_notes.md must open with 'FastLED {tree}' and no "
+                "'(Next Release)' marker"
+            )
+        if newest_tag is not None and tree not in newest_tag.next_steps():
+            allowed = ", ".join(str(v) for v in sorted(newest_tag.next_steps()))
+            problems.append(
+                f"tree is {tree}, newest tag is {newest_tag}; a release must be "
+                f"one of {allowed}"
+            )
+        return problems
+
+    # Steady state: the registry crawler publishes the default branch's version,
+    # so it must already be tagged.
+    if newest_tag is not None and tree != newest_tag:
+        problems.append(
+            f"tree is {tree} but the newest tag is {newest_tag}: the registry "
+            "crawler would publish this branch as an unreleased version "
+            "(use --releasing in a release PR)"
+        )
+    upcoming = (
+        notes.is_next_release and Version.parse(notes.version) in tree.next_steps()
+    )
+    if notes.version != str(tree) and not upcoming:
+        problems.append(
+            f"release_notes.md opens with {notes.version}; expected {tree}, or "
+            "the next version marked '(Next Release)'"
+        )
+    return problems
+
+
+def cmd_check(root: Path, releasing: bool) -> int:
     sites = tree_version_sites(root)
+    notes = notes_heading(root)
     width = max(len(s.path) for s in sites)
     for site in sites:
         print(f"  {site.path:<{width}}  {site.value}")
-    ok = True
-    if len({s.value for s in sites}) != 1:
-        print("FAIL: version strings disagree")
-        ok = False
+    marker = " (Next Release)" if notes.is_next_release else ""
+    print(f"  {'release_notes.md':<{width}}  {notes.version}{marker}")
+
     tags = release_tags(root, merged_only=True)
     if not tags:
-        print("SKIP: no release tags reachable from HEAD (shallow clone?)")
-    elif ok:
-        tree, newest = Version.parse(sites[0].value), tags[-1]
-        if tree not in newest.next_steps():
-            allowed = ", ".join(str(v) for v in sorted(newest.next_steps()))
-            print(
-                f"FAIL: tree is {tree}, newest tag is {newest}; must be one of {allowed}"
-            )
-            ok = False
-        else:
-            print(f"OK: {tree} is one step ahead of tag {newest}")
-    return 0 if ok else 1
-
-
-def export_tag(tag: Version, root: Path, dest: Path) -> Path:
-    """Unpack the tagged tree into ``dest`` -- never publish the working tree."""
-    archive = dest / "src.tar"
-    # -o writes the tar itself; a captured binary stdout would be corrupted.
-    _git(["archive", "--format=tar", "-o", str(archive), str(tag)], root)
-    tree = dest / "tree"
-    with tarfile.open(archive) as tar:
-        tar.extractall(tree, filter="data")
-    return tree
-
-
-def publish_command(package: Path) -> list[str]:
-    return [
-        *PUBLISH_TOOL,
-        "pkg",
-        "publish",
-        str(package),
-        "--owner",
-        REGISTRY_OWNER,
-        "--type",
-        "library",
-        "--no-notify",
-        "--no-interactive",
-    ]
-
-
-def _run_tool(cmd: list[str], cwd: Path) -> int:
-    proc = RunningProcess(cmd, cwd=cwd, auto_run=False, capture=True, encoding="utf-8")
-    proc.start()
-    proc.wait(echo=True)
-    return proc.returncode if proc.returncode is not None else 1
-
-
-def cmd_publish(root: Path, tag_text: str, yes: bool) -> int:
-    tag = Version.parse(tag_text)
-    if tag not in release_tags(root, merged_only=False):
-        print(f"FAIL: no tag {tag} in this clone")
-        return 1
-    if tag in registry_versions():
-        print(f"{tag} is already in the PlatformIO registry; nothing to do")
-        return 0
-    if yes and not os.environ.get(AUTH_TOKEN_ENV):
-        print(
-            f"FAIL: {AUTH_TOKEN_ENV} is not set. It must be a token from an account in "
-            f"the '{REGISTRY_OWNER}' registry organization."
-        )
-        return 1
-
-    with tempfile.TemporaryDirectory(prefix="fastled-release-") as tmp:
-        tree = export_tag(tag, root, Path(tmp))
-        manifest = json.loads((tree / "library.json").read_text(encoding="utf-8"))
-        if manifest.get("version") != str(tag):
-            # The registry takes the version from library.json, not from the tag.
-            print(
-                f"FAIL: tag {tag} ships library.json version "
-                f"{manifest.get('version')!r}; the registry would publish it as that"
-            )
-            return 1
-
-        package = Path(tmp) / f"FastLED-{tag}.tar.gz"
-        rc = _run_tool(
-            [*PUBLISH_TOOL, "pkg", "pack", str(tree), "-o", str(package)], tree
-        )
-        if rc != 0 or not package.is_file():
-            print("FAIL: packing the library failed")
-            return rc or 1
-        print(f"packed {package.name}: {package.stat().st_size:,} bytes")
-
-        if not yes:
-            print(f"dry run: pass --yes to publish {tag} as '{REGISTRY_OWNER}/FastLED'")
-            return 0
-        rc = _run_tool(publish_command(package), tree)
-        if rc != 0:
-            print("FAIL: publish was rejected (see output above)")
-            return rc
-    print(f"published {tag}; the registry can take a few minutes to list it")
-    return 0
+        print("SKIP tag comparison: no release tags reachable (shallow clone?)")
+    problems = check_tree(sites, notes, tags[-1] if tags else None, releasing)
+    for problem in problems:
+        print(f"FAIL: {problem}")
+    if not problems:
+        print("OK")
+    return 1 if problems else 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -301,21 +272,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status", help="what each registry has versus the newest tag")
-    sub.add_parser(
-        "check", help="version strings agree and lead the newest tag by one step"
-    )
-    pub = sub.add_parser("publish", help="publish a tag to the PlatformIO registry")
-    pub.add_argument("tag", help="release tag, X.Y.Z")
-    pub.add_argument(
-        "--yes", action="store_true", help="actually publish (default: pack only)"
+    chk = sub.add_parser("check", help="version strings are in a releasable state")
+    chk.add_argument(
+        "--releasing",
+        action="store_true",
+        help="release PR: the version is one step ahead of the newest tag",
     )
     args = parser.parse_args(argv)
 
     if args.command == "status":
         return cmd_status(PROJECT_ROOT)
-    if args.command == "check":
-        return cmd_check(PROJECT_ROOT)
-    return cmd_publish(PROJECT_ROOT, args.tag, args.yes)
+    return cmd_check(PROJECT_ROOT, args.releasing)
 
 
 if __name__ == "__main__":

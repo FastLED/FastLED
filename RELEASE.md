@@ -4,11 +4,12 @@
 
 ## Release helper script
 
-`bash release` automates the checks and the registry publish (see `ci/release.py`):
+`bash release` (see `ci/release.py`) checks the tree and reports where a release has landed. It uploads nothing:
 
-  * `bash release check` -- every in-tree version string agrees, and the tree is exactly one step ahead of the newest tag.
+  * `bash release check` -- the version strings agree and match the newest tag. Add `--releasing` in the release PR, where the version moves exactly one step ahead and the release notes lose their "(Next Release)" marker.
   * `bash release status` -- what the newest tag, GitHub Releases, the Arduino index and the package registry each have.
-  * `bash release publish X.Y.Z` -- packs the *tagged* tree and validates it; add `--yes` to upload it to the package registry. Uploading needs the registry auth token in the environment (the variable is named in `ci/release.py`), from an account in the `fastled` registry organization.
+
+**Why master must not run ahead of the newest tag:** the package registry's crawler publishes whatever version `library.json` / `library.properties` show on the default branch. No tag or GitHub release triggers it; a tag named after the version only decides which tree it packages. So bump the version only in the release commit, and tag that commit immediately.
 
 ## Example
 
