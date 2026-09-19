@@ -2,6 +2,15 @@
 
 *Pushing a fastled release, the short version, last updated May 2024*
 
+## Release helper script
+
+`bash release` (see `ci/release.py`) checks the tree and reports where a release has landed. It uploads nothing:
+
+  * `bash release check` -- the version strings agree and match the newest tag. Add `--releasing` in the release PR, where the version moves exactly one step ahead and the release notes lose their "(Next Release)" marker.
+  * `bash release status` -- what the newest tag, GitHub Releases, the Arduino index and the package registry each have.
+
+**Why master must not run ahead of the newest tag:** the package registry's crawler publishes whatever version `library.json` / `library.properties` show on the default branch. No tag or GitHub release triggers it; a tag named after the version only decides which tree it packages. So bump the version only in the release commit, and tag that commit immediately.
+
 ## Example
 
 https://github.com/FastLED/FastLED/commit/4444758ffaf853ba4f8deb973532548c9c1ee231

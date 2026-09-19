@@ -34,6 +34,7 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
+from ci.release import run_release_version_lint
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
 
 
@@ -260,6 +261,17 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="banned_build_tools",
                 display_name="BANNED BUILD TOOLS",
                 run_fn=lambda: run_banned_build_tools_lint(),
+                timeout=60.0,
+            )
+        )
+        # Release version: every version string agrees and master never shows
+        # a version that is not tagged (the package registry's crawler would
+        # publish it). See ci/release.py and #4444.
+        stages.append(
+            LintStage(
+                name="release_version",
+                display_name="RELEASE VERSION",
+                run_fn=lambda: run_release_version_lint(),
                 timeout=60.0,
             )
         )

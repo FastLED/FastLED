@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+PYTHONPATH=. uv run --no-sync ci/release.py "$@"
