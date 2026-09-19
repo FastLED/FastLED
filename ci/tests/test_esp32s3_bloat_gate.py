@@ -13,11 +13,15 @@ builds -- and the parser that now lets an upward move carry its reason.
 
 from __future__ import annotations
 
+from typing import Any
+
+import pytest
 from typeguard import typechecked
 
 from tests.test_esp32s3_bloat_regression import (
     comment_lines,
     kHeadroomTolerance,
+    linked_pipeline_symbols,
     parse_baseline,
     raise_lacks_reason,
 )
@@ -134,3 +138,79 @@ def test_a_malformed_file_is_not_reported_as_a_missing_reason() -> None:
 def test_comment_lines_are_returned_in_order() -> None:
     assert comment_lines("# a\n342177\n# b\n") == ("# a", "# b")
     assert comment_lines("342177\n") == ()
+
+
+# Blink binds no colour profile, so it must link none of the pipeline: the
+# pipeline is reached only through the hooks `setColorProfile` installs
+# (FastLED#4455).
+
+
+@typechecked
+def _symbol(name: str) -> dict[str, Any]:
+    return {"demangled": name, "size": 100, "region": "flash"}
+
+
+@typechecked
+def test_blink_symbols_are_not_pipeline_symbols() -> None:
+    """Real Blink symbols with pipeline-sounding names must not trip the check.
+
+    The profile API, its event lists and the empty hook table exist in every
+    build.
+    """
+
+    report = {
+        "symbols": [
+            _symbol("fl::colorPipelineHooks()::hooks"),
+            _symbol("fl::Channel::colorPipeline() const"),
+            _symbol("fl::CLEDController::staticEmitterProfile() const"),
+            _symbol("fl::shared_ptr<fl::StreamingPipelineQ16>::reset()"),
+            _symbol("fl::FluxScalar::unity()"),
+            _symbol(
+                "fl::rgb_2_rgbw_colorimetric(unsigned short, unsigned char, "
+                "unsigned char, unsigned char)"
+            ),
+        ]
+    }
+    assert linked_pipeline_symbols(report) == []
+
+
+@typechecked
+def test_pipeline_entry_points_are_named() -> None:
+    report = {
+        "symbols": [
+            _symbol("fl::installColorPipelineHooks()"),
+            _symbol(
+                "fl::processPixelQ16(fl::StreamingPipelineQ16 const&, "
+                "unsigned char, unsigned char, unsigned char, long (&) [3])"
+            ),
+            _symbol(
+                "fl::ColorManagedPixelSource::loadAndScaleRGB(unsigned char*, "
+                "unsigned char*, unsigned char*)"
+            ),
+            _symbol("fl::Channel::colorPipeline() const"),
+        ]
+    }
+    assert linked_pipeline_symbols(report) == [
+        "fl::ColorManagedPixelSource::loadAndScaleRGB(unsigned char*, "
+        "unsigned char*, unsigned char*)",
+        "fl::installColorPipelineHooks()",
+        "fl::processPixelQ16(fl::StreamingPipelineQ16 const&, unsigned char, "
+        "unsigned char, unsigned char, long (&) [3])",
+    ]
+
+
+@pytest.mark.parametrize(
+    "report",
+    [
+        {},
+        {"symbols": "not a list"},
+        {"symbols": ["not an object"]},
+        {"symbols": [{"mangled": "_ZN2fl16processPixelQ16Ev", "size": 3}]},
+        {"symbols": [{"demangled": "", "size": 3}]},
+    ],
+)
+def test_an_unreadable_report_is_refused_not_passed(report: dict[str, Any]) -> None:
+    """A row the check cannot read would otherwise let a leak pass unseen."""
+
+    with pytest.raises(ValueError):
+        linked_pipeline_symbols(report)

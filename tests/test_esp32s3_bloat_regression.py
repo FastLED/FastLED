@@ -241,19 +241,24 @@ def linked_pipeline_symbols(report: dict[str, Any]) -> list[str]:
     """Colour-pipeline symbols the build linked, sorted and deduplicated.
 
     Matches on the demangled name up to its parameter list, so an overload or
-    a signature change still counts.
+    a signature change still counts. A symbol row without a demangled name
+    raises ValueError rather than being skipped: a mangled name cannot match
+    these anchors, so skipping it would let a leak pass unseen.
     """
 
     raw = report.get("symbols")
     if not isinstance(raw, list):
-        return []
+        raise ValueError("report.json has no `symbols` list")
     found: set[str] = set()
     for entry in raw:
         if not isinstance(entry, dict):
-            continue
-        name = entry.get("demangled") or entry.get("mangled")
-        if not isinstance(name, str):
-            continue
+            raise ValueError(f"report.json symbol row is not an object: {entry!r}")
+        name = entry.get("demangled")
+        if not isinstance(name, str) or not name:
+            raise ValueError(
+                "report.json symbol row has no demangled name, so it cannot "
+                f"be checked for pipeline code: {entry.get('mangled')!r}"
+            )
         qualified = name.split("(", 1)[0]
         if qualified in kUnboundPipelineSymbols or qualified.startswith(
             kUnboundPipelinePrefixes
@@ -340,7 +345,11 @@ def main() -> int:
     data = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
     total_flash = int(data["total_flash"])
 
-    leaked = linked_pipeline_symbols(data)
+    try:
+        leaked = linked_pipeline_symbols(data)
+    except ValueError as error:
+        print(f"esp32s3-bloat-regression: {error}", file=sys.stderr)
+        return 2
     if leaked:
         print(
             "esp32s3-bloat-regression: FAIL — Blink binds no colour profile "
