@@ -1001,6 +1001,43 @@ FL_TEST_CASE("[#4042] B3: managed LPD8806/LPD6803 quantize the drive once, at wi
     FL_CHECK_GT(differs_6803, 0);
 }
 
+FL_TEST_CASE("[#4457] a managed non-HD APA102/SK9822 holds its field at 31") {
+    // FASTLED_USE_GLOBAL_BRIGHTNESS would derive a strip-wide field from the
+    // first pixel and rescale only that pixel -- a second shaping stage on
+    // solved drives. The managed hook owns these chips and always emits field
+    // 31 with the pipeline's codes, whatever that option says; checked on the
+    // hook directly, since with the option off the encoder's own path emits
+    // the same bytes and a Channel-level test could not tell them apart.
+    installColorPipelineHooks();
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    FL_REQUIRE(hooks.encodeManagedSpi != nullptr);
+    const StreamingPipelineQ16 pipeline = makePipeline();
+    CRGB leds[2] = {CRGB(200, 40, 10), CRGB(10, 180, 90)};
+    StubController stub(leds, 2);
+
+    const SpiChipset chips[] = {SpiChipset::APA102, SpiChipset::DOTSTAR,
+                                SpiChipset::HD107, SpiChipset::SK9822};
+    for (SpiChipset chip : chips) {
+        PixelController<RGB> controller(leds, 2, ColorAdjustment::noAdjustment(),
+                                        DISABLE_DITHER);
+        ColorManagedPixelSource source(controller, RGB, pipeline);
+        PixelIterator iterator(&source, Rgbw(), Rgbww());
+        fl::vector_psram<u8> out;
+        FL_REQUIRE(hooks.encodeManagedSpi(iterator, &out, chip, stub));
+        FL_REQUIRE_GE(out.size(), 12u);
+        for (int led = 0; led < 2; ++led) {
+            i32 drives[3];
+            processPixelQ16(pipeline, leds[led].r, leds[led].g, leds[led].b, drives);
+            const fl::size at = 4 + 4 * static_cast<fl::size>(led);
+            FL_CHECK_EQ(int(out[at]), 0xFF);  // 0xE0 | field 31
+            for (int c = 0; c < 3; ++c) {
+                i32 d = drives[c] < 0 ? 0 : (drives[c] > 65536 ? 65536 : drives[c]);
+                FL_CHECK_EQ(int(out[at + 1 + c]), int((d * 255 + 32768) >> 16));
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
     CRGB leds[1] = {CRGB(200, 40, 9)};
     const StreamingPipelineQ16 pipeline = makePipeline();

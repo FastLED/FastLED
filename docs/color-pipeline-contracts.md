@@ -350,7 +350,7 @@ with brightness already applied as C4's flux scalar.
 | UCS7604 8-bit | 8-bit | the 8-bit drive, verbatim | none | header carries the current fields |
 | UCS7604 16-bit, 16-bit/1600 | 16-bit | the 16-bit drive (`encodeUCS7604_16bit_RGB_wide`) | **Gamma8 LUT (expansion), unmanaged only** | #4368; the managed path skips it |
 | HD108 | 16-bit + 5-bit gains | the 16-bit drive; gains held at 31 | **gamma 2.8 (`hd108GammaCorrect`), unmanaged only** | #4387 |
-| APA102, SK9822, DOTSTAR, HD107 | 8-bit + 5-bit field | the 8-bit drive, verbatim; field 31 | none by default | under `FASTLED_USE_GLOBAL_BRIGHTNESS` (off by default), `encodeAPA102_AutoBrightness` derives one strip-wide field from the first pixel's peak but rescales **only the first pixel's** codes to it. Every other pixel keeps its codes under the reduced field, so it is dimmed by field/31 on both the managed and the legacy path. Not reviewed against B1. |
+| APA102, SK9822, DOTSTAR, HD107 | 8-bit + 5-bit field | the 8-bit drive, verbatim; **field held at 31** | none | managed channels encode through `encodeManagedSpi` with a fixed field, whatever `FASTLED_USE_GLOBAL_BRIGHTNESS` says (#4457). On the legacy path that option still derives a strip-wide field from pixel 0 and rescales only that pixel, dimming the rest by field/31: long-standing behaviour of an opt-in flag, left unchanged. |
 | APA102HD, SK9822HD, DOTSTARHD, HD107HD | 8-bit + 5-bit field | the 8-bit drive; **field held at 31** | brightness→field map, **unmanaged only** | #4441, B1's conservative treatment. A joint code/field solve needs B1's flicker floor. |
 | WS2801, WS2803, SM16716 | 8-bit | the 8-bit drive, verbatim | none | |
 | P9813 | 8-bit | the 8-bit drive, verbatim, after the per-pixel checksum byte | none | |
@@ -359,7 +359,7 @@ with brightness already applied as C4's flux scalar.
 | TM1812 RGBWW | 8-bit | legacy path (#4198) | legacy | |
 | WS2816, MY9221 | — | not on the Channel path (legacy `addLeds<>` only) | — | |
 
-**Where §6 is met.** Every encoder that embeds a gamma or expansion stage skips it on a managed channel, and none of those modes applies a second gamma after the device solve. **One exception** is not covered by that statement: APA102/SK9822 under `FASTLED_USE_GLOBAL_BRIGHTNESS`. There, `encodeAPA102_AutoBrightness` still runs on a managed channel and re-derives a strip-wide 5-bit field from the drives. Until it is reviewed against B1, that build option is outside §6.
+**Where §6 is met.** Every encoder that embeds a gamma, expansion or field-derivation stage skips it on a managed channel. That includes APA102/SK9822 under `FASTLED_USE_GLOBAL_BRIGHTNESS` (#4457), and nothing on the managed path applies a second shaping stage after the device solve.
 
 **Narrow wires (B3).** LPD8806 and LPD6803 have wires narrower than 8 bits. On a managed channel they quantize the 16-bit drive once, straight to their width, through `ColorPipelineHooks::encodeManagedSpi`. Their 8-bit path would round to 8 bits and then shift or truncate again. `tests/fl/channels/color_managed_source.cpp` checks every byte against the single-step computation, and requires that it differ from the two-step result somewhere.
 
