@@ -520,7 +520,11 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("pixels", static_cast<int64_t>(pixels));
         response.set("frames", static_cast<int64_t>(frames));
         response.set("dither", dither);
-        if (pixels < 1 || pixels > 4096 || frames < 1 || frames > 10000) {
+        // Total work bounded too: the loops run synchronously in the RPC
+        // handler and the watchdog is fed only after it returns. 200,000
+        // pixel-frames is about a second at the measured ~5 us/px.
+        if (pixels < 1 || pixels > 4096 || frames < 1 || frames > 10000 ||
+            static_cast<long>(pixels) * frames > 200000L) {
             response.set("success", false);
             response.set("error", "out_of_range");
             return response;
@@ -542,7 +546,10 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         }
         const EDitherMode mode = dither ? BINARY_DITHER : DISABLE_DITHER;
         ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
-        volatile uint32_t sink = 0;
+        // One order-sensitive FNV-1a per path over every emitted byte, so a
+        // checksum match between boards means the same byte sequence.
+        uint32_t managed_hash = 2166136261u;
+        uint32_t legacy_hash = 2166136261u;
 
         const uint32_t managed_start = fl::micros();
         for (int f = 0; f < frames; ++f) {
@@ -551,7 +558,9 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             while (source.has(1)) {
                 uint8_t b0, b1, b2;
                 source.loadAndScaleRGB(&b0, &b1, &b2);
-                sink = sink + b0 + b1 + b2;
+                managed_hash = (managed_hash ^ b0) * 16777619u;
+                managed_hash = (managed_hash ^ b1) * 16777619u;
+                managed_hash = (managed_hash ^ b2) * 16777619u;
                 source.advanceData();
             }
         }
@@ -561,8 +570,9 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         for (int f = 0; f < frames; ++f) {
             PixelController<GRB> controller(buffer.data(), pixels, adjustment, mode);
             while (controller.has(1)) {
-                sink = sink + controller.loadAndScale0() + controller.loadAndScale1() +
-                       controller.loadAndScale2();
+                legacy_hash = (legacy_hash ^ controller.loadAndScale0()) * 16777619u;
+                legacy_hash = (legacy_hash ^ controller.loadAndScale1()) * 16777619u;
+                legacy_hash = (legacy_hash ^ controller.loadAndScale2()) * 16777619u;
                 controller.stepDithering();
                 controller.advanceData();
             }
@@ -579,7 +589,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("legacy_us_per_pixel", legacy_per);
         response.set("managed_pixels_per_second",
                      managed_per > 0.0 ? 1.0e6 / managed_per : 0.0);
-        response.set("sink", static_cast<int64_t>(sink));
+        response.set("managed_fnv1a", static_cast<int64_t>(managed_hash));
+        response.set("legacy_fnv1a", static_cast<int64_t>(legacy_hash));
         return response;
     });
 #endif

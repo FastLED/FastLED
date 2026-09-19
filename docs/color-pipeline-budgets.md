@@ -9,8 +9,10 @@ move as the pipeline does, so re-measure rather than quote when it matters.
 
 Measured with `examples/ColorProfile`, built twice per board: once as shipped,
 and once with `-DFASTLED_EXAMPLE_NO_COLOR_PROFILE=1`, which removes the
-`setColorProfile` call and nothing else. The difference is the cost of the
-colour pipeline on that board, including its temporal dither.
+`setColorProfile` call and nothing else. Both builds ask for `BINARY_DITHER`,
+so the dither setting is identical. What differs is that one channel is
+colour-managed, so the delta is the whole pipeline, including the temporal
+dither code a managed channel with `BINARY_DITHER` runs.
 
 ```
 bash compile <board> --examples ColorProfile
@@ -44,11 +46,12 @@ Measured on the bench, 2026-09-19:
 
 | board | CPU | managed | legacy | ratio | managed px/s | + temporal dither |
 |---|---|---:|---:|---:|---:|---:|
-| ESP32-C6 | RISC-V, 160 MHz | 4.76 µs/px | 0.27 µs/px | 17.8× | 210,000 | 4.98 µs/px |
-| Pico 2 W (RP2350) | Cortex-M33, 150 MHz | 4.65 µs/px | 0.33 µs/px | 14.3× | 215,000 | 4.89 µs/px |
+| ESP32-C6 | RISC-V, 160 MHz | 4.76 µs/px | 0.27 µs/px | 17.8× | 210,000 | 4.99 µs/px |
+| Pico 2 W (RP2350) | Cortex-M33, 150 MHz | 4.71 µs/px | 0.33 µs/px | 14.4× | 212,000 | 4.92 µs/px |
 
 - **What this means for a sketch.** At 60 fps one core can push about 3,500 colour-managed pixels per frame before the pipeline alone fills the frame, against about 60,000 on the legacy path. C2's streaming model runs the pipeline inside the encode, so this is also the cost a parallel-output driver pays per pixel per lane.
-- **Determinism.** Both boards returned the same output checksum (`sink` 2611140), so the fixed-point per-pixel path gives bit-identical drives on RISC-V and ARM.
+- **Determinism.** The RPC returns an order-sensitive FNV-1a over every byte each path emits. With dither off, both boards return the same managed checksum (`1509334301`) and the same legacy one (`952363461`), so the fixed-point per-pixel path emits bit-identical bytes on RISC-V and ARM. With dither on, the managed checksums differ between boards, and they should. The phase comes from the shared frame counter, which reflects how many frames each board has shown. The legacy checksums happen to agree there only because, at full scale, its offset rounds to 0 for most phases.
+- **Bounded.** The RPC refuses more than 200,000 pixel-frames (about a second), because it runs synchronously inside the RPC handler and the watchdog is fed only after it returns.
 
 ## TINY tier: no pipeline, no float, no per-controller state
 
