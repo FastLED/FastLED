@@ -174,3 +174,13 @@ def test_gnu_toolchain_falls_back_without_a_hint(tmp_path: Path) -> None:
         dev / "bin"
     )
     assert _gnu_toolchain_bin_for_target("riscv32-esp-elf", [], home=tmp_path) is None
+
+
+def test_gnu_toolchain_matches_a_sysroot_operand(tmp_path: Path) -> None:
+    _fake_gnu_toolchain(tmp_path, "dev", "20251107")
+    prod = _fake_gnu_toolchain(tmp_path, "prod", "20260121")
+    used = [f"--sysroot={prod / 'xtensa-esp-elf'}"]
+
+    got = _gnu_toolchain_bin_for_target("xtensa-esp-elf", used, home=tmp_path)
+
+    assert got == prod / "bin"

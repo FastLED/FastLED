@@ -154,9 +154,11 @@ def _gnu_toolchain_bin_for_target(
         raise
     except OSError:
         return None
+    # A flag may carry its path as an operand (`--sysroot=<root>`).
+    normalized = [path.split("=", 1)[-1].replace("\\", "/") for path in used_paths]
     for gcc in found:
         root = gcc.parent.parent.as_posix() + "/"
-        if any(path.replace("\\", "/").startswith(root) for path in used_paths):
+        if any(path.startswith(root) for path in normalized):
             return gcc.parent
     return found[0].parent if found else None
 
