@@ -1473,9 +1473,11 @@ NUCLEO_G070RB = Board(
 )
 
 # Arduino UNO Q board support.
-# No ArduinoCore-zephyr UNO Q platform is published yet, so CI uses
-# the STM32duino STM32U585ZITxQ toolchain as a compile target while preserving
-# the UNO Q board macro that selects FastLED's board pin map.
+# This fbuild target is not ArduinoCore-zephyr: it uses the STM32duino
+# STM32U585ZITxQ toolchain as a compile surrogate while preserving the UNO Q
+# board macro that selects FastLED's board pin map. The core users actually
+# have (arduino:zephyr:unoq) is compile-checked separately by
+# .github/workflows/build_arduino_uno_q_zephyr.yml.
 ARDUINO_UNO_Q = Board(
     board_name="arduino_uno_q",
     real_board_name="arduino_uno_q",
