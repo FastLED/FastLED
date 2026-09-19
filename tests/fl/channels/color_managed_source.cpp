@@ -954,6 +954,53 @@ FL_TEST_CASE("[#4347] phase-correlated drops no longer bias the dither cycle") {
     FL_CHECK_LE(fl::fabs(sum / 8.0 - exact_red), 1.0 / 16.0 + 1e-9);
 }
 
+FL_TEST_CASE("[#4042] B3: managed LPD8806/LPD6803 quantize the drive once, at wire width") {
+    // The 8-bit path rounds the drive to 8 bits and the encoder then shifts
+    // it down to 7 (LPD8806, also forcing the low bit on) or truncates to 5
+    // (LPD6803): two quantizations. The managed path quantizes the 16-bit
+    // drive straight to the chip's width. Checked against that computation
+    // over a spread of colours, and required to differ from the two-step
+    // result somewhere, or the check says nothing.
+    // The same pipeline `setColorProfile(rgbDevice())` binds: linear sRGB in.
+    StreamingPipelineQ16 pipeline;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
+    auto quantize16 = [](i32 drive) -> u32 {
+        if (drive <= 0) { return 0; }
+        if (drive >= 65536) { return 65535; }
+        return static_cast<u32>((static_cast<u64>(drive) * 65535u + 32768u) >> 16);
+    };
+    int differs_8806 = 0;
+    int differs_6803 = 0;
+    for (int v = 1; v < 256; v += 5) {
+        const CRGB pixel(static_cast<u8>(v), static_cast<u8>(255 - v),
+                         static_cast<u8>((v * 7) & 0xFF));
+        i32 drives[3];
+        processPixelQ16(pipeline, pixel.r, pixel.g, pixel.b, drives);
+
+        const fl::vector<u8> f8806 = managedHdFrame(SpiEncoder::lpd8806(), pixel, 31);
+        const fl::vector<u8> f6803 = managedHdFrame(SpiEncoder::lpd6803(), pixel, 31);
+        FL_REQUIRE_GE(f8806.size(), 3u);
+        FL_REQUIRE_GE(f6803.size(), 6u);
+        u16 command = 0x8000;
+        for (int c = 0; c < 3; ++c) {
+            const u32 w = quantize16(drives[c]);  // RGB channel order
+            const u32 code7 = (w * 127u + 32767u) / 65535u;
+            FL_CHECK_EQ(int(f8806[c]), int(0x80 | code7));
+            const u32 code5 = (w * 31u + 32767u) / 65535u;
+            command = static_cast<u16>(command | (code5 << (10 - 5 * c)));
+            // The two-step result the legacy encoders would have produced.
+            const u32 byte8 = (static_cast<u32>(drives[c] < 0 ? 0 : (drives[c] > 65536 ? 65536 : drives[c])) * 255u + 32768u) >> 16;
+            if ((0x80 | code7) != fl::lpd8806Encode(static_cast<u8>(byte8))) { ++differs_8806; }
+            if (code5 != (byte8 >> 3)) { ++differs_6803; }
+        }
+        FL_CHECK_EQ(int(f6803[4]), int(command >> 8));
+        FL_CHECK_EQ(int(f6803[5]), int(command & 0xFF));
+    }
+    FL_CHECK_GT(differs_8806, 0);
+    FL_CHECK_GT(differs_6803, 0);
+}
+
 FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
     CRGB leds[1] = {CRGB(200, 40, 9)};
     const StreamingPipelineQ16 pipeline = makePipeline();

@@ -100,9 +100,21 @@ u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
 }
 #endif  // FL_COLOR_PIPELINE_SHARED
 
-bool encodeColorPipelineHdWide(PixelIterator& pixels, vector_psram<u8>* out,
-                               SpiChipset chip,
-                               const CLEDController& controller) FL_NO_EXCEPT {
+bool encodeColorPipelineManagedSpi(PixelIterator& pixels,
+                                   vector_psram<u8>* out, SpiChipset chip,
+                                   const CLEDController& controller) FL_NO_EXCEPT {
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    switch (chip) {
+        case SpiChipset::LPD8806:
+            pixels.writeLPD8806Wide(fl::back_inserter(*out));
+            return true;
+        case SpiChipset::LPD6803:
+            pixels.writeLPD6803Wide(fl::back_inserter(*out));
+            return true;
+        default:
+            break;
+    }
+#endif
 #if FASTLED_HD_COLOR_MIXING && !FL_PLATFORM_HAS_TINY_MEMORY
     // The profile is read here rather than by the caller, so the accessor
     // links only with the hook.
@@ -149,7 +161,7 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.setFlux = &setColorPipelineFlux;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
-    hooks.encodeHdWide = &encodeColorPipelineHdWide;
+    hooks.encodeManagedSpi = &encodeColorPipelineManagedSpi;
 #if FL_COLOR_PIPELINE_SHARED
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
 #endif
