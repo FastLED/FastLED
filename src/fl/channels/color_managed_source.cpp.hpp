@@ -30,7 +30,14 @@ ColorManagedPixelSource::ColorManagedPixelSource(
     PixelController<RGB>& controller, EOrder order,
     const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT
     : ColorManagedPixelSource(controller, order, pipeline,
-                              detail::ditherFrame()) {}
+#if FL_PLATFORM_HAS_TINY_MEMORY
+                              // No shared frame counter on TINY (the colour
+                              // pipeline is compiled out there anyway).
+                              0
+#else
+                              detail::ditherFrame()
+#endif
+                              ) {}
 
 void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
                                              u8* b2_out) FL_NO_EXCEPT {
