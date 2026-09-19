@@ -218,4 +218,11 @@
 # base), and the limiter's per-controller estimate becomes a call through
 # controller_unscaled_power_mW(). The estimator itself is reached through
 # ColorPipelineHooks, so it does not link into a sketch that binds no profile.
-382829
+#
+# +116 B (382829 -> 382945), #4440 in the same PR: a channel's colour
+# pipeline is held by fl::shared_ptr instead of unique_ptr so a reader cannot
+# have it freed underneath it -- make_shared's control block, the reference
+# showPixels takes for each frame's encode, and the one the power estimate
+# takes for its pass. Large-memory tiers only (FL_COLOR_PIPELINE_SHARED);
+# uno Blink is byte-identical to master.
+382945
