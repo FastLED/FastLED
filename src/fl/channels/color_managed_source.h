@@ -79,11 +79,12 @@ class ColorManagedPixelSource {
                            u8* b3_out, u8* b4_out) FL_NO_EXCEPT;
 
 #if FASTLED_HD_COLOR_MIXING
-    /// Legacy. This hands the encoder a colour triple *and* a separate 5-bit
-    /// brightness for APA102-HD. What that should mean once the pipeline
-    /// owns the amplitude stage is P8's question -- chipset-aware
-    /// quantization and 5-bit semantics -- and answering it by whatever
-    /// makes this compile would be the wrong way round.
+    /// Full scale, always: the HD encoders' 5-bit field is held fixed on a
+    /// managed channel, because the drives already carry brightness (C4) and
+    /// the field would apply it again. This is B1's conservative treatment
+    /// (SK9822 and unknown chips). An APA102 joint code/field solve, which
+    /// would use the field for low-light resolution, needs B1's flicker floor
+    /// and is not implemented.
     void loadRGBScaleAndBrightness(u8* c0, u8* c1, u8* c2,
                                    u8* brightness) FL_NO_EXCEPT;
 #endif
