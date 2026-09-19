@@ -2,6 +2,8 @@
 
 #include "fl/gfx/device_solve.h"
 
+#include "fl/stl/bit_cast.h"
+
 namespace fl {
 
 namespace {
@@ -9,31 +11,6 @@ namespace {
 // Helpers carry a `solve` qualifier: .cpp.hpp files share one translation
 // unit under the unity build, so an anonymous namespace does not isolate them
 // from same-named helpers in sibling files.
-
-bool isUsableSolveChromaticity(const float (&xy)[2]) FL_NO_EXCEPT {
-    // Self-comparison rejects NaN, which every relational guard downstream
-    // lets through because comparisons against NaN are false.
-    if (!(xy[0] == xy[0]) || !(xy[1] == xy[1])) {
-        return false;
-    }
-    if (xy[0] <= 0.0f || xy[0] >= 1.0f || xy[1] <= 1e-6f || xy[1] >= 1.0f) {
-        return false;
-    }
-    // Inside the CIE xy simplex. Checking the coordinates independently is
-    // not enough: {0.8, 0.8} passes that and gives z = 1 - x - y = -0.6, so
-    // xyY_to_XYZ yields a negative Z for a physical emitter. The boundary
-    // itself is legal, so the test is on the sum exceeding 1.
-    return xy[0] + xy[1] <= 1.0f;
-}
-
-bool isUsableLuminance(float lum) FL_NO_EXCEPT {
-    return lum == lum && lum > 0.0f && lum < 1e6f;
-}
-
-i32 quantizeSolveQ16(float v) FL_NO_EXCEPT {
-    const float scaled = v * 65536.0f;
-    return static_cast<i32>(scaled >= 0.0f ? scaled + 0.5f : scaled - 0.5f);
-}
 
 /// Largest coefficient magnitude the build accepts, in whole units.
 ///
@@ -190,7 +167,7 @@ bool emitterColumnQ16(const i32 (&xy)[2], i32 luminance,
     }
     if (static_cast<i64>(x) + static_cast<i64>(y) > kQ16One) {
         // Outside the CIE simplex, so z would be negative for a physical
-        // emitter -- the same rejection `isUsableSolveChromaticity` makes.
+        // emitter.
         return false;
     }
     const i64 z = kQ16One - static_cast<i64>(x) - static_cast<i64>(y);
@@ -312,55 +289,92 @@ bool buildRgbSolveMatrixFromQ16(const EmitterChromaticitiesQ16& profile,
     return invert3x3Q16(emitter, out->m);
 }
 
+bool q16FromFloatBits(float value, i32* out) FL_NO_EXCEPT {
+    if (out == nullptr) {
+        return false;
+    }
+    // Integer arithmetic on the IEEE-754 single-precision bits: sign, 8-bit
+    // biased exponent, 23-bit mantissa. A float->int cast would be a call to
+    // a soft-float helper (__aeabi_f2iz) on a part without an FPU, which is
+    // exactly what the bind path must not reach (FastLED#4458).
+    const u32 bits = fl::bit_cast<u32>(value);
+    const bool negative = (bits >> 31) != 0;
+    const i32 exponent = static_cast<i32>((bits >> 23) & 0xFFu);
+    const u32 fraction = bits & 0x7FFFFFu;
+    if (exponent == 0xFF) {
+        return false;  // infinity or NaN
+    }
+    if (exponent == 0) {
+        *out = 0;  // zero or subnormal: far below one s16.16 step
+        return true;
+    }
+    // value = mantissa * 2^(exponent - 150); in s16.16 that is
+    // mantissa * 2^(exponent - 134).
+    const u64 mantissa = static_cast<u64>(fraction | 0x800000u);
+    const i32 shift = exponent - 134;
+    u64 magnitude = 0;
+    if (shift >= 0) {
+        if (shift > 7) {
+            return false;  // |value| >= 32768: outside s16.16
+        }
+        magnitude = mantissa << shift;
+    } else {
+        const i32 right = -shift;
+        if (right > 40) {
+            magnitude = 0;
+        } else {
+            // Round to nearest, halves away from zero -- the same rounding
+            // the float quantizers this replaces used.
+            magnitude = (mantissa + (static_cast<u64>(1) << (right - 1))) >> right;
+        }
+    }
+    if (magnitude > 0x7FFFFFFFull) {
+        return false;
+    }
+    *out = negative ? -static_cast<i32>(magnitude) : static_cast<i32>(magnitude);
+    return true;
+}
+
+namespace detail {
+
+i64 roundedDivideQ16(i64 numerator, i64 denominator) FL_NO_EXCEPT {
+    return ::fl::roundedDivideQ16(numerator, denominator);
+}
+
+bool xyzColumnQ16(const i32 (&xy)[2], i32 luminance,
+                  i64 (&column)[3]) FL_NO_EXCEPT {
+    return emitterColumnQ16(xy, luminance, column);
+}
+
+i32 dotRowQ16(const i32 (&row)[3], const i32 (&v)[3]) FL_NO_EXCEPT {
+    return dotSolveRowQ16(row, v);
+}
+
+}  // namespace detail
+
 bool buildRgbSolveMatrixQ16(const colorimetric_response::EmitterProfile& profile,
                             EmitterSolveMatrixQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
-    if (!isUsableSolveChromaticity(profile.xy_r) ||
-        !isUsableSolveChromaticity(profile.xy_g) ||
-        !isUsableSolveChromaticity(profile.xy_b) ||
-        !isUsableLuminance(profile.lum_r) || !isUsableLuminance(profile.lum_g) ||
-        !isUsableLuminance(profile.lum_b)) {
+    // The profile stores float; its fields come across by their bits, and
+    // the whole derivation runs in s16.16 (FastLED#4458). The Q16 build
+    // refuses what the float one did: a non-positive or out-of-simplex
+    // chromaticity, a non-positive luminance, a singular matrix -- and NaN,
+    // infinity or an out-of-range value never gets past the conversion.
+    EmitterChromaticitiesQ16 q16;
+    if (!q16FromFloatBits(profile.xy_r[0], &q16.xy_r[0]) ||
+        !q16FromFloatBits(profile.xy_r[1], &q16.xy_r[1]) ||
+        !q16FromFloatBits(profile.xy_g[0], &q16.xy_g[0]) ||
+        !q16FromFloatBits(profile.xy_g[1], &q16.xy_g[1]) ||
+        !q16FromFloatBits(profile.xy_b[0], &q16.xy_b[0]) ||
+        !q16FromFloatBits(profile.xy_b[1], &q16.xy_b[1]) ||
+        !q16FromFloatBits(profile.lum_r, &q16.lum_r) ||
+        !q16FromFloatBits(profile.lum_g, &q16.lum_g) ||
+        !q16FromFloatBits(profile.lum_b, &q16.lum_b)) {
         return false;
     }
-
-    float xyz_r[3];
-    float xyz_g[3];
-    float xyz_b[3];
-    colorimetric_response::xyY_to_XYZ(profile.xy_r[0], profile.xy_r[1],
-                                      profile.lum_r, xyz_r);
-    colorimetric_response::xyY_to_XYZ(profile.xy_g[0], profile.xy_g[1],
-                                      profile.lum_g, xyz_g);
-    colorimetric_response::xyY_to_XYZ(profile.xy_b[0], profile.xy_b[1],
-                                      profile.lum_b, xyz_b);
-
-    // Columns are the emitters' XYZ contributions at full drive.
-    const float emitter[3][3] = {
-        {xyz_r[0], xyz_g[0], xyz_b[0]},
-        {xyz_r[1], xyz_g[1], xyz_b[1]},
-        {xyz_r[2], xyz_g[2], xyz_b[2]},
-    };
-
-    float inverse[3][3];
-    if (!colorimetric_response::invert3x3(emitter, inverse)) {
-        return false;
-    }
-    for (int row = 0; row < 3; ++row) {
-        for (int col = 0; col < 3; ++col) {
-            // A non-finite entry would reach the float-to-i32 cast, which is
-            // undefined behaviour. invert3x3's determinant guard does not
-            // catch NaN, so check the result rather than trusting it.
-            const float value = inverse[row][col];
-            if (!(value == value) ||
-                value > static_cast<float>(kMaxCoefficient) ||
-                value < -static_cast<float>(kMaxCoefficient)) {
-                return false;
-            }
-            out->m[row][col] = quantizeSolveQ16(value);
-        }
-    }
-    return true;
+    return buildRgbSolveMatrixFromQ16(q16, out);
 }
 
 void solveRgbDrivesQ16(const EmitterSolveMatrixQ16& matrix,

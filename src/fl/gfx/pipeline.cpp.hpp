@@ -33,12 +33,23 @@ bool buildStreamingPipelineQ16(const SourceProfile& source,
     // the per-pixel path never pays for it. Skipped when the source already
     // renders to D65, where the transform is the identity and folding it
     // would only add a round trip's worth of quantization.
+    //
+    // Compared in s16.16 from the float's bits, so this check links no float
+    // either (FastLED#4458). 1e-4 is 6.55 steps; 7 keeps the same window.
     const Chromaticity source_white = source.primaries.white;
-    const bool already_d65 =
-        source_white.x > kPipelineD65.x - 1e-4f &&
-        source_white.x < kPipelineD65.x + 1e-4f &&
-        source_white.y > kPipelineD65.y - 1e-4f &&
-        source_white.y < kPipelineD65.y + 1e-4f;
+    i32 white_x = 0;
+    i32 white_y = 0;
+    if (!q16FromFloatBits(source_white.x, &white_x) ||
+        !q16FromFloatBits(source_white.y, &white_y)) {
+        return false;
+    }
+    constexpr i32 kD65XQ16 = 20493;  // 0.3127
+    constexpr i32 kD65YQ16 = 21561;  // 0.3290
+    constexpr i32 kD65ToleranceQ16 = 7;  // ~1e-4
+    const bool already_d65 = white_x > kD65XQ16 - kD65ToleranceQ16 &&
+                             white_x < kD65XQ16 + kD65ToleranceQ16 &&
+                             white_y > kD65YQ16 - kD65ToleranceQ16 &&
+                             white_y < kD65YQ16 + kD65ToleranceQ16;
     if (!already_d65) {
         AdaptationMatrixQ16 adaptation;
         if (!buildBradfordMatrixQ16(source_white, kPipelineD65, &adaptation)) {

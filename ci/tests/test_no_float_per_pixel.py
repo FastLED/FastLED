@@ -167,29 +167,33 @@ class TestNoFloatPerPixel(unittest.TestCase):
             ),
         )
 
-    def test_bind_time_float_is_still_allowed(self: "TestNoFloatPerPixel") -> None:
-        """The boundary this test draws, asserted from the other side.
+    def test_bind_time_is_float_free_too(self: "TestNoFloatPerPixel") -> None:
+        """P9's remaining half, landed (FastLED#4458).
 
-        `buildRgbSolveMatrixQ16` derives the inverse emitter matrix in float
-        and quantizes once. If that ever became float-free the guard above
-        would still pass, but this case would fail and prompt whoever did it
-        to say so here -- which is how P9's remaining half gets noticed when
-        it lands rather than silently.
+        This case used to assert the opposite -- that `buildRgbSolveMatrixQ16`
+        still derived in float -- so that converting it would be noticed and
+        said here rather than slipping through. It was converted: the bind-time
+        builders take the profile's floats by their bits
+        (`q16FromFloatBits`) and derive in s16.16. The object-level proof is
+        `ci/tests/test_q16_inverse_is_float_free.py`; this is the source-level
+        one, per builder.
         """
 
-        text = blank_noise((GFX / "device_solve.cpp.hpp").read_text(encoding="utf-8"))
-        body = definition_body(text, "buildRgbSolveMatrixQ16")
-        self.assertIsNotNone(body)
-        assert body is not None
-        self.assertRegex(
-            body,
-            FLOAT_TOKEN,
-            msg=(
-                "buildRgbSolveMatrixQ16 no longer uses float. If the bind-time "
-                "derivation was converted to fixed point, that is P9's "
-                "remaining half -- update this test and say so."
-            ),
-        )
+        for file_name, function in (
+            ("device_solve.cpp.hpp", "buildRgbSolveMatrixQ16"),
+            ("source_xyz.cpp.hpp", "buildSourceMatrixQ16"),
+            ("chromatic_adaptation.cpp.hpp", "buildBradfordMatrixQ16"),
+        ):
+            with self.subTest(function=function):
+                text = blank_noise((GFX / file_name).read_text(encoding="utf-8"))
+                body = definition_body(text, function)
+                self.assertIsNotNone(body)
+                assert body is not None
+                self.assertNotRegex(
+                    body,
+                    FLOAT_TOKEN,
+                    msg=f"{function} uses float again; the bind path was float-free",
+                )
 
     def test_the_detector_finds_float_when_it_is_there(
         self: "TestNoFloatPerPixel",

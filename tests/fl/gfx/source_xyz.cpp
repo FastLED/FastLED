@@ -114,7 +114,13 @@ FL_TEST_CASE("Fixed-point XYZ tracks the P5 float64 reference") {
         i32 xyz[3];
         linearRgbToXyzQ16(matrix, c.rgb[0], c.rgb[1], c.rgb[2], xyz);
         for (int i = 0; i < 3; ++i) {
-            FL_CHECK_CLOSE(toFloat(xyz[i]), c.xyz[i], 0.0001f);
+            // 4e-4, from 1e-4: the matrix is now built in s16.16 from the
+            // primaries' bits (FastLED#4458) rather than in float and
+            // quantised once. Measured worst ~3e-4 absolute, at the largest
+            // values (0.96 grey, 1.06 BT.2020 blue Z) -- about 0.03% -- and
+            // the pipeline's A1 case over the whole corpus is unchanged at
+            // 0.3951 dE2000 (luminance 3.8e-4 against a 5e-4 bound).
+            FL_CHECK_CLOSE(toFloat(xyz[i]), c.xyz[i], 0.0004f);
         }
     }
 }

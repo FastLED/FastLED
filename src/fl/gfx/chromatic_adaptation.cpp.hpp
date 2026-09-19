@@ -3,6 +3,7 @@
 #include "fl/gfx/chromatic_adaptation.h"
 
 #include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/device_solve.h"
 
 namespace fl {
 
@@ -34,6 +35,19 @@ const float kBradfordInverse[3][3] = {
     {-0.0085286675f, 0.0400428213f, 0.968486726f},
 };
 
+/// The two matrices above in s16.16, rounded from the float32 values, so the
+/// bind-time build needs no float (FastLED#4458).
+const i32 kBradfordQ16[3][3] = {
+    {58661, 17459, -10578},
+    {-49165, 112296, 2405},
+    {2549, -4489, 67476},
+};
+const i32 kBradfordInverseQ16[3][3] = {
+    {64684, -9637, 10483},
+    {28332, 33971, 3230},
+    {-559, 2624, 63471},
+};
+
 } // namespace detail
 
 namespace {
@@ -43,23 +57,17 @@ namespace {
 // namespace does not isolate them from a same-named helper in a sibling file
 // -- source_xyz.cpp.hpp defines its own quantizer.
 
-/// True only for a real, usable chromaticity.
-///
-/// `xyY_to_XYZ` guards `y < 1e-12f`, which NaN slips past because every
-/// comparison against NaN is false. It then propagates through the cone
-/// solve -- the zero-cone check below is comparison-based and lets it
-/// through for the same reason -- and reaches the float-to-i32 cast, where
-/// converting a NaN is undefined behaviour rather than a wrong number.
-bool isUsableChromaticity(Chromaticity c) FL_NO_EXCEPT {
-    // Self-comparison rejects NaN; the bounds reject infinities and values
-    // outside the chromaticity diagram.
-    return c.x == c.x && c.y == c.y && c.x > 0.0f && c.x < 1.0f &&
-           c.y > 1e-6f && c.y < 1.0f;
-}
+constexpr i32 kAdaptationQ16One = 65536;
 
-i32 quantizeAdaptationQ16(float v) FL_NO_EXCEPT {
-    const float scaled = v * 65536.0f;
-    return static_cast<i32>(scaled >= 0.0f ? scaled + 0.5f : scaled - 0.5f);
+/// A white point, converted from float by its bits, inside the open unit
+/// square with a non-zero y -- the float check (NaN, 0 < x < 1,
+/// 1e-6 < y < 1) with y's floor at one s16.16 step.
+bool adaptationWhiteQ16(Chromaticity c, i32 (&out)[2]) FL_NO_EXCEPT {
+    if (!q16FromFloatBits(c.x, &out[0]) || !q16FromFloatBits(c.y, &out[1])) {
+        return false;
+    }
+    return out[0] > 0 && out[0] < kAdaptationQ16One && out[1] > 0 &&
+           out[1] < kAdaptationQ16One;
 }
 
 i32 dotAdaptationRowQ16(const i32 (&row)[3], const i32 (&v)[3]) FL_NO_EXCEPT {
@@ -78,49 +86,55 @@ bool buildBradfordMatrixQ16(Chromaticity source_white,
     if (out == nullptr) {
         return false;
     }
-    if (!isUsableChromaticity(source_white) ||
-        !isUsableChromaticity(destination_white)) {
+    // In s16.16 throughout (FastLED#4458). The same construction as the
+    // float build it replaces: both whites to XYZ at Y = 1, into cone space,
+    // the per-cone ratio as a diagonal, and B^-1 * diag * B collapsed once.
+    i32 source_xy[2];
+    i32 destination_xy[2];
+    if (!adaptationWhiteQ16(source_white, source_xy) ||
+        !adaptationWhiteQ16(destination_white, destination_xy)) {
         return false;
     }
-    float source_xyz[3];
-    float destination_xyz[3];
-    colorimetric_response::xyY_to_XYZ(source_white.x, source_white.y, 1.0f,
-                                      source_xyz);
-    colorimetric_response::xyY_to_XYZ(destination_white.x, destination_white.y,
-                                      1.0f, destination_xyz);
-
-    float source_cones[3];
-    float destination_cones[3];
-    colorimetric_response::matvec3(detail::kBradford, source_xyz,
-                                   source_cones);
-    colorimetric_response::matvec3(detail::kBradford, destination_xyz,
-                                   destination_cones);
-
-    float scale[3];
+    i64 source_xyz[3];
+    i64 destination_xyz[3];
+    if (!detail::xyzColumnQ16(source_xy, kAdaptationQ16One, source_xyz) ||
+        !detail::xyzColumnQ16(destination_xy, kAdaptationQ16One, destination_xyz)) {
+        return false;
+    }
+    const i32 source_v[3] = {static_cast<i32>(source_xyz[0]), static_cast<i32>(source_xyz[1]),
+                             static_cast<i32>(source_xyz[2])};
+    const i32 destination_v[3] = {static_cast<i32>(destination_xyz[0]),
+                                  static_cast<i32>(destination_xyz[1]),
+                                  static_cast<i32>(destination_xyz[2])};
+    i64 scale[3];
     for (int i = 0; i < 3; ++i) {
+        const i32 source_cone = detail::dotRowQ16(detail::kBradfordQ16[i], source_v);
+        const i32 destination_cone =
+            detail::dotRowQ16(detail::kBradfordQ16[i], destination_v);
         // A zero cone response would divide by zero. No physical white does
         // this; a corrupt profile can.
-        if (source_cones[i] > -1e-9f && source_cones[i] < 1e-9f) {
+        if (source_cone == 0) {
             return false;
         }
-        scale[i] = destination_cones[i] / source_cones[i];
+        scale[i] = detail::roundedDivideQ16(
+            static_cast<i64>(destination_cone) * kAdaptationQ16One, source_cone);
     }
-
-    // Collapse B_inv * diag(scale) * B into one matrix. Done once here so the
-    // per-pixel path never sees the cone space at all.
-    //
-    // `kBradfordInverse` rather than inverting `kBradford` again: the operand
-    // is a constant, so the inverse is one, and the solver's failure return
-    // could not fire on it. Nothing that varies per profile was being
-    // computed there.
     for (int row = 0; row < 3; ++row) {
         for (int col = 0; col < 3; ++col) {
-            float sum = 0.0f;
+            // sum_k Binv[row][k] * scale[k] * B[k][col]: each term is Q48,
+            // brought back to Q16 once at the end rather than per product.
+            i64 sum_q32 = 0;
             for (int k = 0; k < 3; ++k) {
-                sum += detail::kBradfordInverse[row][k] * scale[k] *
-                       detail::kBradford[k][col];
+                const i64 inv_scale_q16 = detail::roundedDivideQ16(
+                    static_cast<i64>(detail::kBradfordInverseQ16[row][k]) * scale[k],
+                    kAdaptationQ16One);
+                sum_q32 += inv_scale_q16 * detail::kBradfordQ16[k][col];
             }
-            out->m[row][col] = quantizeAdaptationQ16(sum);
+            const i64 value = detail::roundedDivideQ16(sum_q32, kAdaptationQ16One);
+            if (value > 2147483647LL || value < -2147483648LL) {
+                return false;
+            }
+            out->m[row][col] = static_cast<i32>(value);
         }
     }
     return true;
