@@ -154,12 +154,13 @@ RGBWW) unless the row says otherwise.
 
 | property | tolerance | worst measured |
 |---|---|---|
-| in-gamut target preserved | drives identical to the unmapped solve, which is within 0.002 of the requested drive | identical |
+| in-gamut target preserved (RGB, RGBW) | drives identical to the unmapped solve, which is within 0.002 of the requested drive | identical |
+| in-gamut target preserved (RGBWW) | re-rendered XYZ within 0.01 of the target, per component | within bound |
 | neutral ramp stays neutral (RGBW, RGBWW) | xy within 0.002 of the rendering white | within bound |
 | hue, in gamut and under compression | `hueDivergence` < **0.005** (`kHueTolerance`) | below 0.002 at every mapper case; 0.0034 across the 283 in-gamut targets of the allocator plane sweep |
 | continuity (RGB) | one input step moves summed drive < 1.5 codes at 8 bits | 1.03 codes (neutral luminance ramp); 0.80 across the hull boundary |
 | continuity across the neutral cap | < 0.02 summed drive (about five 8-bit codes) | 1 to 3 codes |
-| continuity through the hull boundary (RGBWW) | output step < one input step (0.05 in Y) | within bound |
+| continuity through the hull boundary (RGBWW) | largest per-component XYZ output change < 0.05 between adjacent samples (input Y step 0.0125, 240 steps) | within bound |
 
 **The hue tolerance.** `hueDivergence` is the sine of the angle between
 target and mapped OKLab chroma. It returns 1 for a collapse to grey or a 180°
