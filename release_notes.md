@@ -1,7 +1,7 @@
 
 
 
-FastLED 3.10.4 (Next Release)
+FastLED 3.10.6 (Next Release)
 ==============
   * **MP3 decoder: minimp3 is now the only backend, and it decodes in fixed point**
     * The RPSL/RCSL-licensed `src/third_party/libhelix_mp3/` tree has been **removed**. FastLED's MP3 support is now entirely CC0 (minimp3), which is what makes the library redistributable without the Helix licence obligations.

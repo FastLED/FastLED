@@ -1,0 +1,62 @@
+name: arduino_uno_q_zephyr
+
+# Compile check against ArduinoCore-zephyr (arduino:zephyr:unoq), the core the
+# Arduino IDE installs for the UNO Q. The arduino_uno_q job builds with the
+# STM32duino toolchain, which has neither the Zephyr kernel headers nor CMSIS 6
+# that Arduino.h pulls in here, so it cannot see macro/typedef collisions with
+# them (#4408, #4416). Compile only: board builds and deploys stay on fbuild.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/Blink/**'
+      - '.github/workflows/build_arduino_uno_q_zephyr.yml'
+      - 'library.properties'
+  # Safe on pull_request: arduino-cli compiles C++ only and runs no repo scripts.
+  pull_request:
+    paths:
+      - 'src/platforms/arm/stm32/**'
+      - '.github/workflows/build_arduino_uno_q_zephyr.yml'
+      - 'library.properties'
+
+permissions:
+  contents: read
+
+env:
+  ZEPHYR_CORE: arduino:zephyr@1.0.0
+  FQBN: arduino:zephyr:unoq
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Cache Arduino core
+        uses: actions/cache@v4
+        with:
+          path: ~/.arduino15
+          key: arduino15-${{ env.ZEPHYR_CORE }}
+
+      - name: Install core and board library
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install "$ZEPHYR_CORE"
+          # The core's Arduino.h #errors out without this library.
+          arduino-cli lib install Arduino_RouterBridge
+
+      - name: Compile Blink
+        run: arduino-cli compile --fqbn "$FQBN" --library "$GITHUB_WORKSPACE" examples/Blink
