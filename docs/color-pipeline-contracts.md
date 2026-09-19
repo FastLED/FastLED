@@ -331,6 +331,38 @@ one native RGB8 code-1 frame per 257 equally timed frames to match its average
 on an ideal linear PWM device. At 60 Hz that is about 4.28 seconds. The native
 output report must state the resulting fidelity/flicker limitations.
 
+### Encoder table: what each chipset does after the device solve (P8, §6)
+
+B1 and §6 allow a chipset encoder to do only chipset-specific quantization and current encoding after the device solve. It must not add a second correction or gamma stage. This table records, **as built**, what each encoder on the `fl::Channel` path does to a colour-managed channel's drives, and which modes embed their own shaping stage. The dispatch is `Channel::showPixels` in `src/fl/channels/channel.cpp.hpp`.
+
+**The managed source.** `ColorManagedPixelSource` hands every encoder the pipeline's drive:
+- rounded once to 8 bits (`quantize`), or
+- to 16 bits for wide encoders (`quantize16`);
+
+with brightness already applied as C4's flux scalar.
+
+**RGBW and RGBWW.** On a managed channel the RGBW and RGBWW sources still hand off to the legacy controller, because the two-white allocation is not on the pipeline (#4198). The legacy rows apply to them.
+
+| encoder (Channel) | wire | managed channel receives | embedded shaping stage | notes |
+|---|---|---|---|---|
+| WS2812-class clockless | 8-bit | the 8-bit drive, verbatim | none | |
+| TM1908 | 8-bit | the 8-bit drive, verbatim, after the command prefix | none | |
+| UCS7604 8-bit | 8-bit | the 8-bit drive, verbatim | none | header carries the current fields |
+| UCS7604 16-bit, 16-bit/1600 | 16-bit | the 16-bit drive (`encodeUCS7604_16bit_RGB_wide`) | **Gamma8 LUT (expansion), unmanaged only** | #4368; the managed path skips it |
+| HD108 | 16-bit + 5-bit gains | the 16-bit drive; gains held at 31 | **gamma 2.8 (`hd108GammaCorrect`), unmanaged only** | #4387 |
+| APA102, SK9822, DOTSTAR, HD107 | 8-bit + 5-bit field | the 8-bit drive, verbatim; field 31 | none by default | under `FASTLED_USE_GLOBAL_BRIGHTNESS` (off by default), `encodeAPA102_AutoBrightness` derives one strip-wide field from the first pixel's peak but rescales **only the first pixel's** codes to it. Every other pixel keeps its codes under the reduced field, so it is dimmed by field/31 on both the managed and the legacy path. Not reviewed against B1. |
+| APA102HD, SK9822HD, DOTSTARHD, HD107HD | 8-bit + 5-bit field | the 8-bit drive; **field held at 31** | brightness→field map, **unmanaged only** | #4441, B1's conservative treatment. A joint code/field solve needs B1's flicker floor. |
+| WS2801, WS2803, SM16716 | 8-bit | the 8-bit drive, verbatim | none | |
+| P9813 | 8-bit | the 8-bit drive, verbatim, after the per-pixel checksum byte | none | |
+| LPD8806 | 7-bit | the 8-bit drive **re-quantized** to 7 bits (`value >> 1`, with a low-bit nudge) | none | second quantization after the pipeline's; see below |
+| LPD6803 | 5-bit | the 8-bit drive **truncated** to 5 bits (`value >> 3`) | none | second quantization, biased low; see below |
+| TM1812 RGBWW | 8-bit | legacy path (#4198) | legacy | |
+| WS2816, MY9221 | — | not on the Channel path (legacy `addLeds<>` only) | — | |
+
+**Where §6 is met.** Every encoder that embeds a shaping stage skips it on a managed channel. Nothing on the managed path applies a second gamma after the device solve.
+
+**Where B3 is not.** LPD8806 and LPD6803 have wires narrower than 8 bits. The pipeline rounds each drive to 8 bits, and the encoder then quantizes again, truncating in LPD6803's case. That is two quantizations where B3 asks for one. A native-width managed quantizer would fix it: `quantize` to 7 or 5 bits directly. It is recorded here rather than fixed because neither chipset has a managed-path test yet.
+
 ## Ownership and tiers (R9)
 
 Runtime bindings own immutable profile/configuration data, including response
