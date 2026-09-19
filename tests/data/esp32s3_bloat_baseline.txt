@@ -225,4 +225,8 @@
 # showPixels takes for each frame's encode, and the one the power estimate
 # takes for its pass. Large-memory tiers only (FL_COLOR_PIPELINE_SHARED);
 # uno Blink is byte-identical to master.
-382945
+#
+# +2 B (382945 -> 382947), #4440 review follow-up: showPixels copies the
+# shared pipeline and sets flux on the frame-local copy, so the shared object
+# is never written after it is built.
+382947
