@@ -204,4 +204,81 @@ FL_TEST_CASE("HD108: those bytes are the 16-bit code, not something constant") {
     FL_CHECK_GT(highest, 60000);
 }
 
+
+// ---------------------------------------------------------------------------
+// The same joint solve on 16-bit linear drives (`five_bit_hd_solve16`), which
+// is what a colour-managed APA102 channel feeds it (#4042, B1). `min_field` is
+// the flicker floor: 31 pins the field, lower values let the solve use it for
+// low-light resolution.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+Emitted solve16(u16 r, u16 g, u16 b, u8 min_field) {
+    Emitted e;
+    fl::detail::five_bit_hd_solve16(r, g, b, min_field, &e.color, &e.field);
+    return e;
+}
+
+}  // namespace
+
+FL_TEST_CASE("Five-bit HD, 16-bit drive: a rising neutral never emits less light") {
+    const u8 kFloors[] = {1, 2, 4, 8, 16, 31};
+    for (u8 floor : kFloors) {
+        // Every drive value, not a sample: the legacy field rule reversed
+        // 5-8 times on this ramp, all at points a coarser sweep can step over.
+        const int reversals = countReversals(65535, [&](int step) {
+            const u16 v = static_cast<u16>(step);
+            return emittedLight(solve16(v, v, v, floor), 0);
+        });
+        FL_CHECK_EQ(reversals, 0);
+    }
+}
+
+FL_TEST_CASE("Five-bit HD, 16-bit drive: a channel under a pinned maximum does not reverse") {
+    const u8 kFloors[] = {1, 8, 31};
+    for (u8 floor : kFloors) {
+        for (int other = 0; other <= 65535; other += 8191) {
+            const u16 pinned = static_cast<u16>(other);
+            const int reversals = countReversals(65535 / 32, [&](int step) {
+                const u16 v = static_cast<u16>(step * 32);
+                return emittedLight(solve16(v, pinned, pinned, floor), 0);
+            });
+            FL_CHECK_EQ(reversals, 0);
+        }
+    }
+}
+
+FL_TEST_CASE("Five-bit HD, 16-bit drive: the floor is honoured, and 31 pins the field") {
+    for (int v = 0; v <= 65535; v += 97) {
+        const u16 d = static_cast<u16>(v);
+        FL_CHECK_EQ(int(solve16(d, d / 2, d / 3, 31).field), 31);
+        FL_CHECK_GE(int(solve16(d, d / 2, d / 3, 8).field), 8);
+        FL_CHECK_LE(int(solve16(d, d / 2, d / 3, 1).field), 31);
+    }
+}
+
+FL_TEST_CASE("Five-bit HD, 16-bit drive: a lower floor resolves more low-light levels") {
+    // The criterion's "improved low-light resolution": over the dimmest 1/32
+    // of the drive range, count distinct emitted light levels (duty x field).
+    // Pinned at 31 the field adds nothing, and the code alone has about eight
+    // steps there; with the floor at 1 the field carries the range and the
+    // code keeps its eight bits.
+    auto distinct = [](u8 floor) {
+        fl::vector<long> levels;
+        for (int v = 0; v <= 2048; ++v) {
+            const long light = emittedLight(solve16(static_cast<u16>(v), 0, 0, floor), 0);
+            bool seen = false;
+            for (long l : levels) {
+                if (l == light) { seen = true; break; }
+            }
+            if (!seen) { levels.push_back(light); }
+        }
+        return static_cast<int>(levels.size());
+    };
+    const int pinned = distinct(31);
+    const int free_field = distinct(1);
+    FL_CHECK_LT(pinned, 12);
+    FL_CHECK_GT(free_field, pinned * 8);
+}
 }

@@ -21,6 +21,7 @@
 #include "fl/chipsets/encoders/apa102.h"
 #include "fl/chipsets/encoders/sk9822.h"
 #include "fl/chipsets/encoders/hd108.h"
+#include "fl/gfx/five_bit_hd_gamma.h"  // five_bit_hd_solve16 (managed HD, #4042)
 #include "fl/chipsets/encoders/p9813.h"
 #include "fl/chipsets/encoders/lpd8806.h"
 #include "fl/chipsets/encoders/lpd6803.h"
@@ -452,6 +453,39 @@ class PixelIterator {
                                back_ins, 31);
         #endif
     }
+
+#if FASTLED_HD_COLOR_MIXING && !FL_PLATFORM_HAS_TINY_MEMORY
+    /// APA102/SK9822 framing over a colour-managed channel's 16-bit drives,
+    /// with the 5-bit field chosen per pixel by `five_bit_hd_solve16` (B1's
+    /// joint code/field solve, #4042): start frame, `0xE0 | field` + three
+    /// wire-order codes per LED, then `(n / 32) + 1` all-ones dwords -- the
+    /// same frame `encodeAPA102_HD` / `encodeSK9822_HD` emit.
+    template <typename OutputIterator>
+    void writeFiveBitWide(OutputIterator back_ins, u8 min_field) FL_NO_EXCEPT {
+        for (int i = 0; i < 4; ++i) {
+            *back_ins++ = 0x00;
+        }
+        fl::size num_leds = 0;
+        while (has(1)) {
+            u16 w0, w1, w2;
+            loadAndScaleRGB16(&w0, &w1, &w2);  // wire order
+            CRGB codes;
+            u8 field = 31;
+            detail::five_bit_hd_solve16(w0, w1, w2, min_field, &codes, &field);
+            *back_ins++ = static_cast<u8>(0xE0 | (field & 0x1F));
+            *back_ins++ = codes.raw[0];
+            *back_ins++ = codes.raw[1];
+            *back_ins++ = codes.raw[2];
+            stepDithering();
+            advanceData();
+            ++num_leds;
+        }
+        const fl::size end_dwords = (num_leds / 32) + 1;
+        for (fl::size i = 0; i < end_dwords * 4; ++i) {
+            *back_ins++ = 0xFF;
+        }
+    }
+#endif
 
     // ========== SPI Chipset Encoders ==========
     // Refactored to use standalone encoder functions in src/fl/chipsets/encoders/

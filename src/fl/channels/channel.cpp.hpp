@@ -802,9 +802,27 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
         const SpiEncoder& config = spi->timing;
 
+        // B1 (#4042): on a colour-managed HD channel the 5-bit field is a
+        // per-chip decision -- a joint code/field solve for APA102's slow
+        // PWM, held fixed for SK9822's current gain and for unknown chips.
+        // Through the hook, so a sketch that binds no profile does not link
+        // the solve; when the field stays fixed it declines and the case
+        // below encodes as before.
+        bool hd_encoded = false;
+#if FL_COLOR_PROFILE_RUNTIME
+        if (iterator.isManaged()) {
+            // The hook filters by chip: anything without a solvable field
+            // declines and falls through to the switch.
+            const ColorPipelineHooks& hd_hooks = colorPipelineHooks();
+            hd_encoded = hd_hooks.encodeHdWide != nullptr &&
+                         hd_hooks.encodeHdWide(pixelIterator, &data,
+                                               config.chipset, *this);
+        }
+#endif
+
         // Switch on enum WITHOUT default case - compiler will warn if new enum values are added
         // TODO: Consolidate these PixelIterator methods with template controllers in src/fl/chipsets/
-        switch (config.chipset) {
+        if (!hd_encoded) switch (config.chipset) {
             case SpiChipset::APA102:
             case SpiChipset::DOTSTAR:
             case SpiChipset::HD107:

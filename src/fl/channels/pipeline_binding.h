@@ -15,6 +15,8 @@
 #include "fl/channels/color_profile.h"
 #include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
 #include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/chipsets/spi_chipsets.h"
+#include "fl/stl/vector.h"
 #include "fl/gfx/eorder.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/gfx/rgbw.h"
@@ -23,6 +25,8 @@
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+
+class CLEDController;  // fl/channels/cled_controller.h; only a reference is named here
 
 /// Build the streaming pipeline a binding describes.
 ///
@@ -107,6 +111,15 @@ struct ColorPipelineHooks {
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
                                    span<const CRGB> leds, const Rgbw& rgbw);
 #endif
+
+    /// B1's joint code/field solve for a colour-managed APA102-class HD
+    /// channel (#4042): resolves the chip's 5-bit semantics (a bound profile
+    /// overriding the chip default), and if they allow the field below 31 at
+    /// the configured floor, encodes the frame through it and returns true.
+    /// Otherwise returns false and the caller encodes as before. Through the
+    /// hook so the solve links only into sketches that bind a profile.
+    bool (*encodeHdWide)(PixelIterator& pixels, vector_psram<u8>* out,
+                         SpiChipset chip, const CLEDController& controller);
 };
 
 /// The installed hooks. Both pointers are null in a program that never binds
