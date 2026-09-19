@@ -1,6 +1,7 @@
 """Unit tests for the release helper's pure logic (no network, no git)."""
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -131,7 +132,7 @@ class _FakeResult:
         self.stdout = stdout
 
 
-def _fake_gh(result: _FakeResult):
+def _fake_gh(result: _FakeResult) -> Callable[..., _FakeResult]:
     def run(*_args: object, **_kwargs: object) -> _FakeResult:
         return result
 
@@ -175,3 +176,15 @@ def test_git_env_drops_repository_overrides(monkeypatch: pytest.MonkeyPatch) -> 
     assert "GIT_DIR" not in env
     assert "GIT_COMMON_DIR" not in env
     assert env["GIT_AUTHOR_NAME"] == "kept"
+
+
+def test_notes_heading_needs_its_underline(tmp_path: Path) -> None:
+    # Prose mentioning a version before the real heading must not be read
+    # as the heading.
+    (tmp_path / "release_notes.md").write_text(
+        "FastLED 9.9.9 is mentioned here in passing.\n\n"
+        "FastLED 3.10.6 (Next Release)\n==============\n"
+    )
+    heading = notes_heading(tmp_path)
+    assert heading.version == "3.10.6"
+    assert heading.is_next_release

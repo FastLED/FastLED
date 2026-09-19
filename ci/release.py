@@ -129,7 +129,11 @@ class NotesHeading:
 def notes_heading(root: Path) -> NotesHeading:
     """The first ``FastLED X.Y.Z`` heading in release_notes.md."""
     notes = (root / "release_notes.md").read_text(encoding="utf-8")
-    m = re.search(r"^FastLED (\d+\.\d+\.\d+)(.*)$", notes, re.MULTILINE)
+    # A setext heading: the version line followed by its `=` underline, so a
+    # prose line that happens to start "FastLED X.Y.Z" cannot stand in for it.
+    m = re.search(
+        r"^FastLED (\d+\.\d+\.\d+)([^\r\n]*)\r?\n=+[ \t]*$", notes, re.MULTILINE
+    )
     if m is None:
         return NotesHeading("missing", False)
     return NotesHeading(m.group(1), "(Next Release)" in m.group(2))
