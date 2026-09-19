@@ -23,7 +23,7 @@ import json
 import shlex
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NamedTuple, Optional
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Sequence
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -125,23 +125,40 @@ def _target_triple(flags: list[str]) -> Optional[str]:
     return None
 
 
-def _gnu_toolchain_bin_for_target(triple: Any) -> Optional[Path]:
+def _gnu_toolchain_bin_for_target(
+    triple: Any, used_paths: Sequence[str] = (), home: Optional[Path] = None
+) -> Optional[Path]:
     """bin/ dir of an fbuild-cached GNU toolchain for ``triple`` (e.g.
-    ``xtensa-esp-elf``), found by its ``<triple>-gcc``; None when absent."""
+    ``xtensa-esp-elf``), found by its ``<triple>-gcc``; None when absent.
+
+    fbuild keeps one cache per mode (``~/.fbuild/dev``, ``~/.fbuild/prod``),
+    and each can hold a different release of the same toolchain. The one the
+    build used is the one whose root appears in ``used_paths`` (the compile
+    command's include paths and flags), so that wins. Taking the first match
+    in sort order picked ``dev`` over ``prod`` and paired a build with another
+    release's binutils (FastLED#4468).
+    """
     if not isinstance(triple, str) or not triple:
         return None
+    base = home if home is not None else Path.home()
     try:
-        for gcc in sorted(
-            Path.home().glob(f".fbuild/*/cache/toolchains/*/**/bin/{triple}-gcc")
-        ):
-            if gcc.is_file():
-                return gcc.parent
+        found = [
+            gcc
+            for gcc in sorted(
+                base.glob(f".fbuild/*/cache/toolchains/*/**/bin/{triple}-gcc")
+            )
+            if gcc.is_file()
+        ]
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except OSError:
         return None
-    return None
+    for gcc in found:
+        root = gcc.parent.parent.as_posix() + "/"
+        if any(path.replace("\\", "/").startswith(root) for path in used_paths):
+            return gcc.parent
+    return found[0].parent if found else None
 
 
 def insert_tool_aliases(
@@ -175,7 +192,12 @@ def insert_tool_aliases(
                 # disassemble xtensa/riscv where host llvm-objdump cannot)
                 # live in fbuild's toolchain cache. Prefer those, fall back
                 # to the llvm-* tools next to clang.
-                gnu_bin = _gnu_toolchain_bin_for_target(env.get("target"))
+                used_paths = [
+                    str(v)
+                    for key in ("includes", "cc_flags", "cxx_flags")
+                    for v in (env.get(key) or [])
+                ]
+                gnu_bin = _gnu_toolchain_bin_for_target(env.get("target"), used_paths)
                 if gnu_bin is not None:
                     tool_bin_dir = gnu_bin
                     tool_prefix = f"{env['target']}-"
