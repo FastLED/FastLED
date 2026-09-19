@@ -47,6 +47,9 @@
 #include "AutoResearchTimingDrift.h"
 #include "AutoResearchParlioStream.h"
 #include "fl/chipsets/spi.h"
+#include "fl/channels/color_managed_source.h"  // colorPipelinePerf (P9, #4043)
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/pipeline.h"
 #include "fl/channels/config.h"
 #include <Arduino.h>
 
@@ -488,6 +491,109 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
                      bench.fps_at_one_update_per_frame);
         return response;
     });
+
+#if FL_COLOR_PROFILE_RUNTIME
+    // P9 (#4043): throughput of the colour pipeline on the real per-pixel
+    // path. Times `ColorManagedPixelSource::loadAndScaleRGB` -- decode, gamut
+    // map, device solve, flux and the final quantize, exactly what an encoder
+    // pulls per pixel on a colour-managed channel -- against the legacy
+    // `loadAndScale0/1/2` over the same buffer, so the ratio is the pipeline's
+    // cost over what an unmanaged channel pays. Args: { pixels, frames,
+    // dither }. `dither` selects the pipeline's temporal dither (C5).
+    remote.bind("colorPipelinePerf", [](const fl::json& args) -> fl::json {
+        int pixels = 256;
+        int frames = 20;
+        bool dither = false;
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            const fl::json& cfg = args[0];
+            if (cfg.contains("pixels") && cfg["pixels"].is_int()) {
+                pixels = static_cast<int>(cfg["pixels"].as_int().value());
+            }
+            if (cfg.contains("frames") && cfg["frames"].is_int()) {
+                frames = static_cast<int>(cfg["frames"].as_int().value());
+            }
+            if (cfg.contains("dither") && cfg["dither"].is_bool()) {
+                dither = cfg["dither"].as_bool().value();
+            }
+        }
+        fl::json response = fl::json::object();
+        response.set("pixels", static_cast<int64_t>(pixels));
+        response.set("frames", static_cast<int64_t>(frames));
+        response.set("dither", dither);
+        // Total work bounded too: the loops run synchronously in the RPC
+        // handler and the watchdog is fed only after it returns. 200,000
+        // pixel-frames is about a second at the measured ~5 us/px.
+        if (pixels < 1 || pixels > 4096 || frames < 1 || frames > 10000 ||
+            static_cast<long>(pixels) * frames > 200000L) {
+            response.set("success", false);
+            response.set("error", "out_of_range");
+            return response;
+        }
+        fl::StreamingPipelineQ16 pipeline;
+        if (!fl::buildStreamingPipelineQ16(fl::SourceProfile::linearSrgb(),
+                                           fl::profiles::WS2812B,
+                                           fl::GamutPolicy::ChromaCompress,
+                                           &pipeline)) {
+            response.set("success", false);
+            response.set("error", "pipeline_build_failed");
+            return response;
+        }
+        fl::vector<CRGB> buffer(static_cast<fl::size>(pixels));
+        for (int i = 0; i < pixels; ++i) {
+            buffer[static_cast<fl::size>(i)] = CRGB(
+                static_cast<uint8_t>(i * 7), static_cast<uint8_t>(i * 13 + 40),
+                static_cast<uint8_t>(255 - i * 3));
+        }
+        const EDitherMode mode = dither ? BINARY_DITHER : DISABLE_DITHER;
+        ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+        // One order-sensitive FNV-1a per path over every emitted byte, so a
+        // checksum match between boards means the same byte sequence.
+        uint32_t managed_hash = 2166136261u;
+        uint32_t legacy_hash = 2166136261u;
+
+        const uint32_t managed_start = fl::micros();
+        for (int f = 0; f < frames; ++f) {
+            PixelController<RGB> controller(buffer.data(), pixels, adjustment, mode);
+            fl::ColorManagedPixelSource source(controller, GRB, pipeline);
+            while (source.has(1)) {
+                uint8_t b0, b1, b2;
+                source.loadAndScaleRGB(&b0, &b1, &b2);
+                managed_hash = (managed_hash ^ b0) * 16777619u;
+                managed_hash = (managed_hash ^ b1) * 16777619u;
+                managed_hash = (managed_hash ^ b2) * 16777619u;
+                source.advanceData();
+            }
+        }
+        const uint32_t managed_us = fl::micros() - managed_start;
+
+        const uint32_t legacy_start = fl::micros();
+        for (int f = 0; f < frames; ++f) {
+            PixelController<GRB> controller(buffer.data(), pixels, adjustment, mode);
+            while (controller.has(1)) {
+                legacy_hash = (legacy_hash ^ controller.loadAndScale0()) * 16777619u;
+                legacy_hash = (legacy_hash ^ controller.loadAndScale1()) * 16777619u;
+                legacy_hash = (legacy_hash ^ controller.loadAndScale2()) * 16777619u;
+                controller.stepDithering();
+                controller.advanceData();
+            }
+        }
+        const uint32_t legacy_us = fl::micros() - legacy_start;
+
+        const double n = static_cast<double>(pixels) * static_cast<double>(frames);
+        const double managed_per = static_cast<double>(managed_us) / n;
+        const double legacy_per = static_cast<double>(legacy_us) / n;
+        response.set("success", true);
+        response.set("managed_us", static_cast<int64_t>(managed_us));
+        response.set("legacy_us", static_cast<int64_t>(legacy_us));
+        response.set("managed_us_per_pixel", managed_per);
+        response.set("legacy_us_per_pixel", legacy_per);
+        response.set("managed_pixels_per_second",
+                     managed_per > 0.0 ? 1.0e6 / managed_per : 0.0);
+        response.set("managed_fnv1a", static_cast<int64_t>(managed_hash));
+        response.set("legacy_fnv1a", static_cast<int64_t>(legacy_hash));
+        return response;
+    });
+#endif
 }
 
 #endif // !(FASTLED_AUTORESEARCH_LOW_MEMORY)
