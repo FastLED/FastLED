@@ -418,7 +418,7 @@ public:
 
     /// Get the dithering option currently set for this controller
     /// @return the currently set dithering option (CLEDController::mSettings.mDitherMode)
-    inline fl::u8 getDither() FL_NO_EXCEPT { return mSettings.mDitherMode; }
+    inline fl::u8 getDither() const FL_NO_EXCEPT { return mSettings.mDitherMode; }
 
     virtual void* beginShowLeds(int size) FL_NO_EXCEPT {
         FASTLED_UNUSED(size);

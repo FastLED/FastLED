@@ -71,6 +71,9 @@ static constexpr fl::size kPowerScalingTableSize = 256;
 struct PowerScalingState {
     fl::array<fl::u8, kPowerScalingTableSize> forward;
     fl::array<fl::u8, kPowerScalingTableSize> reverse;
+    /// Largest `forward[i + 1] - forward[i]`: what one output code can cost
+    /// at the steepest point of the response. 1 for the identity table.
+    fl::u8 max_step = 1;
 
     PowerScalingState() {
         reset_identity();
@@ -81,6 +84,7 @@ struct PowerScalingState {
             forward[i] = static_cast<fl::u8>(i);
             reverse[i] = static_cast<fl::u8>(i);
         }
+        max_step = 1;
     }
 };
 
@@ -111,6 +115,13 @@ static void rebuild_power_scaling_tables(float exponent) {
         state.forward[i] = static_cast<fl::u8>(fl::clamp(mapped, 0, 255));
     }
     state.forward[255] = 255;
+    state.max_step = 1;
+    for (fl::size i = 1; i < kPowerScalingTableSize; ++i) {
+        const int step = state.forward[i] - state.forward[i - 1];
+        if (step > state.max_step) {
+            state.max_step = static_cast<fl::u8>(step);
+        }
+    }
 
     // Reverse LUT: scaled brightness -> largest source whose forward value is
     // <= the scaled value. Floor-inverse, so `unmap_power_value()` never
@@ -139,6 +150,16 @@ static fl::u8 unmap_power_value(fl::u8 scaled_brightness) {
     return gPowerScaling().reverse[scaled_brightness];
 #else
     return scaled_brightness;
+#endif
+}
+
+/// What one output code can cost at the steepest point of the response, in
+/// the 0-255 scaled units `calculate_unscaled_power_mW` multiplies by.
+static fl::u8 max_power_step() {
+#if SKETCH_HAS_LARGE_MEMORY
+    return gPowerScaling().max_step;
+#else
+    return 1;
 #endif
 }
 
@@ -371,6 +392,53 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     return calculate_unscaled_power_mW(leds, controller.getRgbw());
 }
 
+// Two output codes: the most one `BINARY_DITHER` offset can lift a lit channel
+// once scaled. `d <= 256/s` scales back to at most one code, and the
+// FASTLED_SCALE8_FIXED form `(x * (s + 1)) >> 8` can carry one more; an
+// exhaustive check over every source, scale and offset finds 2 as the maximum.
+static constexpr fl::u32 kDitherReserveCodes = 2;
+
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
+    fl::u32 lit_r = 0, lit_g = 0, lit_b = 0;
+    for (fl::size i = 0; i < leds.size(); ++i) {
+        // A zero channel is never dithered: `dither()` returns 0 for it.
+        lit_r += leds[i].r != 0 ? 1u : 0u;
+        lit_g += leds[i].g != 0 ? 1u : 0u;
+        lit_b += leds[i].b != 0 ? 1u : 0u;
+    }
+    const PowerModelRGB& model = gPowerModel();
+    const fl::u64 per_code =
+        static_cast<fl::u64>(lit_r) * model.red_mW +
+        static_cast<fl::u64>(lit_g) * model.green_mW +
+        static_cast<fl::u64>(lit_b) * model.blue_mW;
+    // Same >> 8 as the estimator, rounded up: this is a bound, and truncating
+    // it would hand back the under-charge it exists to remove.
+    const fl::u64 scaled = per_code * kDitherReserveCodes * max_power_step();
+    return static_cast<fl::u32>((scaled + 255) >> 8);
+}
+
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
+    if (controller.getDither() != BINARY_DITHER) {
+        return 0;
+    }
+#if !defined(FL_IS_AVR)
+    // The RGBW and RGBWW conversions read the raw pixel, not the dithered
+    // one (AVR has no conversion and does dither those channels).
+    if (controller.getRgbw().active() || controller.getRgbww().active()) {
+        return 0;
+    }
+#endif
+#if FL_COLOR_PIPELINE_SHARED
+    // The managed source reads the raw pixel too; C5 keeps legacy dither off
+    // the pipeline (pinned in tests/fl/channels/color_managed_source.cpp).
+    if (controller.colorPipeline()) {
+        return 0;
+    }
+#endif
+    return dither_reserve_mW(fl::span<const CRGB>(
+        controller.leds(), static_cast<fl::size>(controller.size())));
+}
+
 // sets brightness to
 //  - no more than target_brightness
 //  - no more than max_mW milliwatts
@@ -388,7 +456,9 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
         // solved drives rather than the source (#4344).
         const fl::u32 unscaled_mW = controller_unscaled_power_mW(*pCur);
         const fl::u32 dark_mW = fixed_power_mW(count);
-        fixed_mW += dark_mW;
+        // Dither's upward reserve does not scale with brightness, so it is
+        // charged with the baseline (#4342).
+        fixed_mW += dark_mW + controller_dither_reserve_mW(*pCur);
         controllable_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
 		pCur = pCur->next();
 	}

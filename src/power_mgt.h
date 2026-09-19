@@ -314,6 +314,24 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& r
 /// other controller is charged through its RGBW conversion, as before.
 fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
 
+/// The most `BINARY_DITHER` can add to one latched frame of `leds`, in mW
+/// (#4342, contract R4: "quantization reserve").
+///
+/// Dither is applied before scaling and only ever raises a lit channel --
+/// `dither()` is `b ? qadd8(b, d) : 0` -- by up to two output codes at any
+/// non-zero brightness (the offset `d <= 256/s` is scaled back by `s`, and the
+/// FASTLED_SCALE8_FIXED rounding can carry once more). So the reserve is two
+/// codes on every lit channel, at the power model's steepest single-code step,
+/// rounded up. It does not scale with brightness, which is why the limiter
+/// adds it to the fixed part of the demand rather than the scaled part.
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
+
+/// `dither_reserve_mW()` for a controller that dithers, and zero for one that
+/// does not: a mode other than `BINARY_DITHER`, an active RGBW/RGBWW
+/// conversion (which reads the raw pixel on every non-AVR target), or a
+/// colour-managed channel (whose source never dithers, C5).
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
+
 /// Applies the configured power-scaling response to a total power value.
 ///
 /// Pass the *scalable* share only. `calculate_unscaled_power_mW()` includes the
