@@ -241,8 +241,9 @@ FL_TEST_CASE_FIXTURE(PowerEstimationFixture,"Power estimation - non linear scali
 // #4342: the estimate reads pre-dither pixels, and dither only ever adds.
 //
 // `docs/color-pipeline-contracts.md` requires the prepass to "include response
-// inversion, current-field policy, and quantization reserve". The reserve is
-// unimplemented, and this measures what that costs while it stays that way.
+// inversion, current-field policy, and quantization reserve". The first two
+// cases measure what dithering physically adds; the ones after them check that
+// `dither_reserve_mW()` -- the reserve, now charged -- covers it.
 //
 // Nothing pinned it before. The figure in #4342 was a one-off measurement; a
 // regression that made the gap worse -- or a fix that closed it -- would move
@@ -369,6 +370,58 @@ FL_TEST_CASE("[#4342] the unaccounted draw matters most where the signal is smal
     // rather than between two roundings.
     FL_CHECK_GT(dim_ratio, 1.10);
     FL_CHECK_GT(bright_ratio, 1.05);
+}
+
+FL_TEST_CASE("[#4342] the dither reserve covers the worst dithered frame") {
+    // The contract's bound: modelled demand plus the reserve is never below
+    // what any frame of the dither cycle actually latches. Checked like for
+    // like (both sides through the estimator on scaled pixels) and against
+    // the limiter's own arithmetic (baseline + reserve + the scaled
+    // controllable part), over sources and brightnesses that include the
+    // low-light end where the gap was largest.
+    const fl::u8 sources[] = {1, 8, 16, 40, 64, 200, 255};
+    const fl::u8 brightnesses[] = {1, 4, 16, 64, 128, 254, 255};
+    const fl::u32 dark_mW =
+        static_cast<fl::u32>(get_power_model().dark_mW) * kStripLen;
+    fl::u32 worst_slack = 0xFFFFFFFFu;
+    for (fl::u8 src : sources) {
+        const CRGB source(src, src, src);
+        fl::vector<CRGB> strip(kStripLen, source);
+        const fl::u32 reserve =
+            dither_reserve_mW(fl::span<const CRGB>(strip));
+        FL_REQUIRE_GT(reserve, 0u);
+        const fl::u32 unscaled = powerOfStrip(source);
+        const fl::u32 controllable = unscaled > dark_mW ? unscaled - dark_mW : 0;
+        for (fl::u8 b : brightnesses) {
+            const fl::u32 worst = worstDitheredFrame(source, b);
+            // Like for like.
+            FL_CHECK_GE(unditheredDraw(source, b) + reserve, worst);
+            // What the limiter budgets against at this brightness.
+            const fl::u32 charged =
+                dark_mW + reserve + scale_power_for_brightness(controllable, b);
+            FL_CHECK_GE(charged, worst);
+            if (charged >= worst && charged - worst < worst_slack) {
+                worst_slack = charged - worst;
+            }
+        }
+    }
+    // Not vacuous: the grid includes cases where the bound is close, so a
+    // reserve that was merely huge would not be what passes this.
+    FL_CHECK_LT(worst_slack, 200u);
+}
+
+FL_TEST_CASE("[#4342] a dark strip carries no reserve") {
+    // Dither never lifts a zero channel, so nothing is reserved for one.
+    fl::vector<CRGB> dark(kStripLen, CRGB(0, 0, 0));
+    FL_CHECK_EQ(dither_reserve_mW(fl::span<const CRGB>(dark)), 0u);
+    // One lit channel is charged for that channel only.
+    fl::vector<CRGB> red(kStripLen, CRGB(9, 0, 0));
+    fl::vector<CRGB> white(kStripLen, CRGB(9, 9, 9));
+    const fl::u32 red_only =
+        dither_reserve_mW(fl::span<const CRGB>(red));
+    FL_CHECK_GT(red_only, 0u);
+    FL_CHECK_LT(red_only,
+                dither_reserve_mW(fl::span<const CRGB>(white)));
 }
 
 // ---------------------------------------------------------------------------
@@ -554,6 +607,29 @@ FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {
     ManagedStrip strip(source, nullptr);
     FL_REQUIRE_FALSE(strip.channel->isColorManaged());
     FL_CHECK_EQ(controller_unscaled_power_mW(*strip.channel), powerOfStrip(source));
+}
+
+FL_TEST_CASE("[#4342] a dithering controller is charged the reserve; others are not") {
+    const CRGB source(40, 40, 40);
+    ManagedStrip plain(source, nullptr);
+    FL_REQUIRE_EQ(plain.channel->getDither(), BINARY_DITHER);
+    const fl::u32 expected = dither_reserve_mW(
+        fl::span<const CRGB>(plain.leds, kStripLen));
+    FL_CHECK_EQ(controller_dither_reserve_mW(*plain.channel), expected);
+
+    // Dithering off: nothing to reserve.
+    plain.channel->setDither(DISABLE_DITHER);
+    FL_CHECK_EQ(controller_dither_reserve_mW(*plain.channel), 0u);
+
+#if FL_COLOR_PIPELINE_SHARED
+    // A managed channel's source never dithers (C5), even with the mode
+    // forced back on after binding.
+    const EmitterProfile dim = deviceWithLuminance(0.10f);
+    ManagedStrip managed(source, &dim);
+    FL_REQUIRE(managed.channel->isColorManaged());
+    managed.channel->setDither(BINARY_DITHER);
+    FL_CHECK_EQ(controller_dither_reserve_mW(*managed.channel), 0u);
+#endif
 }
 
 #if FL_COLOR_PIPELINE_SHARED

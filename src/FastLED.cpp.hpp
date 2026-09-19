@@ -486,6 +486,7 @@ void CFastLED::setDither(fl::u8 ditherMode)  {
 fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 	fl::u32 fixed_power_mW = 0;
 	fl::u32 controllable_power_mW = 0;
+	fl::u32 dither_reserve_power_mW = 0;
 
 	// Sum unscaled power from all LED controllers using visitor pattern.
 	// The dark-current baseline is kept apart from the part brightness scales,
@@ -500,6 +501,8 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 			const fl::u32 dark_mW = dark_mW_per_led * static_cast<fl::u32>(leds.size());
 			fixed_power_mW += dark_mW;
 			controllable_power_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
+			// What dithering can add on top, at any non-zero brightness (#4342).
+			dither_reserve_power_mW += controller_dither_reserve_mW(*controller);
 		}
 	});
 
@@ -516,6 +519,11 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 	// and add the baseline back, so the estimate matches what the limiter now
 	// budgets against.
 	// Note: MCU power consumption is NOT included - caller should add platform-specific MCU power if needed
+	// The dither reserve only at a non-zero brightness: nothing dithers at 0,
+	// the same as the limiter, whose answer of 0 needs no reserve either.
+	if (effective_brightness != 0) {
+		fixed_power_mW += dither_reserve_power_mW;
+	}
 	return fixed_power_mW +
 	       scale_power_for_brightness(controllable_power_mW, effective_brightness);
 }
