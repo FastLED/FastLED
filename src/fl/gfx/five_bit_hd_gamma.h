@@ -40,8 +40,11 @@ void five_bit_hd_gamma_bitshift(
 // floor for APA102's slow-PWM field (#4042) -- and rounds the codes at it.
 // Emitted light (code x field) never falls as a drive rises. `min_field` 31
 // pins the field, as for SK9822.
+// Internal: the only caller is PixelIterator's managed HD writer.
+namespace detail {
 void five_bit_hd_solve16(fl::u16 r16, fl::u16 g16, fl::u16 b16,
                          fl::u8 min_field, CRGB* out,
                          fl::u8* out_field) FL_NO_EXCEPT;
+}  // namespace detail
 
 } // namespace fl

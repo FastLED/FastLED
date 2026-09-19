@@ -216,7 +216,7 @@ namespace {
 
 Emitted solve16(u16 r, u16 g, u16 b, u8 min_field) {
     Emitted e;
-    fl::five_bit_hd_solve16(r, g, b, min_field, &e.color, &e.field);
+    fl::detail::five_bit_hd_solve16(r, g, b, min_field, &e.color, &e.field);
     return e;
 }
 

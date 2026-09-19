@@ -471,7 +471,7 @@ class PixelIterator {
             loadAndScaleRGB16(&w0, &w1, &w2);  // wire order
             CRGB codes;
             u8 field = 31;
-            five_bit_hd_solve16(w0, w1, w2, min_field, &codes, &field);
+            detail::five_bit_hd_solve16(w0, w1, w2, min_field, &codes, &field);
             *back_ins++ = static_cast<u8>(0xE0 | (field & 0x1F));
             *back_ins++ = codes.raw[0];
             *back_ins++ = codes.raw[1];

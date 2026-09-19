@@ -178,6 +178,8 @@ void five_bit_hd_gamma_bitshift(
     }
 }
 
+namespace detail {
+
 void five_bit_hd_solve16(u16 r16, u16 g16, u16 b16, u8 min_field, CRGB* out,
                          u8* out_field) FL_NO_EXCEPT {
     // Target light per channel, in code x field units with eight fraction
@@ -199,7 +201,7 @@ void five_bit_hd_solve16(u16 r16, u16 g16, u16 b16, u8 min_field, CRGB* out,
     u32 brightest = 0;
     for (int i = 0; i < 3; ++i) {
         target[i] = static_cast<u32>(
-            (static_cast<u64>(drives[i]) * (255u * 31u * 256u)) / 65535u);
+            (static_cast<u64>(drives[i]) * 7905u * 256u) / 65535u);  // 7905 = 255 x 31; u64 throughout (AVR int is 16 bits)
         if (target[i] > brightest) {
             brightest = target[i];
         }
@@ -219,6 +221,8 @@ void five_bit_hd_solve16(u16 r16, u16 g16, u16 b16, u8 min_field, CRGB* out,
     }
     *out_field = static_cast<u8>(field);
 }
+
+}  // namespace detail
 
 } // namespace fl
 
