@@ -10,8 +10,10 @@ from ci.release import (
     NotesHeading,
     Version,
     VersionSite,
+    apply_version,
     check_tree,
     notes_heading,
+    release_notes_section,
     run_release_version_lint,
     tree_version_sites,
 )
@@ -188,3 +190,63 @@ def test_notes_heading_needs_its_underline(tmp_path: Path) -> None:
     heading = notes_heading(tmp_path)
     assert heading.version == "3.10.6"
     assert heading.is_next_release
+
+
+NOTES = """
+
+FastLED 3.10.6 (Next Release)
+==============
+  * new thing
+
+FastLED 3.10.5
+==============
+  * old thing
+"""
+
+
+def _write_full_tree(root: Path, notes: str = NOTES) -> None:
+    _write_tree(root, "3.10.5", "3.10.5", 3010005, "unused")
+    (root / "library.json").write_text(
+        '{\n    "name": "FastLED",\n    "version": "3.10.5",\n    "x": 1\n}\n'
+    )
+    (root / "release_notes.md").write_text(notes)
+
+
+def test_release_notes_section_stops_at_the_next_heading() -> None:
+    assert release_notes_section(NOTES, Version.parse("3.10.6")) == "  * new thing"
+    assert release_notes_section(NOTES, Version.parse("3.10.5")) == "  * old thing"
+    assert release_notes_section(NOTES, Version.parse("3.9.0")) is None
+
+
+def test_apply_version_makes_the_tree_a_valid_release(tmp_path: Path) -> None:
+    _write_full_tree(tmp_path)
+    apply_version(tmp_path, Version.parse("3.10.6"))
+    sites = tree_version_sites(tmp_path)
+    assert {s.value for s in sites} == {"3.10.6"}
+    assert notes_heading(tmp_path) == NotesHeading("3.10.6", False)
+    assert check_tree(sites, notes_heading(tmp_path), TAG, True) == []
+    # Only the version changed in the manifest.
+    assert json.loads((tmp_path / "library.json").read_text())["x"] == 1
+
+
+def test_apply_version_renumbers_the_heading_for_a_minor_bump(tmp_path: Path) -> None:
+    _write_full_tree(tmp_path)
+    apply_version(tmp_path, Version.parse("3.11.0"))
+    assert notes_heading(tmp_path) == NotesHeading("3.11.0", False)
+    assert "3.011.000" in (tmp_path / "src" / "FastLED.h").read_text()
+
+
+@pytest.mark.parametrize(
+    "notes",
+    [
+        "\nFastLED 3.10.5\n====\n  * old thing\n",  # no upcoming section
+        "\nFastLED 3.10.6 (Next Release)\n====\n\nFastLED 3.10.5\n====\n  * old\n",  # empty
+    ],
+)
+def test_apply_version_refuses_without_notes_and_changes_nothing(
+    tmp_path: Path, notes: str
+) -> None:
+    _write_full_tree(tmp_path, notes)
+    with pytest.raises(ValueError):
+        apply_version(tmp_path, Version.parse("3.10.6"))
+    assert {s.value for s in tree_version_sites(tmp_path)} == {"3.10.5"}

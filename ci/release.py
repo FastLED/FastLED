@@ -4,6 +4,10 @@ Commands:
   status   What the newest tag, GitHub, the Arduino index and the PlatformIO
            registry each have. Read-only.
   check    The in-tree version strings are in a releasable state. Read-only.
+  prepare  Bump every version string one step past the newest tag and make the
+           release-notes heading final. With --pr: branch, commit, push, open
+           the release PR. Merging that PR is the release.
+  notes    Print one version's section of release_notes.md.
 
 How a version reaches each registry -- nothing here uploads anything:
   * Arduino indexes git tags.
@@ -359,6 +363,165 @@ def cmd_check(root: Path, releasing: bool) -> int:
     return 1 if problems else 0
 
 
+_NOTES_HEADING_RE = re.compile(
+    r"^FastLED (\d+\.\d+\.\d+)([^\r\n]*)(\r?\n=+[ \t]*)$", re.MULTILINE
+)
+
+
+def release_notes_section(notes: str, version: Version) -> str | None:
+    """The body under ``FastLED <version>`` up to the next version heading."""
+    headings = list(_NOTES_HEADING_RE.finditer(notes))
+    for i, m in enumerate(headings):
+        if m.group(1) == str(version):
+            end = headings[i + 1].start() if i + 1 < len(headings) else len(notes)
+            return notes[m.end() : end].strip("\r\n").rstrip() or None
+    return None
+
+
+def _sub_once(pattern: str, repl: str, text: str, where: str) -> str:
+    out, n = re.subn(pattern, repl, text, count=1, flags=re.MULTILINE)
+    if n != 1:
+        raise ValueError(f"no version string to rewrite in {where}")
+    return out
+
+
+def apply_version(root: Path, version: Version) -> None:
+    """Write ``version`` to every site ``tree_version_sites`` reads, and make the
+    top release-notes heading final. Raises ValueError, changing nothing, when
+    the notes have no section for this release."""
+    notes_path = root / "release_notes.md"
+    notes = notes_path.read_text(encoding="utf-8")
+    top = _NOTES_HEADING_RE.search(notes)
+    if top is None or "(Next Release)" not in top.group(2):
+        raise ValueError(
+            "release_notes.md has no '(Next Release)' section on top: write the "
+            "notes for this release first"
+        )
+    if release_notes_section(notes, Version.parse(top.group(1))) is None:
+        raise ValueError("the '(Next Release)' section of release_notes.md is empty")
+
+    padded = f"{version.major}.{version.minor:03d}.{version.patch:03d}"
+    edits: list[tuple[Path, str]] = []
+    path = root / "library.properties"
+    edits.append(
+        (
+            path,
+            _sub_once(
+                r"^version=.*$",
+                f"version={version}",
+                path.read_text(encoding="utf-8"),
+                path.name,
+            ),
+        )
+    )
+    path = root / "library.json"
+    edits.append(
+        (
+            path,
+            _sub_once(
+                r'^(\s*"version":\s*")[^"]*(")',
+                rf"\g<1>{version}\g<2>",
+                path.read_text(encoding="utf-8"),
+                path.name,
+            ),
+        )
+    )
+    path = root / "src" / "FastLED.h"
+    header = _sub_once(
+        r"^(#define FASTLED_VERSION )\d+$",
+        rf"\g<1>{version.as_int()}",
+        path.read_text(encoding="utf-8"),
+        "src/FastLED.h",
+    )
+    header = re.sub(r"(FastLED version )\d+\.\d{3}\.\d{3}", rf"\g<1>{padded}", header)
+    edits.append((path, header))
+    path = root / "docs" / "Doxyfile"
+    edits.append(
+        (
+            path,
+            _sub_once(
+                r"^(PROJECT_NUMBER\s*=\s*)\S+",
+                rf"\g<1>{version}",
+                path.read_text(encoding="utf-8"),
+                "docs/Doxyfile",
+            ),
+        )
+    )
+    final_heading = f"FastLED {version}{top.group(3)}"
+    edits.append(
+        (notes_path, notes[: top.start()] + final_heading + notes[top.end() :])
+    )
+
+    # Every rewrite succeeded; only now touch the tree.
+    for target, text in edits:
+        target.write_text(text, encoding="utf-8", newline="")
+
+
+def _step(newest: Version, bump: str) -> Version:
+    if bump == "major":
+        return Version(newest.major + 1, 0, 0)
+    if bump == "minor":
+        return Version(newest.major, newest.minor + 1, 0)
+    return Version(newest.major, newest.minor, newest.patch + 1)
+
+
+def cmd_prepare(root: Path, bump: str, open_pr: bool) -> int:
+    tags = release_tags(root, merged_only=True)
+    if not tags:
+        print("FAIL: no release tags reachable from HEAD (run: git fetch --tags)")
+        return 1
+    version = _step(tags[-1], bump)
+    branch = f"release/{version}"
+    if open_pr:
+        if _git(["status", "--porcelain"], root).strip():
+            print("FAIL: working tree is not clean; --pr commits only the version bump")
+            return 1
+        _git(["checkout", "-b", branch], root)
+    try:
+        apply_version(root, version)
+    except ValueError as e:
+        print(f"FAIL: {e}")
+        return 1
+    print(f"prepared {version} (newest tag: {tags[-1]})")
+    rc = cmd_check(root, releasing=True)
+    if rc != 0 or not open_pr:
+        if rc == 0:
+            print("review the diff, then open a PR -- or rerun with --pr")
+        return rc
+
+    _git(["commit", "-am", f"Rev {version}"], root)
+    _git(["push", "-u", "origin", branch], root)
+    body = (
+        f"Release {version}.\n\n"
+        "Merging this PR **is** the release: the `release` workflow tags the merge "
+        "commit and creates the GitHub release from the notes below. The tag puts "
+        "it in the Arduino index; the package registry's crawler picks the new "
+        "version up from `library.json` on master.\n\n"
+        f"`bash release check --releasing` passes on this branch."
+    )
+    result = RunningProcess.run(
+        ["gh", "pr", "create", "--title", f"Rev {version}", "--body", body],
+        cwd=str(root),
+        check=False,
+        timeout=120,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    print((result.stdout or "").strip())
+    return result.returncode or 0
+
+
+def cmd_notes(root: Path, version_text: str) -> int:
+    notes = (root / "release_notes.md").read_text(encoding="utf-8")
+    section = release_notes_section(notes, Version.parse(version_text))
+    if section is None:
+        print(f"no release notes for {version_text}", file=sys.stderr)
+        return 1
+    print(section)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="bash release", description=__doc__.split("\n")[0]
@@ -371,10 +534,23 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="release PR: the version is one step ahead of the newest tag",
     )
+    prep = sub.add_parser("prepare", help="bump every version string for a release")
+    prep.add_argument(
+        "bump", nargs="?", choices=("patch", "minor", "major"), default="patch"
+    )
+    prep.add_argument(
+        "--pr", action="store_true", help="branch, commit, push and open the PR"
+    )
+    notes = sub.add_parser("notes", help="print one version's release notes")
+    notes.add_argument("version", help="X.Y.Z")
     args = parser.parse_args(argv)
 
     if args.command == "status":
         return cmd_status(PROJECT_ROOT)
+    if args.command == "prepare":
+        return cmd_prepare(PROJECT_ROOT, args.bump, args.pr)
+    if args.command == "notes":
+        return cmd_notes(PROJECT_ROOT, args.version)
     return cmd_check(PROJECT_ROOT, args.releasing)
 
 
