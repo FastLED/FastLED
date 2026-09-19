@@ -12,6 +12,7 @@
 #include "fl/log/log.h"
 #include "fl/channels/options.h"
 #include "fl/channels/pipeline_binding.h"
+#include "fl/channels/five_bit_semantics.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
 #include "fl/system/trace.h"
@@ -802,6 +803,24 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
         const SpiEncoder& config = spi->timing;
 
+        // B1 (#4042): on a colour-managed HD channel the 5-bit field is a
+        // per-chip decision -- a joint code/field solve for APA102's slow
+        // PWM, held fixed for SK9822's current gain and for unknown chips --
+        // and a bound profile's `five_bit_semantics` overrides the chip's.
+        // 0 selects the existing path everywhere else.
+        u8 hd_min_field = 0;
+#if FL_COLOR_PROFILE_RUNTIME
+        if (iterator.isManaged()) {
+            const EmitterProfile* profile = emitterProfile();
+            hd_min_field = hdMinimumField(
+                fiveBitSemanticsFor(config.chipset,
+                                    profile != nullptr
+                                        ? profile->five_bit_semantics
+                                        : FiveBitSemantics::NotApplicable),
+                detail::hdFieldFloor());
+        }
+#endif
+
         // Switch on enum WITHOUT default case - compiler will warn if new enum values are added
         // TODO: Consolidate these PixelIterator methods with template controllers in src/fl/chipsets/
         switch (config.chipset) {
@@ -814,7 +833,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case SpiChipset::APA102HD:
             case SpiChipset::DOTSTARHD:
             case SpiChipset::HD107HD:
-                pixelIterator.writeAPA102(&data, true);
+                pixelIterator.writeAPA102(&data, true, hd_min_field);
                 break;
 
             case SpiChipset::SK9822:
@@ -822,7 +841,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                 break;
 
             case SpiChipset::SK9822HD:
-                pixelIterator.writeSK9822(&data, true);
+                pixelIterator.writeSK9822(&data, true, hd_min_field);
                 break;
 
             case SpiChipset::WS2801:

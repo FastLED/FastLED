@@ -1649,6 +1649,18 @@ public:
 	/// @param milliwatts the max power draw desired, in milliwatts
 	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) { mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW); mNPowerData = milliwatts; }
 
+	/// Lowest 5-bit current field the colour-managed APA102-HD path may use
+	/// (B1's flicker floor, #4042). APA102's field is a secondary slow PWM:
+	/// letting the joint code/field solve lower it buys low-light resolution
+	/// at the cost of possible visible flicker at low field values. Default
+	/// 31 holds the field fixed, which cannot add flicker; values are clamped
+	/// to 1..31. SK9822-HD and chips without documented field semantics keep
+	/// the field fixed whatever this says. Affects only channels bound to a
+	/// colour profile.
+	void setHdFieldFloor(fl::u8 min_field);
+	/// @see setHdFieldFloor()
+	fl::u8 getHdFieldFloor() const;
+
 	/// Brightness the most recent show() / showColor() actually applied,
 	/// after the power limiter set by setMaxPowerInMilliWatts(). Equal to the
 	/// requested brightness when no limit is set or the limit did not bind.

@@ -33,4 +33,15 @@ void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, fl::u8 global_brightness,
     fl::span<CRGBA5> out) FL_NO_EXCEPT;
 
+// A joint code/field solve on one pixel of 16-bit *linear* drives -- what a
+// colour-managed channel already holds, so no gamma and no brightness are
+// applied here (the pipeline did both). Picks the smallest 5-bit field that
+// carries the brightest channel, no lower than `min_field` -- B1's flicker
+// floor for APA102's slow-PWM field (#4042) -- and rounds the codes at it.
+// Emitted light (code x field) never falls as a drive rises. `min_field` 31
+// pins the field, as for SK9822.
+void five_bit_hd_solve16(fl::u16 r16, fl::u16 g16, fl::u16 b16,
+                         fl::u8 min_field, CRGB* out,
+                         fl::u8* out_field) FL_NO_EXCEPT;
+
 } // namespace fl

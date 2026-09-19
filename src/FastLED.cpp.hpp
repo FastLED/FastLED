@@ -8,6 +8,7 @@
 #include "fl/channels/all_drivers.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
+#include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/manager.h"
 #include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
@@ -481,6 +482,15 @@ void CFastLED::setDither(fl::u8 ditherMode)  {
 		pCur->setDither(ditherMode);
 		pCur = pCur->next();
 	}
+}
+
+void CFastLED::setHdFieldFloor(fl::u8 min_field) {
+	fl::detail::hdFieldFloor() =
+		min_field < 1 ? 1 : (min_field > 31 ? 31 : min_field);
+}
+
+fl::u8 CFastLED::getHdFieldFloor() const {
+	return fl::detail::hdFieldFloor();
 }
 
 fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {

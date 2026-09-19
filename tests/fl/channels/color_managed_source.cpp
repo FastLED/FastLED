@@ -6,6 +6,8 @@
 #include "fl/channels/channel.h"
 #include "fl/channels/data.h"
 #include "fl/channels/dither_frame.h"
+#include "fl/channels/five_bit_semantics.h"
+#include "fl/chipsets/spi.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/pipeline_binding.h"
@@ -588,6 +590,67 @@ void managedFrame(CRGB* leds, int count, const StreamingPipelineQ16& pipeline,
         out->push_back(c);
         source.advanceData();
     }
+FL_TEST_CASE("[#4042] B1: the per-chip 5-bit semantics table, and the profile override") {
+    // APA102's field is a slow PWM; SK9822's is a current gain; HD107's is
+    // undocumented, so it gets the SK9822-conservative treatment. Non-HD
+    // chips have no field solve at all.
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::APA102HD, FiveBitSemantics::NotApplicable) ==
+             FiveBitSemantics::SecondarySlowPwm);
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::DOTSTARHD, FiveBitSemantics::NotApplicable) ==
+             FiveBitSemantics::SecondarySlowPwm);
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::SK9822HD, FiveBitSemantics::NotApplicable) ==
+             FiveBitSemantics::CurrentGain);
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::HD107HD, FiveBitSemantics::NotApplicable) ==
+             FiveBitSemantics::Unknown);
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::APA102, FiveBitSemantics::SecondarySlowPwm) ==
+             FiveBitSemantics::NotApplicable);
+    // A profile that characterises the field overrides the chip default.
+    FL_CHECK(fiveBitSemanticsFor(SpiChipset::SK9822HD, FiveBitSemantics::SecondarySlowPwm) ==
+             FiveBitSemantics::SecondarySlowPwm);
+
+    // Only a slow-PWM field may go below 31, and only as far as the floor.
+    FL_CHECK_EQ(hdMinimumField(FiveBitSemantics::SecondarySlowPwm, 4), 4);
+    FL_CHECK_EQ(hdMinimumField(FiveBitSemantics::SecondarySlowPwm, 0), 1);
+    FL_CHECK_EQ(hdMinimumField(FiveBitSemantics::CurrentGain, 4), 31);
+    FL_CHECK_EQ(hdMinimumField(FiveBitSemantics::Unknown, 4), 31);
+}
+
+FL_TEST_CASE("[#4042] B1: setHdFieldFloor defaults to a fixed field and clamps") {
+    FL_CHECK_EQ(FastLED.getHdFieldFloor(), 31);
+    FastLED.setHdFieldFloor(0);
+    FL_CHECK_EQ(FastLED.getHdFieldFloor(), 1);
+    FastLED.setHdFieldFloor(200);
+    FL_CHECK_EQ(FastLED.getHdFieldFloor(), 31);
+}
+
+namespace {
+
+/// Encodes one frame of a managed HD SPI channel and returns the bytes.
+fl::vector<u8> managedHdFrame(SpiEncoder encoder, CRGB pixel, u8 floor) {
+    FastLED.setHdFieldFloor(floor);
+    auto engine = fl::make_shared<ByteCapturingMockEngine>("HD_CAPTURE");
+    ChannelManager::instance().addDriver(2030, engine);
+    CRGB leds[1] = {pixel};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(rgbDevice()));
+    auto channel = Channel::create(ChannelConfig(
+        SpiChipsetConfig{5, 6, encoder}, fl::span<CRGB>(leds, 1), RGB, options));
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->isColorManaged());
+    channel->showLeds(255);
+    fl::vector<u8> bytes;
+    if (!engine->mCapturedChannels.empty()) {
+        const auto& data = engine->mCapturedChannels.back()->getData();
+        bytes.assign(data.begin(), data.end());
+    }
+    ChannelManager::instance().removeDriver(engine);
+    FastLED.setHdFieldFloor(31);
+    return bytes;
+}
+
+long hdLight(const fl::vector<u8>& frame, int channel) {
+    // Start frame is 4 bytes; then [0xE0|field][c0][c1][c2].
+    return static_cast<long>(frame[4] & 0x1F) * frame[5 + channel];
 }
 
 }  // namespace
@@ -675,6 +738,36 @@ FL_TEST_CASE("[#4042] C5: a managed channel without BINARY_DITHER rounds, every 
         managedFrame(led, 1, pipeline, DISABLE_DITHER, 255, &frame);
         FL_CHECK(frame[0] == first[0]);
     }
+}
+
+FL_TEST_CASE("[#4042] B1: a managed APA102-HD strip uses its field below the floor") {
+    // A dim pixel. Field pinned (floor 31, the default) spends the whole
+    // range on a handful of codes; with the floor at 1 the joint solve picks
+    // a small field and keeps the code's resolution -- the same light, more
+    // precisely.
+    const CRGB dim(6, 3, 2);
+    const fl::vector<u8> pinned = managedHdFrame(SpiEncoder::apa102HD(), dim, 31);
+    const fl::vector<u8> free_field = managedHdFrame(SpiEncoder::apa102HD(), dim, 1);
+    FL_REQUIRE_GE(pinned.size(), 8u);
+    FL_REQUIRE_GE(free_field.size(), 8u);
+    FL_CHECK_EQ(pinned[4], 0xFF);                 // field held at 31
+    FL_CHECK_LT(int(free_field[4] & 0x1F), 31);   // field lowered
+    for (int c = 0; c < 3; ++c) {
+        FL_CHECK_GE(int(free_field[5 + c]), int(pinned[5 + c]));
+        // Same light to within half a code at the pinned field.
+        const long diff = hdLight(free_field, c) - hdLight(pinned, c);
+        FL_CHECK_LE(diff < 0 ? -diff : diff, 16);
+    }
+}
+
+FL_TEST_CASE("[#4042] B1: SK9822-HD and HD107-HD keep the field fixed whatever the floor") {
+    const CRGB dim(6, 3, 2);
+    const fl::vector<u8> sk = managedHdFrame(SpiEncoder::sk9822HD(), dim, 1);
+    const fl::vector<u8> hd107 = managedHdFrame(SpiEncoder::hd107HD(), dim, 1);
+    FL_REQUIRE_GE(sk.size(), 8u);
+    FL_REQUIRE_GE(hd107.size(), 8u);
+    FL_CHECK_EQ(sk[4], 0xFF);
+    FL_CHECK_EQ(hd107[4], 0xFF);
 }
 
 FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
