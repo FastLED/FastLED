@@ -23,6 +23,7 @@
 #include "fl/math/xymap.h"
 #include "fl/video/pixel_stream.h"
 #include "fl/fled/color.h"
+#include "fl/gfx/color_profile.h"
 #include "fl/fled/pixel_format.h"
 #include "FastLED.h"
 
@@ -314,6 +315,15 @@ FL_TEST_CASE("Video carries RGB16 FLED source metadata and darkens rejected play
     FL_CHECK_EQ(storage.mComponentByteOrder,
                 fl::fled::ComponentByteOrder::LittleEndian);
     FL_CHECK_EQ(color.transfer, fl::fled::ColorTransfer::Linear);
+
+    // The same declaration as the colour pipeline's source profile (#4460):
+    // what a sketch binds to decode this file on a colour-managed channel.
+    fl::SourceProfile source = fl::SourceProfile::srgbBt709();
+    FL_REQUIRE(video.sourceProfile(&source));
+    FL_CHECK(source.transfer == fl::TransferFunction::Linear);
+    FL_CHECK_FALSE(video.sourceProfile(nullptr));
+    fl::Video unopened(1, 30, 1);
+    FL_CHECK_FALSE(unopened.sourceProfile(&source));
 
     CRGB leds[] = {CRGB::Red};
     FL_CHECK_FALSE(video.draw(0, leds));

@@ -174,13 +174,16 @@ decides whether it cares, rather than treating the file as corrupt.
 **With colour management** (a channel with `setColorProfile`), each pixel is interpreted through the channel's **source profile**: decoded to linear light, mapped into the strip's gamut, and solved per emitter. The same file therefore looks different, and should.
 
 - **Why.** An LED's light is roughly proportional to its drive, while a display-encoded `.fled` stores sRGB-encoded values. Legacy playback sends an sRGB value of 128 as roughly half drive. It means about 22% of full light, so mid-tones play too bright and desaturated. Colour-managed playback decodes the transfer and renders the light the value asks for.
-- **What to set.** The source profile is not taken from the file today. A colour-managed channel uses `FastLED.defaultSourceProfile()`, which is `SourceProfile::linearSrgb()` unless changed. The default tuple of the display-encoded formats is `{bt709, srgb}`, so to play such a file colour-accurately, tell FastLED so:
+- **What to set.** A colour-managed channel decodes through its source profile, which is `FastLED.defaultSourceProfile()` (linear sRGB unless changed) or the one passed to `setColorProfile`. The file's declaration becomes that profile through `Video::sourceProfile()`, or `fled::toSourceProfile()` for a resolved `VideoColor`. It covers named primaries, custom xy primaries, and the sRGB, BT.709 and linear transfers. An absent declaration gives the pixel format's default tuple, so a legacy rgb8 file maps to sRGB:
 
   ```cpp
-  FastLED.setDefaultSourceProfile(fl::SourceProfile::srgbBt709());
+  fl::SourceProfile source;
+  if (video.sourceProfile(&source)) {
+      FastLED.setDefaultSourceProfile(source);   // or per channel via setColorProfile
+  }
   ```
 
-  For a file whose `video.color` declares other primaries or transfer, pick the matching profile: `displayP3()`, `bt2020()`, `bt709()`, or `custom(...)` built from `Video::videoColor()`. Wiring the declared tuple to the source profile automatically is tracked in FastLED#4460.
+  Binding is explicit rather than automatic on purpose. A `Video` draws into a pixel buffer, not into particular channels. A sketch can also play several files, or mix video with generated content (B8), and silently switching every channel's decode to the last file opened would be wrong there. Nothing changes until the sketch binds it, so legacy playback stays byte-identical.
 
 ### Declaration verdicts vs. consumer policy
 

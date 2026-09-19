@@ -4,10 +4,10 @@
 // envelope block. See FLED_FORMAT.md "Source Color Metadata" for the
 // canonical contract (the authority is the ledmapper spec that file mirrors).
 //
-// This layer only CARRIES and VALIDATES the declaration. Nothing here feeds
-// the render path: FastLED does not yet transform pixels according to the
-// declared source profile. Reading a .fled tells you what its numbers mean;
-// acting on that is the color-pipeline work tracked separately.
+// This layer CARRIES and VALIDATES the declaration, and toSourceProfile()
+// turns a resolved one into the SourceProfile a colour-managed channel
+// decodes with (#4460). Binding it is the sketch's choice: legacy playback,
+// with no profile bound, ignores it and stays byte-identical.
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -16,6 +16,7 @@
 namespace fl {
 
 class json;
+struct SourceProfile;
 
 namespace fled {
 
@@ -116,6 +117,14 @@ ColorStatus resolveVideoColor(const fl::json& envelope, PixelFormat pixelFormat,
 
 // Stable human-readable text for a status, for diagnostics. Never null.
 const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT;
+
+// The colour-pipeline source profile a resolved declaration describes: its
+// primaries (named, or the custom xy pairs) and its transfer function. Bind
+// it to decode a file colour-accurately on a colour-managed channel, e.g.
+//     FastLED.setDefaultSourceProfile(profile);
+// or ChannelOptions::setColorProfile(emitter, profile). Returns false only
+// for a null out-pointer; every resolvable VideoColor has a SourceProfile.
+bool toSourceProfile(const VideoColor& color, SourceProfile* out) FL_NO_EXCEPT;
 
 }  // namespace fled
 }  // namespace fl

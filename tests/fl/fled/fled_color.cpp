@@ -12,10 +12,14 @@
 //   - all-or-nothing declarations for gray8/rgbw8;
 //   - custom primaries as CIE xy pairs.
 //
-// FastLED only CARRIES this declaration today - nothing here asserts that
-// pixels are transformed by it.
+// toSourceProfile() (#4460) turns a resolved declaration into the
+// SourceProfile a colour-managed channel decodes with; the cases at the end
+// check the mapping and that it changes the decode the way it should.
 
 #include "fl/fled/color.h"
+#include "fl/gfx/color_profile.h"
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/pipeline.h"
 #include "fl/fled/pixel_format.h"
 #include "fl/fled/fled.h"
 #include "fl/stl/cstring.h"
@@ -605,4 +609,100 @@ FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") 
     FL_CHECK(null.videoColor(nullptr) == ColorStatus::NullOutput);
 }
 
+
+// ============================================================================
+// toSourceProfile (#4460): the declaration a colour-managed channel decodes by
+// ============================================================================
+
+namespace {
+
+bool sameChroma(Chromaticity a, Chromaticity b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+bool sameProfile(const SourceProfile& a, const SourceProfile& b) {
+    return sameChroma(a.primaries.red, b.primaries.red) &&
+           sameChroma(a.primaries.green, b.primaries.green) &&
+           sameChroma(a.primaries.blue, b.primaries.blue) &&
+           sameChroma(a.primaries.white, b.primaries.white) &&
+           a.transfer == b.transfer;
+}
+
+SourceProfile profileOf(const char* envelope, fl::u8 pixelFormat) {
+    VideoColor c;
+    FL_REQUIRE(resolve(envelope, pixelFormat, &c) == ColorStatus::Ok);
+    SourceProfile out = SourceProfile::linearSrgb();
+    FL_REQUIRE(fl::fled::toSourceProfile(c, &out));
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("FLED_COLOR - the default rgb8 tuple is sRGB, not linear") {
+    // The case #4460 is about: an rgb8 file with no video.color is sRGB-
+    // encoded, and a colour-managed channel's own default is linear.
+    FL_CHECK(sameProfile(profileOf("{}", kRgb8), SourceProfile::srgbBt709()));
+    FL_CHECK(sameProfile(profileOf(kCanonical, kRgb8), SourceProfile::srgbBt709()));
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear maps to linear sRGB primaries") {
+    FL_CHECK(sameProfile(profileOf("{}", kRgb16Lin), SourceProfile::linearSrgb()));
+}
+
+FL_TEST_CASE("FLED_COLOR - named primaries and transfers map through") {
+    FL_CHECK(sameProfile(
+        profileOf("{\"video\":{\"color\":{\"primaries\":\"display-p3\"}}}", kRgb8),
+        SourceProfile::displayP3()));
+    const SourceProfile bt2020 =
+        profileOf("{\"video\":{\"color\":{\"primaries\":\"bt2020\"}}}", kRgb8);
+    FL_CHECK(sameChroma(bt2020.primaries.red, SourceProfile::bt2020().primaries.red));
+    FL_CHECK(bt2020.transfer == TransferFunction::Srgb);  // inherited, not bt2020's
+    FL_CHECK(profileOf("{\"video\":{\"color\":{\"transfer\":\"bt709\"}}}", kRgb8).transfer ==
+             TransferFunction::Bt709);
+}
+
+FL_TEST_CASE("FLED_COLOR - custom primaries carry through as chromaticities") {
+    const SourceProfile p = profileOf(
+        "{\"video\":{\"color\":{\"primaries\":{"
+        "\"red\":[0.680,0.320],\"green\":[0.265,0.690],"
+        "\"blue\":[0.150,0.060],\"white\":[0.3127,0.3290]}}}}",
+        kRgb8);
+    FL_CHECK(p.primaries.red.x > 0.679f);
+    FL_CHECK(p.primaries.red.x < 0.681f);
+    FL_CHECK(p.primaries.green.y > 0.689f);
+    FL_CHECK(p.primaries.white.x > 0.312f);
+    FL_CHECK(p.primaries.white.x < 0.313f);
+    FL_CHECK(p.transfer == TransferFunction::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - toSourceProfile rejects a null out-pointer") {
+    VideoColor c;
+    FL_REQUIRE(resolve("{}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK_FALSE(fl::fled::toSourceProfile(c, nullptr));
+}
+
+FL_TEST_CASE("FLED_COLOR - binding the file's profile decodes sRGB mid-grey") {
+    // End to end through the real pipeline: the same rgb8 value 128 drives a
+    // device at ~21.6% of full with the file's profile (sRGB decode) against
+    // 50% with the channel's linear default -- the difference #4460 is about.
+    const EmitterProfile device = EmitterProfile::rgb(
+        "test/rgb", Chromaticity(.640f, .330f), Chromaticity(.300f, .600f),
+        Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f, "test", "test");
+    auto greenRatio = [&](const SourceProfile& source) {
+        StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(source, device, GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        fl::i32 mid[3];
+        fl::i32 full[3];
+        processPixelQ16(pipeline, 128, 128, 128, mid);
+        processPixelQ16(pipeline, 255, 255, 255, full);
+        return static_cast<double>(mid[1]) / static_cast<double>(full[1]);
+    };
+    const double file = greenRatio(profileOf("{}", kRgb8));
+    const double linear = greenRatio(SourceProfile::linearSrgb());
+    FL_CHECK_GT(file, 0.20);
+    FL_CHECK_LT(file, 0.23);
+    FL_CHECK_GT(linear, 0.48);
+    FL_CHECK_LT(linear, 0.52);
+}
 }  // FL_TEST_FILE

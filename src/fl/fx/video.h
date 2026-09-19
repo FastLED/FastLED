@@ -12,6 +12,8 @@
 
 namespace fl {
 
+struct SourceProfile;  // fl/gfx/color_profile.h
+
 struct CRGB;
 using CRGB = fl::CRGB;  // CRGB is now a typedef
 
@@ -90,6 +92,13 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     bool hasEmbeddedScreenMap() const FL_NO_EXCEPT;
     const fl::string &embeddedScreenMapJson() const FL_NO_EXCEPT;
     bool videoColor(fled::VideoColor *out) const FL_NO_EXCEPT;
+    /// The colour-pipeline source profile the file declares (or the default
+    /// tuple of its pixel format). False when no FLED file is open or its
+    /// colour does not resolve. Bind it to play the file colour-accurately
+    /// on a colour-managed channel (#4460):
+    ///     fl::SourceProfile source;
+    ///     if (video.sourceProfile(&source)) FastLED.setDefaultSourceProfile(source);
+    bool sourceProfile(SourceProfile *out) const FL_NO_EXCEPT;
     bool pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT;
     bool readSample(video::PixelSample *out) FL_NO_EXCEPT;
     void setFledPlaybackMode(FledPlaybackMode mode) FL_NO_EXCEPT;

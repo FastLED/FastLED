@@ -1,6 +1,7 @@
 // ok no header - implementation for fl/fled/color.h.
 
 #include "fl/fled/color.h"
+#include "fl/gfx/color_profile.h"
 
 #include "fl/fled/detail/pixel_format.h"
 #include "fl/stl/cstring.h"
@@ -359,6 +360,47 @@ const char* colorStatusMessage(ColorStatus status) FL_NO_EXCEPT {
         return "video.color.primaries object needs red/green/blue/white CIE xy pairs";
     }
     return "unknown color status";
+}
+
+bool toSourceProfile(const VideoColor& color, SourceProfile* out) FL_NO_EXCEPT {
+    if (out == nullptr) {
+        return false;
+    }
+    RgbPrimaries primaries = SourceProfile::srgbBt709().primaries;
+    switch (color.primaries) {
+        case ColorPrimaries::Bt709:
+            primaries = SourceProfile::srgbBt709().primaries;
+            break;
+        case ColorPrimaries::DisplayP3:
+            primaries = SourceProfile::displayP3().primaries;
+            break;
+        case ColorPrimaries::Bt2020:
+            primaries = SourceProfile::bt2020().primaries;
+            break;
+        case ColorPrimaries::Custom:
+            primaries = RgbPrimaries(
+                Chromaticity(color.customPrimaries[0], color.customPrimaries[1]),
+                Chromaticity(color.customPrimaries[2], color.customPrimaries[3]),
+                Chromaticity(color.customPrimaries[4], color.customPrimaries[5]),
+                Chromaticity(color.customPrimaries[6], color.customPrimaries[7]));
+            break;
+    }
+    TransferFunction transfer = TransferFunction::Srgb;
+    switch (color.transfer) {
+        case ColorTransfer::Srgb:
+            transfer = TransferFunction::Srgb;
+            break;
+        case ColorTransfer::Bt709:
+            transfer = TransferFunction::Bt709;
+            break;
+        case ColorTransfer::Linear:
+            transfer = TransferFunction::Linear;
+            break;
+    }
+    // matrix and range: v1 defines only rgb / full, which is what the
+    // pipeline assumes, so there is nothing further to carry.
+    *out = SourceProfile(primaries, transfer);
+    return true;
 }
 
 }  // namespace fled
