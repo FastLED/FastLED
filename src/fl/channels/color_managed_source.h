@@ -115,9 +115,7 @@ class ColorManagedPixelSource {
     /// offsets -- one dither per channel, which is C5's exclusion -- and the
     /// same gates apply: the wrapped controller's offsets are non-zero only
     /// for `BINARY_DITHER`, a lit scale, and a refresh rate `show()` allows.
-    bool temporalDitherEnabled() const FL_NO_EXCEPT {
-        return (mController.e[0] | mController.e[1] | mController.e[2]) != 0;
-    }
+    bool temporalDitherEnabled() const FL_NO_EXCEPT;
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     /// `quantize` onto the 16-bit wire. Same clamps, same rounding, 65535

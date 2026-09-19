@@ -30,10 +30,9 @@ void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
             // any eight neighbours cover the whole cycle in every frame: a
             // uniform strip's total light does not pulse. All three channels
             // share it, so a neutral pixel is neutral in every frame.
-            const u8 position =
-                static_cast<u8>(mController.mLen - mController.mLenRemaining);
-            const u8 phase =
-                static_cast<u8>(detail::ditherFrame() + position) & 7u;
+            const int position = mController.mLen - mController.mLenRemaining;
+            const u8 phase = static_cast<u8>(
+                (detail::ditherFrame() + (position & 7)) & 7);
             const u8 threshold = kTemporalDitherThresholds[phase];
             for (int i = 0; i < 3; ++i) {
                 channels[i] = quantizeDithered(drives[i], threshold);
@@ -94,6 +93,10 @@ void ColorManagedPixelSource::loadRGBScaleAndBrightness(
     *brightness = 255;
 }
 #endif
+
+bool ColorManagedPixelSource::temporalDitherEnabled() const FL_NO_EXCEPT {
+        return (mController.e[0] | mController.e[1] | mController.e[2]) != 0;
+}
 
 u8 ColorManagedPixelSource::quantizeDithered(i32 drive,
                                              u8 threshold) FL_NO_EXCEPT {
