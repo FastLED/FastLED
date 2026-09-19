@@ -9,6 +9,8 @@
 #include "fl/fx/frame.h"
 #include "fl/video/frame_interpolator.h"
 #include "fl/video/pixel_stream.h"
+#include "fl/fled/color.h"
+#include "fl/gfx/color_profile.h"
 #include "fl/video/video_impl.h"
 #include "fl/stl/noexcept.h"
 
@@ -124,6 +126,12 @@ float Video::timeScale() const {
 }
 
 string Video::error() const { return mError; }
+
+bool Video::sourceProfile(SourceProfile *out) const FL_NO_EXCEPT {
+    fled::VideoColor color;
+    return out != nullptr && videoColor(&color) &&
+           fled::toSourceProfile(color, out);
+}
 
 bool Video::videoColor(fled::VideoColor *out) const FL_NO_EXCEPT {
     return mImpl && mImpl->videoColor(out);
