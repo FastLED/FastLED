@@ -392,23 +392,12 @@ class PixelIterator {
     /// @param out Output buffer to write encoded bytes
     /// @param hd_gamma Enable high-definition gamma correction (per-LED brightness)
     /// @note Protocol: [Start:32b 0x00][LED:[0xE0|bri5][B][G][R]] x N, then [End: (N/32)+1 x 32b 0xFF]
-    /// @param managed_min_field For a colour-managed HD channel, the lowest
-    ///        5-bit field the joint code/field solve may use (B1's flicker
-    ///        floor). 0 or 31 keeps the field fixed and the existing path.
     template <typename CONTAINER_UIN8_T>
-    void writeAPA102(CONTAINER_UIN8_T* out, bool hd_gamma = false,
-                     u8 managed_min_field = 0) FL_NO_EXCEPT {
+    void writeAPA102(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
         FL_UNUSED(hd_gamma);  // only read under FASTLED_HD_COLOR_MIXING
-        FL_UNUSED(managed_min_field);
         auto back_ins = fl::back_inserter(*out);
 
         #if FASTLED_HD_COLOR_MIXING
-#if !FL_PLATFORM_HAS_TINY_MEMORY
-        if (hd_gamma && managed_min_field != 0 && managed_min_field < 31) {
-            writeFiveBitWide(back_ins, managed_min_field);
-            return;
-        }
-#endif
         if (hd_gamma) {
             // HD gamma mode: per-LED brightness
             auto pixel_range = makeScaledPixelRangeRGB(this);
@@ -437,21 +426,11 @@ class PixelIterator {
     /// @param hd_gamma Enable high-definition gamma correction (per-LED brightness)
     /// @note Protocol: Same as APA102, including the all-ones end clock frame.
     template <typename CONTAINER_UIN8_T>
-    void writeSK9822(CONTAINER_UIN8_T* out, bool hd_gamma = false,
-                     u8 managed_min_field = 0) FL_NO_EXCEPT {
+    void writeSK9822(CONTAINER_UIN8_T* out, bool hd_gamma = false) FL_NO_EXCEPT {
         FL_UNUSED(hd_gamma);  // only read under FASTLED_HD_COLOR_MIXING
-        FL_UNUSED(managed_min_field);
         auto back_ins = fl::back_inserter(*out);
 
         #if FASTLED_HD_COLOR_MIXING
-#if !FL_PLATFORM_HAS_TINY_MEMORY
-        // Only reachable when a bound profile says SK9822's field is a
-        // characterised slow PWM; by default its field is held fixed (B1).
-        if (hd_gamma && managed_min_field != 0 && managed_min_field < 31) {
-            writeFiveBitWide(back_ins, managed_min_field);
-            return;
-        }
-#endif
         if (hd_gamma) {
             // HD gamma mode: per-LED brightness
             auto pixel_range = makeScaledPixelRangeRGB(this);

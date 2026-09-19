@@ -12,7 +12,6 @@
 #include "fl/log/log.h"
 #include "fl/channels/options.h"
 #include "fl/channels/pipeline_binding.h"
-#include "fl/channels/five_bit_semantics.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
 #include "fl/system/trace.h"
@@ -805,25 +804,25 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
         // B1 (#4042): on a colour-managed HD channel the 5-bit field is a
         // per-chip decision -- a joint code/field solve for APA102's slow
-        // PWM, held fixed for SK9822's current gain and for unknown chips --
-        // and a bound profile's `five_bit_semantics` overrides the chip's.
-        // 0 selects the existing path everywhere else.
-        u8 hd_min_field = 0;
+        // PWM, held fixed for SK9822's current gain and for unknown chips.
+        // Through the hook, so a sketch that binds no profile does not link
+        // the solve; when the field stays fixed it declines and the case
+        // below encodes as before.
+        bool hd_encoded = false;
 #if FL_COLOR_PROFILE_RUNTIME
         if (iterator.isManaged()) {
-            const EmitterProfile* profile = emitterProfile();
-            hd_min_field = hdMinimumField(
-                fiveBitSemanticsFor(config.chipset,
-                                    profile != nullptr
-                                        ? profile->five_bit_semantics
-                                        : FiveBitSemantics::NotApplicable),
-                detail::hdFieldFloor());
+            // The hook filters by chip: anything without a solvable field
+            // declines and falls through to the switch.
+            const ColorPipelineHooks& hd_hooks = colorPipelineHooks();
+            hd_encoded = hd_hooks.encodeHdWide != nullptr &&
+                         hd_hooks.encodeHdWide(pixelIterator, &data,
+                                               config.chipset, *this);
         }
 #endif
 
         // Switch on enum WITHOUT default case - compiler will warn if new enum values are added
         // TODO: Consolidate these PixelIterator methods with template controllers in src/fl/chipsets/
-        switch (config.chipset) {
+        if (!hd_encoded) switch (config.chipset) {
             case SpiChipset::APA102:
             case SpiChipset::DOTSTAR:
             case SpiChipset::HD107:
@@ -833,7 +832,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case SpiChipset::APA102HD:
             case SpiChipset::DOTSTARHD:
             case SpiChipset::HD107HD:
-                pixelIterator.writeAPA102(&data, true, hd_min_field);
+                pixelIterator.writeAPA102(&data, true);
                 break;
 
             case SpiChipset::SK9822:
@@ -841,7 +840,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                 break;
 
             case SpiChipset::SK9822HD:
-                pixelIterator.writeSK9822(&data, true, hd_min_field);
+                pixelIterator.writeSK9822(&data, true);
                 break;
 
             case SpiChipset::WS2801:

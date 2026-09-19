@@ -4,6 +4,8 @@
 
 #include "fl/channels/channel_events.h"
 #include "fl/channels/color_managed_source.h"
+#include "fl/channels/five_bit_semantics.h"
+#include "fl/channels/cled_controller.h"
 #include "fl/stl/new.h"
 #include "power_mgt.h"
 
@@ -98,6 +100,33 @@ u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
 }
 #endif  // FL_COLOR_PIPELINE_SHARED
 
+bool encodeColorPipelineHdWide(PixelIterator& pixels, vector_psram<u8>* out,
+                               SpiChipset chip,
+                               const CLEDController& controller) FL_NO_EXCEPT {
+#if FASTLED_HD_COLOR_MIXING && !FL_PLATFORM_HAS_TINY_MEMORY
+    // The profile is read here rather than by the caller, so the accessor
+    // links only with the hook.
+    const EmitterProfile* profile = controller.emitterProfile();
+    const u8 min_field = hdMinimumField(
+        fiveBitSemanticsFor(chip, profile != nullptr
+                                      ? profile->five_bit_semantics
+                                      : FiveBitSemantics::NotApplicable),
+        detail::hdFieldFloor());
+    if (min_field >= 31) {
+        // Field held fixed: the caller's existing path is exactly that.
+        return false;
+    }
+    pixels.writeFiveBitWide(fl::back_inserter(*out), min_field);
+    return true;
+#else
+    FL_UNUSED(pixels);
+    FL_UNUSED(out);
+    FL_UNUSED(chip);
+    FL_UNUSED(controller);
+    return false;
+#endif
+}
+
 void notifyColorPipelineProfileClearedByLegacy() FL_NO_EXCEPT {
     ChannelEvents::instance().onColorProfileWarning(
         ColorProfileEvent{-1, {}, ColorProfileWarning::ProfileClearedByLegacy});
@@ -120,6 +149,7 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.setFlux = &setColorPipelineFlux;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
+    hooks.encodeHdWide = &encodeColorPipelineHdWide;
 #if FL_COLOR_PIPELINE_SHARED
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
 #endif
