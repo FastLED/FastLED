@@ -45,6 +45,7 @@
 
 **NEVER use:** `uv run python test.py` — use `bash test` or `uv run test.py`
 **FORBIDDEN:** `--no-fingerprint` (use `bash test --clean`), the PlatformIO tool (banned repo-wide, lint enforced — fbuild is the only board build backend), bare `meson`/`ninja`/`clang++`
+**One exception to the PlatformIO ban — registry publishing:** `pio pkg publish` is permitted, because it is the only way to get a FastLED release into the PlatformIO registry (which sat at 3.10.3 while 3.10.5 was out). It is allowed **only** in the release workflow/script, and only that subcommand — never `pio run`, `pio test`, `pio device`, or any build, upload, or monitor use; those stay fbuild's job. The lint (`ci/lint/banned_build_tools.py`) and the command hook (`ci/hooks/check_forbidden_commands.py`) still block it everywhere: whoever adds the release publish step allowlists that one file there, with the reason in the comment.
 
 See `agents/docs/commands-reference.md` for Docker, fbuild, WASM, profiling, example compilation, and override mechanism.
 See `agents/docs/build-system.md` for full command execution rules and forbidden patterns.
