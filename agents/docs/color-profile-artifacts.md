@@ -79,6 +79,30 @@ profile and are not one, and the schema forbids it:
 
 The fix for a refusal is upstream measurement, which is P10's gate.
 
+## Pins, floating aliases and the profile enum (C8.3)
+
+For every admitted artifact the generator emits three things:
+
+- a **pinned symbol** carrying the full ID, report included
+  (`FIXTURE_RGB_NONE_SYNTHETIC_R1`). It never moves. Pin a sketch to it when
+  bit-for-bit reproducibility matters.
+- a **floating alias** per identity, the ID without its report
+  (`FIXTURE_RGB_NONE`). It is a `constexpr` reference to the best-available
+  pin: a `measured` artifact beats a `datasheet_derived` one, then the highest
+  `rN` revision wins (numerically, so `r10` beats `r2`), then the report ID
+  breaks ties.
+- a `GeneratedProfile` **enum** with one enumerator per identity, and
+  `generated_profile_of<Id>::value`, which resolves to the alias.
+
+An alias advancing is a one-line diff in the generated header. The header is
+only regenerated in a reviewed maintainer PR, so that diff is the reviewable
+alias index the artifact schema asks for.
+
+The generated header is test-only today because its one admitted profile is a
+synthetic fixture. P2's `fl::profiles::WS2812B` in `src/` stays a labeled
+placeholder until a runtime-admissible artifact for that part exists, which
+requires a P10 measurement: the mirrored datasheet artifacts are all refused.
+
 ## Related
 
 - `ci/color_profile_generator.py` — the artifact → C++ bridge and its gate

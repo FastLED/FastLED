@@ -19,8 +19,10 @@ from ci.color_profile_generator import (
     TOPOLOGY_CHANNELS,
     Admission,
     Refusal,
+    _render_aliases_and_enum,  # noqa: PLC2701
     admit,
     alias_name,
+    choose_aliases,
     load_artifacts,
     parse_artifact,
     render_header,
@@ -214,6 +216,89 @@ class TestAdmissionAndRendering(unittest.TestCase):
             symbol_name("ws2812b/5050/none/datasheet-r1"),
             symbol_name("ws2812b/5050/none/datasheet-r2"),
         )
+
+
+def _fixture_variant(report: str, kind: str) -> Admission:
+    """The committed fixture, re-identified as `report` with provenance `kind`."""
+
+    payload = json.loads(
+        (FIXTURES / "fixture-rgb-none-synthetic-r1.profile.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    payload["profile_id"] = f"fixture/rgb/none/{report}"
+    payload["identity"]["report_id"] = report
+    payload["provenance"]["kind"] = kind
+    payload["provenance"]["report_id"] = report
+    decision = admit(parse_artifact(json.dumps(payload).encode(), f"{report}.json"))
+    assert isinstance(decision, Admission)
+    return decision
+
+
+class TestFloatingAliases(unittest.TestCase):
+    """C8.3: pins never move; the bare alias floats to the best report."""
+
+    def test_a_measurement_outranks_a_later_datasheet_derivation(
+        self: "TestFloatingAliases",
+    ) -> None:
+        measured = _fixture_variant("lab-r1", "measured")
+        derived = _fixture_variant("datasheet-r5", "datasheet_derived")
+        chosen = choose_aliases([derived, measured])
+        self.assertIs(chosen["FIXTURE_RGB_NONE"], measured)
+
+    def test_the_highest_revision_wins_within_a_provenance_kind(
+        self: "TestFloatingAliases",
+    ) -> None:
+        r2 = _fixture_variant("lab-r2", "measured")
+        r10 = _fixture_variant("lab-r10", "measured")
+        # Numeric, not lexical: "r10" must beat "r2".
+        self.assertIs(choose_aliases([r10, r2])["FIXTURE_RGB_NONE"], r10)
+        self.assertIs(choose_aliases([r2, r10])["FIXTURE_RGB_NONE"], r10)
+
+    def test_the_choice_does_not_depend_on_input_order(
+        self: "TestFloatingAliases",
+    ) -> None:
+        a = _fixture_variant("lab-r1", "measured")
+        b = _fixture_variant("bench-r1", "measured")
+        self.assertIs(
+            choose_aliases([a, b])["FIXTURE_RGB_NONE"],
+            choose_aliases([b, a])["FIXTURE_RGB_NONE"],
+        )
+
+    def test_the_enum_refuses_more_identities_than_u8_holds(
+        self: "TestFloatingAliases",
+    ) -> None:
+        one = _fixture_variant("lab-r1", "measured")
+        at_limit = {f"ID_{i}": one for i in range(255)}
+        rendered = _render_aliases_and_enum(at_limit)
+        self.assertIn("constexpr u8 kGeneratedProfileCount = 255;", rendered)
+        over = {f"ID_{i}": one for i in range(256)}
+        with self.assertRaisesRegex(ValueError, "u8 range"):
+            _render_aliases_and_enum(over)
+
+    def test_the_header_emits_alias_enum_and_lookup_for_the_pin(
+        self: "TestFloatingAliases",
+    ) -> None:
+        rendered = GENERATED.read_text(encoding="utf-8")
+        self.assertIn(
+            "constexpr const colorimetric_response::EmitterProfile& "
+            "FIXTURE_RGB_NONE = FIXTURE_RGB_NONE_SYNTHETIC_R1;",
+            rendered,
+        )
+        self.assertIn("enum class GeneratedProfile : u8 {", rendered)
+        self.assertIn(
+            "struct generated_profile_of<GeneratedProfile::FIXTURE_RGB_NONE>",
+            rendered,
+        )
+
+    def test_an_advanced_alias_keeps_every_pin(self: "TestFloatingAliases") -> None:
+        old = _fixture_variant("lab-r1", "measured")
+        new = _fixture_variant("lab-r2", "measured")
+        rendered = render_header([old, new], [], "c0ffee", "2026-01-01")
+        self.assertIn("FIXTURE_RGB_NONE_LAB_R1 =", rendered)
+        self.assertIn("FIXTURE_RGB_NONE_LAB_R2 =", rendered)
+        self.assertIn("FIXTURE_RGB_NONE = FIXTURE_RGB_NONE_LAB_R2;", rendered)
+        self.assertEqual(rendered.count("    FIXTURE_RGB_NONE,"), 1)
 
 
 class TestRenderableTopologies(unittest.TestCase):
