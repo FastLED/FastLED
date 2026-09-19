@@ -39,11 +39,15 @@ namespace fl {
 /// not own.
 class ColorManagedPixelSource {
   public:
+    /// `dither_phase` is where this frame sits in the temporal-dither cycle.
+    /// `fl::Channel` passes its own phase, advanced only when its driver
+    /// accepts a frame (#4347); the three-argument form uses the shared
+    /// per-frame counter.
     ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
-                            const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT
-        : mController(controller), mPipeline(pipeline),
-          mSlot0(RGB_BYTE0(order)), mSlot1(RGB_BYTE1(order)),
-          mSlot2(RGB_BYTE2(order)) {}
+                            const StreamingPipelineQ16& pipeline,
+                            u8 dither_phase) FL_NO_EXCEPT;
+    ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
+                            const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT;
 
     /// The colour-managed path.
     ///
@@ -128,6 +132,7 @@ class ColorManagedPixelSource {
     int mSlot0;
     int mSlot1;
     int mSlot2;
+    u8 mDitherPhase;
 };
 
 }  // namespace fl

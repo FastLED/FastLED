@@ -86,9 +86,11 @@ class ReorderingPixelIteratorAny {
         Rgbw rgbw,
         Rgbww rgbww,
         const fl::string& channelName,
-        const StreamingPipelineQ16* pipeline) FL_NO_EXCEPT
+        const StreamingPipelineQ16* pipeline,
+        u8 ditherPhase) FL_NO_EXCEPT
         : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
         FL_UNUSED(pipeline);
+        FL_UNUSED(ditherPhase);  // read only by the colour-managed source
         FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
 
         // Apply addressing transformation if configured
@@ -137,7 +139,7 @@ class ReorderingPixelIteratorAny {
                 mAddressedController ? mAddressedController.value() : pixels;
             mManagedIterator = hooks.makeIterator(
                 mManagedSourceStorage, mManagedIteratorStorage, base, rgbOrder,
-                *pipeline, rgbw, rgbww);
+                *pipeline, rgbw, rgbww, ditherPhase);
         }
 #endif
     }
@@ -736,9 +738,17 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 #else
     const StreamingPipelineQ16* pipeline = nullptr;
 #endif
+    // Dither advances on presentation, not on attempt (#4347, R8): this
+    // channel's phase moves only when its driver accepts a frame (below), so
+    // a dropped submission -- no driver, a disabled one, a busy buffer --
+    // does not consume a phase and the cycle's average stays unbiased. Both
+    // the legacy offsets and the colour-managed temporal dither read it.
+    if ((pixels.e[0] | pixels.e[1] | pixels.e[2]) != 0) {
+        pixels.reseed_binary_dithering(mDitherPhase);
+    }
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
                                         mSettings.rgbw(), mSettings.rgbww(),
-                                        mName, pipeline);
+                                        mName, pipeline, mDitherPhase);
     PixelIterator& pixelIterator = iterator.get();
 
     // Encode pixels based on chipset type
@@ -930,6 +940,8 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
     // Enqueue for transmission (will be sent when driver->show() is called)
     driver->enqueue(mChannelData);
+    // Presented, per the driver contract: an accepted enqueue is the frame.
+    ++mDitherPhase;
     auto& events = ChannelEvents::instance();
     events.onChannelEnqueued(*this, driver->getName());
 }
@@ -1014,6 +1026,10 @@ int Channel::size() const {
 
 void Channel::showLeds(u8 brightness) {
     CPixelLEDController<RGB>::showLeds(brightness);
+}
+
+u8 Channel::ditherPhase() const FL_NO_EXCEPT {
+    return mDitherPhase;
 }
 
 bool Channel::isInDrawList() const {

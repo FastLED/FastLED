@@ -236,4 +236,11 @@
 # that binds no profile links none of them; what remains in every Channel
 # sketch is Channel::showPixels's managed check and the indirect call (+36 B by
 # symbol diff) and the hook table's extra pointer (+4 B), plus alignment.
-383000
+#
+# +158 B (383000 -> 383158), #4452: a fl::Channel's dither phase advances on
+# presentation, not attempt (#4347, R8). By symbol diff the whole cost is in
+# Channel::showPixels (+136 B): reseeding the controller's offsets from the
+# channel's own phase, advancing it after an accepted enqueue, and handing it
+# to the managed source. PixelController's constructor path is unchanged, so
+# legacy addLeds<> on AVR is byte-identical (uno Blink 5170/633).
+383158

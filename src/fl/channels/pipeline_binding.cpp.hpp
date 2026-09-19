@@ -36,9 +36,9 @@ PixelIterator* makeColorPipelineIterator(
     void* source_storage, void* iterator_storage,
     PixelController<RGB, 1, 0xFFFFFFFF>& controller, EOrder order,
     const StreamingPipelineQ16& pipeline, const Rgbw& rgbw,
-    Rgbww rgbww) FL_NO_EXCEPT {
-    ColorManagedPixelSource* source =
-        new (source_storage) ColorManagedPixelSource(controller, order, pipeline);
+    Rgbww rgbww, u8 dither_phase) FL_NO_EXCEPT {
+    ColorManagedPixelSource* source = new (source_storage)
+        ColorManagedPixelSource(controller, order, pipeline, dither_phase);
     return new (iterator_storage) PixelIterator(source, rgbw, rgbww);
 }
 

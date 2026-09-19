@@ -75,7 +75,8 @@ struct ColorPipelineHooks {
                                    PixelController<RGB, 1, 0xFFFFFFFF>& controller,
                                    EOrder order,
                                    const StreamingPipelineQ16& pipeline,
-                                   const Rgbw& rgbw, Rgbww rgbww);
+                                   const Rgbw& rgbw, Rgbww rgbww,
+                                   u8 dither_phase);
 
     /// Destroys what `makeIterator` built. Null until installed.
     void (*destroyIterator)(void* source_storage, void* iterator_storage);

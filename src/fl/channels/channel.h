@@ -231,6 +231,9 @@ public:
     fl::shared_ptr<StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override;
 #endif
     bool isEnabled() const FL_NO_EXCEPT { return const_cast<Channel*>(this)->getEnabled(); }
+    /// Where this channel is in its dither cycle: the number of frames its
+    /// driver has accepted, mod 256 (#4347).
+    u8 ditherPhase() const FL_NO_EXCEPT;
     bool hasColorProfileFallback() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         return mColorProfileFallback;
@@ -391,6 +394,10 @@ private:
                                      // named driver wasn't registered with ChannelManager).
                                      // Subsequent shows on the same channel skip the warn even
                                      // though the priority-dispatch fallback re-runs every frame.
+    /// This channel's temporal-dither phase. Advanced when its driver accepts
+    /// a frame rather than when one is attempted, so dropped submissions do
+    /// not skew the cycle (#4347).
+    u8 mDitherPhase = 0;
     bool mDisabledDriverWarned = false;  // One-shot guard for the #2517 FL_ERROR. Flipped on the
                                          // first showPixels() that would have enqueued data to a
                                          // driver disabled by `setExclusiveDriver(...)` (or
