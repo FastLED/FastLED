@@ -97,6 +97,7 @@ fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::str
 // Weak default implementation - no audio support
 FL_LINK_WEAK
 fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) {
+    FL_UNUSED(config);  // no audio input here to configure
     if (error_message) {
         *error_message = "AudioInput not supported on this platform.";
     }
