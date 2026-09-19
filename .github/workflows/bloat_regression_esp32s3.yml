@@ -118,3 +118,19 @@ jobs:
           else
             uv run python tests/test_esp32s3_bloat_regression.py
           fi
+
+      # The gate's total is a sum over this report, and a local run of the same
+      # commit has been seen to disagree with it by 4 KB (#4468). Keeping the
+      # report lets a local build be diffed against CI's symbol by symbol
+      # instead of rebuilt and guessed at. Uploaded on failure too: that is
+      # when it is needed most.
+      - name: Upload the symbol report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32s3-bloat-report
+          path: |
+            .build/symbols/esp32s3/report.json
+            .build/symbols/esp32s3/report.md
+          if-no-files-found: warn
+          retention-days: 30
