@@ -382,6 +382,38 @@ struct PixelController {
 #endif
     }
 
+    /// Re-point binary dithering at phase `R` after construction, leaving the
+    /// per-channel ranges `e[]` as `init_binary_dithering()` set them: only the
+    /// offsets depend on the phase. `fl::Channel` keeps its own phase and
+    /// advances it only when its driver accepts a frame, so a dropped
+    /// submission does not consume one (#4347, R8). Same arithmetic as the
+    /// constructor's path; kept separate so that path compiles unchanged.
+    void reseed_binary_dithering(fl::u8 R) {
+        (void)R;  // unread when NO_DITHERING compiles the body out
+#if !defined(NO_DITHERING) || (NO_DITHERING != 1)
+        R &= (0x01 << VIRTUAL_BITS) - 1;
+        fl::u8 Q = 0;
+        for (int b = 0; b < 8; ++b) {
+            if (R & (0x01 << b)) { Q |= static_cast<fl::u8>(0x80 >> b); }
+        }
+        if (VIRTUAL_BITS < 8) {
+            Q += 0x01 << (7 - VIRTUAL_BITS);
+        }
+        for (int i = 0; i < 3; ++i) {
+            // `e[i]` is the constructor's range less one; zero only for an
+            // unlit channel, which carries no offset.
+            if (e[i] == 0) {
+                d[i] = 0;
+                continue;
+            }
+            d[i] = fl::scale8(Q, static_cast<fl::u8>(e[i] + 1));
+#if (FASTLED_SCALE8_FIXED == 1)
+            if (d[i]) { --d[i]; }
+#endif
+        }
+#endif
+    }
+
     /// Do we have n pixels left to process?
     /// @param n the number to check against
     /// @returns 'true' if there are more than n pixels left to process

@@ -430,9 +430,11 @@ A colour-managed channel with `BINARY_DITHER` now dithers the pipeline's drive i
 | uniform strip | constant total light per frame | the per-pixel phase offset is removed |
 | `DISABLE_DITHER` | the rounded code, every frame | — |
 
+**Advances on presentation (#4347, R8).** A `fl::Channel` keeps its own dither phase. The phase advances only when the channel's driver accepts a frame, and both the legacy offsets and this temporal dither read it. So a dropped submission does not consume a phase: no driver, a disabled one, or a busy buffer. Irregular dwell between presentations does not move it either. A phase-correlated drop pattern (every other attempt dropped) presents all eight phases over eight presentations, and the mean stays within 1/16 of a code. With the phase advancing on attempt, the same pattern presents only four phases and misses by 0.12. Legacy `addLeds<>` controllers present synchronously inside `show()` and keep the shared per-frame counter.
+
 ## Not covered
 
-The frame counter advances when a frame is attempted, not when it is presented (#4347, R8). The gamma LUT paths are not scored here
+The gamma LUT paths are not scored here
 either — they are shaping *strategies* rather than fixed paths, and scoring
 them requires the strategy-space definition that the section-5 comparison
 proper has to settle.

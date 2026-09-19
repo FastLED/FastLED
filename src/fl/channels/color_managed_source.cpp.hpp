@@ -19,6 +19,19 @@ constexpr u8 kTemporalDitherThresholds[8] = {16, 144, 80, 208, 48, 176, 112, 240
 
 }  // namespace
 
+ColorManagedPixelSource::ColorManagedPixelSource(
+    PixelController<RGB>& controller, EOrder order,
+    const StreamingPipelineQ16& pipeline, u8 dither_phase) FL_NO_EXCEPT
+    : mController(controller), mPipeline(pipeline),
+      mSlot0(RGB_BYTE0(order)), mSlot1(RGB_BYTE1(order)),
+      mSlot2(RGB_BYTE2(order)), mDitherPhase(dither_phase) {}
+
+ColorManagedPixelSource::ColorManagedPixelSource(
+    PixelController<RGB>& controller, EOrder order,
+    const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT
+    : ColorManagedPixelSource(controller, order, pipeline,
+                              detail::ditherFrame()) {}
+
 void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
                                              u8* b2_out) FL_NO_EXCEPT {
         const u8* raw = mController.mData;
@@ -31,8 +44,7 @@ void ColorManagedPixelSource::loadAndScaleRGB(u8* b0_out, u8* b1_out,
             // uniform strip's total light does not pulse. All three channels
             // share it, so a neutral pixel is neutral in every frame.
             const int position = mController.mLen - mController.mLenRemaining;
-            const u8 phase = static_cast<u8>(
-                (detail::ditherFrame() + (position & 7)) & 7);
+            const u8 phase = static_cast<u8>((mDitherPhase + (position & 7)) & 7);
             const u8 threshold = kTemporalDitherThresholds[phase];
             for (int i = 0; i < 3; ++i) {
                 channels[i] = quantizeDithered(drives[i], threshold);

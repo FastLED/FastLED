@@ -77,6 +77,8 @@ class ByteCapturingMockEngine : public IChannelDriver {
         : mName(name) {}
 
     fl::vector<ChannelDataPtr> mCapturedChannels;
+    /// When set, `poll()` reports BUSY: a driver still transmitting.
+    bool mBusy = false;
 
     bool canHandle(const ChannelDataPtr& data) const override {
         (void)data;
@@ -88,7 +90,9 @@ class ByteCapturingMockEngine : public IChannelDriver {
         }
     }
     void show() override {}
-    DriverState poll() override { return DriverState::READY; }
+    DriverState poll() override {
+        return mBusy ? DriverState::BUSY : DriverState::READY;
+    }
     fl::string getName() const override { return mName; }
     Capabilities getCapabilities() const override {
         return Capabilities(true, true);
@@ -772,6 +776,182 @@ FL_TEST_CASE("[#4042] B1: SK9822-HD and HD107-HD keep the field fixed whatever t
     FL_REQUIRE_GE(hd107.size(), 8u);
     FL_CHECK_EQ(sk[4], 0xFF);
     FL_CHECK_EQ(hd107[4], 0xFF);
+}
+
+namespace {
+
+/// A managed channel on a capture driver whose frames can be dropped by
+/// disabling that driver -- the drop path `showPixels` actually takes.
+struct DroppableChannel {
+    CRGB leds[1];
+    fl::shared_ptr<ByteCapturingMockEngine> engine;
+    ChannelPtr channel;
+    const char* name;
+
+    DroppableChannel(const char* driver_name, CRGB source, bool managed)
+        : name(driver_name) {
+        leds[0] = source;
+        engine = fl::make_shared<ByteCapturingMockEngine>(driver_name);
+        ChannelManager::instance().addDriver(2020, engine);
+        ChannelOptions options;
+        if (managed) {
+            FL_REQUIRE(options.setColorProfile(rgbDevice()));
+        }
+        options.mDitherMode = BINARY_DITHER;
+        auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+        channel = Channel::create(ChannelConfig(
+            7, timing, fl::span<CRGB>(leds, 1), RGB, options));
+        FL_REQUIRE(channel != nullptr);
+    }
+    ~DroppableChannel() {
+        ChannelManager::instance().setDriverEnabled(name, true);
+        ChannelManager::instance().removeDriver(engine);
+    }
+    /// One attempt at a frame. A dropped one has no enabled driver at all --
+    /// every registered driver is disabled for it and restored afterwards --
+    /// so nothing else in the test binary can take the frame instead.
+    /// Returns true if the capture driver accepted it.
+    bool attempt(bool drop) {
+        ChannelManager& manager = ChannelManager::instance();
+        fl::vector<fl::string> reenable;
+        if (drop) {
+            for (const DriverInfo& info : manager.getDriverInfos()) {
+                if (info.enabled) {
+                    reenable.push_back(info.name);
+                }
+            }
+            for (const fl::string& n : reenable) {
+                manager.setDriverEnabled(n.c_str(), false);
+            }
+        }
+        const fl::size before = engine->mCapturedChannels.size();
+        channel->showLeds(255);
+        for (const fl::string& n : reenable) {
+            manager.setDriverEnabled(n.c_str(), true);
+        }
+        return engine->mCapturedChannels.size() > before;
+    }
+    u8 lastRed() const {
+        return engine->mCapturedChannels.back()->getData()[0];
+    }
+};
+
+}  // namespace
+
+FL_TEST_CASE("[#4347] reseeding at a phase matches constructing at it") {
+    // The channel re-points an already-built controller at its own phase.
+    // That must land exactly where the constructor would have put it for the
+    // same phase, or the per-channel phase would change what legacy dither
+    // emits rather than only when it advances.
+    const u8 kScales[] = {0, 1, 2, 16, 51, 128, 200, 255};
+    CRGB led[1] = {CRGB(10, 20, 30)};
+    const u8 saved = fl::detail::gDitherFrame;
+    for (int r = 0; r < 256; ++r) {
+        for (u8 s0 : kScales) {
+            ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+            adjustment.premixed = CRGB(s0, static_cast<u8>(255 - s0), 64);
+
+            fl::detail::gDitherFrame = static_cast<u8>(r);
+            PixelController<RGB> constructed(led, 1, adjustment, BINARY_DITHER);
+
+            fl::detail::gDitherFrame = static_cast<u8>(r + 3);  // some other phase
+            PixelController<RGB> reseeded(led, 1, adjustment, BINARY_DITHER);
+            reseeded.reseed_binary_dithering(static_cast<u8>(r));
+
+            for (int i = 0; i < 3; ++i) {
+                FL_CHECK_EQ(reseeded.d[i], constructed.d[i]);
+                FL_CHECK_EQ(reseeded.e[i], constructed.e[i]);
+            }
+        }
+    }
+    fl::detail::gDitherFrame = saved;
+}
+
+FL_TEST_CASE("[#4347] a dropped submission does not consume the dither phase") {
+    // R8: "State advances on presentation ... with explicit tests for
+    // dropped submissions and irregular dwell." The shared counter moves on
+    // every attempt; the channel's own phase moves only when its driver
+    // accepts the frame.
+    DroppableChannel strip("DITHER_DROP", CRGB(37, 90, 5), false);
+    const u8 start = strip.channel->ditherPhase();
+
+    FL_REQUIRE(strip.attempt(false));
+    FL_CHECK_EQ(strip.channel->ditherPhase(), static_cast<u8>(start + 1));
+
+    // Three drops, and irregular dwell around them -- frames that pass with
+    // no attempt on this channel at all. The shared counter moves through
+    // all of it; the channel's phase does not.
+    const u8 shared_before = fl::detail::ditherFrame();
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_FALSE(strip.attempt(true));
+    }
+    fl::detail::advanceDitherFrame();
+    fl::detail::advanceDitherFrame();
+    FL_CHECK_GE(static_cast<u8>(fl::detail::ditherFrame() - shared_before), 2);
+    FL_CHECK_EQ(strip.channel->ditherPhase(), static_cast<u8>(start + 1));
+
+    FL_REQUIRE(strip.attempt(false));
+    FL_CHECK_EQ(strip.channel->ditherPhase(), static_cast<u8>(start + 2));
+}
+
+FL_TEST_CASE("[#4347] a busy buffer drops the frame without consuming the phase") {
+    // The third drop path: the channel's buffer is still in use by a driver
+    // that does not come READY in time. (The disabled-everything drops above
+    // take the no-driver path.) Costs one waitForReady timeout, ~1 s.
+    DroppableChannel strip("DITHER_BUSY", CRGB(37, 90, 5), false);
+    FL_REQUIRE(strip.attempt(false));
+    const u8 after_first = strip.channel->ditherPhase();
+
+    // The channel's own buffer, as the driver holds it, marked in flight.
+    FL_REQUIRE(!strip.engine->mCapturedChannels.empty());
+    ChannelDataPtr in_flight = strip.engine->mCapturedChannels.back();
+    in_flight->setInUse(true);
+    strip.engine->mBusy = true;
+    const fl::size before = strip.engine->mCapturedChannels.size();
+    strip.channel->showLeds(255);
+    FL_CHECK_EQ(strip.engine->mCapturedChannels.size(), before);  // dropped
+    FL_CHECK_EQ(strip.channel->ditherPhase(), after_first);
+
+    // Driver done: the next frame is presented and the phase moves on.
+    strip.engine->mBusy = false;
+    in_flight->setInUse(false);
+    FL_REQUIRE(strip.attempt(false));
+    FL_CHECK_EQ(strip.channel->ditherPhase(), static_cast<u8>(after_first + 1));
+}
+
+FL_TEST_CASE("[#4347] phase-correlated drops no longer bias the dither cycle") {
+    // The failure mode #4347 describes: drops that correlate with phase. Here
+    // every other attempt is dropped -- on the shared counter, the presented
+    // frames would all be even phases, and the cycle's mean would land on
+    // half of the pattern. On the channel's own phase, eight presentations
+    // are eight consecutive phases, whatever was dropped between them.
+    DroppableChannel strip("DITHER_BIAS", CRGB(37, 90, 5), true);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    StreamingPipelineQ16 pipeline;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
+    i32 drives[3];
+    processPixelQ16(pipeline, 37, 90, 5, drives);
+    const double exact_red = exactCode(drives[0]);
+
+    bool phase_seen[8] = {false, false, false, false, false, false, false, false};
+    int presented = 0;
+    double sum = 0.0;
+    for (int attempt = 0; presented < 8; ++attempt) {
+        const bool drop = (attempt % 2) == 1;
+        const u8 phase = strip.channel->ditherPhase();
+        if (strip.attempt(drop)) {
+            phase_seen[phase & 7] = true;
+            sum += strip.lastRed();
+            ++presented;
+        }
+        FL_REQUIRE_LT(attempt, 64);
+    }
+    for (int p = 0; p < 8; ++p) {
+        FL_CHECK(phase_seen[p]);
+    }
+    FL_CHECK_LE(fl::fabs(sum / 8.0 - exact_red), 1.0 / 16.0 + 1e-9);
 }
 
 FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
