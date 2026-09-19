@@ -281,7 +281,10 @@ def _helpers_called(objdump: str, obj: Path, symbol: str) -> set[str]:
     # stdout and stderr piped separately so objdump's warnings stay out of
     # the disassembly this parses.
     completed = RunningProcess.run(
-        [objdump, "-d", "--no-show-raw-insn", str(obj)],
+        # `-r`: in an unlinked object a call's real target is in the
+        # relocation record on the next line; the printed `<name>` can be
+        # whatever sits at address zero (see `_disassembly`).
+        [objdump, "-d", "-r", "--no-show-raw-insn", str(obj)],
         stdout=PIPE,
         stderr=PIPE,
         encoding="utf-8",
