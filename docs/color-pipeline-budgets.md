@@ -30,7 +30,7 @@ Teensy's figures are rounded to its linker's reporting granularity.
 
 - **Flash.** About 10–11 KB is the whole pipeline: decode, gamut mapping, device solve, flux and dither. The bind-time derivation is included; it still uses float (see below).
 - **RAM.** About 540 B is mostly the per-channel pipeline (held behind a pointer, #4440) and the hook table. On Teensy the extra is its `.data`/`.bss` rounding, not the pipeline.
-- **Not using it costs nothing.** A sketch that never binds a profile links none of this. The whole pipeline is reached through `ColorPipelineHooks`, installed only by `setColorProfile`. uno Blink is byte-identical to before the pipeline existed (5170 B flash / 633 B RAM), and the ESP32-S3 bloat gate holds every sketch to that.
+- **Not using it costs nothing.** A sketch that never binds a profile links none of this. The whole pipeline is reached through `ColorPipelineHooks`, installed only by `setColorProfile`. uno Blink is byte-identical to before the pipeline existed (5170 B flash / 633 B RAM). On ESP32-S3, `examples/ColorProfile` built with and without the `setColorProfile` call differs by about 100 symbols, and none of them is in Blink. The ESP32-S3 bloat gate enforces this: it fails if Blink links any pipeline entry point, and names the symbol (#4455). What an unbound build does carry is the profile API itself: the empty hook table, two `ColorProfileEvent` listener lists and the `colorPipeline()` accessors, about 0.7 KB.
 
 ## Per-pixel throughput on the real path
 

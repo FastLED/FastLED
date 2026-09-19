@@ -217,6 +217,51 @@ def print_largest_symbols(report: dict[str, Any], count: int) -> None:
         )
 
 
+# Entry points every bound colour pipeline links, and that Blink -- which binds
+# no profile -- must not. The pipeline is reached only through the hooks
+# `setColorProfile` installs (`ColorPipelineHooks`), so a sketch that never
+# binds one pays nothing for it (#4455). The byte gate would catch a leak only
+# as an unexplained few KB; this names it. These are the stable anchors, not
+# every symbol: any leak reaches at least one of them.
+kUnboundPipelineSymbols = (
+    "fl::installColorPipelineHooks",
+    "fl::buildStreamingPipelineQ16",
+    "fl::processPixelQ16",
+    "fl::buildGamutMapQ16",
+    "fl::mapAndSolveDrivesQ16",
+    "fl::buildRgbSolveMatrixFromQ16",
+    "fl::q16FromFloatBits",
+    "fl::detail::five_bit_hd_solve16",
+)
+kUnboundPipelinePrefixes = ("fl::ColorManagedPixelSource::",)
+
+
+@typechecked
+def linked_pipeline_symbols(report: dict[str, Any]) -> list[str]:
+    """Colour-pipeline symbols the build linked, sorted and deduplicated.
+
+    Matches on the demangled name up to its parameter list, so an overload or
+    a signature change still counts.
+    """
+
+    raw = report.get("symbols")
+    if not isinstance(raw, list):
+        return []
+    found: set[str] = set()
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("demangled") or entry.get("mangled")
+        if not isinstance(name, str):
+            continue
+        qualified = name.split("(", 1)[0]
+        if qualified in kUnboundPipelineSymbols or qualified.startswith(
+            kUnboundPipelinePrefixes
+        ):
+            found.add(name)
+    return sorted(found)
+
+
 def run_bloat(skip_build: bool) -> None:
     cmd: list[str] = ["bash", "bloat", "esp32s3"]
     if not skip_build:
@@ -294,6 +339,23 @@ def main() -> int:
 
     data = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
     total_flash = int(data["total_flash"])
+
+    leaked = linked_pipeline_symbols(data)
+    if leaked:
+        print(
+            "esp32s3-bloat-regression: FAIL — Blink binds no colour profile "
+            "but links colour-pipeline code:",
+            file=sys.stderr,
+        )
+        for name in leaked:
+            print(f"    {name}", file=sys.stderr)
+        print(
+            "esp32s3-bloat-regression: the pipeline must be reached only "
+            "through ColorPipelineHooks, which setColorProfile installs. "
+            "Something now calls it directly (#4455).",
+            file=sys.stderr,
+        )
+        return 1
 
     delta = total_flash - baseline
     if delta <= 0:
