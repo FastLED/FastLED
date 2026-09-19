@@ -218,6 +218,66 @@ class _RetryOutcome:
     latest: str
 
 
+def _run_precompile_passes(build_dir: Path) -> None:
+    """Run the passes that must happen before Ninja is invoked.
+
+    The PCH staleness check runs on **every** compile. A PCH is stale when a
+    header it was built from changes, and editing a header does not touch
+    ``build.ninja`` -- so gating this on build.ninja's mtime (as #3129 A5 did)
+    skipped it in exactly the case it exists for, and a build after a header
+    edit died with "file ... has been modified since the precompiled header
+    was built" until ``--clean``. Ninja does not reliably track the PCH's
+    header deps here, which is why the explicit check exists at all.
+
+    The strict-path normalize is different: it repairs what a meson
+    reconfigure writes into ``build.ninja``, so it is a genuine no-op while
+    build.ninja is unchanged, and keeps the A5 mtime shortcut.
+    """
+    # Check for stale PCH before invoking Ninja.  Compilers on Windows
+    # emit absolute backslash paths in depfiles which Ninja may fail to
+    # track correctly, leaving the PCH stale even though headers changed.
+    _invalidate_stale_pchs(build_dir)
+
+    if _precompile_passes_can_be_skipped(build_dir):
+        return
+
+    # Re-normalize strict-path include flags before every compile (#2378).
+    # Meson setup already normalizes once, but ninja can regenerate
+    # build.ninja silently when meson.build files change — that
+    # regeneration re-introduces the relative + backslash
+    # `-Ici/meson/native\fastled.dll.p` form that zccache's
+    # --strict-paths=absolute rejects. Running the normalizer here costs
+    # ~5-20 ms and is idempotent when nothing changed.
+    from ci.meson.build_config import normalize_meson_private_include_paths
+
+    normalize_succeeded = False
+    try:
+        normalize_meson_private_include_paths(build_dir)
+        normalize_succeeded = True
+    except KeyboardInterrupt as ki:
+        # Ctrl-C during normalization — propagate cleanly so the watchdog
+        # and signal-handler chain runs to completion (KBI001).
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        # Non-fatal: if the normalizer fails for any reason, fall through
+        # to the compile — the worst case is the original zccache strict-
+        # paths error surfaces, which is still better than silently
+        # breaking the build at the normalize step.
+        _ts_print(
+            f"[MESON] ⚠️  Pre-compile normalize_meson_private_include_paths failed: {e}"
+        )
+
+    # Persist the marker only when the normalize succeeded -- otherwise the
+    # next compile retries it. The marker gates the normalize alone.
+    if normalize_succeeded:
+        build_ninja = build_dir / "build.ninja"
+        try:
+            _write_precompile_mtime_marker(build_dir, build_ninja.stat().st_mtime)
+        except OSError:
+            pass
+
+
 def _retry_ninja(
     cmd: list[str],
     output: str,
@@ -341,54 +401,7 @@ def compile_meson(
             error_log_file=None,
         )
 
-    # Pre-compile passes (PCH staleness check + strict-path normalize) run
-    # in two cases:
-    #   1. First build of this build_dir (marker absent).
-    #   2. build.ninja mtime changed since the last successful pass (meson
-    #      reconfigured, or build.ninja was edited externally).
-    # When neither is true, both passes are guaranteed no-ops by construction
-    # and the ~5-20 ms cost is skipped. See #3129 A5.
-    if not _precompile_passes_can_be_skipped(build_dir):
-        # Check for stale PCH before invoking Ninja.  Compilers on Windows
-        # emit absolute backslash paths in depfiles which Ninja may fail to
-        # track correctly, leaving the PCH stale even though headers changed.
-        _invalidate_stale_pchs(build_dir)
-
-        # Re-normalize strict-path include flags before every compile (#2378).
-        # Meson setup already normalizes once, but ninja can regenerate
-        # build.ninja silently when meson.build files change — that
-        # regeneration re-introduces the relative + backslash
-        # `-Ici/meson/native\fastled.dll.p` form that zccache's
-        # --strict-paths=absolute rejects. Running the normalizer here costs
-        # ~5-20 ms and is idempotent when nothing changed.
-        from ci.meson.build_config import normalize_meson_private_include_paths
-
-        normalize_succeeded = False
-        try:
-            normalize_meson_private_include_paths(build_dir)
-            normalize_succeeded = True
-        except KeyboardInterrupt as ki:
-            # Ctrl-C during normalization — propagate cleanly so the watchdog
-            # and signal-handler chain runs to completion (KBI001).
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            # Non-fatal: if the normalizer fails for any reason, fall through
-            # to the compile — the worst case is the original zccache strict-
-            # paths error surfaces, which is still better than silently
-            # breaking the build at the normalize step.
-            _ts_print(
-                f"[MESON] ⚠️  Pre-compile normalize_meson_private_include_paths failed: {e}"
-            )
-
-        # Persist the marker only when both passes succeeded — otherwise the
-        # next compile retries.
-        if normalize_succeeded:
-            build_ninja = build_dir / "build.ninja"
-            try:
-                _write_precompile_mtime_marker(build_dir, build_ninja.stat().st_mtime)
-            except OSError:
-                pass
+    _run_precompile_passes(build_dir)
 
     if target:
         cmd.append(target)
