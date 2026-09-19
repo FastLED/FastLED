@@ -61,6 +61,10 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
 
+# Checkout and artifact upload need nothing beyond reading the repository.
+permissions:
+  contents: read
+
 jobs:
   bloat_regression:
     name: bloat regression
