@@ -11,6 +11,7 @@ from ci.release import (
     VersionSite,
     check_tree,
     notes_heading,
+    run_release_version_lint,
     tree_version_sites,
 )
 
@@ -42,8 +43,15 @@ def _write_tree(
     (root / "src").mkdir()
     (root / "library.properties").write_text(f"name=FastLED\nversion={props}\n")
     (root / "library.json").write_text(json.dumps({"version": manifest}))
-    (root / "src" / "FastLED.h").write_text(f"#define FASTLED_VERSION {define}\n")
+    shown = f"{define // 1_000_000}.{define // 1_000 % 1_000:03d}.{define % 1_000:03d}"
+    (root / "src" / "FastLED.h").write_text(
+        f"#define FASTLED_VERSION {define}\n"
+        f'#      pragma message "FastLED version {shown}"\n'
+        f"#      warning FastLED version {shown}  (Not really a warning)\n"
+    )
     (root / "release_notes.md").write_text(f"\n{heading}\n====\n")
+    (root / "docs").mkdir()
+    (root / "docs" / "Doxyfile").write_text(f"PROJECT_NUMBER = {props}\n")
 
 
 def test_tree_sites_and_notes_heading_are_parsed(tmp_path: Path) -> None:
@@ -57,6 +65,19 @@ def test_tree_sites_expose_drift(tmp_path: Path) -> None:
     values = {s.path: s.value for s in tree_version_sites(tmp_path)}
     assert values["library.json"] == "3.10.3"
     assert values["src/FastLED.h"] == "3.10.4"
+    assert values["src/FastLED.h (FASTLED_SHOW_VERSION)"] == "3.10.4"
+    assert values["docs/Doxyfile"] == "3.10.4"
+
+
+def test_lint_stage_accepts_steady_state_and_a_release_pr(tmp_path: Path) -> None:
+    # No git repo under tmp_path, so there are no tags: only agreement is checked.
+    _write_tree(tmp_path, "3.10.5", "3.10.5", 3010005, "FastLED 3.10.6 (Next Release)")
+    assert run_release_version_lint(tmp_path)
+
+
+def test_lint_stage_rejects_drift(tmp_path: Path) -> None:
+    _write_tree(tmp_path, "3.10.4", "3.10.3", 3010004, "FastLED 3.10.4")
+    assert not run_release_version_lint(tmp_path)
 
 
 def _sites(version: str) -> list[VersionSite]:

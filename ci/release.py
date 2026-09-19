@@ -26,7 +26,7 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-from running_process import RunningProcess
+from running_process import CalledProcessError, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -98,6 +98,19 @@ def tree_version_sites(root: Path) -> list[VersionSite]:
     else:
         sites.append(VersionSite("src/FastLED.h", "missing"))
 
+    # Shown when a sketch defines FASTLED_SHOW_VERSION; zero-padded X.YYY.ZZZ.
+    shown = re.findall(r"FastLED version (\d+)\.(\d{3})\.(\d{3})", header)
+    shown_versions = {str(Version(int(a), int(b), int(c))) for a, b, c in shown}
+    sites.append(
+        VersionSite(
+            "src/FastLED.h (FASTLED_SHOW_VERSION)",
+            shown_versions.pop() if len(shown_versions) == 1 else "missing/mixed",
+        )
+    )
+
+    doxyfile = (root / "docs" / "Doxyfile").read_text(encoding="utf-8")
+    m = re.search(r"^PROJECT_NUMBER\s*=\s*(\S+)", doxyfile, re.MULTILINE)
+    sites.append(VersionSite("docs/Doxyfile", m.group(1) if m else "missing"))
     return sites
 
 
@@ -131,7 +144,11 @@ def _git(args: list[str], root: Path) -> str:
 
 def release_tags(root: Path, merged_only: bool) -> list[Version]:
     args = ["tag", "--merged", "HEAD"] if merged_only else ["tag"]
-    tags = [t for t in _git(args, root).split() if _TAG_RE.match(t)]
+    try:
+        listing = _git(args, root)
+    except CalledProcessError:
+        return []  # not a git checkout (e.g. a ZIP download)
+    tags = [t for t in listing.split() if _TAG_RE.match(t)]
     return sorted(Version.parse(t) for t in tags)
 
 
@@ -244,6 +261,24 @@ def check_tree(
             "the next version marked '(Next Release)'"
         )
     return problems
+
+
+def run_release_version_lint(root: Path = PROJECT_ROOT) -> bool:
+    """``bash lint`` stage: the tree is either in steady state or a release PR."""
+    sites, notes = tree_version_sites(root), notes_heading(root)
+    tags = release_tags(root, merged_only=True)
+    newest = tags[-1] if tags else None
+    steady = check_tree(sites, notes, newest, releasing=False)
+    if not steady or not check_tree(sites, notes, newest, releasing=True):
+        print("Release version: consistent")
+        return True
+    for site in sites:
+        print(f"  {site.path}: {site.value}")
+    print(f"  release_notes.md: {notes.version}")
+    for problem in steady:
+        print(f"[release-version] {problem}")
+    print("Run `bash release check` (or `check --releasing` in a release PR).")
+    return False
 
 
 def cmd_check(root: Path, releasing: bool) -> int:
