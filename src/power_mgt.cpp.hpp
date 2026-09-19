@@ -414,7 +414,10 @@ fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
     // Same >> 8 as the estimator, rounded up: this is a bound, and truncating
     // it would hand back the under-charge it exists to remove.
     const fl::u64 scaled = per_code * kDitherReserveCodes * max_power_step();
-    return static_cast<fl::u32>((scaled + 255) >> 8);
+    const fl::u64 reserve = (scaled + 255) >> 8;
+    // Saturate rather than wrap: an under-stated reserve is the failure this
+    // exists to prevent.
+    return reserve > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(reserve);
 }
 
 fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
