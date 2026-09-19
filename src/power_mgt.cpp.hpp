@@ -432,10 +432,23 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
     }
 #endif
 #if FL_COLOR_PIPELINE_SHARED
-    // The managed source reads the raw pixel too; C5 keeps legacy dither off
-    // the pipeline (pinned in tests/fl/channels/color_managed_source.cpp).
+    // A managed channel never takes the legacy offsets (C5); with
+    // BINARY_DITHER it runs the pipeline's temporal dither instead, which
+    // emits floor(x) or floor(x) + 1 of the exact code -- at most one code
+    // above the rounded code its estimate charges. The solve can light a
+    // channel the source left dark, so every channel of every lit pixel is
+    // reserved one code.
     if (controller.colorPipeline()) {
-        return 0;
+        const fl::span<const CRGB> leds(controller.leds(),
+                                        static_cast<fl::size>(controller.size()));
+        fl::u32 lit = 0;
+        for (fl::size i = 0; i < leds.size(); ++i) {
+            lit += (leds[i].r | leds[i].g | leds[i].b) != 0 ? 1u : 0u;
+        }
+        const PowerModelRGB& model = gPowerModel();
+        const fl::u64 per_code = static_cast<fl::u64>(lit) *
+            (static_cast<fl::u32>(model.red_mW) + model.green_mW + model.blue_mW);
+        return static_cast<fl::u32>((per_code * max_power_step() + 255) >> 8);
     }
 #endif
     return dither_reserve_mW(fl::span<const CRGB>(

@@ -327,9 +327,11 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
 fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
 
 /// `dither_reserve_mW()` for a controller that dithers, and zero for one that
-/// does not: a mode other than `BINARY_DITHER`, an active RGBW/RGBWW
-/// conversion (which reads the raw pixel on every non-AVR target), or a
-/// colour-managed channel (whose source never dithers, C5).
+/// does not: a mode other than `BINARY_DITHER`, or an active RGBW/RGBWW
+/// conversion (which reads the raw pixel on every non-AVR target). A
+/// colour-managed channel never takes the legacy offsets (C5); with
+/// `BINARY_DITHER` it runs the pipeline's temporal dither instead, and is
+/// reserved one code on every channel of every lit pixel.
 fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
 
 /// Applies the configured power-scaling response to a total power value.
