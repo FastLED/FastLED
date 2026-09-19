@@ -812,27 +812,26 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
         const SpiEncoder& config = spi->timing;
 
-        // B1 (#4042): on a colour-managed HD channel the 5-bit field is a
-        // per-chip decision -- a joint code/field solve for APA102's slow
-        // PWM, held fixed for SK9822's current gain and for unknown chips.
-        // Through the hook, so a sketch that binds no profile does not link
-        // the solve; when the field stays fixed it declines and the case
-        // below encodes as before.
-        bool hd_encoded = false;
+        // A colour-managed channel's chipset-specific quantization, where
+        // the 8-bit path cannot do it in one step (#4042): B1's joint
+        // code/field solve on APA102-class HD chips, and a single
+        // quantization to LPD8806's 7 / LPD6803's 5 bits (B3). Through the
+        // hook, so a sketch that binds no profile links none of it; a chip it
+        // does not handle, or an HD field held fixed, falls through to the
+        // switch.
+        bool managed_encoded = false;
 #if FL_COLOR_PROFILE_RUNTIME
         if (iterator.isManaged()) {
-            // The hook filters by chip: anything without a solvable field
-            // declines and falls through to the switch.
-            const ColorPipelineHooks& hd_hooks = colorPipelineHooks();
-            hd_encoded = hd_hooks.encodeHdWide != nullptr &&
-                         hd_hooks.encodeHdWide(pixelIterator, &data,
-                                               config.chipset, *this);
+            const ColorPipelineHooks& spi_hooks = colorPipelineHooks();
+            managed_encoded = spi_hooks.encodeManagedSpi != nullptr &&
+                              spi_hooks.encodeManagedSpi(pixelIterator, &data,
+                                                         config.chipset, *this);
         }
 #endif
 
         // Switch on enum WITHOUT default case - compiler will warn if new enum values are added
         // TODO: Consolidate these PixelIterator methods with template controllers in src/fl/chipsets/
-        if (!hd_encoded) switch (config.chipset) {
+        if (!managed_encoded) switch (config.chipset) {
             case SpiChipset::APA102:
             case SpiChipset::DOTSTAR:
             case SpiChipset::HD107:

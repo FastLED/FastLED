@@ -354,14 +354,14 @@ with brightness already applied as C4's flux scalar.
 | APA102HD, SK9822HD, DOTSTARHD, HD107HD | 8-bit + 5-bit field | the 8-bit drive; **field held at 31** | brightness→field map, **unmanaged only** | #4441, B1's conservative treatment. A joint code/field solve needs B1's flicker floor. |
 | WS2801, WS2803, SM16716 | 8-bit | the 8-bit drive, verbatim | none | |
 | P9813 | 8-bit | the 8-bit drive, verbatim, after the per-pixel checksum byte | none | |
-| LPD8806 | 7-bit | the 8-bit drive **re-quantized** to 7 bits (`value >> 1`, with a low-bit nudge) | none | second quantization after the pipeline's; see below |
-| LPD6803 | 5-bit | the 8-bit drive **truncated** to 5 bits (`value >> 3`) | none | second quantization, biased low; see below |
+| LPD8806 | 7-bit | the 16-bit drive quantized **once** to 7 bits (`writeLPD8806Wide`) | none | managed path only; the legacy path's low-bit nudge does not apply |
+| LPD6803 | 5-bit | the 16-bit drive quantized **once** to 5 bits (`writeLPD6803Wide`) | none | managed path only |
 | TM1812 RGBWW | 8-bit | legacy path (#4198) | legacy | |
 | WS2816, MY9221 | — | not on the Channel path (legacy `addLeds<>` only) | — | |
 
 **Where §6 is met.** Every encoder that embeds a gamma or expansion stage skips it on a managed channel, and none of those modes applies a second gamma after the device solve. **One exception** is not covered by that statement: APA102/SK9822 under `FASTLED_USE_GLOBAL_BRIGHTNESS`. There, `encodeAPA102_AutoBrightness` still runs on a managed channel and re-derives a strip-wide 5-bit field from the drives. Until it is reviewed against B1, that build option is outside §6.
 
-**Where B3 is not.** LPD8806 and LPD6803 have wires narrower than 8 bits. The pipeline rounds each drive to 8 bits, and the encoder then quantizes again, truncating in LPD6803's case. That is two quantizations where B3 asks for one. A native-width managed quantizer would fix it: `quantize` to 7 or 5 bits directly. It is recorded here rather than fixed because neither chipset has a managed-path test yet.
+**Narrow wires (B3).** LPD8806 and LPD6803 have wires narrower than 8 bits. On a managed channel they quantize the 16-bit drive once, straight to their width, through `ColorPipelineHooks::encodeManagedSpi`. Their 8-bit path would round to 8 bits and then shift or truncate again. `tests/fl/channels/color_managed_source.cpp` checks every byte against the single-step computation, and requires that it differ from the two-step result somewhere.
 
 ## Ownership and tiers (R9)
 

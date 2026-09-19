@@ -454,6 +454,67 @@ class PixelIterator {
         #endif
     }
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// LPD8806 over a colour-managed channel's 16-bit drives, quantized once
+    /// to the chip's 7 bits (B3: one final quantization). The 8-bit path
+    /// rounds to 8 bits and then shifts, which is two, and its encoder also
+    /// forces the low bit on every lit value below 254. Same framing as
+    /// `encodeLPD8806`: three `0x80 | code` bytes per LED in wire order, then
+    /// `(n * 3 + 63) / 64` zero latch bytes.
+    template <typename OutputIterator>
+    void writeLPD8806Wide(OutputIterator back_ins) FL_NO_EXCEPT {
+        fl::size num_leds = 0;
+        while (has(1)) {
+            u16 w[3];
+            loadAndScaleRGB16(&w[0], &w[1], &w[2]);  // wire order
+            for (int c = 0; c < 3; ++c) {
+                const u32 code = (static_cast<u32>(w[c]) * 127u + 32767u) / 65535u;
+                *back_ins++ = static_cast<u8>(0x80 | code);
+            }
+            stepDithering();
+            advanceData();
+            ++num_leds;
+        }
+        const fl::size latch = (num_leds * 3 + 63) / 64;
+        for (fl::size i = 0; i < latch; ++i) {
+            *back_ins++ = 0x00;
+        }
+    }
+
+    /// LPD6803 over a colour-managed channel's 16-bit drives, quantized once
+    /// to the chip's 5 bits per channel (B3). Same framing as `encodeLPD6803`:
+    /// four zero bytes, `1rrrrrgggggbbbbb` per LED in wire order, then
+    /// `n / 32` dwords of `FF 00 00 00`.
+    template <typename OutputIterator>
+    void writeLPD6803Wide(OutputIterator back_ins) FL_NO_EXCEPT {
+        for (int i = 0; i < 4; ++i) {
+            *back_ins++ = 0x00;
+        }
+        fl::size num_leds = 0;
+        while (has(1)) {
+            u16 w[3];
+            loadAndScaleRGB16(&w[0], &w[1], &w[2]);  // wire order
+            u16 command = 0x8000;
+            for (int c = 0; c < 3; ++c) {
+                const u32 code = (static_cast<u32>(w[c]) * 31u + 32767u) / 65535u;
+                command = static_cast<u16>(command | (code << (10 - 5 * c)));
+            }
+            *back_ins++ = static_cast<u8>(command >> 8);
+            *back_ins++ = static_cast<u8>(command & 0xFF);
+            stepDithering();
+            advanceData();
+            ++num_leds;
+        }
+        const fl::size end_dwords = num_leds / 32;
+        for (fl::size i = 0; i < end_dwords; ++i) {
+            *back_ins++ = 0xFF;
+            *back_ins++ = 0x00;
+            *back_ins++ = 0x00;
+            *back_ins++ = 0x00;
+        }
+    }
+#endif
+
 #if FASTLED_HD_COLOR_MIXING && !FL_PLATFORM_HAS_TINY_MEMORY
     /// APA102/SK9822 framing over a colour-managed channel's 16-bit drives,
     /// with the 5-bit field chosen per pixel by `five_bit_hd_solve16` (B1's

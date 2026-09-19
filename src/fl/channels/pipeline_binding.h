@@ -113,14 +113,17 @@ struct ColorPipelineHooks {
                                    span<const CRGB> leds, const Rgbw& rgbw);
 #endif
 
-    /// B1's joint code/field solve for a colour-managed APA102-class HD
-    /// channel (#4042): resolves the chip's 5-bit semantics (a bound profile
-    /// overriding the chip default), and if they allow the field below 31 at
-    /// the configured floor, encodes the frame through it and returns true.
-    /// Otherwise returns false and the caller encodes as before. Through the
-    /// hook so the solve links only into sketches that bind a profile.
-    bool (*encodeHdWide)(PixelIterator& pixels, vector_psram<u8>* out,
-                         SpiChipset chip, const CLEDController& controller);
+    /// Chipset-specific quantization of a colour-managed SPI channel's wide
+    /// drive, where the 8-bit path cannot do it in one step (#4042):
+    /// - APA102-class HD: B1's joint code/field solve, when the chip's 5-bit
+    ///   semantics (a bound profile overriding the chip default) allow the
+    ///   field below 31 at the configured floor;
+    /// - LPD8806 / LPD6803: one quantization to the chip's 7 / 5 bits (B3).
+    /// Returns true if it encoded the frame, false to let the caller encode
+    /// as before. Through the hook so none of it links into a sketch that
+    /// binds no profile.
+    bool (*encodeManagedSpi)(PixelIterator& pixels, vector_psram<u8>* out,
+                             SpiChipset chip, const CLEDController& controller);
 };
 
 /// The installed hooks. Both pointers are null in a program that never binds
