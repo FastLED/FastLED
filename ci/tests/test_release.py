@@ -122,3 +122,56 @@ def test_no_reachable_tags_skips_the_tag_comparison() -> None:
     assert (
         check_tree(_sites("3.10.6"), NotesHeading("3.10.6", False), None, False) == []
     )
+
+
+class _FakeResult:
+    def __init__(self, returncode: int, stderr: str = "", stdout: str = "") -> None:
+        self.returncode = returncode
+        self.stderr = stderr
+        self.stdout = stdout
+
+
+def _fake_gh(result: _FakeResult):
+    def run(*_args: object, **_kwargs: object) -> _FakeResult:
+        return result
+
+    return run
+
+
+def test_github_release_present_missing_and_query_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import ci.release as release
+
+    tag = Version.parse("3.10.5")
+    monkeypatch.setattr(release.RunningProcess, "run", _fake_gh(_FakeResult(0)))
+    assert release.github_has_release(tag, tmp_path) is True
+
+    monkeypatch.setattr(
+        release.RunningProcess, "run", _fake_gh(_FakeResult(1, "release not found"))
+    )
+    assert release.github_has_release(tag, tmp_path) is False
+
+    # Not logged in / no network is not "missing": it must not send anyone off
+    # to create a release that exists.
+    monkeypatch.setattr(
+        release.RunningProcess,
+        "run",
+        _fake_gh(
+            _FakeResult(4, "To get started with GitHub CLI, please run: gh auth login")
+        ),
+    )
+    with pytest.raises(release.GitHubQueryError):
+        release.github_has_release(tag, tmp_path)
+
+
+def test_git_env_drops_repository_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    import ci.release as release
+
+    monkeypatch.setenv("GIT_DIR", "/elsewhere/.git")
+    monkeypatch.setenv("GIT_COMMON_DIR", "/elsewhere/.git")
+    monkeypatch.setenv("GIT_AUTHOR_NAME", "kept")
+    env = release._git_env()
+    assert "GIT_DIR" not in env
+    assert "GIT_COMMON_DIR" not in env
+    assert env["GIT_AUTHOR_NAME"] == "kept"

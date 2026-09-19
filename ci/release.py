@@ -19,7 +19,9 @@ commit has to be tagged straight away.
 """
 
 import argparse
+import gzip
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -27,6 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from running_process import CalledProcessError, RunningProcess
+from typeguard import typechecked
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +40,7 @@ ARDUINO_INDEX_URL = "https://downloads.arduino.cc/libraries/library_index.json.g
 _TAG_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 
+@typechecked
 @dataclass(frozen=True, order=True)
 class Version:
     major: int
@@ -66,6 +70,7 @@ class Version:
         }
 
 
+@typechecked
 @dataclass(frozen=True)
 class VersionSite:
     path: str
@@ -114,6 +119,7 @@ def tree_version_sites(root: Path) -> list[VersionSite]:
     return sites
 
 
+@typechecked
 @dataclass(frozen=True)
 class NotesHeading:
     version: str  # X.Y.Z, or "missing"
@@ -129,10 +135,28 @@ def notes_heading(root: Path) -> NotesHeading:
     return NotesHeading(m.group(1), "(Next Release)" in m.group(2))
 
 
+# Variables that point git at a repository other than the one under `cwd`.
+_GIT_LOCATION_VARS = (
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_COMMON_DIR",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+)
+
+
+def _git_env() -> dict[str, str]:
+    """The caller's environment without repository overrides, so tag queries
+    read the checkout at `root` and nothing else."""
+    return {k: v for k, v in os.environ.items() if k not in _GIT_LOCATION_VARS}
+
+
 def _git(args: list[str], root: Path) -> str:
     result = RunningProcess.run(
         ["git", *args],
         cwd=str(root),
+        env=_git_env(),
         check=True,
         timeout=120,
         capture_output=True,
@@ -163,8 +187,6 @@ def registry_versions() -> list[Version]:
 
 
 def arduino_versions() -> list[Version]:
-    import gzip  # noqa: PLC0415 - only status needs it
-
     data = json.loads(gzip.decompress(_fetch(ARDUINO_INDEX_URL)))
     return sorted(
         Version.parse(lib["version"])
@@ -173,7 +195,17 @@ def arduino_versions() -> list[Version]:
     )
 
 
+class GitHubQueryError(RuntimeError):
+    """`gh` failed for a reason other than the release not existing."""
+
+
 def github_has_release(tag: Version, root: Path) -> bool:
+    """True if GitHub has a release for `tag`, False if it has none.
+
+    Any other `gh` failure -- not logged in, no network, rate limited -- raises
+    GitHubQueryError rather than reading as "missing", which would send a
+    maintainer to create a release that already exists.
+    """
     result = RunningProcess.run(
         ["gh", "release", "view", str(tag), "--json", "tagName"],
         cwd=str(root),
@@ -183,7 +215,14 @@ def github_has_release(tag: Version, root: Path) -> bool:
         encoding="utf-8",
         errors="replace",
     )
-    return result.returncode == 0
+    if result.returncode == 0:
+        return True
+    detail = f"{result.stderr or ''}{result.stdout or ''}".strip()
+    if "release not found" in detail.lower():
+        return False
+    raise GitHubQueryError(
+        f"gh release view {tag} failed (exit {result.returncode}): {detail}"
+    )
 
 
 def cmd_status(root: Path) -> int:
@@ -192,15 +231,30 @@ def cmd_status(root: Path) -> int:
         print("no X.Y.Z tags found (shallow clone? run: git fetch --tags)")
         return 1
     newest = tags[-1]
+    try:
+        has_release = github_has_release(newest, root)
+    except GitHubQueryError as exc:
+        print(f"cannot query GitHub releases: {exc}")
+        return 1
+    arduino = arduino_versions()
+    registry = registry_versions()
+    if not arduino or not registry:
+        empty = [
+            name
+            for name, v in (
+                ("Arduino index", arduino),
+                ("PlatformIO registry", registry),
+            )
+            if not v
+        ]
+        print(f"no FastLED X.Y.Z versions found in: {', '.join(empty)}")
+        return 1
     rows = [
         ("newest tag", str(newest)),
         ("tree (library.properties)", tree_version_sites(root)[0].value),
-        (
-            "GitHub release for tag",
-            "yes" if github_has_release(newest, root) else "MISSING",
-        ),
-        ("Arduino index", str(arduino_versions()[-1])),
-        ("PlatformIO registry", str(registry_versions()[-1])),
+        ("GitHub release for tag", "yes" if has_release else "MISSING"),
+        ("Arduino index", str(arduino[-1])),
+        ("PlatformIO registry", str(registry[-1])),
     ]
     for label, value in rows:
         print(f"  {label:<28} {value}")
