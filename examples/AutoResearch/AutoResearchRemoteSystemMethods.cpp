@@ -87,6 +87,22 @@ struct ParlioRawTestState {
 ParlioRawTestState& parlioRawTestState() {
     return fl::Singleton<ParlioRawTestState>::instance();
 }
+
+// The TX clock edge field was renamed within IDF 5.5: 5.5.1 has only
+// `sample_edge`; 5.5.5 has `shift_edge` and keeps `sample_edge` as a
+// deprecated alias. Which one exists is detected here rather than guessed
+// from a version number. The two enums are ordered differently
+// (PARLIO_SAMPLE_EDGE_POS == 1, PARLIO_SHIFT_EDGE_POS == 0), and the newer
+// enumerator is not declared on older IDFs, so the new branch names the
+// member's own type and the value's meaning is in the comment.
+template <typename Cfg>
+auto setParlioRawTxEdge(Cfg& cfg, int) -> decltype(cfg.shift_edge, void()) {
+    cfg.shift_edge = static_cast<decltype(cfg.shift_edge)>(0);  // PARLIO_SHIFT_EDGE_POS
+}
+template <typename Cfg>
+void setParlioRawTxEdge(Cfg& cfg, long) {
+    cfg.sample_edge = PARLIO_SAMPLE_EDGE_POS;  // IDF before the rename
+}
 #endif
 
 fl::json autoResearchDeviceJson(const fl::string& name) {
@@ -354,7 +370,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
         cfg.trans_queue_depth = (size_t)depth;
         cfg.max_transfer_size = (size_t)mts;
         cfg.output_clk_freq_hz = (uint32_t)hz;
-        cfg.sample_edge = PARLIO_SAMPLE_EDGE_POS;  // the field the shipped IDF names (see parlio_peripheral_esp.cpp.hpp)
+        setParlioRawTxEdge(cfg, 0);  // shift_edge where it exists, sample_edge before
         cfg.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
         if (burst > 0) cfg.dma_burst_size = (size_t)burst;
         for (int i = 0; i < 16; ++i) cfg.data_gpio_nums[i] = (gpio_num_t)-1;
