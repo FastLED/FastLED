@@ -243,4 +243,10 @@
 # channel's own phase, advancing it after an accepted enqueue, and handing it
 # to the managed source. PixelController's constructor path is unchanged, so
 # legacy addLeds<> on AVR is byte-identical (uno Blink 5170/633).
-383158
+#
+# +56 B (383158 -> 383214), #4474 / FastLED/fbuild#1450: fbuild 2.5.25 stops
+# Blink from linking Arduino Matter and its networking stack. The corrected
+# CI image is 1,073,049 B smaller than the rejected 1.6 MB build; the remaining
+# 56 B is the deterministic link-layout change from the repaired framework
+# library selection and is not a new FastLED feature cost.
+383214

@@ -953,6 +953,10 @@ ESP32_S3_DEVKITC_1 = Board(
     framework="arduino",
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
+    # AutoResearchOta.cpp directly uses LittleFS, whose public header includes
+    # FS.h. Declare both bundled libraries so fbuild adds their headers and
+    # archives before compiling examples.
+    lib_deps=["FS", "LittleFS"],
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
     # NOTE: esp32s3 has NO PARLIO peripheral (SOC_PARLIO_SUPPORTED is unset in
     # soc_caps.h). Do NOT set parlio_capable=True here — PR #3276 historically
