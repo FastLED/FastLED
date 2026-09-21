@@ -1,3 +1,7 @@
+# +56 B: fbuild 2.5.25 (FastLED/fbuild#1450) selects only the framework
+# libraries a build reaches. The previous number came from the older, wider
+# selection; this is what a correct esp32s3 Blink links. Measured in CI at
+# 462.61 KB image, against 1.60 MB while #4474 was open.
 # 2026-09-14, PR #4418 (issue #4415): +53,979 B, 336474 -> 390453.
 #
 # A measurement change, not code growth. This gate builds Blink through
@@ -243,4 +247,4 @@
 # channel's own phase, advancing it after an accepted enqueue, and handing it
 # to the managed source. PixelController's constructor path is unchanged, so
 # legacy addLeds<> on AVR is byte-identical (uno Blink 5170/633).
-383158
+383214
