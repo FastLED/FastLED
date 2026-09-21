@@ -6,21 +6,21 @@ concurrency:
 
 on:
   workflow_dispatch:
-    push:
-      branches:
-        - master
-      paths:
-        - 'src/**'
-        - 'examples/wasm/**'
-        - 'examples/WasmScreenCoords/**'
-        - 'ci/**'
-        - '.github/workflows/build_wasm_compilers.yml'
-        - 'CMakeLists.txt'
-        - 'platformio.ini'
-        - 'library.json'
-        - 'library.properties'
-        - 'pyproject.toml'
-        - 'uv.lock'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/wasm/**'
+      - 'examples/WasmScreenCoords/**'
+      - 'ci/**'
+      - '.github/workflows/build_wasm_compilers.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
 permissions:
   contents: read        # Required to checkout code
   actions: read         # Required for artifact operations  

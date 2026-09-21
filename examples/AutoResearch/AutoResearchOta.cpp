@@ -538,6 +538,8 @@ fl::json stopOta() {
 }
 
 fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
+    (void)expected_size;
+    (void)sha256;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact staging only supported on ESP32-C6");
@@ -545,6 +547,7 @@ fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
 }
 
 fl::json writeOtaArtifact(fl::vector<fl::u8> bytes) {
+    (void)bytes;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact staging only supported on ESP32-C6");
@@ -672,6 +675,8 @@ fl::json rpOtaUpdateStatus() {
 #else
 
 fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
+    (void)host;
+    (void)port;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact update only supported on RP2350W");

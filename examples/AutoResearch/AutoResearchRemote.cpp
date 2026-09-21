@@ -474,7 +474,7 @@ void AutoResearchRemoteControl::registerAllMethods(fl::Remote* remote) {
     // This registers a subset of methods — enough for ping/pong PoC.
 
     // Register "ping" function - health check with timestamp
-    remote->bind("ping", [this](const fl::json& args) -> fl::json {
+    remote->bind("ping", [](const fl::json& args) -> fl::json {
         uint32_t now = millis();
         fl::json response = fl::json::object();
         response.set("success", true);

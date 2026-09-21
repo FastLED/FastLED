@@ -256,7 +256,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // ========================================================================
 
     // Register "ping" function - health check with timestamp
-    remote.bind("ping", [this](const fl::json& args) -> fl::json {
+    remote.bind("ping", [](const fl::json& args) -> fl::json {
         uint32_t now = millis();
         const fl::ResetCause reset_cause = FastLED.watchdog().lastResetCause();
 
@@ -271,7 +271,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     });
 
     // TEST: Simple RPC without Serial to verify task context works
-    remote.bind("testNoSerial", [this](const fl::json& args) -> fl::json {
+    remote.bind("testNoSerial", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "RPC works from task context");
@@ -503,7 +503,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     });
 #endif
 
-    remote.bind("peekMem", [this](const fl::json& args) -> fl::json {
+    remote.bind("peekMem", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         if (!args.is_object() || !args.contains("addr") ||
             !args["addr"].is_int()) {
