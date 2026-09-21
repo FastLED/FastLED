@@ -6,10 +6,7 @@
 // the validation suite which exceed the LPC845 / Tiny-memory budgets.
 // Matches the conditional structure in AutoResearch.ino itself.
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 #include "AutoResearchHelpers.h"
 #include "fl/channels/manager.h"
@@ -129,4 +126,4 @@ void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
 
 // Build test matrix configuration from preprocessor defines and available drivers
 
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

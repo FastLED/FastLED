@@ -14,10 +14,7 @@
 // the entire RPC dispatch surface which doesn't fit Low-memory budgets.
 // Matches the conditional structure in AutoResearch.ino itself.
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 // Legacy debug macros (no-ops, kept for debugTest RPC function)
 #define DEBUG_PRINT(x) do {} while(0)
@@ -549,4 +546,4 @@ fl::json AutoResearchRemoteControl::stopBleRemote() {
     return response;
 }
 
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

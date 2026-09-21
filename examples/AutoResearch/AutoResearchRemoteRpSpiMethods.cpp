@@ -1,10 +1,7 @@
 // RP2040/RP2350 fixed-SPI byte-loopback AutoResearch RPC.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 #include "AutoResearchRemote.h"
 
@@ -303,4 +300,4 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
     });
 }
 
-#endif  // !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

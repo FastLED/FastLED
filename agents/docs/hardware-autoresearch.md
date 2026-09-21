@@ -333,7 +333,7 @@ the lower-level async UART TX DMA bench.
 ### Low-Memory vs Full-Memory Strategy
 
 `examples/AutoResearch/AutoResearch.ino` is shared by constrained and rich
-targets. It auto-enables `FASTLED_AUTORESEARCH_LOW_MEMORY` when
+targets. It uses the reduced bring-up surface when
 `FL_PLATFORM_HAS_LARGE_MEMORY == 0`.
 
 Low-memory boards, such as LPC845/LPC804:

@@ -1,10 +1,7 @@
 // runParallelTestImpl. Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 // Legacy debug macros (no-ops, kept for debugTest RPC function)
 #define DEBUG_PRINT(x) do {} while(0)
@@ -430,4 +427,4 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
     return response;
 }
 
-#endif // !(FASTLED_AUTORESEARCH_LOW_MEMORY)
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

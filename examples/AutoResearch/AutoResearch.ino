@@ -7,19 +7,15 @@
 // FastLED #3000 memory classification), this sketch is folded down to the
 // JSON-RPC echo + SCT-RX bring-up surface inherited from the retired
 // `examples/AutoResearchLpc/AutoResearchLpc.ino`. Auto-enabled when
-// `FL_PLATFORM_HAS_LARGE_MEMORY == 0`; can be forced on with
-// `-DFASTLED_AUTORESEARCH_LOW_MEMORY=1` or off with `=0`.
+// `FL_PLATFORM_HAS_LARGE_MEMORY == 0`.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-  #define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
 
-#if defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY
+#if !FL_PLATFORM_HAS_LARGE_MEMORY
 #include "AutoResearchLowMemory.h"
 void setup() { autoResearchLowMemorySetup(); }
 void loop()  { autoResearchLowMemoryLoop(); }
-#else  // !FASTLED_AUTORESEARCH_LOW_MEMORY
+#else  // FL_PLATFORM_HAS_LARGE_MEMORY
 
 // examples/AutoResearch/AutoResearch.ino
 //
@@ -704,4 +700,4 @@ void loop() {
     }
 }
 
-#endif  // FASTLED_AUTORESEARCH_LOW_MEMORY
+#endif  // !FL_PLATFORM_HAS_LARGE_MEMORY
