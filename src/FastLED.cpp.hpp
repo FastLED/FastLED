@@ -512,7 +512,11 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 			fixed_power_mW += dark_mW;
 			controllable_power_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
 			// What dithering can add on top, at any non-zero brightness (#4342).
+			// Not on TINY, where the bound costs more flash than the tier has
+			// to spare (#4478); controller_dither_reserve_mW is 0 there.
+#if !FL_PLATFORM_HAS_TINY_MEMORY
 			dither_reserve_power_mW += controller_dither_reserve_mW(*controller);
+#endif
 		}
 	});
 

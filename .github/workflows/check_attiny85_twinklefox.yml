@@ -1,0 +1,50 @@
+name: attiny85 TwinkleFox
+
+# TwinkleFox is the ATtiny85's tightest sketch: it linked at 8,036 B of the
+# 8,192 B flash region when #4478 was fixed, 156 B of headroom. The two other
+# ATtiny85 workflows (build_attiny85.yml, check_attiny85.yml) run on master
+# pushes only, so #4450's power-estimation reserve landed and overflowed the
+# region by 468 B before any job looked (#4478). This one runs on pull
+# requests, so a size regression fails the PR that causes it.
+#
+# Its trigger list is deliberately wider than the sketch: the regression came
+# from src/power_mgt.* and src/FastLED.cpp.hpp, not from TwinkleFox.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/TwinkleFox/**'
+      - 'ci/**'
+      - '.github/workflows/check_attiny85_twinklefox.yml'
+      - '.github/workflows/build_template.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/TwinkleFox/**'
+      - 'ci/**'
+      - '.github/workflows/check_attiny85_twinklefox.yml'
+      - '.github/workflows/build_template.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      # A link failure is the gate: avr-ld reports `region `text' overflowed by
+      # N bytes` and exits non-zero, so no separate size assertion is needed.
+      args: attiny85 --examples TwinkleFox
