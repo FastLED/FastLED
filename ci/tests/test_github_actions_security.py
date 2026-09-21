@@ -279,6 +279,26 @@ class TestGitHubActionsSecurityTest(unittest.TestCase):
                 + "\n\nUse minimal required permissions instead."
             )
 
+    def test_push_and_pull_request_workflows_allow_manual_dispatch(self) -> None:
+        """Keep ordinary CI workflows rerunnable when path filters skip a push."""
+        missing_dispatch: list[str] = []
+
+        for workflow_path in self.workflow_files:
+            workflow = self._load_workflow(workflow_path)
+            triggers = workflow.on_config
+            if not isinstance(triggers, dict):
+                continue
+
+            is_push_or_pr_ci = "push" in triggers or "pull_request" in triggers
+            if is_push_or_pr_ci and "workflow_dispatch" not in triggers:
+                missing_dispatch.append(workflow_path.name)
+
+        if missing_dispatch:
+            self.fail(
+                "Push/pull-request workflows missing workflow_dispatch:\n"
+                + "\n".join(f"  - {name}" for name in sorted(missing_dispatch))
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

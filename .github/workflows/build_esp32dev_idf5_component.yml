@@ -26,6 +26,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
