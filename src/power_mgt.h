@@ -324,15 +324,23 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
 /// codes on every lit channel, at the power model's steepest single-code step,
 /// rounded up. It does not scale with brightness, which is why the limiter
 /// adds it to the fixed part of the demand rather than the scaled part.
+///
+/// Tiny power-limited builds disable binary dithering before output, so their
+/// reserve is zero and the larger accounting path does not link (#4478).
+#if FL_PLATFORM_HAS_TINY_MEMORY
+inline fl::u32 dither_reserve_mW(fl::span<const CRGB>) { return 0; }
+inline fl::u32 controller_dither_reserve_mW(const fl::CLEDController&) { return 0; }
+#else
 fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
 
 /// `dither_reserve_mW()` for a controller that dithers, and zero for one that
 /// does not: a mode other than `BINARY_DITHER`, or an active RGBW/RGBWW
-/// conversion (which reads the raw pixel on every non-AVR target). A
+/// conversion (which reads the raw pixel on non-AVR targets). A
 /// colour-managed channel never takes the legacy offsets (C5); with
 /// `BINARY_DITHER` it runs the pipeline's temporal dither instead, and is
 /// reserved one code on every channel of every lit pixel.
 fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
+#endif
 
 /// Applies the configured power-scaling response to a total power value.
 ///

@@ -1,0 +1,42 @@
+name: attiny85_twinklefox_size
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'examples/TwinkleFox/**'
+      - 'ci/boards.py'
+      - '.github/workflows/check_attiny85_twinklefox.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'examples/TwinkleFox/**'
+      - 'ci/boards.py'
+      - '.github/workflows/check_attiny85_twinklefox.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+
+jobs:
+  build:
+    # #4478: TwinkleFox configures the power limiter, so its ATtiny85 image
+    # catches a power/dither size regression that Blink does not exercise.
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: attiny85 TwinkleFox

@@ -331,7 +331,12 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 			gControllersData[length] = nullptr;
 		}
 		length++;
-		if (mNFPS < FL_DITHER_ENABLE_MIN_REFRESH_HZ) { pCur->setDither(0); }
+		#if FL_PLATFORM_HAS_TINY_MEMORY
+			// A tiny power-limited build disables binary dithering before output,
+			// so the compact limiter remains an electrical upper bound (#4478).
+			if (mPPowerFunc) { pCur->setDither(DISABLE_DITHER); }
+#endif
+			if (mNFPS < FL_DITHER_ENABLE_MIN_REFRESH_HZ) { pCur->setDither(0); }
 		pCur = pCur->next();
 	}
 
@@ -410,7 +415,12 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 
 	pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		if (mNFPS < FL_DITHER_ENABLE_MIN_REFRESH_HZ) { pCur->setDither(0); }
+		#if FL_PLATFORM_HAS_TINY_MEMORY
+			// A tiny power-limited build disables binary dithering before output,
+			// so the compact limiter remains an electrical upper bound (#4478).
+			if (mPPowerFunc) { pCur->setDither(DISABLE_DITHER); }
+#endif
+			if (mNFPS < FL_DITHER_ENABLE_MIN_REFRESH_HZ) { pCur->setDither(0); }
 		if (pCur->getEnabled()) {
 			pCur->showColorInternal(color, scale);
 		}

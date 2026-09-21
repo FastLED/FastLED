@@ -396,6 +396,7 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     return calculate_unscaled_power_mW(leds, controller.getRgbw());
 }
 
+#if !FL_PLATFORM_HAS_TINY_MEMORY
 // Two output codes: the most one `BINARY_DITHER` offset can lift a lit channel
 // once scaled. `d <= 256/s` scales back to at most one code, and the
 // FASTLED_SCALE8_FIXED form `(x * (s + 1)) >> 8` can carry one more; an
@@ -458,6 +459,7 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
     return dither_reserve_mW(fl::span<const CRGB>(
         controller.leds(), static_cast<fl::size>(controller.size())));
 }
+#endif
 
 // sets brightness to
 //  - no more than target_brightness
