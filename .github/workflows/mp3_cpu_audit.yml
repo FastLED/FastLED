@@ -17,7 +17,6 @@ on:
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
       - 'codec_cpu_trend.json'
-      - 'pyproject.toml'
       - '.github/workflows/mp3_cpu_audit.yml'
   pull_request:
     branches: [master]
@@ -31,7 +30,6 @@ on:
       - 'ci/codec_cpu/**'
       - 'ci/codec_memory/*_audit.cpp'
       - 'codec_cpu_trend.json'
-      - 'pyproject.toml'
       - '.github/workflows/mp3_cpu_audit.yml'
   workflow_dispatch:
 
@@ -58,6 +56,11 @@ jobs:
 
       - name: Install audit tools
         run: |
+          # The hosted image's optional Microsoft repository periodically
+          # returns 403. The audit uses only Ubuntu packages, so remove that
+          # unrelated source before refreshing apt metadata.
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list \
+            /etc/apt/sources.list.d/microsoft-prod.sources
           sudo apt-get update
           sudo apt-get install -y clang llvm valgrind
           for governor in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
