@@ -4,6 +4,12 @@ import re
 from pathlib import Path
 
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
+
+
 ROOT = Path(__file__).resolve().parents[2]
 
 FIXED_PYTHON_WORKFLOWS = (
@@ -30,9 +36,15 @@ FIXED_PYTHON_WORKFLOWS = (
 
 def test_fbuild_locking_uses_the_py310_abi_baseline() -> None:
     """FastLED must resolve fbuild against its public abi3-py310 API floor."""
-    manifest = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'requires-python = ">=3.10"' in manifest
-    assert 'pythonVersion = "3.10"' in manifest
+    with (ROOT / "pyproject.toml").open("rb") as manifest_file:
+        manifest = tomllib.load(manifest_file)
+
+    assert manifest["project"]["requires-python"] == ">=3.10"
+    assert manifest["tool"]["pyright"]["pythonVersion"] == "3.10"
+    assert all(
+        environment["pythonVersion"] == "3.10"
+        for environment in manifest["tool"]["pyright"]["executionEnvironments"]
+    )
 
     for workflow in FIXED_PYTHON_WORKFLOWS:
         contents = (ROOT / workflow).read_text(encoding="utf-8")

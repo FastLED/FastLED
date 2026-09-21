@@ -353,6 +353,9 @@ dependencies = [
     "httpx",
     "psutil",
     "toml>=0.10.2",
+    # `tomllib` joined the standard library in Python 3.11. The fbuild API
+    # baseline is Python 3.10, so retain its maintained backport there.
+    "tomli>=2.0.0; python_version < '3.11'",
     "typeguard>=4.4.4",
     "mcp>=1.12.2",
     "compiledb>=0.10.7",
