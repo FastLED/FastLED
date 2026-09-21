@@ -9,10 +9,7 @@
 // fl::net BLE stack does not fit on parts like LPC845-BRK (64 KB flash).
 // Matches the conditional structure in AutoResearch.ino itself.
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 #include "AutoResearchBle.h"
 #include "fl/stl/singleton.h"
@@ -25,4 +22,4 @@ AutoResearchBleState& getBleState() {
     return fl::Singleton<BleStateHolder>::instance().state;
 }
 
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

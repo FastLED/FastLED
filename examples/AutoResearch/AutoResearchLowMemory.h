@@ -9,9 +9,8 @@
 // from #3022 phase 2 freed up the budget on LPC8xx.
 //
 // Included from the main `AutoResearch.ino` when
-// `FASTLED_AUTORESEARCH_LOW_MEMORY` is defined (auto-defined when
-// `FL_PLATFORM_HAS_LARGE_MEMORY == 0`, i.e. Low + Tiny tiers per the
-// FastLED #3000 memory classification).
+// `FL_PLATFORM_HAS_LARGE_MEMORY == 0` (Low + Tiny tiers per the FastLED
+// #3000 memory classification).
 //
 // Same JSON-RPC contract as the retired LPC sketch:
 //   echo: [int] -> int

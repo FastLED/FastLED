@@ -6,10 +6,7 @@
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 // Legacy debug macros (no-ops, kept for debugTest RPC function)
 #define DEBUG_PRINT(x) do {} while(0)
@@ -96,7 +93,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // Teensy-4-only because FLEXIO1 is iMXRT1062-specific. Other platforms
     // get a clean "not supported" response so the RPC harness can still
     // round-trip.
-    remote.bind("flexioRxBenchmark", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioRxBenchmark", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -259,7 +256,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     //
     // Teensy-4-only — FLEXIO1 is iMXRT1062-specific. ObjectFLED also relies
     // on Teensy 4-core APIs, so non-Teensy builds return `PlatformNotSupported`.
-    remote.bind("flexioObjectFledTest", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioObjectFledTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -476,7 +473,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     //     capture_buffer_first8_hex: [...], notes }
     //
     // Teensy-4-only.
-    remote.bind("flexioRxLoopbackPing", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioRxLoopbackPing", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -684,7 +681,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     //     mosi_flexio_pin, sclk_flexio_pin }
     //
     // Teensy 4.x-only.
-    remote.bind("flexioSpiSelfTest", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioSpiSelfTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -838,7 +835,7 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     //     mosi_bit, sclk_bit, dma_* (10), tmr3_* (5), xbar1_ctrl1 }
     //
     // Teensy 4.x-only.
-    remote.bind("objectfledSpiSelfTest", [this](const fl::json& args) -> fl::json {
+    remote.bind("objectfledSpiSelfTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -982,4 +979,4 @@ void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     });
 }
 
-#endif // !(FASTLED_AUTORESEARCH_LOW_MEMORY)
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

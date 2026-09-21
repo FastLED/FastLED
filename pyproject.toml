@@ -5,10 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.5.25. It carries the ESP32 framework-library selection
+    # Pin to fbuild 2.5.26. It carries the ESP32 framework-library selection
     # fix and the accumulated USB/deploy and build fixes below.
     #
     # Pin history:
+    #   2.5.26 -- restores direct and transitive ESP32 framework-library
+    #              discovery from compiler-authoritative include paths
+    #              (FastLED/fbuild#1452, #1454; FastLED#4482).
     #   2.5.25 -- stops ESP32 Blink from compiling every bundled Arduino
     #              library: Arduino Matter could retain global roots and pull
     #              ~1.07 MB of Matter/Wi-Fi/BLE code into the image
@@ -253,7 +256,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.25",
+    "fbuild==2.5.26",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented

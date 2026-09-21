@@ -1,10 +1,7 @@
 // RP2040/RP2350 fixed-SPI byte-loopback AutoResearch RPC.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 #include "AutoResearchRemote.h"
 
@@ -226,6 +223,7 @@ fl::json runPublicApiLoopback(
 void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
     remote.bind("rpSpiLoopback", [this](const fl::json& args) -> fl::json {
 #if !defined(FL_IS_RP2040) && !defined(FL_IS_RP2350)
+        (void)this;
         (void)args;
         fl::json response = fl::json::object();
         response.set("success", false);
@@ -274,6 +272,7 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
     });
     remote.bind("rpSpiPublicApiLoopback", [this](const fl::json& args) -> fl::json {
 #if !defined(FL_IS_RP2040) && !defined(FL_IS_RP2350)
+        (void)this;
         (void)args;
         fl::json response = fl::json::object();
         response.set("success", false);
@@ -303,4 +302,4 @@ void AutoResearchRemoteControl::bindRpSpiMethods(fl::Remote& remote) {
     });
 }
 
-#endif  // !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

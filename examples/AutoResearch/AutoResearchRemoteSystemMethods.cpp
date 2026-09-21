@@ -5,10 +5,7 @@
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 // Legacy debug macros (no-ops, kept for debugTest RPC function)
 #define DEBUG_PRINT(x) do {} while(0)
@@ -259,7 +256,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     // ========================================================================
 
     // Register "ping" function - health check with timestamp
-    remote.bind("ping", [this](const fl::json& args) -> fl::json {
+    remote.bind("ping", [](const fl::json& args) -> fl::json {
         uint32_t now = millis();
         const fl::ResetCause reset_cause = FastLED.watchdog().lastResetCause();
 
@@ -274,7 +271,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     });
 
     // TEST: Simple RPC without Serial to verify task context works
-    remote.bind("testNoSerial", [this](const fl::json& args) -> fl::json {
+    remote.bind("testNoSerial", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         response.set("success", true);
         response.set("message", "RPC works from task context");
@@ -506,7 +503,7 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     });
 #endif
 
-    remote.bind("peekMem", [this](const fl::json& args) -> fl::json {
+    remote.bind("peekMem", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         if (!args.is_object() || !args.contains("addr") ||
             !args["addr"].is_int()) {
@@ -540,4 +537,4 @@ void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
     });
 }
 
-#endif // !(FASTLED_AUTORESEARCH_LOW_MEMORY)
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY

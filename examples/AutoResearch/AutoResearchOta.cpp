@@ -9,10 +9,7 @@
 // WiFi / a network stack. Matches the conditional structure in
 // AutoResearch.ino itself.
 #include "fl/system/sketch_macros.h"
-#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
-#define FASTLED_AUTORESEARCH_LOW_MEMORY 1
-#endif
-#if !(defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 
 #include "AutoResearchOta.h"
 #include "fl/stl/json.h"
@@ -541,6 +538,8 @@ fl::json stopOta() {
 }
 
 fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
+    (void)expected_size;
+    (void)sha256;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact staging only supported on ESP32-C6");
@@ -548,6 +547,7 @@ fl::json beginOtaArtifact(size_t expected_size, const char* sha256) {
 }
 
 fl::json writeOtaArtifact(fl::vector<fl::u8> bytes) {
+    (void)bytes;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact staging only supported on ESP32-C6");
@@ -675,6 +675,8 @@ fl::json rpOtaUpdateStatus() {
 #else
 
 fl::json queueOtaArtifactUpdate(const char* host, uint16_t port) {
+    (void)host;
+    (void)port;
     fl::json response = fl::json::object();
     response.set("success", false);
     response.set("error", "Artifact update only supported on RP2350W");
@@ -692,4 +694,4 @@ fl::json rpOtaUpdateStatus() {
 
 #endif
 
-#endif  // !FASTLED_AUTORESEARCH_LOW_MEMORY
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY
