@@ -1,7 +1,10 @@
-# +56 B: fbuild 2.5.25 (FastLED/fbuild#1450) selects only the framework
-# libraries a build reaches. The previous number came from the older, wider
-# selection; this is what a correct esp32s3 Blink links. Measured in CI at
-# 462.61 KB image, against 1.60 MB while #4474 was open.
+# +56 B (383158 -> 383214), #4477: fbuild 2.5.25 (FastLED/fbuild#1450)
+# selects only the framework libraries a build reaches. The previous number
+# came from the older, wider selection; 383,214 B is what a correct esp32s3
+# Blink links, measured by this gate in CI. As a cross-check on the same
+# build, fbuild reports the flash image at 462.61 KB -- a different metric
+# from this file's symbol-sum total, quoted only because it was 1.60 MB
+# while #4474 was open.
 # 2026-09-14, PR #4418 (issue #4415): +53,979 B, 336474 -> 390453.
 #
 # A measurement change, not code growth. This gate builds Blink through
