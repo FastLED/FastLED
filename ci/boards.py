@@ -954,6 +954,13 @@ ESP32_S3_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
+    # `examples/AutoResearch/AutoResearchOta.cpp` includes <LittleFS.h>, and
+    # LittleFS.h includes <FS.h>. fbuild 2.5.25 narrowed framework-library
+    # selection (FastLED/fbuild#1450, which fixed Blink linking Matter) and no
+    # longer picks either up from the sketch's own includes, so the build fails
+    # on the first of them. Declaring both restores it. Remove when
+    # FastLED/fbuild#1452 makes selection follow sketch includes again.
+    lib_deps=["LittleFS", "FS"],
     # NOTE: esp32s3 has NO PARLIO peripheral (SOC_PARLIO_SUPPORTED is unset in
     # soc_caps.h). Do NOT set parlio_capable=True here — PR #3276 historically
     # had this wrong; #3304 fixes it.
