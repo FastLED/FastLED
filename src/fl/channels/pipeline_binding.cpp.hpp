@@ -7,7 +7,6 @@
 #include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/cled_controller.h"
 #include "fl/stl/new.h"
-#include "power_mgt.h"
 
 namespace fl {
 
@@ -55,9 +54,9 @@ void destroyColorPipelineIterator(void* source_storage,
 }
 
 #if FL_COLOR_PIPELINE_SHARED
-u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
-                                         span<const CRGB> leds,
-                                         const Rgbw& rgbw) FL_NO_EXCEPT {
+u32 colorPipelineUnscaledPowerMilliwatts(
+    const StreamingPipelineQ16& pipeline, span<const CRGB> leds,
+    const Rgbw& rgbw, ColorPipelineHooks::PowerEstimator estimate) FL_NO_EXCEPT {
     // Demand at full brightness: a copy of the pipeline at unity flux, so the
     // frame's brightness and the limiter's own previous scalar are not folded
     // into the number the limiter is about to scale.
@@ -89,12 +88,12 @@ u32 colorPipelineUnscaledPowerMilliwatts(const StreamingPipelineQ16& pipeline,
             chunk[filled].raw[c] = static_cast<u8>((d * 255 + 32768) >> 16);
         }
         if (++filled == kChunk) {
-            total += calculate_unscaled_power_mW(span<const CRGB>(chunk, filled), rgbw);
+            total += estimate(span<const CRGB>(chunk, filled), rgbw);
             filled = 0;
         }
     }
     if (filled != 0) {
-        total += calculate_unscaled_power_mW(span<const CRGB>(chunk, filled), rgbw);
+        total += estimate(span<const CRGB>(chunk, filled), rgbw);
     }
     return total;
 }
