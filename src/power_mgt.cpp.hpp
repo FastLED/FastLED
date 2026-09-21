@@ -7,6 +7,7 @@
 #include "controller.h"       // CLEDController
 #include "fastpin.h"          // Pin
 #include "fl/system/sketch_macros.h"
+#include "fl/stl/compiler_control.h"  // FL_UNUSED
 #if SKETCH_HAS_LARGE_MEMORY
 #include "fl/math/math.h"  // fl::pow, fl::lround — libm-gated wrappers
 #include "fl/stl/array.h"
@@ -402,6 +403,20 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
 // exhaustive check over every source, scale and offset finds 2 as the maximum.
 static constexpr fl::u32 kDitherReserveCodes = 2;
 
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// TINY tier: no reserve, and none of the 64-bit arithmetic that computes it
+// (#4478). A target with 8 KiB of flash cannot spend 468 B on a bound that
+// only matters when a sketch also limits power.
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
+    FL_UNUSED(leds);
+    return 0;
+}
+
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
+    FL_UNUSED(controller);
+    return 0;
+}
+#else
 fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
     fl::u32 lit_r = 0, lit_g = 0, lit_b = 0;
     for (fl::size i = 0; i < leds.size(); ++i) {
@@ -458,6 +473,7 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
     return dither_reserve_mW(fl::span<const CRGB>(
         controller.leds(), static_cast<fl::size>(controller.size())));
 }
+#endif  // FL_PLATFORM_HAS_TINY_MEMORY
 
 // sets brightness to
 //  - no more than target_brightness

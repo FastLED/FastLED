@@ -332,6 +332,11 @@ fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
 /// colour-managed channel never takes the legacy offsets (C5); with
 /// `BINARY_DITHER` it runs the pipeline's temporal dither instead, and is
 /// reserved one code on every channel of every lit pixel.
+///
+/// On the TINY memory tier (`FL_PLATFORM_HAS_TINY_MEMORY`) both of these are
+/// compiled out and the reserve is zero: the 64-bit arithmetic the bound needs
+/// costs 468 B of an ATtiny85's 8 KiB, which is what pushed `TwinkleFox` over
+/// the flash region (#4478). Every tier that can afford it keeps the reserve.
 fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
 
 /// Applies the configured power-scaling response to a total power value.
