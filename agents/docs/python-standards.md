@@ -1,11 +1,11 @@
 # Python Code Standards
 
 ## Type Annotations
-Use modern PEP 585 and PEP 604 type hints (Python 3.11+ native syntax):
+Use modern PEP 585 and PEP 604 type hints (Python 3.10+ native syntax):
 - Use `list[T]`, `dict[K, V]`, `set[T]` instead of `List[T]`, `Dict[K, V]`, `Set[T]`
 - Use `X | Y` for unions instead of `Union[X, Y]`
 - Use `T | None` instead of `Optional[T]`
-- No need for `from __future__ import annotations` (works natively in Python 3.11+)
+- No need for `from __future__ import annotations` (works natively in Python 3.10+)
 
 ## Structured Return Types
 Prefer `@dataclass` over tuples and dicts for function return types:

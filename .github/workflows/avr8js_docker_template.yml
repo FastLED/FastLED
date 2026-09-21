@@ -50,7 +50,7 @@ jobs:
           persist-credentials: false
 
       - name: Pin python version
-        run: echo "3.11" > .python-version
+        run: echo "3.10" > .python-version
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6

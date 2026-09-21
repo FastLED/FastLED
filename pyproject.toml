@@ -3,7 +3,7 @@ name = "ci"
 version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     # Pin to fbuild 2.5.26. It carries the ESP32 framework-library selection
     # fix and the accumulated USB/deploy and build fixes below.
@@ -462,7 +462,7 @@ exclude = [
 
 # Type checking configuration
 typeCheckingMode = "strict"
-pythonVersion = "3.11"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 useLibraryCodeForTypes = true
 analyzeUnannotatedFunctions = true
@@ -572,12 +572,12 @@ markers = [
 
 [[tool.pyright.executionEnvironments]]
 root = "."
-pythonVersion = "3.11"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 
 [[tool.pyright.executionEnvironments]]
 root = "ci/tests"
-pythonVersion = "3.11"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 # Enforce return type annotations even for test methods
 reportReturnType = "error"

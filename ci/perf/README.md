@@ -146,7 +146,7 @@ PERFORMANCE FLAGS
 ## Requirements
 
 - Clang compiler with `-ftime-trace` support (Clang 9+)
-- Python 3.11+
+- Python 3.10+
 - FastLED source code
 
 ## Troubleshooting
