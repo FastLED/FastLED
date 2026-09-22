@@ -8,6 +8,8 @@ Commands:
            release-notes heading final. With --pr: branch, commit, push, open
            the release PR. Merging that PR is the release.
   notes    Print one version's section of release_notes.md.
+  check-tag  A pushed X.Y.Z tag names the version the tree has, with final
+           notes. Runs on tag push (see .github/workflows/check_tag.yml).
 
 How a version reaches each registry -- nothing here uploads anything:
   * Arduino indexes git tags.
@@ -325,6 +327,44 @@ def check_tree(
     return problems
 
 
+def check_tag(root: Path, tag: str) -> list[str]:
+    """Every reason a pushed ``X.Y.Z`` tag disagrees with the tree; empty = OK.
+
+    The tag is what the Arduino index packages; the tree is what the package
+    registry's crawler publishes. They must name the same release, and the
+    release notes for it must be final -- "(Next Release)" means the notes
+    were never closed out. See #4444.
+    """
+    try:
+        version = Version.parse(tag)
+    except KeyboardInterrupt:
+        raise
+    except ValueError:
+        return [f"tag {tag!r} is not an X.Y.Z release name"]
+    if str(version) != tag:
+        # e.g. 3.09.1 parses, but the registries would treat it as a
+        # different string than the tree's 3.9.1.
+        return [f"tag {tag!r} is not canonical; use {version}"]
+
+    sites = tree_version_sites(root)
+    problems: list[str] = []
+    for site in sites:
+        if site.value != tag:
+            problems.append(f"{site.path} is {site.value}, tag is {version}")
+
+    notes = notes_heading(root)
+    if notes.is_next_release:
+        problems.append(
+            f"release_notes.md still marks 'FastLED {notes.version}' as "
+            "'(Next Release)'"
+        )
+    elif notes.version != tag:
+        problems.append(
+            f"release_notes.md opens with {notes.version}, tag is {version}"
+        )
+    return problems
+
+
 def run_release_version_lint(root: Path = PROJECT_ROOT) -> bool:
     """``bash lint`` stage: the tree is either in steady state or a release PR."""
     sites, notes = tree_version_sites(root), notes_heading(root)
@@ -572,6 +612,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     notes = sub.add_parser("notes", help="print one version's release notes")
     notes.add_argument("version", help="X.Y.Z")
+    tag_chk = sub.add_parser(
+        "check-tag", help="a pushed X.Y.Z tag agrees with the tree (CI on tag push)"
+    )
+    tag_chk.add_argument("tag", help="the tag that was pushed")
     args = parser.parse_args(argv)
 
     if args.command == "status":
@@ -580,6 +624,13 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_prepare(PROJECT_ROOT, args.bump, args.pr)
     if args.command == "notes":
         return cmd_notes(PROJECT_ROOT, args.version)
+    if args.command == "check-tag":
+        problems = check_tag(PROJECT_ROOT, args.tag)
+        for problem in problems:
+            print(f"FAIL: {problem}")
+        if not problems:
+            print(f"tag {args.tag} matches the tree")
+        return 1 if problems else 0
     return cmd_check(PROJECT_ROOT, args.releasing)
 
 
