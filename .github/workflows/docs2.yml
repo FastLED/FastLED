@@ -6,8 +6,16 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag used for documentation metadata
+        required: false
+        type: string
   release:
     types: released
+
+permissions:
+  contents: write
 
 jobs:
   docs:
@@ -22,9 +30,15 @@ jobs:
 
       - name: Fetch Repository Reference Info
         id: repo-info
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
         run: |
           git fetch --prune --unshallow --tags
-          RELEASE_TAG=3.9.15
+          if [ -n "$RELEASE_TAG" ] && ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release tag: $RELEASE_TAG"
+            exit 1
+          fi
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
           LATEST_TAG=$(git tag | grep -E '^[0-9]' | sort -V | tail -1)
           GIT_SHA_SHORT=$(sed 's/\(.\{7\}\).*/\1/' <<< "$GITHUB_SHA")
           PROJECT_NUMBER=${RELEASE_TAG:-${LATEST_TAG:-$GIT_SHA_SHORT}}
@@ -35,12 +49,14 @@ jobs:
           echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
 
       - name: Install UV
-        run: pip install uv
+        run: pip install uv==0.12.13
 
       - name: Update docs with project number
         working-directory: ./docs
+        env:
+          PROJECT_NUMBER: ${{ steps.repo-info.outputs.project-number }}
         run: |
-          sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
+          sed -i -E "s/(PROJECT_NUMBER\s*=\s*).*/\1 $PROJECT_NUMBER/g" Doxyfile
 
 
       - name: Run Docs script
