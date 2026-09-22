@@ -30,8 +30,11 @@ jobs:
     timeout-minutes: 10
     steps:
       # The check compares the tag against the tree at the tagged commit;
-      # a shallow checkout of that one commit is all it reads.
+      # a shallow checkout of that one commit is all it reads. The tagged
+      # tree's own code runs next, so the token stays out of .git/config.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install uv
         run: pip install uv==0.12.13
