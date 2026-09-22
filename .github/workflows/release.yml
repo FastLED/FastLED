@@ -29,15 +29,21 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Require master
+        if: github.ref != 'refs/heads/master'
+        run: |
+          echo "Release runs must use master."
+          exit 1
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # the check compares against every release tag
 
       - name: Read the version on master
         id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION=$(sed -n 's/^version=//p' library.properties)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -58,7 +64,7 @@ jobs:
 
       - name: Install uv
         if: steps.v.outputs.released == 'false'
-        run: pip install uv
+        run: pip install uv==0.12.13
 
       # An untagged version on master that is not a valid release fails here,
       # loudly: that is the state the registry crawler would publish as-is.
@@ -72,6 +78,8 @@ jobs:
 
       - name: Tag and create the GitHub release
         if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.v.outputs.version }}" \
             --target "$GITHUB_SHA" \
@@ -80,6 +88,8 @@ jobs:
 
       - name: Create the GitHub release for an existing tag
         if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.v.outputs.version }}" \
             --verify-tag \
@@ -90,4 +100,6 @@ jobs:
       # so the docs build is dispatched rather than left to `on: release`.
       - name: Rebuild the docs
         if: steps.v.outputs.released == 'false'
-        run: gh workflow run docs2.yml --ref master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docs2.yml --ref master -f "release_tag=${{ steps.v.outputs.version }}"

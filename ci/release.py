@@ -385,12 +385,7 @@ def _sub_once(pattern: str, repl: str, text: str, where: str) -> str:
     return out
 
 
-def apply_version(root: Path, version: Version) -> None:
-    """Write ``version`` to every site ``tree_version_sites`` reads, and make the
-    top release-notes heading final. Raises ValueError, changing nothing, when
-    the notes have no section for this release."""
-    notes_path = root / "release_notes.md"
-    notes = notes_path.read_text(encoding="utf-8")
+def _validate_release_notes(notes: str) -> re.Match[str]:
     top = _NOTES_HEADING_RE.search(notes)
     if top is None or "(Next Release)" not in top.group(2):
         raise ValueError(
@@ -399,6 +394,13 @@ def apply_version(root: Path, version: Version) -> None:
         )
     if release_notes_section(notes, Version.parse(top.group(1))) is None:
         raise ValueError("the '(Next Release)' section of release_notes.md is empty")
+    return top
+
+
+def _version_edits(root: Path, version: Version) -> list[tuple[Path, str]]:
+    notes_path = root / "release_notes.md"
+    notes = notes_path.read_text(encoding="utf-8")
+    top = _validate_release_notes(notes)
 
     padded = f"{version.major}.{version.minor:03d}.{version.patch:03d}"
     edits: list[tuple[Path, str]] = []
@@ -433,7 +435,11 @@ def apply_version(root: Path, version: Version) -> None:
         path.read_text(encoding="utf-8"),
         "src/FastLED.h",
     )
-    header = re.sub(r"(FastLED version )\d+\.\d{3}\.\d{3}", rf"\g<1>{padded}", header)
+    header, shown_count = re.subn(
+        r"(FastLED version )\d+\.\d{3}\.\d{3}", rf"\g<1>{padded}", header
+    )
+    if shown_count == 0:
+        raise ValueError("no displayed version string to rewrite in src/FastLED.h")
     edits.append((path, header))
     path = root / "docs" / "Doxyfile"
     edits.append(
@@ -451,6 +457,14 @@ def apply_version(root: Path, version: Version) -> None:
     edits.append(
         (notes_path, notes[: top.start()] + final_heading + notes[top.end() :])
     )
+    return edits
+
+
+def apply_version(root: Path, version: Version) -> None:
+    """Write ``version`` to every site ``tree_version_sites`` reads, and make the
+    top release-notes heading final. Raises ValueError, changing nothing, when
+    any required rewrite cannot be prepared."""
+    edits = _version_edits(root, version)
 
     # Every rewrite succeeded; only now touch the tree.
     for target, text in edits:
@@ -466,22 +480,37 @@ def _step(newest: Version, bump: str) -> Version:
 
 
 def cmd_prepare(root: Path, bump: str, open_pr: bool) -> int:
+    if open_pr:
+        if _git(["status", "--porcelain"], root).strip():
+            print("FAIL: working tree is not clean; --pr commits only the version bump")
+            return 1
+        current_branch = _git(["branch", "--show-current"], root).strip()
+        if current_branch != "master":
+            print("FAIL: --pr must be run from master")
+            return 1
+        _git(["fetch", "origin", "master", "--tags"], root)
+        head = _git(["rev-parse", "HEAD"], root).strip()
+        upstream = _git(["rev-parse", "origin/master"], root).strip()
+        if head != upstream:
+            print("FAIL: local master must match origin/master")
+            return 1
     tags = release_tags(root, merged_only=True)
     if not tags:
         print("FAIL: no release tags reachable from HEAD (run: git fetch --tags)")
         return 1
     version = _step(tags[-1], bump)
     branch = f"release/{version}"
-    if open_pr:
-        if _git(["status", "--porcelain"], root).strip():
-            print("FAIL: working tree is not clean; --pr commits only the version bump")
-            return 1
-        _git(["checkout", "-b", branch], root)
+    if open_pr and _git(["branch", "--list", branch], root).strip():
+        print(f"FAIL: local branch already exists: {branch}")
+        return 1
     try:
-        apply_version(root, version)
+        _version_edits(root, version)
     except ValueError as e:
         print(f"FAIL: {e}")
         return 1
+    if open_pr:
+        _git(["checkout", "-b", branch], root)
+    apply_version(root, version)
     print(f"prepared {version} (newest tag: {tags[-1]})")
     rc = cmd_check(root, releasing=True)
     if rc != 0 or not open_pr:

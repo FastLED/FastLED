@@ -204,7 +204,7 @@ FastLED 3.10.5
 """
 
 
-def _write_full_tree(root: Path, notes: str = NOTES) -> None:
+def _write_full_tree(root: Path, notes: str) -> None:
     _write_tree(root, "3.10.5", "3.10.5", 3010005, "unused")
     (root / "library.json").write_text(
         '{\n    "name": "FastLED",\n    "version": "3.10.5",\n    "x": 1\n}\n'
@@ -219,7 +219,7 @@ def test_release_notes_section_stops_at_the_next_heading() -> None:
 
 
 def test_apply_version_makes_the_tree_a_valid_release(tmp_path: Path) -> None:
-    _write_full_tree(tmp_path)
+    _write_full_tree(tmp_path, NOTES)
     apply_version(tmp_path, Version.parse("3.10.6"))
     sites = tree_version_sites(tmp_path)
     assert {s.value for s in sites} == {"3.10.6"}
@@ -230,10 +230,74 @@ def test_apply_version_makes_the_tree_a_valid_release(tmp_path: Path) -> None:
 
 
 def test_apply_version_renumbers_the_heading_for_a_minor_bump(tmp_path: Path) -> None:
-    _write_full_tree(tmp_path)
+    _write_full_tree(tmp_path, NOTES)
     apply_version(tmp_path, Version.parse("3.11.0"))
     assert notes_heading(tmp_path) == NotesHeading("3.11.0", False)
     assert "3.011.000" in (tmp_path / "src" / "FastLED.h").read_text()
+
+
+def test_apply_version_requires_the_displayed_version_string(tmp_path: Path) -> None:
+    _write_full_tree(tmp_path, NOTES)
+    header_path = tmp_path / "src" / "FastLED.h"
+    original = header_path.read_text()
+    header_path.write_text(original.replace("FastLED version", "FastLED release"))
+
+    with pytest.raises(ValueError, match="displayed version string"):
+        apply_version(tmp_path, Version.parse("3.10.6"))
+
+    assert (tmp_path / "library.properties").read_text() == (
+        "name=FastLED\nversion=3.10.5\n"
+    )
+
+
+def test_prepare_pr_requires_master(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import ci.release as release
+
+    monkeypatch.setattr(release, "release_tags", lambda _root, merged_only: [TAG])
+
+    def fake_git(args: list[str], _root: Path) -> str:
+        if args == ["status", "--porcelain"]:
+            return ""
+        if args == ["branch", "--show-current"]:
+            return "feature\n"
+        raise AssertionError(f"unexpected git call: {args}")
+
+    monkeypatch.setattr(release, "_git", fake_git)
+    assert release.cmd_prepare(tmp_path, "patch", True) == 1
+
+
+def test_prepare_pr_validates_all_rewrites_before_creating_branch(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import ci.release as release
+
+    _write_full_tree(tmp_path, NOTES)
+    header_path = tmp_path / "src" / "FastLED.h"
+    header_path.write_text(
+        header_path.read_text().replace("FastLED version", "FastLED release")
+    )
+    monkeypatch.setattr(release, "release_tags", lambda _root, merged_only: [TAG])
+    calls: list[list[str]] = []
+
+    def fake_git(args: list[str], _root: Path) -> str:
+        calls.append(args)
+        if args == ["status", "--porcelain"]:
+            return ""
+        if args == ["branch", "--show-current"]:
+            return "master\n"
+        if args == ["fetch", "origin", "master", "--tags"]:
+            return ""
+        if args in (["rev-parse", "HEAD"], ["rev-parse", "origin/master"]):
+            return "abc123\n"
+        if args == ["branch", "--list", "release/3.10.6"]:
+            return ""
+        raise AssertionError(f"unexpected git call: {args}")
+
+    monkeypatch.setattr(release, "_git", fake_git)
+    assert release.cmd_prepare(tmp_path, "patch", True) == 1
+    assert not any(args[:2] == ["checkout", "-b"] for args in calls)
 
 
 @pytest.mark.parametrize(
