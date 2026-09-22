@@ -11,6 +11,7 @@ from ci.release import (
     Version,
     VersionSite,
     apply_version,
+    check_tag,
     check_tree,
     notes_heading,
     release_notes_section,
@@ -314,3 +315,49 @@ def test_apply_version_refuses_without_notes_and_changes_nothing(
     with pytest.raises(ValueError):
         apply_version(tmp_path, Version.parse("3.10.6"))
     assert {s.value for s in tree_version_sites(tmp_path)} == {"3.10.5"}
+
+
+def test_tag_matches_tree_and_final_notes(tmp_path: Path) -> None:
+    _write_tree(tmp_path, "3.10.6", "3.10.6", 3010006, "FastLED 3.10.6")
+    assert check_tag(tmp_path, "3.10.6") == []
+
+
+def test_tag_disagreeing_with_the_tree_fails_and_names_every_site(
+    tmp_path: Path,
+) -> None:
+    # Tag 3.10.6 pushed at a commit whose tree still says 3.10.5.
+    _write_tree(tmp_path, "3.10.5", "3.10.5", 3010005, "FastLED 3.10.5")
+    problems = check_tag(tmp_path, "3.10.6")
+    assert problems
+    assert any("library.properties" in p for p in problems)
+    assert any("3.10.5" in p and "3.10.6" in p for p in problems)
+
+
+def test_tag_with_drifted_sites_fails(tmp_path: Path) -> None:
+    _write_tree(tmp_path, "3.10.6", "3.10.5", 3010006, "FastLED 3.10.6")
+    problems = check_tag(tmp_path, "3.10.6")
+    assert any("library.json" in p and "3.10.5" in p for p in problems)
+
+
+def test_tag_with_unreleased_notes_fails(tmp_path: Path) -> None:
+    # The tag names a release, so the notes must be final, not "(Next Release)".
+    _write_tree(tmp_path, "3.10.6", "3.10.6", 3010006, "FastLED 3.10.6 (Next Release)")
+    problems = check_tag(tmp_path, "3.10.6")
+    assert any("(Next Release)" in p for p in problems)
+
+
+def test_tag_must_be_a_release_name(tmp_path: Path) -> None:
+    _write_tree(tmp_path, "3.10.6", "3.10.6", 3010006, "FastLED 3.10.6")
+    for bad in ("v3.10.6", "3.10", "3.10.6-rc1"):
+        assert any("X.Y.Z" in p for p in check_tag(tmp_path, bad))
+
+
+def test_tag_must_be_canonical_so_the_report_cannot_contradict_itself(
+    tmp_path: Path,
+) -> None:
+    # 3.09.1 parses as 3.9.1; comparing the raw tag against normalized
+    # sites would print "is 3.9.1, tag is 3.9.1" as a failure.
+    _write_tree(tmp_path, "3.9.1", "3.9.1", 3009001, "FastLED 3.9.1")
+    problems = check_tag(tmp_path, "3.09.1")
+    assert any("canonical" in p and "3.9.1" in p for p in problems)
+    assert check_tag(tmp_path, "3.9.1") == []
