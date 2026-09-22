@@ -21,7 +21,7 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6

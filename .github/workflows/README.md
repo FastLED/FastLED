@@ -38,7 +38,7 @@ This workflow includes the fix for the common issue where Claude Code Action fai
 
 **✅ FastLED Project Integration**
 
-- Automatically sets up Python 3.11 and uv package manager
+- Automatically sets up Python 3.10 and uv package manager
 - Runs `uv sync` to install project dependencies
 - Compatible with the project's Python build system and MCP server tools
 

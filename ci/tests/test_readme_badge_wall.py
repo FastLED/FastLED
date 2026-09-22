@@ -46,7 +46,7 @@ def _readme_build_badges() -> dict[str, str]:
     readme = README.read_text(encoding="utf-8")
     matches = re.findall(
         r"\[!\[([^]]+)]\(https://github\.com/FastLED/FastLED/actions/"
-        r"workflows/(build_[^/)]+\.yml)/badge\.svg\)]",
+        r"workflows/(build_[^/)]+\.yml)/badge\.svg(?:\?event=push)?\)]",
         readme,
     )
     return {workflow: label for label, workflow in matches}

@@ -20,9 +20,14 @@ import argparse
 import json
 import os
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any, cast
+
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 
 PROJECT_ROOT = Path(__file__).parent.parent
