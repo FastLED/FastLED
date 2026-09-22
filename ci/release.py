@@ -337,6 +337,8 @@ def check_tag(root: Path, tag: str) -> list[str]:
     """
     try:
         version = Version.parse(tag)
+    except KeyboardInterrupt:
+        raise
     except ValueError:
         return [f"tag {tag!r} is not an X.Y.Z release name"]
     if str(version) != tag:
@@ -345,9 +347,10 @@ def check_tag(root: Path, tag: str) -> list[str]:
         return [f"tag {tag!r} is not canonical; use {version}"]
 
     sites = tree_version_sites(root)
-    problems = [
-        f"{s.path} is {s.value}, tag is {version}" for s in sites if s.value != tag
-    ]
+    problems: list[str] = []
+    for site in sites:
+        if site.value != tag:
+            problems.append(f"{site.path} is {site.value}, tag is {version}")
 
     notes = notes_heading(root)
     if notes.is_next_release:
