@@ -113,6 +113,7 @@ CFastLED::CFastLED() {
 	mNPowerData = 0xFFFFFFFF;
 	mLastRequestedScale = 255;
 	mLastShownScale = 255;
+	mLastPowerLimited = false;
 	mNMinMicros = 0;
 }
 
@@ -233,6 +234,7 @@ void CFastLED::clear(ClearFlags flags) {
 		FastLED.mNPowerData = 0xFFFFFFFF;   // No power limit (max value)
 		FastLED.mLastRequestedScale = 255;
 		FastLED.mLastShownScale = 255;
+		FastLED.mLastPowerLimited = false;
 	}
 
 	// Reset BRIGHTNESS - reset global brightness to 255 (full brightness)
@@ -348,7 +350,7 @@ fl::u8 CFastLED::getLastShowBrightness() const {
 }
 
 bool CFastLED::isPowerLimited() const {
-	return mLastShownScale < mLastRequestedScale;
+	return mLastPowerLimited;
 }
 
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
@@ -358,6 +360,7 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	lastshow = fl::micros();
 
 	mLastRequestedScale = scale;
+	mLastPowerLimited = false;
 	// If we have a function for computing power, use it!
 	// On a managed frame, the power scalar remains Q16 through response
 	// inversion. Legacy byte encoders receive that same scalar rounded down.
@@ -375,6 +378,8 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		if (managed) {
 			const fl::FramePowerPlan plan =
 				fl::calculateFramePowerPlan(scale, mNPowerData);
+			mLastPowerLimited = plan.flux_q16 < static_cast<fl::u32>(
+				fl::FluxScalar::fromBrightness(scale).rawQ16());
 			scale = plan.legacy_brightness;
 			fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
 			hooks.frameFluxQ16 = plan.flux_q16;
@@ -388,6 +393,13 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
 	mLastShownScale = scale;
+#if FL_COLOR_PIPELINE_SHARED
+	if (!planned_frame_flux) {
+		mLastPowerLimited = scale < mLastRequestedScale;
+	}
+#else
+	mLastPowerLimited = scale < mLastRequestedScale;
+#endif
 
 
 	int length = 0;
@@ -469,6 +481,7 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
 	mLastShownScale = scale;
+	mLastPowerLimited = scale < mLastRequestedScale;
 
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
@@ -568,6 +581,25 @@ fl::u8 CFastLED::getHdFieldFloor() const {
 }
 
 fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
+#if FL_COLOR_PIPELINE_SHARED
+	if (apply_limiter && mPPowerFunc == static_cast<power_func>(
+			&calculate_max_brightness_for_power_mW)) {
+		bool managed = false;
+		for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
+			if (p->getEnabled() && p->colorPipeline()) {
+				managed = true;
+				break;
+			}
+		}
+		if (managed) {
+			const fl::FramePowerPlan plan =
+				fl::calculateFramePowerPlan(mScale, mNPowerData);
+			if (plan.modeled_mW == 0xFFFFFFFFu) return plan.modeled_mW;
+			const fl::u32 mcu_mW = fl::framePowerMCUBaselineMilliwatts();
+			return plan.modeled_mW > mcu_mW ? plan.modeled_mW - mcu_mW : 0;
+		}
+	}
+#endif
 	fl::u32 fixed_power_mW = 0;
 	fl::u32 controllable_power_mW = 0;
 	fl::u32 dither_reserve_power_mW = 0;

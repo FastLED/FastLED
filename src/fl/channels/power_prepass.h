@@ -35,4 +35,7 @@ struct FramePowerPlan {
 FramePowerPlan calculateFramePowerPlan(u8 requested_brightness,
                                       u32 budget_mW) FL_NO_EXCEPT;
 
+/// The fixed MCU term included in FramePowerPlan::modeled_mW.
+u32 framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT;
+
 }  // namespace fl

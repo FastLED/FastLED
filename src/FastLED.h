@@ -729,6 +729,7 @@ class CFastLED {
 	power_func mPPowerFunc;  ///< function for overriding brightness when using FastLED.show();
 	fl::u8  mLastRequestedScale;  ///< brightness the last show()/showColor() was asked for
 	fl::u8  mLastShownScale;      ///< brightness the last show()/showColor() applied, after the power limiter
+	bool mLastPowerLimited;       ///< exact Q16 limit state for the most recent frame
 	static fl::vector<fl::ChannelPtr>& channels(); ///< stored ChannelPtrs to keep them alive
 
 public:

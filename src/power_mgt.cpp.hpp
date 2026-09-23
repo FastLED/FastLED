@@ -717,6 +717,10 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
     plan.modeled_mW = framePowerAtFluxMilliwatts(snapshot, low);
     return plan;
 }
+
+fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
+    return gMCU_mW;
+}
 #endif  // FL_COLOR_PIPELINE_SHARED
 
 // sets brightness to

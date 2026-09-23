@@ -135,6 +135,29 @@ FL_TEST_CASE("[#4499] mixed RGB and managed wide frame stays within shared power
     FastLED.show();
     FL_REQUIRE_EQ(capture->frames.size(), fl::size(3));
     FL_REQUIRE_LT(int(FastLED.getLastShowBrightness()), 255);
+    const FramePowerPlan reported_plan = calculateFramePowerPlan(255, budget_mW);
+    FL_CHECK_EQ(FastLED.getEstimatedPowerInMilliWatts(true) +
+                    framePowerMCUBaselineMilliwatts(),
+                reported_plan.modeled_mW);
+    FL_CHECK(FastLED.isPowerLimited());
+
+    // At requested brightness 1, the Q16 scalar can change while both
+    // limited and unrestricted legacy-byte projections remain zero.
+    FastLED.setBrightness(1);
+    FastLED.setMaxPowerInMilliWatts(0xFFFFFFFFu);
+    FastLED.show();
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 0);
+    FL_CHECK_FALSE(FastLED.isPowerLimited());
+    const FramePowerPlan low_request = calculateFramePowerPlan(1, 0xFFFFFFFFu);
+    const FramePowerPlan zero_request = calculateFramePowerPlan(0, 0xFFFFFFFFu);
+    const u32 tight_budget = zero_request.modeled_mW;
+    FL_REQUIRE_GT(low_request.modeled_mW, tight_budget);
+    FastLED.setMaxPowerInMilliWatts(tight_budget);
+    FastLED.show();
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 0);
+    FL_CHECK(FastLED.isPowerLimited());
+    FastLED.setBrightness(255);
+    FastLED.setMaxPowerInMilliWatts(budget_mW);
 
     const u8 emitters[] = {3, 4, 5};
     u32 modeled_frame_mW = 125;  // MCU baseline charged by the limiter.
