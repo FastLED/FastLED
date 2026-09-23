@@ -269,6 +269,27 @@ FL_TEST_CASE("ColorFromPaletteHD supports existing RGB palette families") {
         0u);
 }
 
+FL_TEST_CASE("palette mapping span stops at destination length") {
+    CRGBPalette256 palette(CRGB::Black);
+    palette[1] = CRGB::Red;
+    palette[2] = CRGB::Blue;
+    fl::u8 indices[] = {1, 2};
+
+    CRGB short_output[] = {CRGB::Black, CRGB::Green};
+    map_data_into_colors_through_palette(
+        fl::span<fl::u8>(indices, 2), fl::span<CRGB>(short_output, 1),
+        palette, 255, 255, NOBLEND);
+    FL_CHECK_EQ(short_output[0], CRGB::Red);
+    FL_CHECK_EQ(short_output[1], CRGB::Green);
+
+    CRGB full_output[] = {CRGB::Black, CRGB::Black};
+    map_data_into_colors_through_palette(
+        fl::span<fl::u8>(indices, 2), fl::span<CRGB>(full_output, 2),
+        palette, 255, 255, NOBLEND);
+    FL_CHECK_EQ(full_output[0], CRGB::Red);
+    FL_CHECK_EQ(full_output[1], CRGB::Blue);
+}
+
 } // FL_TEST_FILE
 
 FL_TEST_CASE("RGB and HSV progmem palette types are distinct (issue #807)") {
