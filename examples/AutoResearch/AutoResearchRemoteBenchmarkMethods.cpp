@@ -496,11 +496,13 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
     // pulls per pixel on a colour-managed channel -- against the legacy
     // `loadAndScale0/1/2` over the same buffer, so the ratio is the pipeline's
     // cost over what an unmanaged channel pays. Args: { pixels, frames,
-    // dither }. `dither` selects the pipeline's temporal dither (C5).
+    // dither, response_curve }. `dither` selects temporal dither (C5);
+    // `response_curve` selects a synthetic three-sample response (#4497).
     remote.bind("colorPipelinePerf", [](const fl::json& args) -> fl::json {
         int pixels = 256;
         int frames = 20;
         bool dither = false;
+        bool response_curve = false;
         if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
             const fl::json& cfg = args[0];
             if (cfg.contains("pixels") && cfg["pixels"].is_int()) {
@@ -512,23 +514,35 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             if (cfg.contains("dither") && cfg["dither"].is_bool()) {
                 dither = cfg["dither"].as_bool().value();
             }
+            if (cfg.contains("response_curve") && cfg["response_curve"].is_bool()) {
+                response_curve = cfg["response_curve"].as_bool().value();
+            }
         }
         fl::json response = fl::json::object();
         response.set("pixels", static_cast<int64_t>(pixels));
         response.set("frames", static_cast<int64_t>(frames));
         response.set("dither", dither);
-        // Total work bounded too: the loops run synchronously in the RPC
-        // handler and the watchdog is fed only after it returns. 200,000
-        // pixel-frames is about a second at the measured ~5 us/px.
+        response.set("response_curve", response_curve);
+        // Each path is measured in both complementary orders. Bound all eight
+        // intervals so the synchronous RPC returns before the watchdog window.
         if (pixels < 1 || pixels > 4096 || frames < 1 || frames > 10000 ||
-            static_cast<long>(pixels) * frames > 200000L) {
+            static_cast<long>(pixels) * frames > 50000L) {
             response.set("success", false);
             response.set("error", "out_of_range");
             return response;
         }
         fl::StreamingPipelineQ16 pipeline;
+        fl::colorimetric_response::EmitterProfile device = fl::profiles::WS2812B;
+        const fl::u16 linear_response[] = {0, 32768, 65535};
+        const fl::u16 nonlinear_response[] = {0, 16384, 65535};
+        if (response_curve) {
+            device.response_lut_r = linear_response;
+            device.response_lut_g = nonlinear_response;
+            device.response_lut_b = linear_response;
+            device.response_lut_size = 3;
+        }
         if (!fl::buildStreamingPipelineQ16(fl::SourceProfile::linearSrgb(),
-                                           fl::profiles::WS2812B,
+                                           device,
                                            fl::GamutPolicy::ChromaCompress,
                                            &pipeline)) {
             response.set("success", false);
@@ -547,47 +561,81 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         // checksum match between boards means the same byte sequence.
         uint32_t managed_hash = 2166136261u;
         uint32_t legacy_hash = 2166136261u;
+        uint32_t managed_second_hash = 2166136261u;
+        uint32_t legacy_second_hash = 2166136261u;
+        uint32_t baab_managed_hash = 2166136261u;
+        uint32_t baab_legacy_hash = 2166136261u;
 
-        const uint32_t managed_start = fl::micros();
-        for (int f = 0; f < frames; ++f) {
-            PixelController<RGB> controller(buffer.data(), pixels, adjustment, mode);
-            fl::ColorManagedPixelSource source(controller, GRB, pipeline);
-            while (source.has(1)) {
-                uint8_t b0, b1, b2;
-                source.loadAndScaleRGB(&b0, &b1, &b2);
-                managed_hash = (managed_hash ^ b0) * 16777619u;
-                managed_hash = (managed_hash ^ b1) * 16777619u;
-                managed_hash = (managed_hash ^ b2) * 16777619u;
-                source.advanceData();
+        auto measure_managed = [&](uint32_t& hash) -> uint32_t {
+            const uint32_t start = fl::micros();
+            for (int f = 0; f < frames; ++f) {
+                PixelController<RGB> controller(buffer.data(), pixels, adjustment, mode);
+                fl::ColorManagedPixelSource source(controller, GRB, pipeline);
+                while (source.has(1)) {
+                    uint8_t b0, b1, b2;
+                    source.loadAndScaleRGB(&b0, &b1, &b2);
+                    hash = (hash ^ b0) * 16777619u;
+                    hash = (hash ^ b1) * 16777619u;
+                    hash = (hash ^ b2) * 16777619u;
+                    source.advanceData();
+                }
             }
-        }
-        const uint32_t managed_us = fl::micros() - managed_start;
+            return fl::micros() - start;
+        };
 
-        const uint32_t legacy_start = fl::micros();
-        for (int f = 0; f < frames; ++f) {
-            PixelController<GRB> controller(buffer.data(), pixels, adjustment, mode);
-            while (controller.has(1)) {
-                legacy_hash = (legacy_hash ^ controller.loadAndScale0()) * 16777619u;
-                legacy_hash = (legacy_hash ^ controller.loadAndScale1()) * 16777619u;
-                legacy_hash = (legacy_hash ^ controller.loadAndScale2()) * 16777619u;
-                controller.stepDithering();
-                controller.advanceData();
+        auto measure_legacy = [&](uint32_t& hash) -> uint32_t {
+            const uint32_t start = fl::micros();
+            for (int f = 0; f < frames; ++f) {
+                PixelController<GRB> controller(buffer.data(), pixels, adjustment, mode);
+                while (controller.has(1)) {
+                    hash = (hash ^ controller.loadAndScale0()) * 16777619u;
+                    hash = (hash ^ controller.loadAndScale1()) * 16777619u;
+                    hash = (hash ^ controller.loadAndScale2()) * 16777619u;
+                    controller.stepDithering();
+                    controller.advanceData();
+                }
             }
-        }
-        const uint32_t legacy_us = fl::micros() - legacy_start;
+            return fl::micros() - start;
+        };
 
-        const double n = static_cast<double>(pixels) * static_cast<double>(frames);
+        // ABBA and BAAB place each implementation in every position across
+        // the pair, reducing both linear drift and order-specific warm-up bias.
+        const uint32_t abba_m1_us = measure_managed(managed_hash);
+        const uint32_t abba_l2_us = measure_legacy(legacy_hash);
+        const uint32_t abba_l3_us = measure_legacy(legacy_second_hash);
+        const uint32_t abba_m4_us = measure_managed(managed_second_hash);
+        const uint32_t baab_l1_us = measure_legacy(baab_legacy_hash);
+        const uint32_t baab_m2_us = measure_managed(baab_managed_hash);
+        const uint32_t baab_m3_us = measure_managed(baab_managed_hash);
+        const uint32_t baab_l4_us = measure_legacy(baab_legacy_hash);
+        const uint32_t managed_us = abba_m1_us + abba_m4_us + baab_m2_us + baab_m3_us;
+        const uint32_t legacy_us = abba_l2_us + abba_l3_us + baab_l1_us + baab_l4_us;
+
+        const double n = 4.0 * static_cast<double>(pixels) *
+                         static_cast<double>(frames);
         const double managed_per = static_cast<double>(managed_us) / n;
         const double legacy_per = static_cast<double>(legacy_us) / n;
         response.set("success", true);
         response.set("managed_us", static_cast<int64_t>(managed_us));
         response.set("legacy_us", static_cast<int64_t>(legacy_us));
+        response.set("abba_m1_us", static_cast<int64_t>(abba_m1_us));
+        response.set("abba_l2_us", static_cast<int64_t>(abba_l2_us));
+        response.set("abba_l3_us", static_cast<int64_t>(abba_l3_us));
+        response.set("abba_m4_us", static_cast<int64_t>(abba_m4_us));
+        response.set("baab_l1_us", static_cast<int64_t>(baab_l1_us));
+        response.set("baab_m2_us", static_cast<int64_t>(baab_m2_us));
+        response.set("baab_m3_us", static_cast<int64_t>(baab_m3_us));
+        response.set("baab_l4_us", static_cast<int64_t>(baab_l4_us));
         response.set("managed_us_per_pixel", managed_per);
         response.set("legacy_us_per_pixel", legacy_per);
         response.set("managed_pixels_per_second",
                      managed_per > 0.0 ? 1.0e6 / managed_per : 0.0);
         response.set("managed_fnv1a", static_cast<int64_t>(managed_hash));
         response.set("legacy_fnv1a", static_cast<int64_t>(legacy_hash));
+        response.set("managed_second_fnv1a", static_cast<int64_t>(managed_second_hash));
+        response.set("legacy_second_fnv1a", static_cast<int64_t>(legacy_second_hash));
+        response.set("baab_managed_fnv1a", static_cast<int64_t>(baab_managed_hash));
+        response.set("baab_legacy_fnv1a", static_cast<int64_t>(baab_legacy_hash));
         return response;
     });
 #endif

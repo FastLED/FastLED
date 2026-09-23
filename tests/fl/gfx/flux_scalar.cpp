@@ -194,10 +194,9 @@ FL_TEST_CASE("The shipped order scales linear drives, which is the safe one") {
     // quantity being scaled is emitter light and the counterexample above
     // cannot arise.
     //
-    // A per-channel response would change that, and `EmitterProfile` already
-    // carries `response_lut_r/g/b`. Those are validated on bind and applied
-    // by nothing; `tests/fl/channels/color_profile.cpp` pins that. When they
-    // are applied, the case above says where.
+    // A per-channel response is inverted only after this scalar. The
+    // unequal-curve integration case in `tests/fl/gfx/pipeline.cpp` verifies
+    // that emitted light remains proportional at several brightnesses.
     //
     // Linearity, checked directly: scaling by a half twice is scaling by a
     // quarter once, which is only true of a linear quantity.

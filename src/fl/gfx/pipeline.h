@@ -16,10 +16,10 @@
 //      is folded into that matrix at bind time, so it costs nothing here.
 //   3. The gamut mapper maps the target onto the device hull and solves for
 //      drives -- clamping belongs to it, not to the stages before.
-//   4. `applyFluxScalar` scales the drives. C4's single insertion point:
+//   4. `applyFluxScalar` scales linear emitter light. C4's single insertion point:
 //      brightness and the power limiter compose into one scalar before they
-//      get here, and scaling all drives together preserves chromaticity by
-//      construction. Nothing downstream rescales channels independently.
+//      get here. Inverse physical response then produces drive coordinates;
+//      native encoding performs the final quantization.
 //
 // Streaming, per C2: the per-pixel call carries no state and allocates
 // nothing, so it runs inside `PixelController` iteration without an RGB16
@@ -32,8 +32,19 @@
 #include "fl/gfx/source_xyz.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/vector.h"
 
 namespace fl {
+
+/// Owned code-to-light samples for the three physical emitters. Pipeline
+/// copies share this immutable table, including frame-local and power-pass
+/// copies, so a caller may rebind or destroy the input profile safely.
+struct ResponseLutsQ16 {
+    vector<u16> red;
+    vector<u16> green;
+    vector<u16> blue;
+};
 
 /// Everything the per-pixel path needs, derived once when a profile binds.
 ///
@@ -75,6 +86,10 @@ struct StreamingPipelineQ16 {
     /// there is no sensible "unset" amplitude, and unity is what a pipeline
     /// that has never been told a brightness should do.
     FluxScalar flux = FluxScalar::unity();
+
+    /// Absent means linear code-to-light response. With a table, the inverse
+    /// is applied after `flux` and before the final wire quantization.
+    shared_ptr<const ResponseLutsQ16> response;
 };
 
 /// Bind a source declaration and a device profile into a pipeline.
@@ -94,7 +109,7 @@ bool buildStreamingPipelineQ16(const SourceProfile& source,
 /// Set the composed brightness-and-power scalar for the frames that follow.
 void setPipelineFluxQ16(StreamingPipelineQ16* pipeline, FluxScalar flux) FL_NO_EXCEPT;
 
-/// One pixel: an RGB8 code triple to three emitter drives in s16.16.
+/// One pixel: an RGB8 code triple to three physical emitter drives in s16.16.
 ///
 /// Drives always come back inside [0, 1]. No allocation, no state carried
 /// between calls, no RGB8 intermediate.

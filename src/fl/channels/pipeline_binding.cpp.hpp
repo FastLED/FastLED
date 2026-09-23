@@ -34,16 +34,12 @@ namespace {
 PixelIterator* makeColorPipelineIterator(
     void* source_storage, void* iterator_storage,
     PixelController<RGB, 1, 0xFFFFFFFF>& controller, EOrder order,
-    const StreamingPipelineQ16& pipeline, const Rgbw& rgbw,
-    Rgbww rgbww, u8 dither_phase) FL_NO_EXCEPT {
+    ColorPipelineFrameRef pipeline, const Rgbw& rgbw,
+    Rgbww rgbww, u8 dither_phase, u8 brightness) FL_NO_EXCEPT {
     ColorManagedPixelSource* source = new (source_storage)
         ColorManagedPixelSource(controller, order, pipeline, dither_phase);
+    source->setFlux(brightness);
     return new (iterator_storage) PixelIterator(source, rgbw, rgbww);
-}
-
-void setColorPipelineFlux(StreamingPipelineQ16* pipeline,
-                          u8 brightness) FL_NO_EXCEPT {
-    setPipelineFluxQ16(pipeline, FluxScalar::fromBrightness(brightness));
 }
 
 void destroyColorPipelineIterator(void* source_storage,
@@ -176,7 +172,6 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.build = &buildPipelineForBinding;
     hooks.makeIterator = &makeColorPipelineIterator;
     hooks.destroyIterator = &destroyColorPipelineIterator;
-    hooks.setFlux = &setColorPipelineFlux;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
     hooks.encodeManagedSpi = &encodeColorPipelineManagedSpi;
 #if FL_COLOR_PIPELINE_SHARED

@@ -23,7 +23,7 @@ fi
 cd "$(dirname "$0")"
 
 # Skip .venv setup if running inside Docker (system packages are pre-installed)
-if [ -z "$FASTLED_DOCKER" ]; then
+if [ -z "${FASTLED_DOCKER:-}" ]; then
     # if .venv not found
     if [ ! -d .venv ]; then
         # create virtual environment

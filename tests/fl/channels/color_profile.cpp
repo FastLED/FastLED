@@ -139,17 +139,14 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
                 static_cast<const fl::u16*>(response));
 }
 
-FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
+FL_TEST_CASE("A response LUT is validated, owned, and applied after flux scaling") {
     // FastLED#4156 R2 turns on P2 permitting a per-channel nonlinear
     // code-to-light response: a shared brightness scalar preserves
     // chromaticity only while what it scales is linear light, so a
     // compensation stage and the flux stage cannot be in either order.
     //
-    // The defect is not live, because the compensation does not exist.
-    // `response_lut_r/g/b` are checked for non-null and monotonicity on bind
-    // and copied into owned storage -- and outside `options.h` nothing in
-    // `src/` reads them. `processPixelQ16` goes decode, source matrix, gamut
-    // map, device solve, flux, with no response stage anywhere.
+    // The response is code-to-light; brightness must scale light first and
+    // then invert the response to get the physical drive code.
     //
     // When one is added, the ordering constraint is written down as
     // arithmetic in `tests/fl/gfx/flux_scalar.cpp`: "A shared scalar is only
@@ -179,8 +176,8 @@ FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
     ChannelOptions rejecting;
     FL_CHECK_FALSE(rejecting.setColorProfile(bad, SourceProfile::linearSrgb()));
 
-    // The inert half: a profile carrying a response curve builds the same
-    // streaming pipeline as one without, because no stage consults it.
+    // A nonlinear response must change the physical drive at fractional
+    // brightness; a pipeline that merely stores the curve fails this check.
     EmitterProfile plain = kFixtureProfile;
     ChannelOptions plain_options;
     FL_REQUIRE(plain_options.setColorProfile(plain, SourceProfile::linearSrgb()));
@@ -197,10 +194,7 @@ FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
     setPipelineFluxQ16(&with_curve, FluxScalar::fromBrightness(64));
     setPipelineFluxQ16(&without_curve, FluxScalar::fromBrightness(64));
 
-    // Same drives for the same source pixel, curve or no curve. When the
-    // curve starts being applied this stops holding, and that is the signal
-    // to go and read the ordering case.
-    int compared = 0;
+    int changed = 0;
     const fl::u8 kSamples[][3] = {{200, 40, 10}, {10, 180, 90}, {128, 128, 128}};
     for (const auto& pixel : kSamples) {
         i32 with_drives[3];
@@ -209,11 +203,10 @@ FL_TEST_CASE("A response LUT is validated, owned, and applied by nothing") {
         processPixelQ16(without_curve, pixel[0], pixel[1], pixel[2],
                         without_drives);
         for (int i = 0; i < 3; ++i) {
-            FL_CHECK_EQ(with_drives[i], without_drives[i]);
-            ++compared;
+            if (with_drives[i] != without_drives[i]) ++changed;
         }
     }
-    FL_CHECK_EQ(compared, 9);
+    FL_CHECK_GT(changed, 0);
 }
 
 FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {

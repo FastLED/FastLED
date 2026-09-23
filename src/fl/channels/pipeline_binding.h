@@ -74,20 +74,12 @@ struct ColorPipelineHooks {
                                    void* iterator_storage,
                                    PixelController<RGB, 1, 0xFFFFFFFF>& controller,
                                    EOrder order,
-                                   const StreamingPipelineQ16& pipeline,
+                                   ColorPipelineFrameRef pipeline,
                                    const Rgbw& rgbw, Rgbww rgbww,
-                                   u8 dither_phase);
+                                   u8 dither_phase, u8 brightness);
 
     /// Destroys what `makeIterator` built. Null until installed.
     void (*destroyIterator)(void* source_storage, void* iterator_storage);
-
-    /// Sets the frame's amplitude on a pipeline. Null until installed.
-    ///
-    /// Here rather than called directly for the same reason as the rest:
-    /// `setPipelineFluxQ16` and `FluxScalar::fromBrightness` are pipeline
-    /// functions, and naming either from `Channel` keeps their translation
-    /// units -- and what they pull in -- alive in every build.
-    void (*setFlux)(StreamingPipelineQ16*, u8 brightness);
 
     /// Fires `ChannelEvents::onColorProfileWarning(ProfileClearedByLegacy)`.
     /// Null until installed.

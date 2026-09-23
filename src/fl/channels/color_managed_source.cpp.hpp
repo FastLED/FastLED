@@ -21,14 +21,18 @@ constexpr u8 kTemporalDitherThresholds[8] = {16, 144, 80, 208, 48, 176, 112, 240
 
 ColorManagedPixelSource::ColorManagedPixelSource(
     PixelController<RGB>& controller, EOrder order,
-    const StreamingPipelineQ16& pipeline, u8 dither_phase) FL_NO_EXCEPT
+    ColorPipelineFrameRef pipeline, u8 dither_phase) FL_NO_EXCEPT
     : mController(controller), mPipeline(pipeline),
       mSlot0(RGB_BYTE0(order)), mSlot1(RGB_BYTE1(order)),
       mSlot2(RGB_BYTE2(order)), mDitherPhase(dither_phase) {}
 
+void ColorManagedPixelSource::setFlux(u8 brightness) FL_NO_EXCEPT {
+    setPipelineFluxQ16(&mPipeline, FluxScalar::fromBrightness(brightness));
+}
+
 ColorManagedPixelSource::ColorManagedPixelSource(
     PixelController<RGB>& controller, EOrder order,
-    const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT
+    ColorPipelineFrameRef pipeline) FL_NO_EXCEPT
     : ColorManagedPixelSource(controller, order, pipeline,
 #if FL_PLATFORM_HAS_TINY_MEMORY
                               // No shared frame counter on TINY (the colour

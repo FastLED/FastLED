@@ -133,9 +133,9 @@ struct ChannelOptions {
             clearColorProfile();
             return false;
         }
-        if (!monotonic(profile.response_lut_r, profile.response_lut_size) ||
-            !monotonic(profile.response_lut_g, profile.response_lut_size) ||
-            !monotonic(profile.response_lut_b, profile.response_lut_size)) {
+        if (!validResponseLut(profile.response_lut_r, profile.response_lut_size) ||
+            !validResponseLut(profile.response_lut_g, profile.response_lut_size) ||
+            !validResponseLut(profile.response_lut_b, profile.response_lut_size)) {
             clearColorProfile();
             return false;
         }
@@ -287,7 +287,10 @@ private:
         return validChromaticity(primaries.red) && validChromaticity(primaries.green) &&
                validChromaticity(primaries.blue) && validChromaticity(primaries.white);
     }
-    static bool monotonic(const u16* values, u16 size) FL_NO_EXCEPT {
+    static bool validResponseLut(const u16* values, u16 size) FL_NO_EXCEPT {
+        if (size == 0) return true;
+        if (values == nullptr || size < 2 || values[0] != 0 ||
+            values[size - 1] != 65535) return false;
         for (u16 i = 1; i < size; ++i) {
             if (values[i] < values[i - 1]) return false;
         }

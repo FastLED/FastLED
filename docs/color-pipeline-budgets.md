@@ -50,9 +50,20 @@ Measured on the bench, 2026-09-19:
 | ESP32-C6 | RISC-V, 160 MHz | 4.76 µs/px | 0.27 µs/px | 17.8× | 210,000 | 4.99 µs/px |
 | Pico 2 W (RP2350) | Cortex-M33, 150 MHz | 4.71 µs/px | 0.33 µs/px | 14.4× | 212,000 | 4.92 µs/px |
 
+On Pico 2 W, a synthetic three-sample response LUT (linear red/blue,
+nonlinear green) raises the managed path from 4.72 to 6.50 µs/px, or about
+154,000 px/s. Measured on 2026-09-22 with the same 256-pixel, 20-frame RPC
+using `"response_curve":true`; the no-LUT and LUT checksums were 2316354037
+and 599299525 respectively. This measures the three-sample case only, not
+larger measured tables; lookup cost grows with the binary-search depth.
+These timing figures predate the balanced benchmark. The RPC now measures
+complementary ABBA and BAAB intervals, reports each interval and their
+combined per-pixel average; its original checksum fields still describe the
+first pass of each path, so the historical hashes remain comparable.
+
 - **What this means for a sketch.** At 60 fps one core can push about 3,500 colour-managed pixels per frame before the pipeline alone fills the frame, against about 60,000 on the legacy path. C2's streaming model runs the pipeline inside the encode, so this is also the cost a parallel-output driver pays per pixel per lane.
 - **Determinism.** The RPC returns an order-sensitive FNV-1a over every byte each path emits. With dither off, both boards return the same managed checksum (`1509334301`) and the same legacy one (`952363461`). That is strong evidence, not proof, that the fixed-point per-pixel path emits the same bytes on RISC-V and ARM: a 32-bit hash can collide, so treat a match as a regression signal and a mismatch as a definite difference. With dither on, the managed checksums differ between boards, and they should. The phase comes from the shared frame counter, which reflects how many frames each board has shown. The legacy checksums happen to agree there only because, at full scale, its offset rounds to 0 for most phases.
-- **Bounded.** The RPC refuses more than 200,000 pixel-frames (about a second), because it runs synchronously inside the RPC handler and the watchdog is fed only after it returns.
+- **Bounded.** The RPC refuses more than 50,000 pixel-frames per interval. Its eight intervals run at most 400,000 pixel-frames total, because it runs synchronously inside the RPC handler and the watchdog is fed only after it returns.
 
 ## TINY tier: no pipeline, no float, no per-controller state
 
@@ -75,4 +86,8 @@ The one name the pattern matches is `CLEDController::staticEmitterProfile()`. It
 ## What this does not cover
 
 - **Bind time is float-free too (#4458).** Binding a profile no longer reaches the soft-float runtime. The profile's floats are converted through their IEEE-754 bits (`q16FromFloatBits`), and the source matrix, the Bradford adaptation and the device solve are derived in s16.16. `ci/tests/test_q16_inverse_is_float_free.py` proves it on Cortex-M0+ and Cortex-M33 without an FPU. The A1 case is unchanged: 0.3951 dE2000 worst above the floor, luminance 3.8e-4. On an ESP32 the platform links the float runtime anyway, so the saving there is only code the pipeline no longer calls.
-- **Measured profiles.** The budgets above use the `WS2812B` placeholder profile. A measured profile has the same shape, so it costs the same; P10 supplies measured ones.
+- **Measured profiles.** The budgets above use the `WS2812B` placeholder
+  without a response LUT. A measured profile without a LUT has the same
+  per-pixel path. A measured response LUT adds owned table storage and inverse
+  lookup cost; the three-sample example above is one measured cost, not a
+  bound for larger tables. P10 supplies measured profiles.

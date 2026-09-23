@@ -249,4 +249,10 @@
 # CI image is 1,073,049 B smaller than the rejected 1.6 MB build; the remaining
 # 56 B is the deterministic link-layout change from the repaired framework
 # library selection and is not a new FastLED feature cost.
-383214
+# -74 B (383214 -> 383140), #4497: the managed pixel source now owns its
+# frame-local pipeline copy and applies flux during iterator construction.
+# This removes the copy/destructor scaffolding from unbound Channel::showPixels;
+# the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
+# symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
+# so this ratchet uses the CI measurement from PR #4511.
+383140
