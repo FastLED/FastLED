@@ -1,8 +1,10 @@
 # FastLED AI Agent Guidelines
 
 > [!IMPORTANT]
-> Routine PR and `master` board jobs are minimal. Use `ci-full` for complete
-> board validation before platform-sensitive merges; hosted Intel and Apple
+> Routine PR and `master` CI runs the explicit native/Python smoke inventories
+> in `ci/native_ci.py` and skips the board matrix. Use `ci-full` for complete
+> native, Python, example, and board validation before platform-sensitive
+> merges; hosted Intel and Apple
 > Silicon macOS run only with `ci-full` or release validation. Before choosing
 > a narrower board or test label, run `bash ci-labels list --json` and use an emitted
 > name. See [CI modes](docs/CI_MODES.md). A version bump on `master` is not

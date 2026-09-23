@@ -49,4 +49,9 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       # Opt-in board validation compiles the complete set on the requested SHA.
+      # 9c0def ci-full ran `esp32s3 all` successfully for 43m31, then the
+      # template's 45m job timeout cancelled cleanup at 23:40:13 UTC.
+      # Give this one full sweep room to upload logs/status; retain the 45m
+      # default for other boards and diagnose regressions above 60m.
+      timeout-minutes: 60
       args: esp32s3 all

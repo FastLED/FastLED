@@ -1,9 +1,21 @@
-# CI modes (board selection pilot)
+# CI modes (fractional CI pilot)
 
 This is the first slice of [FastLED #4543](https://github.com/FastLED/FastLED/issues/4543).
 Ordinary PR and `master` events skip the reusable fbuild board and size jobs,
 plus QEMU, WASM, AVR8JS, and ESP32-S3 bloat checks.
+They run a named Linux/Windows native unit smoke inventory from
+`ci/native_ci.py`, the small Python color/CI guard smoke inventory on Linux,
+and Linux `CompileTests` examples. The Windows example suite and full native
+unit/Python breadth move to `ci-full`; nothing is deleted. Run
+`bash ci-native cpp` or `bash ci-native py` to inspect the exact smoke list.
+The three C++ smoke targets share one Meson build and its `fastled.so`, while
+the standalone Linux example lane still builds separately; further sharing
+requires measured benefit and memory safety.
 An internal PR labeled `ci-full` runs all 109 jobs in 90 selected workflows.
+It also re-runs complete native Linux/Windows/hosted Intel+Apple Silicon
+macOS unit suites, the full Linux Python suite, and Linux/Windows/macOS
+example suites on the same PR head SHA. `labeled`/`unlabeled` retrigger these
+native wrappers without requiring another commit.
 `workflow_dispatch` still runs an individual board workflow when explicitly
 requested. Selected board/test and native unit/example workflows use the PR
 head commit for checkout, and labeled
@@ -30,8 +42,14 @@ matched source change used 128.89 runner-minutes across 20 PR workflows
 Both figures sum Actions job `completed_at - started_at` for all runs with
 the event and SHA. The existing Linux unit and example jobs alone used
 24.95 PR runner-minutes, above the 12.889-minute strict 10% PR threshold.
-The next slice must share the native build and run unit and example suites
-in parallel, then measure complete ordinary PR and `master` events again.
+The selected native smoke subset is a measured candidate, not acceptance.
+The exact-SHA ordinary PR and `master` events must each use <10% of their
+matched full-event runner-minutes before the pilot can merge. The full event
+must prove every selected cell and every hosted Mac variant on that same SHA.
+`tests/meson.build` currently names three serial tests, but only
+`channel_driver_uart` is live; the custom streaming runner does not consume
+Meson's `is_parallel` metadata. Keep smoke execution serial until selective
+parallelism has RED→GREEN exclusion tests and peak-RSS/OOM evidence.
 
 The existing `release.yml` still tags automatically on a `master` version
 change, before exact-commit full CI can pass. `ci/release.py` documents that

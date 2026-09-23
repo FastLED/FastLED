@@ -12,6 +12,11 @@ on:
         type: string
         default: debug
         description: 'Native sanitizer preset (debug or Linux-only debug-thin)'
+      full-suite:
+        required: false
+        type: boolean
+        default: true
+        description: 'Run every native/Python test; false uses ci/native_ci.py smoke inventory'
 
 permissions:
   contents: read        # Required to checkout code
@@ -99,7 +104,9 @@ jobs:
         shell: bash
 
       - name: Python tests (ci/tests)
-        # ~1,500 tests that no pull-request workflow ran. The C++ runs here
+        # Complete ~1,500-test suite for ci-full/release. A deterministic
+        # color/CI guard smoke subset runs on ordinary Linux PR/master.
+        # Historically no pull-request workflow ran these tests. The C++ runs here
         # and in `build_linux.yml` both exclude them by definition -- `--unit`
         # is "C++ unit tests only" and `--cpp` "suppresses Python tests" --
         # and the one job that did run `bash test --py`, `mp3_cpu_audit.yml`,
@@ -107,9 +114,7 @@ jobs:
         # under `ci/`.
         #
         # That left the guards the colour pipeline is measured against gating
-        # nothing on the way in: the decode LUTs against the float64
-        # reference, Bradford against ICC, the per-pixel stage lists, the
-        # golden corpus itself. A failure reached master in #4340 and stayed
+        # nothing on the way in. A failure reached master in #4340 and stayed
         # there until the suite happened to be run locally. FastLED#4359.
         #
         # Linux only: these are pure Python and platform-independent, and the
@@ -125,18 +130,41 @@ jobs:
         # disables fingerprinting outright is forbidden by project policy.
         # With `--py` it forces the run without touching the native build the
         # next step consumes -- checked, object count unchanged.
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && inputs.full-suite
         run: |
           uv run test.py --py --clean
         shell: bash
 
+      - name: Python smoke tests
+        if: runner.os == 'Linux' && !inputs.full-suite
+        run: |
+          mapfile -t smoke_py < <(bash ci-native py)
+          test "${#smoke_py[@]}" -gt 0
+          uv run pytest -q --tb=short "${smoke_py[@]}"
+        shell: bash
+
       - name: Run All Unit Tests
         id: run_tests
+        if: inputs.full-suite
         env:
           FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
         run: |
           set -o pipefail
           ./test --clang --no-parallel --unit --verbose --build-mode "$FASTLED_BUILD_MODE" --log-failures failures 2>&1 | tee test.log
+        shell: bash
+
+      - name: Run Native Unit Smoke
+        id: run_smoke
+        if: '!inputs.full-suite'
+        env:
+          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
+        run: |
+          set -o pipefail
+          mapfile -t smoke_cpp < <(bash ci-native cpp)
+          test "${#smoke_cpp[@]}" -gt 0
+          for target in "${smoke_cpp[@]}"; do
+            ./test --clang --no-parallel --unit "$target" --verbose --build-mode "$FASTLED_BUILD_MODE" --log-failures failures 2>&1 | tee -a test.log
+          done
         shell: bash
 
       - name: Linux native build bytes
