@@ -428,7 +428,7 @@ size_t PixelStream::readBytes(u8 *dst, size_t len) {
         (!probeStreamingMagic() || mStreamingProbePending)) {
         return 0;
     }
-    u16 bytesRead = 0;
+    size_t bytesRead = 0;
     while (bytesRead < len && mStreamingPrefixPos < mStreamingPrefixSize) {
         dst[bytesRead++] = mStreamingPrefix[mStreamingPrefixPos++];
     }

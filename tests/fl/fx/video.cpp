@@ -618,6 +618,24 @@ FL_TEST_CASE("PixelStream defers fragmented stream classification without losing
     }
 }
 
+FL_TEST_CASE("PixelStream readBytes handles requests beyond u16 range") {
+    constexpr size_t requested = 65536;
+    for (size_t extra = 0; extra <= 1; ++extra) {
+        FakeFilebufPtr file = fl::make_shared<FakeFilebuf>();
+        file->data.resize(requested + extra, 0x42);
+        fl::PixelStream stream(3);
+        FL_REQUIRE(stream.begin(file));
+
+        fl::vector<uint8_t> destination(requested + 1, 0);
+        destination[requested] = 0x7e;
+        FL_CHECK_EQ(stream.readBytes(destination.data(), requested), requested);
+        FL_CHECK_EQ(file->tell(), requested);
+        FL_CHECK_EQ(destination[0], 0x42);
+        FL_CHECK_EQ(destination[requested - 1], 0x42);
+        FL_CHECK_EQ(destination[requested], 0x7e);
+    }
+}
+
 FL_TEST_CASE("video with memory stream") {
     // fl::Video video(LEDS_PER_FRAME, FPS);
     fl::Video video(LEDS_PER_FRAME, FPS, 1);
