@@ -54,6 +54,15 @@ void destroyColorPipelineIterator(void* source_storage,
 }
 
 #if FL_COLOR_PIPELINE_SHARED
+StreamingPipelineQ16* copyColorPipelineFrame(
+    void* storage, const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT {
+    return new (storage) StreamingPipelineQ16(pipeline);
+}
+
+void destroyColorPipelineFrame(StreamingPipelineQ16* pipeline) FL_NO_EXCEPT {
+    pipeline->~StreamingPipelineQ16();
+}
+
 u32 colorPipelineUnscaledPowerMilliwatts(
     const StreamingPipelineQ16& pipeline, span<const CRGB> leds,
     const Rgbw& rgbw, ColorPipelineHooks::PowerEstimator estimate) FL_NO_EXCEPT {
@@ -180,6 +189,8 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;
     hooks.encodeManagedSpi = &encodeColorPipelineManagedSpi;
 #if FL_COLOR_PIPELINE_SHARED
+    hooks.copyFrame = &copyColorPipelineFrame;
+    hooks.destroyFrame = &destroyColorPipelineFrame;
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
 #endif
 }

@@ -718,13 +718,25 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // `mPipeline` without touching what this frame encodes through. Small
     // tiers encode synchronously and keep single ownership, mutated in place.
 #if FL_COLOR_PIPELINE_SHARED
-    StreamingPipelineQ16 frame_pipeline;
+    FL_ALIGNAS(alignof(StreamingPipelineQ16))
+    unsigned char frame_pipeline_storage[sizeof(StreamingPipelineQ16)];
+    struct FramePipelineCleanup {
+        StreamingPipelineQ16* pipeline;
+        void (*destroy)(StreamingPipelineQ16*);
+        ~FramePipelineCleanup() FL_DTOR_NOEXCEPT {
+            if (pipeline != nullptr) {
+                destroy(pipeline);
+            }
+        }
+    } frame_cleanup = {nullptr, nullptr};
     StreamingPipelineQ16* pipeline_mut = nullptr;
     {
         const ColorPipelineStorage pipeline_ref = mPipeline;
         if (pipeline_ref) {
-            frame_pipeline = *pipeline_ref;
-            pipeline_mut = &frame_pipeline;
+            pipeline_mut = colorPipelineHooks().copyFrame(
+                frame_pipeline_storage, *pipeline_ref);
+            frame_cleanup.pipeline = pipeline_mut;
+            frame_cleanup.destroy = colorPipelineHooks().destroyFrame;
         }
     }
 #else

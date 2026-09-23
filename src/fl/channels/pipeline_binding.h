@@ -64,6 +64,15 @@ struct ColorPipelineHooks {
     /// Derives a pipeline from a binding. Null until installed.
     bool (*build)(const ColorProfileBinding&, StreamingPipelineQ16*);
 
+#if FL_COLOR_PIPELINE_SHARED
+    /// Copy/destroy a frame-local pipeline only after a profile is bound.
+    /// Keeping its shared ownership operations behind the installer prevents
+    /// an unbound sketch from linking response-LUT cleanup code.
+    StreamingPipelineQ16* (*copyFrame)(void* storage,
+                                       const StreamingPipelineQ16& pipeline);
+    void (*destroyFrame)(StreamingPipelineQ16* pipeline);
+#endif
+
     /// Constructs a colour-managed `PixelIterator` in caller-provided
     /// storage. Null until installed.
     ///
