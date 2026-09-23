@@ -11,7 +11,10 @@ def test_tiny_layout_query_bypasses_host_dll_smart_selection() -> None:
     assert parsed.unit
 
 
-def test_debug_thin_shorthand_matches_named_build_mode() -> None:
+def test_debug_thin_shorthand_matches_named_build_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(test_args.sys, "platform", "linux")
     shorthand = parse_args(["--unit", "--debug-thin"])
     named = parse_args(["--unit", "--build-mode", "debug-thin"])
     assert shorthand.build_mode == named.build_mode == "debug-thin"
@@ -19,9 +22,21 @@ def test_debug_thin_shorthand_matches_named_build_mode() -> None:
 
 
 @pytest.mark.parametrize("other", [["--debug"], ["--build-mode", "quick"]])
-def test_debug_thin_rejects_conflicting_modes(other: list[str]) -> None:
+def test_debug_thin_rejects_conflicting_modes(
+    monkeypatch: pytest.MonkeyPatch, other: list[str]
+) -> None:
+    monkeypatch.setattr(test_args.sys, "platform", "linux")
     with pytest.raises(SystemExit):
         parse_args(["--debug-thin", *other])
+
+
+def test_named_debug_thin_rejects_full_debug(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(test_args.sys, "platform", "linux")
+    with pytest.raises(SystemExit):
+        parse_args(["--debug", "--build-mode", "debug-thin"])
+    assert "cannot be combined with --debug" in capsys.readouterr().err
 
 
 def test_debug_thin_is_explained_in_help(capsys: pytest.CaptureFixture[str]) -> None:
@@ -43,6 +58,7 @@ def test_debug_thin_rejects_other_hosts(
         parse_args(argv)
 
 
-def test_debug_thin_rejects_emulator_runs() -> None:
+def test_debug_thin_rejects_emulator_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(test_args.sys, "platform", "linux")
     with pytest.raises(SystemExit):
         parse_args(["--debug-thin", "--run", "uno"])

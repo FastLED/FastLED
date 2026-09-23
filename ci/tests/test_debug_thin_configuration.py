@@ -28,7 +28,7 @@ def test_debug_thin_has_a_distinct_meson_mode_and_linux_guard() -> None:
 
     assert "'debug-thin'" in options
     assert (
-        "build_mode == 'debug-thin' and (is_wasm_build or host_machine.system() != 'linux')"
+        "build_mode == 'debug-thin' and (meson.is_cross_build() or host_machine.system() != 'linux')"
         in project
     )
 

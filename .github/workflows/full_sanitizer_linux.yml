@@ -2,10 +2,9 @@ name: full sanitizer linux
 
 on:
   workflow_dispatch:
-  # GitHub cron uses UTC. Check local hour below to run at 03:00 Pacific
-  # through both daylight-saving and standard time.
   schedule:
-    - cron: '0 10,11 * * *'
+    - cron: '0 3 * * *'
+      timezone: America/Los_Angeles
 
 permissions:
   contents: read
@@ -24,10 +23,6 @@ jobs:
         run: |
           if [[ '${{ github.event_name }}' == workflow_dispatch ]]; then
             echo 'run_full=true' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [[ "$(TZ=America/Los_Angeles date +%H)" != 03 ]]; then
-            echo 'run_full=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if [[ -n "$(git log -1 --since='24 hours ago' --format=%H)" ]]; then

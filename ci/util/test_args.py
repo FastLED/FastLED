@@ -188,6 +188,8 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         if parsed_args.debug or parsed_args.build_mode is not None:
             parser.error("--debug-thin cannot be combined with --debug or --build-mode")
         parsed_args.build_mode = "debug-thin"
+    if parsed_args.build_mode == "debug-thin" and parsed_args.debug:
+        parser.error("--build-mode debug-thin cannot be combined with --debug")
     if parsed_args.build_mode == "debug-thin" and not sys.platform.startswith("linux"):
         parser.error("debug-thin is supported only on native Linux")
     if parsed_args.build_mode == "debug-thin" and parsed_args.run:
