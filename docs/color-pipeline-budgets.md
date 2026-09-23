@@ -56,10 +56,14 @@ nonlinear green) raises the managed path from 4.72 to 6.50 µs/px, or about
 using `"response_curve":true`; the no-LUT and LUT checksums were 2316354037
 and 599299525 respectively. This measures the three-sample case only, not
 larger measured tables; lookup cost grows with the binary-search depth.
+These timing figures predate the two-order benchmark. The RPC now measures
+managed→legacy and legacy→managed intervals separately and reports their
+combined per-pixel average; its original checksum fields still describe the
+first pass of each path, so the historical hashes remain comparable.
 
 - **What this means for a sketch.** At 60 fps one core can push about 3,500 colour-managed pixels per frame before the pipeline alone fills the frame, against about 60,000 on the legacy path. C2's streaming model runs the pipeline inside the encode, so this is also the cost a parallel-output driver pays per pixel per lane.
 - **Determinism.** The RPC returns an order-sensitive FNV-1a over every byte each path emits. With dither off, both boards return the same managed checksum (`1509334301`) and the same legacy one (`952363461`). That is strong evidence, not proof, that the fixed-point per-pixel path emits the same bytes on RISC-V and ARM: a 32-bit hash can collide, so treat a match as a regression signal and a mismatch as a definite difference. With dither on, the managed checksums differ between boards, and they should. The phase comes from the shared frame counter, which reflects how many frames each board has shown. The legacy checksums happen to agree there only because, at full scale, its offset rounds to 0 for most phases.
-- **Bounded.** The RPC refuses more than 200,000 pixel-frames (about a second), because it runs synchronously inside the RPC handler and the watchdog is fed only after it returns.
+- **Bounded.** The RPC refuses more than 100,000 pixel-frames per interval. Its four intervals run at most 400,000 pixel-frames total, because it runs synchronously inside the RPC handler and the watchdog is fed only after it returns.
 
 ## TINY tier: no pipeline, no float, no per-controller state
 
