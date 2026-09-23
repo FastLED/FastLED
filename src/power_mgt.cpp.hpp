@@ -654,7 +654,8 @@ bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
 }
 
 fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
-                                   fl::u32 flux_q16) FL_NO_EXCEPT {
+                                   fl::u32 flux_q16,
+                                   fl::u8 legacy_brightness) FL_NO_EXCEPT {
     fl::u64 total = gMCU_mW;
     const fl::FluxScalar flux = fl::FluxScalar::fromRawQ16(
         static_cast<fl::i32>(flux_q16));
@@ -668,10 +669,9 @@ fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
         total += static_cast<fl::u64>(gPowerModel().dark_mW) *
                  entry.histogram.pixels + ((numerator + 255u) >> 8);
     }
-    const fl::u8 brightness = static_cast<fl::u8>(
-        (static_cast<fl::u64>(flux_q16) * 255u) >> 16);
     for (fl::size i = 0; i < snapshot.legacy.size(); ++i) {
-        total += legacyFramePowerMilliwatts(*snapshot.legacy[i], brightness);
+        total += legacyFramePowerMilliwatts(*snapshot.legacy[i],
+                                           legacy_brightness);
     }
     return total > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(total);
 }
@@ -695,7 +695,7 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
     }
     const fl::u32 request_flux = fl::FluxScalar::fromBrightness(
         requested_brightness).rawQ16();
-    const fl::u32 zero_demand = framePowerAtFluxMilliwatts(snapshot, 0);
+    const fl::u32 zero_demand = framePowerAtFluxMilliwatts(snapshot, 0, 0);
     if (zero_demand > budget_mW) {
         plan.flux_q16 = 0;
         plan.legacy_brightness = 0;
@@ -706,9 +706,15 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
     }
     fl::u32 low = 0;
     fl::u32 high = request_flux;
+    const auto legacy_at_flux = [request_flux, requested_brightness](
+        fl::u32 candidate) -> fl::u8 {
+        return candidate == request_flux ? requested_brightness
+            : static_cast<fl::u8>((static_cast<fl::u64>(candidate) * 255u) >> 16);
+    };
     while (low < high) {
         const fl::u32 candidate = low + (high - low + 1) / 2;
-        if (framePowerAtFluxMilliwatts(snapshot, candidate) <= budget_mW) {
+        if (framePowerAtFluxMilliwatts(snapshot, candidate,
+                                      legacy_at_flux(candidate)) <= budget_mW) {
             low = candidate;
         } else {
             high = candidate - 1;
@@ -716,9 +722,12 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
     }
     plan.flux_q16 = low;
     plan.limited = low < request_flux;
-    plan.legacy_brightness = static_cast<fl::u8>(
-        (static_cast<fl::u64>(low) * 255u) >> 16);
-    plan.modeled_mW = framePowerAtFluxMilliwatts(snapshot, low);
+    // Preserve the caller's exact byte when no limiting was needed. Q16's
+    // representation of b/255 is rounded, so projecting it back with a floor
+    // can otherwise turn even an unlimited b=1 into zero.
+    plan.legacy_brightness = legacy_at_flux(low);
+    plan.modeled_mW = framePowerAtFluxMilliwatts(
+        snapshot, low, plan.legacy_brightness);
     return plan;
 }
 

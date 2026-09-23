@@ -116,7 +116,6 @@ CFastLED::CFastLED() {
 	mNPowerData = 0xFFFFFFFF;
 	mLastRequestedScale = 255;
 	mLastShownScale = 255;
-	mLastPowerLimited = false;
 	mNMinMicros = 0;
 }
 
@@ -240,7 +239,6 @@ void CFastLED::clear(ClearFlags flags) {
 		FastLED.mNPowerData = 0xFFFFFFFF;   // No power limit (max value)
 		FastLED.mLastRequestedScale = 255;
 		FastLED.mLastShownScale = 255;
-		FastLED.mLastPowerLimited = false;
 	}
 
 	// Reset BRIGHTNESS - reset global brightness to 255 (full brightness)
@@ -356,7 +354,7 @@ fl::u8 CFastLED::getLastShowBrightness() const {
 }
 
 bool CFastLED::isPowerLimited() const {
-	return mLastPowerLimited;
+	return mLastShownScale < mLastRequestedScale;
 }
 
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
@@ -366,7 +364,6 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	lastshow = fl::micros();
 
 	mLastRequestedScale = scale;
-	mLastPowerLimited = false;
 	// If we have a function for computing power, use it!
 	// On a managed frame, the power scalar remains Q16 through response
 	// inversion. Legacy byte encoders receive that same scalar rounded down.
@@ -383,7 +380,6 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		if (managed) {
 			const fl::FramePowerPlan plan =
 				mPFramePowerDispatch->calculate(scale, mNPowerData);
-			mLastPowerLimited = plan.limited;
 			scale = plan.legacy_brightness;
 			mPFramePowerDispatch->setFrameFlux(true, plan.flux_q16);
 			planned_frame_flux = true;
@@ -395,13 +391,6 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
 	mLastShownScale = scale;
-#if FL_COLOR_PIPELINE_SHARED
-	if (!planned_frame_flux) {
-		mLastPowerLimited = scale < mLastRequestedScale;
-	}
-#else
-	mLastPowerLimited = scale < mLastRequestedScale;
-#endif
 
 
 	int length = 0;
@@ -483,7 +472,6 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
 	mLastShownScale = scale;
-	mLastPowerLimited = scale < mLastRequestedScale;
 
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();

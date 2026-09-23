@@ -141,12 +141,12 @@ FL_TEST_CASE("[#4499] mixed RGB and managed wide frame stays within shared power
                 reported_plan.modeled_mW);
     FL_CHECK(FastLED.isPowerLimited());
 
-    // At requested brightness 1, the Q16 scalar can change while both
-    // limited and unrestricted legacy-byte projections remain zero.
+    // An unlimited Q16 plan must preserve the legacy channel's requested
+    // byte exactly, even at brightness 1. A true limit rounds it down.
     FastLED.setBrightness(1);
     FastLED.setMaxPowerInMilliWatts(0xFFFFFFFFu);
     FastLED.show();
-    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 0);
+    FL_CHECK_EQ(FastLED.getLastShowBrightness(), 1);
     FL_CHECK_FALSE(FastLED.isPowerLimited());
     const FramePowerPlan low_request = calculateFramePowerPlan(1, 0xFFFFFFFFu);
     const FramePowerPlan zero_request = calculateFramePowerPlan(0, 0xFFFFFFFFu);
@@ -156,8 +156,36 @@ FL_TEST_CASE("[#4499] mixed RGB and managed wide frame stays within shared power
     FastLED.show();
     FL_CHECK_EQ(FastLED.getLastShowBrightness(), 0);
     FL_CHECK(FastLED.isPowerLimited());
+
+    // The requested Q16 endpoint must charge the exact legacy byte it
+    // emits. Brightness 100 projects back to 99 if it is floored twice.
+    FastLED.setBrightness(100);
+    FastLED.setMaxPowerInMilliWatts(0xFFFFFFFFu);
+    capture->frames.clear();
+    FastLED.show();
+    FL_REQUIRE_EQ(capture->frames.size(), fl::size(3));
+    const auto& lit_legacy_bytes = capture->frames[0]->getData();
+    const u32 lit_legacy_mW = calculate_unscaled_emitter_power_mW(
+        fl::span<const u8>(lit_legacy_bytes), 3);
+    const FramePowerPlan lit_plan = calculateFramePowerPlan(100, 0xFFFFFFFFu);
+    FL_CHECK_EQ(lit_plan.legacy_brightness, 100);
+    for (int i = 0; i < kCount; ++i) legacy_leds[i] = CRGB::Black;
+    capture->frames.clear();
+    FastLED.show();
+    FL_REQUIRE_EQ(capture->frames.size(), fl::size(3));
+    const auto& dark_legacy_bytes = capture->frames[0]->getData();
+    const u32 dark_legacy_mW = calculate_unscaled_emitter_power_mW(
+        fl::span<const u8>(dark_legacy_bytes), 3);
+    const FramePowerPlan dark_plan = calculateFramePowerPlan(100, 0xFFFFFFFFu);
+    FL_REQUIRE_GE(lit_plan.modeled_mW, dark_plan.modeled_mW);
+    FL_CHECK_GE(lit_plan.modeled_mW - dark_plan.modeled_mW,
+                lit_legacy_mW - dark_legacy_mW);
+    for (int i = 0; i < kCount; ++i) legacy_leds[i] = CRGB(100, 100, 100);
     FastLED.setBrightness(255);
     FastLED.setMaxPowerInMilliWatts(budget_mW);
+    capture->frames.clear();
+    FastLED.show();
+    FL_REQUIRE_EQ(capture->frames.size(), fl::size(3));
 
     const u8 emitters[] = {3, 4, 5};
     u32 modeled_frame_mW = 125;  // MCU baseline charged by the limiter.
