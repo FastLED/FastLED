@@ -59,62 +59,12 @@
 #include "fl/log/log.h"
 #include "fl/stl/mutex.h"
 #include "platforms/wasm/js.h"
+#include "platforms/wasm/fs_wasm_file_handle.h"
 
 
 namespace fl {
 
 FASTLED_SHARED_PTR(FsImplWasm);
-FASTLED_SHARED_PTR(WasmFileHandle);
-
-// Map is great because it doesn't invalidate it's data members unless erase is
-// called.
-FASTLED_SHARED_PTR(FileData);
-
-class FileData {
-  public:
-    FileData(size_t capacity) : mCapacity(capacity) { mData.reserve(capacity); }
-    FileData(const fl::vector<u8> &data, size_t len)
-        : mData(data), mCapacity(len) {}
-    FileData() = default;
-
-    void append(const u8 *data, size_t len) {
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        mData.insert(mData.end(), data, data + len);
-        mCapacity = fl::max(mCapacity, mData.size());
-    }
-
-    size_t read(size_t pos, u8 *dst, size_t len) {
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        if (pos >= mData.size()) {
-            return 0;
-        }
-        size_t bytesAvailable = mData.size() - pos;
-        size_t bytesToActuallyRead = fl::min(len, bytesAvailable);
-        fl::memcpy(dst, mData.data() + pos, bytesToActuallyRead);
-        return bytesToActuallyRead;
-    }
-
-    bool ready(size_t pos) {
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        return mData.size() == mCapacity || pos < mData.size();
-    }
-
-    size_t bytesRead() const {
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        return mData.size();
-    }
-
-    size_t capacity() const {
-        fl::unique_lock<fl::mutex> lock(mMutex);
-        return mCapacity;
-    }
-
-  private:
-    fl::vector<u8> mData;
-    size_t mCapacity = 0;
-    mutable fl::mutex mMutex;
-};
-
 typedef fl::flat_map<fl::string, FileDataPtr, fl::StringFastLess> FileMap;  // okay fl namespace
 
 struct FileRegistry {
@@ -126,95 +76,6 @@ struct FileRegistry {
     }
 private:
     FileRegistry() = default;
-};
-
-class WasmFileHandle : public fl::filebuf {
-  private:
-    FileDataPtr mData;
-    size_t mPos;
-    string mPath;
-
-  public:
-    WasmFileHandle(const string &path, const FileDataPtr data)
-        : mData(data), mPos(0), mPath(path) {}
-
-    virtual ~WasmFileHandle() override {}
-
-    bool is_open() const override { return true; } // always open if we have data
-
-    bool available() const override {
-        if (mPos >= mData->capacity()) {
-            return false;
-        }
-        if (!mData->ready(mPos)) {
-            FL_WARN_F("File is not ready yet. This is a major error because "
-                         "FastLED-wasm does not support async yet, the file "
-                         "will fail to read.");
-            return false;
-        }
-        return true;
-    }
-
-    fl::size_t bytes_left() const override {
-        if (!available()) {
-            return 0;
-        }
-        return mData->capacity() - mPos;
-    }
-
-    size_t size() const override { return mData->capacity(); }
-
-    size_t read(char *dst, size_t bytesToRead) override {
-        if (mPos >= mData->capacity()) {
-            return 0;
-        }
-        if (mPos + bytesToRead > mData->capacity()) {
-            bytesToRead = mData->capacity() - mPos;
-        }
-        if (!mData->ready(mPos)) {
-            FL_WARN_F("File is not ready yet. This is a major error because "
-                         "FastLED-wasm does not support async yet, the file "
-                         "will fail to read.");
-            return 0;
-        }
-        size_t bytesRead = mData->read(mPos, reinterpret_cast<u8*>(dst), bytesToRead); // ok reinterpret cast
-        mPos += bytesRead;
-        return bytesRead;
-    }
-    using filebuf::read; // Pull in u8 overload
-
-    size_t write(const char *data, size_t count) override {
-        (void)data; (void)count;
-        return 0; // Read-only
-    }
-
-    size_t tell() override { return mPos; }
-    const char *path() const override { return mPath.c_str(); }
-
-    bool seek(size_t pos, fl::seek_dir dir) override {
-        size_t target = pos;
-        if (dir == fl::seek_dir::cur) {
-            target = mPos + pos;
-        } else if (dir == fl::seek_dir::end) {
-            target = mData->capacity() + pos;
-        }
-        if (target > mData->capacity()) {
-            return false;
-        }
-        mPos = target;
-        return true;
-    }
-    using filebuf::seek; // Pull in single-arg overload
-
-    void close() override {
-        // No need to do anything for in-memory files
-    }
-
-    bool is_eof() const override { return mPos >= mData->capacity(); }
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char *error_message() const override { return "No error"; }
 };
 
 class FsImplWasm : public fl::FsImpl {
