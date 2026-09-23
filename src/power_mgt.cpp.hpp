@@ -156,6 +156,7 @@ static fl::u8 unmap_power_value(fl::u8 scaled_brightness) {
 
 /// What one output code can cost at the steepest point of the response, in
 /// the 0-255 scaled units `calculate_unscaled_power_mW` multiplies by.
+#if !FL_PLATFORM_HAS_TINY_MEMORY
 static fl::u8 max_power_step() {
 #if SKETCH_HAS_LARGE_MEMORY
     return gPowerScaling().max_step;
@@ -163,6 +164,7 @@ static fl::u8 max_power_step() {
     return 1;
 #endif
 }
+#endif
 
 fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) {
     return fl::scale32by8(total_mW, map_power_value(brightness));

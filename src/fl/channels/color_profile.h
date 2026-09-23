@@ -48,6 +48,8 @@ struct ColorProfileBinding {
     fl::shared_ptr<const ColorProfileStorage> mStorage;
     SourceProfile mSource = SourceProfile::linearSrgb();
     GamutPolicy mGamut = GamutPolicy::ChromaCompress;
+    Chromaticity mTargetWhite;
+    bool mHasTargetWhite = false;
     bool mRequested = false;
     bool mUseGlobalSourceDefault = false;
     const EmitterProfile* mStaticProfile = nullptr;

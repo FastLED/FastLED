@@ -61,7 +61,8 @@ i32 inverseResponseQ16(i32 light, const vector<u16>& values) FL_NO_EXCEPT {
 bool buildStreamingPipelineQ16(const SourceProfile& source,
                                const colorimetric_response::EmitterProfile& device,
                                GamutPolicy policy,
-                               StreamingPipelineQ16* out) FL_NO_EXCEPT {
+                               StreamingPipelineQ16* out,
+                               const Chromaticity* target_white) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
@@ -99,8 +100,43 @@ bool buildStreamingPipelineQ16(const SourceProfile& source,
         foldAdaptationIntoSourceMatrix(adaptation, &out->source);
     }
 
-    if (!buildGamutMapQ16(device, &out->gamut)) {
-        return false;
+    if (target_white == nullptr) {
+        if (!buildGamutMapQ16(device, &out->gamut)) return false;
+    } else {
+        // The source and OKLab objective remain in D65 coordinates. Map the
+        // physical gamut into that space by composing the inverse emitter
+        // solve with Bradford D65 -> selected rendering white. The neutral
+        // cap must be computed from the composed solve, not the raw profile.
+        AdaptationMatrixQ16 to_target;
+        if (!buildBradfordMatrixQ16(kPipelineD65, *target_white, &to_target))
+            return false;
+        EmitterSolveMatrixQ16 physical_solve;
+        if (!buildRgbSolveMatrixQ16(device, &physical_solve)) return false;
+        EmitterSolveMatrixQ16 effective_solve;
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 3; ++col) {
+                i64 sum = 0;
+                constexpr i64 kMax = 9223372036854775807LL;
+                for (int k = 0; k < 3; ++k) {
+                    // Each i32 product fits i64, but their sum need not.
+                    const i64 term = static_cast<i64>(physical_solve.m[row][k]) *
+                                     to_target.m[k][col];
+                    if ((term > 0 && sum > kMax - term) ||
+                        (term < 0 && sum < -kMax - term)) return false;
+                    sum += term;
+                }
+                // Keep rounding/negation away from the i64 boundary too.
+                if (sum > 2147483647LL * 65536 + 32768 ||
+                    sum < -2147483648LL * 65536 - 32768) return false;
+                const i64 value = sum >= 0 ? (sum + 32768) >> 16
+                                           : -((-sum + 32768) >> 16);
+                if (value < -2147483647LL - 1 || value > 2147483647LL)
+                    return false;
+                effective_solve.m[row][col] = static_cast<i32>(value);
+            }
+        }
+        if (!buildGamutMapFromSolveQ16(effective_solve, &out->gamut))
+            return false;
     }
     out->response.reset();
     if (device.response_lut_size != 0) {

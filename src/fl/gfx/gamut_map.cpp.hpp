@@ -294,6 +294,13 @@ bool buildGamutMapQ16(const colorimetric_response::EmitterProfile& profile, Gamu
     if (!buildRgbSolveMatrixQ16(profile, &out->solve)) {
         return false;
     }
+    return buildGamutMapFromSolveQ16(out->solve, out);
+}
+
+bool buildGamutMapFromSolveQ16(const EmitterSolveMatrixQ16& solve,
+                              GamutMapQ16* out) FL_NO_EXCEPT {
+    if (out == nullptr) return false;
+    out->solve = solve;
 
     // The drives this device needs to reproduce D65 at unit luminance. The
     // largest of them is what saturates first as the neutral is scaled up,
