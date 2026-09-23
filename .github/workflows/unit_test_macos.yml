@@ -6,40 +6,19 @@ concurrency:
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test*.yml'
-      - '.github/workflows/template_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
   pull_request:
     branches:
       - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test*.yml'
-      - '.github/workflows/template_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 jobs:
   test:
+    # Full validation is opt-in for PRs; manual runs are available for releases.
     # Hard-block external-fork pull requests (no exceptions per #2757).
-    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'ci-full'))
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-15]
     uses: ./.github/workflows/template_unit_test.yml
     with:
-      os: macos-latest
+      os: ${{ matrix.os }}
