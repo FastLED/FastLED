@@ -7,9 +7,10 @@ import pytest
 import yaml
 
 from ci.ci_labels import ROOT, board_jobs, catalog, expand, rendered, select
+from ci.ci_labels import test_jobs as registered_test_jobs
 
 
-JOBS = board_jobs()
+JOBS = board_jobs() | registered_test_jobs()
 LABELS = catalog(JOBS)
 
 
@@ -57,6 +58,22 @@ def test_prefix_exact_companion_and_union() -> None:
         "pull_request", pr_event(["ci-platform:esp*", "ci-platform:teensy41"]), LABELS
     )
     assert set(union.cells) == esp | teen
+
+
+def test_test_family_selector_is_separate_from_board_selector() -> None:
+    qemu = set(expand("ci-test:qemu*", LABELS))
+    assert "qemu_esp32c3_test.yml/esp32c3_qemu_test" in qemu
+    assert "qemu_esp32s3_test.yml/esp32s3_qemu_lcd" in qemu
+    assert qemu <= set(expand("ci-platform:esp*", LABELS))
+    assert "bloat_regression_esp32s3.yml/bloat_regression" in expand(
+        "ci-platform:esp32s3", LABELS
+    )
+    assert "avr8js_uno_test.yml/uno_avr8js_test" in expand("ci-platform:uno", LABELS)
+    assert "build_wasm.yml/build" in expand("ci-platform:wasm", LABELS)
+    selected = select(
+        "pull_request", pr_event(["ci-test:qemu*", "ci-platform:teensy41"]), LABELS
+    )
+    assert set(selected.cells) == qemu | set(expand("ci-platform:teensy41", LABELS))
 
 
 def test_invalid_labels_fail_and_forks_are_blocked() -> None:

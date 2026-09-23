@@ -1,16 +1,18 @@
 # CI modes (board selection pilot)
 
 This is the first slice of [FastLED #4543](https://github.com/FastLED/FastLED/issues/4543).
-Ordinary PR and `master` events skip the reusable fbuild board and size jobs.
-An internal PR labeled `ci-full` runs all 101 jobs in 83 board workflows.
+Ordinary PR and `master` events skip the reusable fbuild board and size jobs,
+plus QEMU, WASM, AVR8JS, and ESP32-S3 bloat checks.
+An internal PR labeled `ci-full` runs all 109 jobs in 90 selected workflows.
 `workflow_dispatch` still runs an individual board workflow when explicitly
 requested. Board workflows use the PR head commit for checkout, and labeled
 and unlabeled events recompute the selection without a new commit.
 
-Run `bash ci-labels list --json` to see every exact `ci-platform:<board>` and
-approved prefix label. `bash ci-labels expand 'ci-platform:esp*'` shows its
-concrete jobs; `bash ci-labels expand 'ci-platform:teensy41'` includes the
-Teensy 4.1 size gate. Multiple labels are additive. Unknown `ci-platform:` or
+Run `bash ci-labels list --json` to see every exact `ci-platform:<board>`,
+approved prefix label, and `ci-test:` family. `bash ci-labels expand 'ci-platform:esp*'` shows its
+concrete build, size, QEMU, and bloat jobs; `bash ci-labels expand 'ci-platform:teensy41'` includes the
+Teensy 4.1 size gate. `ci-test:qemu*`, `ci-test:wasm`, `ci-test:avr8js`, and
+`ci-test:bloat` request independent longer-running suites. Multiple labels are additive. Unknown `ci-platform:` or
 `ci-test:` names fail the CI board selection check. To update generated gates
 after changing a board wrapper, run `bash ci-labels sync` and commit the
 result. `bash ci-labels check` detects drift. Maintainers can run

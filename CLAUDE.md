@@ -4,7 +4,7 @@
 > Routine PR and `master` board jobs are minimal. Use `ci-full` for complete
 > board validation before platform-sensitive merges; hosted Intel and Apple
 > Silicon macOS run only with `ci-full` or release validation. Before choosing
-> a narrower board label, run `bash ci-labels list --json` and use an emitted
+> a narrower board or test label, run `bash ci-labels list --json` and use an emitted
 > name. See [CI modes](docs/CI_MODES.md). A version bump on `master` is not
 > evidence that full CI passed; follow the release issue's exact-SHA gate.
 
