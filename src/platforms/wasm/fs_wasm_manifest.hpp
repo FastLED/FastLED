@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FL_PLATFORMS_WASM_FS_WASM_MANIFEST_HPP
+#define FL_PLATFORMS_WASM_FS_WASM_MANIFEST_HPP
 
 // IWYU pragma: private
 
@@ -39,3 +40,5 @@ void declareManifestFiles(const char *jsonStr, DeclareFile declareFile) {
 
 } // namespace wasm
 } // namespace fl
+
+#endif // FL_PLATFORMS_WASM_FS_WASM_MANIFEST_HPP

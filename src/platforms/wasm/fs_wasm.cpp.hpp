@@ -264,9 +264,8 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
     fl::wasm::declareManifestFiles(jsonStr, [](const fl::string &path, size_t size) {
-        fl::printf("Declaring file %s with size %zu. These will become available as "
-                   "File system paths within the app.\n",
-                   path.c_str(), size);
+        FL_DBG_F("Declaring file %s with size %zu. These will become available "
+                 "as File system paths within the app.", path.c_str(), size);
         if (!jsDeclareFile(path.c_str(), size)) {
             FL_WARN_F("Failed to declare manifest file: %s", path.c_str());
         }
