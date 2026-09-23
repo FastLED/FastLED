@@ -562,6 +562,11 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         }
 
         fl::vector<CRGB> leds(static_cast<fl::size>(pixels * 3));
+        if (leds.size() != static_cast<fl::size>(pixels * 3)) {
+            response.set("success", false);
+            response.set("error", "allocation_failed");
+            return response;
+        }
         for (int i = 0; i < pixels * 3; ++i)
             leds[static_cast<fl::size>(i)] = CRGB(170 + i * 7, 220 + i * 3, 190 + i * 11);
         fl::ChannelOptions legacy_options;
@@ -608,6 +613,9 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             FastLED.setBrightness(prior_brightness);
             fl::ChannelManager::instance().removeDriver(capture);
         });
+        // This is a dedicated fixture: leave the harness at its default
+        // unlimited power setting after each run, even if a caller configured
+        // a limiter before invoking this benchmark.
         FastLED.add(legacy);
         FastLED.add(rgbw);
         FastLED.add(rgbww);

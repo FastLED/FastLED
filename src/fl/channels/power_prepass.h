@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/channels/options.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 
@@ -32,10 +33,12 @@ struct FramePowerPlan {
 /// Solve a frame's maximum shared scalar without advancing dither state.
 /// The caller must keep source data and profile bindings stable until encode
 /// completes. A below-idle budget returns zero flux and `infeasible=true`.
+#if FL_COLOR_PIPELINE_SHARED
 FramePowerPlan calculateFramePowerPlan(u8 requested_brightness,
                                       u32 budget_mW) FL_NO_EXCEPT;
 
 /// The fixed MCU term included in FramePowerPlan::modeled_mW.
 u32 framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT;
+#endif
 
 }  // namespace fl
