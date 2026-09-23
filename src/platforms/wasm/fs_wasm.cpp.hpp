@@ -58,8 +58,9 @@
 #include "fl/stl/stdio.h"
 #include "fl/log/log.h"
 #include "fl/stl/mutex.h"
-#include "platforms/wasm/js.h"
 #include "platforms/wasm/fs_wasm_file_handle.h"
+#include "platforms/wasm/fs_wasm_manifest.hpp"
+#include "platforms/wasm/js.h"
 
 
 namespace fl {
@@ -262,37 +263,14 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 }
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
-    fl::json doc = fl::json::parse(fl::string(jsonStr));
-    if (!doc.is_object() || !doc.contains("files")) {
-        return;
-    }
-    
-    auto files = doc["files"];
-    if (!files.is_array()) {
-        return;
-    }
-    
-    size_t fileCount = files.size();
-    for (size_t i = 0; i < fileCount; i++) {
-        auto file = files[i];
-        if (!file.is_object()) {
-            continue;
-        }
-        
-        if (!file.contains("size") || !file.contains("path")) {
-            continue;
-        }
-        
-        int size = file["size"] | 0;
-        fl::string path = file["path"] | fl::string("");
-        
-        if (size > 0 && !path.empty()) {
-            fl::printf("Declaring file %s with size %d. These will become available as "
+    fl::wasm::declareManifestFiles(jsonStr, [](const fl::string &path, size_t size) {
+        fl::printf("Declaring file %s with size %zu. These will become available as "
                    "File system paths within the app.\n",
                    path.c_str(), size);
-            jsDeclareFile(path.c_str(), size);
+        if (!jsDeclareFile(path.c_str(), size)) {
+            FL_WARN_F("Failed to declare manifest file: %s", path.c_str());
         }
-    }
+    });
 }
 
 } // extern "C"
