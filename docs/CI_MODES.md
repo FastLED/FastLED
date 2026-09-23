@@ -5,7 +5,8 @@ Ordinary PR and `master` events skip the reusable fbuild board and size jobs,
 plus QEMU, WASM, AVR8JS, and ESP32-S3 bloat checks.
 An internal PR labeled `ci-full` runs all 109 jobs in 90 selected workflows.
 `workflow_dispatch` still runs an individual board workflow when explicitly
-requested. Board workflows use the PR head commit for checkout, and labeled
+requested. Selected board/test and native unit/example workflows use the PR
+head commit for checkout, and labeled
 and unlabeled events recompute the selection without a new commit.
 
 Run `bash ci-labels list --json` to see every exact `ci-platform:<board>`,
@@ -35,6 +36,8 @@ in parallel, then measure complete ordinary PR and `master` events again.
 The existing `release.yml` still tags automatically on a `master` version
 change, before exact-commit full CI can pass. `ci/release.py` documents that
 the package registry crawler can publish a default-branch version without a tag.
+An explicit release worker with a candidate SHA input and a pre-tag coverage
+gate is still required; this selector PR does not provide it.
 Until the release control issue resolves that ordering, do not treat a
 version bump, an individual board dispatch, or a green minimal run as
 release approval. Release candidates need all platforms and boards, both

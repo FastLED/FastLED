@@ -97,7 +97,14 @@ def test_generated_guards_and_exact_sha_checkout_do_not_drift() -> None:
         assert {"labeled", "unlabeled", "synchronize"} <= set(
             data["on"]["pull_request"]["types"]
         )
-    for name in ("build_template.yml", "build_template_binary_size.yml"):
+    for name in (
+        "build_template.yml",
+        "build_template_binary_size.yml",
+        "template_unit_test.yml",
+        "template_example_test.yml",
+        "qemu_template.yml",
+        "avr8js_docker_template.yml",
+    ):
         text = (ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
         assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in text
 
