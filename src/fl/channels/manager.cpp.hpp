@@ -530,17 +530,9 @@ IChannelDriver::DriverState ChannelManager::poll() {
         for (const auto& entry : mDrivers) drivers.push_back(entry.driver);
     }
     const fl::size driverCount = sink ? drivers.size() : mDrivers.size();
-#else
-    const fl::size driverCount = mDrivers.size();
-#endif
     for (fl::size i = 0; i < driverCount; ++i) {
-#if FL_PRESENTATION_TIMING
         fl::shared_ptr<IChannelDriver> driver = sink ? drivers[i] : mDrivers[i].driver;
-#else
-        fl::shared_ptr<IChannelDriver> driver = mDrivers[i].driver;
-#endif
         IChannelDriver::DriverState result = driver->poll();
-#if FL_PRESENTATION_TIMING
         if (sink &&
             driver->presentationTimingCapability() ==
             PresentationTimingCapability::MeasuredVisibility) {
@@ -553,6 +545,9 @@ IChannelDriver::DriverState ChannelManager::poll() {
                 sink->onPresentationEvent(presentation);
             }
         }
+#else
+    for (auto& entry : mDrivers) {
+        IChannelDriver::DriverState result = entry.driver->poll();
 #endif
         if (result.state == IChannelDriver::DriverState::BUSY) {
             anyBusy = true;
