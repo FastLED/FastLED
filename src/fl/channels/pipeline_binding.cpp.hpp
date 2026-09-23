@@ -53,28 +53,34 @@ void destroyColorPipelineIterator(void* source_storage,
 #if FL_COLOR_PIPELINE_SHARED
 u32 colorPipelineUnscaledPowerMilliwatts(
     const StreamingPipelineQ16& pipeline, span<const CRGB> leds,
-    const Rgbw& rgbw, ColorPipelineHooks::PowerEstimator estimate) FL_NO_EXCEPT {
+    u8 emitter_count, ColorPipelineHooks::PowerEstimator estimate) FL_NO_EXCEPT {
     // Demand at full brightness: a copy of the pipeline at unity flux, so the
     // frame's brightness and the limiter's own previous scalar are not folded
     // into the number the limiter is about to scale.
     StreamingPipelineQ16 unity = pipeline;
     setPipelineFluxQ16(&unity, FluxScalar::unity());
 
-    // The power model is 8-bit, so each solved drive is rounded to its 8-bit
-    // equivalent here and charged through the same estimator every other
-    // controller uses -- same per-emitter mW, same response exponent, same
-    // idle draw, same RGBW conversion. This buffer exists only for the
-    // estimate; nothing here reaches the output path.
+    // Charge the actual solved physical emitter codes. Passing the RGB
+    // subset through the legacy RGBW estimator would extract white a second
+    // time, and RGBWW cannot be represented by its three-channel fold.
     // Summing per chunk truncates each chunk's per-emitter total separately:
     // under 3 mW low per 32 pixels, well inside the model's own precision.
     enum { kChunk = 32 };
-    CRGB chunk[kChunk];
+    u8 chunk[kChunk * 5];
     u32 total = 0;
     fl::size filled = 0;
     for (fl::size i = 0; i < leds.size(); ++i) {
-        i32 drives[3];
-        processPixelQ16(unity, leds[i].r, leds[i].g, leds[i].b, drives);
-        for (int c = 0; c < 3; ++c) {
+        i32 drives[5] = {};
+        if (pipeline.wide) {
+            processPixelWideQ16(unity, leds[i].r, leds[i].g, leds[i].b,
+                                drives);
+        } else {
+            i32 rgb_drives[3];
+            processPixelQ16(unity, leds[i].r, leds[i].g, leds[i].b,
+                            rgb_drives);
+            for (int c = 0; c < 3; ++c) drives[c] = rgb_drives[c];
+        }
+        for (int c = 0; c < emitter_count; ++c) {
             i32 d = drives[c];
             if (d < 0) {
                 d = 0;
@@ -82,15 +88,18 @@ u32 colorPipelineUnscaledPowerMilliwatts(
             if (d > 65536) {
                 d = 65536;
             }
-            chunk[filled].raw[c] = static_cast<u8>((d * 255 + 32768) >> 16);
+            chunk[filled * emitter_count + c] =
+                static_cast<u8>((d * 255 + 32768) >> 16);
         }
         if (++filled == kChunk) {
-            total += estimate(span<const CRGB>(chunk, filled), rgbw);
+            total += estimate(span<const u8>(chunk, filled * emitter_count),
+                              emitter_count);
             filled = 0;
         }
     }
     if (filled != 0) {
-        total += estimate(span<const CRGB>(chunk, filled), rgbw);
+        total += estimate(span<const u8>(chunk, filled * emitter_count),
+                          emitter_count);
     }
     return total;
 }

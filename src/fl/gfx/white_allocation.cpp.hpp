@@ -86,17 +86,15 @@ i32 scaleWhiteQ16(i32 value, i32 factor) FL_NO_EXCEPT {
 
 }  // namespace
 
-bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
-                             const i32 (&white_xyz)[3],
-                             WhiteAllocationPolicy policy,
-                             WhiteAllocationQ16* out) FL_NO_EXCEPT {
+bool buildWhiteAllocationFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white_xyz)[3],
+    WhiteAllocationPolicy policy, WhiteAllocationQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
     out->policy = policy;
-    if (!buildRgbSolveMatrixQ16(profile, &out->rgb_solve)) {
-        return false;
-    }
+    out->rgb_solve = solve;
     solveRgbDrivesQ16(out->rgb_solve, white_xyz, out->per_white);
 
     // Per-channel slack, so the allowance costs the same colour everywhere.
@@ -162,6 +160,15 @@ bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profil
         }
     }
     return expressible;
+}
+
+bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
+                             const i32 (&white_xyz)[3],
+                             WhiteAllocationPolicy policy,
+                             WhiteAllocationQ16* out) FL_NO_EXCEPT {
+    EmitterSolveMatrixQ16 solve;
+    return buildRgbSolveMatrixQ16(profile, &solve) &&
+           buildWhiteAllocationFromSolveQ16(profile, solve, white_xyz, policy, out);
 }
 
 bool allocateEmitterDrivesQ16(const WhiteAllocationQ16& allocation,
@@ -343,18 +350,15 @@ bool narrowTotalForPair(const SplitBound& lower, const SplitBound& upper, i64* l
 
 }  // namespace
 
-bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
-                                const i32 (&white1_xyz)[3],
-                                const i32 (&white2_xyz)[3],
-                                WhiteAllocationPolicy policy,
-                                TwoWhiteAllocationQ16* out) FL_NO_EXCEPT {
+bool buildTwoWhiteAllocationFromSolveQ16(
+    const EmitterSolveMatrixQ16& solve, const i32 (&white1_xyz)[3],
+    const i32 (&white2_xyz)[3], WhiteAllocationPolicy policy,
+    TwoWhiteAllocationQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
     out->policy = policy;
-    if (!buildRgbSolveMatrixQ16(profile, &out->rgb_solve)) {
-        return false;
-    }
+    out->rgb_solve = solve;
     i32 per_white1[3];
     solveRgbDrivesQ16(out->rgb_solve, white1_xyz, per_white1);
     solveRgbDrivesQ16(out->rgb_solve, white2_xyz, out->per_white2);
@@ -371,6 +375,17 @@ bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& pro
         out->difference[i] = per_white1[i] - out->per_white2[i];
     }
     return true;
+}
+
+bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profile,
+                                const i32 (&white1_xyz)[3],
+                                const i32 (&white2_xyz)[3],
+                                WhiteAllocationPolicy policy,
+                                TwoWhiteAllocationQ16* out) FL_NO_EXCEPT {
+    EmitterSolveMatrixQ16 solve;
+    return buildRgbSolveMatrixQ16(profile, &solve) &&
+           buildTwoWhiteAllocationFromSolveQ16(solve, white1_xyz, white2_xyz,
+                                               policy, out);
 }
 
 bool allocateTwoWhiteDrivesQ16(const TwoWhiteAllocationQ16& allocation,

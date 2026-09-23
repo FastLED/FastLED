@@ -16,6 +16,8 @@ struct ColorProfileStorage {
     fl::vector<u16> mResponseRed;
     fl::vector<u16> mResponseGreen;
     fl::vector<u16> mResponseBlue;
+    fl::vector<u16> mResponseWhite1;
+    fl::vector<u16> mResponseWhite2;
     fl::string mId;
     fl::string mProvenanceKind;
     fl::string mReportId;
@@ -31,6 +33,16 @@ struct ColorProfileStorage {
             mProfile.response_lut_r = mResponseRed.data();
             mProfile.response_lut_g = mResponseGreen.data();
             mProfile.response_lut_b = mResponseBlue.data();
+            if (source.response_lut_white1 != nullptr) {
+                mResponseWhite1.assign(source.response_lut_white1,
+                                       source.response_lut_white1 + source.response_lut_size);
+                mProfile.response_lut_white1 = mResponseWhite1.data();
+            }
+            if (source.response_lut_white2 != nullptr) {
+                mResponseWhite2.assign(source.response_lut_white2,
+                                       source.response_lut_white2 + source.response_lut_size);
+                mProfile.response_lut_white2 = mResponseWhite2.data();
+            }
         }
         mProfile.id = mId.empty() ? nullptr : mId.c_str();
         mProfile.provenance_kind = mProvenanceKind.empty() ? nullptr : mProvenanceKind.c_str();

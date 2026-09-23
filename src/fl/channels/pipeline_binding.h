@@ -106,9 +106,10 @@ struct ColorPipelineHooks {
     /// would link the limiter and its tables into every build that can bind
     /// a profile, power limiting or not (#4472).
 #if FL_COLOR_PIPELINE_SHARED
-    using PowerEstimator = u32 (*)(span<const CRGB> leds, const Rgbw& rgbw);
+    using PowerEstimator = u32 (*)(span<const u8> interleaved_codes,
+                                   u8 emitter_count);
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
-                                   span<const CRGB> leds, const Rgbw& rgbw,
+                                   span<const CRGB> leds, u8 emitter_count,
                                    PowerEstimator estimate);
 #endif
 

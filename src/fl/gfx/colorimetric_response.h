@@ -314,15 +314,11 @@ inline i16 quantize_lut_cell(float v) FL_NO_EXCEPT {
     return static_cast<i16>(scaled);
 }
 
-// ===== RGB-only emitter profile =============================================
-// Reserved for the PR 3 RGB colorimetric path (issue #3255). The struct is
-// declared here so callers and tests can reference it from PR 1 onwards;
-// the matching `solve_rgb_colorimetric(...)` lands in PR 3.
-//
-// Mirrors the RGB subset of the existing RGBW `DiodeProfile` (which carries
-// xy_w / lum_w / nominal_cct on top of these fields). An RGB strip has no
-// W diode, so those fields are intentionally absent — see #3255 → Decision 3
-// for the type-separation rationale.
+// ===== Physical emitter profile =============================================
+enum class EmitterTopology : u8 { RGB = 0, RGBW = 1, RGBWW = 2 };
+
+// The RGB fields retain their original layout; wide topology data is appended
+// so existing RGB profiles and factory calls remain source-compatible.
 struct EmitterProfile {
     float xy_r[2];      // R diode chromaticity (CIE 1931 xy)
     float xy_g[2];      // G diode chromaticity
@@ -355,6 +351,19 @@ struct EmitterProfile {
     float electrical_milliwatts_b;
     float electrical_idle_milliwatts;
 
+    // Appended so existing RGB aggregate initializers retain their meaning.
+    // In RGBW white1 is the sole white; in RGBWW it is warm white and white2
+    // is cool white. Unused white slots stay zero/null.
+    EmitterTopology topology;
+    float xy_white1[2];
+    float xy_white2[2];
+    float lum_white1;
+    float lum_white2;
+    const u16* response_lut_white1;
+    const u16* response_lut_white2;
+    float electrical_milliwatts_white1;
+    float electrical_milliwatts_white2;
+
     static constexpr EmitterProfile rgb(const char* profile_id, Chromaticity red,
                                         Chromaticity green, Chromaticity blue,
                                         float red_y, float green_y, float blue_y,
@@ -362,7 +371,47 @@ struct EmitterProfile {
                                         const char* report = nullptr) FL_NO_EXCEPT {
         return EmitterProfile{{red.x, red.y}, {green.x, green.y}, {blue.x, blue.y}, red_y, green_y, blue_y,
                               {0, 0}, {0, 0}, {0, 0}, {0, 0}, profile_id, nullptr, nullptr, nullptr, 0, 8,
-                              FiveBitSemantics::NotApplicable, provenance, report, 0, 0, 0, 0, 0};
+                              FiveBitSemantics::NotApplicable, provenance, report, 0, 0, 0, 0, 0,
+                              EmitterTopology::RGB, {0, 0}, {0, 0}, 0, 0,
+                              nullptr, nullptr, 0, 0};
+    }
+
+    static constexpr EmitterProfile rgbw(const char* profile_id, Chromaticity red,
+                                         Chromaticity green, Chromaticity blue,
+                                         Chromaticity white, float red_y,
+                                         float green_y, float blue_y,
+                                         float white_y,
+                                         const char* provenance = nullptr,
+                                         const char* report = nullptr) FL_NO_EXCEPT {
+        return EmitterProfile{{red.x, red.y}, {green.x, green.y}, {blue.x, blue.y},
+                              red_y, green_y, blue_y,
+                              {0, 0}, {0, 0}, {0, 0}, {0, 0}, profile_id,
+                              nullptr, nullptr, nullptr, 0, 8,
+                              FiveBitSemantics::NotApplicable, provenance, report,
+                              0, 0, 0, 0, 0,
+                              EmitterTopology::RGBW, {white.x, white.y}, {0, 0},
+                              white_y, 0, nullptr, nullptr, 0, 0};
+    }
+
+    static constexpr EmitterProfile rgbww(const char* profile_id, Chromaticity red,
+                                          Chromaticity green, Chromaticity blue,
+                                          Chromaticity warm_white,
+                                          Chromaticity cool_white, float red_y,
+                                          float green_y, float blue_y,
+                                          float warm_white_y, float cool_white_y,
+                                          const char* provenance = nullptr,
+                                          const char* report = nullptr) FL_NO_EXCEPT {
+        return EmitterProfile{{red.x, red.y}, {green.x, green.y}, {blue.x, blue.y},
+                              red_y, green_y, blue_y,
+                              {0, 0}, {0, 0}, {0, 0}, {0, 0}, profile_id,
+                              nullptr, nullptr, nullptr, 0, 8,
+                              FiveBitSemantics::NotApplicable, provenance, report,
+                              0, 0, 0, 0, 0,
+                              EmitterTopology::RGBWW,
+                              {warm_white.x, warm_white.y},
+                              {cool_white.x, cool_white.y},
+                              warm_white_y, cool_white_y,
+                              nullptr, nullptr, 0, 0};
     }
 };
 

@@ -95,6 +95,14 @@ bool buildWhiteAllocationQ16(const colorimetric_response::EmitterProfile& profil
                              WhiteAllocationPolicy policy,
                              WhiteAllocationQ16* out) FL_NO_EXCEPT;
 
+/// Bind from an RGB solve already adapted to the D65 working domain.
+/// `white_xyz` must be adapted into that same domain. The profile supplies
+/// physical RGB column magnitudes for the per-channel rounding allowance.
+bool buildWhiteAllocationFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white_xyz)[3],
+    WhiteAllocationPolicy policy, WhiteAllocationQ16* out) FL_NO_EXCEPT;
+
 /// One pixel: XYZ in s16.16 to four drives, in the order red, green, blue,
 /// white, at whichever end of the feasible interval the profile's policy
 /// names.
@@ -149,6 +157,12 @@ bool buildTwoWhiteAllocationQ16(const colorimetric_response::EmitterProfile& pro
                                 const i32 (&white2_xyz)[3],
                                 WhiteAllocationPolicy policy,
                                 TwoWhiteAllocationQ16* out) FL_NO_EXCEPT;
+
+/// Bind two adapted white columns with an RGB solve in the same XYZ domain.
+bool buildTwoWhiteAllocationFromSolveQ16(
+    const EmitterSolveMatrixQ16& solve, const i32 (&white1_xyz)[3],
+    const i32 (&white2_xyz)[3], WhiteAllocationPolicy policy,
+    TwoWhiteAllocationQ16* out) FL_NO_EXCEPT;
 
 /// One pixel: XYZ in s16.16 to five drives -- red, green, blue, white1,
 /// white2 -- at whichever end of the feasible total the profile's policy

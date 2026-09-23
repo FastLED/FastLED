@@ -123,6 +123,31 @@ FL_TEST_CASE("set_power_model - RGBWW folds in W/WW power (#2558 Phase F)") {
     FL_CHECK(retrieved.dark_mW == 5);
 }
 
+FL_TEST_CASE("Managed power charges physical RGBW and RGBWW emitter codes") {
+    const PowerModelRGB previous = get_power_model();
+    const fl::u8 previous_white = get_white_emitter_mW();
+
+    set_power_model(PowerModelRGBW(10, 20, 30, 80, 5));
+    const fl::u8 rgbw_codes[] = {0, 0, 0, 128};
+    FL_CHECK_EQ(calculate_unscaled_emitter_power_mW(rgbw_codes, 4),
+                static_cast<fl::u32>(((128u * 80u) >> 8) + 5u));
+
+    set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
+    // The fourth drive is warm white; the fifth is cool white.
+    const fl::u8 rgbww_codes[] = {0, 0, 0, 128, 255};
+    FL_CHECK_EQ(calculate_unscaled_emitter_power_mW(rgbww_codes, 5),
+                static_cast<fl::u32>(((128u * 80u) >> 8) +
+                                     ((255u * 40u) >> 8) + 5u));
+
+    if (previous_white != 0) {
+        set_power_model(PowerModelRGBW(previous.red_mW, previous.green_mW,
+                                      previous.blue_mW, previous_white,
+                                      previous.dark_mW, previous.exponent));
+    } else {
+        set_power_model(previous);
+    }
+}
+
 FL_TEST_CASE("Power calculation - uses custom model") {
     // Set custom model with easy-to-test values
     set_power_model(PowerModelRGB(40, 40, 40, 2));
@@ -517,7 +542,43 @@ class RegisteredController : public CLEDController {
     void init() FL_NO_EXCEPT override {}
 };
 
+#if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
+class ManagedRegisteredController : public RegisteredController {
+  public:
+    ManagedRegisteredController()
+        : pipeline(fl::make_shared<fl::StreamingPipelineQ16>()) {}
+
+    fl::shared_ptr<fl::StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override {
+        return pipeline;
+    }
+
+  private:
+    fl::shared_ptr<fl::StreamingPipelineQ16> pipeline;
+};
+#endif
+
 } // namespace
+
+#if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
+FL_TEST_CASE("Managed wide dither reserves every physical emitter") {
+    ScopedRgbwPowerModel guard(PowerModelRGBW(10, 20, 30, 80, 5));
+    CRGB leds[16];
+    for (auto& led : leds) {
+        led = CRGB(1, 1, 1);
+    }
+    ManagedRegisteredController controller;
+    controller.setLeds(leds, 16);
+    controller.setDither(BINARY_DITHER);
+    controller.setRgbw(fl::RgbwDefault::value());
+    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
+                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u) + 255u) >> 8));
+
+    set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
+    controller.setRgbww(fl::RgbwwDefault::value());
+    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
+                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u + 40u) + 255u) >> 8));
+}
+#endif
 
 FL_TEST_CASE("Power model - an RGBW declaration keeps its white emitter") {
     // `set_power_model(PowerModelRGBW)` used to route through `toRGB()`,
