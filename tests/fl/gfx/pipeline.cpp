@@ -206,6 +206,16 @@ EmitterProfile rgbDevice() {
     return p;
 }
 
+double emittedLight(i32 drive, const u16* response) {
+    const double position = static_cast<double>(drive) * 2.0 / 65536.0;
+    if (position <= 0.0) return 0.0;
+    if (position >= 2.0) return 1.0;
+    const int cell = position >= 1.0 ? 1 : 0;
+    const double fraction = position - cell;
+    return (response[cell] * (1.0 - fraction) +
+            response[cell + 1] * fraction) / 65535.0;
+}
+
 enum class Src { Srgb, DisplayP3, Bt2020 };
 
 SourceProfile sourceFor(Src which) {
@@ -658,6 +668,91 @@ FL_TEST_CASE("Streaming pipeline rejects what its stages reject") {
     // rejecting everything.
     FL_CHECK(buildStreamingPipelineQ16(SourceProfile::bt2020(), rgbDevice(),
                                        GamutPolicy::ChromaCompress, &pipeline));
+}
+
+FL_TEST_CASE("Emitter response is inverted after linear brightness") {
+    u16 linear[3] = {0, 32768, 65535};
+    u16 green_square[3] = {0, 16384, 65535};
+    EmitterProfile curved_device = rgbDevice();
+    curved_device.response_lut_r = linear;
+    curved_device.response_lut_g = green_square;
+    curved_device.response_lut_b = linear;
+    curved_device.response_lut_size = 3;
+
+    StreamingPipelineQ16 plain;
+    StreamingPipelineQ16 curved;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &plain));
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), curved_device,
+                                         GamutPolicy::ChromaCompress, &curved));
+    const u8 brightnesses[] = {0, 8, 128, 255};
+    for (u8 brightness : brightnesses) {
+        const FluxScalar flux = FluxScalar::fromBrightness(brightness);
+        setPipelineFluxQ16(&plain, flux);
+        setPipelineFluxQ16(&curved, flux);
+        i32 ideal[3];
+        i32 drive[3];
+        processPixelQ16(plain, 128, 128, 128, ideal);
+        processPixelQ16(curved, 128, 128, 128, drive);
+        FL_CHECK_LE(::fabs(emittedLight(drive[0], linear) - toFloat(ideal[0])), 0.0001);
+        FL_CHECK_LE(::fabs(emittedLight(drive[1], green_square) - toFloat(ideal[1])), 0.0001);
+        FL_CHECK_LE(::fabs(emittedLight(drive[2], linear) - toFloat(ideal[2])), 0.0001);
+        if (brightness == 128) FL_CHECK_GT(drive[1], ideal[1]);
+    }
+
+    // Pipeline state owns a snapshot, not pointers into the caller's table.
+    setPipelineFluxQ16(&curved, FluxScalar::fromBrightness(128));
+    i32 before[3];
+    processPixelQ16(curved, 128, 128, 128, before);
+    green_square[1] = 60000;
+    i32 after[3];
+    processPixelQ16(curved, 128, 128, 128, after);
+    FL_CHECK_EQ(after[1], before[1]);
+
+    curved_device.response_lut_g = green_square;
+    green_square[0] = 1;
+    FL_CHECK_FALSE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), curved_device,
+                                             GamutPolicy::ChromaCompress, &curved));
+}
+
+FL_TEST_CASE("Emitter response plateaus invert to the first matching code") {
+    const u16 plateau[3] = {0, 0, 65535};
+    EmitterProfile device = rgbDevice();
+    device.response_lut_r = plateau;
+    device.response_lut_g = plateau;
+    device.response_lut_b = plateau;
+    device.response_lut_size = 3;
+    StreamingPipelineQ16 plain;
+    StreamingPipelineQ16 curved;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &plain));
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), device,
+                                         GamutPolicy::ChromaCompress, &curved));
+    i32 ideal[3];
+    i32 drive[3];
+    processPixelQ16(plain, 128, 128, 128, ideal);
+    processPixelQ16(curved, 128, 128, 128, drive);
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_GE(drive[i], 32768);
+        FL_CHECK_LE(::fabs(emittedLight(drive[i], plateau) - toFloat(ideal[i])), 0.0001);
+    }
+
+    // Put the target light exactly on an interior two-sample plateau. The
+    // lower-bound lookup must stop at its first sample (code 1/3), not the
+    // second (code 2/3).
+    const u16 target = static_cast<u16>(
+        (static_cast<u32>(ideal[1]) * 65535u + 32768u) >> 16);
+    FL_REQUIRE_GT(target, 0);
+    FL_REQUIRE_LT(target, 65535);
+    const u16 interior[4] = {0, target, target, 65535};
+    device.response_lut_r = interior;
+    device.response_lut_g = interior;
+    device.response_lut_b = interior;
+    device.response_lut_size = 4;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), device,
+                                         GamutPolicy::ChromaCompress, &curved));
+    processPixelQ16(curved, 128, 128, 128, drive);
+    FL_CHECK_EQ(drive[1], 21845);
 }
 
 }  // FL_TEST_FILE

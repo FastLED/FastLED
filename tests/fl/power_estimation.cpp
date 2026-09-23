@@ -600,6 +600,24 @@ FL_TEST_CASE("[#4344] the limiter now dims a managed channel the source said wou
     FL_CHECK_LT(int(calculate_max_brightness_for_power_mW(255, budget)), 255);
 }
 
+FL_TEST_CASE("[#4497] managed power estimation includes physical response inversion") {
+    const CRGB source(40, 40, 40);
+    EmitterProfile plain_profile = deviceWithLuminance(1.0f);
+    EmitterProfile curved_profile = plain_profile;
+    const fl::u16 linear[] = {0, 32768, 65535};
+    const fl::u16 dim_green[] = {0, 8192, 65535};
+    curved_profile.response_lut_r = linear;
+    curved_profile.response_lut_g = dim_green;
+    curved_profile.response_lut_b = linear;
+    curved_profile.response_lut_size = 3;
+    ManagedStrip plain(source, &plain_profile);
+    ManagedStrip curved(source, &curved_profile);
+    FL_REQUIRE(plain.channel->isColorManaged());
+    FL_REQUIRE(curved.channel->isColorManaged());
+    FL_CHECK_GT(controller_unscaled_power_mW(*curved.channel),
+                controller_unscaled_power_mW(*plain.channel));
+}
+
 #endif  // FL_COLOR_PIPELINE_SHARED
 
 FL_TEST_CASE("[#4344] an unmanaged channel still charges its source") {

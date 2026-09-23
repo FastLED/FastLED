@@ -1094,4 +1094,50 @@ FL_TEST_CASE("[#4042] C5: legacy dithering cannot reach the managed source") {
     FL_CHECK_EQ((int)managed_seen.size(), 1);
 }
 
+FL_TEST_CASE("[#4497] physical response reaches 8-bit and 16-bit managed output") {
+    EmitterProfile device = rgbDevice();
+    const u16 linear[] = {0, 32768, 65535};
+    const u16 dim_green[] = {0, 8192, 65535};
+    device.response_lut_r = linear;
+    device.response_lut_g = dim_green;
+    device.response_lut_b = linear;
+    device.response_lut_size = 3;
+    StreamingPipelineQ16 curved;
+    StreamingPipelineQ16 plain;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), device,
+                                         GamutPolicy::ChromaCompress, &curved));
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &plain));
+    const FluxScalar half = FluxScalar::fromBrightness(128);
+    setPipelineFluxQ16(&curved, half);
+    setPipelineFluxQ16(&plain, half);
+
+    CRGB led(128, 128, 128);
+    ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+    PixelController<RGB> curved_ctrl(&led, 1, adjustment, DISABLE_DITHER);
+    PixelController<RGB> plain_ctrl(&led, 1, adjustment, DISABLE_DITHER);
+    ColorManagedPixelSource curved_source(curved_ctrl, RGB, curved);
+    ColorManagedPixelSource plain_source(plain_ctrl, RGB, plain);
+    u8 curved8[3];
+    u8 plain8[3];
+    curved_source.loadAndScaleRGB(&curved8[0], &curved8[1], &curved8[2]);
+    plain_source.loadAndScaleRGB(&plain8[0], &plain8[1], &plain8[2]);
+    FL_CHECK_GT(curved8[1], plain8[1]);
+    const auto green_light = [](double code) {
+        if (code <= 0.5) return code * (8192.0 / 65535.0) * 2.0;
+        return (8192.0 + (code - 0.5) * 2.0 * (65535.0 - 8192.0)) / 65535.0;
+    };
+    FL_CHECK_LE(fl::fabs(green_light(curved8[1] / 255.0) - plain8[1] / 255.0),
+                0.01);
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    u16 curved16[3];
+    u16 plain16[3];
+    curved_source.loadAndScaleRGB16(&curved16[0], &curved16[1], &curved16[2]);
+    plain_source.loadAndScaleRGB16(&plain16[0], &plain16[1], &plain16[2]);
+    FL_CHECK_GT(curved16[1], plain16[1]);
+    FL_CHECK_LE(fl::fabs(green_light(curved16[1] / 65535.0) - plain16[1] / 65535.0),
+                0.0001);
+#endif
+}
+
 }  // FL_TEST_FILE

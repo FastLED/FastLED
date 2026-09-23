@@ -496,11 +496,13 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
     // pulls per pixel on a colour-managed channel -- against the legacy
     // `loadAndScale0/1/2` over the same buffer, so the ratio is the pipeline's
     // cost over what an unmanaged channel pays. Args: { pixels, frames,
-    // dither }. `dither` selects the pipeline's temporal dither (C5).
+    // dither, response_curve }. `dither` selects temporal dither (C5);
+    // `response_curve` selects a synthetic three-sample response (#4497).
     remote.bind("colorPipelinePerf", [](const fl::json& args) -> fl::json {
         int pixels = 256;
         int frames = 20;
         bool dither = false;
+        bool response_curve = false;
         if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
             const fl::json& cfg = args[0];
             if (cfg.contains("pixels") && cfg["pixels"].is_int()) {
@@ -512,11 +514,15 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             if (cfg.contains("dither") && cfg["dither"].is_bool()) {
                 dither = cfg["dither"].as_bool().value();
             }
+            if (cfg.contains("response_curve") && cfg["response_curve"].is_bool()) {
+                response_curve = cfg["response_curve"].as_bool().value();
+            }
         }
         fl::json response = fl::json::object();
         response.set("pixels", static_cast<int64_t>(pixels));
         response.set("frames", static_cast<int64_t>(frames));
         response.set("dither", dither);
+        response.set("response_curve", response_curve);
         // Total work bounded too: the loops run synchronously in the RPC
         // handler and the watchdog is fed only after it returns. 200,000
         // pixel-frames is about a second at the measured ~5 us/px.
@@ -527,8 +533,17 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             return response;
         }
         fl::StreamingPipelineQ16 pipeline;
+        fl::colorimetric_response::EmitterProfile device = fl::profiles::WS2812B;
+        const fl::u16 linear_response[] = {0, 32768, 65535};
+        const fl::u16 nonlinear_response[] = {0, 16384, 65535};
+        if (response_curve) {
+            device.response_lut_r = linear_response;
+            device.response_lut_g = nonlinear_response;
+            device.response_lut_b = linear_response;
+            device.response_lut_size = 3;
+        }
         if (!fl::buildStreamingPipelineQ16(fl::SourceProfile::linearSrgb(),
-                                           fl::profiles::WS2812B,
+                                           device,
                                            fl::GamutPolicy::ChromaCompress,
                                            &pipeline)) {
             response.set("success", false);

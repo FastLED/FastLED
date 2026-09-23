@@ -15,6 +15,47 @@ namespace {
 /// the unity build, so an anonymous namespace does not isolate it.
 constexpr Chromaticity kPipelineD65 = Chromaticity(0.3127f, 0.3290f);
 
+bool validResponseLut(const u16* values, u16 size) FL_NO_EXCEPT {
+    if (values == nullptr || size < 2 || values[0] != 0 ||
+        values[size - 1] != 65535) {
+        return false;
+    }
+    for (u16 i = 1; i < size; ++i) {
+        if (values[i] < values[i - 1]) return false;
+    }
+    return true;
+}
+
+/// Invert piecewise-linear code-to-light data. The first sample that reaches
+/// the requested light wins at a plateau; zero and full-scale are exact.
+i32 inverseResponseQ16(i32 light, const vector<u16>& values) FL_NO_EXCEPT {
+    if (light <= 0) return 0;
+    if (light >= 65536) return 65536;
+    const u32 target =
+        (static_cast<u32>(light) * 65535u + 32768u) >> 16;
+    u32 low = 1;
+    u32 high = static_cast<u32>(values.size() - 1);
+    while (low < high) {
+        const u32 middle = low + (high - low) / 2;
+        if (values[middle] >= target) high = middle;
+        else low = middle + 1;
+    }
+    high = low;
+    const u32 low_value = values[high - 1];
+    const u32 high_value = values[high];
+    // A plateau at the requested light maps to its first attainable code.
+    if (high_value == low_value) {
+        return static_cast<i32>((high - 1) * 65536u /
+                                static_cast<u32>(values.size() - 1));
+    }
+    const u32 interval = high_value - low_value;
+    const u32 fraction =
+        ((target - low_value) * 65536u + interval / 2) / interval;
+    const u32 segments = static_cast<u32>(values.size() - 1);
+    return static_cast<i32>(((high - 1) * 65536u + fraction + segments / 2) /
+                            segments);
+}
+
 }  // namespace
 
 bool buildStreamingPipelineQ16(const SourceProfile& source,
@@ -61,6 +102,23 @@ bool buildStreamingPipelineQ16(const SourceProfile& source,
     if (!buildGamutMapQ16(device, &out->gamut)) {
         return false;
     }
+    out->response.reset();
+    if (device.response_lut_size != 0) {
+        const u16 size = device.response_lut_size;
+        if (!validResponseLut(device.response_lut_r, size) ||
+            !validResponseLut(device.response_lut_g, size) ||
+            !validResponseLut(device.response_lut_b, size)) {
+            return false;
+        }
+        shared_ptr<ResponseLutsQ16> response = make_shared<ResponseLutsQ16>();
+        if (!response) return false;
+        response->red.assign(device.response_lut_r, device.response_lut_r + size);
+        response->green.assign(device.response_lut_g, device.response_lut_g + size);
+        response->blue.assign(device.response_lut_b, device.response_lut_b + size);
+        if (response->red.size() != size || response->green.size() != size ||
+            response->blue.size() != size) return false;
+        out->response = response;
+    }
     out->transfer = source.transfer;
     out->flux = FluxScalar::unity();
     return true;
@@ -105,9 +163,14 @@ void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
         mapAndSolveDrivesQ16(pipeline.gamut, xyz, drives);
     }
 
-    // C4's single amplitude stage, last so nothing downstream can rescale a
-    // channel on its own.
+    // C4's single amplitude stage scales linear light. Physical response
+    // inversion follows it; dimming compensated drive codes would skew hue.
     applyFluxScalar(pipeline.flux, span<i32>(drives, 3));
+    if (pipeline.response) {
+        drives[0] = inverseResponseQ16(drives[0], pipeline.response->red);
+        drives[1] = inverseResponseQ16(drives[1], pipeline.response->green);
+        drives[2] = inverseResponseQ16(drives[2], pipeline.response->blue);
+    }
 }
 
 }  // namespace fl
