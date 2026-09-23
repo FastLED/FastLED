@@ -302,7 +302,7 @@
 - [x] Route PR example workflows to the live gate and add the nightly six-group sweep and badge.
 - [x] Remove redundant cold Blink setup and 114-sketch Meson discovery from the live gate; measure local cold/warm behavior.
 - [x] Remove unused OIDC grants from the affected reusable workflows and callers.
-- [ ] Address the two security review comments after pushing the fix.
+- [x] Address the two security review comments after pushing the fix.
 - [ ] Run focused tests, full repository gates, review, and both live/nightly CI paths; merge only after validated.
 
 ### Review
