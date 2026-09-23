@@ -235,31 +235,9 @@ struct ChannelOptions {
         return nullptr;
 #endif
     }
-    bool setTargetWhite(Chromaticity white) FL_NO_EXCEPT {
-#if FL_COLOR_PROFILE_RUNTIME
-        if (!validChromaticity(white)) return false;
-        mColorProfile.mTargetWhite = white;
-        mColorProfile.mHasTargetWhite = true;
-        return true;
-#else
-        FL_UNUSED(white);
-        return false;
-#endif
-    }
-    Chromaticity targetWhite() const FL_NO_EXCEPT {
-#if FL_COLOR_PROFILE_RUNTIME
-        return mColorProfile.mTargetWhite;
-#else
-        return Chromaticity();
-#endif
-    }
-    bool hasTargetWhite() const FL_NO_EXCEPT {
-#if FL_COLOR_PROFILE_RUNTIME
-        return mColorProfile.mHasTargetWhite;
-#else
-        return false;
-#endif
-    }
+    bool setTargetWhite(Chromaticity white) FL_NO_EXCEPT;
+    Chromaticity targetWhite() const FL_NO_EXCEPT;
+    bool hasTargetWhite() const FL_NO_EXCEPT;
 
     template<const EmitterProfile& Profile>
     static ChannelOptions withColorProfile() FL_NO_EXCEPT {
