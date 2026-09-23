@@ -931,12 +931,12 @@ CoverageResult measureCoverage(int samples, int bands,
 
 }  // namespace
 
-FL_TEST_CASE("CQ_OCTAVE leaves gaps in the range it declares, LOG_REBIN does not") {
+FL_TEST_CASE("CQ_OCTAVE covers its declared range without losing band resolution") {
     // FastLED#4301. `CQ_OCTAVE`'s sparse kernels are narrower than the
     // spacing between adjacent band centres in the upper octaves, so they do
-    // not tile the axis and tones between them fall through: at 512 samples
-    // and 16 bands, 33 of 200 log-spaced tones produce under 20 counts in
-    // *every* band, the widest gap running 146-183 Hz.
+    // not tile the axis and tones between them fall through on the unfixed
+    // implementation. The corrected mode must cover the range while still
+    // locating tones near the expected band, including with longer windows.
     //
     // The comparison is what makes that a defect rather than a property of
     // the problem. `LOG_REBIN` -- which `Args::resolveModeEnums` already
@@ -944,36 +944,30 @@ FL_TEST_CASE("CQ_OCTAVE leaves gaps in the range it declares, LOG_REBIN does not
     // configuration measured here and in the wider sweep on the issue.
     const int kSteps = 200;
 
-    const CoverageResult octave_512_16 =
-        measureCoverage(512, 16, fl::audio::fft::Mode::CQ_OCTAVE, kSteps);
-    const CoverageResult rebin_512_16 =
-        measureCoverage(512, 16, fl::audio::fft::Mode::LOG_REBIN, kSteps);
-
-    FL_CHECK_EQ(rebin_512_16.dead, 0);
-    // Bounded from below as well, deliberately. The gaps are the subject of
-    // an open issue, so if they close, that is a change someone made and
-    // should record -- not something to absorb silently. The message says so,
-    // because a bound that fails on good news has to explain itself.
-    //
-    // One constant for both, so the warning cannot stop covering the failure
-    // it exists to explain. Written as two separate numbers first, and
-    // exactly 10 fell between them: the check failed and the message did not
-    // print. FastLED#4306.
-    const int kRecordedGapFloor = 10;
-    if (octave_512_16.dead <= kRecordedGapFloor) {
-        FL_WARN_F("CQ_OCTAVE coverage at 512/16 improved to %d dead tones of "
-                  "%d, from the 33 recorded here. That is good news, not a "
-                  "failure: find what changed, note it on FastLED#4301, and "
-                  "re-pin this bound.",
-                  octave_512_16.dead, kSteps);
+    const int sampleCounts[] = {512, 512, 512, 512, 512, 256, 1024};
+    const int bandCounts[] = {16, 24, 32, 48, 64, 48, 48};
+    for (int i = 0; i < 7; ++i) {
+        const CoverageResult octave = measureCoverage(
+            sampleCounts[i], bandCounts[i], fl::audio::fft::Mode::CQ_OCTAVE,
+            kSteps);
+        const CoverageResult rebin = measureCoverage(
+            sampleCounts[i], bandCounts[i], fl::audio::fft::Mode::LOG_REBIN,
+            kSteps);
+        FL_CHECK_EQ(rebin.dead, 0);
+        FL_CHECK_EQ(octave.dead, 0);
+        FL_CHECK_GT(octave.centre_hits, bandCounts[i] / 2);
     }
-    FL_CHECK_GT(octave_512_16.dead, kRecordedGapFloor);
-    FL_CHECK_LT(octave_512_16.dead, 60);
+}
 
-    // And the gaps are not the price of resolution: on the same
-    // configuration the two modes land a tone in its own band equally often.
-    // Measured 14 of 16 for CQ_OCTAVE against 15 of 16 for LOG_REBIN.
-    FL_CHECK_GT(rebin_512_16.centre_hits, octave_512_16.centre_hits - 2);
+FL_TEST_CASE("CQ_OCTAVE hears a gap tone alongside a resolved tone") {
+    fl::audio::fft::Args args(512, 16, 90.0f, 14080.0f, 44100,
+                             fl::audio::fft::Mode::CQ_OCTAVE);
+    fl::audio::fft::Impl fft(args);
+    auto pcm = makeTwoTone(951.0f, 8348.0f);
+    fl::audio::fft::Bins bins(16);
+    fft.run(pcm, &bins);
+    FL_CHECK_GT(bins.raw()[7], 20.0f);
+    FL_CHECK_GT(bins.raw()[13], 20.0f);
 }
 
 FL_TEST_CASE("answering everywhere is not the same as resolving anything") {
@@ -1045,23 +1039,17 @@ FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
     // Rising input frequency must never drive the CQ peak bin backwards.
     //
     // The sweep steps the analyser's own band centres rather than an
-    // arbitrary log grid, because CQ_OCTAVE does not respond everywhere in
-    // the range it declares. Measured over 200 log-spaced probe tones across
-    // 90-14080 Hz at 16 bands / 512 samples, 49 of them (24%) produce under
-    // 20 counts in *every* band, with two wide holes at the top: 7463-9621 Hz
-    // and 10923-13383 Hz. A tone inside a hole gives no detection at all --
-    // every band reads 0-7 counts -- so `findPeakBin` returns whichever band
-    // happens to hold the most noise, and comparing two such answers measures
-    // nothing.
+    // arbitrary log grid. Before the #4301 coverage supplement, a tone
+    // inside a kernel gap gave no detection at all, so `findPeakBin` returned
+    // whichever band happened to hold the most noise.
     //
     // A 30-step grid put 2 of its 30 steps inside those holes, and the peak
     // there was decided by margins of one count (16 versus 15 at 11502 Hz).
     // That is why this used to be able to pass or fail on an unrelated change
     // to `fl::exp`, which moves the grid by a few percent: FastLED#4288.
     //
-    // The holes are a real deficiency and are tracked in FastLED#4301. This case
-    // is about ordering, so it asks the question where the analyser has an
-    // answer, and checks that it really does have one.
+    // The holes were tracked in FastLED#4301. This case is about ordering,
+    // so it sweeps the analyser's band centres and checks each response.
     const int bands = 16;
     const float fmin = fl::audio::fft::Args::DefaultMinFrequency();
     const float fmax = fl::audio::fft::Args::DefaultMaxFrequency();
@@ -1097,7 +1085,9 @@ FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
                 second = v;
             }
         }
-        if (top < 15.0f || top < second * 1.5f) {
+        // The coverage supplement overlaps adjacent low bands, so the
+        // narrow-kernel 1.5x margin is no longer appropriate there.
+        if (top < 20.0f || top < second * 1.3f) {
             FL_WARN("CQ weak detection at " << freq << " Hz: top " << top
                          << ", runner-up " << second);
             weakDetections++;
@@ -1113,8 +1103,7 @@ FL_TEST_CASE("Binning adversarial - CQ_OCTAVE monotonicity sweep") {
         prevPeak = peak;
     }
     FL_CHECK_EQ(violations, 0);
-    // Every centre detects, and by a margin: measured top 19-2410 counts
-    // against runner-ups of 2-27, the tightest ratio being 1.58 at 177 Hz.
+    // Every centre must be detectable and lead its runner-up by 30%.
     FL_CHECK_EQ(weakDetections, 0);
 }
 

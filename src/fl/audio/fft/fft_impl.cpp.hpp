@@ -163,6 +163,8 @@ class Context {
         fl::vector<kiss_fft_scalar> windowed;
         fl::vector<kiss_fft_cpx> fftOut;
         fl::vector<u32> rawBinsI;
+        fl::vector<float> cqSnapshot;
+        fl::vector<int> coverageMaxQueue;
     };
 
     static FftScratch &scratch() {
@@ -653,6 +655,26 @@ class Context {
         mFftOut.resize(samples);
 
         buildLinearBinLut(mLinearBinLut, samples);
+        initLogRebin();
+        computeWindow(mWindowBuf, samples, Window::BLACKMAN_HARRIS);
+        const float mainLobeHz = 4.0f * static_cast<float>(sr) /
+                                 static_cast<float>(samples);
+        mCoverageFirst.resize(bands);
+        mCoverageLast.resize(bands);
+        int firstNearby = 0;
+        int lastNearby = 0;
+        for (int i = 0; i < bands; ++i) {
+            while (centerFreqs[i] - centerFreqs[firstNearby] > mainLobeHz) {
+                ++firstNearby;
+            }
+            if (lastNearby < i) lastNearby = i;
+            while (lastNearby + 1 < bands &&
+                   centerFreqs[lastNearby + 1] - centerFreqs[i] <= mainLobeHz) {
+                ++lastNearby;
+            }
+            mCoverageFirst[i] = firstNearby;
+            mCoverageLast[i] = lastNearby;
+        }
         // Note: CQ kernels already apply Hamming windowing in frequency domain.
         // Adding time-domain Hanning would double-window and over-attenuate.
     }
@@ -710,7 +732,6 @@ class Context {
                     mWorkBuf[i] = 0;
                 fl_fft_real_forward(mFftrCfg, mInputSamples, mWorkBuf.data(), mFftOut.data());
             }
-
             // Zero the CQ accumulator and apply kernels
             fl::memset(cq, 0, sizeof(kiss_fft_cpx) * oi.numBins);
             apply_kernels(mFftOut.data(), cq, oi.kernels, oi.cfg);
@@ -726,6 +747,50 @@ class Context {
                 float i2 = float(imag * imag);
                 rawBins[binIdx] = sqrt(r2 + i2);
 #endif
+            }
+        }
+
+        // A full-rate Blackman-Harris FFT supplies a low-gain floor wherever
+        // the narrow CQ kernels leave a gap. Its low-frequency resolution is
+        // coarse, so do not let it override a CQ detection within its main
+        // lobe (about four FFT-bin widths).
+        s.windowed.resize(N);
+        s.fftOut.resize(N);
+        s.rawBinsI.resize(mTotalBands);
+        applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
+        fl_fft_real_forward(mFftrCfg, N, s.windowed.data(), s.fftOut.data());
+        deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
+        batchMag(s.re.data(), s.im.data(), s.mag.data(), numRawBins);
+        fl::memset(s.rawBinsI.data(), 0, sizeof(u32) * mTotalBands);
+        logRebinRange(s.mag.data(), N, static_cast<float>(mSampleRate), 0,
+                      mTotalBands, s.rawBinsI.data(), mLogBinLut);
+        static constexpr float kCoverageGain = 0.02f;
+        static constexpr float kDetectedCqMagnitude = 20.0f;
+        s.cqSnapshot.resize(mTotalBands);
+        s.coverageMaxQueue.resize(mTotalBands);
+        for (int i = 0; i < mTotalBands; ++i) {
+            s.cqSnapshot[i] = rawBins[i];
+        }
+        int head = 0;
+        int tail = 0;
+        int next = 0;
+        for (int i = 0; i < mTotalBands; ++i) {
+            while (next <= mCoverageLast[i]) {
+                while (tail > head &&
+                       s.cqSnapshot[s.coverageMaxQueue[tail - 1]] <=
+                           s.cqSnapshot[next]) {
+                    --tail;
+                }
+                s.coverageMaxQueue[tail++] = next++;
+            }
+            while (head < tail &&
+                   s.coverageMaxQueue[head] < mCoverageFirst[i]) {
+                ++head;
+            }
+            const float localCq = s.cqSnapshot[s.coverageMaxQueue[head]];
+            float coverage = static_cast<float>(s.rawBinsI[i]) * kCoverageGain;
+            if (localCq < kDetectedCqMagnitude && coverage > rawBins[i]) {
+                rawBins[i] = coverage;
             }
         }
     }
@@ -1117,6 +1182,8 @@ class Context {
 
     // Pre-computed bin mapping LUTs (built at init, used at runtime)
     fl::vector<u8> mLogBinLut;       // FFT bin k → log-bin index (primary fft::FFT)
+    fl::vector<int> mCoverageFirst;   // first CQ band within one FFT main lobe
+    fl::vector<int> mCoverageLast;    // last CQ band within one FFT main lobe
     fl::vector<u8> mLinearBinLut;    // FFT bin k → linear-bin index (primary fft::FFT)
     fl::vector<u8> mLogBinLutMid;    // HYBRID mid-tier LUT (256pt)
     fl::vector<u8> mLogBinLutBass;   // HYBRID bass-tier LUT (64pt)
