@@ -198,6 +198,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     )
 
     parsed_args = parser.parse_args(args)
+    if parsed_args.example_group == "AutoResearch":
+        parser.error(
+            "AutoResearch runs on ESP32-S3, not the host runner; "
+            "use `bash compile esp32s3 --examples AutoResearch`"
+        )
     if parsed_args.example_group is not None:
         if parsed_args.examples:
             parser.error(

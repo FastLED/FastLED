@@ -53,3 +53,11 @@ def test_group_selects_examples_without_named_sketches() -> None:
 def test_group_rejects_named_sketches() -> None:
     with pytest.raises(SystemExit):
         parse_args(["--examples", "Blink", "--example-group", "CompileTests"])
+
+
+def test_host_group_rejects_board_only_autoresearch(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        parse_args(["--example-group", "AutoResearch"])
+    assert "AutoResearch runs on ESP32-S3" in capsys.readouterr().err

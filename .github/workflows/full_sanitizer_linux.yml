@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
 
 jobs:
   recent-change:

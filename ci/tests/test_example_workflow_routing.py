@@ -27,11 +27,17 @@ def test_nightly_and_full_sanitizer_select_full_examples() -> None:
     assert "schedule:" in nightly
     assert "workflow_dispatch:" in nightly
     assert "example-group: Nightly" in nightly
+    assert "uses: ./.github/workflows/build_template.yml" in nightly
+    assert "args: esp32s3 --examples AutoResearch" in nightly
+    assert "id-token: write" in nightly
+    assert "pull-requests: read" in nightly
 
     full_sanitizer = (WORKFLOWS / "full_sanitizer_linux.yml").read_text(
         encoding="utf-8"
     )
     assert "example-group: Nightly" in full_sanitizer
+    assert "id-token: write" in full_sanitizer
+    assert "pull-requests: read" in full_sanitizer
 
 
 def test_readme_examples_badge_reports_nightly_workflow() -> None:
