@@ -523,10 +523,10 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("frames", static_cast<int64_t>(frames));
         response.set("dither", dither);
         response.set("response_curve", response_curve);
-        // Each path is measured in both orders. Bound all four intervals so
-        // the synchronous RPC still returns before the watchdog window.
+        // Each path is measured in both complementary orders. Bound all eight
+        // intervals so the synchronous RPC returns before the watchdog window.
         if (pixels < 1 || pixels > 4096 || frames < 1 || frames > 10000 ||
-            static_cast<long>(pixels) * frames > 100000L) {
+            static_cast<long>(pixels) * frames > 50000L) {
             response.set("success", false);
             response.set("error", "out_of_range");
             return response;
@@ -563,6 +563,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         uint32_t legacy_hash = 2166136261u;
         uint32_t managed_second_hash = 2166136261u;
         uint32_t legacy_second_hash = 2166136261u;
+        uint32_t baab_managed_hash = 2166136261u;
+        uint32_t baab_legacy_hash = 2166136261u;
 
         auto measure_managed = [&](uint32_t& hash) -> uint32_t {
             const uint32_t start = fl::micros();
@@ -596,24 +598,34 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
             return fl::micros() - start;
         };
 
-        const uint32_t managed_first_us = measure_managed(managed_hash);
-        const uint32_t legacy_second_us = measure_legacy(legacy_hash);
-        const uint32_t legacy_first_us = measure_legacy(legacy_second_hash);
-        const uint32_t managed_second_us = measure_managed(managed_second_hash);
-        const uint32_t managed_us = managed_first_us + managed_second_us;
-        const uint32_t legacy_us = legacy_first_us + legacy_second_us;
+        // ABBA and BAAB place each implementation in every position across
+        // the pair, reducing both linear drift and order-specific warm-up bias.
+        const uint32_t abba_m1_us = measure_managed(managed_hash);
+        const uint32_t abba_l2_us = measure_legacy(legacy_hash);
+        const uint32_t abba_l3_us = measure_legacy(legacy_second_hash);
+        const uint32_t abba_m4_us = measure_managed(managed_second_hash);
+        const uint32_t baab_l1_us = measure_legacy(baab_legacy_hash);
+        const uint32_t baab_m2_us = measure_managed(baab_managed_hash);
+        const uint32_t baab_m3_us = measure_managed(baab_managed_hash);
+        const uint32_t baab_l4_us = measure_legacy(baab_legacy_hash);
+        const uint32_t managed_us = abba_m1_us + abba_m4_us + baab_m2_us + baab_m3_us;
+        const uint32_t legacy_us = abba_l2_us + abba_l3_us + baab_l1_us + baab_l4_us;
 
-        const double n = 2.0 * static_cast<double>(pixels) *
+        const double n = 4.0 * static_cast<double>(pixels) *
                          static_cast<double>(frames);
         const double managed_per = static_cast<double>(managed_us) / n;
         const double legacy_per = static_cast<double>(legacy_us) / n;
         response.set("success", true);
         response.set("managed_us", static_cast<int64_t>(managed_us));
         response.set("legacy_us", static_cast<int64_t>(legacy_us));
-        response.set("managed_first_us", static_cast<int64_t>(managed_first_us));
-        response.set("legacy_second_us", static_cast<int64_t>(legacy_second_us));
-        response.set("legacy_first_us", static_cast<int64_t>(legacy_first_us));
-        response.set("managed_second_us", static_cast<int64_t>(managed_second_us));
+        response.set("abba_m1_us", static_cast<int64_t>(abba_m1_us));
+        response.set("abba_l2_us", static_cast<int64_t>(abba_l2_us));
+        response.set("abba_l3_us", static_cast<int64_t>(abba_l3_us));
+        response.set("abba_m4_us", static_cast<int64_t>(abba_m4_us));
+        response.set("baab_l1_us", static_cast<int64_t>(baab_l1_us));
+        response.set("baab_m2_us", static_cast<int64_t>(baab_m2_us));
+        response.set("baab_m3_us", static_cast<int64_t>(baab_m3_us));
+        response.set("baab_l4_us", static_cast<int64_t>(baab_l4_us));
         response.set("managed_us_per_pixel", managed_per);
         response.set("legacy_us_per_pixel", legacy_per);
         response.set("managed_pixels_per_second",
@@ -622,6 +634,8 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         response.set("legacy_fnv1a", static_cast<int64_t>(legacy_hash));
         response.set("managed_second_fnv1a", static_cast<int64_t>(managed_second_hash));
         response.set("legacy_second_fnv1a", static_cast<int64_t>(legacy_second_hash));
+        response.set("baab_managed_fnv1a", static_cast<int64_t>(baab_managed_hash));
+        response.set("baab_legacy_fnv1a", static_cast<int64_t>(baab_legacy_hash));
         return response;
     });
 #endif
