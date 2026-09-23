@@ -130,6 +130,21 @@ foreach line : example_metadata_output.split('\n')
     endif
 endforeach
 
+# The explicit manifest classifies every sketch directory. Resolve groups by
+# path, since sketch names alone need not be unique across nested folders.
+group_metadata = run_command(
+    'python', project_root / 'ci' / 'examples' / 'example_groups.py',
+    '--meson-metadata', check: true
+).stdout().strip()
+example_group_by_root = {}
+foreach line : group_metadata.split('\n')
+    parts = line.split('|')
+    if parts.length() != 3 or parts[0] != 'GROUP'
+        error('Invalid example group metadata: ' + line)
+    endif
+    example_group_by_root += {parts[1]: parts[2]}
+endforeach
+
 # ============================================================================
 # BUILD EXAMPLE RUNNER (DLL LOADER)
 # ============================================================================
@@ -185,6 +200,7 @@ example_executables = []
 # DLL-only list for the all-with-examples alias (avoids building runner copies
 # which each take ~1.5s of file-copy overhead on Windows, saving ~10s total)
 example_dlls = []
+example_group_targets = {}
 
 # Create executable target for each discovered example
 foreach example_name : example_paths.keys()
@@ -195,6 +211,12 @@ foreach example_name : example_paths.keys()
 
     # Get the example's root directory path (sketch directory)
     example_root = example_paths[example_name]
+    example_root_key = example_root.replace('\\', '/')
+    if not example_group_by_root.has_key(example_root_key)
+        error('Example missing from group manifest: ' + example_root_key)
+    endif
+    example_group_name = example_group_by_root[example_root_key]
+    example_group_suite = 'examples-' + example_group_name.to_lower()
 
     # Get include directories for this example
     example_include_dirs = example_includes.get(example_name, [])
@@ -322,7 +344,7 @@ foreach example_name : example_paths.keys()
     # upstream-blessed replacement (zccache#33).
     test('example-' + example_name, example_runner_exe,
         args: [example_dll.full_path()],
-        suite: 'examples',
+        suite: ['examples', example_group_suite],
         timeout: 60,
         env: example_test_env,
     )
@@ -330,12 +352,19 @@ foreach example_name : example_paths.keys()
     # Track both DLL and runner for alias target
     example_executables += [example_dll, example_runner_copy]
     example_dlls += [example_dll]
+    example_group_targets += {
+        example_group_suite: example_group_targets.get(example_group_suite, []) +
+            [example_dll, example_runner_copy]
+    }
 endforeach
 
 # Create alias target to build all examples (only if we have examples)
 if example_executables.length() > 0
     alias_target('examples-host', example_executables)
 endif
+foreach group_suite, group_targets : example_group_targets
+    alias_target(group_suite, group_targets)
+endforeach
 
 example_count = example_executables.length()
 total_discovered = example_paths.keys().length()

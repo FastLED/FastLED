@@ -100,35 +100,38 @@ bool buildWhiteAllocationFromSolveQ16(
     // Per-channel slack, so the allowance costs the same colour everywhere.
     // Bind time, once per profile -- there is no per-pixel work here.
     {
-        float columns[3][3];
-        colorimetric_response::xyY_to_XYZ(profile.xy_r[0], profile.xy_r[1],
-                                          profile.lum_r, columns[0]);
-        colorimetric_response::xyY_to_XYZ(profile.xy_g[0], profile.xy_g[1],
-                                          profile.lum_g, columns[1]);
-        colorimetric_response::xyY_to_XYZ(profile.xy_b[0], profile.xy_b[1],
-                                          profile.lum_b, columns[2]);
+        const float* xy[3] = {profile.xy_r, profile.xy_g, profile.xy_b};
+        const float luminance[3] = {profile.lum_r, profile.lum_g, profile.lum_b};
         for (int channel = 0; channel < 3; ++channel) {
+            i32 xy_q16[2];
+            i32 luminance_q16;
+            if (!q16FromFloatBits(xy[channel][0], &xy_q16[0]) ||
+                !q16FromFloatBits(xy[channel][1], &xy_q16[1]) ||
+                !q16FromFloatBits(luminance[channel], &luminance_q16)) {
+                return false;
+            }
+            i64 column[3];
+            if (!detail::xyzColumnQ16(xy_q16, luminance_q16, column)) {
+                return false;
+            }
             // The peak component, because that is what bounds the per-axis
             // XYZ error a clamp of one drive unit can cause.
-            float peak = 0.0f;
+            i64 peak = 0;
             for (int axis = 0; axis < 3; ++axis) {
-                const float magnitude = columns[channel][axis] < 0.0f
-                                            ? -columns[channel][axis]
-                                            : columns[channel][axis];
+                const i64 magnitude = column[axis] < 0 ? -column[axis]
+                                                         : column[axis];
                 if (magnitude > peak) {
                     peak = magnitude;
                 }
             }
-            // A degenerate column would divide by zero; the solve build
-            // above has already refused those, so this is belt and braces.
-            if (!(peak > 0.0f)) {
-                peak = 1.0f;
-            }
-            float scaled = static_cast<float>(kWhiteSlackAtUnitColumn) / peak;
+            // Both operands are Q16, so the quotient is in raw drive units.
+            // The numerator fits i64 even at the largest supported slack.
+            i64 scaled = (static_cast<i64>(kWhiteSlackAtUnitColumn) * 65536 +
+                          peak / 2) / peak;
             // Never zero: a column so large that the allowance rounds away
             // would reject the rounding this exists to tolerate.
-            if (scaled < 1.0f) {
-                scaled = 1.0f;
+            if (scaled < 1) {
+                scaled = 1;
             }
             // And never larger than the allowance it is scaling. Dim
             // emitters have small columns, so the division wants to *grow*
@@ -143,10 +146,10 @@ bool buildWhiteAllocationFromSolveQ16(
             // below it each channel sits. For the corpus device nothing is
             // clipped -- green is already at 64 and the others below it --
             // so the measurements above are unaffected.
-            if (scaled > static_cast<float>(kWhiteSlackAtUnitColumn)) {
-                scaled = static_cast<float>(kWhiteSlackAtUnitColumn);
+            if (scaled > kWhiteSlackAtUnitColumn) {
+                scaled = kWhiteSlackAtUnitColumn;
             }
-            out->slack[channel] = static_cast<i32>(scaled + 0.5f);
+            out->slack[channel] = static_cast<i32>(scaled);
         }
     }
 

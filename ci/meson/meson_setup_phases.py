@@ -39,6 +39,7 @@ class MarkerPaths:
     compiler_version: Path
     zccache_version: Path
     enable_examples: Path
+    enable_full_examples: Path
     enable_unit_tests: Path
 
     @classmethod
@@ -54,6 +55,7 @@ class MarkerPaths:
             compiler_version=build_dir / ".compiler_version_config",
             zccache_version=build_dir / ".zccache_version_config",
             enable_examples=build_dir / ".enable_examples_config",
+            enable_full_examples=build_dir / ".enable_full_examples_config",
             enable_unit_tests=build_dir / ".enable_unit_tests_config",
         )
 
@@ -168,6 +170,7 @@ def check_reconfigure_markers(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     use_thin_archives: bool,
 ) -> ReconfigureDecision:
@@ -314,6 +317,23 @@ def check_reconfigure_markers(
         except (OSError, IOError):
             decision.reasons.append("enable_examples marker unreadable")
 
+    # A missing marker in an existing build has unknown target coverage. Reconfigure
+    # before recording the requested setting so the marker describes the real graph.
+    if markers.enable_full_examples.exists():
+        try:
+            marker_value = markers.enable_full_examples.read_text().strip()
+            if marker_value not in ("True", "False"):
+                decision.reasons.append("enable_full_examples marker unreadable")
+            elif (marker_value == "True") != enable_full_examples:
+                decision.reasons.append(
+                    "enable_full_examples changed: "
+                    f"{marker_value} → {enable_full_examples}"
+                )
+        except (OSError, IOError):
+            decision.reasons.append("enable_full_examples marker unreadable")
+    else:
+        decision.reasons.append("enable_full_examples marker missing")
+
     # enable_unit_tests marker
     if markers.enable_unit_tests.exists():
         try:
@@ -359,7 +379,7 @@ def check_reconfigure_markers(
 
 
 def check_meson_build_modified(source_dir: Path, build_dir: Path) -> bool:
-    """Return True if any meson.build is newer than build.ninja."""
+    """Return True if a Meson configuration input is newer than build.ninja."""
     build_ninja_path = build_dir / "build.ninja"
     if not build_ninja_path.exists():
         return False
@@ -367,22 +387,29 @@ def check_meson_build_modified(source_dir: Path, build_dir: Path) -> bool:
         build_ninja_mtime = build_ninja_path.stat().st_mtime
         meson_build_files = [
             source_dir / "meson.build",
+            source_dir / "meson.options",
             source_dir / "tests" / "meson.build",
             source_dir / "examples" / "meson.build",
+            source_dir / "ci" / "examples" / "example_groups.py",
+            source_dir / "ci" / "meson" / "compile_tests" / "meson.build",
         ]
         for meson_file in meson_build_files:
-            if meson_file.exists():
-                meson_file_mtime = meson_file.stat().st_mtime
-                if meson_file_mtime > build_ninja_mtime:
-                    _ts_print(
-                        f"[MESON] ⚠️  Detected modified meson.build: {meson_file.relative_to(source_dir)}"
-                    )
-                    _ts_print(
-                        f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
-                    )
-                    return True
+            if not meson_file.exists():
+                _ts_print(
+                    f"[MESON] ⚠️  Missing configuration input: {meson_file.relative_to(source_dir)}"
+                )
+                return True
+            meson_file_mtime = meson_file.stat().st_mtime
+            if meson_file_mtime > build_ninja_mtime:
+                _ts_print(
+                    f"[MESON] ⚠️  Detected modified configuration input: {meson_file.relative_to(source_dir)}"
+                )
+                _ts_print(
+                    f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
+                )
+                return True
     except (OSError, IOError) as e:
-        _ts_print(f"[MESON] Warning: Could not check meson.build timestamps: {e}")
+        _ts_print(f"[MESON] Warning: Could not check Meson input timestamps: {e}")
         return True
     return False
 

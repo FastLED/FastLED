@@ -109,6 +109,20 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Run example compilation tests only (optionally specify example names). Use with --full for complete compilation + linking + execution",
     )
     parser.add_argument(
+        "--example-group",
+        choices=[
+            "CompileTests",
+            "Nightly",
+            "Basic",
+            "Classic",
+            "Advanced",
+            "Fx",
+            "Experimental",
+            "AutoResearch",
+        ],
+        help="Select the live compile gate, all nightly examples, or one example group",
+    )
+    parser.add_argument(
         "--no-pch",
         action="store_true",
         help="Disable precompiled headers (PCH) when running example compilation tests",
@@ -184,6 +198,18 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     )
 
     parsed_args = parser.parse_args(args)
+    if parsed_args.example_group == "AutoResearch":
+        parser.error(
+            "AutoResearch runs on ESP32-S3, not the host runner; "
+            "use `bash compile esp32s3 --examples AutoResearch`"
+        )
+    if parsed_args.example_group is not None:
+        if parsed_args.examples:
+            parser.error(
+                "--example-group cannot be combined with specific example names"
+            )
+        if parsed_args.examples is None:
+            parsed_args.examples = []
     if parsed_args.debug_thin:
         if parsed_args.debug or parsed_args.build_mode is not None:
             parser.error("--debug-thin cannot be combined with --debug or --build-mode")
@@ -222,6 +248,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         stack_trace=parsed_args.stack_trace,
         check=parsed_args.check,
         examples=parsed_args.examples,
+        example_group=parsed_args.example_group,
         no_pch=parsed_args.no_pch,
         full=parsed_args.full,
         no_parallel=parsed_args.no_parallel,

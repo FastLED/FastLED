@@ -119,7 +119,13 @@ if not is_wasm_build
   # Build examples subdirectory (provides meson targets for example compilation)
   # Can be disabled with -Denable_examples=false to speed up Meson setup for unit tests only
   if get_option('enable_examples')
-    subdir('examples')
+    if get_option('enable_full_examples')
+      subdir('examples')
+    else
+      example_executables = []
+      example_dlls = []
+    endif
+    subdir('ci/meson/compile_tests')
   else
     # Stub variables for when examples are disabled
     example_executables = []

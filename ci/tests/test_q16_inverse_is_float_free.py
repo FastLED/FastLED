@@ -312,7 +312,7 @@ kPerPixelSymbol = "_ZN2fl15processPixelQ16ERKNS_20StreamingPipelineQ16EhhhRA3_l"
 kBindSymbol = (
     "_ZN2fl25buildStreamingPipelineQ16ERKNS_13SourceProfileERKNS_"
     "21colorimetric_response14EmitterProfileENS_11GamutPolicyEPNS_"
-    "20StreamingPipelineQ16E"
+    "20StreamingPipelineQ16EPKNS_12ChromaticityE"
 )
 
 kPipelineSource = """

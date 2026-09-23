@@ -597,6 +597,8 @@ def create_examples_test_process(
     # Add example names if specified
     if args.examples is not None:
         cmd.extend(args.examples)
+    if args.example_group is not None:
+        cmd.extend(["--example-group", args.example_group])
 
     # Map command-line arguments to meson_example_runner.py
     if args.clean:

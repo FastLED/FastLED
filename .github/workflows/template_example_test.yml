@@ -12,11 +12,15 @@ on:
         type: string
         default: debug
         description: 'Native sanitizer preset (debug or Linux-only debug-thin)'
+      example-group:
+        required: false
+        type: string
+        default: CompileTests
+        description: 'Example group to compile (CompileTests for the live gate)'
 
 permissions:
   contents: read        # Required to checkout code
   actions: read         # Required for artifact operations
-  id-token: write      # Required for artifact upload (OIDC)
   pull-requests: read   # If needed to read PR info
 
 defaults:
@@ -62,28 +66,22 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: Run Example Blink
+      - name: Compile ${{ inputs.example-group }}
         env:
           FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
+          FASTLED_EXAMPLE_GROUP: ${{ inputs.example-group }}
         run: |
-          if [[ "$RUNNER_OS" == Linux ]]; then
-            ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose --build-mode "$FASTLED_BUILD_MODE"
-          else
-            ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
-          fi
-        shell: bash
-
-      - name: Run All Examples
-        env:
-          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
-        run: |
-          # Enable unbuffered Python output for better CI log streaming
           export PYTHONUNBUFFERED=1
-          # Force line-buffered output for better log streaming
           export PYTHONIOENCODING=utf-8
+          if [[ "$RUNNER_OS" == Linux && "$FASTLED_EXAMPLE_GROUP" == CompileTests ]]; then
+            export FASTLED_EXAMPLE_JOBS=2
+          fi
+          ./test --clang --examples --example-group "$FASTLED_EXAMPLE_GROUP" --verbose --build-mode "$FASTLED_BUILD_MODE"
           if [[ "$RUNNER_OS" == Linux ]]; then
-            ./test --clang --no-parallel --examples --verbose --clean --build-mode "$FASTLED_BUILD_MODE"
-          else
-            ./test --clang --no-parallel --examples --verbose --build-mode "$FASTLED_BUILD_MODE"
+            build_suffix=""
+            if [[ "$FASTLED_EXAMPLE_GROUP" == CompileTests ]]; then
+              build_suffix="-compile-tests"
+            fi
+            du -sb ".build/meson-${FASTLED_BUILD_MODE}${build_suffix}" | awk '{print "Build bytes: " $1}'
           fi
         shell: bash

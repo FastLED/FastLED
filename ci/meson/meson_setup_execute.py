@@ -363,6 +363,7 @@ def handle_skip_meson_setup(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     compiler: CompilerDetection,
 ) -> None:
@@ -411,6 +412,8 @@ def handle_skip_meson_setup(
         current_zccache_version=compiler.zccache_version or None,
         enable_examples_marker=markers.enable_examples,
         enable_examples=enable_examples,
+        enable_full_examples_marker=markers.enable_full_examples,
+        enable_full_examples=enable_full_examples,
         enable_unit_tests_marker=markers.enable_unit_tests,
         enable_unit_tests=enable_unit_tests,
         only_missing=True,
@@ -431,17 +434,21 @@ def handle_skip_meson_setup(
     _enforce_strict_path_violations(build_dir)
 
 
-# FastLED's full set of meson.build files, relative to the source dir
+# FastLED's Meson configuration inputs, relative to the source dir
 # (the project root). Listed explicitly so the wrapper can be invoked
 # with `--no-walk` and avoid the recursive `--source-dir` traversal
 # whose dominant cost was walking `.venv/` (~100k Python files, ~5s
-# cold-with-cache). Keep this list in sync with `find . -name meson.build`
-# (excluding scratch/worktree copies). See zackees/zccache#659.
+# cold-with-cache). Keep the Meson files in sync with
+# `find . -name meson.build` (excluding scratch/worktree copies), and
+# include non-Meson inputs that affect target generation. See zackees/zccache#659.
 FASTLED_MESON_BUILD_FILES: tuple[str, ...] = (
     "meson.build",
+    "meson.options",
     "tests/meson.build",
     "tests/profile/meson.build",
     "examples/meson.build",
+    "ci/examples/example_groups.py",
+    "ci/meson/compile_tests/meson.build",
     "ci/meson/native/meson.build",
     "ci/meson/shared/meson.build",
     "ci/meson/wasm/meson.build",
@@ -558,6 +565,7 @@ def build_meson_setup_cmd(
     enable_examples: bool,
     enable_unit_tests: bool,
     reconfigure: bool,
+    enable_full_examples: bool = True,
     source_hashes: Optional["SourceHashes"] = None,
 ) -> list[str]:
     """Build the ``meson setup [--reconfigure] ...`` command list.
@@ -593,6 +601,7 @@ def build_meson_setup_cmd(
         f"-Dbuild_mode={build_mode}",
         f"-Denable_examples={str(enable_examples).lower()}",
         f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
+        f"-Denable_full_examples={str(enable_full_examples).lower()}",
     ]
 
     capability = _get_zccache_meson_configure_path()
@@ -692,6 +701,7 @@ def run_meson_setup_command(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     use_thin_archives: bool,
     compiler: CompilerDetection,
@@ -773,6 +783,8 @@ def run_meson_setup_command(
             current_zccache_version=compiler.zccache_version or None,
             enable_examples_marker=markers.enable_examples,
             enable_examples=enable_examples,
+            enable_full_examples_marker=markers.enable_full_examples,
+            enable_full_examples=enable_full_examples,
             enable_unit_tests_marker=markers.enable_unit_tests,
             enable_unit_tests=enable_unit_tests,
             only_missing=False,

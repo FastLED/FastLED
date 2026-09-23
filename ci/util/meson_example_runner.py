@@ -112,10 +112,12 @@ class CompilationHeartbeat:
 def compile_examples(
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     verbose: bool = False,
     parallel: bool = True,
     build_mode: str = "quick",
     log_failures: Path | None = None,
+    include_runner: bool = False,
 ) -> bool:
     """
     Compile FastLED examples using Meson.
@@ -126,6 +128,7 @@ def compile_examples(
         verbose: Enable verbose compilation output
         parallel: Enable parallel compilation (default: True)
         build_mode: Build mode (quick, debug, debug-thin, release, profile)
+        include_runner: Build the test runner before the executable-bit repair
 
     Returns:
         True if compilation successful, False otherwise
@@ -139,10 +142,21 @@ def compile_examples(
     if not parallel:
         # Sequential compilation (-j 1)
         cmd.extend(["-j", "1"])
+    elif jobs_text := os.environ.get("FASTLED_EXAMPLE_JOBS"):
+        # Bound CI memory use without making every example build serial.
+        if not jobs_text.isdigit() or int(jobs_text) < 1:
+            raise ValueError("FASTLED_EXAMPLE_JOBS must be a positive integer")
+        cmd.extend(["-j", jobs_text])
 
     # Determine targets to build
     # Note: process_group already shows "Compiling: <examples>" status
-    if examples is None:
+    if example_group == "CompileTests":
+        cmd.append("compile-tests")
+        target_desc = "compile tests"
+    elif example_group is not None and example_group != "Nightly":
+        cmd.append(f"examples-{example_group.lower()}")
+        target_desc = f"{example_group} examples"
+    elif examples is None:
         # Build all examples via the alias target
         cmd.append("examples-host")
         target_desc = "all examples"
@@ -151,6 +165,11 @@ def compile_examples(
         for example_name in examples:
             cmd.append(f"example-{example_name}")
         target_desc = ", ".join(examples)
+
+    if include_runner and example_group != "CompileTests":
+        # meson test will run this binary directly. Build it before restoring
+        # the executable bit lost by zccache's link-cache restoration.
+        cmd.append("example_runner")
 
     # Start heartbeat for CI environments during long compilations
     heartbeat = CompilationHeartbeat(interval_seconds=30)
@@ -252,6 +271,7 @@ def compile_examples(
 def run_examples(
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     verbose: bool = False,
     timeout: int = 30,
     build_mode: str = "quick",
@@ -288,7 +308,17 @@ def run_examples(
         )
 
     # Build command
-    cmd = [get_meson_executable(), "test", "-C", str(build_dir), "--print-errorlogs"]
+    # compile_examples has already built every selected test dependency.
+    # An implicit Meson rebuild can relink example_runner *after* its lost
+    # executable bit is restored above, leaving it non-executable again.
+    cmd = [
+        get_meson_executable(),
+        "test",
+        "-C",
+        str(build_dir),
+        "--print-errorlogs",
+        "--no-rebuild",
+    ]
 
     if verbose:
         cmd.append("-v")
@@ -297,7 +327,19 @@ def run_examples(
     cmd.extend(["--timeout-multiplier", str(timeout / 30.0)])  # 30s is default
 
     # Determine which tests to run
-    if examples is None:
+    if example_group is not None:
+        suite = (
+            "compile-tests"
+            if example_group == "CompileTests"
+            else "examples"
+            if example_group == "Nightly"
+            else f"examples-{example_group.lower()}"
+        )
+        cmd.extend(["--suite", suite])
+        target_desc = f"{example_group} examples"
+        if not verbose:
+            _ts_print(f"Running {target_desc}...")
+    elif examples is None:
         # Run all tests in the 'examples' suite
         cmd.extend(["--suite", "examples"])
         target_desc = "all examples"
@@ -344,6 +386,11 @@ def run_examples(
                 f"Examples failed (return code {returncode})",
                 file=sys.stderr,
             )
+            if not verbose and proc.stdout:
+                _ts_print("Example test output (last 80 lines):", file=sys.stderr)
+                _ts_print(
+                    "\n".join(str(proc.stdout).splitlines()[-80:]), file=sys.stderr
+                )
             # Write per-example run failure logs from testlog.txt
             if log_failures is not None:
                 from ci.meson.testlog_parser import parse_testlog
@@ -403,6 +450,7 @@ def run_meson_examples(
     source_dir: Path,
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     clean: bool = False,
     verbose: bool = False,
     debug: bool = False,
@@ -466,7 +514,8 @@ def run_meson_examples(
     # This enables caching per mode when source unchanged but flags differ
     # Example: .build/meson -> .build/meson-debug
     original_build_dir = build_dir
-    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
+    suffix = "-compile-tests" if example_group == "CompileTests" else ""
+    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}{suffix}"
 
     # Build directory removed from output - build mode already shown in Config line
     # and full path rarely useful to users (just noise)
@@ -541,6 +590,7 @@ def run_meson_examples(
         build_mode=build_mode,
         verbose=verbose,
         enable_unit_tests=False,
+        enable_full_examples=example_group != "CompileTests",
     ):
         return MesonTestResult(
             success=False,
@@ -559,10 +609,12 @@ def run_meson_examples(
             if not compile_examples(
                 build_dir,
                 examples=examples,
+                example_group=example_group,
                 verbose=verbose,
                 parallel=parallel,
                 build_mode=build_mode,
                 log_failures=log_failures,
+                include_runner=full,
             ):
                 duration = time.time() - start_time
                 out: MesonTestResult = MesonTestResult.construct_build_error(
@@ -580,6 +632,7 @@ def run_meson_examples(
         result = run_examples(
             build_dir,
             examples=examples,
+            example_group=example_group,
             verbose=verbose,
             timeout=60,
             build_mode=build_mode,
@@ -608,6 +661,20 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "examples", nargs="*", help="Specific examples to compile/run (None = all)"
+    )
+    parser.add_argument(
+        "--example-group",
+        choices=[
+            "CompileTests",
+            "Nightly",
+            "Basic",
+            "Classic",
+            "Advanced",
+            "Fx",
+            "Experimental",
+            "AutoResearch",
+        ],
+        help="Select one example group or the live compile gate",
     )
     parser.add_argument("--clean", action="store_true", help="Clean build directory")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -641,6 +708,13 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    if args.example_group == "AutoResearch":
+        parser.error(
+            "AutoResearch runs on ESP32-S3, not the host runner; "
+            "use `bash compile esp32s3 --examples AutoResearch`"
+        )
+    if args.example_group and args.examples:
+        parser.error("--example-group cannot be combined with specific examples")
 
     source_dir = Path.cwd()
     build_dir = Path(args.build_dir)
@@ -651,6 +725,7 @@ if __name__ == "__main__":
         source_dir=source_dir,
         build_dir=build_dir,
         examples=examples_list,
+        example_group=args.example_group,
         clean=args.clean,
         verbose=args.verbose,
         debug=args.debug,

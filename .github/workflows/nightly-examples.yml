@@ -1,0 +1,30 @@
+name: nightly examples linux
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 3 * * *'
+      timezone: America/Los_Angeles
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  examples:
+    uses: ./.github/workflows/template_example_test.yml
+    with:
+      os: ubuntu-latest
+      build-mode: debug-thin
+      example-group: Nightly
+
+  autoresearch:
+    # AutoResearch requires a board platform and has no native host target.
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32s3 --examples AutoResearch

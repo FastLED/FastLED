@@ -88,6 +88,7 @@ class TestArgs:
     stack_trace: bool = False
     check: bool = False
     examples: Optional[list[str]] = None
+    example_group: Optional[str] = None
     no_pch: bool = False
     full: bool = False
 
