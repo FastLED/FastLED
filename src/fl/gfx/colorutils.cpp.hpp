@@ -1331,6 +1331,10 @@ void SetupPartyColors(CRGBPalette16& pal)
 
 void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
                                 fl::u8 maxChanges) {
+    if (maxChanges == 0) {
+        return;
+    }
+
     fl::u8 *p1;
     fl::u8 *p2;
     fl::u8 changes = 0;

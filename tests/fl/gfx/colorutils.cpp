@@ -88,6 +88,22 @@ FL_TEST_CASE("palette mapping preserves destination at zero opacity") {
     FL_CHECK_EQ(destination[0], ColorFromPalette(palette, 0));
 }
 
+FL_TEST_CASE("palette cross-fade respects zero and nonzero change budgets") {
+    CRGBPalette16 current(CRGB::Black);
+    CRGBPalette16 target(CRGB::Red);
+
+    nblendPaletteTowardPalette(current, target, 0);
+    for (int i = 0; i < 16; ++i) {
+        FL_CHECK_EQ(current[i], CRGB::Black);
+    }
+
+    nblendPaletteTowardPalette(current, target, 1);
+    FL_CHECK_EQ(current[0], CRGB(1, 0, 0));
+    for (int i = 1; i < 16; ++i) {
+        FL_CHECK_EQ(current[i], CRGB::Black);
+    }
+}
+
 FL_TEST_CASE("Oklab blending is opt-in and preserves endpoints") {
     const CRGB first(12, 34, 56);
     const CRGB second(210, 180, 90);
