@@ -74,7 +74,7 @@ constexpr i32 kWhiteSlack = 64;
 /// nothing: the comparisons that follow are between values the caller
 /// already holds, and the chosen level is inside [0, full] before narrowing.
 i64 divideWhiteQ16(i32 numerator, i32 denominator) FL_NO_EXCEPT {
-    const i64 scaled = static_cast<i64>(numerator) << 16;
+    const i64 scaled = static_cast<i64>(numerator) * 65536;
     return scaled / static_cast<i64>(denominator);
 }
 
@@ -283,7 +283,7 @@ struct SplitBound {
 /// `value` at total `s`, in s16.16.
 i64 splitBoundAt(const SplitBound& bound, i64 total) FL_NO_EXCEPT {
     const i64 scaled =
-        (static_cast<i64>(bound.numerator) << 16) + static_cast<i64>(bound.slope) * total;
+        static_cast<i64>(bound.numerator) * 65536 + static_cast<i64>(bound.slope) * total;
     return scaled / static_cast<i64>(bound.denominator);
 }
 
@@ -337,7 +337,7 @@ bool narrowTotalForPair(const SplitBound& lower, const SplitBound& upper, i64* l
         // never does.
         return constant >= 0;
     }
-    const i64 bound = (constant << 16) / slope;
+    const i64 bound = (constant * 65536) / slope;
     if (slope > 0) {
         if (bound < *high) {
             *high = bound;

@@ -90,7 +90,16 @@ PixelIterator* makeColorPipelineIterator(
     Rgbww rgbww, u8 dither_phase, u8 brightness) FL_NO_EXCEPT {
     ColorManagedPixelSource* source = new (source_storage)
         ColorManagedPixelSource(controller, order, pipeline, dither_phase);
-    source->setFlux(brightness);
+#if FL_COLOR_PIPELINE_SHARED
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    if (hooks.frameFluxActive) {
+        source->setFlux(FluxScalar::fromRawQ16(
+            static_cast<i32>(hooks.frameFluxQ16)));
+    } else
+#endif
+    {
+        source->setFlux(brightness);
+    }
     return new (iterator_storage) PixelIterator(source, rgbw, rgbww);
 }
 
@@ -102,6 +111,78 @@ void destroyColorPipelineIterator(void* source_storage,
 }
 
 #if FL_COLOR_PIPELINE_SHARED
+void colorPipelineBuildPowerHistogram(
+    const StreamingPipelineQ16& pipeline, span<const CRGB> leds,
+    u8 emitter_count, ManagedPowerHistogram* out) FL_NO_EXCEPT {
+    if (out == nullptr) return;
+    *out = ManagedPowerHistogram();
+    out->pixels = static_cast<u32>(leds.size());
+    out->emitters = emitter_count;
+    for (fl::size i = 0; i < leds.size(); ++i) {
+        i32 light[5] = {};
+        if (pipeline.wide) {
+            processPixelWideLinearQ16(pipeline, leds[i].r, leds[i].g,
+                                      leds[i].b, light);
+        } else {
+            i32 rgb_light[3];
+            processPixelLinearQ16(pipeline, leds[i].r, leds[i].g,
+                                  leds[i].b, rgb_light);
+            for (int c = 0; c < 3; ++c) light[c] = rgb_light[c];
+        }
+        for (u8 c = 0; c < emitter_count; ++c) {
+            if (light[c] > 0) {
+                const u32 bounded = light[c] > 65536 ? 65536u :
+                    static_cast<u32>(light[c]);
+                const u8 bin = static_cast<u8>((bounded - 1u) >> 10);
+                ++out->counts[c][bin];
+            }
+        }
+    }
+}
+
+u64 colorPipelineHistogramPowerNumerator(
+    const StreamingPipelineQ16& pipeline,
+    const ManagedPowerHistogram& histogram, FluxScalar flux,
+    PowerCodecPolicy codec, const u8 (&weights)[5],
+    u8 (*electrical_map)(u8)) FL_NO_EXCEPT {
+    u64 numerator = 0;
+    for (u8 c = 0; c < histogram.emitters; ++c) {
+        for (u8 bin = 0; bin < ManagedPowerHistogram::kBins; ++bin) {
+            const u32 count = histogram.counts[c][bin];
+            if (count == 0) continue;
+            const i32 upper_light = static_cast<i32>((bin + 1u) << 10);
+            const i32 drive = encodeLinearEmitterQ16(pipeline, c, upper_light,
+                                                     flux);
+            if (drive <= 0) continue;
+            u8 mapped_upper = 255;
+            if (codec.kind == PowerCodecKind::Byte) {
+                const u32 code = (static_cast<u32>(drive) * 255u + 65535u) >> 16;
+                mapped_upper = electrical_map(static_cast<u8>(code > 255 ? 255 : code));
+            } else if (codec.kind == PowerCodecKind::Native7 ||
+                       codec.kind == PowerCodecKind::Native5) {
+                const u32 max_code = codec.kind == PowerCodecKind::Native7 ? 127u : 31u;
+                const u32 native = (static_cast<u32>(drive) * max_code + 65535u) >> 16;
+                const u32 equivalent = (native * 255u + max_code - 1u) / max_code;
+                mapped_upper = electrical_map(static_cast<u8>(equivalent > 255 ? 255 : equivalent));
+            } else if (codec.kind == PowerCodecKind::FiveBit) {
+                mapped_upper = 0;
+                const u32 min_field = codec.min_field < 1 ? 1 : codec.min_field;
+                for (u32 field = min_field; field <= 31; ++field) {
+                    const u64 numerator_code = static_cast<u64>(drive) * 255u * 31u;
+                    const u64 denominator = static_cast<u64>(65536) * field;
+                    const u32 code = static_cast<u32>((numerator_code + denominator - 1) / denominator);
+                    const u8 bounded_code = static_cast<u8>(code > 255 ? 255 : code);
+                    const u32 weighted = (static_cast<u32>(electrical_map(bounded_code)) *
+                                          field + 30u) / 31u;
+                    if (weighted > mapped_upper) mapped_upper = static_cast<u8>(weighted);
+                }
+            }
+            numerator += static_cast<u64>(count) * mapped_upper * weights[c];
+        }
+    }
+    return numerator;
+}
+
 u32 colorPipelineUnscaledPowerMilliwatts(
     const StreamingPipelineQ16& pipeline, span<const CRGB> leds,
     u8 emitter_count, ColorPipelineHooks::PowerEstimator estimate) FL_NO_EXCEPT {
@@ -237,6 +318,8 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.encodeManagedSpi = &encodeColorPipelineManagedSpi;
 #if FL_COLOR_PIPELINE_SHARED
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
+    hooks.buildPowerHistogram = &colorPipelineBuildPowerHistogram;
+    hooks.histogramPowerNumerator = &colorPipelineHistogramPowerNumerator;
 #endif
 }
 

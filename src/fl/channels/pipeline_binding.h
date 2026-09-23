@@ -15,6 +15,7 @@
 #include "fl/channels/color_profile.h"
 #include "fl/channels/config.h"
 #include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
+#include "fl/channels/power_prepass.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/spi_chipsets.h"
 #include "fl/stl/vector.h"
@@ -60,6 +61,18 @@ bool buildPipelineForBinding(const ColorProfileBinding& binding,
 /// and it is *references* to the definitions that keep code alive.
 constexpr fl::size kColorPipelineSourceStorage = sizeof(ColorManagedPixelSource);
 constexpr fl::size kColorPipelineIteratorStorage = sizeof(PixelIterator);
+
+#if FL_COLOR_PIPELINE_SHARED
+/// Upward-rounded linear-light buckets for one managed channel. This is not
+/// a pixel framebuffer: storage is fixed at 1.3 KiB regardless of strip
+/// length, and only exists during a power-limited frame.
+struct ManagedPowerHistogram {
+    static constexpr u8 kBins = 64;
+    u32 counts[5][kBins] = {};
+    u32 pixels = 0;
+    u8 emitters = 3;
+};
+#endif
 
 struct ColorPipelineHooks {
     /// Derives a pipeline from a binding. Null until installed.
@@ -113,6 +126,21 @@ struct ColorPipelineHooks {
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
                                    span<const CRGB> leds, u8 emitter_count,
                                    PowerEstimator estimate);
+    /// Solve pixels only once, then evaluate candidate scalars from bounded
+    /// linear-light buckets. The electrical mapper is supplied by power_mgt
+    /// to preserve the profile/limiter's linker isolation.
+    void (*buildPowerHistogram)(const StreamingPipelineQ16& pipeline,
+                                span<const CRGB> leds, u8 emitter_count,
+                                ManagedPowerHistogram* out);
+    u64 (*histogramPowerNumerator)(const StreamingPipelineQ16& pipeline,
+                                   const ManagedPowerHistogram& histogram,
+                                   FluxScalar flux, PowerCodecPolicy codec,
+                                   const u8 (&weights)[5],
+                                   u8 (*electricalMap)(u8 code));
+    /// Set only during CFastLED::show()'s encoding pass. Zero flux is valid,
+    /// so the activation flag is separate from the value.
+    bool frameFluxActive;
+    u32 frameFluxQ16;
 #endif
 
     /// Chipset-specific quantization of a colour-managed SPI channel's wide

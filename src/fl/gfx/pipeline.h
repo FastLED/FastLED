@@ -132,10 +132,23 @@ void setPipelineFluxQ16(StreamingPipelineQ16* pipeline, FluxScalar flux) FL_NO_E
 void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
                      i32 (&drives)[3]) FL_NO_EXCEPT;
 
+/// Pre-response linear emitter light for a power prepass. Source decoding,
+/// gamut mapping and the physical solve are exactly the encoder's stages;
+/// brightness/response inversion intentionally follow this boundary.
+void processPixelLinearQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                           u8 b, i32 (&light)[3]) FL_NO_EXCEPT;
+
 /// Like processPixelQ16, but solves the physical 4/5-emitter hull. The
 /// first three drives are RGB, followed by W or warm/cool W. Unused slots
 /// are zero; call only when `wide` is present.
 void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
                          u8 b, i32 (&drives)[5]) FL_NO_EXCEPT;
+void processPixelWideLinearQ16(const StreamingPipelineQ16& pipeline, u8 r,
+                               u8 g, u8 b, i32 (&light)[5]) FL_NO_EXCEPT;
+
+/// Scale one linear emitter and invert its physical response, using the
+/// identical final stage as processPixel[Wide]Q16.
+i32 encodeLinearEmitterQ16(const StreamingPipelineQ16& pipeline, u8 emitter,
+                            i32 light, FluxScalar flux) FL_NO_EXCEPT;
 
 }  // namespace fl

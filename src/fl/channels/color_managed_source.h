@@ -57,6 +57,7 @@ class ColorManagedPixelSource {
     /// Frame-local brightness is applied to the source's owned pipeline on
     /// shared tiers; only managed iterator construction calls this.
     void setFlux(u8 brightness) FL_NO_EXCEPT;
+    void setFlux(FluxScalar flux) FL_NO_EXCEPT;
 
     /// The colour-managed path.
     ///

@@ -15,6 +15,8 @@
 #include "fl/stl/int.h"           // fl::u32, fl::u8
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 #include "fl/channels/pipeline_binding.h"  // colorPipelineHooks (#4344)
+#include "fl/channels/power_prepass.h"
+#include "pixel_controller.h"
 #include "fl/stl/singleton.h"    // fl::Singleton
 #include "fl/gfx/rgbw.h"     // fl::Rgbw, fl::rgb_2_rgbw
 // POWER MANAGEMENT
@@ -544,6 +546,178 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
         controller.leds(), static_cast<fl::size>(controller.size())));
 }
 #endif  // FL_PLATFORM_HAS_TINY_MEMORY
+
+#if FL_COLOR_PIPELINE_SHARED
+namespace {
+
+// Candidate-specific legacy demand. Unlike the old unity-demand projection,
+// this runs the same brightness premix and white extraction as PixelController.
+// Dither can raise a lit channel by at most two codes, so charge that upward
+// choice without touching the global/frame phase.
+fl::u32 legacyFramePowerMilliwatts(fl::CLEDController& controller,
+                                    fl::u8 brightness) FL_NO_EXCEPT {
+    const fl::u32 count = static_cast<fl::u32>(controller.size());
+    const fl::u8 emitters = controller.getRgbww().active() ? 5 :
+                            (controller.getRgbw().active() ? 4 : 3);
+    fl::u8 weights[5];
+    emitter_power_weights(emitters, weights);
+    fl::u64 sums[5] = {};
+    PixelController<RGB> pixels(
+        controller.leds(), controller.size(),
+        controller.getAdjustmentData(brightness), DISABLE_DITHER);
+    for (fl::u32 i = 0; i < count; ++i) {
+        fl::u8 codes[5] = {};
+        if (emitters == 5) {
+            pixels.loadAndScaleRGBWWUnordered(controller.getRgbww(),
+                &codes[0], &codes[1], &codes[2], &codes[3], &codes[4]);
+        } else if (emitters == 4) {
+            pixels.loadAndScaleRGBWUnordered(controller.getRgbw(),
+                &codes[0], &codes[1], &codes[2], &codes[3]);
+        } else {
+            pixels.loadAndScaleRGB(&codes[0], &codes[1], &codes[2]);
+        }
+        const CRGB& source = controller.leds()[i];
+        const bool dithered = controller.getDither() == BINARY_DITHER &&
+            (source.r | source.g | source.b) != 0 && brightness != 0;
+        for (fl::u8 c = 0; c < emitters; ++c) {
+            const fl::u8 upper = dithered
+                ? static_cast<fl::u8>(codes[c] > 253 ? 255 : codes[c] + 2)
+                : codes[c];
+            sums[c] += map_power_value(upper);
+        }
+        pixels.advanceData();
+    }
+    fl::u64 total = static_cast<fl::u64>(gPowerModel().dark_mW) * count;
+    for (fl::u8 c = 0; c < emitters; ++c) {
+        total += (sums[c] * weights[c] + 255u) >> 8;
+    }
+    return total > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(total);
+}
+
+struct ManagedFramePower {
+    fl::shared_ptr<fl::StreamingPipelineQ16> pipeline;
+    fl::ManagedPowerHistogram histogram;
+    fl::PowerCodecPolicy codec;
+    fl::u8 weights[5] = {};
+};
+
+struct FramePowerSnapshot {
+    fl::vector<ManagedFramePower> managed;
+    fl::vector<fl::CLEDController*> legacy;
+};
+
+bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
+    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    fl::size managed_count = 0;
+    fl::size legacy_count = 0;
+    for (fl::CLEDController* controller = fl::CLEDController::head();
+         controller != nullptr; controller = controller->next()) {
+        if (!controller->getEnabled()) continue;
+        if (controller->colorPipeline() && hooks.buildPowerHistogram) {
+            ++managed_count;
+        } else {
+            ++legacy_count;
+        }
+    }
+    // Allocate exactly once, then construct histograms in their final slots.
+    // fl::vector silently leaves size unchanged when allocation fails.
+    snapshot->managed.resize(managed_count);
+    snapshot->legacy.resize(legacy_count);
+    if (snapshot->managed.size() != managed_count ||
+        snapshot->legacy.size() != legacy_count) return false;
+    fl::size managed_index = 0;
+    fl::size legacy_index = 0;
+    for (fl::CLEDController* controller = fl::CLEDController::head();
+         controller != nullptr; controller = controller->next()) {
+        if (!controller->getEnabled()) continue;
+        const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline =
+            controller->colorPipeline();
+        if (pipeline && hooks.buildPowerHistogram != nullptr) {
+            if (managed_index >= managed_count) return false;
+            ManagedFramePower& entry = snapshot->managed[managed_index++];
+            entry.pipeline = pipeline;
+            entry.codec = fl::powerChannelCodecPolicy(*controller);
+            const fl::u8 emitters = controller->getRgbww().active() ? 5 :
+                (controller->getRgbw().active() ? 4 : 3);
+            emitter_power_weights(emitters, entry.weights);
+            hooks.buildPowerHistogram(
+                *pipeline,
+                fl::span<const CRGB>(controller->leds(), controller->size()),
+                emitters, &entry.histogram);
+        } else {
+            if (legacy_index >= legacy_count) return false;
+            snapshot->legacy[legacy_index++] = controller;
+        }
+    }
+    // A binding/list mutation during capture would invalidate the model.
+    return managed_index == managed_count && legacy_index == legacy_count;
+}
+
+fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
+                                   fl::u32 flux_q16) FL_NO_EXCEPT {
+    fl::u64 total = gMCU_mW;
+    const fl::FluxScalar flux = fl::FluxScalar::fromRawQ16(
+        static_cast<fl::i32>(flux_q16));
+    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    for (fl::size i = 0; i < snapshot.managed.size(); ++i) {
+        const ManagedFramePower& entry = snapshot.managed[i];
+        const fl::u64 numerator = hooks.histogramPowerNumerator(
+            *entry.pipeline, entry.histogram, flux, entry.codec,
+            entry.weights,
+            &map_power_value);
+        total += static_cast<fl::u64>(gPowerModel().dark_mW) *
+                 entry.histogram.pixels + ((numerator + 255u) >> 8);
+    }
+    const fl::u8 brightness = static_cast<fl::u8>(
+        (static_cast<fl::u64>(flux_q16) * 255u) >> 16);
+    for (fl::size i = 0; i < snapshot.legacy.size(); ++i) {
+        total += legacyFramePowerMilliwatts(*snapshot.legacy[i], brightness);
+    }
+    return total > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(total);
+}
+
+}  // namespace
+
+fl::FramePowerPlan fl::calculateFramePowerPlan(
+    fl::u8 requested_brightness, fl::u32 budget_mW) FL_NO_EXCEPT {
+    FramePowerPlan plan;
+    FramePowerSnapshot snapshot;
+    if (!captureFramePowerSnapshot(&snapshot)) {
+        // Never solve against a partial set of enabled channels. Zero is the
+        // minimum controllable output; the unknown demand is not certified.
+        plan.flux_q16 = 0;
+        plan.legacy_brightness = 0;
+        plan.modeled_mW = 0xFFFFFFFFu;
+        plan.infeasible = true;
+        return plan;
+    }
+    const fl::u32 request_flux = fl::FluxScalar::fromBrightness(
+        requested_brightness).rawQ16();
+    const fl::u32 zero_demand = framePowerAtFluxMilliwatts(snapshot, 0);
+    if (zero_demand > budget_mW) {
+        plan.flux_q16 = 0;
+        plan.legacy_brightness = 0;
+        plan.modeled_mW = zero_demand;
+        plan.infeasible = true;
+        return plan;
+    }
+    fl::u32 low = 0;
+    fl::u32 high = request_flux;
+    while (low < high) {
+        const fl::u32 candidate = low + (high - low + 1) / 2;
+        if (framePowerAtFluxMilliwatts(snapshot, candidate) <= budget_mW) {
+            low = candidate;
+        } else {
+            high = candidate - 1;
+        }
+    }
+    plan.flux_q16 = low;
+    plan.legacy_brightness = static_cast<fl::u8>(
+        (static_cast<fl::u64>(low) * 255u) >> 16);
+    plan.modeled_mW = framePowerAtFluxMilliwatts(snapshot, low);
+    return plan;
+}
+#endif  // FL_COLOR_PIPELINE_SHARED
 
 // sets brightness to
 //  - no more than target_brightness

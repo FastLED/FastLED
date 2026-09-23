@@ -10,6 +10,8 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/manager.h"
+#include "fl/channels/pipeline_binding.h"
+#include "fl/channels/power_prepass.h"
 #include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/channels/detail/wait_spin_budget.h"  // for tiered-wait spin-budget setters (#2818)
@@ -144,6 +146,48 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 
 fl::vector<fl::ChannelPtr>& CFastLED::channels() {
 	return fl::Singleton<fl::vector<fl::ChannelPtr>>::instance();
+}
+
+fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
+    const fl::CLEDController& controller) FL_NO_EXCEPT {
+    PowerCodecPolicy policy;
+    const fl::vector<fl::ChannelPtr>& registered = CFastLED::channels();
+    for (fl::size i = 0; i < registered.size(); ++i) {
+        const fl::Channel* channel = registered[i].get();
+        if (channel != &controller) continue;
+        policy.kind = PowerCodecKind::Byte;
+        const fl::SpiChipsetConfig* spi =
+            channel->getChipset().ptr<fl::SpiChipsetConfig>();
+        if (spi == nullptr) return policy;
+        switch (spi->timing.chipset) {
+            case fl::SpiChipset::LPD6803:
+                policy.kind = PowerCodecKind::Native5;
+                break;
+            case fl::SpiChipset::LPD8806:
+                policy.kind = PowerCodecKind::Native7;
+                break;
+            case fl::SpiChipset::APA102HD:
+            case fl::SpiChipset::DOTSTARHD:
+            case fl::SpiChipset::SK9822HD:
+            case fl::SpiChipset::HD107HD: {
+                policy.kind = PowerCodecKind::FiveBit;
+                const fl::EmitterProfile* profile = channel->emitterProfile();
+                const fl::FiveBitSemantics semantics = fl::fiveBitSemanticsFor(
+                    spi->timing.chipset, profile != nullptr
+                        ? profile->five_bit_semantics
+                        : fl::FiveBitSemantics::NotApplicable);
+                policy.min_field = fl::hdMinimumField(
+                    semantics, fl::detail::hdFieldFloor());
+                break;
+            }
+            default:
+                break;
+        }
+        return policy;
+    }
+    // A custom managed controller has no known wire encoding. Charging full
+    // code for every lit emitter is conservative, never a silent guess.
+    return policy;
 }
 
 void CFastLED::add(fl::ChannelPtr channel) {
@@ -315,6 +359,31 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 
 	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
+	// On a managed frame, the power scalar remains Q16 through response
+	// inversion. Legacy byte encoders receive that same scalar rounded down.
+#if FL_COLOR_PIPELINE_SHARED
+	bool planned_frame_flux = false;
+	if (mPPowerFunc == static_cast<power_func>(
+	        &calculate_max_brightness_for_power_mW)) {
+		bool managed = false;
+		for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
+			if (p->getEnabled() && p->colorPipeline()) {
+				managed = true;
+				break;
+			}
+		}
+		if (managed) {
+			const fl::FramePowerPlan plan =
+				fl::calculateFramePowerPlan(scale, mNPowerData);
+			scale = plan.legacy_brightness;
+			fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+			hooks.frameFluxQ16 = plan.flux_q16;
+			hooks.frameFluxActive = true;
+			planned_frame_flux = true;
+		}
+	}
+	if (!planned_frame_flux)
+#endif
 	if(mPPowerFunc) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
@@ -354,6 +423,11 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
+#if FL_COLOR_PIPELINE_SHARED
+	if (planned_frame_flux) {
+		fl::colorPipelineHooks().frameFluxActive = false;
+	}
+#endif
 	onEndFrame();
 	onEndShowLeds();
 }
