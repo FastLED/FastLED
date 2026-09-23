@@ -16,6 +16,7 @@ def test_live_example_workflows_select_compile_tests() -> None:
     for os_name in ("linux", "macos", "windows"):
         caller = (WORKFLOWS / f"example_test_{os_name}.yml").read_text(encoding="utf-8")
         assert "example-group: CompileTests" in caller
+        assert "pull_request:" in caller
 
 
 def test_nightly_and_full_sanitizer_select_full_examples() -> None:
