@@ -63,6 +63,31 @@ CRGB downconvert(const fl::CRGB16 &rgb) {
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+FL_TEST_CASE("palette mapping preserves destination at zero opacity") {
+    CRGBPalette16 palette(CRGB(200, 100, 50));
+    fl::u8 index[] = {0};
+    const CRGB original(37, 81, 129);
+    CRGB destination[] = {original};
+
+    map_data_into_colors_through_palette(index, 1, destination, palette, 255,
+                                         0);
+    FL_CHECK_EQ(destination[0], original);
+
+    destination[0] = original;
+    CRGB expected = original;
+    expected.nscale8(255);
+    CRGB contribution = ColorFromPalette(palette, 0);
+    contribution.nscale8_video(1);
+    expected += contribution;
+    map_data_into_colors_through_palette(index, 1, destination, palette, 255,
+                                         1);
+    FL_CHECK_EQ(destination[0], expected);
+
+    map_data_into_colors_through_palette(index, 1, destination, palette, 255,
+                                         255);
+    FL_CHECK_EQ(destination[0], ColorFromPalette(palette, 0));
+}
+
 FL_TEST_CASE("Oklab blending is opt-in and preserves endpoints") {
     const CRGB first(12, 34, 56);
     const CRGB second(210, 180, 90);

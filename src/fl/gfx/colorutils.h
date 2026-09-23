@@ -1630,9 +1630,9 @@ inline void fill_palette_circular(fl::span<CRGB> L, fl::u8 startIndex,
 /// color
 /// @param opacity optional opacity value for the new color. If this is 255
 /// (default), the new colors will be written to the array directly. Otherwise
-/// the existing LED data will be scaled down using `CRGB::nscale8_video()` and
+/// the existing LED data will be scaled down using `CRGB::nscale8()` and
 /// then new colors will be added on top. A higher value means that the new
-/// colors will be more visible.
+/// colors will be more visible. If this is 0, existing colors are unchanged.
 /// @param blendType whether to take the palette entries directly (NOBLEND)
 /// or blend linearly between palette entries (LINEARBLEND)
 template <typename PALETTE>
@@ -1640,6 +1640,9 @@ void map_data_into_colors_through_palette(
     fl::u8 *dataArray, fl::u16 dataCount, CRGB *targetColorArray,
     const PALETTE &pal, fl::u8 brightness = 255, fl::u8 opacity = 255,
     TBlendType blendType = LINEARBLEND) FL_NO_EXCEPT {
+    if (opacity == 0) {
+        return;
+    }
     for (fl::u16 i = 0; i < dataCount; ++i) {
         fl::u8 d = dataArray[i];
         CRGB rgb = ColorFromPalette(pal, d, brightness, blendType);
