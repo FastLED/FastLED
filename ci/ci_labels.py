@@ -108,11 +108,8 @@ class Selection:
 def select(event_name: str, event: dict, labels: dict[str, list[str]]) -> Selection:
     """Resolve one event; the YAML gates are generated from this catalog."""
     if event_name == "workflow_dispatch":
-        return Selection(
-            "full",
-            event.get("after", ""),
-            sorted({c for v in labels.values() for c in v}),
-        )
+        # Manually dispatching the validator does not launch the matrix.
+        return Selection("manual-catalog", event.get("after", ""), [])
     if event_name == "push":
         return Selection("minimal", event.get("after", ""), [])
     if event_name != "pull_request":

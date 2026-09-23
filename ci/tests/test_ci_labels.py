@@ -44,7 +44,7 @@ def test_full_covers_every_board_job_and_overrides_selectors() -> None:
     assert set(full.cells) == {
         f"{workflow}/{job}" for workflow, entries in JOBS.items() for job in entries
     }
-    assert full.cells == select("workflow_dispatch", {"after": "a" * 40}, LABELS).cells
+    assert select("workflow_dispatch", {"after": "a" * 40}, LABELS).cells == []
 
 
 def test_prefix_exact_companion_and_union() -> None:
