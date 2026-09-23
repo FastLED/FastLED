@@ -1654,14 +1654,19 @@ void map_data_into_colors_through_palette(
 }
 
 /// @copydoc map_data_into_colors_through_palette()
+/// Processes only as many entries as fit in both spans when the destination
+/// is shorter than the source.
 template <typename PALETTE>
 inline void map_data_into_colors_through_palette(
     fl::span<fl::u8> dataArray, fl::span<CRGB> targetColorArray,
     const PALETTE &pal, fl::u8 brightness = 255, fl::u8 opacity = 255,
     TBlendType blendType = LINEARBLEND) FL_NO_EXCEPT {
+    const fl::u16 count = static_cast<fl::u16>(
+        dataArray.size() < targetColorArray.size() ? dataArray.size()
+                                                   : targetColorArray.size());
     map_data_into_colors_through_palette(
-        dataArray.data(), static_cast<fl::u16>(dataArray.size()),
-        targetColorArray.data(), pal, brightness, opacity, blendType);
+        dataArray.data(), count, targetColorArray.data(), pal, brightness,
+        opacity, blendType);
 }
 
 /// Alter one palette by making it slightly more like a "target palette".
