@@ -83,6 +83,7 @@ static const HelpEntry kHelpEntries[] = {
     {"getResults", "Phase 3: Selective Execution", "[]", "[{driver, lanes, stripSize, ...}, ...]", "Return all test results"},
     {"getResult", "Phase 3: Selective Execution", "[testCaseIndex]", "{driver, lanes, stripSize, ...}", "Return specific test case result"},
     {"perfProbeBitBangCost", "Phase 2: Performance", "[{iterations, ns, pin}]", "{success, nop_us_per_iter, delay_us_per_iter, delay_hz_us_per_iter, write_byte_us_per_iter, clock_query_us, predicted_bit_overhead_us}", "Attribute the BIT_BANG per-bit overhead across delay vs pin-write calls (FastLED#4203)"},
+    {"mixedPowerShowPerf", "Phase 2: Performance", "[{pixels, frames, budget_mw}] (optional; max 128 pixels/channel)", "{success, on_median_us, off_median_us, on_plan_modeled_mw, off_plan_modeled_mw, on_plan_flux_q16, off_plan_flux_q16, on_fnv1a, off_fnv1a}", "Benchmark mixed RGB/RGBW/RGBWW power planning plus encode through FastLED.show(), excluding physical wire time (#4499)"},
     {"reset", "Phase 4: Utility", "[]", "{success, message, testCasesCleared}", "Reset test state without device reboot"},
     {"halt", "Phase 4: Utility", "[]", "{success, message}", "Trigger sketch halt"},
     {"ping", "Phase 4: Utility", "[]", "{success, message, timestamp, uptimeMs, lastResetCause, lastResetWasWatchdog, frameCounter}", "Health check with timestamp and reset evidence"},
