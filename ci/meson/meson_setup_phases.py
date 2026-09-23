@@ -379,7 +379,7 @@ def check_reconfigure_markers(
 
 
 def check_meson_build_modified(source_dir: Path, build_dir: Path) -> bool:
-    """Return True if any meson.build is newer than build.ninja."""
+    """Return True if a Meson configuration input is newer than build.ninja."""
     build_ninja_path = build_dir / "build.ninja"
     if not build_ninja_path.exists():
         return False
@@ -387,22 +387,29 @@ def check_meson_build_modified(source_dir: Path, build_dir: Path) -> bool:
         build_ninja_mtime = build_ninja_path.stat().st_mtime
         meson_build_files = [
             source_dir / "meson.build",
+            source_dir / "meson.options",
             source_dir / "tests" / "meson.build",
             source_dir / "examples" / "meson.build",
+            source_dir / "ci" / "examples" / "example_groups.py",
+            source_dir / "ci" / "meson" / "compile_tests" / "meson.build",
         ]
         for meson_file in meson_build_files:
-            if meson_file.exists():
-                meson_file_mtime = meson_file.stat().st_mtime
-                if meson_file_mtime > build_ninja_mtime:
-                    _ts_print(
-                        f"[MESON] ⚠️  Detected modified meson.build: {meson_file.relative_to(source_dir)}"
-                    )
-                    _ts_print(
-                        f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
-                    )
-                    return True
+            if not meson_file.exists():
+                _ts_print(
+                    f"[MESON] ⚠️  Missing configuration input: {meson_file.relative_to(source_dir)}"
+                )
+                return True
+            meson_file_mtime = meson_file.stat().st_mtime
+            if meson_file_mtime > build_ninja_mtime:
+                _ts_print(
+                    f"[MESON] ⚠️  Detected modified configuration input: {meson_file.relative_to(source_dir)}"
+                )
+                _ts_print(
+                    f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
+                )
+                return True
     except (OSError, IOError) as e:
-        _ts_print(f"[MESON] Warning: Could not check meson.build timestamps: {e}")
+        _ts_print(f"[MESON] Warning: Could not check Meson input timestamps: {e}")
         return True
     return False
 

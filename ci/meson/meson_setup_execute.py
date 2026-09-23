@@ -434,17 +434,20 @@ def handle_skip_meson_setup(
     _enforce_strict_path_violations(build_dir)
 
 
-# FastLED's full set of meson.build files, relative to the source dir
+# FastLED's Meson configuration inputs, relative to the source dir
 # (the project root). Listed explicitly so the wrapper can be invoked
 # with `--no-walk` and avoid the recursive `--source-dir` traversal
 # whose dominant cost was walking `.venv/` (~100k Python files, ~5s
-# cold-with-cache). Keep this list in sync with `find . -name meson.build`
-# (excluding scratch/worktree copies). See zackees/zccache#659.
+# cold-with-cache). Keep the Meson files in sync with
+# `find . -name meson.build` (excluding scratch/worktree copies), and
+# include non-Meson inputs that affect target generation. See zackees/zccache#659.
 FASTLED_MESON_BUILD_FILES: tuple[str, ...] = (
     "meson.build",
+    "meson.options",
     "tests/meson.build",
     "tests/profile/meson.build",
     "examples/meson.build",
+    "ci/examples/example_groups.py",
     "ci/meson/compile_tests/meson.build",
     "ci/meson/native/meson.build",
     "ci/meson/shared/meson.build",
