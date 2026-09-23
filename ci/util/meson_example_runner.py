@@ -140,6 +140,11 @@ def compile_examples(
     if not parallel:
         # Sequential compilation (-j 1)
         cmd.extend(["-j", "1"])
+    elif jobs_text := os.environ.get("FASTLED_EXAMPLE_JOBS"):
+        # Bound CI memory use without making every example build serial.
+        if not jobs_text.isdigit() or int(jobs_text) < 1:
+            raise ValueError("FASTLED_EXAMPLE_JOBS must be a positive integer")
+        cmd.extend(["-j", jobs_text])
 
     # Determine targets to build
     # Note: process_group already shows "Compiling: <examples>" status

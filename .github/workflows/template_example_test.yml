@@ -74,6 +74,9 @@ jobs:
         run: |
           export PYTHONUNBUFFERED=1
           export PYTHONIOENCODING=utf-8
+          if [[ "$RUNNER_OS" == Linux && "$FASTLED_EXAMPLE_GROUP" == CompileTests ]]; then
+            export FASTLED_EXAMPLE_JOBS=2
+          fi
           ./test --clang --examples --example-group "$FASTLED_EXAMPLE_GROUP" --verbose --build-mode "$FASTLED_BUILD_MODE"
           if [[ "$RUNNER_OS" == Linux ]]; then
             build_suffix=""
