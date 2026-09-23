@@ -431,14 +431,15 @@ void mapAndSolveDrivesQ16(const GamutMapQ16& map, const i32 (&xyz)[3],
     clampGamutDrives(drives);
 }
 
-bool buildGamutMapRgbwQ16(const colorimetric_response::EmitterProfile& profile,
-                          const i32 (&white_xyz)[3],
-                          WhiteAllocationPolicy policy,
-                          GamutMapRgbwQ16* out) FL_NO_EXCEPT {
+bool buildGamutMapRgbwFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white_xyz)[3],
+    WhiteAllocationPolicy policy, GamutMapRgbwQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
-    if (!buildWhiteAllocationQ16(profile, white_xyz, policy, &out->allocation)) {
+    if (!buildWhiteAllocationFromSolveQ16(profile, solve, white_xyz, policy,
+                                          &out->allocation)) {
         return false;
     }
 
@@ -611,17 +612,26 @@ void mapAndAllocateRgbwQ16(const GamutMapRgbwQ16& map, const i32 (&xyz)[3],
     }
 }
 
+bool buildGamutMapRgbwQ16(const colorimetric_response::EmitterProfile& profile,
+                          const i32 (&white_xyz)[3],
+                          WhiteAllocationPolicy policy,
+                          GamutMapRgbwQ16* out) FL_NO_EXCEPT {
+    EmitterSolveMatrixQ16 solve;
+    return buildRgbSolveMatrixQ16(profile, &solve) &&
+           buildGamutMapRgbwFromSolveQ16(profile, solve, white_xyz, policy, out);
+}
 
-bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
-                           const i32 (&white1_xyz)[3],
-                           const i32 (&white2_xyz)[3],
-                           WhiteAllocationPolicy policy,
-                           GamutMapRgbwwQ16* out) FL_NO_EXCEPT {
+
+bool buildGamutMapRgbwwFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white1_xyz)[3],
+    const i32 (&white2_xyz)[3], WhiteAllocationPolicy policy,
+    GamutMapRgbwwQ16* out) FL_NO_EXCEPT {
     if (out == nullptr) {
         return false;
     }
-    if (!buildTwoWhiteAllocationQ16(profile, white1_xyz, white2_xyz, policy,
-                                    &out->allocation)) {
+    if (!buildTwoWhiteAllocationFromSolveQ16(solve, white1_xyz, white2_xyz,
+                                             policy, &out->allocation)) {
         return false;
     }
 
@@ -720,6 +730,17 @@ bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
     xyzToOklabQ16(brightest_neutral, lab);
     out->max_neutral_lightness = lab[0];
     return true;
+}
+
+bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
+                           const i32 (&white1_xyz)[3],
+                           const i32 (&white2_xyz)[3],
+                           WhiteAllocationPolicy policy,
+                           GamutMapRgbwwQ16* out) FL_NO_EXCEPT {
+    EmitterSolveMatrixQ16 solve;
+    return buildRgbSolveMatrixQ16(profile, &solve) &&
+           buildGamutMapRgbwwFromSolveQ16(profile, solve, white1_xyz, white2_xyz,
+                                           policy, out);
 }
 
 void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],

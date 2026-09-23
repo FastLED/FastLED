@@ -96,6 +96,13 @@ bool buildGamutMapRgbwQ16(const colorimetric_response::EmitterProfile& profile,
                           WhiteAllocationPolicy policy,
                           GamutMapRgbwQ16* out) FL_NO_EXCEPT;
 
+/// Bind a four-emitter map from an effective RGB solve and a white column
+/// already adapted into the same D65 working coordinates.
+bool buildGamutMapRgbwFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white_xyz)[3],
+    WhiteAllocationPolicy policy, GamutMapRgbwQ16* out) FL_NO_EXCEPT;
+
 /// One pixel: XYZ in s16.16 to four in-gamut drives, red, green, blue, white.
 ///
 /// Same shape as the three-emitter path -- one forward OKLab transform, one
@@ -136,6 +143,14 @@ bool buildGamutMapRgbwwQ16(const colorimetric_response::EmitterProfile& profile,
                            const i32 (&white2_xyz)[3],
                            WhiteAllocationPolicy policy,
                            GamutMapRgbwwQ16* out) FL_NO_EXCEPT;
+
+/// Bind a five-emitter map from one effective RGB solve and two white
+/// columns, all in the same D65 working coordinates.
+bool buildGamutMapRgbwwFromSolveQ16(
+    const colorimetric_response::EmitterProfile& profile,
+    const EmitterSolveMatrixQ16& solve, const i32 (&white1_xyz)[3],
+    const i32 (&white2_xyz)[3], WhiteAllocationPolicy policy,
+    GamutMapRgbwwQ16* out) FL_NO_EXCEPT;
 
 /// One pixel: XYZ in s16.16 to five in-gamut drives -- red, green, blue,
 /// white1, white2.

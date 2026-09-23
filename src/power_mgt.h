@@ -92,9 +92,9 @@ struct PowerModelRGBW {
     }
 };
 
-/// RGBWW LED power consumption model (RGB + Cool White + Warm White)
-/// @note Future API enhancement - not yet implemented in power calculations
-/// @note Currently forwards to PowerModelRGB, ignoring white channels
+/// RGBWW LED power consumption model (RGB + warm white + cool white).
+/// Managed five-emitter output charges these channels independently. Legacy
+/// output retains the historical folded-RGB estimate for compatibility.
 struct PowerModelRGBWW {
     fl::u8 red_mW;        ///< Red channel power at full brightness (255), in milliwatts
     fl::u8 green_mW;      ///< Green channel power at full brightness (255), in milliwatts
@@ -204,14 +204,9 @@ void set_power_model(const PowerModelRGBW& model);
 /// Set custom RGBWW LED power consumption model
 /// @param model RGBWW power consumption model
 ///
-/// Unlike the RGBW model above, `PowerModelRGBWW::toRGB()` does not drop its
-/// white emitters -- it spreads them across R/G/B, which over-estimates and
-/// so cannot break the budget. That fold is left in place: it is documented,
-/// safe by construction, and a five-emitter accounting needs the RGBWW
-/// allocation the way the RGBW path needs `rgb_2_rgbw`. #4156 R3.
-inline void set_power_model(const PowerModelRGBWW& model) {
-    set_power_model(model.toRGB());
-}
+/// The folded model remains active for legacy RGBWW output. Managed output
+/// also retains the original five weights for its physical emitted codes.
+void set_power_model(const PowerModelRGBWW& model);
 
 /// Get current RGB power model
 /// @returns Current RGB power consumption model
@@ -223,6 +218,12 @@ PowerModelRGB get_power_model();
 /// Zero is the "not declared" reading rather than "declared as free": no
 /// emitter costs nothing, so the two cannot be confused.
 fl::u8 get_white_emitter_mW();
+
+/// Charge already-solved physical output bytes in source emitter order:
+/// RGB, RGBW, or RGB + warm white + cool white. Used by the managed pipeline's
+/// power hook; it must not apply legacy RGB-to-RGBW conversion a second time.
+fl::u32 calculate_unscaled_emitter_power_mW(fl::span<const fl::u8> codes,
+                                            fl::u8 emitter_count);
 
 /// @} PowerModel
 

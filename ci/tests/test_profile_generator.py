@@ -305,13 +305,13 @@ class TestRenderableTopologies(unittest.TestCase):
     def _white_artifact(self: "TestRenderableTopologies", topology: str) -> object:
         channels = TOPOLOGY_CHANNELS[topology]
         channel_records: list[dict[str, object]] = []
-        for name in channels:
+        for index, name in enumerate(channels):
             channel_records.append(
                 {
                     "name": name,
                     "runtime_admissible": True,
-                    "chromaticity": {"x": 0.3, "y": 0.3},
-                    "relative_y": {"value": 0.3},
+                    "chromaticity": {"x": 0.2 + index * 0.05, "y": 0.3},
+                    "relative_y": {"value": 0.3 + index * 0.1},
                 }
             )
         payload = {
@@ -323,27 +323,28 @@ class TestRenderableTopologies(unittest.TestCase):
         }
         return admit(parse_artifact(json.dumps(payload).encode("utf-8"), topology))
 
-    def test_a_fully_specified_white_artifact_is_still_refused(
+    def test_a_fully_specified_white_artifact_preserves_all_emitters(
         self: "TestRenderableTopologies",
     ) -> None:
-        """No silent reduction to three channels.
-
-        `EmitterProfile` carries three primaries and `EmitterProfile::rgb` is
-        its only factory, so rendering an admitted RGBW artifact would emit an
-        RGB profile with the white simply gone. That is the quiet data loss
-        this gate exists to prevent, so it is refused at admission instead --
-        even though every channel here is individually admissible.
-        """
+        """An admitted wide artifact must render every physical white."""
 
         for topology in ("rgbw", "rgbww"):
             with self.subTest(topology=topology):
                 decision = self._white_artifact(topology)
-                self.assertIsInstance(decision, Refusal)
-                assert isinstance(decision, Refusal)
-                self.assertTrue(
-                    any("no EmitterProfile form yet" in r for r in decision.reasons),
-                    msg=f"reasons were {decision.reasons}",
+                self.assertIsInstance(decision, Admission)
+                assert isinstance(decision, Admission)
+                rendered = render_header([decision], [], "c0ffee", "2026-01-01")
+                self.assertIn(f"EmitterProfile::{topology}(", rendered)
+                self.assertEqual(
+                    rendered.count("Chromaticity("), len(TOPOLOGY_CHANNELS[topology])
                 )
+                for index, name in enumerate(TOPOLOGY_CHANNELS[topology]):
+                    with self.subTest(channel=name):
+                        self.assertIn(
+                            f"Chromaticity({0.2 + index * 0.05:.6f}f, 0.300000f)",
+                            rendered,
+                        )
+                        self.assertIn(f"{0.3 + index * 0.1:.6f}f", rendered)
 
     def test_rgb_is_still_renderable(self: "TestRenderableTopologies") -> None:
         # Guards the screen above from becoming "refuse everything".

@@ -39,11 +39,9 @@ using ColorPipelineFrameRef = StreamingPipelineQ16&;
 
 /// Runs `processPixelQ16` over a `PixelController`'s pixels as they are read.
 ///
-/// Only the plain RGB path is colour-managed. `loadAndScaleRGBW`,
-/// `loadAndScaleRGBWW` and the HD entry points delegate to the wrapped
-/// controller, which is the legacy behaviour, and they say why at each site.
-/// Those are not oversights: each is blocked on something this phase does
-/// not own.
+/// RGB, RGBW and RGBWW use the physical profile matching their topology.
+/// Without a wide profile the white-channel methods retain the wrapped
+/// controller's legacy conversion and wire bytes.
 class ColorManagedPixelSource {
   public:
     /// `dither_phase` is where this frame sits in the temporal-dither cycle.
@@ -81,15 +79,13 @@ class ColorManagedPixelSource {
     void loadAndScaleRGB16(u16* b0_out, u16* b1_out, u16* b2_out) FL_NO_EXCEPT;
 #endif
 
-    /// Legacy. An RGBW device's white emitter has no home in
-    /// `EmitterProfile`, which carries three primaries and nothing else, so
-    /// there is no profile for `allocateEmitterDrivesQ16` to be given. That
-    /// is a schema question (P1/P3), not something to invent here.
+    /// Physical RGBW solve when a matching profile is bound; otherwise the
+    /// legacy RGB-to-RGBW conversion. White insertion follows EOrderW.
     void loadAndScaleRGBW(const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out,
                           u8* b3_out) FL_NO_EXCEPT;
 
-    /// Legacy, for the same reason, with two whites instead of one -- and
-    /// the two-white allocation is itself unimplemented (#4198).
+    /// Physical two-white solve when a matching RGBWW profile is bound;
+    /// otherwise the legacy conversion. Placement follows EOrderWW.
     void loadAndScaleRGBWW(Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out,
                            u8* b3_out, u8* b4_out) FL_NO_EXCEPT;
 

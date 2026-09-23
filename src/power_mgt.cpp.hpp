@@ -63,6 +63,43 @@ static WhiteEmitterPower& gWhiteEmitterPower() {
     return fl::Singleton<WhiteEmitterPower>::instance();
 }
 
+struct RgbwwEmitterPower {
+    PowerModelRGBWW model;
+    bool declared = false;
+};
+
+static RgbwwEmitterPower& gRgbwwEmitterPower() {
+    return fl::Singleton<RgbwwEmitterPower>::instance();
+}
+
+// Source order, not wire order: RGB, then W or warm-W/cool-W. An undeclared
+// white gets the maximum representable emitter draw, so a managed channel
+// cannot silently under-budget it. Legacy estimates keep their old fallback.
+static void emitter_power_weights(fl::u8 count, fl::u8 (&weights)[5]) {
+    const PowerModelRGB& rgb = gPowerModel();
+    weights[0] = rgb.red_mW;
+    weights[1] = rgb.green_mW;
+    weights[2] = rgb.blue_mW;
+    weights[3] = 0;
+    weights[4] = 0;
+    if (count == 4) {
+        const fl::u8 white = gWhiteEmitterPower().mW;
+        weights[3] = white != 0 ? white : 255;
+    } else if (count == 5) {
+        const RgbwwEmitterPower& rgbww = gRgbwwEmitterPower();
+        if (rgbww.declared) {
+            weights[0] = rgbww.model.red_mW;
+            weights[1] = rgbww.model.green_mW;
+            weights[2] = rgbww.model.blue_mW;
+            weights[3] = rgbww.model.warm_white_mW;
+            weights[4] = rgbww.model.white_mW;
+        } else {
+            weights[3] = 255;
+            weights[4] = 255;
+        }
+    }
+}
+
 #if SKETCH_HAS_LARGE_MEMORY
 static constexpr fl::size kPowerScalingTableSize = 256;
 
@@ -218,6 +255,28 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds) {
 
     fl::u32 total = red32 + green32 + blue32 + (gPowerModel().dark_mW * leds.size());
 
+    return total;
+}
+
+fl::u32 calculate_unscaled_emitter_power_mW(fl::span<const fl::u8> codes,
+                                            fl::u8 emitter_count) {
+    if (emitter_count < 3 || emitter_count > 5 ||
+        codes.size() % emitter_count != 0) {
+        return 0;
+    }
+    fl::u8 weights[5];
+    emitter_power_weights(emitter_count, weights);
+    fl::u32 sums[5] = {};
+    for (fl::size i = 0; i < codes.size(); i += emitter_count) {
+        for (fl::u8 channel = 0; channel < emitter_count; ++channel) {
+            sums[channel] += map_power_value(codes[i + channel]);
+        }
+    }
+    fl::u32 total = static_cast<fl::u32>(gPowerModel().dark_mW) *
+                    (codes.size() / emitter_count);
+    for (fl::u8 channel = 0; channel < emitter_count; ++channel) {
+        total += (sums[channel] * weights[channel]) >> 8;
+    }
     return total;
 }
 
@@ -387,11 +446,12 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = controller.colorPipeline();
     const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
     if (pipeline && hooks.unscaledPowerMilliwatts != nullptr) {
-        // The estimator is passed in so the pipeline side never names it (#4472).
-        fl::u32 (*const estimate)(fl::span<const CRGB>, const fl::Rgbw&) =
-            &calculate_unscaled_power_mW;
-        return hooks.unscaledPowerMilliwatts(*pipeline, leds, controller.getRgbw(),
-                                             estimate);
+        // The callback charges already-solved physical emitter bytes. In
+        // particular, the RGBW legacy estimator must not convert them again.
+        const fl::u8 emitters = controller.getRgbww().active()
+                                    ? 5 : (controller.getRgbw().active() ? 4 : 3);
+        return hooks.unscaledPowerMilliwatts(
+            *pipeline, leds, emitters, &calculate_unscaled_emitter_power_mW);
     }
 #endif
     // Below the large-memory tier only this is compiled: a managed channel
@@ -445,13 +505,6 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
     if (controller.getDither() != BINARY_DITHER) {
         return 0;
     }
-#if !defined(FL_IS_AVR)
-    // The RGBW and RGBWW conversions read the raw pixel, not the dithered
-    // one (AVR has no conversion and does dither those channels).
-    if (controller.getRgbw().active() || controller.getRgbww().active()) {
-        return 0;
-    }
-#endif
 #if FL_COLOR_PIPELINE_SHARED
     // A managed channel never takes the legacy offsets (C5); with
     // BINARY_DITHER it runs the pipeline's temporal dither instead, which
@@ -466,10 +519,25 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
         for (fl::size i = 0; i < leds.size(); ++i) {
             lit += (leds[i].r | leds[i].g | leds[i].b) != 0 ? 1u : 0u;
         }
-        const PowerModelRGB& model = gPowerModel();
-        const fl::u64 per_code = static_cast<fl::u64>(lit) *
-            (static_cast<fl::u32>(model.red_mW) + model.green_mW + model.blue_mW);
-        return static_cast<fl::u32>((per_code * max_power_step() + 255) >> 8);
+        const fl::u8 emitters = controller.getRgbww().active()
+                                    ? 5 : (controller.getRgbw().active() ? 4 : 3);
+        fl::u8 weights[5];
+        emitter_power_weights(emitters, weights);
+        fl::u32 sum_weights = 0;
+        for (fl::u8 i = 0; i < emitters; ++i) {
+            sum_weights += weights[i];
+        }
+        const fl::u64 per_code = static_cast<fl::u64>(lit) * sum_weights;
+        const fl::u64 reserve = (per_code * max_power_step() + 255) >> 8;
+        return reserve > 0xFFFFFFFFu ? 0xFFFFFFFFu
+                                     : static_cast<fl::u32>(reserve);
+    }
+#endif
+#if !defined(FL_IS_AVR)
+    // Legacy RGBW and RGBWW conversions read the raw pixel, not the
+    // dithered one. Managed channels have already returned above.
+    if (controller.getRgbw().active() || controller.getRgbww().active()) {
+        return 0;
     }
 #endif
     return dither_reserve_mW(fl::span<const CRGB>(
@@ -577,11 +645,22 @@ void set_power_model(const PowerModelRGB& model) {
     // declaration from an earlier RGBW model standing would charge this one
     // for a diode the caller just said it does not have.
     gWhiteEmitterPower().mW = 0;
+    gRgbwwEmitterPower().declared = false;
 }
 
 void set_power_model(const PowerModelRGBW& model) {
     apply_rgb_power_model(model.toRGB());
     gWhiteEmitterPower().mW = model.white_mW;
+    gRgbwwEmitterPower().declared = false;
+}
+
+void set_power_model(const PowerModelRGBWW& model) {
+    // Preserve the legacy folded-RGB estimate while retaining the physical
+    // weights for a managed five-emitter pipeline.
+    apply_rgb_power_model(model.toRGB());
+    gWhiteEmitterPower().mW = 0;
+    gRgbwwEmitterPower().model = model;
+    gRgbwwEmitterPower().declared = true;
 }
 
 fl::u8 get_white_emitter_mW() {

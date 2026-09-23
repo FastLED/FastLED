@@ -414,7 +414,6 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     if (options.mColorProfile.mUseGlobalSourceDefault) {
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
     }
-
     // Guards the build below: a binding already rejected by strict mode must
     // not be built. It is deliberately *not* reused for the enablement
     // branch -- the build can raise the fallback itself (#4345), and reading
@@ -438,7 +437,8 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         // usable pipeline costs no allocation -- that is the failing half of
         // an ordinary unbound channel, not an exceptional path.
         StreamingPipelineQ16 pipeline;
-        if (hooks.build(mSettings.mColorProfile, &pipeline)) {
+        if (hooks.build(mSettings.mColorProfile, mSettings, mChipset,
+                        &pipeline)) {
 #if FL_COLOR_PIPELINE_SHARED
             mPipeline = fl::make_shared<StreamingPipelineQ16>(pipeline);
 #else

@@ -147,6 +147,224 @@ FL_TEST_CASE("The managed source emits one byte triple per pixel, in order") {
     }
 }
 
+FL_TEST_CASE("[#4515] physical RGBW and RGBWW profiles drive their white emitters") {
+    const CRGB pixel(180, 160, 140);
+    const EmitterProfile base = rgbDevice();
+    for (int emitter_count = 4; emitter_count <= 5; ++emitter_count) {
+        EmitterProfile profile = base;
+        profile.topology = emitter_count == 4
+            ? colorimetric_response::EmitterTopology::RGBW
+            : colorimetric_response::EmitterTopology::RGBWW;
+        profile.xy_white1[0] = 0.39f;
+        profile.xy_white1[1] = 0.38f;
+        profile.lum_white1 = 0.8f;
+        profile.xy_white2[0] = 0.28f;
+        profile.xy_white2[1] = 0.31f;
+        profile.lum_white2 = 0.7f;
+        StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(), profile,
+                                             GamutPolicy::ChromaCompress, &pipeline));
+        i32 drives[5] = {};
+        processPixelWideQ16(pipeline, pixel.r, pixel.g, pixel.b, drives);
+        FL_CHECK_GT(drives[3], 0);
+        if (emitter_count == 5) FL_CHECK_GT(drives[4], 0);
+        CRGB leds[1] = {pixel};
+        PixelController<RGB> controller(leds, 1, ColorAdjustment(),
+                                        DISABLE_DITHER);
+        ColorManagedPixelSource source(controller, GRB, pipeline);
+        u8 bytes[5] = {};
+        if (emitter_count == 4) {
+            const Rgbw config(6000, RGBW_MODE::kRGBWNullWhitePixel,
+                              EOrderW::W0);
+            source.loadAndScaleRGBW(config, &bytes[0], &bytes[1],
+                                    &bytes[2], &bytes[3]);
+            FL_CHECK_EQ(bytes[0], static_cast<u8>((drives[3] * 255 + 32768) >> 16));
+            FL_CHECK_EQ(bytes[1], static_cast<u8>((drives[1] * 255 + 32768) >> 16));
+            FL_CHECK_EQ(bytes[2], static_cast<u8>((drives[0] * 255 + 32768) >> 16));
+        } else {
+            const Rgbww config(2700, 6500, RGBWW_MODE::kRGBWWColorimetric,
+                                EOrderWW::WwWcStart);
+            source.loadAndScaleRGBWW(config, &bytes[0], &bytes[1],
+                                     &bytes[2], &bytes[3], &bytes[4]);
+            FL_CHECK_EQ(bytes[0], static_cast<u8>((drives[3] * 255 + 32768) >> 16));
+            FL_CHECK_EQ(bytes[1], static_cast<u8>((drives[4] * 255 + 32768) >> 16));
+            FL_CHECK_EQ(bytes[2], static_cast<u8>((drives[1] * 255 + 32768) >> 16));
+        }
+    }
+}
+
+FL_TEST_CASE("[#4515] a managed profile must match the channel's emitter count") {
+    CRGB leds[1] = {CRGB(128, 128, 128)};
+    EmitterProfile profile = rgbDevice();
+    profile.topology = colorimetric_response::EmitterTopology::RGBW;
+    profile.xy_white1[0] = 0.3127f;
+    profile.xy_white1[1] = 0.3290f;
+    profile.lum_white1 = 1.0f;
+    ChannelOptions wrong;
+    FL_REQUIRE(wrong.setColorProfile(profile));
+    ChannelConfig wrong_config(3015, makeTimingConfig<TIMING_WS2812_800KHZ>(),
+                               fl::span<CRGB>(leds, 1), RGB, wrong);
+    auto rejected = Channel::create(wrong_config);
+    FL_REQUIRE(rejected != nullptr);
+    FL_CHECK_EQ(rejected->colorProfileStatus(), ColorProfileStatus::Fallback);
+#if FL_COLOR_PIPELINE_SHARED
+    FL_CHECK_FALSE(rejected->colorPipeline());
+#endif
+
+    ChannelOptions right;
+    right.mWhiteCfg = RgbwDefault::value();
+    FL_REQUIRE(right.setColorProfile(profile));
+    ChannelConfig right_config(3016, makeTimingConfig<TIMING_WS2812_800KHZ>(),
+                               fl::span<CRGB>(leds, 1), RGB, right);
+    auto accepted = Channel::create(right_config);
+    FL_REQUIRE(accepted != nullptr);
+    FL_CHECK_EQ(accepted->colorProfileStatus(), ColorProfileStatus::Configured);
+#if FL_COLOR_PIPELINE_SHARED
+    FL_CHECK(accepted->colorPipeline());
+#endif
+}
+
+FL_TEST_CASE("[#4515] bound RGBW and RGBWW profiles reach encoded channel bytes") {
+    CRGB rgbw_leds[1] = {CRGB(180, 160, 140)};
+    CRGB rgbww_leds[1] = {CRGB(180, 160, 140)};
+    auto capture = fl::make_shared<ByteCapturingMockEngine>("WIDE_CAPTURE");
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(2015, capture);
+    auto cleanup = fl::make_scope_exit([&]() { manager.removeDriver(capture); });
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+
+    EmitterProfile rgbw_profile = rgbDevice();
+    rgbw_profile.topology = colorimetric_response::EmitterTopology::RGBW;
+    rgbw_profile.xy_white1[0] = 0.39f;
+    rgbw_profile.xy_white1[1] = 0.38f;
+    rgbw_profile.lum_white1 = 0.8f;
+    ChannelOptions rgbw_options;
+    rgbw_options.mWhiteCfg = Rgbw(6000, RGBW_MODE::kRGBWNullWhitePixel,
+                                   EOrderW::W0);
+    FL_REQUIRE(rgbw_options.setColorProfile(rgbw_profile,
+                                            SourceProfile::srgbBt709()));
+    ChannelConfig rgbw_config(3017, timing, fl::span<CRGB>(rgbw_leds, 1),
+                              GRB, rgbw_options);
+    auto rgbw_channel = Channel::create(rgbw_config);
+    FL_REQUIRE(rgbw_channel != nullptr);
+
+    EmitterProfile rgbww_profile = rgbw_profile;
+    rgbww_profile.topology = colorimetric_response::EmitterTopology::RGBWW;
+    rgbww_profile.xy_white2[0] = 0.28f;
+    rgbww_profile.xy_white2[1] = 0.31f;
+    rgbww_profile.lum_white2 = 0.7f;
+    ChannelOptions rgbww_options;
+    rgbww_options.mWhiteCfg = Rgbww(2700, 6500,
+                                    RGBWW_MODE::kRGBWWColorimetric,
+                                    EOrderWW::WwWcStart);
+    FL_REQUIRE(rgbww_options.setColorProfile(rgbww_profile,
+                                             SourceProfile::srgbBt709()));
+    ChannelConfig rgbww_config(3018, timing, fl::span<CRGB>(rgbww_leds, 1),
+                               GRB, rgbww_options);
+    auto rgbww_channel = Channel::create(rgbww_config);
+    FL_REQUIRE(rgbww_channel != nullptr);
+    CRGB legacy_leds[1] = {CRGB(180, 160, 140)};
+    ChannelOptions legacy_options;
+    legacy_options.mWhiteCfg = Rgbw(6000, RGBW_MODE::kRGBWNullWhitePixel,
+                                     EOrderW::W0);
+    ChannelConfig legacy_config(3019, timing, fl::span<CRGB>(legacy_leds, 1),
+                                GRB, legacy_options);
+    auto legacy_channel = Channel::create(legacy_config);
+    FL_REQUIRE(legacy_channel != nullptr);
+    auto remove_channels = fl::make_scope_exit([&]() {
+        rgbw_channel->removeFromDrawList();
+        rgbww_channel->removeFromDrawList();
+        legacy_channel->removeFromDrawList();
+    });
+    FastLED.add(rgbw_channel);
+    FastLED.add(rgbww_channel);
+    FastLED.add(legacy_channel);
+    capture->mCapturedChannels.clear();
+    FastLED.show();
+    FL_REQUIRE_GE(capture->mCapturedChannels.size(), fl::size(3));
+    const auto& four = capture->mCapturedChannels[0]->getData();
+    const auto& five = capture->mCapturedChannels[1]->getData();
+    const auto& legacy = capture->mCapturedChannels[2]->getData();
+    FL_REQUIRE_GE(four.size(), fl::size(4));
+    FL_REQUIRE_GE(five.size(), fl::size(5));
+    FL_REQUIRE_GE(legacy.size(), fl::size(4));
+    FL_CHECK_EQ(legacy[0], 0);
+    FL_CHECK_EQ(legacy[1], 160);
+    FL_CHECK_EQ(legacy[2], 180);
+    FL_CHECK_EQ(legacy[3], 140);
+    FL_CHECK_GT(four[0], 0);  // W0: legacy NullWhitePixel would emit zero.
+    FL_CHECK_GT(five[0], 0);
+    FL_CHECK_GT(five[1], 0);
+    for (int index = 0; index < 2; ++index) {
+        const EmitterProfile& profile = index == 0 ? rgbw_profile : rgbww_profile;
+        StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(), profile,
+                                             GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        i32 drives[5];
+        processPixelWideQ16(pipeline, 180, 160, 140, drives);
+        const auto& actual = index == 0 ? four : five;
+        const int count = index == 0 ? 4 : 5;
+        const int order4[4] = {3, 1, 0, 2};
+        const int order5[5] = {3, 4, 1, 0, 2};
+        for (int slot = 0; slot < count; ++slot) {
+            const int emitter = index == 0 ? order4[slot] : order5[slot];
+            const i32 drive = drives[emitter];
+            const u8 expected = drive <= 0 ? 0 :
+                (drive >= 65536 ? 255 :
+                 static_cast<u8>((drive * 255 + 32768) >> 16));
+            FL_CHECK_EQ(actual[slot], expected);
+        }
+    }
+}
+
+FL_TEST_CASE("[#4515] wide profiles reject encoders that consume only RGB drives") {
+    installColorPipelineHooks();
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    FL_REQUIRE(hooks.build != nullptr);
+    EmitterProfile profile = rgbDevice();
+    profile.topology = colorimetric_response::EmitterTopology::RGBW;
+    profile.xy_white1[0] = 0.39f;
+    profile.xy_white1[1] = 0.38f;
+    profile.lum_white1 = 0.8f;
+    ChannelOptions options;
+    options.mWhiteCfg = Rgbw(6000, RGBW_MODE::kRGBWNullWhitePixel,
+                              EOrderW::W0);
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::srgbBt709()));
+    StreamingPipelineQ16 pipeline;
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    const ChipsetVariant ws2812 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+    const ChipsetVariant ucs8 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
+    const ChipsetVariant ucs16 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
+    const ChipsetVariant tm1908 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_TM1908);
+    const ChipsetVariant spi = SpiChipsetConfig(1, 2, SpiEncoder::apa102());
+    FL_CHECK(hooks.build(options.mColorProfile, options, ws2812, &pipeline));
+    FL_CHECK(hooks.build(options.mColorProfile, options, ucs8, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, ucs16,
+                               &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, tm1908,
+                               &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, spi, &pipeline));
+
+    profile.topology = colorimetric_response::EmitterTopology::RGBWW;
+    profile.xy_white2[0] = 0.28f;
+    profile.xy_white2[1] = 0.31f;
+    profile.lum_white2 = 0.7f;
+    options.mWhiteCfg = Rgbww(2700, 6500, RGBWW_MODE::kRGBWWColorimetric,
+                               EOrderWW::WwWcStart);
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::srgbBt709()));
+    const ChipsetVariant tm1812 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW);
+    FL_CHECK(hooks.build(options.mColorProfile, options, ws2812, &pipeline));
+    FL_CHECK(hooks.build(options.mColorProfile, options, tm1812, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, ucs8, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, spi, &pipeline));
+}
+
 FL_TEST_CASE("Brightness is applied once, by the pipeline") {
     // The trap this class exists to avoid. `loadAndScale0/1/2` fold in
     // `mColorAdjustment`, whose premixed value carries brightness, and the
@@ -553,7 +771,10 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
         // And the binding really yields a pipeline, so the hooks being
         // installed is not the whole of the claim.
         StreamingPipelineQ16 pipeline;
-        FL_CHECK(colorPipelineHooks().build(options.mColorProfile, &pipeline));
+        const ChipsetVariant chipset = ClocklessChipset(
+            1, makeTimingConfig<TIMING_WS2812_800KHZ>());
+        FL_CHECK(colorPipelineHooks().build(options.mColorProfile, options,
+                                            chipset, &pipeline));
     }
 
     {
@@ -680,6 +901,64 @@ FL_TEST_CASE("[#4042] C5: BINARY_DITHER on a managed channel is a temporal dithe
     // The control: without dither the same drives miss by up to half a code,
     // so the bound above is the dither's doing.
     FL_CHECK_GT(worst_rounded, 0.4);
+}
+
+FL_TEST_CASE("[#4515] managed white emitters use the low-light temporal dither") {
+    const EmitterProfile profiles[] = {
+        EmitterProfile::rgbw(
+            "dither/rgbw", Chromaticity(.6400f, .3300f),
+            Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+            Chromaticity(.3127f, .3290f), 1, 1, 1, 1),
+        EmitterProfile::rgbww(
+            "dither/rgbww", Chromaticity(.6400f, .3300f),
+            Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+            Chromaticity(.3457f, .3585f), Chromaticity(.3127f, .3290f),
+            .22f, .60f, .08f, .35f, .35f),
+    };
+    for (int topology = 0; topology < 2; ++topology) {
+        StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::srgbBt709(),
+                                             profiles[topology],
+                                             GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        setPipelineFluxQ16(&pipeline, FluxScalar::fromBrightness(4));
+        CRGB led[1] = {CRGB(200, 200, 200)};
+        i32 drives[5];
+        processPixelWideQ16(pipeline, led[0].r, led[0].g, led[0].b, drives);
+        const double exact = exactCode(drives[3]);
+        FL_REQUIRE_GT(exact, 0.1);
+        FL_REQUIRE_LT(exact, 254.9);
+        ColorAdjustment adjustment = ColorAdjustment::noAdjustment();
+        adjustment.premixed = CRGB(255, 255, 255);
+        double sum = 0;
+        bool saw_floor = false;
+        bool saw_ceil = false;
+        for (int phase = 0; phase < 8; ++phase) {
+            fl::detail::advanceDitherFrame();
+            PixelController<RGB> controller(led, 1, adjustment, BINARY_DITHER);
+            ColorManagedPixelSource source(controller, RGB, pipeline,
+                                           static_cast<u8>(phase));
+            u8 bytes[5] = {};
+            if (topology == 0) {
+                source.loadAndScaleRGBW(RgbwDefault::value(), &bytes[0],
+                                        &bytes[1], &bytes[2], &bytes[3]);
+            } else {
+                source.loadAndScaleRGBWW(RgbwwDefault::value(), &bytes[0],
+                                         &bytes[1], &bytes[2], &bytes[3],
+                                         &bytes[4]);
+            }
+            const int code = bytes[3];
+            const int floor_code = static_cast<int>(exact);
+            FL_CHECK_GE(code, floor_code);
+            FL_CHECK_LE(code, floor_code + 1);
+            saw_floor |= code == floor_code;
+            saw_ceil |= code == floor_code + 1;
+            sum += code;
+        }
+        FL_CHECK(saw_floor);
+        FL_CHECK(saw_ceil);
+        FL_CHECK_LE(fl::fabs(sum / 8.0 - exact), 1.0 / 16.0 + 1e-9);
+    }
 }
 
 FL_TEST_CASE("[#4042] C5: the temporal dither does not pulse a uniform strip") {

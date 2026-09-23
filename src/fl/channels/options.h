@@ -128,6 +128,19 @@ struct ChannelOptions {
             !validChromaticity(profile.xy_r) || !validChromaticity(profile.xy_g) ||
             !validChromaticity(profile.xy_b) || !validPrimaries(source.primaries) ||
             !finitePositive(profile.lum_r) || !finitePositive(profile.lum_g) || !finitePositive(profile.lum_b) ||
+            (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+             profile.topology != colorimetric_response::EmitterTopology::RGBW &&
+             profile.topology != colorimetric_response::EmitterTopology::RGBWW) ||
+            (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+             (!validChromaticity(profile.xy_white1) ||
+              !finitePositive(profile.lum_white1) ||
+              (profile.response_lut_size != 0 &&
+               profile.response_lut_white1 == nullptr))) ||
+            (profile.topology == colorimetric_response::EmitterTopology::RGBWW &&
+             (!validChromaticity(profile.xy_white2) ||
+              !finitePositive(profile.lum_white2) ||
+              (profile.response_lut_size != 0 &&
+               profile.response_lut_white2 == nullptr))) ||
             (profile.response_lut_size != 0 &&
              (profile.response_lut_r == nullptr || profile.response_lut_g == nullptr || profile.response_lut_b == nullptr))) {
             clearColorProfile();
@@ -136,6 +149,18 @@ struct ChannelOptions {
         if (!validResponseLut(profile.response_lut_r, profile.response_lut_size) ||
             !validResponseLut(profile.response_lut_g, profile.response_lut_size) ||
             !validResponseLut(profile.response_lut_b, profile.response_lut_size)) {
+            clearColorProfile();
+            return false;
+        }
+        if (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+            !validResponseLut(profile.response_lut_white1,
+                              profile.response_lut_size)) {
+            clearColorProfile();
+            return false;
+        }
+        if (profile.topology == colorimetric_response::EmitterTopology::RGBWW &&
+            !validResponseLut(profile.response_lut_white2,
+                              profile.response_lut_size)) {
             clearColorProfile();
             return false;
         }

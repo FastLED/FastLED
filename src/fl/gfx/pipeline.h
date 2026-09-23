@@ -46,6 +46,16 @@ struct ResponseLutsQ16 {
     vector<u16> blue;
 };
 
+/// Allocated only for a bound four- or five-emitter profile. Plain RGB
+/// pipelines retain their historical storage and per-pixel path.
+struct WidePipelineQ16 {
+    colorimetric_response::EmitterTopology topology;
+    GamutMapRgbwQ16 rgbw;
+    GamutMapRgbwwQ16 rgbww;
+    vector<u16> white1_response;
+    vector<u16> white2_response;
+};
+
 /// Everything the per-pixel path needs, derived once when a profile binds.
 ///
 /// Deliberately a plain carrier of the stages' own bind-time state rather
@@ -90,6 +100,8 @@ struct StreamingPipelineQ16 {
     /// Absent means linear code-to-light response. With a table, the inverse
     /// is applied after `flux` and before the final wire quantization.
     shared_ptr<const ResponseLutsQ16> response;
+
+    shared_ptr<const WidePipelineQ16> wide;
 };
 
 /// Bind a source declaration and a device profile into a pipeline.
@@ -119,5 +131,11 @@ void setPipelineFluxQ16(StreamingPipelineQ16* pipeline, FluxScalar flux) FL_NO_E
 /// between calls, no RGB8 intermediate.
 void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
                      i32 (&drives)[3]) FL_NO_EXCEPT;
+
+/// Like processPixelQ16, but solves the physical 4/5-emitter hull. The
+/// first three drives are RGB, followed by W or warm/cool W. Unused slots
+/// are zero; call only when `wide` is present.
+void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                         u8 b, i32 (&drives)[5]) FL_NO_EXCEPT;
 
 }  // namespace fl

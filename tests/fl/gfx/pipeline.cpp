@@ -218,6 +218,23 @@ double emittedLight(i32 drive, const u16* response) {
             response[cell + 1] * fraction) / 65535.0;
 }
 
+void wideEmittedXyz(const EmitterProfile& profile, const i32 (&drives)[5],
+                    double (&xyz)[3]) {
+    const float* xy[] = {profile.xy_r, profile.xy_g, profile.xy_b,
+                         profile.xy_white1, profile.xy_white2};
+    const float peak[] = {profile.lum_r, profile.lum_g, profile.lum_b,
+                          profile.lum_white1, profile.lum_white2};
+    xyz[0] = xyz[1] = xyz[2] = 0.0;
+    const int count = profile.topology == colorimetric_response::EmitterTopology::RGBW
+                          ? 4 : 5;
+    for (int i = 0; i < count; ++i) {
+        const double light = static_cast<double>(drives[i]) / 65536.0 * peak[i];
+        xyz[0] += light * xy[i][0] / xy[i][1];
+        xyz[1] += light;
+        xyz[2] += light * (1.0 - xy[i][0] - xy[i][1]) / xy[i][1];
+    }
+}
+
 enum class Src { Srgb, DisplayP3, Bt2020 };
 
 SourceProfile sourceFor(Src which) {
@@ -759,6 +776,133 @@ FL_TEST_CASE("Emitter response plateaus invert to the first matching code") {
                                          GamutPolicy::ChromaCompress, &curved));
     processPixelQ16(curved, 128, 128, 128, drive);
     FL_CHECK_EQ(drive[1], 21845);
+}
+
+FL_TEST_CASE("Wide pipeline reproduces committed float64 white-emitter corpus") {
+    // Independent expectations from ci/golden/color-reference-v1.json.
+    // Compare emitted XYZ, not a particular feasible RGB/white allocation.
+    const EmitterProfile rgbw = EmitterProfile::rgbw(
+        "corpus/rgbw", Chromaticity(.6400f, .3300f),
+        Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+        Chromaticity(.3127f, .3290f), 1, 1, 1, 1);
+    const EmitterProfile rgbww = EmitterProfile::rgbww(
+        "corpus/rgbww_two_white", Chromaticity(.6400f, .3300f),
+        Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+        Chromaticity(.3457f, .3585f), Chromaticity(.3127f, .3290f),
+        .22f, .60f, .08f, .35f, .35f);
+    struct Case {
+        const char* id;
+        const EmitterProfile* device;
+        u8 encoded[3];
+        double expected_xyz[3];
+    };
+    const Case cases[] = {
+        {"bt2020-rgbw-09", &rgbw, {255, 255, 255},
+         {.9504559270516717, 1.0, 1.0890577507598784}},
+        {"bt2020-rgbw-12", &rgbw, {255, 0, 0},
+         {.5409080533586774, .278108222536633, .06135718031124257}},
+        {"bt2020-rgbww_two_white-09", &rgbww, {255, 255, 255},
+         {.9504559270516717, 1.0, 1.0890577507598784}},
+        {"bt2020-rgbww_two_white-11", &rgbww, {255, 220, 180},
+         {.828999104143426, .7964362305333453, .5519013732020442}},
+    };
+    for (const Case& sample : cases) {
+        FL_SUBCASE(sample.id) {
+            StreamingPipelineQ16 pipeline;
+            FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::bt2020(),
+                                                 *sample.device,
+                                                 GamutPolicy::ChromaCompress,
+                                                 &pipeline));
+            FL_REQUIRE(pipeline.wide != nullptr);
+            i32 drives[5];
+            processPixelWideQ16(pipeline, sample.encoded[0], sample.encoded[1],
+                                sample.encoded[2], drives);
+            double emitted[3];
+            wideEmittedXyz(*sample.device, drives, emitted);
+            for (int i = 0; i < 3; ++i) {
+                FL_CHECK_LT(::fabs(emitted[i] - sample.expected_xyz[i]), .005);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("Wide pipeline adapts selected target white") {
+    // ci/golden/color-reference-v1.json: bt2020-non_d65_white-09.
+    const EmitterProfile device = EmitterProfile::rgbw(
+        "corpus/non_d65_white", Chromaticity(.6400f, .3300f),
+        Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+        Chromaticity(.3457f, .3585f), 1, 1, 1, 1);
+    const Chromaticity d50(.3457f, .3585f);
+    StreamingPipelineQ16 pipeline;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::bt2020(), device,
+                                         GamutPolicy::ChromaCompress,
+                                         &pipeline, &d50));
+    i32 drives[5];
+    processPixelWideQ16(pipeline, 255, 255, 255, drives);
+    double emitted[3];
+    wideEmittedXyz(device, drives, emitted);
+    FL_CHECK_LT(::fabs(emitted[0] - .9642956764295681), .005);
+    FL_CHECK_LT(::fabs(emitted[1] - 1.0), .005);
+    FL_CHECK_LT(::fabs(emitted[2] - .8251046025104606), .005);
+}
+
+FL_TEST_CASE("Wide pipeline inverts each nonlinear white response after flux") {
+    const u16 linear[] = {0, 32768, 65535};
+    const u16 white1[] = {0, 8192, 65535};
+    const u16 white2[] = {0, 16384, 65535};
+    EmitterProfile curved_device = EmitterProfile::rgbww(
+        "response/rgbww", Chromaticity(.6400f, .3300f),
+        Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+        Chromaticity(.3457f, .3585f), Chromaticity(.3127f, .3290f),
+        .22f, .60f, .08f, .35f, .35f);
+    curved_device.response_lut_r = linear;
+    curved_device.response_lut_g = linear;
+    curved_device.response_lut_b = linear;
+    curved_device.response_lut_white1 = white1;
+    curved_device.response_lut_white2 = white2;
+    curved_device.response_lut_size = 3;
+    EmitterProfile plain_device = curved_device;
+    plain_device.response_lut_size = 0;
+    StreamingPipelineQ16 curved;
+    StreamingPipelineQ16 plain;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(),
+                                         curved_device, GamutPolicy::ChromaCompress,
+                                         &curved));
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(),
+                                         plain_device, GamutPolicy::ChromaCompress,
+                                         &plain));
+    setPipelineFluxQ16(&curved, FluxScalar::fromBrightness(128));
+    setPipelineFluxQ16(&plain, FluxScalar::fromBrightness(128));
+    i32 curved_drives[5];
+    i32 plain_drives[5];
+    processPixelWideQ16(curved, 200, 200, 200, curved_drives);
+    processPixelWideQ16(plain, 200, 200, 200, plain_drives);
+    FL_CHECK_GT(plain_drives[3], 0);
+    FL_CHECK_GT(plain_drives[4], 0);
+    FL_CHECK_GT(curved_drives[3], plain_drives[3]);
+    FL_CHECK_GT(curved_drives[4], plain_drives[4]);
+    FL_CHECK_LT(::fabs(emittedLight(curved_drives[3], white1) -
+                        toFloat(plain_drives[3])), .0001);
+    FL_CHECK_LT(::fabs(emittedLight(curved_drives[4], white2) -
+                        toFloat(plain_drives[4])), .0001);
+}
+
+FL_TEST_CASE("Wide Clamp policy clips unreachable colours without white allocation") {
+    const EmitterProfile device = EmitterProfile::rgbw(
+        "clamp/rgbw", Chromaticity(.6400f, .3300f),
+        Chromaticity(.3000f, .6000f), Chromaticity(.1500f, .0600f),
+        Chromaticity(.3127f, .3290f), 1, 1, 1, 1);
+    StreamingPipelineQ16 pipeline;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::bt2020(), device,
+                                         GamutPolicy::Clamp, &pipeline));
+    i32 drives[5];
+    processPixelWideQ16(pipeline, 255, 0, 0, drives);
+    FL_CHECK_EQ(drives[3], 0);
+    FL_CHECK_EQ(drives[4], 0);
+    for (int i = 0; i < 3; ++i) {
+        FL_CHECK_GE(drives[i], 0);
+        FL_CHECK_LE(drives[i], 65536);
+    }
 }
 
 }  // FL_TEST_FILE

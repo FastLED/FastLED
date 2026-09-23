@@ -89,15 +89,55 @@ void ColorManagedPixelSource::loadAndScaleRGB16(u16* b0_out, u16* b1_out,
 void ColorManagedPixelSource::loadAndScaleRGBW(const Rgbw& rgbw, u8* b0_out,
                                               u8* b1_out, u8* b2_out,
                                               u8* b3_out) FL_NO_EXCEPT {
-        mController.loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
+        if (!mPipeline.wide || mPipeline.wide->topology !=
+                colorimetric_response::EmitterTopology::RGBW) {
+            mController.loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
+            return;
+        }
+        const u8* raw = mController.mData;
+        i32 drives[5];
+        processPixelWideQ16(mPipeline, raw[0], raw[1], raw[2], drives);
+        u8 codes[4];
+        if (temporalDitherEnabled()) {
+            const int position = mController.mLen - mController.mLenRemaining;
+            const u8 phase = static_cast<u8>((mDitherPhase + (position & 7)) & 7);
+            const u8 threshold = kTemporalDitherThresholds[phase];
+            for (int i = 0; i < 4; ++i)
+                codes[i] = quantizeDithered(drives[i], threshold);
+        } else {
+            for (int i = 0; i < 4; ++i) codes[i] = quantize(drives[i]);
+        }
+        rgbw_partial_reorder(rgbw.w_placement, codes[mSlot0], codes[mSlot1],
+                             codes[mSlot2], codes[3], b0_out, b1_out,
+                             b2_out, b3_out);
 }
 
 void ColorManagedPixelSource::loadAndScaleRGBWW(Rgbww rgbww, u8* b0_out,
                                                u8* b1_out, u8* b2_out,
                                                u8* b3_out,
                                                u8* b4_out) FL_NO_EXCEPT {
-        mController.loadAndScaleRGBWW(rgbww, b0_out, b1_out, b2_out, b3_out,
-                                      b4_out);
+        if (!mPipeline.wide || mPipeline.wide->topology !=
+                colorimetric_response::EmitterTopology::RGBWW) {
+            mController.loadAndScaleRGBWW(rgbww, b0_out, b1_out, b2_out,
+                                          b3_out, b4_out);
+            return;
+        }
+        const u8* raw = mController.mData;
+        i32 drives[5];
+        processPixelWideQ16(mPipeline, raw[0], raw[1], raw[2], drives);
+        u8 codes[5];
+        if (temporalDitherEnabled()) {
+            const int position = mController.mLen - mController.mLenRemaining;
+            const u8 phase = static_cast<u8>((mDitherPhase + (position & 7)) & 7);
+            const u8 threshold = kTemporalDitherThresholds[phase];
+            for (int i = 0; i < 5; ++i)
+                codes[i] = quantizeDithered(drives[i], threshold);
+        } else {
+            for (int i = 0; i < 5; ++i) codes[i] = quantize(drives[i]);
+        }
+        rgbww_partial_reorder(rgbww.w_placement, codes[mSlot0], codes[mSlot1],
+                              codes[mSlot2], codes[3], codes[4], b0_out,
+                              b1_out, b2_out, b3_out, b4_out);
 }
 
 #if FASTLED_HD_COLOR_MIXING

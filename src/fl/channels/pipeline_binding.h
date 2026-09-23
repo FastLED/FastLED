@@ -13,6 +13,7 @@
 
 #include "fl/channels/color_managed_source.h"
 #include "fl/channels/color_profile.h"
+#include "fl/channels/config.h"
 #include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/spi_chipsets.h"
@@ -62,7 +63,8 @@ constexpr fl::size kColorPipelineIteratorStorage = sizeof(PixelIterator);
 
 struct ColorPipelineHooks {
     /// Derives a pipeline from a binding. Null until installed.
-    bool (*build)(const ColorProfileBinding&, StreamingPipelineQ16*);
+    bool (*build)(const ColorProfileBinding&, const ChannelOptions&,
+                  const ChipsetVariant&, StreamingPipelineQ16*);
 
     /// Constructs a colour-managed `PixelIterator` in caller-provided
     /// storage. Null until installed.
@@ -106,9 +108,10 @@ struct ColorPipelineHooks {
     /// would link the limiter and its tables into every build that can bind
     /// a profile, power limiting or not (#4472).
 #if FL_COLOR_PIPELINE_SHARED
-    using PowerEstimator = u32 (*)(span<const CRGB> leds, const Rgbw& rgbw);
+    using PowerEstimator = u32 (*)(span<const u8> interleaved_codes,
+                                   u8 emitter_count);
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
-                                   span<const CRGB> leds, const Rgbw& rgbw,
+                                   span<const CRGB> leds, u8 emitter_count,
                                    PowerEstimator estimate);
 #endif
 

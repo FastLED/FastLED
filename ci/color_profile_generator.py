@@ -43,9 +43,9 @@ TOPOLOGY_CHANNELS: dict[str, tuple[str, ...]] = {
     "rgbww": ("red", "green", "blue", "warm_white", "cool_white"),
 }
 
-# The subset the renderer can actually express. `EmitterProfile` is a
-# three-primary type today, so a white emitter has nowhere to go.
-RENDERABLE_TOPOLOGIES: frozenset[str] = frozenset({"rgb"})
+# Every supported topology has a distinct EmitterProfile factory; rendering
+# follows the declared channel set rather than silently dropping whites.
+RENDERABLE_TOPOLOGIES: frozenset[str] = frozenset(TOPOLOGY_CHANNELS)
 
 
 @typechecked
@@ -154,12 +154,6 @@ def admit(artifact: Artifact) -> Admission | Refusal:
         )
         topology = ""
     elif topology not in RENDERABLE_TOPOLOGIES:
-        # P2's `EmitterProfile` carries three chromaticities and three
-        # luminances, and `EmitterProfile::rgb` is its only factory. Admitting
-        # a white-emitter artifact would hand the renderer a channel set it
-        # cannot express, and it would emit an RGB profile that silently drops
-        # the white -- the exact class of quiet data loss this gate exists to
-        # prevent. Refuse until there is a type to render into.
         reasons.append(
             f"topology {topology!r} has no EmitterProfile form yet; only "
             + ", ".join(sorted(RENDERABLE_TOPOLOGIES))
@@ -416,10 +410,10 @@ def _render_profile(admission: Admission) -> list[str]:
     lines.append(f"// sha256:{admission.artifact.content_sha256}")
     lines.append(
         f"constexpr colorimetric_response::EmitterProfile {symbol} = "
-        "colorimetric_response::EmitterProfile::rgb("
+        f"colorimetric_response::EmitterProfile::{admission.topology}("
     )
     lines.append(f'    "{admission.artifact.profile_id}",')
-    for name in ("red", "green", "blue"):
+    for name in TOPOLOGY_CHANNELS[admission.topology]:
         chromaticity = by_name[name]["chromaticity"]
         assert isinstance(chromaticity, dict)
         lines.append(
@@ -427,7 +421,7 @@ def _render_profile(admission: Admission) -> list[str]:
             f"{float(chromaticity['y']):.6f}f),"
         )
     values: list[str] = []
-    for name in ("red", "green", "blue"):
+    for name in TOPOLOGY_CHANNELS[admission.topology]:
         relative = by_name[name]["relative_y"]
         assert isinstance(relative, dict)
         values.append(f"{float(relative['value']):.6f}f")

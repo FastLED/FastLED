@@ -29,6 +29,32 @@ float toFloat(i32 v) { return static_cast<float>(v) / 65536.0f; }
 
 constexpr i32 kFullDrive = 65536;
 
+FL_TEST_CASE("Wide gamut builders use the effective RGB solve") {
+    EmitterSolveMatrixQ16 solve;
+    FL_REQUIRE(buildRgbSolveMatrixQ16(rgbDevice(), &solve));
+    // A bind-time adaptation changes the inverse RGB matrix before the
+    // white columns are expressed in the D65 working domain.
+    for (int axis = 0; axis < 3; ++axis) {
+        solve.m[0][axis] /= 2;
+    }
+    const i32 white1[3] = {62289, 65536, 71372};
+    const i32 white2[3] = {63196, 65536, 54074};
+    GamutMapRgbwQ16 one;
+    FL_REQUIRE(buildGamutMapRgbwFromSolveQ16(
+        rgbDevice(), solve, white1, WhiteAllocationPolicy::WhitePreferred, &one));
+    GamutMapRgbwwQ16 two;
+    FL_REQUIRE(buildGamutMapRgbwwFromSolveQ16(
+        rgbDevice(), solve, white1, white2,
+        WhiteAllocationPolicy::WhitePreferred, &two));
+    i32 expected[3];
+    solveRgbDrivesQ16(solve, white1, expected);
+    FL_CHECK_EQ(one.allocation.rgb_solve.m[0][0], solve.m[0][0]);
+    FL_CHECK_EQ(one.allocation.per_white[0], expected[0]);
+    FL_CHECK_EQ(two.allocation.rgb_solve.m[0][0], solve.m[0][0]);
+    FL_CHECK_EQ(two.allocation.difference[0],
+                expected[0] - two.allocation.per_white2[0]);
+}
+
 /// XYZ of a chromaticity at the given luminance.
 void xyzAt(float x, float y, float luminance, i32 (&out)[3]) {
     float xyz[3];

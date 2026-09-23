@@ -139,6 +139,45 @@ FL_TEST_CASE("Profile binding validates and owns response tables") {
                 static_cast<const fl::u16*>(response));
 }
 
+FL_TEST_CASE("Wide profile binding owns both white response tables") {
+    fl::u16 warm[] = {0, 4096, 65535};
+    fl::u16 cool[] = {0, 8192, 65535};
+    EmitterProfile profile = EmitterProfile::rgbww(
+        "fixture/rgbww", Chromaticity(.64f, .33f),
+        Chromaticity(.30f, .60f), Chromaticity(.15f, .06f),
+        Chromaticity(.42f, .40f), Chromaticity(.28f, .30f),
+        1.0f, 1.0f, 1.0f, .8f, .6f);
+    profile.response_lut_r = warm;
+    profile.response_lut_g = warm;
+    profile.response_lut_b = warm;
+    profile.response_lut_white1 = warm;
+    profile.response_lut_white2 = cool;
+    profile.response_lut_size = 3;
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::linearSrgb()));
+    warm[1] = 123;
+    cool[1] = 456;
+    const EmitterProfile* stored = options.emitterProfile();
+    FL_REQUIRE(stored != nullptr);
+    FL_CHECK_EQ(stored->topology, colorimetric_response::EmitterTopology::RGBWW);
+    FL_CHECK_EQ(stored->response_lut_white1[1], fl::u16(4096));
+    FL_CHECK_EQ(stored->response_lut_white2[1], fl::u16(8192));
+    FL_CHECK_NE(stored->response_lut_white1, static_cast<const fl::u16*>(warm));
+    FL_CHECK_NE(stored->response_lut_white2, static_cast<const fl::u16*>(cool));
+}
+
+FL_TEST_CASE("RGBW profile factory leaves the second white slot inactive") {
+    constexpr EmitterProfile profile = EmitterProfile::rgbw(
+        "fixture/rgbw", Chromaticity(.64f, .33f),
+        Chromaticity(.30f, .60f), Chromaticity(.15f, .06f),
+        Chromaticity(.32f, .34f), 1.0f, 1.0f, 1.0f, .7f);
+    FL_CHECK_EQ(profile.topology, colorimetric_response::EmitterTopology::RGBW);
+    FL_CHECK_CLOSE(profile.xy_white1[0], .32f, .0001f);
+    FL_CHECK_CLOSE(profile.lum_white1, .7f, .0001f);
+    FL_CHECK_EQ(profile.response_lut_white2, static_cast<const fl::u16*>(nullptr));
+    FL_CHECK_CLOSE(profile.lum_white2, 0.0f, .0001f);
+}
+
 FL_TEST_CASE("A response LUT is validated, owned, and applied after flux scaling") {
     // FastLED#4156 R2 turns on P2 permitting a per-channel nonlinear
     // code-to-light response: a shared brightness scalar preserves
