@@ -10,6 +10,8 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/five_bit_semantics.h"
 #include "fl/channels/manager.h"
+#include "fl/channels/pipeline_binding.h"
+#include "fl/channels/power_prepass.h"
 #include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/channels/detail/wait_spin_budget.h"  // for tiered-wait spin-budget setters (#2818)
@@ -114,6 +116,13 @@ CFastLED::CFastLED() {
 	mNMinMicros = 0;
 }
 
+#if FL_COLOR_PIPELINE_SHARED
+const fl::FramePowerDispatch*& fl::activeFramePowerDispatch() FL_NO_EXCEPT {
+	static const FramePowerDispatch* dispatch = nullptr;
+	return dispatch;
+}
+#endif
+
 void CFastLED::init() {
 	// Call platform-specific initialization once
 	// Uses the trampoline pattern: platforms/init.h dispatches to platform-specific headers
@@ -144,6 +153,48 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 
 fl::vector<fl::ChannelPtr>& CFastLED::channels() {
 	return fl::Singleton<fl::vector<fl::ChannelPtr>>::instance();
+}
+
+fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
+    const fl::CLEDController& controller) FL_NO_EXCEPT {
+    PowerCodecPolicy policy;
+    const fl::vector<fl::ChannelPtr>& registered = CFastLED::channels();
+    for (fl::size i = 0; i < registered.size(); ++i) {
+        const fl::Channel* channel = registered[i].get();
+        if (channel != &controller) continue;
+        policy.kind = PowerCodecKind::Byte;
+        const fl::SpiChipsetConfig* spi =
+            channel->getChipset().ptr<fl::SpiChipsetConfig>();
+        if (spi == nullptr) return policy;
+        switch (spi->timing.chipset) {
+            case fl::SpiChipset::LPD6803:
+                policy.kind = PowerCodecKind::Native5;
+                break;
+            case fl::SpiChipset::LPD8806:
+                policy.kind = PowerCodecKind::Native7;
+                break;
+            case fl::SpiChipset::APA102HD:
+            case fl::SpiChipset::DOTSTARHD:
+            case fl::SpiChipset::SK9822HD:
+            case fl::SpiChipset::HD107HD: {
+                policy.kind = PowerCodecKind::FiveBit;
+                const fl::EmitterProfile* profile = channel->emitterProfile();
+                const fl::FiveBitSemantics semantics = fl::fiveBitSemanticsFor(
+                    spi->timing.chipset, profile != nullptr
+                        ? profile->five_bit_semantics
+                        : fl::FiveBitSemantics::NotApplicable);
+                policy.min_field = fl::hdMinimumField(
+                    semantics, fl::detail::hdFieldFloor());
+                break;
+            }
+            default:
+                break;
+        }
+        return policy;
+    }
+    // A custom managed controller has no known wire encoding. Charging full
+    // code for every lit emitter is conservative, never a silent guess.
+    return policy;
 }
 
 void CFastLED::add(fl::ChannelPtr channel) {
@@ -392,7 +443,15 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
 	if(mPPowerFunc) {
+		// showColor() encodes a constant, not controller source pixels; the
+		// source-frame managed prepass cannot model it.
+#if FL_COLOR_PIPELINE_SHARED
+		const fl::FramePowerDispatch* dispatch = fl::activeFramePowerDispatch();
+		scale = dispatch ? dispatch->showColorBrightness(scale, mNPowerData)
+			: (*mPPowerFunc)(scale, mNPowerData);
+#else
 		scale = (*mPPowerFunc)(scale, mNPowerData);
+#endif
 	}
 	mLastShownScale = scale;
 
@@ -494,6 +553,24 @@ fl::u8 CFastLED::getHdFieldFloor() const {
 }
 
 fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
+#if FL_COLOR_PIPELINE_SHARED
+	if (apply_limiter && mPPowerFunc && fl::activeFramePowerDispatch()) {
+		bool managed = false;
+		for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
+			if (p->getEnabled() && p->colorPipeline()) {
+				managed = true;
+				break;
+			}
+		}
+		if (managed) {
+			const fl::FramePowerPlan plan =
+				fl::activeFramePowerDispatch()->calculate(mScale, mNPowerData);
+			if (plan.modeled_mW == 0xFFFFFFFFu) return plan.modeled_mW;
+			const fl::u32 mcu_mW = plan.mcu_mW;
+			return plan.modeled_mW > mcu_mW ? plan.modeled_mW - mcu_mW : 0;
+		}
+	}
+#endif
 	fl::u32 fixed_power_mW = 0;
 	fl::u32 controllable_power_mW = 0;
 	fl::u32 dither_reserve_power_mW = 0;

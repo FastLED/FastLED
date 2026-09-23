@@ -15,6 +15,7 @@
 #include "fl/channels/color_profile.h"
 #include "fl/channels/config.h"
 #include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
+#include "fl/channels/power_prepass.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/spi_chipsets.h"
 #include "fl/stl/vector.h"
@@ -60,6 +61,18 @@ bool buildPipelineForBinding(const ColorProfileBinding& binding,
 /// and it is *references* to the definitions that keep code alive.
 constexpr fl::size kColorPipelineSourceStorage = sizeof(ColorManagedPixelSource);
 constexpr fl::size kColorPipelineIteratorStorage = sizeof(PixelIterator);
+
+#if FL_COLOR_PIPELINE_SHARED
+/// Upward-rounded linear-light buckets for one managed channel. This is not
+/// a pixel framebuffer: storage is fixed at 1.3 KiB regardless of strip
+/// length, and only exists during a power-limited frame.
+struct ManagedPowerHistogram {
+    static constexpr u8 kBins = 64;
+    u32 counts[5][kBins] = {};
+    u32 pixels = 0;
+    u8 emitters = 3;
+};
+#endif
 
 struct ColorPipelineHooks {
     /// Derives a pipeline from a binding. Null until installed.
@@ -127,6 +140,26 @@ struct ColorPipelineHooks {
     bool (*encodeManagedSpi)(PixelIterator& pixels, vector_psram<u8>* out,
                              SpiChipset chip, const CLEDController& controller);
 };
+
+#if FL_COLOR_PIPELINE_SHARED
+/// Power-only callbacks and temporary scalar live outside ColorPipelineHooks:
+/// unbound sketches already link that general hook object, but must not pay
+/// RAM for the optional shared-frame limiter.
+struct PowerFrameHooks {
+    void (*buildPowerHistogram)(const StreamingPipelineQ16& pipeline,
+                                span<const CRGB> leds, u8 emitter_count,
+                                ManagedPowerHistogram* out);
+    u64 (*histogramPowerNumerator)(const StreamingPipelineQ16& pipeline,
+                                   const ManagedPowerHistogram& histogram,
+                                   FluxScalar flux, PowerCodecPolicy codec,
+                                   const u8 (&weights)[5],
+                                   u8 (*electricalMap)(u8 code));
+    bool frameFluxActive;
+    u32 frameFluxQ16;
+};
+
+PowerFrameHooks& powerFrameHooks() FL_NO_EXCEPT;
+#endif
 
 /// The installed hooks. Both pointers are null in a program that never binds
 /// a colour profile.

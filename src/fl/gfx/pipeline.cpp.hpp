@@ -260,8 +260,8 @@ void setPipelineFluxQ16(StreamingPipelineQ16* pipeline,
     pipeline->flux = flux;
 }
 
-void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
-                     i32 (&drives)[3]) FL_NO_EXCEPT {
+void processPixelLinearQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                           u8 b, i32 (&drives)[3]) FL_NO_EXCEPT {
     // One semantic conversion per channel: code straight to linear light.
     // Nothing here writes an RGB8 intermediate, which is what B3 asks and
     // what ci/tests/test_no_rgb8_intermediate.py enforces structurally.
@@ -291,6 +291,11 @@ void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
         mapAndSolveDrivesQ16(pipeline.gamut, xyz, drives);
     }
 
+}
+
+void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
+                     i32 (&drives)[3]) FL_NO_EXCEPT {
+    processPixelLinearQ16(pipeline, r, g, b, drives);
     // C4's single amplitude stage scales linear light. Physical response
     // inversion follows it; dimming compensated drive codes would skew hue.
     applyFluxScalar(pipeline.flux, span<i32>(drives, 3));
@@ -301,8 +306,8 @@ void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
     }
 }
 
-void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
-                         u8 b, i32 (&drives)[5]) FL_NO_EXCEPT {
+void processPixelWideLinearQ16(const StreamingPipelineQ16& pipeline, u8 r,
+                               u8 g, u8 b, i32 (&drives)[5]) FL_NO_EXCEPT {
     for (int i = 0; i < 5; ++i) drives[i] = 0;
     if (!pipeline.wide) return;
     const u16 linear_r = decodeTransferU16(pipeline.transfer, r);
@@ -348,6 +353,14 @@ void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
         }
         for (int i = 0; i < 4; ++i) drives[i] = wide_drives[i];
     }
+}
+
+void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                         u8 b, i32 (&drives)[5]) FL_NO_EXCEPT {
+    processPixelWideLinearQ16(pipeline, r, g, b, drives);
+    if (!pipeline.wide) return;
+    const bool rgbww = pipeline.wide && pipeline.wide->topology ==
+        colorimetric_response::EmitterTopology::RGBWW;
     const int count = rgbww ? 5 : 4;
     applyFluxScalar(pipeline.flux, span<i32>(drives, count));
     if (pipeline.response) {
@@ -361,6 +374,20 @@ void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
                                             pipeline.wide->white2_response);
         }
     }
+}
+
+i32 encodeLinearEmitterQ16(const StreamingPipelineQ16& pipeline, u8 emitter,
+                            i32 light, FluxScalar flux) FL_NO_EXCEPT {
+    i32 scaled[1] = {light};
+    applyFluxScalar(flux, span<i32>(scaled, 1));
+    if (!pipeline.response) return scaled[0];
+    if (emitter == 0) return inverseResponseQ16(scaled[0], pipeline.response->red);
+    if (emitter == 1) return inverseResponseQ16(scaled[0], pipeline.response->green);
+    if (emitter == 2) return inverseResponseQ16(scaled[0], pipeline.response->blue);
+    if (!pipeline.wide) return 0;
+    if (emitter == 3) return inverseResponseQ16(scaled[0], pipeline.wide->white1_response);
+    if (emitter == 4) return inverseResponseQ16(scaled[0], pipeline.wide->white2_response);
+    return 0;
 }
 
 }  // namespace fl

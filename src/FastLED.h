@@ -273,6 +273,7 @@ using fl::degrees;
 
 #include "noise.h"
 #include "power_mgt.h"
+#include "fl/channels/power_prepass.h"
 
 #include "fastspi.h"
 #include "chipsets.h"
@@ -718,6 +719,8 @@ inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) {
 /// This is instantiated as a global object with the name FastLED.
 /// @nosubgrouping
 class CFastLED {
+	friend fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
+		const fl::CLEDController& controller) FL_NO_EXCEPT;
 	// int m_nControllers;
 	fl::u8  mScale;         ///< the current global brightness scale setting
 	        fl::u16 mNFPS;          ///< tracking for current frames per second (FPS) value
@@ -1647,7 +1650,15 @@ public:
 
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts the max power draw desired, in milliwatts
-	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) { mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW); mNPowerData = milliwatts; }
+	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) {
+		mNPowerData = milliwatts;
+#if FL_COLOR_PIPELINE_SHARED
+		fl::activeFramePowerDispatch() = fl::framePowerDispatch();
+		mPPowerFunc = fl::activeFramePowerDispatch()->showBrightness;
+#else
+		mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW);
+#endif
+	}
 
 	/// Lowest 5-bit current field the colour-managed APA102-HD path may use
 	/// (B1's flicker floor, #4042). APA102's field is a secondary slow PWM:

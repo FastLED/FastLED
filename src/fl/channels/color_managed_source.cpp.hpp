@@ -30,6 +30,10 @@ void ColorManagedPixelSource::setFlux(u8 brightness) FL_NO_EXCEPT {
     setPipelineFluxQ16(&mPipeline, FluxScalar::fromBrightness(brightness));
 }
 
+void ColorManagedPixelSource::setFlux(FluxScalar flux) FL_NO_EXCEPT {
+    setPipelineFluxQ16(&mPipeline, flux);
+}
+
 ColorManagedPixelSource::ColorManagedPixelSource(
     PixelController<RGB>& controller, EOrder order,
     ColorPipelineFrameRef pipeline) FL_NO_EXCEPT

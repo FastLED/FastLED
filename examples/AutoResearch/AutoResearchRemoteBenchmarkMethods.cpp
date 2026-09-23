@@ -48,6 +48,13 @@
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/channels/config.h"
+#include "fl/channels/channel.h"
+#include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
+#include "fl/channels/data.h"
+#include "fl/channels/power_prepass.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/stl/scope_exit.h"
 #include <Arduino.h>
 
 #include "fl/net/ble.h"
@@ -67,6 +74,37 @@ struct PerfProbeMemcpyState {
 PerfProbeMemcpyState& perfProbeMemcpyState() {
     return fl::Singleton<PerfProbeMemcpyState>::instance();
 }
+
+#if FL_COLOR_PIPELINE_SHARED
+class PowerBenchCaptureDriver : public fl::IChannelDriver {
+  public:
+    fl::ChannelDataPtr frames[3];
+    int count = 0;
+    bool canHandle(const fl::ChannelDataPtr&) const FL_NO_EXCEPT override { return true; }
+    void enqueue(fl::ChannelDataPtr data) FL_NO_EXCEPT override {
+        if (count < 3) frames[count++] = data;
+    }
+    void show() FL_NO_EXCEPT override {}
+    DriverState poll() FL_NO_EXCEPT override { return DriverState::READY; }
+    fl::string getName() const FL_NO_EXCEPT override { return "POWER_BENCH_CAPTURE"; }
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+        return Capabilities(true, true);
+    }
+};
+
+fl::colorimetric_response::EmitterProfile powerBenchProfile(
+    fl::colorimetric_response::EmitterTopology topology) {
+    fl::colorimetric_response::EmitterProfile profile = fl::profiles::WS2812B;
+    profile.topology = topology;
+    profile.xy_white1[0] = 0.39f;
+    profile.xy_white1[1] = 0.38f;
+    profile.xy_white2[0] = 0.28f;
+    profile.xy_white2[1] = 0.31f;
+    profile.lum_white1 = 0.8f;
+    profile.lum_white2 = 0.8f;
+    return profile;
+}
+#endif
 
 }  // namespace
 
@@ -488,6 +526,162 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
                      bench.fps_at_one_update_per_frame);
         return response;
     });
+
+#if FL_COLOR_PIPELINE_SHARED
+    // colorPipelinePerf below stops at the pixel source. This measures the
+    // complete show -> power plan -> channel encode path on three channels.
+    // A capture driver consumes encoded frames without requiring LED wiring;
+    // physical transmission time is deliberately outside this measurement.
+    remote.bind("mixedPowerShowPerf", [](const fl::json& args) -> fl::json {
+        int pixels = 64;
+        int frames = 4;
+        int budget_mw = 2500;
+        if (args.is_array() && args.size() && args[0].is_object()) {
+            const fl::json& cfg = args[0];
+            if (cfg.contains("pixels") && cfg["pixels"].is_int())
+                pixels = static_cast<int>(cfg["pixels"].as_int().value());
+            if (cfg.contains("frames") && cfg["frames"].is_int())
+                frames = static_cast<int>(cfg["frames"].as_int().value());
+            if (cfg.contains("budget_mw") && cfg["budget_mw"].is_int())
+                budget_mw = static_cast<int>(cfg["budget_mw"].as_int().value());
+        }
+        fl::json response = fl::json::object();
+        response.set("pixels_per_channel", pixels);
+        response.set("frames_per_sample", frames);
+        response.set("budget_mw", budget_mw);
+        if (pixels < 1 || pixels > 128 || frames < 1 || frames > 8 ||
+            budget_mw < 625 || budget_mw > 50000) {
+            response.set("success", false);
+            response.set("error", "out_of_range");
+            return response;
+        }
+        if (FastLED.count() != 0) {
+            response.set("success", false);
+            response.set("error", "existing_channels");
+            return response;
+        }
+
+        fl::vector<CRGB> leds(static_cast<fl::size>(pixels * 3));
+        if (leds.size() != static_cast<fl::size>(pixels * 3)) {
+            response.set("success", false);
+            response.set("error", "allocation_failed");
+            return response;
+        }
+        for (int i = 0; i < pixels * 3; ++i)
+            leds[static_cast<fl::size>(i)] = CRGB(170 + i * 7, 220 + i * 3, 190 + i * 11);
+        fl::ChannelOptions legacy_options;
+        fl::ChannelOptions rgbw_options;
+        fl::ChannelOptions rgbww_options;
+        legacy_options.mDitherMode = DISABLE_DITHER;
+        rgbw_options.mDitherMode = DISABLE_DITHER;
+        rgbww_options.mDitherMode = DISABLE_DITHER;
+        rgbw_options.mWhiteCfg = fl::Rgbw(6000, fl::RGBW_MODE::kRGBWNullWhitePixel,
+                                           fl::EOrderW::W0);
+        rgbww_options.mWhiteCfg = fl::Rgbww(2700, 6500,
+            fl::RGBWW_MODE::kRGBWWColorimetric, fl::EOrderWW::WwWcStart);
+        if (!rgbw_options.setColorProfile(powerBenchProfile(
+                fl::colorimetric_response::EmitterTopology::RGBW),
+                fl::SourceProfile::linearSrgb()) ||
+            !rgbww_options.setColorProfile(powerBenchProfile(
+                fl::colorimetric_response::EmitterTopology::RGBWW),
+                fl::SourceProfile::linearSrgb())) {
+            response.set("success", false);
+            response.set("error", "profile_build_failed");
+            return response;
+        }
+        const auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        auto legacy = fl::Channel::create(fl::ChannelConfig(101, timing,
+            fl::span<CRGB>(leds.data(), pixels), RGB, legacy_options));
+        auto rgbw = fl::Channel::create(fl::ChannelConfig(102, timing,
+            fl::span<CRGB>(leds.data() + pixels, pixels), RGB, rgbw_options));
+        auto rgbww = fl::Channel::create(fl::ChannelConfig(103, timing,
+            fl::span<CRGB>(leds.data() + pixels * 2, pixels), RGB, rgbww_options));
+        if (!legacy || !rgbw || !rgbww || !rgbw->isColorManaged() ||
+            !rgbww->isColorManaged()) {
+            response.set("success", false);
+            response.set("error", "channel_create_failed");
+            return response;
+        }
+        auto capture = fl::make_shared<PowerBenchCaptureDriver>();
+        const fl::u8 prior_brightness = FastLED.getBrightness();
+        fl::ChannelManager::instance().addDriver(1000000, capture);
+        auto cleanup = fl::make_scope_exit([&]() {
+            FastLED.remove(legacy);
+            FastLED.remove(rgbw);
+            FastLED.remove(rgbww);
+            FastLED.clear(ClearFlags::POWER_SETTINGS);
+            FastLED.setBrightness(prior_brightness);
+            fl::ChannelManager::instance().removeDriver(capture);
+        });
+        // This is a dedicated fixture: leave the harness at its default
+        // unlimited power setting after each run, even if a caller configured
+        // a limiter before invoking this benchmark.
+        FastLED.add(legacy);
+        FastLED.add(rgbw);
+        FastLED.add(rgbww);
+        FastLED.setBrightness(255);
+        const fl::FramePowerPlan on_plan =
+            fl::calculateFramePowerPlan(255, static_cast<fl::u32>(budget_mw));
+        const fl::FramePowerPlan off_plan =
+            fl::calculateFramePowerPlan(255, 0xffffffffu);
+
+        bool captured_all = true;
+        auto show_sample = [&](bool limited, fl::u32& hash) -> fl::u32 {
+            if (limited) FastLED.setMaxPowerInMilliWatts(budget_mw);
+            else FastLED.clear(ClearFlags::POWER_SETTINGS);
+            capture->count = 0;
+            FastLED.show(); // untimed warm-up after each setting change
+            const fl::u32 start = fl::micros();
+            for (int f = 0; f < frames; ++f) {
+                capture->count = 0;
+                FastLED.show();
+            }
+            const fl::u32 elapsed = fl::micros() - start;
+            captured_all = captured_all && capture->count == 3;
+            if (capture->count == 3) {
+                for (int c = 0; c < 3; ++c) {
+                    const auto& bytes = capture->frames[c]->getData();
+                    for (fl::size i = 0; i < bytes.size(); ++i)
+                        hash = (hash ^ bytes[i]) * 16777619u;
+                    capture->frames[c].reset();
+                }
+            }
+            return elapsed;
+        };
+        fl::u32 on_hash = 2166136261u, off_hash = 2166136261u;
+        fl::u32 on_us[4], off_us[4];
+        // ABBA / BAAB: each condition occupies every position once.
+        const bool order[8] = {true, false, false, true,
+                               false, true, true, false};
+        int on_count = 0, off_count = 0;
+        for (int i = 0; i < 8; ++i) {
+            if (order[i]) on_us[on_count++] = show_sample(true, on_hash);
+            else off_us[off_count++] = show_sample(false, off_hash);
+        }
+        if (!captured_all) {
+            response.set("success", false);
+            response.set("error", "capture_failed");
+            return response;
+        }
+        auto median4 = [](fl::u32* values) -> fl::u32 {
+            for (int i = 1; i < 4; ++i)
+                for (int j = i; j > 0 && values[j] < values[j - 1]; --j) {
+                    const fl::u32 tmp = values[j]; values[j] = values[j - 1]; values[j - 1] = tmp;
+                }
+            return (values[1] + values[2]) / 2;
+        };
+        response.set("success", true);
+        response.set("on_median_us", static_cast<int64_t>(median4(on_us)));
+        response.set("off_median_us", static_cast<int64_t>(median4(off_us)));
+        response.set("on_plan_modeled_mw", static_cast<int64_t>(on_plan.modeled_mW));
+        response.set("off_plan_modeled_mw", static_cast<int64_t>(off_plan.modeled_mW));
+        response.set("on_plan_flux_q16", static_cast<int64_t>(on_plan.flux_q16));
+        response.set("off_plan_flux_q16", static_cast<int64_t>(off_plan.flux_q16));
+        response.set("on_fnv1a", static_cast<int64_t>(on_hash));
+        response.set("off_fnv1a", static_cast<int64_t>(off_hash));
+        return response;
+    });
+#endif
 
 #if FL_COLOR_PROFILE_RUNTIME
     // P9 (#4043): throughput of the colour pipeline on the real per-pixel

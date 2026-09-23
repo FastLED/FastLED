@@ -199,6 +199,20 @@ existing encoded wire buffers. The prepass and encode cost both count toward
 throughput budgets. Caller-owned source storage must not mutate during either
 pass; profile bindings are immutable snapshots until the frame ends.
 
+The current implementation of this frame-wide prepass is the large-memory,
+shared-pipeline path of `FastLED.show()` when the built-in power limiter is
+installed and at least one enabled channel has a managed profile. It keeps
+64 upward-rounded linear-light bins per emitter per managed channel (at most
+five emitters, about 1.3 KiB of temporary histogram storage per channel),
+then searches a Q16 scalar. Histogram storage is sized once and filled in
+place, so no per-channel histogram copy or vector reallocation is required.
+If snapshot allocation fails, the solver fails closed at zero controllable
+flux and marks the frame infeasible/uncertified. Legacy channels are walked for each candidate;
+the prepass is therefore not a fixed two source walks for those channels.
+Small-memory tiers retain the legacy u8 limiter and do not provide this
+per-latched-frame managed bound. `showColor()` also retains its separate
+legacy path and is outside this managed-frame guarantee.
+
 User brightness remains `b/255` in linear light. The internal power scalar is
 wide, not an eight-bit replacement brightness. Fixed controller/LED idle
 consumption is independent of that scalar. A budget below unavoidable baseline
