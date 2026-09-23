@@ -32,6 +32,7 @@ struct FramePowerPlan {
     bool limited = false;
 };
 
+#if FL_COLOR_PIPELINE_SHARED
 struct FramePowerDispatch {
     FramePowerPlan (*calculate)(u8 requested_brightness, u32 budget_mW);
     void (*setFrameFlux)(bool active, u32 flux_q16);
@@ -44,7 +45,6 @@ const FramePowerDispatch* framePowerDispatch() FL_NO_EXCEPT;
 /// Solve a frame's maximum shared scalar without advancing dither state.
 /// The caller must keep source data and profile bindings stable until encode
 /// completes. A below-idle budget returns zero flux and `infeasible=true`.
-#if FL_COLOR_PIPELINE_SHARED
 FramePowerPlan calculateFramePowerPlan(u8 requested_brightness,
                                       u32 budget_mW) FL_NO_EXCEPT;
 
