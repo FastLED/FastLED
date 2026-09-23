@@ -125,7 +125,7 @@ def compile_examples(
         examples: List of example names to compile (None = all)
         verbose: Enable verbose compilation output
         parallel: Enable parallel compilation (default: True)
-        build_mode: Build mode ("quick", "debug", or "release")
+        build_mode: Build mode (quick, debug, debug-thin, release, profile)
 
     Returns:
         True if compilation successful, False otherwise
@@ -265,7 +265,7 @@ def run_examples(
         examples: List of example names to run (None = all)
         verbose: Enable verbose test output
         timeout: Timeout per example in seconds (default: 30)
-        build_mode: Build mode ("quick", "debug", or "release")
+        build_mode: Build mode (quick, debug, debug-thin, release, profile)
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -422,7 +422,7 @@ def run_meson_examples(
         clean: Clean build directory before setup
         verbose: Enable verbose output
         debug: Enable debug mode (full symbols + sanitizers)
-        build_mode: Override build mode ('quick', 'debug', 'release')
+        build_mode: Override build mode (quick, debug, debug-thin, release, profile)
         no_pch: Disable precompiled headers (NOT IMPLEMENTED - PCH always enabled)
         parallel: Enable parallel compilation (default: True)
         full: Execute examples after compilation (default: False)
@@ -437,7 +437,7 @@ def run_meson_examples(
         build_mode = "debug" if debug else "quick"
 
     # Validate build mode
-    valid_modes = ["quick", "debug", "release", "profile"]
+    valid_modes = ["quick", "debug", "debug-thin", "release", "profile"]
     if build_mode not in valid_modes:
         _ts_print(
             f"[MESON] Error: Invalid build mode: {build_mode}. "
@@ -459,7 +459,7 @@ def run_meson_examples(
     # — the failure mode that had `example tests windows` red on master
     # since 2026-06-23. The shared helper also applies the macOS-specific
     # ASan options used by the unit-test runner.
-    if build_mode == "debug":
+    if build_mode in ("debug", "debug-thin"):
         setup_sanitizer_env(source_dir, verbose)
 
     # Construct mode-specific build directory
@@ -536,7 +536,7 @@ def run_meson_examples(
     if not setup_meson_build(
         source_dir,
         build_dir,
-        debug=(build_mode == "debug"),
+        debug=(build_mode in ("debug", "debug-thin")),
         reconfigure=force_reconfigure,
         build_mode=build_mode,
         verbose=verbose,
@@ -619,7 +619,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--build-mode",
         type=str,
-        choices=["quick", "debug", "release", "profile"],
+        choices=["quick", "debug", "debug-thin", "release", "profile"],
         default=None,
         help="Override build mode (default: quick, or debug if --debug flag set)",
     )

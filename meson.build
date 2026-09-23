@@ -96,6 +96,9 @@ platforms_shared_files = files(platforms_shared_sources)
 build_mode = get_option('build_mode')
 cpp_compiler = meson.get_compiler('cpp')
 is_wasm_build = host_machine.system() == 'emscripten'
+if build_mode == 'debug-thin' and (meson.is_cross_build() or host_machine.system() != 'linux')
+  error('debug-thin is supported only for native Linux builds')
+endif
 
 subdir('ci/meson/shared')
 

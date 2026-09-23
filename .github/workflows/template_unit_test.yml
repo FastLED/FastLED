@@ -7,6 +7,11 @@ on:
         required: true
         type: string
         description: 'Runner OS (ubuntu-latest, macos-latest, or windows-latest)'
+      build-mode:
+        required: false
+        type: string
+        default: debug
+        description: 'Native sanitizer preset (debug or Linux-only debug-thin)'
 
 permissions:
   contents: read        # Required to checkout code
@@ -127,9 +132,21 @@ jobs:
 
       - name: Run All Unit Tests
         id: run_tests
+        env:
+          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
         run: |
           set -o pipefail
-          ./test --clang --no-parallel --unit --verbose --debug --log-failures failures 2>&1 | tee test.log
+          ./test --clang --no-parallel --unit --verbose --build-mode "$FASTLED_BUILD_MODE" --log-failures failures 2>&1 | tee test.log
+        shell: bash
+
+      - name: Linux native build bytes
+        if: always() && runner.os == 'Linux'
+        env:
+          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
+        run: |
+          if [[ -d ".build/meson-$FASTLED_BUILD_MODE" ]]; then
+            du -sb ".build/meson-$FASTLED_BUILD_MODE"
+          fi
         shell: bash
 
       - name: Test summary and failure logs

@@ -96,7 +96,7 @@ def run_meson_build_and_test(
         clean: Clean build directory before setup
         verbose: Enable verbose output
         debug: Enable debug mode with full symbols and sanitizers (default: False)
-        build_mode: Build mode override ("quick", "debug", "release"). If None, uses debug parameter.
+        build_mode: Build mode override (quick, debug, debug-thin, release, profile).
         check: Enable IWYU static analysis (default: False)
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
         test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
@@ -112,9 +112,9 @@ def run_meson_build_and_test(
     if build_mode is None:
         build_mode = "debug" if debug else "quick"
 
-    if build_mode not in ["quick", "debug", "release", "profile"]:
+    if build_mode not in ["quick", "debug", "debug-thin", "release", "profile"]:
         _ts_print(
-            f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', 'release', or 'profile'",
+            f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', 'debug-thin', 'release', or 'profile'",
             file=sys.stderr,
         )
         return MesonTestResult(
@@ -144,7 +144,7 @@ def run_meson_build_and_test(
         _ts_print(f"[MESON] Cleaning build directory: {build_dir}")
         _safe_rmtree(build_dir)
 
-    use_debug = build_mode == "debug"
+    use_debug = build_mode in ("debug", "debug-thin")
     if use_debug:
         setup_sanitizer_env(source_dir, verbose)
 
@@ -290,8 +290,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--build-mode",
-        choices=["quick", "debug", "release", "profile"],
-        help="Build mode (quick, debug, release, profile)",
+        choices=["quick", "debug", "debug-thin", "release", "profile"],
+        help="Build mode (quick, debug, debug-thin, release, profile)",
     )
     parser.add_argument(
         "--check", action="store_true", help="Enable IWYU static analysis"

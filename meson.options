@@ -1,13 +1,14 @@
 # Meson build options for FastLED
 
 # Build mode: Controls optimization level and debug information
-# - quick:   Fast compilation, minimal debug info (-O0 -g1) [DEFAULT]
-# - debug:   Full debug symbols and sanitizers (-O0 -g3 -fsanitize=address,undefined)
+# - quick:   Fast compilation, no debug info (-O0 -g0) [DEFAULT]
+# - debug:   Full debug symbols and sanitizers (-Og -g3 -fsanitize=address,undefined)
+# - debug-thin: Linux-only core ASan+UBSan, lean symbols, unsanitized consumers
 # - release: Maximum optimization, no debug info (-O3 -DNDEBUG)
 # - profile: Size-optimized with debug symbols for callgrind profiling
 # Usage: meson setup -Dbuild_mode=debug build
-option('build_mode', type: 'combo', choices: ['quick', 'debug', 'release', 'profile'], value: 'quick',
-       description: 'Build mode: quick (default), debug (full symbols+sanitizers), release (optimized), or profile (size-optimized+debug symbols for callgrind)')
+option('build_mode', type: 'combo', choices: ['quick', 'debug', 'debug-thin', 'release', 'profile'], value: 'quick',
+       description: 'Build mode: quick, debug (full sanitizers), debug-thin (Linux core-only sanitizers), release, or profile')
 
 # Test wrapper: Enable deadlock detection with stack traces for hung tests
 # When enabled, tests that exceed timeout (20s) will have their thread stacks dumped via lldb/gdb

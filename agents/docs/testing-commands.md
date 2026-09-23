@@ -141,6 +141,9 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 
 **Debug Mode (Full Symbols + Sanitizers):**
 - `uv run test.py --examples --debug` - Compile all examples with debug symbols and sanitizers
+- `bash test --unit --debug-thin` - Linux-only PR preset: ASan+UBSan on FastLED core, lean symbols, unsanitized test DLLs and PCH, ASan-capable runner
+- `bash test --examples --debug-thin` - Compile examples with the same core-only sanitizer preset
+- `bash test --unit --build-mode debug-thin` - Equivalent spelling of `--debug-thin`
 - `uv run test.py --examples Blink --debug` - Compile specific example in debug mode
 - `uv run test.py --examples Blink --debug --full` - Debug mode with execution
 - `uv run python ci/util/meson_example_runner.py Blink --debug` - Direct invocation (debug)
@@ -151,17 +154,21 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run python ci/util/meson_example_runner.py Blink --build-mode release` - Direct invocation (release)
 
 **Build Modes:**
-- **quick** (default): Light optimization with minimal debug info (`-O1 -g1`)
+- **quick** (default): Fast compilation without debug info (`-O0 -g0`)
   - Build directory: `.build/meson-quick/examples/`
   - Binary size: Baseline (e.g., Blink: 2.8M)
   - Use case: Fast iteration and testing
 
-- **debug**: Full symbols and sanitizers (`-O0 -g3 -fsanitize=address,undefined`)
+- **debug**: Full symbols and sanitizers (`-Og -g3 -fsanitize=address,undefined`)
   - Build directory: `.build/meson-debug/examples/`
   - Binary size: 3.3x larger (e.g., Blink: 9.1M)
   - Sanitizers: AddressSanitizer (ASan) + UndefinedBehaviorSanitizer (UBSan)
   - Use case: Debugging crashes, memory issues, undefined behavior
   - Benefits: Detects buffer overflows, use-after-free, memory leaks, integer overflow, null dereference
+
+- **debug-thin** (Linux only): FastLED core receives ASan+UBSan and line-level symbols; the runner loads the sanitizer runtime, while test/example DLLs and PCH are unsanitized.
+  - Build directory: `.build/meson-debug-thin/examples/`
+  - Header/template code instantiated in consumer DLLs is not checked by ASan in this mode. Use `--debug` for full coverage; CI also runs it on a scheduled/manual path.
 
 - **release**: Optimized production build (`-O2 -DNDEBUG`)
   - Build directory: `.build/meson-release/examples/`
@@ -169,9 +176,9 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
   - Use case: Performance testing
 
 **Mode-Specific Directories:**
-- All three modes use separate build directories to enable caching and prevent flag conflicts
+- All build modes use separate build directories to enable caching and prevent flag conflicts
 - Switching modes does not invalidate other mode's cache (no cleanup overhead)
-- All modes can coexist simultaneously: `.build/meson-{quick,debug,release}/examples/`
+- All modes can coexist simultaneously: `.build/meson-{quick,debug,debug-thin,release}/examples/`
 
 **Performance Notes:**
 - Host compilation is 60x+ faster than a board build (2.2s vs 137s for single example)

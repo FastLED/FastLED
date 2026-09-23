@@ -40,6 +40,11 @@ base_defines = shared_defines + [
   '-DFASTLED_DEBUG_STACK_TRACE',  # Enable stack tracing (must be in base for PCH compatibility)
   '-DFASTLED_RGBW_COLORIMETRIC=1', # Exercise the real RGBW/RGBWW colorimetric path in native tests.
 ]
+if build_mode == 'debug-thin'
+  # Singleton inline definitions must match in core and consumers. They call
+  # the runner-provided LSan runtime even in unsanitized consumer modules.
+  base_defines += ['-DFL_HAS_SANITIZER_LSAN=1']
+endif
 
 # Group 2: Warning and error flags (code quality enforcement)
 base_warnings = [
@@ -107,7 +112,7 @@ if build_mode == 'debug'
     '-fsanitize=address',       # Address sanitizer (detect memory errors)
     '-fsanitize=undefined',     # Undefined behavior sanitizer
   ]
-elif build_mode == 'quick'
+elif build_mode == 'quick' or build_mode == 'debug-thin'
   # Quick mode: Default mode for fast development iteration
   # No optimization, no debug symbols, no sanitizers
   # Prioritizes fastest compilation for iteration cycles
@@ -134,7 +139,7 @@ elif build_mode == 'profile'
     '-gdwarf-4',                # DWARF4 format (compatible with Valgrind 3.19)
   ]
 else
-  error('Invalid build_mode: @0@. Must be one of: debug, quick, release, profile'.format(build_mode))
+  error('Invalid build_mode: @0@. Must be one of: debug, debug-thin, quick, release, profile'.format(build_mode))
 endif
 
 # Windows-specific workaround for Clang 19 AVX-512 intrinsics bugs
@@ -149,6 +154,17 @@ endif
 
 # Assemble base_compile_args from organized groups
 base_compile_args = base_optimization + base_defines + base_warnings + windows_avx_workaround
+fastled_core_compile_args = base_compile_args
+if build_mode == 'debug-thin'
+  # Only the shared FastLED implementation gets sanitizer instrumentation.
+  core_debug_symbols = ['-g1']
+  if cpp_compiler.get_id() == 'clang'
+    core_debug_symbols = ['-gline-tables-only']
+  endif
+  fastled_core_compile_args = base_common + stack_trace_flags + [
+    '-Og', '-fsanitize=address', '-fsanitize=undefined',
+  ] + core_debug_symbols + base_defines + base_warnings + windows_avx_workaround
+endif
 
 # Unit test-specific compilation flags (only used for test executables)
 test_specific_args = [
@@ -177,7 +193,7 @@ profile_specific_args = [
   '-g',  # Always on: function names + line numbers
   '-DFL_DISABLE_OPTIMIZATION',  # Disable FastLED optimization macros for accurate profiling
 ]
-if build_mode == 'debug' or build_mode == 'quick'
+if build_mode == 'debug' or build_mode == 'quick' or build_mode == 'debug-thin'
   # Debug/quick modes: Add stack trace preservation (helps deadlock detector)
   profile_specific_args += profile_stacktrace_args
 endif
@@ -248,7 +264,7 @@ endif
 
 # Sanitizer link flags (used in debug mode)
 sanitizer_link_args = []
-if build_mode == 'debug'
+if build_mode == 'debug' or build_mode == 'debug-thin'
   sanitizer_link_args = [
     '-fsanitize=address',
     '-fsanitize=undefined',
@@ -273,6 +289,9 @@ endif
 #
 # IMPORTANT: We do NOT add -Wl,--no-undefined to DLLs because:
 # - On Unix: Sanitizers (debug mode) have symbols resolved at runtime by runner
+# Even unsanitized debug-thin consumers instantiate Singleton headers that
+# call the shared LSan runtime. Link the runtime but do not instrument their
+# translation units; otherwise LLD rejects the unresolved __lsan_* symbols.
 dll_link_args = core_link_args + sanitizer_link_args
 if is_windows
   # NOTE: Do NOT use -static-libgcc/-static-libstdc++ here.
@@ -333,7 +352,7 @@ endif
 #   - debug mode: sanitizers (ASan/UBSan) resolve symbols at runtime
 #     (https://github.com/google/sanitizers/issues/380)
 #   - macOS: ld64.lld doesn't accept the flag; error-on-undefined is default
-if build_mode == 'debug'
+if build_mode == 'debug' or build_mode == 'debug-thin'
   # Debug mode: dynamic linking required for sanitizers
   # No --no-undefined: sanitizers resolve symbols at runtime
   runner_link_args = core_link_args + deploy_link_args + sanitizer_link_args + ['-pthread']
@@ -398,13 +417,17 @@ runner_cpp_args = [
   '-DFASTLED_STUB_IMPL',
   '-Wno-pragma-pack',
 ]
-if build_mode == 'debug'
+if build_mode == 'debug' or build_mode == 'debug-thin'
   runner_cpp_args += stack_trace_flags + [
     '-O0',
-    '-g3',
     '-fsanitize=address',
     '-fsanitize=undefined',
   ]
+  if build_mode == 'debug'
+    runner_cpp_args += ['-g3']
+  else
+    runner_cpp_args += ['-g1']
+  endif
 elif build_mode == 'quick'
   runner_cpp_args += stack_trace_flags + [
     '-O1',
@@ -524,7 +547,7 @@ fastled_lib_abs_include_args = [
 
 fastled_lib = shared_library('fastled',
   fastled_sources + platforms_shared_files,
-  cpp_args: base_compile_args + ['-DFASTLED_BUILDING_DLL'] + fastled_lib_abs_include_args,
+  cpp_args: fastled_core_compile_args + ['-DFASTLED_BUILDING_DLL'] + fastled_lib_abs_include_args,
   link_args: fastled_shared_link_args,
   name_prefix: '',  # Produce 'fastled.dll' not 'libfastled.dll'
   implicit_include_directories: false,

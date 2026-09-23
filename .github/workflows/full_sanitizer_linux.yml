@@ -1,0 +1,48 @@
+name: full sanitizer linux
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+      timezone: America/Los_Angeles
+
+permissions:
+  contents: read
+
+jobs:
+  recent-change:
+    runs-on: ubuntu-latest
+    outputs:
+      run_full: ${{ steps.check.outputs.run_full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: check
+        run: |
+          if [[ '${{ github.event_name }}' == workflow_dispatch ]]; then
+            echo 'run_full=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ -n "$(git log -1 --since='24 hours ago' --format=%H)" ]]; then
+            echo 'run_full=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run_full=false' >> "$GITHUB_OUTPUT"
+          fi
+
+  unit:
+    needs: recent-change
+    if: needs.recent-change.outputs.run_full == 'true'
+    uses: ./.github/workflows/template_unit_test.yml
+    with:
+      os: ubuntu-latest
+      build-mode: debug
+
+  examples:
+    needs: recent-change
+    if: needs.recent-change.outputs.run_full == 'true'
+    uses: ./.github/workflows/template_example_test.yml
+    with:
+      os: ubuntu-latest
+      build-mode: debug
