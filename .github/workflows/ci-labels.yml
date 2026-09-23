@@ -1,6 +1,7 @@
 name: CI board selection
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
   pull_request:
