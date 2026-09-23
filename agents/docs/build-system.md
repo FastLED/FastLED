@@ -12,9 +12,9 @@
 
 All board compiles use `fbuild`. Do not add board allowlists or legacy-backend fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
 
-### Pull requests compile the smoke set; master compiles every example (#4415)
+### Board examples run on explicit CI labels (#4543)
 
-`bash compile <board> smoke` builds `tests/platforms/_standard/SMOKE_SKETCHES.txt` plus every example the PR changes (diffed against `GITHUB_BASE_REF`, or `FASTLED_SMOKE_BASE_REF` locally). The esp32s3, teensy41 and uno workflows use `smoke` on `pull_request` and `all` on push to master. Every example compiles the whole library, so library errors are caught by any sketch; the manifest holds the sketches that were the *only* ones to catch a real defect (link errors, template instantiations, sketch-level config macros, size overflows). Remove an entry only with evidence another entry covers it, and add one when a master-only sweep catches something the set missed.
+`bash compile <board> smoke` remains available for local focused validation: it builds `tests/platforms/_standard/SMOKE_SKETCHES.txt` plus every example the PR changes (diffed against `GITHUB_BASE_REF`, or `FASTLED_SMOKE_BASE_REF` locally). Routine PR and master events skip the costly board workflows. An internal PR with `ci-full` or a matching `ci-platform:` label runs each selected board's full example set, including esp32s3, teensy41, and uno. Use `bash ci-labels list --json` to choose a label. The smoke manifest still records sketches that uniquely caught real defects; do not remove an entry without replacement evidence.
 
 ### 🚨 Deployment (flash / upload) is fbuild's job — ALWAYS
 
