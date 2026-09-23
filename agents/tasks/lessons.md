@@ -1,5 +1,14 @@
 # Lessons Learned
 
+- A prerequisite abstraction is not progress toward a niche feature when no
+  production path uses it. PR #4534 added hundreds of lines of optional
+  presentation-timing API, but no built-in driver produced measured events and
+  no dither consumer used them, so it could not improve emitted light or meet
+  the issue's XYZ criterion. Before opening a feature PR, prove the smallest
+  end-to-end behavior, describe its concrete benefit and relevant costs, and
+  only split out an API seam when a named near-term real consumer (including
+  downstream use) and separate-landing need are clear.
+
 - Host-tool selection and host-tool import context are separate concerns. When
   Meson executes repository Python helpers for an external consumer, provide
   the repository root through the command environment so package imports do not

@@ -32,6 +32,12 @@ Guidelines for how agents should approach work in the FastLED project.
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
 - Skip this for simple, obvious fixes — don't over-engineer
 - Challenge your own work before presenting it
+- Before opening a feature PR, identify its real production path (in-repo or
+  downstream), describe the concrete benefit and relevant costs, and measure
+  where feasible or needed for a performance/size claim. Compare a smaller
+  complete fix or a documented limitation. Do not land a large unused
+  prerequisite just because its isolated tests pass; keep unmet end-to-end
+  criteria open.
 
 ## 6. Autonomous Bug Fixing
 - When given a bug report: just fix it. Don't ask for hand-holding

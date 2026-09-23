@@ -6,6 +6,32 @@ reviews:
   # Per-path natural-language review instructions.
   # See https://docs.coderabbit.ai/getting-started/configure-coderabbit
   path_instructions:
+    - path: "src/**"
+      instructions: |
+        End-to-end value and proportionality gate. For a feature or bug-fix PR,
+        identify the concrete user-visible behavior it changes and the test or
+        measurement that proves that behavior. A real production path may be
+        in this repository or in a named downstream sketch/external driver.
+        Flag as HIGH severity when a PR adds substantial API, state,
+        indirection, or maintenance cost but only supplies an unused
+        prerequisite and leaves its claimed end-to-end outcome unproved.
+
+        A default-off API tested only with fakes is not an end-to-end fix.
+        Passing unit tests, zero default-build flash delta, and an open follow-up
+        issue do not substitute for the missing behavior. Compare the relevant
+        maintenance, memory, flash, and runtime costs with the concrete benefit;
+        measure where feasible or essential to a performance/size claim. For a
+        niche feature, require especially clear evidence that the abstraction
+        is needed now. Ask whether a smaller behavioral fix or an explicit,
+        documented limitation would meet the contract with less code.
+
+        Do not reject every preparatory PR: a narrow seam can be justified by a
+        named, imminent real user (including downstream integrations) and
+        evidence that it cannot reasonably land together. Require that
+        justification in the PR description and
+        keep unmet end-to-end acceptance criteria open. Example: #4534 added a
+        large presentation-timing API while no built-in driver reported actual
+        visibility and dither did not consume it; it was withdrawn, not merged.
     - path: "src/fl/channels/bus.h"
       instructions: |
         Bus enum additions and parallel-IO peripheral driver rule. Flag any

@@ -1,5 +1,21 @@
 # Code Review Rules Reference
 
+## src/** changes - END-TO-END VALUE BEFORE ABSTRACTION
+For a feature or fix, name the user-visible behavior changed and the test or
+measurement that proves it. A real use may be in-repo or in a named downstream
+sketch/external driver. Flag substantial new API/state/indirection when it has
+only fake coverage and leaves the stated outcome entirely to a later PR. A
+default-off path and a green unit test are not evidence of an end-to-end fix.
+Compare relevant maintenance, RAM, flash, and runtime cost with the concrete
+benefit; measure when feasible or essential to the claim. A niche feature
+needs a particularly clear reason to add a broad contract now.
+
+Suggest the smallest complete behavior change or a truthful documented limit.
+Preparatory work is acceptable only when a named near-term real user and
+the need to land the seam separately are justified; do not close an issue whose
+acceptance criterion remains unmet. #4534 is the counterexample: timing events
+had no built-in producer or dither consumer, so the PR was withdrawn.
+
 ## src/** changes - STRICT RULES
 - NO try-catch blocks allowed
 - NO try-except blocks allowed
