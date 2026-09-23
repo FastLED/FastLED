@@ -113,6 +113,13 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 
 ### Code Review Rule
 **ALL AGENTS: Run `/code-review` after making code changes.**
+Before opening a feature PR, show its real production path (in-repo or a named
+downstream integration) and end-to-end evidence for the claimed behavior. Do
+not add a broad, default-off prerequisite API for a niche feature with only
+fake users and call the issue done; justify why it must land separately or
+choose a smaller fix or an explicit limitation. Reviewers apply this value
+gate even when lint and unit tests pass (see
+`.claude/skills/code-review/review-rules.md`).
 
 ### Memory Refresh Rule
 **ALL AGENTS: Read the relevant agents doc before concluding work.**
