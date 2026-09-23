@@ -45,6 +45,8 @@ def _write_configuration_markers(
     current_zccache_version: Optional[str] = None,
     enable_examples_marker: Optional[Path] = None,
     enable_examples: Optional[bool] = None,
+    enable_full_examples_marker: Optional[Path] = None,
+    enable_full_examples: Optional[bool] = None,
     enable_unit_tests_marker: Optional[Path] = None,
     enable_unit_tests: Optional[bool] = None,
     only_missing: bool = False,
@@ -90,6 +92,14 @@ def _write_configuration_markers(
                 enable_examples_marker,
                 str(enable_examples),
                 f"enable_examples: {enable_examples}",
+            )
+        )
+    if enable_full_examples_marker is not None and enable_full_examples is not None:
+        markers.append(
+            (
+                enable_full_examples_marker,
+                str(enable_full_examples),
+                f"enable_full_examples: {enable_full_examples}",
             )
         )
     if enable_unit_tests_marker is not None and enable_unit_tests is not None:

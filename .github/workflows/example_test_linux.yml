@@ -13,6 +13,8 @@ on:
       - 'src/**'
       - 'examples/**'
       - 'ci/**'
+      - 'ci/examples/example_groups.py'
+      - 'ci/meson/compile_tests/**'
       - '.github/workflows/example_test*.yml'
       - '.github/workflows/template_example_test.yml'
       - 'CMakeLists.txt'
@@ -29,6 +31,8 @@ on:
       - 'src/**'
       - 'examples/**'
       - 'ci/**'
+      - 'ci/examples/example_groups.py'
+      - 'ci/meson/compile_tests/**'
       - '.github/workflows/example_test*.yml'
       - '.github/workflows/template_example_test.yml'
       - 'CMakeLists.txt'
@@ -47,3 +51,4 @@ jobs:
     with:
       os: ubuntu-latest
       build-mode: debug-thin
+      example-group: CompileTests

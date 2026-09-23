@@ -22,5 +22,9 @@ option('test_wrapper', type: 'boolean', value: true,
 option('enable_examples', type: 'boolean', value: true,
        description: 'Enable example compilation targets (set to false to speed up Meson setup for unit tests only)')
 
+# The live compile gate does not need to discover/configure every sketch.
+option('enable_full_examples', type: 'boolean', value: true,
+       description: 'Discover all sketch targets (disable for the small live compile gate)')
+
 option('enable_unit_tests', type: 'boolean', value: true,
        description: 'Enable unit test compilation targets (set to false to speed up Meson setup for examples only)')

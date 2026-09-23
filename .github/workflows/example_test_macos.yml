@@ -13,6 +13,8 @@ on:
       - 'src/**'
       - 'examples/**'
       - 'ci/**'
+      - 'ci/examples/example_groups.py'
+      - 'ci/meson/compile_tests/**'
       - '.github/workflows/example_test*.yml'
       - '.github/workflows/template_example_test.yml'
       - 'CMakeLists.txt'
@@ -26,3 +28,5 @@ jobs:
     uses: ./.github/workflows/template_example_test.yml
     with:
       os: macos-latest
+      build-mode: debug
+      example-group: CompileTests

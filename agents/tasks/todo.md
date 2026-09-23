@@ -293,3 +293,20 @@
   unrelated to this diff. The focused I2S guard selection passes independently.
 - The one-agent pre-push review is clean after improving failed-preprocessor
   diagnostics with platform and exit-code context.
+
+## Native example CI split and speed (#4544)
+
+- [x] Investigate current example discovery, workflow timing, badge routing, and related issues; file and read back #4544.
+- [x] Add an exhaustive six-group path manifest with RED -> GREEN membership tests.
+- [x] Add one highly amalgamated live Compile Tests target with a focused failing contract repro.
+- [x] Route PR example workflows to the live gate and add the nightly six-group sweep and badge.
+- [x] Remove redundant cold Blink setup and 114-sketch Meson discovery from the live gate; measure local cold/warm behavior.
+- [ ] Run focused tests, full repository gates, review, and both live/nightly CI paths; merge only after validated.
+
+### Review
+
+- Baseline Linux run 35839651828: 4m43s total; Install 27s, cold Blink 3m00s, all examples 52s.
+- RED: focused group test failed at collection without the six-group manifest; compile-gate contract failed without the target. GREEN: focused Python and workflow-routing tests pass.
+- Live `debug-thin` gate configured just four Meson targets with no full-sketch discovery; cold local build/run took 92s and warm rerun 4–11s. It includes the real Blink sketch plus representative color/noise/palette/controller API calls.
+- Nightly quick selection passed all 95 host-compatible examples in 27s locally; the manifest covers all 114 sketches, including 19 deliberately filtered for host. The AutoResearch sketch is board-filtered and covered separately by board smoke CI.
+- `bash test --cpp` passed 310/310 unit cases; full lint passed; the one-agent pre-push review is clean after cache marker/list and real-sketch coverage fixes. Comparable GitHub Actions timings, build bytes, PR checks, and merge remain pending.

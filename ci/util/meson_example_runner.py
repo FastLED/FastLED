@@ -112,6 +112,7 @@ class CompilationHeartbeat:
 def compile_examples(
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     verbose: bool = False,
     parallel: bool = True,
     build_mode: str = "quick",
@@ -142,7 +143,13 @@ def compile_examples(
 
     # Determine targets to build
     # Note: process_group already shows "Compiling: <examples>" status
-    if examples is None:
+    if example_group == "CompileTests":
+        cmd.append("compile-tests")
+        target_desc = "compile tests"
+    elif example_group is not None and example_group != "Nightly":
+        cmd.append(f"examples-{example_group.lower()}")
+        target_desc = f"{example_group} examples"
+    elif examples is None:
         # Build all examples via the alias target
         cmd.append("examples-host")
         target_desc = "all examples"
@@ -252,6 +259,7 @@ def compile_examples(
 def run_examples(
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     verbose: bool = False,
     timeout: int = 30,
     build_mode: str = "quick",
@@ -297,7 +305,19 @@ def run_examples(
     cmd.extend(["--timeout-multiplier", str(timeout / 30.0)])  # 30s is default
 
     # Determine which tests to run
-    if examples is None:
+    if example_group is not None:
+        suite = (
+            "compile-tests"
+            if example_group == "CompileTests"
+            else "examples"
+            if example_group == "Nightly"
+            else f"examples-{example_group.lower()}"
+        )
+        cmd.extend(["--suite", suite])
+        target_desc = f"{example_group} examples"
+        if not verbose:
+            _ts_print(f"Running {target_desc}...")
+    elif examples is None:
         # Run all tests in the 'examples' suite
         cmd.extend(["--suite", "examples"])
         target_desc = "all examples"
@@ -403,6 +423,7 @@ def run_meson_examples(
     source_dir: Path,
     build_dir: Path,
     examples: list[str] | None = None,
+    example_group: str | None = None,
     clean: bool = False,
     verbose: bool = False,
     debug: bool = False,
@@ -466,7 +487,8 @@ def run_meson_examples(
     # This enables caching per mode when source unchanged but flags differ
     # Example: .build/meson -> .build/meson-debug
     original_build_dir = build_dir
-    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
+    suffix = "-compile-tests" if example_group == "CompileTests" else ""
+    build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}{suffix}"
 
     # Build directory removed from output - build mode already shown in Config line
     # and full path rarely useful to users (just noise)
@@ -541,6 +563,7 @@ def run_meson_examples(
         build_mode=build_mode,
         verbose=verbose,
         enable_unit_tests=False,
+        enable_full_examples=example_group != "CompileTests",
     ):
         return MesonTestResult(
             success=False,
@@ -559,6 +582,7 @@ def run_meson_examples(
             if not compile_examples(
                 build_dir,
                 examples=examples,
+                example_group=example_group,
                 verbose=verbose,
                 parallel=parallel,
                 build_mode=build_mode,
@@ -580,6 +604,7 @@ def run_meson_examples(
         result = run_examples(
             build_dir,
             examples=examples,
+            example_group=example_group,
             verbose=verbose,
             timeout=60,
             build_mode=build_mode,
@@ -608,6 +633,20 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "examples", nargs="*", help="Specific examples to compile/run (None = all)"
+    )
+    parser.add_argument(
+        "--example-group",
+        choices=[
+            "CompileTests",
+            "Nightly",
+            "Basic",
+            "Classic",
+            "Advanced",
+            "Fx",
+            "Experimental",
+            "AutoResearch",
+        ],
+        help="Select one example group or the live compile gate",
     )
     parser.add_argument("--clean", action="store_true", help="Clean build directory")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -641,6 +680,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    if args.example_group and args.examples:
+        parser.error("--example-group cannot be combined with specific examples")
 
     source_dir = Path.cwd()
     build_dir = Path(args.build_dir)
@@ -651,6 +692,7 @@ if __name__ == "__main__":
         source_dir=source_dir,
         build_dir=build_dir,
         examples=examples_list,
+        example_group=args.example_group,
         clean=args.clean,
         verbose=args.verbose,
         debug=args.debug,

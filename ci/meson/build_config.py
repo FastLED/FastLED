@@ -102,6 +102,7 @@ def setup_meson_build(
     verbose: bool = False,
     enable_examples: bool = True,
     enable_unit_tests: bool = True,
+    enable_full_examples: bool = True,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -116,6 +117,7 @@ def setup_meson_build(
         verbose: Show detailed output including toolchain info (default: False)
         enable_examples: Enable example compilation targets (default: True)
         enable_unit_tests: Enable unit test compilation targets (default: True)
+        enable_full_examples: Configure individual example targets (default: True)
 
     Returns:
         True if setup successful, False otherwise
@@ -183,6 +185,7 @@ def setup_meson_build(
             check=check,
             build_mode=build_mode,
             enable_examples=enable_examples,
+            enable_full_examples=enable_full_examples,
             enable_unit_tests=enable_unit_tests,
             use_thin_archives=use_thin_archives,
         )
@@ -231,6 +234,7 @@ def setup_meson_build(
             build_mode=build_mode,
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
+            enable_full_examples=enable_full_examples,
             reconfigure=True,
             source_hashes=hashes,
         )
@@ -242,6 +246,7 @@ def setup_meson_build(
             build_mode=build_mode,
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
+            enable_full_examples=enable_full_examples,
             reconfigure=False,
             source_hashes=hashes,
         )
@@ -312,6 +317,7 @@ def setup_meson_build(
                 build_mode=build_mode,
                 enable_examples=enable_examples,
                 enable_unit_tests=enable_unit_tests,
+                enable_full_examples=enable_full_examples,
                 reconfigure=True,
             )
 
@@ -334,6 +340,7 @@ def setup_meson_build(
             check=check,
             build_mode=build_mode,
             enable_examples=enable_examples,
+            enable_full_examples=enable_full_examples,
             enable_unit_tests=enable_unit_tests,
             compiler=compiler,
         )
@@ -351,6 +358,7 @@ def setup_meson_build(
         check=check,
         build_mode=build_mode,
         enable_examples=enable_examples,
+        enable_full_examples=enable_full_examples,
         enable_unit_tests=enable_unit_tests,
         use_thin_archives=use_thin_archives,
         compiler=compiler,

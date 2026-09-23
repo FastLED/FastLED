@@ -46,3 +46,4 @@ jobs:
     with:
       os: ubuntu-latest
       build-mode: debug
+      example-group: Nightly

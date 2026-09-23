@@ -686,6 +686,7 @@ def main() -> None:
                 force_examples_change = (
                     examples_change
                     or (args.examples is not None and len(args.examples) > 0)
+                    or args.example_group is not None
                     or rebuild_mode != RebuildMode.CACHED
                 )
                 force_python_test_change = (
@@ -732,7 +733,7 @@ def main() -> None:
             # args.examples with specific items (e.g., ['Blink']) means specific examples only
             running_specific_examples = (
                 args.examples is not None and len(args.examples) > 0
-            )
+            ) or args.example_group is not None
             running_all_tests = (
                 args.test is None
                 and not running_specific_examples

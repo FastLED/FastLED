@@ -39,6 +39,7 @@ class MarkerPaths:
     compiler_version: Path
     zccache_version: Path
     enable_examples: Path
+    enable_full_examples: Path
     enable_unit_tests: Path
 
     @classmethod
@@ -54,6 +55,7 @@ class MarkerPaths:
             compiler_version=build_dir / ".compiler_version_config",
             zccache_version=build_dir / ".zccache_version_config",
             enable_examples=build_dir / ".enable_examples_config",
+            enable_full_examples=build_dir / ".enable_full_examples_config",
             enable_unit_tests=build_dir / ".enable_unit_tests_config",
         )
 
@@ -168,6 +170,7 @@ def check_reconfigure_markers(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     use_thin_archives: bool,
 ) -> ReconfigureDecision:
@@ -313,6 +316,23 @@ def check_reconfigure_markers(
                 )
         except (OSError, IOError):
             decision.reasons.append("enable_examples marker unreadable")
+
+    # A missing marker in an existing build has unknown target coverage. Reconfigure
+    # before recording the requested setting so the marker describes the real graph.
+    if markers.enable_full_examples.exists():
+        try:
+            marker_value = markers.enable_full_examples.read_text().strip()
+            if marker_value not in ("True", "False"):
+                decision.reasons.append("enable_full_examples marker unreadable")
+            elif (marker_value == "True") != enable_full_examples:
+                decision.reasons.append(
+                    "enable_full_examples changed: "
+                    f"{marker_value} → {enable_full_examples}"
+                )
+        except (OSError, IOError):
+            decision.reasons.append("enable_full_examples marker unreadable")
+    else:
+        decision.reasons.append("enable_full_examples marker missing")
 
     # enable_unit_tests marker
     if markers.enable_unit_tests.exists():

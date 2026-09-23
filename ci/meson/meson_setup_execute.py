@@ -363,6 +363,7 @@ def handle_skip_meson_setup(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     compiler: CompilerDetection,
 ) -> None:
@@ -411,6 +412,8 @@ def handle_skip_meson_setup(
         current_zccache_version=compiler.zccache_version or None,
         enable_examples_marker=markers.enable_examples,
         enable_examples=enable_examples,
+        enable_full_examples_marker=markers.enable_full_examples,
+        enable_full_examples=enable_full_examples,
         enable_unit_tests_marker=markers.enable_unit_tests,
         enable_unit_tests=enable_unit_tests,
         only_missing=True,
@@ -442,6 +445,7 @@ FASTLED_MESON_BUILD_FILES: tuple[str, ...] = (
     "tests/meson.build",
     "tests/profile/meson.build",
     "examples/meson.build",
+    "ci/meson/compile_tests/meson.build",
     "ci/meson/native/meson.build",
     "ci/meson/shared/meson.build",
     "ci/meson/wasm/meson.build",
@@ -558,6 +562,7 @@ def build_meson_setup_cmd(
     enable_examples: bool,
     enable_unit_tests: bool,
     reconfigure: bool,
+    enable_full_examples: bool = True,
     source_hashes: Optional["SourceHashes"] = None,
 ) -> list[str]:
     """Build the ``meson setup [--reconfigure] ...`` command list.
@@ -593,6 +598,7 @@ def build_meson_setup_cmd(
         f"-Dbuild_mode={build_mode}",
         f"-Denable_examples={str(enable_examples).lower()}",
         f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
+        f"-Denable_full_examples={str(enable_full_examples).lower()}",
     ]
 
     capability = _get_zccache_meson_configure_path()
@@ -692,6 +698,7 @@ def run_meson_setup_command(
     check: bool,
     build_mode: str,
     enable_examples: bool,
+    enable_full_examples: bool,
     enable_unit_tests: bool,
     use_thin_archives: bool,
     compiler: CompilerDetection,
@@ -773,6 +780,8 @@ def run_meson_setup_command(
             current_zccache_version=compiler.zccache_version or None,
             enable_examples_marker=markers.enable_examples,
             enable_examples=enable_examples,
+            enable_full_examples_marker=markers.enable_full_examples,
+            enable_full_examples=enable_full_examples,
             enable_unit_tests_marker=markers.enable_unit_tests,
             enable_unit_tests=enable_unit_tests,
             only_missing=False,
