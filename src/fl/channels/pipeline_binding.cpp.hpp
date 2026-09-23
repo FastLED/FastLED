@@ -22,7 +22,8 @@ bool buildPipelineForBinding(const ColorProfileBinding& binding,
         return false;
     }
     return buildStreamingPipelineQ16(binding.mSource, *profile, binding.mGamut,
-                                     out);
+                                     out, binding.mHasTargetWhite
+                                              ? &binding.mTargetWhite : nullptr);
 }
 
 namespace {

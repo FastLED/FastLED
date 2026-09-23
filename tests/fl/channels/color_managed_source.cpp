@@ -288,6 +288,48 @@ FL_TEST_CASE("The source reports the controller's extent") {
 }
 
 #if FL_COLOR_PROFILE_RUNTIME
+FL_TEST_CASE("[#4498] target-white rebind changes presented neutral ramp") {
+    CRGB leds[3] = {CRGB(64, 64, 64), CRGB(128, 128, 128),
+                    CRGB(192, 192, 192)};
+    auto engine = fl::make_shared<ByteCapturingMockEngine>("WHITE_CAPTURE");
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(2030, engine);
+    auto cleanup = fl::make_scope_exit([&]() { manager.removeDriver(engine); });
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+
+    ChannelOptions base;
+    FL_REQUIRE(base.setColorProfile(rgbDevice(), SourceProfile::linearSrgb()));
+    base.mDitherMode = DISABLE_DITHER;
+    ChannelConfig config(1, timing, fl::span<CRGB>(leds, 3), RGB, base);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_REQUIRE(channel->isColorManaged());
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(engine->mCapturedChannels.size(), fl::size(1));
+    const fl::vector_psram<u8> d65 = engine->mCapturedChannels.back()->getData();
+    FL_REQUIRE_GE(d65.size(), fl::size(9));
+
+    ChannelOptions warm = base;
+    FL_REQUIRE(warm.setTargetWhite(Chromaticity(0.3457f, 0.3585f)));
+    ChannelConfig rebound(1, timing, fl::span<CRGB>(leds, 3), RGB, warm);
+    channel->applyConfig(rebound);
+    FL_REQUIRE(channel->isColorManaged());
+    channel->showLeds(255);
+    FL_REQUIRE_EQ(engine->mCapturedChannels.size(), fl::size(2));
+    const fl::vector_psram<u8>& selected = engine->mCapturedChannels.back()->getData();
+    FL_REQUIRE_GE(selected.size(), fl::size(9));
+    for (int led = 0; led < 3; ++led) {
+        FL_CHECK_NE(selected[led * 3], d65[led * 3]);
+        FL_CHECK_NE(selected[led * 3 + 2], d65[led * 3 + 2]);
+        if (led != 0) {
+            for (int component = 0; component < 3; ++component) {
+                FL_CHECK_GE(selected[led * 3 + component],
+                            selected[(led - 1) * 3 + component]);
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("A bound colour profile reaches the encoded bytes") {
     // The wiring. `setColorProfile` has been settable and inert: the binding
     // was validated and its fallback tracked, and no pixel ever went through

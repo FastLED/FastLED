@@ -238,8 +238,8 @@ struct ChannelOptions {
     bool setTargetWhite(Chromaticity white) FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         if (!validChromaticity(white)) return false;
-        mTargetWhite = white;
-        mHasTargetWhite = true;
+        mColorProfile.mTargetWhite = white;
+        mColorProfile.mHasTargetWhite = true;
         return true;
 #else
         FL_UNUSED(white);
@@ -248,14 +248,14 @@ struct ChannelOptions {
     }
     Chromaticity targetWhite() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
-        return mTargetWhite;
+        return mColorProfile.mTargetWhite;
 #else
         return Chromaticity();
 #endif
     }
     bool hasTargetWhite() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
-        return mHasTargetWhite;
+        return mColorProfile.mHasTargetWhite;
 #else
         return false;
 #endif
@@ -341,8 +341,6 @@ public:
 
 private:
 #if FL_COLOR_PROFILE_RUNTIME
-    Chromaticity mTargetWhite;
-    bool mHasTargetWhite = false;
     bool mWarnedProfileCleared = false;
     bool mWarnedLegacyCleared = false;
 #endif

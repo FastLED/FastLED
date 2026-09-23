@@ -128,6 +128,16 @@ Separate measured emitter XYZ capacities from the selected rendering white and
 its maximum achievable neutral luminance. All emitters at full drive are not
 necessarily that white, particularly for RGBWW and target-white overrides.
 
+For a managed RGB channel, absent an override the selected white is D65 and
+the existing output path is unchanged. A source white describes the source
+RGB encoding; it is adapted to D65 independently of the selected rendering
+white. `setTargetWhite()` selects the physical neutral emitted for that D65
+working neutral. It does not change emitter capacities or mean "all emitters
+at full drive." The attainable neutral luminance is recomputed for that
+selection at bind time. An accepted xy value outside the emitter gamut cannot
+produce a managed pipeline: the channel reports fallback, or rejection with
+strict color management. Managed RGBW/RGBWW overrides require #4515.
+
 Bradford adapts source-relative XYZ to the selected rendering white. Standard
 Oklab/OKLCh computations use D65-relative XYZ with white Y=1; see the
 [Oklab definition](https://bottosson.github.io/posts/oklab/). Therefore the mapper

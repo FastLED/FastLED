@@ -209,23 +209,7 @@ FL_TEST_CASE("A response LUT is validated, owned, and applied after flux scaling
     FL_CHECK_GT(changed, 0);
 }
 
-FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {
-    // FastLED#4156 R7 asks for "target-white overrides" that "preserve the
-    // selected neutral axis". `setTargetWhite` exists, validates its input,
-    // stores it, and is carried through `Channel` -- three cases below
-    // already check that plumbing. None of them asks the question R7 does,
-    // which is whether it reaches the rendering path.
-    //
-    // It does not. Outside these accessors nothing in `src/` reads it, and
-    // the gamut mapper's neutral is `kGamutD65Q16`, a compile-time constant
-    // no override can move. So the setter is settable and inert, which is
-    // where `setColorProfile` was before P6 wired it.
-    //
-    // Recorded rather than left to be discovered, because a setter that
-    // returns true is a promise. When someone wires it, this case fails, and
-    // what to re-measure is "a neutral request stays neutral whatever the
-    // device white is" in `tests/fl/gfx/gamut_map.cpp` -- which holds today
-    // with the mapping white fixed at D65.
+FL_TEST_CASE("A target white changes managed neutral drives") {
     ChannelOptions options;
     FL_CHECK_FALSE(options.hasTargetWhite());
 
@@ -237,9 +221,8 @@ FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {
     // Validated rather than taken on trust, which is the half that works.
     FL_CHECK_FALSE(options.setTargetWhite(Chromaticity(1.5f, 0.5f)));
 
-    // The inert half: a profile bound alongside a target white is the same
-    // profile as one bound without, because there is nothing for the
-    // override to change.
+    // The emitter is still the same physical device; only its selected
+    // rendering neutral changes. No-override behavior keeps the D65 path.
     ChannelOptions with_white;
     FL_REQUIRE(with_white.setTargetWhite(Chromaticity(0.4476f, 0.4074f)));
     FL_REQUIRE(with_white.setColorProfile(kFixtureProfile,
@@ -252,11 +235,80 @@ FL_TEST_CASE("A target white is accepted, stored, and reaches nothing") {
     const EmitterProfile* bound_without = without_white.emitterProfile();
     FL_REQUIRE(bound_with != nullptr);
     FL_REQUIRE(bound_without != nullptr);
-    for (int i = 0; i < 2; ++i) {
-        FL_CHECK_EQ(bound_with->xy_r[i], bound_without->xy_r[i]);
-        FL_CHECK_EQ(bound_with->xy_b[i], bound_without->xy_b[i]);
-    }
     FL_CHECK_EQ(bound_with->lum_g, bound_without->lum_g);
+
+    StreamingPipelineQ16 base;
+    StreamingPipelineQ16 warm;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(),
+                                         *bound_without,
+                                         GamutPolicy::ChromaCompress, &base));
+    const Chromaticity selected = with_white.targetWhite();
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(),
+                                         *bound_with,
+                                         GamutPolicy::ChromaCompress, &warm,
+                                         &selected));
+    i32 base_drives[3];
+    i32 warm_drives[3];
+    processPixelQ16(base, 128, 128, 128, base_drives);
+    processPixelQ16(warm, 128, 128, 128, warm_drives);
+    FL_CHECK_NE(base_drives[0], warm_drives[0]);
+    FL_CHECK_NE(base_drives[2], warm_drives[2]);
+    FL_CHECK_NE(base.gamut.max_neutral_lightness,
+                warm.gamut.max_neutral_lightness);
+
+    float emitted[3] = {};
+    const float xy[3][2] = {{0.640f, 0.330f},
+                            {0.300f, 0.600f},
+                            {0.150f, 0.060f}};
+    for (int emitter = 0; emitter < 3; ++emitter) {
+        float column[3];
+        colorimetric_response::xyY_to_XYZ(xy[emitter][0], xy[emitter][1],
+                                          1.0f, column);
+        for (int component = 0; component < 3; ++component) {
+            emitted[component] +=
+                static_cast<float>(warm_drives[emitter]) / 65536.0f *
+                column[component];
+        }
+    }
+    const float sum = emitted[0] + emitted[1] + emitted[2];
+    FL_REQUIRE_GT(sum, 0.0f);
+    FL_CHECK_CLOSE(emitted[0] / sum, selected.x, 0.003f);
+    FL_CHECK_CLOSE(emitted[1] / sum, selected.y, 0.003f);
+}
+
+FL_TEST_CASE("An unattainable target white reports a channel fallback") {
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile,
+                                       SourceProfile::linearSrgb()));
+    FL_REQUIRE(options.setTargetWhite(Chromaticity(0.1f, 0.8f)));
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Fallback);
+
+    ChannelOptions recovered = options;
+    FL_REQUIRE(recovered.setTargetWhite(Chromaticity(0.3457f, 0.3585f)));
+    ChannelConfig rebound(ClocklessChipset(), leds, RGB, recovered);
+    channel->applyConfig(rebound);
+    FL_CHECK(channel->isColorManaged());
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Configured);
+}
+
+FL_TEST_CASE("An unattainable target white rejects strict binding") {
+    CRGB leds[1] = {};
+    ChannelOptions options;
+    FL_REQUIRE(options.setColorProfile(kFixtureProfile,
+                                       SourceProfile::linearSrgb()));
+    FL_REQUIRE(options.setTargetWhite(Chromaticity(0.1f, 0.8f)));
+    FastLED.setColorManagementStrict(true);
+    ChannelConfig config(ClocklessChipset(), leds, RGB, options);
+    ChannelPtr channel = Channel::create(config);
+    FastLED.setColorManagementStrict(false);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_EQ(channel->colorProfileStatus(), ColorProfileStatus::Rejected);
+    FL_CHECK_FALSE(channel->isEnabled());
 }
 
 FL_TEST_CASE("Rebinding replaces the profile and releases the first") {

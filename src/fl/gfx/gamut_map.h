@@ -153,6 +153,11 @@ void mapAndAllocateRgbwwQ16(const GamutMapRgbwwQ16& map, const i32 (&xyz)[3],
 /// and on a profile that cannot reach any neutral at all.
 bool buildGamutMapQ16(const colorimetric_response::EmitterProfile& profile, GamutMapQ16* out) FL_NO_EXCEPT;
 
+/// Build a mapper from a bind-time solve already transformed into D65 working
+/// coordinates. The neutral cap must be derived from this same solve.
+bool buildGamutMapFromSolveQ16(const EmitterSolveMatrixQ16& solve,
+                              GamutMapQ16* out) FL_NO_EXCEPT;
+
 /// One pixel: XYZ in s16.16 to in-gamut emitter drives in s16.16.
 ///
 /// Drives always come back inside [0, 1]. A target already inside the hull

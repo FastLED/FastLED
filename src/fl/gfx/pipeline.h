@@ -101,10 +101,14 @@ struct StreamingPipelineQ16 {
 /// The flux scalar starts at unity. `setPipelineFluxQ16` is how brightness
 /// and the power limiter reach it, because they change between frames while
 /// everything else here does not.
+/// With `target_white`, D65 working XYZ is adapted to the selected physical
+/// neutral at bind time. A white outside the emitter gamut rejects the build;
+/// nullptr preserves the historical D65 output byte-for-byte.
 bool buildStreamingPipelineQ16(const SourceProfile& source,
                                const colorimetric_response::EmitterProfile& device,
                                GamutPolicy policy,
-                               StreamingPipelineQ16* out) FL_NO_EXCEPT;
+                               StreamingPipelineQ16* out,
+                               const Chromaticity* target_white = nullptr) FL_NO_EXCEPT;
 
 /// Set the composed brightness-and-power scalar for the frames that follow.
 void setPipelineFluxQ16(StreamingPipelineQ16* pipeline, FluxScalar flux) FL_NO_EXCEPT;
