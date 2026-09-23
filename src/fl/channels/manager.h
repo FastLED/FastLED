@@ -29,6 +29,7 @@
 #include "fl/system/engine_events.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/channel_poll_signal.h"
@@ -251,6 +252,14 @@ public:
     /// @note Call this between test cases or when reinitializing the LED system
     void reset() FL_NO_EXCEPT;
 
+#if FL_PRESENTATION_TIMING
+    /// Install a duration-aware observer. With no sink, no driver timing
+    /// methods are called and Blink never links an event-list dispatcher.
+    void setPresentationTimingSink(fl::shared_ptr<IPresentationTimingSink> sink) FL_NO_EXCEPT {
+        mPresentationTimingSink = fl::move(sink);
+    }
+#endif
+
 private:
     enum class AddDriverSlowReason : u8 {
         NULL_DRIVER,
@@ -319,6 +328,10 @@ private:
 
     /// @brief Platform wait primitive owned by the manager.
     platforms::ChannelPollSignal mPollNeededSignal;
+
+#if FL_PRESENTATION_TIMING
+    fl::shared_ptr<IPresentationTimingSink> mPresentationTimingSink;
+#endif
 
     // Non-copyable, non-movable
     ChannelManager(const ChannelManager&) FL_NO_EXCEPT = delete;

@@ -519,8 +519,41 @@ IChannelDriver::DriverState ChannelManager::poll() {
     bool anyDraining = false;
     fl::string firstError;
 
-    for (auto& entry : mDrivers) {
-        IChannelDriver::DriverState result = entry.driver->poll();
+    // A timing sink may reconfigure drivers from its callback. Snapshot the
+    // registry only in that opt-in case: each driver is kept alive and polled
+    // once, while additions/removals take effect on the next poll.
+#if FL_PRESENTATION_TIMING
+    fl::shared_ptr<IPresentationTimingSink> sink = mPresentationTimingSink;
+    fl::vector<fl::shared_ptr<IChannelDriver>> drivers;
+    if (sink) {
+        drivers.reserve(mDrivers.size());
+        for (const auto& entry : mDrivers) drivers.push_back(entry.driver);
+    }
+    const fl::size driverCount = sink ? drivers.size() : mDrivers.size();
+#else
+    const fl::size driverCount = mDrivers.size();
+#endif
+    for (fl::size i = 0; i < driverCount; ++i) {
+#if FL_PRESENTATION_TIMING
+        fl::shared_ptr<IChannelDriver> driver = sink ? drivers[i] : mDrivers[i].driver;
+#else
+        fl::shared_ptr<IChannelDriver> driver = mDrivers[i].driver;
+#endif
+        IChannelDriver::DriverState result = driver->poll();
+#if FL_PRESENTATION_TIMING
+        if (sink &&
+            driver->presentationTimingCapability() ==
+            PresentationTimingCapability::MeasuredVisibility) {
+            PresentationEvent presentation;
+            constexpr fl::size kMaxPresentationEventsPerPoll = 64;
+            for (fl::size eventCount = 0;
+                 eventCount < kMaxPresentationEventsPerPoll &&
+                 driver->takePresentationEvent(presentation);
+                 ++eventCount) {
+                sink->onPresentationEvent(presentation);
+            }
+        }
+#endif
         if (result.state == IChannelDriver::DriverState::BUSY) {
             anyBusy = true;
         } else if (result.state == IChannelDriver::DriverState::DRAINING) {

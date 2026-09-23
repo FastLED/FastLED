@@ -932,6 +932,11 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // the driver decide what to do â€” this is the historic behaviour.
 
     // Enqueue for transmission (will be sent when driver->show() is called)
+#if FL_PRESENTATION_TIMING
+    ++mPresentationFrame;
+    if (mPresentationFrame == 0) ++mPresentationFrame;
+    mChannelData->setPresentationToken(PresentationToken(mId, mPresentationFrame));
+#endif
     driver->enqueue(mChannelData);
     // Presented, per the driver contract: an accepted enqueue is the frame.
     ++mDitherPhase;

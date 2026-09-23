@@ -341,6 +341,54 @@ one native RGB8 code-1 frame per 257 equally timed frames to match its average
 on an ideal linear PWM device. At 60 Hz that is about 4.28 seconds. The native
 output report must state the resulting fidelity/flicker limitations.
 
+### Optional presentation timing (#4517)
+
+`ChannelData::presentationToken()` identifies an accepted submission by channel
+ID and nonzero frame sequence. A timing-capable driver copies that value at
+enqueue and reports `PresentationEvent` values through
+`IChannelDriver::takePresentationEvent()` when polled in task context. `Latched`
+means the pixels actually became visible; `Ended` means they ceased to be
+visible; `Dropped` means a queued submission never latched. Submission and
+DMA completion are **not** latch observations. `ChannelManager` forwards
+observations only to an explicitly registered shared `IPresentationTimingSink`,
+without retaining a channel pointer. Events are
+ordered per channel, not across independent outputs. A successor latch closes
+the previous visible frame at its timestamp if no explicit end arrived.
+The per-channel timeline rejects duplicate or backward latch tokens using
+wrap-aware 32-bit sequence arithmetic; sequence jumps of half the range or
+more are ambiguous and rejected. Once a frame ends, replaying its token cannot
+make it visible again.
+Dropped submissions retain up to eight future-token tombstones per channel, so
+an earlier queued frame can still latch while a later dropped token cannot.
+Tombstones older than the latest latch are pruned, since monotonic sequencing
+already rejects them. If more than eight future drops accumulate before a
+new latch, the timeline fails closed and must be replaced; it never forgets a
+dropped token and later treats that token as visible.
+`presentationTimingCapability()` distinguishes measured visibility from
+unknown timing even while a measured driver has no event pending. The token
+is eight bytes, and the optional per-channel timeline is fixed-size; no
+per-pixel storage or retained channel pointer is involved. With no sink, the
+manager never queries timing capabilities or drains events. The event queue
+belongs to the driver and must remain finite. A poll drains at most 64 events
+per driver; any remainder is available on the next poll. Timing callbacks may
+replace the sink or change driver registration: the manager snapshots both
+for the duration of that poll, so such changes take effect on the next one.
+TINY builds compile the
+driver hooks, sink storage, and channel/token storage out entirely. The
+production default is also off until a measured backend and consumer opt in
+with `-DFL_PRESENTATION_TIMING=1`; host tests enable it automatically. The
+macro must be consistent across the library and sketch. Durations
+use unsigned 32-bit microsecond subtraction, with intervals of
+2^31 microseconds or more rejected as ambiguous across wraparound.
+
+Built-in drivers currently return no presentation observations: their host,
+SPI, RMT, I2S, PARLIO, and other DMA completion paths do not by themselves
+prove when every LED latched. Their managed dither still advances on accepted
+enqueue and has a fixed-cadence/unknown-timing accuracy claim only. Drivers
+with independently verified latch sensing may opt in; #4500 owns the
+duration-aware compensation policy and its emitted-light bound. This contract
+does not infer hardware timestamps or change phase advancement yet.
+
 ### Encoder table: what each chipset does after the device solve (P8, §6)
 
 B1 and §6 allow a chipset encoder to do only chipset-specific quantization and current encoding after the device solve. It must not add a second correction or gamma stage. This table records, **as built**, what each encoder on the `fl::Channel` path does to a colour-managed channel's drives, and which modes embed their own shaping stage. The dispatch is `Channel::showPixels` in `src/fl/channels/channel.cpp.hpp`.

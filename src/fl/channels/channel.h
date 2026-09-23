@@ -26,6 +26,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
 #include "fl/channels/channel_events.h"
+#include "fl/channels/presentation_timing.h"
 #include "fl/stl/compiler_control.h"
 
 namespace fl {
@@ -398,6 +399,9 @@ private:
     /// a frame rather than when one is attempted, so dropped submissions do
     /// not skew the cycle (#4347).
     u8 mDitherPhase = 0;
+#if FL_PRESENTATION_TIMING
+    u32 mPresentationFrame = 0;       // Submission token sequence; zero reserved.
+#endif
     bool mDisabledDriverWarned = false;  // One-shot guard for the #2517 FL_ERROR. Flipped on the
                                          // first showPixels() that would have enqueued data to a
                                          // driver disabled by `setExclusiveDriver(...)` (or

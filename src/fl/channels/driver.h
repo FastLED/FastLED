@@ -20,6 +20,7 @@
 
 #include "fl/channels/can_match.h"      // free fl::canMatch / canMatchBulk
 #include "fl/channels/capabilities.h"   // DriverCapabilities, PinGroup, ChannelRequest, HandleResult
+#include "fl/channels/presentation_timing.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"
@@ -210,6 +211,26 @@ public:
     ///   - Clear channel "in use" flags when transmission completes
     ///   - Return error message via DriverState when state == ERROR
     virtual DriverState poll() FL_NO_EXCEPT = 0;
+
+#if FL_PRESENTATION_TIMING
+    virtual PresentationTimingCapability presentationTimingCapability() const FL_NO_EXCEPT {
+        return PresentationTimingCapability::Unknown;
+    }
+
+    /// Optional measured visibility event, drained in task context after poll().
+    /// Default false means timing unknown; it must never be synthesized from
+    /// enqueue(), show(), or DMA completion. Implementations copy the token at
+    /// enqueue and publish events in temporal order for each channel. A queued
+    /// frame that never latched reports Dropped. At a successor latch, report
+    /// Ended for the prior token before Latched for the new one, or consumers
+    /// may derive that end from the new latch. Inter-channel timestamps need
+    /// not be ordered; each channel has its own timeline. Keep event queues
+    /// finite and do not retain Channel* or ChannelData* asynchronously.
+    virtual bool takePresentationEvent(PresentationEvent& event) FL_NO_EXCEPT {
+        (void)event;
+        return false;
+    }
+#endif
 
     /// @brief Get the driver name for affinity binding
     /// @return Driver name (e.g., "RMT", "SPI", "PARLIO"), or empty string if unnamed

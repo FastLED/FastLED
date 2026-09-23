@@ -11,6 +11,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/span.h"
 #include "fl/channels/config.h"
+#include "fl/channels/presentation_timing.h"
 
 namespace fl {
 
@@ -121,6 +122,23 @@ public:
     /// @param inUse true to mark as in use, false to mark as available
     void setInUse(bool inUse) FL_NO_EXCEPT { mInUse = inUse; }
 
+    /// Stable value identity for this submission. An async driver snapshots
+    /// this at enqueue; ChannelData itself may be reused after transmission.
+    PresentationToken presentationToken() const FL_NO_EXCEPT {
+#if FL_PRESENTATION_TIMING
+        return mPresentationToken;
+#else
+        return PresentationToken();
+#endif
+    }
+    void setPresentationToken(PresentationToken token) FL_NO_EXCEPT {
+#if FL_PRESENTATION_TIMING
+        mPresentationToken = token;
+#else
+        (void)token;
+#endif
+    }
+
     /// @brief Set the padding generator for this channel
     /// @param generator Function that writes data with padding to destination (nullptr for default left-padding)
     void setPaddingGenerator(PaddingGenerator generator) FL_NO_EXCEPT {
@@ -181,6 +199,9 @@ private:
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
+#if FL_PRESENTATION_TIMING
+    PresentationToken mPresentationToken;   ///< Current submission identity; no owner pointer.
+#endif
 };
 
 }  // namespace fl
