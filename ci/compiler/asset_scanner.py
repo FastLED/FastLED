@@ -245,12 +245,17 @@ def _parse_assets_json(content: str) -> tuple[dict[str, AssetEntry], list[str]]:
             continue
 
         size: Any = spec.get("size_bytes", spec.get("size"))
+        try:
+            parsed_size = int(size) if size is not None else None
+        except (TypeError, ValueError, OverflowError):
+            problems.append(f"entry {name!r} has invalid size; skipped")
+            continue
         sha: Any = spec.get("sha256")
         out[str(name)] = AssetEntry(
             url=urls[0],
             sha256=str(sha) if sha is not None else None,
             fallback=urls[1] if len(urls) > 1 else None,
-            size=int(size) if size is not None else None,
+            size=parsed_size,
             storage=_storage_of(spec, default_storage),
         )
     return out, problems
@@ -288,6 +293,11 @@ def _parse_lnk_json(content: str) -> AssetEntry | None:
     sha = doc_typed.get("sha256")
     extract = doc_typed.get("extract")
 
+    try:
+        parsed_size = int(size) if size is not None else None
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("invalid size in JSON .lnk") from exc
+
     return AssetEntry(
         url=urls[0],
         sha256=str(sha) if sha is not None else None,
@@ -296,7 +306,7 @@ def _parse_lnk_json(content: str) -> AssetEntry | None:
             if len(urls) > 1
             else (str(fallback) if fallback is not None else None)
         ),
-        size=int(size) if size is not None else None,
+        size=parsed_size,
         extract=str(extract) if extract is not None else None,
         storage=_storage_of(doc_typed),
     )
@@ -432,7 +442,11 @@ def scan_sketch_assets(sketch_dir: Path) -> AssetScanResult:
             )
             continue
 
-        entry = _parse_lnk_content(content)
+        try:
+            entry = _parse_lnk_content(content)
+        except ValueError as exc:
+            result.warnings.append(f"asset-scan: {lnk_path}: {exc}; skipped")
+            continue
         if entry is None:
             result.warnings.append(
                 f"asset-scan: {lnk_path}: no URL found in .lnk; skipped"

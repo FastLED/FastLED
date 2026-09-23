@@ -322,6 +322,58 @@ class TestAssetsJsonManifest(unittest.TestCase):
             self.assertNotIn("data/bad.bin", scan.manifest)
             self.assertTrue(any("bad.bin" in w for w in scan.warnings))
 
+    def test_invalid_size_warns_and_preserves_valid_siblings(self) -> None:
+        with TemporaryDirectory() as tmp:
+            sketch = self._sketch(
+                tmp,
+                {
+                    "assets.json": json.dumps(
+                        {
+                            "assets": {
+                                "good.bin": {"url": "https://x/good", "size": 42},
+                                "bad.bin": {
+                                    "url": "https://x/bad",
+                                    "size": "not-an-integer",
+                                },
+                            }
+                        }
+                    )
+                },
+            )
+
+            scan = scan_sketch_assets(sketch)
+
+            self.assertIn("data/good.bin", scan.manifest)
+            self.assertEqual(scan.manifest["data/good.bin"].size, 42)
+            self.assertNotIn("data/bad.bin", scan.manifest)
+            self.assertTrue(
+                any(
+                    "bad.bin" in warning and "size" in warning
+                    for warning in scan.warnings
+                )
+            )
+
+    def test_invalid_json_lnk_size_warns_without_failing_scan(self) -> None:
+        with TemporaryDirectory() as tmp:
+            sketch = self._sketch(
+                tmp,
+                {
+                    "broken.bin.lnk": json.dumps(
+                        {"v": 1, "url": "https://x/broken", "size": "unknown"}
+                    )
+                },
+            )
+
+            scan = scan_sketch_assets(sketch)
+
+            self.assertNotIn("data/broken.bin", scan.manifest)
+            self.assertTrue(
+                any(
+                    "broken.bin.lnk" in warning and "invalid size" in warning
+                    for warning in scan.warnings
+                )
+            )
+
 
 class TestRealCommittedLnkFiles(unittest.TestCase):
     """The `.lnk` file committed in this repo must parse."""
