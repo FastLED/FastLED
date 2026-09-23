@@ -337,8 +337,6 @@ def check_tag(root: Path, tag: str) -> list[str]:
     """
     try:
         version = Version.parse(tag)
-    except KeyboardInterrupt:
-        raise
     except ValueError:
         return [f"tag {tag!r} is not an X.Y.Z release name"]
     if str(version) != tag:
