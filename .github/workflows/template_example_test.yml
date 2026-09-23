@@ -7,6 +7,11 @@ on:
         required: true
         type: string
         description: 'Runner OS (ubuntu-latest, macos-latest, or windows-latest)'
+      build-mode:
+        required: false
+        type: string
+        default: debug
+        description: 'Native sanitizer preset (debug or Linux-only debug-thin)'
 
 permissions:
   contents: read        # Required to checkout code
@@ -58,16 +63,27 @@ jobs:
         shell: bash
 
       - name: Run Example Blink
+        env:
+          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
         run: |
-          ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose --build-mode "$FASTLED_BUILD_MODE"
+          else
+            ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
+          fi
         shell: bash
 
       - name: Run All Examples
+        env:
+          FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
         run: |
           # Enable unbuffered Python output for better CI log streaming
           export PYTHONUNBUFFERED=1
           # Force line-buffered output for better log streaming
           export PYTHONIOENCODING=utf-8
-          # Run examples with debug mode
-          ./test --clang --no-parallel --examples --verbose --debug
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            ./test --clang --no-parallel --examples --verbose --clean --build-mode "$FASTLED_BUILD_MODE"
+          else
+            ./test --clang --no-parallel --examples --verbose --build-mode "$FASTLED_BUILD_MODE"
+          fi
         shell: bash

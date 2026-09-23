@@ -17,6 +17,7 @@ on:
       - '.github/workflows/template_example_test.yml'
       - 'CMakeLists.txt'
       - 'meson.build'
+      - 'meson.options'
       - 'examples/meson.build'
       - 'pyproject.toml'
       - 'test'
@@ -32,6 +33,7 @@ on:
       - '.github/workflows/template_example_test.yml'
       - 'CMakeLists.txt'
       - 'meson.build'
+      - 'meson.options'
       - 'examples/meson.build'
       - 'pyproject.toml'
       - 'test'
@@ -44,3 +46,4 @@ jobs:
     uses: ./.github/workflows/template_example_test.yml
     with:
       os: ubuntu-latest
+      build-mode: debug-thin

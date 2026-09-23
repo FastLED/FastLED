@@ -6,6 +6,14 @@ concurrency:
 
 on:
   workflow_dispatch:
+    inputs:
+      build-mode:
+        description: 'Native sanitizer preset (select debug for the full ASan backstop)'
+        type: choice
+        default: debug-thin
+        options:
+          - debug-thin
+          - debug
   push:
     branches:
       - master
@@ -17,6 +25,7 @@ on:
       - '.github/workflows/template_unit_test.yml'
       - 'CMakeLists.txt'
       - 'meson.build'
+      - 'meson.options'
       - 'examples/meson.build'
       - 'pyproject.toml'
       - 'test'
@@ -32,6 +41,7 @@ on:
       - '.github/workflows/template_unit_test.yml'
       - 'CMakeLists.txt'
       - 'meson.build'
+      - 'meson.options'
       - 'examples/meson.build'
       - 'pyproject.toml'
       - 'test'
@@ -44,3 +54,4 @@ jobs:
     uses: ./.github/workflows/template_unit_test.yml
     with:
       os: ubuntu-latest
+      build-mode: ${{ github.event_name == 'workflow_dispatch' && inputs.build-mode || 'debug-thin' }}

@@ -373,6 +373,8 @@ def compile_meson(
     if build_mode is None:
         if "meson-quick" in str(build_dir):
             build_mode = "quick"
+        elif "meson-debug-thin" in str(build_dir):
+            build_mode = "debug-thin"
         elif "meson-debug" in str(build_dir):
             build_mode = "debug"
         elif "meson-release" in str(build_dir):

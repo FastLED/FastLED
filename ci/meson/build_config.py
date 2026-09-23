@@ -112,7 +112,7 @@ def setup_meson_build(
         reconfigure: Force reconfiguration of existing build
         debug: Enable debug mode with full symbols and sanitizers (default: False)
         check: Enable IWYU static analysis (default: False)
-        build_mode: Build mode ("quick", "debug", or "release"). If None, derived from debug flag.
+        build_mode: Build mode (quick, debug, debug-thin, release, profile).
         verbose: Show detailed output including toolchain info (default: False)
         enable_examples: Enable example compilation targets (default: True)
         enable_unit_tests: Enable unit test compilation targets (default: True)
@@ -123,7 +123,7 @@ def setup_meson_build(
     # Derive build_mode from debug flag if not explicitly provided
     if build_mode is None:
         build_mode = "debug" if debug else "quick"
-    if build_mode == "debug":
+    if build_mode in ("debug", "debug-thin"):
         debug = True
     elif build_mode in ("quick", "release", "profile"):
         debug = False

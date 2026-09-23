@@ -130,9 +130,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Enable debug mode for C++ unit tests and examples (full debug symbols + sanitizers)",
     )
     parser.add_argument(
+        "--debug-thin",
+        action="store_true",
+        help="Linux-only shorthand for --build-mode debug-thin (sanitize FastLED core and runner only)",
+    )
+    parser.add_argument(
         "--build-mode",
         type=str,
-        choices=["quick", "debug", "release", "profile"],
+        choices=["quick", "debug", "debug-thin", "release", "profile"],
         default=None,
         help="Override build mode for unit tests and examples (default: quick, or debug if --debug flag set)",
     )
@@ -179,6 +184,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     )
 
     parsed_args = parser.parse_args(args)
+    if parsed_args.debug_thin:
+        if parsed_args.debug or parsed_args.build_mode is not None:
+            parser.error("--debug-thin cannot be combined with --debug or --build-mode")
+        parsed_args.build_mode = "debug-thin"
+    if parsed_args.build_mode == "debug-thin" and not sys.platform.startswith("linux"):
+        parser.error("debug-thin is supported only on native Linux")
+    if parsed_args.build_mode == "debug-thin" and parsed_args.run:
+        parser.error("debug-thin is a native test preset, not an emulator preset")
 
     # Handle test argument - join multiple words into a single query string
     # nargs="*" returns a list, so we need to convert it
@@ -333,14 +346,18 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
             test_args.clang = True
         config_parts.append("check")
 
-    # Auto-enable --cpp and --quick when --examples is provided
+    # Auto-enable --cpp and --quick when --examples is provided without an
+    # explicit build preset. An explicit preset must stay visible in the log.
     if test_args.examples is not None:
         if not test_args.cpp:
             test_args.cpp = True
-        if not test_args.quick:
+        if not test_args.quick and test_args.build_mode is None and not test_args.debug:
             test_args.quick = True
-        # Show just the build mode - "examples" is redundant since user knows what they're running
-        if test_args.quick:
+        if test_args.build_mode is not None:
+            config_parts.append(test_args.build_mode)
+        elif test_args.debug:
+            config_parts.append("debug")
+        elif test_args.quick:
             config_parts.append("quick")
         else:
             config_parts.append("examples")

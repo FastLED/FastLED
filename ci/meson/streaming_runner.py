@@ -157,7 +157,9 @@ class StreamingContext:
     build_optimizer: Optional[BuildOptimizer]
 
 
-def _make_streaming_env(source_dir: Path, build_dir: Path) -> dict[str, str]:
+def _make_streaming_env(
+    source_dir: Path, build_dir: Path, build_mode: str
+) -> dict[str, str]:
     """Build the environment dict for streamed test processes.
 
     Adds the fastled shared lib directory + clang toolchain runtime DLLs to
@@ -174,6 +176,11 @@ def _make_streaming_env(source_dir: Path, build_dir: Path) -> dict[str, str]:
         streaming_env["LD_LIBRARY_PATH"] = (
             fastled_lib_dir + os.pathsep + streaming_env.get("LD_LIBRARY_PATH", "")
         )
+    # The streaming path invokes test DLLs directly, so it does not inherit
+    # the per-test timeout from Meson's test() environment. Sanitizer runs
+    # make the threaded JSON stress test exceed the default 20-second watchdog.
+    if build_mode in ("debug", "debug-thin"):
+        streaming_env.setdefault("FASTLED_TEST_TIMEOUT", "60")
     # source_dir is intentionally unused — only the build_dir matters for
     # DLL lookup, but the parameter is kept for symmetry with the rest of
     # the streaming context.
@@ -316,7 +323,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         _ts_print("[MESON] Using streaming execution (compile + test in parallel)")
 
     failed_test_outputs: dict[str, str] = {}
-    streaming_env = _make_streaming_env(ctx.source_dir, ctx.build_dir)
+    streaming_env = _make_streaming_env(ctx.source_dir, ctx.build_dir, ctx.build_mode)
     failed_outputs_lock = threading.Lock()
 
     active_procs: set[RunningProcess] = set()
