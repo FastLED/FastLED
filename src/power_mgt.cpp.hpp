@@ -681,6 +681,7 @@ fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
 fl::FramePowerPlan fl::calculateFramePowerPlan(
     fl::u8 requested_brightness, fl::u32 budget_mW) FL_NO_EXCEPT {
     FramePowerPlan plan;
+    plan.mcu_mW = gMCU_mW;
     FramePowerSnapshot snapshot;
     if (!captureFramePowerSnapshot(&snapshot)) {
         // Never solve against a partial set of enabled channels. Zero is the
@@ -689,6 +690,7 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
         plan.legacy_brightness = 0;
         plan.modeled_mW = 0xFFFFFFFFu;
         plan.infeasible = true;
+        plan.limited = requested_brightness != 0;
         return plan;
     }
     const fl::u32 request_flux = fl::FluxScalar::fromBrightness(
@@ -699,6 +701,7 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
         plan.legacy_brightness = 0;
         plan.modeled_mW = zero_demand;
         plan.infeasible = true;
+        plan.limited = requested_brightness != 0;
         return plan;
     }
     fl::u32 low = 0;
@@ -712,6 +715,7 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
         }
     }
     plan.flux_q16 = low;
+    plan.limited = low < request_flux;
     plan.legacy_brightness = static_cast<fl::u8>(
         (static_cast<fl::u64>(low) * 255u) >> 16);
     plan.modeled_mW = framePowerAtFluxMilliwatts(snapshot, low);
@@ -720,6 +724,20 @@ fl::FramePowerPlan fl::calculateFramePowerPlan(
 
 fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
     return gMCU_mW;
+}
+
+namespace {
+void setManagedFrameFlux(bool active, fl::u32 flux_q16) FL_NO_EXCEPT {
+    fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    hooks.frameFluxQ16 = flux_q16;
+    hooks.frameFluxActive = active;
+}
+}  // namespace
+
+const fl::FramePowerDispatch* fl::framePowerDispatch() FL_NO_EXCEPT {
+    static const FramePowerDispatch dispatch = {
+        &calculateFramePowerPlan, &setManagedFrameFlux};
+    return &dispatch;
 }
 #endif  // FL_COLOR_PIPELINE_SHARED
 

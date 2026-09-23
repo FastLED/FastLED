@@ -27,8 +27,19 @@ struct FramePowerPlan {
     u32 flux_q16 = 65536;
     u8 legacy_brightness = 255;
     u32 modeled_mW = 0;
+    u32 mcu_mW = 0;
     bool infeasible = false;
+    bool limited = false;
 };
+
+struct FramePowerDispatch {
+    FramePowerPlan (*calculate)(u8 requested_brightness, u32 budget_mW);
+    void (*setFrameFlux)(bool active, u32 flux_q16);
+};
+
+/// Referenced only by the built-in power-limit setter, so an ordinary show()
+/// does not keep the managed power solver in an unbound sketch.
+const FramePowerDispatch* framePowerDispatch() FL_NO_EXCEPT;
 
 /// Solve a frame's maximum shared scalar without advancing dither state.
 /// The caller must keep source data and profile bindings stable until encode
