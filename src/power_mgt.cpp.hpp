@@ -16,6 +16,7 @@
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 #include "fl/channels/pipeline_binding.h"  // colorPipelineHooks (#4344)
 #include "fl/channels/power_prepass.h"
+#include "fl/system/engine_events.h"
 #include "pixel_controller.h"
 #include "fl/stl/singleton.h"    // fl::Singleton
 #include "fl/gfx/rgbw.h"     // fl::Rgbw, fl::rgb_2_rgbw
@@ -736,33 +737,73 @@ fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
 }
 
 namespace {
-bool beginManagedPowerFrame(fl::u8 requested_brightness, fl::u32 budget_mW,
-                            fl::u8* legacy_brightness) FL_NO_EXCEPT {
-    bool managed = false;
+bool hasManagedPowerChannel() FL_NO_EXCEPT {
     for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
         if (p->getEnabled() && p->colorPipeline()) {
-            managed = true;
-            break;
+            return true;
         }
     }
-    if (!managed) return false;
+    return false;
+}
+void beginManagedPowerFrame(fl::u8 requested_brightness, fl::u32 budget_mW,
+                            fl::u8* legacy_brightness) FL_NO_EXCEPT {
     const fl::FramePowerPlan plan =
         fl::calculateFramePowerPlan(requested_brightness, budget_mW);
     *legacy_brightness = plan.legacy_brightness;
     fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
     hooks.frameFluxQ16 = plan.flux_q16;
     hooks.frameFluxActive = true;
-    return true;
 }
 void endManagedPowerFrame() FL_NO_EXCEPT {
-    fl::colorPipelineHooks().frameFluxActive = false;
+    fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    hooks.frameFluxActive = false;
+    hooks.frameFluxQ16 = 0;
+}
+
+// Registered only when setMaxPowerInMilliWatts() is used. This keeps the
+// ordinary show() body and its linked Blink image free of managed-power code.
+class FramePowerEndListener : public fl::EngineEvents::Listener {
+  public:
+    void onEndFrame() FL_NO_EXCEPT override { endManagedPowerFrame(); }
+    ~FramePowerEndListener() FL_NO_EXCEPT override {
+        fl::EngineEvents::removeListener(this);
+    }
+};
+
+FramePowerEndListener& framePowerEndListener() FL_NO_EXCEPT {
+    static FramePowerEndListener listener;
+    return listener;
+}
+
+fl::u8 managedShowBrightness(fl::u8 requested_brightness,
+                             fl::u32 budget_mW) FL_NO_EXCEPT {
+    if (!hasManagedPowerChannel()) {
+        return calculate_max_brightness_for_power_mW(requested_brightness,
+                                                      budget_mW);
+    }
+#if FASTLED_HAS_ENGINE_EVENTS
+    // addListener() may fail to grow its registry. Never leave a Q16 flux
+    // active across frames if the end-of-frame reset could not be installed.
+    if (!fl::EngineEvents::hasListener(&framePowerEndListener())) {
+        endManagedPowerFrame();
+        return 0;
+    }
+#endif
+    fl::u8 legacy_brightness = requested_brightness;
+    beginManagedPowerFrame(requested_brightness, budget_mW,
+                           &legacy_brightness);
+    return legacy_brightness;
 }
 }  // namespace
 
 const fl::FramePowerDispatch* fl::framePowerDispatch() FL_NO_EXCEPT {
     static const FramePowerDispatch dispatch = {
-        &calculateFramePowerPlan, &beginManagedPowerFrame,
+        &calculateFramePowerPlan, &managedShowBrightness,
+        &calculate_max_brightness_for_power_mW,
         &endManagedPowerFrame};
+#if FASTLED_HAS_ENGINE_EVENTS
+    fl::EngineEvents::addListener(&framePowerEndListener(), 1000000);
+#endif
     return &dispatch;
 }
 #endif  // FL_COLOR_PIPELINE_SHARED

@@ -22,7 +22,8 @@ PowerCodecPolicy powerChannelCodecPolicy(const CLEDController& controller)
 
 /// Result of the shared frame-budget prepass on large-memory managed output.
 /// `flux_q16` applies to every channel's linear emitter light. Legacy byte
-/// encoders quantize the same scalar downward to `legacy_brightness`.
+/// encoders quantize the same scalar downward, except an unrestricted plan
+/// preserves the exact requested byte to avoid a second rounding loss.
 struct FramePowerPlan {
     u32 flux_q16 = 65536;
     u8 legacy_brightness = 255;
@@ -35,8 +36,8 @@ struct FramePowerPlan {
 #if FL_COLOR_PIPELINE_SHARED
 struct FramePowerDispatch {
     FramePowerPlan (*calculate)(u8 requested_brightness, u32 budget_mW);
-    bool (*beginFrame)(u8 requested_brightness, u32 budget_mW,
-                       u8* legacy_brightness);
+    u8 (*showBrightness)(u8 requested_brightness, u32 budget_mW);
+    u8 (*showColorBrightness)(u8 requested_brightness, u32 budget_mW);
     void (*endFrame)();
 };
 

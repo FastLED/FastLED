@@ -1654,10 +1654,12 @@ public:
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts the max power draw desired, in milliwatts
 	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) {
-		mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW);
 		mNPowerData = milliwatts;
 #if FL_COLOR_PIPELINE_SHARED
 		mPFramePowerDispatch = fl::framePowerDispatch();
+		mPPowerFunc = mPFramePowerDispatch->showBrightness;
+#else
+		mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW);
 #endif
 	}
 

@@ -365,13 +365,6 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 
 	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
-	// On a managed frame, the power scalar remains Q16 through response
-	// inversion. Legacy byte encoders receive that same scalar rounded down.
-#if FL_COLOR_PIPELINE_SHARED
-	const bool planned_frame_flux = mPFramePowerDispatch &&
-		mPFramePowerDispatch->beginFrame(scale, mNPowerData, &scale);
-	if (!planned_frame_flux)
-#endif
 	if(mPPowerFunc) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
@@ -411,10 +404,10 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
-#if FL_COLOR_PIPELINE_SHARED
-	if (planned_frame_flux) {
-		mPFramePowerDispatch->endFrame();
-	}
+#if FL_COLOR_PIPELINE_SHARED && !FASTLED_HAS_ENGINE_EVENTS
+	// Build configurations without frame events cannot use the optional
+	// listener to clear the temporary managed flux after encode.
+	if (mPFramePowerDispatch) mPFramePowerDispatch->endFrame();
 #endif
 	onEndFrame();
 	onEndShowLeds();
@@ -454,7 +447,15 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	mLastRequestedScale = scale;
 	// If we have a function for computing power, use it!
 	if(mPPowerFunc) {
+#if FL_COLOR_PIPELINE_SHARED
+		// showColor() does not read controller pixel buffers, so its limiter
+		// must not plan managed source-frame flux from those buffers.
+		scale = mPFramePowerDispatch
+			? mPFramePowerDispatch->showColorBrightness(scale, mNPowerData)
+			: (*mPPowerFunc)(scale, mNPowerData);
+#else
 		scale = (*mPPowerFunc)(scale, mNPowerData);
+#endif
 	}
 	mLastShownScale = scale;
 
