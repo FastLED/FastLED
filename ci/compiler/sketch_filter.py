@@ -60,16 +60,148 @@ from typing import Optional
 from ci.boards import Board
 
 
+@dataclass(frozen=True)
+class FilterExpression:
+    """One condition or a boolean operation in a one-line filter."""
+
+    operator: str
+    key: str = ""
+    values: tuple[str, ...] = ()
+    exact: bool = False
+    left: Optional["FilterExpression"] = None
+    right: Optional["FilterExpression"] = None
+
+
 @dataclass
 class SketchFilter:
     """Represents parsed @filter block from a sketch."""
 
     require: dict[str, list[str]] = field(default_factory=lambda: {})
     exclude: dict[str, list[str]] = field(default_factory=lambda: {})
+    expression: Optional[FilterExpression] = None
+    source: str = ""
 
     def is_empty(self) -> bool:
         """Check if filter has any constraints."""
-        return not self.require and not self.exclude
+        return not self.require and not self.exclude and self.expression is None
+
+
+def _parse_filter_expression(
+    tokens: list[str | FilterExpression],
+) -> Optional[FilterExpression]:
+    """Parse `not`, `and`, `or` with normal precedence and parentheses."""
+    position = 0
+
+    def parse_primary() -> Optional[FilterExpression]:
+        nonlocal position
+        if position >= len(tokens):
+            return None
+        token = tokens[position]
+        position += 1
+        if isinstance(token, FilterExpression):
+            return token
+        if token != "(":
+            return None
+        result = parse_or()
+        if position >= len(tokens) or tokens[position] != ")":
+            return None
+        position += 1
+        return result
+
+    def parse_not() -> Optional[FilterExpression]:
+        nonlocal position
+        if position < len(tokens) and tokens[position] == "not":
+            position += 1
+            operand = parse_not()
+            if operand is not None and operand.operator == "condition":
+                operand = FilterExpression(
+                    "condition",
+                    key=operand.key,
+                    values=operand.values,
+                    exact=True,
+                )
+            return (
+                FilterExpression("not", left=operand) if operand is not None else None
+            )
+        return parse_primary()
+
+    def parse_and() -> Optional[FilterExpression]:
+        nonlocal position
+        result = parse_not()
+        while (
+            result is not None and position < len(tokens) and tokens[position] == "and"
+        ):
+            position += 1
+            rhs = parse_not()
+            if rhs is None:
+                return None
+            result = FilterExpression("and", left=result, right=rhs)
+        return result
+
+    def parse_or() -> Optional[FilterExpression]:
+        nonlocal position
+        result = parse_and()
+        while (
+            result is not None and position < len(tokens) and tokens[position] == "or"
+        ):
+            position += 1
+            rhs = parse_and()
+            if rhs is None:
+                return None
+            result = FilterExpression("or", left=result, right=rhs)
+        return result
+
+    expression = parse_or()
+    if position != len(tokens):
+        return None
+    return _remove_unsupported_conditions(expression)
+
+
+def _remove_unsupported_conditions(
+    expression: Optional[FilterExpression],
+) -> Optional[FilterExpression]:
+    """Retain recognized constraints when a legacy filter names an unknown key."""
+
+    def contains_unsupported(node: Optional[FilterExpression]) -> bool:
+        if node is None:
+            return False
+        return (
+            node.operator == "unsupported"
+            or contains_unsupported(node.left)
+            or contains_unsupported(node.right)
+        )
+
+    if expression is None or expression.operator == "unsupported":
+        return None
+    if expression.operator == "condition":
+        return expression
+    left = _remove_unsupported_conditions(expression.left)
+    if expression.operator == "not":
+        # Legacy parsing ignored an unknown clause and retained a known sibling
+        # as a positive requirement, even when the group had a leading `not`.
+        if contains_unsupported(expression.left):
+            return left
+        return FilterExpression("not", left=left) if left is not None else None
+    right = _remove_unsupported_conditions(expression.right)
+    if left is None:
+        return right
+    if right is None:
+        return left
+    return FilterExpression(expression.operator, left=left, right=right)
+
+
+def _filter_gap_tokens(gap: str) -> Optional[list[str]]:
+    """Read operators and grouping between parenthesized conditions."""
+    tokens: list[str] = []
+    position = 0
+    token_pattern = re.compile(r"\s*(and\b|or\b|not\b|[()])", re.IGNORECASE)
+    while position < len(gap):
+        match = token_pattern.match(gap, position)
+        if match is None:
+            return tokens if not gap[position:].strip() else None
+        tokens.append(match.group(1).lower())
+        position = match.end()
+    return tokens
 
 
 def _normalize_property_name(key: str) -> str:
@@ -119,9 +251,12 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
     filter_line = filter_line.strip()
     if not filter_line:
         return None
+    # Sketches commonly add a trailing explanatory comment to the directive.
+    filter_line = filter_line.split("//", 1)[0].strip()
 
     require: dict[str, list[str]] = {}
     exclude: dict[str, list[str]] = {}
+    tokens: list[str | FilterExpression] = []
 
     # Pattern to match conditions in three formats:
     # 1. (key is value) or (key is not value) or (key matches value)
@@ -134,7 +269,14 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
 
     # Parse each condition
     found_any = False
+    previous_end = 0
     for match in re.finditer(condition_pattern, filter_line):
+        gap_tokens = _filter_gap_tokens(filter_line[previous_end : match.start()])
+        if gap_tokens is None:
+            return None
+        tokens.extend(gap_tokens)
+        previous_end = match.end()
+
         key = match.group(1)
         word_operator = match.group(2)  # is, is not, matches (or None)
         match.group(3)  # =, : (or None)
@@ -158,6 +300,7 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
         # Normalize key
         key = _normalize_property_name(key)
         if key not in ("platform", "target", "memory", "board"):
+            tokens.append(FilterExpression("unsupported"))
             continue
 
         # Parse value (may be -D__AVR__ or identifier or glob pattern)
@@ -167,11 +310,35 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
         ):
             value = value[1:-1]
 
+        # A single condition may list alternative values, as in
+        # `(target is Teensy40 or Teensy41)`.
+        values = [part.strip() for part in re.split(r"\s+or\s+", value) if part.strip()]
+        condition = FilterExpression(
+            "condition",
+            key=key,
+            values=tuple(values),
+            exact=word_operator == "is not",
+        )
+        if word_operator == "is not":
+            condition = FilterExpression("not", left=condition)
+        tokens.append(condition)
+
         target_dict = require if not is_negated else exclude
-        target_dict.setdefault(key, []).append(value)
+        target_dict.setdefault(key, []).extend(values)
         found_any = True
 
-    return SketchFilter(require=require, exclude=exclude) if found_any else None
+    if not found_any:
+        return None
+    gap_tokens = _filter_gap_tokens(filter_line[previous_end:])
+    if gap_tokens is None:
+        return None
+    tokens.extend(gap_tokens)
+    expression = _parse_filter_expression(tokens)
+    if expression is None:
+        return None
+    return SketchFilter(
+        require=require, exclude=exclude, expression=expression, source=filter_line
+    )
 
 
 def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
@@ -264,6 +431,33 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
     return SketchFilter(require=require, exclude=exclude)
 
 
+def _expression_matches(board: Board, expression: FilterExpression) -> bool:
+    """Evaluate a one-line filter without losing its boolean grouping."""
+    if expression.operator == "condition":
+        board_value = _get_board_property(board, expression.key)
+        if not board_value:
+            return False
+        values = list(expression.values)
+        if expression.key == "memory" and not expression.exact:
+            return _memory_tier_matches(board_value, values)
+        return _value_matches(board_value, values)
+    if expression.left is None:
+        return False
+    if expression.operator == "not":
+        return not _expression_matches(board, expression.left)
+    if expression.right is None:
+        return False
+    if expression.operator == "and":
+        return _expression_matches(board, expression.left) and _expression_matches(
+            board, expression.right
+        )
+    if expression.operator == "or":
+        return _expression_matches(board, expression.left) or _expression_matches(
+            board, expression.right
+        )
+    return False
+
+
 def should_skip_sketch(
     board: Board, sketch_filter: Optional[SketchFilter]
 ) -> tuple[bool, str]:
@@ -280,6 +474,11 @@ def should_skip_sketch(
     """
     if sketch_filter is None or sketch_filter.is_empty():
         return False, ""
+
+    if sketch_filter.expression is not None:
+        if _expression_matches(board, sketch_filter.expression):
+            return False, ""
+        return True, f"doesn't match filter: {sketch_filter.source}"
 
     # Check exclude conditions (skip if ANY match, exact match)
     for key, values in sketch_filter.exclude.items():

@@ -141,6 +141,73 @@ class TestParseOnelineFilterShortcuts:
 class TestParseOnelineFilterCompound:
     """Test compound filters with and/or logic."""
 
+    def test_or_across_distinct_properties(self) -> None:
+        """Either branch may admit a board, even when keys differ."""
+        sketch_filter = parse_oneline_filter("(platform is teensy) or (board is uno)")
+        assert sketch_filter is not None
+
+        uno = Board(board_name="uno", platform="avr", framework="arduino")
+        teensy = Board(board_name="teensy41", platform="teensy", framework="arduino")
+        other = Board(board_name="mega", platform="avr", framework="arduino")
+
+        assert should_skip_sketch(uno, sketch_filter)[0] is False
+        assert should_skip_sketch(teensy, sketch_filter)[0] is False
+        assert should_skip_sketch(other, sketch_filter)[0] is True
+
+    def test_parenthesized_or_keeps_and_scoped_to_its_branch(self) -> None:
+        """An OR branch must not inherit requirements from its sibling."""
+        sketch_filter = parse_oneline_filter(
+            "((platform is avr) and (board is uno)) or (platform is teensy)"
+        )
+        assert sketch_filter is not None
+
+        uno = Board(board_name="uno", platform="avr", framework="arduino")
+        teensy = Board(board_name="teensy41", platform="teensy", framework="arduino")
+        other_avr = Board(board_name="mega", platform="avr", framework="arduino")
+
+        assert should_skip_sketch(uno, sketch_filter)[0] is False
+        assert should_skip_sketch(teensy, sketch_filter)[0] is False
+        assert should_skip_sketch(other_avr, sketch_filter)[0] is True
+
+    @pytest.mark.parametrize(
+        "expression",
+        ["(memory is not low)", "not (memory is low)"],
+    )
+    def test_negated_memory_still_uses_exact_tier(self, expression: str) -> None:
+        """Negation excludes only the named tier, as the YAML form does."""
+        sketch_filter = parse_oneline_filter(expression)
+        assert sketch_filter is not None
+
+        low = Board(board_name="uno", platform="avr", framework="arduino")
+        huge = Board(board_name="esp32dev", platform="esp32", framework="arduino")
+        assert should_skip_sketch(low, sketch_filter)[0] is True
+        assert should_skip_sketch(huge, sketch_filter)[0] is False
+
+    @pytest.mark.parametrize("connector", ["and", "or"])
+    def test_unknown_property_keeps_known_restriction(self, connector: str) -> None:
+        """Unsupported conditions must not disable supported conditions."""
+        sketch_filter = parse_oneline_filter(
+            f"(platform is esp32) {connector} (framework is arduino)"
+        )
+        assert sketch_filter is not None
+
+        esp32 = Board(board_name="esp32dev", platform="esp32", framework="arduino")
+        uno = Board(board_name="uno", platform="avr", framework="arduino")
+        assert should_skip_sketch(esp32, sketch_filter)[0] is False
+        assert should_skip_sketch(uno, sketch_filter)[0] is True
+
+    def test_unknown_property_under_group_not_keeps_known_polarity(self) -> None:
+        """Dropping an unknown clause must not negate its known sibling."""
+        sketch_filter = parse_oneline_filter(
+            "not ((framework is arduino) or (platform is esp32))"
+        )
+        assert sketch_filter is not None
+
+        esp32 = Board(board_name="esp32dev", platform="esp32", framework="arduino")
+        uno = Board(board_name="uno", platform="avr", framework="arduino")
+        assert should_skip_sketch(esp32, sketch_filter)[0] is False
+        assert should_skip_sketch(uno, sketch_filter)[0] is True
+
     def test_and_logic(self) -> None:
         """Test 'and' operator combining multiple conditions."""
         result = parse_oneline_filter("(mem is large) and (plat is esp32)")
