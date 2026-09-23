@@ -25,6 +25,10 @@ jobs:
           version: "0.8.0"
       - name: Check registry and generated board gates
         run: bash ci-labels check
+      - name: Check GitHub label catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ci-labels labels-check
       - name: Resolve requested board cells
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
