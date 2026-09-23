@@ -403,12 +403,15 @@ console.error = _prev_error;
  */
 function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
   // Stream this chunk
-  moduleInstance.ccall(
+  const appended = moduleInstance.ccall(
     'jsAppendFile',
     'number', // return value
     ['number', 'number', 'number'], // argument types, not sure why numbers works.
     [path_cstr, data_cbytes, len_int],
   );
+  if (!appended) {
+    throw new Error('WASM filesystem rejected the file append');
+  }
 }
 
 /**
@@ -418,14 +421,19 @@ function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
  * @param {Uint8Array} blob - File data as byte array
  */
 function jsAppendFileUint8(moduleInstance, path, blob) {
+  if (blob.length === 0) return; // The declaration already created an empty file.
   const n = moduleInstance.lengthBytesUTF8(path) + 1;
   const path_cstr = moduleInstance._malloc(n);
-  moduleInstance.stringToUTF8(path, path_cstr, n);
-  const ptr = moduleInstance._malloc(blob.length);
-  moduleInstance.HEAPU8.set(blob, ptr);
-  jsAppendFileRaw(moduleInstance, path_cstr, ptr, blob.length);
-  moduleInstance._free(ptr);
-  moduleInstance._free(path_cstr);
+  let ptr = 0;
+  try {
+    moduleInstance.stringToUTF8(path, path_cstr, n);
+    ptr = moduleInstance._malloc(blob.length);
+    moduleInstance.HEAPU8.set(blob, ptr);
+    jsAppendFileRaw(moduleInstance, path_cstr, ptr, blob.length);
+  } finally {
+    if (ptr) moduleInstance._free(ptr);
+    moduleInstance._free(path_cstr);
+  }
 }
 
 /**
