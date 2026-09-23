@@ -9,6 +9,7 @@
 #include "platforms/wasm/engine_listener.cpp.hpp"
 #include "platforms/wasm/entry_point.cpp.hpp"
 #include "platforms/wasm/fs_wasm.cpp.hpp"
+#include "platforms/wasm/fs_wasm_file_handle.cpp.hpp"
 #include "platforms/wasm/init_wasm.cpp.hpp"
 #include "platforms/wasm/io_wasm.cpp.hpp"
 #include "platforms/wasm/js.cpp.hpp"
