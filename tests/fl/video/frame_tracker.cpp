@@ -25,4 +25,23 @@ FL_TEST_CASE("FrameTracker basic frame advancement") {
     FL_CHECK(amountOfNextFrame == 127);
 }
 
+FL_TEST_CASE("FrameTracker timestamps and interpolation cross 32-bit microseconds") {
+    FrameTracker tracker(1.0f);
+    FL_CHECK_EQ(tracker.get_exact_timestamp_ms(4294), 4294000u);
+    FL_CHECK_EQ(tracker.get_exact_timestamp_ms(4295), 4295000u);
+    FL_CHECK_EQ(tracker.get_exact_timestamp_ms(4296), 4296000u);
+
+    fl::u32 frame = 0;
+    fl::u32 next = 0;
+    fl::u8 progress = 0;
+    tracker.get_interval_frames(4294500, &frame, &next, &progress);
+    FL_CHECK_EQ(frame, 4294u);
+    FL_CHECK_EQ(next, 4295u);
+    FL_CHECK_EQ(progress, 127u);
+    tracker.get_interval_frames(4295500, &frame, &next, &progress);
+    FL_CHECK_EQ(frame, 4295u);
+    FL_CHECK_EQ(next, 4296u);
+    FL_CHECK_EQ(progress, 127u);
+}
+
 } // FL_TEST_FILE
