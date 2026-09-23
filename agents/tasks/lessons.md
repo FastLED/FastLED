@@ -451,3 +451,10 @@
   at 800 kHz and fails at 400 kHz. When measurements refuse to collapse into
   one model, stop fitting curves and look for the input you have never varied
   independently.
+- Do not copy `id-token: write` into build/test workflows merely because they
+  upload artifacts or cache outputs. OIDC is for obtaining a federated identity,
+  not ordinary artifact upload. Before granting it, identify the exact step
+  that requests the token, including any composite action. When removing an
+  unused grant from a reusable workflow, update callers and callees together
+  and test the permission contract so an old callee declaration cannot turn a
+  least-privilege caller into a startup failure.

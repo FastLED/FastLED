@@ -29,15 +29,26 @@ def test_nightly_and_full_sanitizer_select_full_examples() -> None:
     assert "example-group: Nightly" in nightly
     assert "uses: ./.github/workflows/build_template.yml" in nightly
     assert "args: esp32s3 --examples AutoResearch" in nightly
-    assert "id-token: write" in nightly
     assert "pull-requests: read" in nightly
 
     full_sanitizer = (WORKFLOWS / "full_sanitizer_linux.yml").read_text(
         encoding="utf-8"
     )
     assert "example-group: Nightly" in full_sanitizer
-    assert "id-token: write" in full_sanitizer
     assert "pull-requests: read" in full_sanitizer
+
+
+def test_build_and_test_workflows_do_not_request_unused_oidc() -> None:
+    for name in (
+        "nightly-examples.yml",
+        "full_sanitizer_linux.yml",
+        "template_example_test.yml",
+        "template_unit_test.yml",
+        "build_template.yml",
+        "check_attiny85_twinklefox.yml",
+    ):
+        workflow = (WORKFLOWS / name).read_text(encoding="utf-8")
+        assert "id-token: write" not in workflow, name
 
 
 def test_readme_examples_badge_reports_nightly_workflow() -> None:

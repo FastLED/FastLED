@@ -301,6 +301,8 @@
 - [x] Add one highly amalgamated live Compile Tests target with a focused failing contract repro.
 - [x] Route PR example workflows to the live gate and add the nightly six-group sweep and badge.
 - [x] Remove redundant cold Blink setup and 114-sketch Meson discovery from the live gate; measure local cold/warm behavior.
+- [x] Remove unused OIDC grants from the affected reusable workflows and callers.
+- [ ] Address the two security review comments after pushing the fix.
 - [ ] Run focused tests, full repository gates, review, and both live/nightly CI paths; merge only after validated.
 
 ### Review
@@ -313,4 +315,5 @@
 - A later full Python run exposed a pre-existing stale Q16 symbol test and reachable software-float operations in RGBW bind-time slack. The symbol guard and Q16 slack are now fixed: the focused ARM tests, full Python suite, clean C++ suite (310/310 unit cases and 95/95 host examples), lint, and three-bucket review pass locally. The pre-existing ATtiny TwinkleFox workflow startup permission mismatch is fixed in the same pending push.
 - Clean nonverbose Nightly exposed zccache restoring `example_runner` without execute permission and a later implicit Meson rebuild undoing the repair. Building the runner explicitly and using `meson test --no-rebuild` fixed the RED repro; clean Nightly, Blink full, and Compile Tests now pass, as do the 315-second full Python suite, lint, and same-reviewer follow-up.
 - Nightly/full-sanitizer reusable-workflow caller permissions now match their callees; this also fixes a likely startup failure analogous to ATtiny.
+- The OIDC grants copied into those callers and their three reusable templates had no consumer (artifact/cache upload does not use OIDC). After maintainer review, removed them from both sides and the ATtiny caller together; focused RED -> GREEN permission regression, YAML parse, lint, and one-reviewer security follow-up pass. Full Python and hosted CI are being rerun.
 - PR merge and a hosted nightly six-group run remain pending.
