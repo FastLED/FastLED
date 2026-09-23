@@ -1,10 +1,12 @@
 """The routine native smoke inventory must never silently become a full sweep."""
 
+import io
+import sys
 from pathlib import Path
 
 import yaml
 
-from ci.native_ci import CPP_SMOKE, PY_SMOKE
+from ci.native_ci import CPP_SMOKE, PY_SMOKE, main
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -26,6 +28,22 @@ def test_smoke_manifest_sources_exist_and_is_small() -> None:
     assert "fastled_core" in CPP_SMOKE
     assert "channel_driver_uart" in CPP_SMOKE
     assert "ci/tests/test_color_reference_corpus.py" in PY_SMOKE
+
+
+def test_smoke_cli_emits_binary_lf_for_windows_bash_mapfile(monkeypatch) -> None:
+    class WindowsTextStream:
+        def __init__(self) -> None:
+            self.buffer = io.BytesIO()
+
+        def write(self, value: str) -> int:
+            self.buffer.write(value.replace("\n", "\r\n").encode())
+            return len(value)
+
+    output = WindowsTextStream()
+    monkeypatch.setattr(sys, "stdout", output)
+    monkeypatch.setattr(sys, "argv", ["native_ci.py", "cpp"])
+    assert main() == 0
+    assert output.buffer.getvalue() == ("\n".join(CPP_SMOKE) + "\n").encode()
 
 
 def test_full_label_retriggers_exact_sha_native_suites() -> None:

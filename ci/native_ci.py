@@ -6,6 +6,7 @@ The full 311-unit/CI-Python suites still run with ``ci-full`` and at release.
 """
 
 import argparse
+import sys
 from pathlib import Path
 
 
@@ -37,8 +38,11 @@ def main() -> int:
     parser.add_argument("kind", choices=("cpp", "py"))
     args = parser.parse_args()
     entries = CPP_SMOKE if args.kind == "cpp" else PY_SMOKE
+    # On Windows, print() translates LF to CRLF; Bash mapfile strips only LF
+    # and passes a trailing CR into test discovery (FastLED #4543). Write to
+    # the binary stream so the manifest protocol is exactly LF on every host.
     for entry in entries:
-        print(entry)
+        sys.stdout.buffer.write(f"{entry}\n".encode("utf-8"))
     return 0
 
 
