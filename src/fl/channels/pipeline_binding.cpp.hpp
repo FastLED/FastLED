@@ -37,13 +37,17 @@ bool buildPipelineForChannelBinding(const ColorProfileBinding& binding,
     const EmitterProfile* profile = binding.profile();
     if (profile != nullptr) {
         const colorimetric_response::EmitterTopology topology = profile->topology;
+        const Rgbw* rgbw = options.mWhiteCfg.ptr<Rgbw>();
+        const Rgbww* rgbww = options.mWhiteCfg.ptr<Rgbww>();
+        const bool is_rgbw = rgbw != nullptr && rgbw->active();
+        const bool is_rgbww = rgbww != nullptr && rgbww->active();
         const bool mismatch =
             (topology == colorimetric_response::EmitterTopology::RGB &&
-             (options.isRgbw() || options.isRgbww())) ||
+             (is_rgbw || is_rgbww)) ||
             (topology == colorimetric_response::EmitterTopology::RGBW &&
-             !options.isRgbw()) ||
+             !is_rgbw) ||
             (topology == colorimetric_response::EmitterTopology::RGBWW &&
-             !options.isRgbww());
+             !is_rgbww);
         if (mismatch) {
             return false;
         }
