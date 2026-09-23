@@ -35,7 +35,9 @@ struct FramePowerPlan {
 #if FL_COLOR_PIPELINE_SHARED
 struct FramePowerDispatch {
     FramePowerPlan (*calculate)(u8 requested_brightness, u32 budget_mW);
-    void (*setFrameFlux)(bool active, u32 flux_q16);
+    bool (*beginFrame)(u8 requested_brightness, u32 budget_mW,
+                       u8* legacy_brightness);
+    void (*endFrame)();
 };
 
 /// Referenced only by the built-in power-limit setter, so an ordinary show()

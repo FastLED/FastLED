@@ -736,16 +736,33 @@ fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
 }
 
 namespace {
-void setManagedFrameFlux(bool active, fl::u32 flux_q16) FL_NO_EXCEPT {
+bool beginManagedPowerFrame(fl::u8 requested_brightness, fl::u32 budget_mW,
+                            fl::u8* legacy_brightness) FL_NO_EXCEPT {
+    bool managed = false;
+    for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
+        if (p->getEnabled() && p->colorPipeline()) {
+            managed = true;
+            break;
+        }
+    }
+    if (!managed) return false;
+    const fl::FramePowerPlan plan =
+        fl::calculateFramePowerPlan(requested_brightness, budget_mW);
+    *legacy_brightness = plan.legacy_brightness;
     fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
-    hooks.frameFluxQ16 = flux_q16;
-    hooks.frameFluxActive = active;
+    hooks.frameFluxQ16 = plan.flux_q16;
+    hooks.frameFluxActive = true;
+    return true;
+}
+void endManagedPowerFrame() FL_NO_EXCEPT {
+    fl::colorPipelineHooks().frameFluxActive = false;
 }
 }  // namespace
 
 const fl::FramePowerDispatch* fl::framePowerDispatch() FL_NO_EXCEPT {
     static const FramePowerDispatch dispatch = {
-        &calculateFramePowerPlan, &setManagedFrameFlux};
+        &calculateFramePowerPlan, &beginManagedPowerFrame,
+        &endManagedPowerFrame};
     return &dispatch;
 }
 #endif  // FL_COLOR_PIPELINE_SHARED

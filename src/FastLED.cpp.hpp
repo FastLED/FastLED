@@ -368,23 +368,8 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	// On a managed frame, the power scalar remains Q16 through response
 	// inversion. Legacy byte encoders receive that same scalar rounded down.
 #if FL_COLOR_PIPELINE_SHARED
-	bool planned_frame_flux = false;
-	if (mPFramePowerDispatch) {
-		bool managed = false;
-		for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
-			if (p->getEnabled() && p->colorPipeline()) {
-				managed = true;
-				break;
-			}
-		}
-		if (managed) {
-			const fl::FramePowerPlan plan =
-				mPFramePowerDispatch->calculate(scale, mNPowerData);
-			scale = plan.legacy_brightness;
-			mPFramePowerDispatch->setFrameFlux(true, plan.flux_q16);
-			planned_frame_flux = true;
-		}
-	}
+	const bool planned_frame_flux = mPFramePowerDispatch &&
+		mPFramePowerDispatch->beginFrame(scale, mNPowerData, &scale);
 	if (!planned_frame_flux)
 #endif
 	if(mPPowerFunc) {
@@ -428,7 +413,7 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	countFPS();
 #if FL_COLOR_PIPELINE_SHARED
 	if (planned_frame_flux) {
-		mPFramePowerDispatch->setFrameFlux(false, 0);
+		mPFramePowerDispatch->endFrame();
 	}
 #endif
 	onEndFrame();
