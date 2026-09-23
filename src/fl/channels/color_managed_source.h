@@ -20,6 +20,7 @@
 // decided at bind time.
 
 #include "fl/gfx/pipeline.h"
+#include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
 #include "fl/channels/color_profile.h"  // IWYU pragma: keep  (EmitterProfile)
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -29,6 +30,12 @@
 #include "pixel_controller.h"
 
 namespace fl {
+
+#if FL_COLOR_PIPELINE_SHARED
+using ColorPipelineFrameRef = const StreamingPipelineQ16&;
+#else
+using ColorPipelineFrameRef = StreamingPipelineQ16&;
+#endif
 
 /// Runs `processPixelQ16` over a `PixelController`'s pixels as they are read.
 ///
@@ -44,10 +51,14 @@ class ColorManagedPixelSource {
     /// accepts a frame (#4347); the three-argument form uses the shared
     /// per-frame counter.
     ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
-                            const StreamingPipelineQ16& pipeline,
+                            ColorPipelineFrameRef pipeline,
                             u8 dither_phase) FL_NO_EXCEPT;
     ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
-                            const StreamingPipelineQ16& pipeline) FL_NO_EXCEPT;
+                            ColorPipelineFrameRef pipeline) FL_NO_EXCEPT;
+
+    /// Frame-local brightness is applied to the source's owned pipeline on
+    /// shared tiers; only managed iterator construction calls this.
+    void setFlux(u8 brightness) FL_NO_EXCEPT;
 
     /// The colour-managed path.
     ///
@@ -128,7 +139,11 @@ class ColorManagedPixelSource {
 #endif
 
     PixelController<RGB>& mController;
-    const StreamingPipelineQ16& mPipeline;
+#if FL_COLOR_PIPELINE_SHARED
+    StreamingPipelineQ16 mPipeline;
+#else
+    StreamingPipelineQ16& mPipeline;
+#endif
     int mSlot0;
     int mSlot1;
     int mSlot2;

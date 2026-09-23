@@ -86,11 +86,16 @@ class ReorderingPixelIteratorAny {
         Rgbw rgbw,
         Rgbww rgbww,
         const fl::string& channelName,
+#if FL_COLOR_PIPELINE_SHARED
         const StreamingPipelineQ16* pipeline,
-        u8 ditherPhase) FL_NO_EXCEPT
+#else
+        StreamingPipelineQ16* pipeline,
+#endif
+        u8 ditherPhase, u8 brightness) FL_NO_EXCEPT
         : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
         FL_UNUSED(pipeline);
         FL_UNUSED(ditherPhase);  // read only by the colour-managed source
+        FL_UNUSED(brightness);   // read only by the colour-managed source
         FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
 
         // Apply addressing transformation if configured
@@ -139,7 +144,7 @@ class ReorderingPixelIteratorAny {
                 mAddressedController ? mAddressedController.value() : pixels;
             mManagedIterator = hooks.makeIterator(
                 mManagedSourceStorage, mManagedIteratorStorage, base, rgbOrder,
-                *pipeline, rgbw, rgbww, ditherPhase);
+                *pipeline, rgbw, rgbww, ditherPhase, brightness);
         }
 #endif
     }
@@ -712,43 +717,19 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // does not exist.
     //
     // The shared pipeline is never written after it is built (#4440): this
-    // frame takes a reference, copies it, and sets flux on the copy, so a
+    // managed iterator takes a reference, copies it, and sets flux on the copy, so a
     // concurrent reader -- the power estimate copies the same pipeline --
     // never sees a half-written flux, and a reconfiguration replaces
     // `mPipeline` without touching what this frame encodes through. Small
     // tiers encode synchronously and keep single ownership, mutated in place.
 #if FL_COLOR_PIPELINE_SHARED
-    FL_ALIGNAS(alignof(StreamingPipelineQ16))
-    unsigned char frame_pipeline_storage[sizeof(StreamingPipelineQ16)];
-    struct FramePipelineCleanup {
-        StreamingPipelineQ16* pipeline;
-        void (*destroy)(StreamingPipelineQ16*);
-        ~FramePipelineCleanup() FL_DTOR_NOEXCEPT {
-            if (pipeline != nullptr) {
-                destroy(pipeline);
-            }
-        }
-    } frame_cleanup = {nullptr, nullptr};
-    StreamingPipelineQ16* pipeline_mut = nullptr;
-    {
-        const ColorPipelineStorage pipeline_ref = mPipeline;
-        if (pipeline_ref) {
-            pipeline_mut = colorPipelineHooks().copyFrame(
-                frame_pipeline_storage, *pipeline_ref);
-            frame_cleanup.pipeline = pipeline_mut;
-            frame_cleanup.destroy = colorPipelineHooks().destroyFrame;
-        }
-    }
+    const ColorPipelineStorage pipeline_ref = mPipeline;
+    const StreamingPipelineQ16* pipeline = pipeline_ref.get();
 #else
-    StreamingPipelineQ16* const pipeline_mut = mPipeline.get();
+    StreamingPipelineQ16* pipeline = mPipeline.get();
 #endif
-    const ColorPipelineHooks& flux_hooks = colorPipelineHooks();
-    const StreamingPipelineQ16* pipeline = pipeline_mut;
-    if (pipeline_mut != nullptr && flux_hooks.setFlux != nullptr) {
-        flux_hooks.setFlux(pipeline_mut, pixels.mColorAdjustment.premixed.r);
-    }
 #else
-    const StreamingPipelineQ16* pipeline = nullptr;
+    StreamingPipelineQ16* pipeline = nullptr;
 #endif
     // Dither advances on presentation, not on attempt (#4347, R8): this
     // channel's phase moves only when its driver accepts a frame (below), so
@@ -760,7 +741,8 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     }
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
                                         mSettings.rgbw(), mSettings.rgbww(),
-                                        mName, pipeline, mDitherPhase);
+                                        mName, pipeline, mDitherPhase,
+                                        pixels.mColorAdjustment.premixed.r);
     PixelIterator& pixelIterator = iterator.get();
 
     // Encode pixels based on chipset type

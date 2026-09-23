@@ -507,7 +507,6 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
         FL_REQUIRE(colorPipelineHooks().build != nullptr);
         FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
         FL_CHECK(colorPipelineHooks().destroyIterator != nullptr);
-        FL_CHECK(colorPipelineHooks().setFlux != nullptr);
 
         // And the binding really yields a pipeline, so the hooks being
         // installed is not the whole of the claim.
