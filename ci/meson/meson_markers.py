@@ -179,8 +179,9 @@ def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
     # Idempotency check: if both patches already present, no write needed
     has_ar_wrapper = ar_wrapper_script.name in content
     has_restat = "restat = 1" in content
+    stale_wrapper_prefix = f'"{ar_wrapper_script}" rm -f $out && '
 
-    if has_ar_wrapper and has_restat:
+    if has_ar_wrapper and has_restat and stale_wrapper_prefix not in content:
         _ar_opt_status_cache[str(build_dir)] = True
         return True
 
@@ -195,6 +196,13 @@ def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
 
     rule_text = content[static_linker_pos:rule_end]
     new_rule_text = rule_text
+
+    # Repair build.ninja files patched by earlier versions of this function.
+    # Reconfiguration need not occur for a source-only change, so the stale
+    # shell prefix may persist in an existing build directory.
+    new_rule_text = new_rule_text.replace(
+        stale_wrapper_prefix, f'"{ar_wrapper_script}" '
+    )
 
     # Patch 1: restat = 1 (enables ninja cascade suppression after archive)
     if not has_restat:
@@ -216,6 +224,10 @@ def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
                 cmd_line_end = len(new_rule_text)
             original_cmd = new_rule_text[cmd_line_start:cmd_line_end]
             if "$LINK_ARGS $out $in" in original_cmd:
+                # Meson prefixes static archive commands with a shell cleanup.
+                # The content-preserving wrapper handles replacement itself;
+                # passing `rm` as its archiver would fail before any test builds.
+                original_cmd = original_cmd.removeprefix("rm -f $out && ")
                 python_exe = sys.executable
                 new_cmd = f'"{python_exe}" "{ar_wrapper_script}" {original_cmd}'
                 new_rule_text = (
