@@ -946,6 +946,13 @@ FL_TEST_CASE("CQ_OCTAVE covers its declared range without losing band resolution
 
     const int sampleCounts[] = {512, 512, 512, 512, 512, 256, 1024};
     const int bandCounts[] = {16, 24, 32, 48, 64, 48, 48};
+    // Measured center hits: 14, 21, 27, 36, 44, 29, 42; worst misses:
+    // 1, 2, 3, 3, 6, 32, 1. The 256/48 mode is poorly conditioned at low
+    // frequencies even before gap coverage; keep it from regressing rather
+    // than claiming this fix also improves its center accuracy. One count
+    // of slack accommodates differences in platform floating-point math.
+    const int minCentreHits[] = {13, 20, 26, 35, 43, 28, 41};
+    const int maxWorstMiss[] = {2, 3, 4, 4, 7, 33, 2};
     for (int i = 0; i < 7; ++i) {
         const CoverageResult octave = measureCoverage(
             sampleCounts[i], bandCounts[i], fl::audio::fft::Mode::CQ_OCTAVE,
@@ -955,7 +962,8 @@ FL_TEST_CASE("CQ_OCTAVE covers its declared range without losing band resolution
             kSteps);
         FL_CHECK_EQ(rebin.dead, 0);
         FL_CHECK_EQ(octave.dead, 0);
-        FL_CHECK_GT(octave.centre_hits, bandCounts[i] / 2);
+        FL_CHECK_GE(octave.centre_hits, minCentreHits[i]);
+        FL_CHECK_LE(octave.worst_miss, maxWorstMiss[i]);
     }
 }
 
