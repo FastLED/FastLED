@@ -1,5 +1,13 @@
 # FastLED AI Agent Guidelines
 
+> [!IMPORTANT]
+> Routine PR and `master` board jobs are minimal. Use `ci-full` for complete
+> board validation before platform-sensitive merges; hosted Intel and Apple
+> Silicon macOS run only with `ci-full` or release validation. Before choosing
+> a narrower board label, run `bash ci-labels list --json` and use an emitted
+> name. See [CI modes](docs/CI_MODES.md). A version bump on `master` is not
+> evidence that full CI passed; follow the release issue's exact-SHA gate.
+
 ## Read the Right File for Your Task
 
 **By what you're doing:**
