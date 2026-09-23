@@ -318,6 +318,53 @@ FL_TEST_CASE("[#4515] bound RGBW and RGBWW profiles reach encoded channel bytes"
     }
 }
 
+FL_TEST_CASE("[#4515] wide profiles reject encoders that consume only RGB drives") {
+    installColorPipelineHooks();
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    FL_REQUIRE(hooks.build != nullptr);
+    EmitterProfile profile = rgbDevice();
+    profile.topology = colorimetric_response::EmitterTopology::RGBW;
+    profile.xy_white1[0] = 0.39f;
+    profile.xy_white1[1] = 0.38f;
+    profile.lum_white1 = 0.8f;
+    ChannelOptions options;
+    options.mWhiteCfg = Rgbw(6000, RGBW_MODE::kRGBWNullWhitePixel,
+                              EOrderW::W0);
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::srgbBt709()));
+    StreamingPipelineQ16 pipeline;
+    const auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    const ChipsetVariant ws2812 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+    const ChipsetVariant ucs8 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
+    const ChipsetVariant ucs16 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
+    const ChipsetVariant tm1908 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_TM1908);
+    const ChipsetVariant spi = SpiChipsetConfig(1, 2, SpiEncoder::apa102());
+    FL_CHECK(hooks.build(options.mColorProfile, options, ws2812, &pipeline));
+    FL_CHECK(hooks.build(options.mColorProfile, options, ucs8, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, ucs16,
+                               &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, tm1908,
+                               &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, spi, &pipeline));
+
+    profile.topology = colorimetric_response::EmitterTopology::RGBWW;
+    profile.xy_white2[0] = 0.28f;
+    profile.xy_white2[1] = 0.31f;
+    profile.lum_white2 = 0.7f;
+    options.mWhiteCfg = Rgbww(2700, 6500, RGBWW_MODE::kRGBWWColorimetric,
+                               EOrderWW::WwWcStart);
+    FL_REQUIRE(options.setColorProfile(profile, SourceProfile::srgbBt709()));
+    const ChipsetVariant tm1812 = ClocklessChipset(
+        1, timing, ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW);
+    FL_CHECK(hooks.build(options.mColorProfile, options, ws2812, &pipeline));
+    FL_CHECK(hooks.build(options.mColorProfile, options, tm1812, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, ucs8, &pipeline));
+    FL_CHECK_FALSE(hooks.build(options.mColorProfile, options, spi, &pipeline));
+}
+
 FL_TEST_CASE("Brightness is applied once, by the pipeline") {
     // The trap this class exists to avoid. `loadAndScale0/1/2` fold in
     // `mColorAdjustment`, whose premixed value carries brightness, and the
@@ -724,7 +771,10 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
         // And the binding really yields a pipeline, so the hooks being
         // installed is not the whole of the claim.
         StreamingPipelineQ16 pipeline;
-        FL_CHECK(colorPipelineHooks().build(options.mColorProfile, &pipeline));
+        const ChipsetVariant chipset = ClocklessChipset(
+            1, makeTimingConfig<TIMING_WS2812_800KHZ>());
+        FL_CHECK(colorPipelineHooks().build(options.mColorProfile, options,
+                                            chipset, &pipeline));
     }
 
     {

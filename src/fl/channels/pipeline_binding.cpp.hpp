@@ -28,6 +28,53 @@ bool buildPipelineForBinding(const ColorProfileBinding& binding,
 
 namespace {
 
+// Keep topology admission behind the installed hook: ordinary unprofiled
+// channels must not link the wide-profile checks into their hot path.
+bool buildPipelineForChannelBinding(const ColorProfileBinding& binding,
+                                    const ChannelOptions& options,
+                                    const ChipsetVariant& chipset,
+                                    StreamingPipelineQ16* out) FL_NO_EXCEPT {
+    const EmitterProfile* profile = binding.profile();
+    if (profile != nullptr) {
+        const colorimetric_response::EmitterTopology topology = profile->topology;
+        const bool mismatch =
+            (topology == colorimetric_response::EmitterTopology::RGB &&
+             (options.isRgbw() || options.isRgbww())) ||
+            (topology == colorimetric_response::EmitterTopology::RGBW &&
+             !options.isRgbw()) ||
+            (topology == colorimetric_response::EmitterTopology::RGBWW &&
+             !options.isRgbww());
+        if (mismatch) {
+            return false;
+        }
+        if (topology != colorimetric_response::EmitterTopology::RGB) {
+            // RGB-only codecs call loadAndScaleRGB[16] and cannot consume a
+            // wide solve. Reject at binding instead of reading the RGB gamut
+            // that wide pipelines do not build or silently dropping W/WW.
+            if (!chipset.is<ClocklessChipset>()) {
+                return false;
+            }
+            const ClocklessEncoder encoder =
+                chipset.ptr<ClocklessChipset>()->encoder;
+            const bool supports_rgbw =
+                encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812 ||
+                encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT;
+            const bool supports_rgbww =
+                encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812 ||
+                encoder == ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW;
+            if (topology == colorimetric_response::EmitterTopology::RGBW
+                    ? !supports_rgbw : !supports_rgbww) {
+                return false;
+            }
+        }
+    }
+    return buildPipelineForBinding(binding, out);
+}
+
+}  // namespace
+
+namespace {
+
 /// Builds the managed iterator in the caller's storage.
 ///
 /// Named for this file because .cpp.hpp files share a translation unit under
@@ -179,7 +226,7 @@ ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
 
 void installColorPipelineHooks() FL_NO_EXCEPT {
     ColorPipelineHooks& hooks = colorPipelineHooks();
-    hooks.build = &buildPipelineForBinding;
+    hooks.build = &buildPipelineForChannelBinding;
     hooks.makeIterator = &makeColorPipelineIterator;
     hooks.destroyIterator = &destroyColorPipelineIterator;
     hooks.notifyProfileClearedByLegacy = &notifyColorPipelineProfileClearedByLegacy;

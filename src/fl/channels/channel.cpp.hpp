@@ -414,18 +414,6 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     if (options.mColorProfile.mUseGlobalSourceDefault) {
         mSettings.mColorProfile.mSource = detail::defaultSourceProfile();
     }
-    const EmitterProfile* requested_profile = mSettings.mColorProfile.profile();
-    const bool topology_mismatch = requested_profile != nullptr &&
-        ((requested_profile->topology == colorimetric_response::EmitterTopology::RGB &&
-          (mSettings.isRgbw() || mSettings.isRgbww())) ||
-         (requested_profile->topology == colorimetric_response::EmitterTopology::RGBW &&
-          !mSettings.isRgbw()) ||
-         (requested_profile->topology == colorimetric_response::EmitterTopology::RGBWW &&
-          !mSettings.isRgbww()));
-    if (topology_mismatch) {
-        raiseColorProfileFallback("profile emitter topology does not match channel output");
-    }
-
     // Guards the build below: a binding already rejected by strict mode must
     // not be built. It is deliberately *not* reused for the enablement
     // branch -- the build can raise the fallback itself (#4345), and reading
@@ -441,7 +429,7 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
     // error.
     mPipeline.reset();
     const ColorPipelineHooks& hooks = colorPipelineHooks();
-    if (!rejectedBeforeBuild && !topology_mismatch && hooks.build != nullptr) {
+    if (!rejectedBeforeBuild && hooks.build != nullptr) {
         // Through the hook, not by name. Calling `buildPipelineForBinding`
         // directly from here is what kept the entire pipeline alive in every
         // build; the pointer is null until `setColorProfile` installs it.
@@ -449,7 +437,8 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
         // usable pipeline costs no allocation -- that is the failing half of
         // an ordinary unbound channel, not an exceptional path.
         StreamingPipelineQ16 pipeline;
-        if (hooks.build(mSettings.mColorProfile, &pipeline)) {
+        if (hooks.build(mSettings.mColorProfile, mSettings, mChipset,
+                        &pipeline)) {
 #if FL_COLOR_PIPELINE_SHARED
             mPipeline = fl::make_shared<StreamingPipelineQ16>(pipeline);
 #else

@@ -13,6 +13,7 @@
 
 #include "fl/channels/color_managed_source.h"
 #include "fl/channels/color_profile.h"
+#include "fl/channels/config.h"
 #include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/spi_chipsets.h"
@@ -62,7 +63,8 @@ constexpr fl::size kColorPipelineIteratorStorage = sizeof(PixelIterator);
 
 struct ColorPipelineHooks {
     /// Derives a pipeline from a binding. Null until installed.
-    bool (*build)(const ColorProfileBinding&, StreamingPipelineQ16*);
+    bool (*build)(const ColorProfileBinding&, const ChannelOptions&,
+                  const ChipsetVariant&, StreamingPipelineQ16*);
 
     /// Constructs a colour-managed `PixelIterator` in caller-provided
     /// storage. Null until installed.
