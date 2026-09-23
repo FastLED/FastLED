@@ -126,21 +126,6 @@ struct ColorPipelineHooks {
     u32 (*unscaledPowerMilliwatts)(const StreamingPipelineQ16& pipeline,
                                    span<const CRGB> leds, u8 emitter_count,
                                    PowerEstimator estimate);
-    /// Solve pixels only once, then evaluate candidate scalars from bounded
-    /// linear-light buckets. The electrical mapper is supplied by power_mgt
-    /// to preserve the profile/limiter's linker isolation.
-    void (*buildPowerHistogram)(const StreamingPipelineQ16& pipeline,
-                                span<const CRGB> leds, u8 emitter_count,
-                                ManagedPowerHistogram* out);
-    u64 (*histogramPowerNumerator)(const StreamingPipelineQ16& pipeline,
-                                   const ManagedPowerHistogram& histogram,
-                                   FluxScalar flux, PowerCodecPolicy codec,
-                                   const u8 (&weights)[5],
-                                   u8 (*electricalMap)(u8 code));
-    /// Set only during CFastLED::show()'s encoding pass. Zero flux is valid,
-    /// so the activation flag is separate from the value.
-    bool frameFluxActive;
-    u32 frameFluxQ16;
 #endif
 
     /// Chipset-specific quantization of a colour-managed SPI channel's wide
@@ -155,6 +140,26 @@ struct ColorPipelineHooks {
     bool (*encodeManagedSpi)(PixelIterator& pixels, vector_psram<u8>* out,
                              SpiChipset chip, const CLEDController& controller);
 };
+
+#if FL_COLOR_PIPELINE_SHARED
+/// Power-only callbacks and temporary scalar live outside ColorPipelineHooks:
+/// unbound sketches already link that general hook object, but must not pay
+/// RAM for the optional shared-frame limiter.
+struct PowerFrameHooks {
+    void (*buildPowerHistogram)(const StreamingPipelineQ16& pipeline,
+                                span<const CRGB> leds, u8 emitter_count,
+                                ManagedPowerHistogram* out);
+    u64 (*histogramPowerNumerator)(const StreamingPipelineQ16& pipeline,
+                                   const ManagedPowerHistogram& histogram,
+                                   FluxScalar flux, PowerCodecPolicy codec,
+                                   const u8 (&weights)[5],
+                                   u8 (*electricalMap)(u8 code));
+    bool frameFluxActive;
+    u32 frameFluxQ16;
+};
+
+PowerFrameHooks& powerFrameHooks() FL_NO_EXCEPT;
+#endif
 
 /// The installed hooks. Both pointers are null in a program that never binds
 /// a colour profile.

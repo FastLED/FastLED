@@ -608,7 +608,7 @@ struct FramePowerSnapshot {
 };
 
 bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
-    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    const fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
     fl::size managed_count = 0;
     fl::size legacy_count = 0;
     for (fl::CLEDController* controller = fl::CLEDController::head();
@@ -660,7 +660,7 @@ fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
     fl::u64 total = gMCU_mW;
     const fl::FluxScalar flux = fl::FluxScalar::fromRawQ16(
         static_cast<fl::i32>(flux_q16));
-    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    const fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
     for (fl::size i = 0; i < snapshot.managed.size(); ++i) {
         const ManagedFramePower& entry = snapshot.managed[i];
         const fl::u64 numerator = hooks.histogramPowerNumerator(
@@ -750,12 +750,12 @@ void beginManagedPowerFrame(fl::u8 requested_brightness, fl::u32 budget_mW,
     const fl::FramePowerPlan plan =
         fl::calculateFramePowerPlan(requested_brightness, budget_mW);
     *legacy_brightness = plan.legacy_brightness;
-    fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
     hooks.frameFluxQ16 = plan.flux_q16;
     hooks.frameFluxActive = true;
 }
 void endManagedPowerFrame() FL_NO_EXCEPT {
-    fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
     hooks.frameFluxActive = false;
     hooks.frameFluxQ16 = 0;
 }
@@ -788,6 +788,10 @@ fl::u8 managedShowBrightness(fl::u8 requested_brightness,
         endManagedPowerFrame();
         return 0;
     }
+#else
+    // A managed Q16 frame requires a guaranteed reset after encode. Without
+    // frame events, fail closed rather than retaining flux into later frames.
+    return 0;
 #endif
     fl::u8 legacy_brightness = requested_brightness;
     beginManagedPowerFrame(requested_brightness, budget_mW,
@@ -799,8 +803,7 @@ fl::u8 managedShowBrightness(fl::u8 requested_brightness,
 const fl::FramePowerDispatch* fl::framePowerDispatch() FL_NO_EXCEPT {
     static const FramePowerDispatch dispatch = {
         &calculateFramePowerPlan, &managedShowBrightness,
-        &calculate_max_brightness_for_power_mW,
-        &endManagedPowerFrame};
+        &calculate_max_brightness_for_power_mW};
 #if FASTLED_HAS_ENGINE_EVENTS
     fl::EngineEvents::addListener(&framePowerEndListener(), 1000000);
 #endif

@@ -140,7 +140,7 @@ FL_TEST_CASE("[#4499] mixed RGB and managed wide frame stays within shared power
                     framePowerMCUBaselineMilliwatts(),
                 reported_plan.modeled_mW);
     FL_CHECK(FastLED.isPowerLimited());
-    FL_CHECK_FALSE(fl::colorPipelineHooks().frameFluxActive);
+    FL_CHECK_FALSE(fl::powerFrameHooks().frameFluxActive);
 
     // showColor() encodes a constant, not the controller source pixels used
     // by the managed prepass. Keep its existing byte-limiter semantics and
@@ -149,7 +149,7 @@ FL_TEST_CASE("[#4499] mixed RGB and managed wide frame stays within shared power
         calculate_max_brightness_for_power_mW(255, budget_mW);
     FastLED.showColor(CRGB::Black, 255);
     FL_CHECK_EQ(FastLED.getLastShowBrightness(), color_brightness);
-    FL_CHECK_FALSE(fl::colorPipelineHooks().frameFluxActive);
+    FL_CHECK_FALSE(fl::powerFrameHooks().frameFluxActive);
 
     // An unlimited Q16 plan must preserve the legacy channel's requested
     // byte exactly, even at brightness 1. A true limit rounds it down.
@@ -361,7 +361,7 @@ FL_TEST_CASE("[#4499] APA102 and SK9822 current-field choices stay within the fr
 
 FL_TEST_CASE("[#4499] histogram bounds every wide temporal-dither phase") {
     installColorPipelineHooks();
-    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    const PowerFrameHooks& hooks = powerFrameHooks();
     FL_REQUIRE(hooks.buildPowerHistogram != nullptr);
     FL_REQUIRE(hooks.histogramPowerNumerator != nullptr);
     CRGB leds[8] = {

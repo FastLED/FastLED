@@ -38,12 +38,15 @@ struct FramePowerDispatch {
     FramePowerPlan (*calculate)(u8 requested_brightness, u32 budget_mW);
     u8 (*showBrightness)(u8 requested_brightness, u32 budget_mW);
     u8 (*showColorBrightness)(u8 requested_brightness, u32 budget_mW);
-    void (*endFrame)();
 };
 
 /// Referenced only by the built-in power-limit setter, so an ordinary show()
 /// does not keep the managed power solver in an unbound sketch.
 const FramePowerDispatch* framePowerDispatch() FL_NO_EXCEPT;
+
+/// Last installed built-in limiter dispatch. Reading this does not reference
+/// the managed solver; the setter is the only path that installs it.
+const FramePowerDispatch*& activeFramePowerDispatch() FL_NO_EXCEPT;
 
 /// Solve a frame's maximum shared scalar without advancing dither state.
 /// The caller must keep source data and profile bindings stable until encode

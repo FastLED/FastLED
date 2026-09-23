@@ -727,9 +727,6 @@ class CFastLED {
 	fl::u32 mNMinMicros;    ///< minimum µs between frames, used for capping frame rates
 	fl::u32 mNPowerData;    ///< max power use parameter
 	power_func mPPowerFunc;  ///< function for overriding brightness when using FastLED.show();
-#if FL_COLOR_PIPELINE_SHARED
-	const fl::FramePowerDispatch* mPFramePowerDispatch; ///< absent until the built-in limiter is enabled
-#endif
 	fl::u8  mLastRequestedScale;  ///< brightness the last show()/showColor() was asked for
 	fl::u8  mLastShownScale;      ///< brightness the last show()/showColor() applied, after the power limiter
 	static fl::vector<fl::ChannelPtr>& channels(); ///< stored ChannelPtrs to keep them alive
@@ -1656,8 +1653,8 @@ public:
 	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) {
 		mNPowerData = milliwatts;
 #if FL_COLOR_PIPELINE_SHARED
-		mPFramePowerDispatch = fl::framePowerDispatch();
-		mPPowerFunc = mPFramePowerDispatch->showBrightness;
+		fl::activeFramePowerDispatch() = fl::framePowerDispatch();
+		mPPowerFunc = fl::activeFramePowerDispatch()->showBrightness;
 #else
 		mPPowerFunc = static_cast<power_func>(&calculate_max_brightness_for_power_mW);
 #endif

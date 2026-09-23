@@ -91,7 +91,7 @@ PixelIterator* makeColorPipelineIterator(
     ColorManagedPixelSource* source = new (source_storage)
         ColorManagedPixelSource(controller, order, pipeline, dither_phase);
 #if FL_COLOR_PIPELINE_SHARED
-    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    const PowerFrameHooks& hooks = powerFrameHooks();
     if (hooks.frameFluxActive) {
         source->setFlux(FluxScalar::fromRawQ16(
             static_cast<i32>(hooks.frameFluxQ16)));
@@ -309,6 +309,13 @@ ColorPipelineHooks& colorPipelineHooks() FL_NO_EXCEPT {
     return hooks;
 }
 
+#if FL_COLOR_PIPELINE_SHARED
+PowerFrameHooks& powerFrameHooks() FL_NO_EXCEPT {
+    static PowerFrameHooks hooks = {};
+    return hooks;
+}
+#endif
+
 void installColorPipelineHooks() FL_NO_EXCEPT {
     ColorPipelineHooks& hooks = colorPipelineHooks();
     hooks.build = &buildPipelineForChannelBinding;
@@ -318,8 +325,9 @@ void installColorPipelineHooks() FL_NO_EXCEPT {
     hooks.encodeManagedSpi = &encodeColorPipelineManagedSpi;
 #if FL_COLOR_PIPELINE_SHARED
     hooks.unscaledPowerMilliwatts = &colorPipelineUnscaledPowerMilliwatts;
-    hooks.buildPowerHistogram = &colorPipelineBuildPowerHistogram;
-    hooks.histogramPowerNumerator = &colorPipelineHistogramPowerNumerator;
+    PowerFrameHooks& power_hooks = powerFrameHooks();
+    power_hooks.buildPowerHistogram = &colorPipelineBuildPowerHistogram;
+    power_hooks.histogramPowerNumerator = &colorPipelineHistogramPowerNumerator;
 #endif
 }
 
