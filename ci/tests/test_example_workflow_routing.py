@@ -10,6 +10,8 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 def test_live_example_workflows_select_compile_tests() -> None:
     template = (WORKFLOWS / "template_example_test.yml").read_text(encoding="utf-8")
     assert '--example-group "$FASTLED_EXAMPLE_GROUP"' in template
+    assert "--no-parallel" not in template
+    assert "Build bytes:" in template
     assert "Run Example Blink" not in template
     assert "Run All Examples" not in template
 

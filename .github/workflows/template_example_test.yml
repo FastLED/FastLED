@@ -74,5 +74,12 @@ jobs:
         run: |
           export PYTHONUNBUFFERED=1
           export PYTHONIOENCODING=utf-8
-          ./test --clang --no-parallel --examples --example-group "$FASTLED_EXAMPLE_GROUP" --verbose --build-mode "$FASTLED_BUILD_MODE"
+          ./test --clang --examples --example-group "$FASTLED_EXAMPLE_GROUP" --verbose --build-mode "$FASTLED_BUILD_MODE"
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            build_suffix=""
+            if [[ "$FASTLED_EXAMPLE_GROUP" == CompileTests ]]; then
+              build_suffix="-compile-tests"
+            fi
+            du -sb ".build/meson-${FASTLED_BUILD_MODE}${build_suffix}" | awk '{print "Build bytes: " $1}'
+          fi
         shell: bash
