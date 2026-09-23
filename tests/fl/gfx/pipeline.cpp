@@ -4,6 +4,8 @@
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/math/math.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/type_traits.h"
 #include <cmath>  // ok include -- see the note on `fl::exp` in test_metric below
 
 #include "test.h"
@@ -671,6 +673,10 @@ FL_TEST_CASE("Streaming pipeline rejects what its stages reject") {
 }
 
 FL_TEST_CASE("Emitter response is inverted after linear brightness") {
+    FL_STATIC_ASSERT(
+        (fl::is_same<decltype(StreamingPipelineQ16().response),
+                     fl::shared_ptr<const ResponseLutsQ16>>::value),
+        "shared response samples must be immutable after construction");
     u16 linear[3] = {0, 32768, 65535};
     u16 green_square[3] = {0, 16384, 65535};
     EmitterProfile curved_device = rgbDevice();

@@ -89,7 +89,7 @@ struct StreamingPipelineQ16 {
 
     /// Absent means linear code-to-light response. With a table, the inverse
     /// is applied after `flux` and before the final wire quantization.
-    shared_ptr<ResponseLutsQ16> response;
+    shared_ptr<const ResponseLutsQ16> response;
 };
 
 /// Bind a source declaration and a device profile into a pipeline.
