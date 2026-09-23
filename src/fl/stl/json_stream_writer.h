@@ -29,8 +29,9 @@ class JsonStreamWriter {
     // pointer past the call.
     using Sink = fl::function<void(const char *data, fl::size len)>;
 
-    // kMaxDepth bounds object/array nesting. JSON-RPC responses are shallow;
-    // 24 is far more than enough and costs 24 bytes.
+    // kMaxDepth bounds object/array nesting. A container beyond this limit is
+    // emitted as null; its contents are ignored through the matching end call.
+    // JSON-RPC responses are shallow; 24 costs only 24 bytes of stack state.
     static constexpr fl::size kMaxDepth = 24;
     // Scratch buffer size. Bytes accumulate here and flush to the sink when
     // full, so the sink sees reasonably-sized writes without any heap use.
@@ -80,6 +81,7 @@ class JsonStreamWriter {
     fl::size mLen;                 // bytes currently in mBuf
     bool mNeedComma[kMaxDepth];    // does the current container have a prior element?
     fl::size mDepth;              // current nesting depth
+    fl::size mSuppressedDepth;    // nesting inside a container replaced by null
     bool mPendingKey;             // true after key(), expecting a value next
 };
 

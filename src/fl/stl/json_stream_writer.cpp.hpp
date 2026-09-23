@@ -10,7 +10,8 @@
 namespace fl {
 
 JsonStreamWriter::JsonStreamWriter(Sink sink) FL_NO_EXCEPT
-    : mSink(fl::move(sink)), mLen(0), mDepth(0), mPendingKey(false) {}
+    : mSink(fl::move(sink)), mLen(0), mDepth(0), mSuppressedDepth(0),
+      mPendingKey(false) {}
 
 JsonStreamWriter::~JsonStreamWriter() FL_NO_EXCEPT { flush(); }
 
@@ -95,15 +96,26 @@ void JsonStreamWriter::prefixForKey() FL_NO_EXCEPT {
 }
 
 void JsonStreamWriter::beginObject() FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        ++mSuppressedDepth;
+        return;
+    }
+    if (mDepth == kMaxDepth) {
+        valueNull();
+        mSuppressedDepth = 1;
+        return;
+    }
     prefixForValue();
     writeChar('{');
-    if (mDepth < kMaxDepth) {
-        mNeedComma[mDepth] = false;
-    }
+    mNeedComma[mDepth] = false;
     ++mDepth;
 }
 
 void JsonStreamWriter::endObject() FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        --mSuppressedDepth;
+        return;
+    }
     if (mDepth > 0) {
         --mDepth;
     }
@@ -111,15 +123,26 @@ void JsonStreamWriter::endObject() FL_NO_EXCEPT {
 }
 
 void JsonStreamWriter::beginArray() FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        ++mSuppressedDepth;
+        return;
+    }
+    if (mDepth == kMaxDepth) {
+        valueNull();
+        mSuppressedDepth = 1;
+        return;
+    }
     prefixForValue();
     writeChar('[');
-    if (mDepth < kMaxDepth) {
-        mNeedComma[mDepth] = false;
-    }
+    mNeedComma[mDepth] = false;
     ++mDepth;
 }
 
 void JsonStreamWriter::endArray() FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        --mSuppressedDepth;
+        return;
+    }
     if (mDepth > 0) {
         --mDepth;
     }
@@ -127,6 +150,9 @@ void JsonStreamWriter::endArray() FL_NO_EXCEPT {
 }
 
 void JsonStreamWriter::key(const char *k) FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
     prefixForKey();
     putEscaped(k);
     writeChar(':');
@@ -134,11 +160,17 @@ void JsonStreamWriter::key(const char *k) FL_NO_EXCEPT {
 }
 
 void JsonStreamWriter::value(const char *s) FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
     prefixForValue();
     putEscaped(s);
 }
 
 void JsonStreamWriter::value(fl::i64 n) FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
     prefixForValue();
     char buf[24];
     int len = fl::itoa64(n, buf, 10);
@@ -148,11 +180,17 @@ void JsonStreamWriter::value(fl::i64 n) FL_NO_EXCEPT {
 }
 
 void JsonStreamWriter::value(bool b) FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
     prefixForValue();
     puts(b ? "true" : "false");
 }
 
 void JsonStreamWriter::valueNull() FL_NO_EXCEPT {
+    if (mSuppressedDepth > 0) {
+        return;
+    }
     prefixForValue();
     puts("null");
 }

@@ -61,6 +61,36 @@ FL_TEST_CASE("JsonStreamWriter emits correct JSON") {
         FL_CHECK_EQ(out, fl::string("{\"v\":null,\"nested\":{\"x\":-5}}"));
     }
 
+    FL_SUBCASE("depth 24 is supported and depth 25 becomes null") {
+        fl::string out;
+        {
+            fl::JsonStreamWriter w([&](const char *p, fl::size n) { out.append(p, n); });
+            for (fl::size i = 0; i < fl::JsonStreamWriter::kMaxDepth; ++i) {
+                w.beginArray();
+            }
+            w.value(1); // A value at the supported limit must still work.
+            w.beginObject(); // Depth 25 is replaced with null.
+            w.member("ignored", 2);
+            w.beginArray();
+            w.value(3);
+            w.endArray();
+            w.endObject();
+            w.value(4); // The enclosing array must resume after rejection.
+            for (fl::size i = 0; i < fl::JsonStreamWriter::kMaxDepth; ++i) {
+                w.endArray();
+            }
+        }
+        fl::string expected;
+        for (fl::size i = 0; i < fl::JsonStreamWriter::kMaxDepth; ++i) {
+            expected.append("[");
+        }
+        expected.append("1,null,4");
+        for (fl::size i = 0; i < fl::JsonStreamWriter::kMaxDepth; ++i) {
+            expected.append("]");
+        }
+        FL_CHECK_EQ(out, expected);
+    }
+
     FL_SUBCASE("large array uses bounded memory (no N-sized buffer)") {
         // The writer's own footprint is fixed regardless of output size:
         // the whole document streams through a 128-byte scratch buffer.
