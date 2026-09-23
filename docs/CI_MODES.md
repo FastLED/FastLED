@@ -34,17 +34,21 @@ the emitted catalog with GitHub labels. Existing `platform:` labels are
 metadata and never select jobs. Fork PRs cannot execute board or selection
 jobs.
 
-This slice does not yet satisfy the strict whole-event compute target. One
-matched source change used 128.89 runner-minutes across 20 PR workflows
+One historical ordinary source-change PR used 128.89 runner-minutes across
+20 PR workflows
 ([head `cd48ec4`](https://github.com/FastLED/FastLED/pull/4418)); the merged
 `master` push used 903.95 runner-minutes across 99 workflows
 ([SHA `df106df`](https://github.com/FastLED/FastLED/commit/df106dfe6a2124c03143ef611c7d1174ea70f06c)).
-Both figures sum Actions job `completed_at - started_at` for all runs with
-the event and SHA. The existing Linux unit and example jobs alone used
-24.95 PR runner-minutes, above the 12.889-minute strict 10% PR threshold.
-The selected native smoke subset is a measured candidate, not acceptance.
-The exact-SHA ordinary PR and `master` events must each use <10% of their
-matched full-event runner-minutes before the pilot can merge. The full event
+Both figures sum positive Actions job `completed_at - started_at` for all
+executed jobs with the event and SHA. They are historical routine-event costs,
+not the denominator for the <10%-of-full acceptance metric. On one exact SHA,
+an unlabeled Phase 1 PR event used 30.57 runner-minutes while its labeled
+full sweep used 1011.14 runner-minutes (3.02%); that full sweep had one
+ESP32-S3 timeout after its compilation succeeded, so it was not a full pass.
+The selected native smoke subset further reduces routine cost, but remains a
+measured candidate, not acceptance. The final exact-SHA ordinary PR and
+`master` events must each use <10% of their matched *full* event's raw
+runner-minutes before the pilot can merge. The full event
 must prove every selected cell and every hosted Mac variant on that same SHA.
 `tests/meson.build` currently names three serial tests, but only
 `channel_driver_uart` is live; the custom streaming runner does not consume
