@@ -417,7 +417,7 @@ A colour-managed channel with `BINARY_DITHER` now dithers the pipeline's drive i
 - **Accuracy.** The cycle's mean is within **1/16 of a code** of `x`. Rounding, the path with dither off, misses by up to half a code.
 - **Cadence.** Eight frames is the cycle `BINARY_DITHER` already runs, gated the same way: `show()` turns it off below `FL_DITHER_ENABLE_MIN_REFRESH_HZ`. So the cadence question above is unchanged, not new.
 - **Flicker, per pixel.** The amplitude is one code. The phase is offset by pixel position, so any eight neighbours cover the whole cycle in every frame, and a uniform strip's total light is the same in each frame. All three channels share the phase, so equal drives give equal codes in every frame.
-- **State.** Stateless per pixel: only the shared frame counter. That keeps it inside the TINY-tier limit to "stateless/temporal forms", and no error-diffusion buffer is needed.
+- **State.** Stateless per pixel: managed channels keep one phase counter each, while legacy `addLeds<>` controllers use the shared frame counter. No error-diffusion buffer is needed; the temporal form stays inside the TINY-tier limit.
 - **Default: off.** `setColorProfile` still selects `DISABLE_DITHER`, so a managed channel dithers only when asked to.
 - **Power.** The limiter reserves one code on every channel of every lit pixel for a managed channel that dithers (#4342).
 
@@ -430,7 +430,7 @@ A colour-managed channel with `BINARY_DITHER` now dithers the pipeline's drive i
 | uniform strip | constant total light per frame | the per-pixel phase offset is removed |
 | `DISABLE_DITHER` | the rounded code, every frame | — |
 
-**Advances on presentation (#4347, R8).** A `fl::Channel` keeps its own dither phase. The phase advances only when the channel's driver accepts a frame, and both the legacy offsets and this temporal dither read it. So a dropped submission does not consume a phase: no driver, a disabled one, or a busy buffer. Irregular dwell between presentations does not move it either. A phase-correlated drop pattern (every other attempt dropped) presents all eight phases over eight presentations, and the mean stays within 1/16 of a code. With the phase advancing on attempt, the same pattern presents only four phases and misses by 0.12. Legacy `addLeds<>` controllers present synchronously inside `show()` and keep the shared per-frame counter.
+**Advances on accepted presentation (#4347, R8).** A `fl::Channel` keeps its own dither phase. The phase advances only when the channel's driver accepts a frame, and both the legacy offsets and this temporal dither read it. So a dropped submission does not consume a phase: no driver, a disabled one, or a busy buffer. A phase-correlated drop pattern (every other attempt dropped) presents all eight phases over eight presentations, and the equal-dwell mean stays within 1/16 of a code. With the phase advancing on attempt, the same pattern presents only four phases and misses by 0.12. Legacy `addLeds<>` controllers present synchronously inside `show()` and keep the shared per-frame counter. Driver acceptance does not measure actual visibility duration: unequal dwell of accepted frames can bias the time-weighted light, and no duration-aware accuracy guarantee is made. The eight-phase accuracy bound assumes equally timed presentations at the nominal cadence; the refresh-rate gate does not establish that assumption.
 
 ## Not covered
 

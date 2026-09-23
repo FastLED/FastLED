@@ -332,11 +332,18 @@ same paragraph asks for -- that is a statement about what a device is allowed
 to render, and it needs P8's dithering answer, since a sub-ULP average drive is
 reachable over a cycle even though it is not reachable in one frame.
 
-Dither accuracy is based on time-weighted emitted XYZ over a declared cadence
-and observation window, followed by perceptual error calculation. It is not
-an unweighted mean of frame codes or frame Delta E values. State advances on
-presentation according to the documented driver contract, with explicit tests
-for dropped submissions and irregular dwell. For scale: linear16 code 1 needs
+Dither accuracy for the current eight-presentation cycle is specified for
+equally timed accepted presentations at a declared nominal cadence and
+observation window. Evaluate the emitted light over the whole cycle in XYZ
+before calculating perceptual error; do not average frame Delta E values.
+Each channel advances its phase when its driver accepts a frame, so dropped
+submissions do not consume a phase. Acceptance does not report when the frame
+becomes visible or how long it remains visible. Unequal dwell between accepted
+presentations can bias the time-weighted result and is **not** covered by the
+cycle-mean accuracy guarantee; tests must demonstrate this limitation as well
+as the equal-dwell and dropped-submission behavior. The existing refresh-rate
+gate can disable dithering at low cadence; it does not measure frame dwell.
+For scale: linear16 code 1 needs
 one native RGB8 code-1 frame per 257 equally timed frames to match its average
 on an ideal linear PWM device. At 60 Hz that is about 4.28 seconds. The native
 output report must state the resulting fidelity/flicker limitations.

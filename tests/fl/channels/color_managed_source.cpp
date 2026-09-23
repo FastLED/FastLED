@@ -1274,6 +1274,45 @@ FL_TEST_CASE("[#4347] phase-correlated drops no longer bias the dither cycle") {
     FL_CHECK_LE(fl::fabs(sum / 8.0 - exact_red), 1.0 / 16.0 + 1e-9);
 }
 
+FL_TEST_CASE("[#4538] accepted-frame dither accuracy assumes equal dwell") {
+    // Red drive maps linearly into emitted XYZ for this fixed emitter profile.
+    // Holding its low-code presentations four times as long biases time-weighted
+    // light even though every accepted phase appears exactly once.
+    DroppableChannel strip("DITHER_DWELL", CRGB(37, 90, 5), true);
+    FL_REQUIRE(strip.channel->isColorManaged());
+
+    StreamingPipelineQ16 pipeline;
+    FL_REQUIRE(buildStreamingPipelineQ16(SourceProfile::linearSrgb(), rgbDevice(),
+                                         GamutPolicy::ChromaCompress, &pipeline));
+    i32 drives[3];
+    processPixelQ16(pipeline, 37, 90, 5, drives);
+    const double exact_red = exactCode(drives[0]);
+
+    u8 red[8];
+    u8 highest = 0;
+    double equal_sum = 0.0;
+    for (int frame = 0; frame < 8; ++frame) {
+        FL_REQUIRE(strip.attempt(false));
+        red[frame] = strip.lastRed();
+        if (red[frame] > highest) {
+            highest = red[frame];
+        }
+        equal_sum += red[frame];
+    }
+    const double equal_mean = equal_sum / 8.0;
+    FL_CHECK_LE(fl::fabs(equal_mean - exact_red), 1.0 / 16.0 + 1e-9);
+
+    double weighted_sum = 0.0;
+    int dwell_sum = 0;
+    for (int frame = 0; frame < 8; ++frame) {
+        const int dwell = red[frame] == highest ? 1 : 4;
+        weighted_sum += red[frame] * dwell;
+        dwell_sum += dwell;
+    }
+    FL_CHECK_GT(highest, static_cast<u8>(equal_mean));
+    FL_CHECK_GT(equal_mean - weighted_sum / dwell_sum, 1.0 / 16.0);
+}
+
 FL_TEST_CASE("[#4042] B3: managed LPD8806/LPD6803 quantize the drive once, at wire width") {
     // The 8-bit path rounds the drive to 8 bits and the encoder then shifts
     // it down to 7 (LPD8806, also forcing the low bit on) or truncates to 5
