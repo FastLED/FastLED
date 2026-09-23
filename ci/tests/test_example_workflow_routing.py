@@ -53,5 +53,7 @@ def test_build_and_test_workflows_do_not_request_unused_oidc() -> None:
 
 def test_readme_examples_badge_reports_nightly_workflow() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "nightly-examples.yml/badge.svg?event=schedule" in readme
+    # Both scheduled and manually dispatched runs execute the same full sweep.
+    assert "nightly-examples.yml/badge.svg)" in readme
+    assert "nightly-examples.yml/badge.svg?event=schedule" not in readme
     assert "Nightly Examples (Linux)" in readme
