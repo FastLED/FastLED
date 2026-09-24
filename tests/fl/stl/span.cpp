@@ -8,6 +8,25 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+class dereference_counting_iterator {
+  public:
+    dereference_counting_iterator(int *pointer, int *dereference_count)
+        : mPointer(pointer), mDereferenceCount(dereference_count) {}
+
+    int &operator*() const {
+        ++*mDereferenceCount;
+        return *mPointer;
+    }
+
+    fl::ptrdiff operator-(const dereference_counting_iterator &other) const {
+        return mPointer - other.mPointer;
+    }
+
+  private:
+    int *mPointer;
+    int *mDereferenceCount;
+};
+
 
 FL_TEST_CASE("fl::span explicit conversions work correctly") {
     FL_SUBCASE("fl::vector to fl::span conversions") {
@@ -138,6 +157,12 @@ FL_TEST_CASE("fl::span accepts empty iterator ranges") {
     fl::span<int> vector_span(values.begin(), values.end());
     FL_CHECK_EQ(vector_span.size(), 0u);
     FL_CHECK_EQ(vector_span.begin(), vector_span.end());
+
+    int dereference_count = 0;
+    dereference_counting_iterator empty(&value, &dereference_count);
+    fl::span<int> counted_span(empty, empty);
+    FL_CHECK_EQ(counted_span.size(), 0u);
+    FL_CHECK_EQ(dereference_count, 0);
 }
 
 // P2447R6 initializer_list constructor is deleted because the backing array
