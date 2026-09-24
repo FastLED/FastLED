@@ -126,6 +126,10 @@ class SampleImpl {
     }
     const VectorPCM &pcm() const FL_NO_EXCEPT { return mSignedPcm; }
     VectorPCM &pcm_mutable() FL_NO_EXCEPT { return mSignedPcm; }
+    void pcmDidChange() FL_NO_EXCEPT {
+        initZeroCrossings();
+        mRmsComputed = false;
+    }
     fl::u32 timestamp() const FL_NO_EXCEPT { return mTimestamp; }
 
     // For object pool - reset internal state for reuse

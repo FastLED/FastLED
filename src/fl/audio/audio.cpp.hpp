@@ -150,6 +150,10 @@ SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
       mCurrentSpl(spl_floor) {}
 
 void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::size count) {
+    if (count == 0) {
+        return;
+    }
+
     // 1) compute block power → dBFS
     double sum_sq = 0.0;
     for (fl::size i = 0; i < count; ++i) {
@@ -162,7 +166,7 @@ void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::size count) {
 
     // 2) update global floor (with optional smoothing)
     if (dbfs < mDbfsFloorGlobal) {
-        if (mSmoothingAlpha <= 0.0) {
+        if (mDbfsFloorGlobal == FL_INFINITY_DOUBLE || mSmoothingAlpha <= 0.0) {
             mDbfsFloorGlobal = dbfs;
         } else {
             mDbfsFloorGlobal = mSmoothingAlpha * dbfs +
@@ -197,6 +201,7 @@ void Sample::applyGain(float gain) {
         if (val < -32768) val = -32768;
         samples[i] = static_cast<fl::i16>(val);
     }
+    mImpl->pcmDidChange();
 }
 
 Sample::Sample(fl::span<const fl::i16> span, fl::u32 timestamp) {
