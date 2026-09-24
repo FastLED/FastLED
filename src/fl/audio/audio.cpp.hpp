@@ -64,6 +64,11 @@ struct AudioSamplePool {
 
 } // namespace
 
+void SampleImpl::pcmDidChange() FL_NO_EXCEPT {
+    initZeroCrossings();
+    mRmsComputed = false;
+}
+
 Sample::~Sample() FL_NO_EXCEPT {
     if (mImpl) {
         fl::Singleton<AudioSamplePool>::instance().put(fl::move(mImpl));
