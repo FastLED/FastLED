@@ -15,17 +15,19 @@ USAGE
     uv run python tests/measure_esp32s3_opt_ins.py
     uv run python tests/measure_esp32s3_opt_ins.py --config stage2
     uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md
-    uv run python tests/measure_esp32s3_opt_ins.py --keep-ini-backup
 
 Exits 0 on success. Exits 1 if any requested config's build / bloat
-run fails. Exits 2 on infrastructure failure (missing project ini,
+run fails. Exits 2 on infrastructure failure (unknown/unsupported config,
 missing bash compile, etc.).
 
-The script's first action is to back up the root `platformio.ini`
-(fbuild's project-file format) to `platformio.ini.bak` and install
-signal handlers so a Ctrl-C mid-run restores the file before exit. The
-build / bloat invocations go through the same `bash compile` /
-`bash bloat` wrappers the rest of the project uses.
+Compile-time defines reach the build through `bash compile --defines`.
+The Stage 3 sdkconfig overlay cannot be applied: `bash compile` builds
+through fbuild, which has no sdkconfig-override support yet
+(FastLED/fbuild#1460). Configs that need the overlay are skipped by
+`--config all` and refused when requested explicitly, rather than
+silently measuring the baseline (#4570). The build / bloat invocations
+go through the same `bash compile` / `bash bloat` wrappers the rest of
+the project uses.
 
 Run from the FastLED project root.
 """
@@ -34,9 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import shutil
-import signal
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,10 +45,8 @@ from running_process import STDOUT, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PROJECT_INI = PROJECT_ROOT / "platformio.ini"
-PROJECT_INI_BACKUP = PROJECT_ROOT / "platformio.ini.bak"
 REPORT_JSON = PROJECT_ROOT / ".build" / "symbols" / "esp32s3" / "report.json"
-OVERLAY_PATH = "tools/sdkconfig_for_smallest_fastled.defaults"
+FBUILD_OVERLAY_GAP = "https://github.com/FastLED/fbuild/issues/1460"
 
 
 @dataclass(frozen=True)
@@ -60,8 +58,9 @@ class OptInConfig:
         label: human-readable description shown in the comparison table.
         defines: compile-time defines passed directly to `bash compile`.
             Entries use `NAME=VALUE` form without a leading `-D`.
-        overlay: True iff sdkconfig_for_smallest_fastled.defaults must
-            be appended to board_build.sdkconfig_defaults.
+        overlay: True iff the config needs the
+            sdkconfig_for_smallest_fastled.defaults overlay; such configs
+            cannot be measured until fbuild supports sdkconfig overrides.
         slim_row: priority-table row in docs/SLIM_ESP32S3.md that
             this config corresponds to (None for stacked combos).
     """
@@ -163,54 +162,34 @@ CONFIGS: dict[str, OptInConfig] = {
 }
 
 
-def backup_project_ini() -> None:
-    if not PROJECT_INI.is_file():
-        print(
-            f"measure-opt-ins: platformio.ini not found at {PROJECT_INI}",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-    shutil.copyfile(PROJECT_INI, PROJECT_INI_BACKUP)
+class UnsupportedConfigError(ValueError):
+    """A requested config needs a build feature fbuild does not provide."""
 
 
-def restore_project_ini(keep_backup: bool) -> None:
-    if PROJECT_INI_BACKUP.is_file():
-        shutil.copyfile(PROJECT_INI_BACKUP, PROJECT_INI)
-        if not keep_backup:
-            PROJECT_INI_BACKUP.unlink()
+def select_configs(spec: str) -> tuple[list[str], list[str]]:
+    """Resolve a `--config` value into (configs to run, overlay configs skipped).
 
-
-def patch_project_ini(cfg: OptInConfig) -> None:
-    """Inject cfg's sdkconfig overlay into the [env:esp32s3] block.
-
-    This is a targeted regex patch - we don't fully re-parse INI
-    because the project INI flavor carries continuation lines and
-    `${var.x}` interpolations that configparser mangles. The regex
-    target is the literal `[env:esp32s3]` header through the next
-    `[env:` header (or EOF), which is well-defined in practice.
+    `all` skips configs that need the sdkconfig overlay; naming one of
+    them explicitly raises UnsupportedConfigError instead of measuring
+    the baseline under the overlay's name.
     """
-    text = PROJECT_INI.read_text(encoding="utf-8")
-    block_re = re.compile(r"(\[env:esp32s3\][^\[]*?)(?=\n\[env:|\Z)", re.DOTALL)
-    match = block_re.search(text)
-    if not match:
-        print(
-            "measure-opt-ins: could not locate [env:esp32s3] block in platformio.ini",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-    block = match.group(1)
-    if cfg.overlay:
-        line = f"board_build.sdkconfig_defaults = {OVERLAY_PATH}\n"
-        if "board_build.sdkconfig_defaults" in block:
-            block = re.sub(
-                r"board_build\.sdkconfig_defaults\s*=.*",
-                line.rstrip(),
-                block,
+    if spec == "all":
+        requested = [name for name, cfg in CONFIGS.items() if not cfg.overlay]
+        skipped = [name for name, cfg in CONFIGS.items() if cfg.overlay]
+        return requested, skipped
+    requested = [c.strip() for c in spec.split(",") if c.strip()]
+    for name in requested:
+        if name not in CONFIGS:
+            raise ValueError(
+                f"unknown config '{name}'. Available: " + ", ".join(CONFIGS.keys())
             )
-        else:
-            block = block.rstrip() + "\n" + line
-    new_text = text[: match.start()] + block + text[match.end() :]
-    PROJECT_INI.write_text(new_text, encoding="utf-8")
+    overlay = [name for name in requested if CONFIGS[name].overlay]
+    if overlay:
+        raise UnsupportedConfigError(
+            f"config(s) {', '.join(overlay)} need the sdkconfig overlay, which "
+            f"fbuild cannot apply yet ({FBUILD_OVERLAY_GAP})"
+        )
+    return requested, []
 
 
 def _run_compile_cmd(example: str, cfg: OptInConfig) -> list[str]:
@@ -345,7 +324,7 @@ def _force_relink() -> None:
     trade-off. But a link step that decides whether to relink based on
     object-file timestamps, NOT on project ini / sdkconfig changes, can
     leave the previous config's ELF on disk when switching configs that
-    affect only sdkconfig (e.g. stage3 <-> baseline) - and the downstream
+    affect only sdkconfig (e.g. stage3 <-> baseline, once fbuild#1460 lands) - and the downstream
     `bash bloat` step then measures that stale ELF.
 
     Deleting the ELF before each compile forces the link to run; the
@@ -361,8 +340,6 @@ def _force_relink() -> None:
 def measure_one(cfg: OptInConfig, example: str) -> BuildMeasurement | None:
     """Build + bloat one config; return its measured sizes or None on failure."""
     print(f"\n=== measure-opt-ins: config {cfg.name} ({cfg.label}) ===", flush=True)
-    restore_project_ini(keep_backup=True)
-    patch_project_ini(cfg)
     _force_relink()
     if not run_compile(example, cfg):
         print(f"measure-opt-ins: compile failed for {cfg.name}", file=sys.stderr)
@@ -443,47 +420,28 @@ def main() -> int:
         default=None,
         help="If set, write the Markdown comparison table to this path.",
     )
-    parser.add_argument(
-        "--keep-ini-backup",
-        action="store_true",
-        help="Keep platformio.ini.bak around after the run (default: delete on success).",
-    )
     args = parser.parse_args()
 
-    if args.config == "all":
-        requested = list(CONFIGS.keys())
-    else:
-        requested = [c.strip() for c in args.config.split(",") if c.strip()]
-        for name in requested:
-            if name not in CONFIGS:
-                print(
-                    f"measure-opt-ins: unknown config '{name}'. Available: "
-                    + ", ".join(CONFIGS.keys()),
-                    file=sys.stderr,
-                )
-                return 2
-
-    backup_project_ini()
-
-    def _restore_and_exit(*_: object) -> None:
-        restore_project_ini(keep_backup=args.keep_ini_backup)
-        sys.exit(130)
-
-    signal.signal(signal.SIGINT, _restore_and_exit)
-    if hasattr(signal, "SIGTERM"):
-        signal.signal(signal.SIGTERM, _restore_and_exit)
+    try:
+        requested, skipped = select_configs(args.config)
+    except ValueError as e:
+        print(f"measure-opt-ins: {e}", file=sys.stderr)
+        return 2
+    if skipped:
+        print(
+            f"measure-opt-ins: skipping {', '.join(skipped)}: the sdkconfig "
+            f"overlay cannot be applied through fbuild ({FBUILD_OVERLAY_GAP})",
+            flush=True,
+        )
 
     results: dict[str, BuildMeasurement] = {}
     failed: list[str] = []
-    try:
-        for name in requested:
-            total = measure_one(CONFIGS[name], args.example)
-            if total is None:
-                failed.append(name)
-            else:
-                results[name] = total
-    finally:
-        restore_project_ini(keep_backup=args.keep_ini_backup)
+    for name in requested:
+        total = measure_one(CONFIGS[name], args.example)
+        if total is None:
+            failed.append(name)
+        else:
+            results[name] = total
 
     print()
     print("=== Measured comparison ===")

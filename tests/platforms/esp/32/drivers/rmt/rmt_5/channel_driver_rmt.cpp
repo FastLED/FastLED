@@ -348,6 +348,15 @@ FL_TEST_CASE("RMT5 driver - failed strip setup does not drop a valid strip") {
 
     FL_CHECK_EQ(mock.getChannelCount(), 1u);
     FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+
+    // Finish the transmission so the driver destructor does not block
+    // waiting for READY.
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    for (int i = 0; i < 10 && valid->isInUse(); i++) {
+        driver->poll();
+    }
+    FL_CHECK_FALSE(valid->isInUse());
+    FL_CHECK(driver->poll() == DriverState::READY);
 }
 
 FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel") {
@@ -378,6 +387,7 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     }
     FL_CHECK_FALSE(first->isInUse());
     FL_CHECK_FALSE(second->isInUse());
+    FL_CHECK(driver->poll() == DriverState::READY);
     mock.setMaxChannels(0);
 }
 

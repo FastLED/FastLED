@@ -57,7 +57,7 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
    The user-facing copy of this table — same content, written for end users rather than agents, with platformio.ini snippets — lives at [`docs/SLIM_ESP32S3.md`](../../docs/SLIM_ESP32S3.md). When a new knob lands, update both: this table for the agent reference, and `docs/SLIM_ESP32S3.md` for the user copy.
 
-   To refresh the measured numbers in the SLIM doc, run `uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md` — the script builds the ESP32-S3 Blink under each opt-in combo, runs `bash bloat esp32s3` against each ELF, and emits a Markdown comparison table sized to drop straight into the doc. See #2905.
+   To refresh the measured numbers in the SLIM doc, run `uv run python tests/measure_esp32s3_opt_ins.py --config all --out compare.md` — the script builds the ESP32-S3 Blink under each opt-in combo, runs `bash bloat esp32s3` against each ELF, and emits a Markdown comparison table sized to drop straight into the doc. See #2905. Configs that need the Stage 3 sdkconfig overlay (`stage3`, `stack`, `max_savings`) are skipped by `all` and refused by name, because fbuild cannot apply sdkconfig overrides yet (FastLED/fbuild#1460, #4570).
 
 4. **The ELF it analyses is the newest one, and `--build` refuses a stale one.** `find_elf` used to rank candidate ELFs under a board directory by fixed priority and ignore mtime, so `--build` could compile one and report on another. That is fixed in #4386: the newest candidate wins, with the documented order only as a tie-break, and after `--build` an ELF older than the build is refused outright rather than analysed.
 

@@ -398,7 +398,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         if (!mPendingChannels.empty()) {
             anyActive = true;
             FL_LOG_RMT("Pending channels: %s", mPendingChannels.size());
-        } else if (activeCount > 0) {
+        } else if (activeCount > 0 || hasChannelInUse()) {
+            // hasChannelInUse(): a release above may have started a pending
+            // strip on an already-visited channel, which activeCount missed.
             anyActive = true;
             FL_LOG_RMT("No pending channels, but %s active channels (%s completed)", activeCount, completedCount);
         } else {
@@ -1553,6 +1555,14 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
         if (!ch.inUse && ch.channel && !ch.useDMA) {
             ch.inUse = true;
             configureChannel(&ch, pin, timing, dataSize);
+            if (!ch.channel || !ch.encoder) {
+                // Reconfiguration destroyed the old channel and could not
+                // build a new one (e.g. invalid pin). Report failure instead
+                // of handing out a dead channel.
+                ch.inUse = false;
+                mAllocationFailed = true;
+                return nullptr;
+            }
             FL_LOG_RMT("Reconfiguring idle non-DMA channel for pin %s", static_cast<int>(pin));
             return &ch;
         }
