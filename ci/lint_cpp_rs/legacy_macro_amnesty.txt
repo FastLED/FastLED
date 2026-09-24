@@ -1,10 +1,9 @@
-# Known `FASTLED_*` macro names in src/, for
-# ci/tools/check_macro_prefix.py. Regenerate with:
-#   uv run python ci/tools/check_macro_prefix.py --update-baseline
+# Legacy `FASTLED_*` macro names explicitly grandfathered by MacroPrefixChecker.
 #
-# One name per line. Names may disappear freely -- renaming a macro to
-# FL_ just removes it. A NEW name fails, so introducing one has to be a
-# deliberate edit here that a reviewer sees.
+# This is an amnesty list, not a generated baseline. Do not bulk-regenerate it.
+# Every addition must be reviewed as a compatibility exception to the rule that
+# new FastLED-owned macros use FL_. Remove entries when their legacy macros are
+# retired or renamed; an unlisted FASTLED_* name fails `bash lint --cpp`.
 
 FASTLED_ACCURATE_CLOCK
 FASTLED_ALLOW_INTERRUPTS

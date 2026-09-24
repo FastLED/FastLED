@@ -197,6 +197,101 @@ mod tests {
     }
 
     #[test]
+    fn macro_prefix_rejects_new_fastled_name() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#define FASTLED_NEW_INTERNAL_SETTING 1\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].1.contains("must use the FL_ prefix"));
+    }
+
+    #[test]
+    fn macro_prefix_accepts_fl_name() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#define FL_NEW_INTERNAL_SETTING 1\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn macro_prefix_accepts_explicitly_amnestied_name() {
+        let checker = MacroPrefixChecker {
+            amnesty: "FASTLED_LEGACY_PUBLIC_SETTING\n",
+        };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#if FASTLED_LEGACY_PUBLIC_SETTING\n#endif\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn macro_prefix_removing_amnesty_exposes_violation() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#if defined(FASTLED_LEGACY_PUBLIC_SETTING)\n#endif\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].1.contains("FASTLED_LEGACY_PUBLIC_SETTING"));
+    }
+
+    #[test]
+    fn macro_prefix_ignores_line_comments_and_multiline_raw_strings() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#if 1 // FASTLED_COMMENT_ONLY\n\
+             constexpr auto text = R\"tag(\n\
+             #define FASTLED_RAW_STRING_ONLY 1\n\
+             )tag\";\n",
+        ));
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn macro_prefix_detects_name_on_continued_directive() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#if defined( \\\n                 FASTLED_CONTINUED_SETTING)\n\
+             #endif\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].1.contains("FASTLED_CONTINUED_SETTING"));
+    }
+
+    #[test]
+    fn macro_prefix_splices_before_masking_continued_string() {
+        let checker = MacroPrefixChecker { amnesty: "" };
+        let hits = checker.check_file_content(&file(
+            "src/fl/example.h",
+            "#define BANNER \"abc\\\n\
+             def\" \\\n                 FASTLED_AFTER_CONTINUED_STRING\n",
+        ));
+        assert_eq!(hits.len(), 1);
+        assert!(hits[0].1.contains("FASTLED_AFTER_CONTINUED_STRING"));
+    }
+
+    #[test]
+    fn macro_prefix_only_scans_project_root_src() {
+        let checker = MacroPrefixChecker::production();
+        let root = Path::new("/repo");
+        assert!(checker.should_process_file("/repo/src/fl/example.h", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.c", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.s", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.S", root));
+        assert!(!checker.should_process_file("/repo/src/third_party/vendor.h", root));
+        assert!(!checker.should_process_file("/repo/src/third_party/vendor.S", root));
+        assert!(!checker.should_process_file("/repo/examples/Demo/src/helper.cpp", root));
+        assert!(!checker.should_process_file("/repo/tests/fixture/src/main.cpp", root));
+    }
+
+    #[test]
     fn autoresearch_runtime_output_flags_direct_logging_and_serial_prints() {
         let checker = AutoResearchRuntimeOutputChecker;
         let result = checker.check_file_content(&file(

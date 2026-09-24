@@ -178,10 +178,11 @@ reason.
 - Wrong: `FASTLED_STM32_F1`, `FASTLED_STM32` (missing `FL_IS_` prefix)
 - Wrong: `FL_STM32_F1`, `IS_STM32_F1` (incorrect prefix pattern)
 
-**Enforced, as of FastLED#4021.** `ci/tools/check_macro_prefix.py` runs inside
-`bash lint` and fails on a *new* `FASTLED_*` macro name. The ~490 existing ones
-are baselined -- most are public knobs users set in their own sketches, so
-renaming them would break people -- and the baseline may shrink freely.
+**Enforced, as of FastLED#4021.** The Rust `MacroPrefixChecker` runs inside
+`bash lint --cpp` and fails on a *new* `FASTLED_*` macro name. Existing public
+and compatibility names that cannot yet be renamed are explicitly listed in
+`ci/lint_cpp_rs/legacy_macro_amnesty.txt`. That centralized list is reviewed
+by hand and may shrink freely; it must never be bulk-regenerated from source.
 
 It matches names on preprocessor lines, so a macro that is only ever *tested*
 counts. That is deliberate: `FASTLED_SAMD51_HW_SPI` was a user-supplied opt-in
@@ -189,8 +190,9 @@ appearing solely as `#if defined(...)`, never defined here, and a
 definitions-only check would have passed exactly the case that motivated the
 rule's enforcement.
 
-If a name genuinely has to match one published outside this repo, annotate it
-with `// fl-lint: macro-prefix-ok(<reason>)`. The reason is required.
+If a name genuinely has to match one published outside this repo, add it to
+the centralized amnesty with reviewable compatibility justification in the
+change description. New internal macros still use `FL_`.
 
 **Detection and Usage:**
 - Platform defines like `FL_IS_ARM`, `FL_IS_STM32`, `FL_IS_ESP32` and their variants

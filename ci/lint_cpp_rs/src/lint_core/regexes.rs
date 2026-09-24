@@ -658,6 +658,16 @@ fn regex_legacy_log_macro() -> &'static Regex {
     })
 }
 
+fn macro_prefix_directive() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"^#\s*(?:define|undef|if|ifdef|ifndef|elif)\b").unwrap())
+}
+
+fn macro_prefix_name() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"\bFASTLED_[A-Za-z0-9_]+\b").unwrap())
+}
+
 /// `name.data()` / `name->data()` -- captures the receiver identifier.
 /// Used by the FastLED#3287 container-pointer checkers in
 /// `checkers/container_ptr.rs`.
