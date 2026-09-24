@@ -264,6 +264,7 @@ def test_default_early_exit_requires_validated_wasm(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(sys, "argv", ["test.py"])
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+    monkeypatch.delenv("FASTLED_NATIVE_LINKER", raising=False)
     for dirname in ("src", "tests", "examples", "ci", "examples/wasm"):
         (tmp_path / dirname).mkdir(parents=True, exist_ok=True)
     cache = tmp_path / ".cache" / "fingerprint"
@@ -291,6 +292,11 @@ def test_default_early_exit_requires_validated_wasm(
     with pytest.raises(SystemExit) as hit:
         argv_ultra_early_exit(0)
     assert hit.value.code == 0
+
+    # A selected native linker must not reuse the default linker's cache.
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(tmp_path / "wild"))
+    argv_ultra_early_exit(0)
+    monkeypatch.delenv("FASTLED_NATIVE_LINKER")
 
     wasm_source = tmp_path / "examples" / "wasm" / "changed.js"
     wasm_source.write_text("changed")
