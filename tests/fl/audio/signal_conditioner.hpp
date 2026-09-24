@@ -141,15 +141,16 @@ FL_TEST_CASE("audio::SignalConditioner - noise gate preserves i16 minimum") {
     config.noiseGateCloseThreshold = 300;
     conditioner.configure(config);
 
-    vector<i16> samples = {-32768, -499, 500};
+    vector<i16> samples = {-499, -32768, 299, 500};
     audio::Sample cleaned = conditioner.processSample(
         createSample_SignalConditioner(samples));
     const auto &pcm = cleaned.pcm();
 
     FL_REQUIRE_EQ(pcm.size(), samples.size());
-    FL_CHECK_EQ(pcm[0], -32768);
-    FL_CHECK_EQ(pcm[1], 0);
-    FL_CHECK_EQ(pcm[2], 500);
+    FL_CHECK_EQ(pcm[0], 0);
+    FL_CHECK_EQ(pcm[1], -32768);
+    FL_CHECK_EQ(pcm[2], 0);
+    FL_CHECK_EQ(pcm[3], 500);
     FL_CHECK_TRUE(conditioner.getStats().noiseGateOpen);
 }
 
