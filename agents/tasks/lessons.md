@@ -458,3 +458,8 @@
   unused grant from a reusable workflow, update callers and callees together
   and test the permission contract so an old callee declaration cannot turn a
   least-privilege caller into a startup failure.
+- When a user chooses one cross-platform linker, keep one native-test selection
+  path. Select host-specific release assets during installation, but do not
+  silently retain a different linker on a platform without evidence and an
+  explicit decision. Validate every host in CI before claiming cross-platform
+  success, and distinguish raw-link speed from end-to-end job speed.
