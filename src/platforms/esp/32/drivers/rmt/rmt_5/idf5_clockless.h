@@ -13,47 +13,23 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
-#include "fl/system/engine_events.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
 
 namespace fl {
 
-namespace detail {
-/// Frame hook for legacy addLeds<> RMT5 controllers: flushes the shared RMT5
-/// driver at end of frame with the same wait semantics ChannelManager uses,
-/// without linking ChannelManager or fl::Channel. One instance per program.
-class Rmt5LegacyFrameHook : public EngineEvents::Listener {
-  public:
-    static void ensure() FL_NO_EXCEPT {
-        static Rmt5LegacyFrameHook sHook;
-        (void)sHook;
-    }
-
-  private:
-    Rmt5LegacyFrameHook() FL_NO_EXCEPT { EngineEvents::addListener(this); }
-    ~Rmt5LegacyFrameHook() FL_NO_EXCEPT override {
-        EngineEvents::removeListener(this);
-    }
-    void onBeginFrame() FL_NO_EXCEPT override {
-        BusTraits<Bus::RMT>::instance().waitForReady();
-    }
-    void onEndFrame() FL_NO_EXCEPT override {
-        auto &driver = BusTraits<Bus::RMT>::instance();
-        driver.show();
-        driver.waitForReadyOrDraining();
-    }
-};
-} // namespace detail
-
 /// Legacy FastLED.addLeds<> clockless controller on the RMT5 engine.
 ///
-/// A plain CPixelLEDController (not an fl::Channel): it owns one ChannelData
-/// whose byte buffer is cleared and refilled each frame, so after the first
-/// frame no allocation happens on the show path.
+/// A plain CPixelLEDController (not an fl::Channel) that still bridges through
+/// ChannelManager: the RMT5 driver is registered with the manager, which owns
+/// the frame (begin-frame wait, end-frame show() + async drain) for legacy and
+/// Channel API strips alike. The controller owns one ChannelData whose byte
+/// buffer is cleared and refilled each frame, so after the first frame no
+/// allocation happens on the show path.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessIdf5 : public CPixelLEDController<RGB_ORDER>
 {
@@ -66,7 +42,8 @@ public:
     ClocklessIdf5() FL_NO_EXCEPT
         : mChannelData(ChannelData::create(DATA_PIN, makeTimingConfig<TIMING>()))
     {
-        detail::Rmt5LegacyFrameHook::ensure();
+        // ChannelManager::addDriver() is idempotent for duplicates.
+        BusTraits<Bus::RMT>::registerWithManager();
     }
 
     void init() FL_NO_EXCEPT override { }
