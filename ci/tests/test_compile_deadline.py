@@ -135,6 +135,41 @@ def test_compile_timeout_is_a_nonretryable_failure(
     assert attempted == ["first"]
 
 
+def test_retry_deadline_after_tee_closes_returns_timeout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    build_dir = tmp_path / "meson-quick"
+    build_dir.mkdir()
+    monkeypatch.setattr(compile_mod, "check_ninja_skip", lambda *_: False)
+    monkeypatch.setattr(compile_mod, "_run_precompile_passes", lambda *_: None)
+    monkeypatch.setattr(compile_mod, "kill_stale_runner_processes", lambda *_: 0)
+    real_process = RunningProcess
+
+    def transient_failure(*_args: object, **_kwargs: object) -> RunningProcess:
+        return real_process(
+            [
+                sys.executable,
+                "-c",
+                "print('FAILED: [code=113] source.cpp.o', flush=True); exit(1)",
+            ],
+            auto_run=True,
+            check=False,
+        )
+
+    def retry_deadline(*_args: object, **_kwargs: object) -> None:
+        raise compile_mod._CompileDeadlineExceeded("retry deadline reached")
+
+    monkeypatch.setattr(compile_mod, "RunningProcess", transient_failure)
+    monkeypatch.setattr(compile_mod, "_retry_ninja", retry_deadline)
+    result = compile_mod.compile_meson(build_dir, target="smoke", quiet=True)
+
+    assert not result.success
+    assert result.timed_out
+    assert result.error_output == "retry deadline reached"
+    assert result.error_log_file is not None
+    assert "retry deadline reached" in result.error_log_file.read_text(encoding="utf-8")
+
+
 def test_retry_uses_original_compile_deadline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

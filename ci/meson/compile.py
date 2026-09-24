@@ -602,6 +602,7 @@ def compile_meson(
 
     # Create tee for error log capture (stdout + stderr merged)
     stderr_tee = StreamTee(error_log_path, echo=False)
+    tee_closed = False
     last_error_lines: list[str] = []
 
     try:
@@ -809,6 +810,7 @@ def compile_meson(
         # Write standardized footer to error log
         stderr_tee.write_footer(returncode)
         stderr_tee.close()
+        tee_closed = True
 
         # Save last error snippet if compilation failed
         if returncode != 0 and last_error_lines:
@@ -1048,9 +1050,14 @@ def compile_meson(
         )
 
     except _CompileDeadlineExceeded as exc:
-        stderr_tee.write_line(str(exc))
-        stderr_tee.write_footer(-1)
-        stderr_tee.close()
+        if tee_closed:
+            # Retry failures occur after the initial attempt's tee is closed.
+            with error_log_path.open("a", encoding="utf-8") as error_log:
+                error_log.write(f"{exc}\n")
+        else:
+            stderr_tee.write_line(str(exc))
+            stderr_tee.write_footer(-1)
+            stderr_tee.close()
         return CompileResult(
             success=False,
             error_output=str(exc),
