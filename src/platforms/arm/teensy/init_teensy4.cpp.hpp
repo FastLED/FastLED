@@ -31,7 +31,7 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG_F("Teensy 4.x: Platform initialization starting");
+    FL_DBG("Teensy 4.x: Platform initialization starting");
 
     // Initialize ObjectFLED registry singleton
     // This ensures the registry exists before any strips are created,
@@ -39,7 +39,7 @@ void init() {
     (void)ObjectFLEDRegistry::getInstance();
 
     initialized = true;
-    FL_DBG_F("Teensy 4.x: Platform initialization complete");
+    FL_DBG("Teensy 4.x: Platform initialization complete");
 }
 
 } // namespace platforms

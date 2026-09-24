@@ -35,7 +35,7 @@ MutexSTM32::MutexSTM32() : mHandle(nullptr) {
     SemaphoreHandle_t handle = xSemaphoreCreateMutex();
 
     if (handle == nullptr) {
-        FL_WARN_F("MutexSTM32: Failed to create mutex");
+        FL_WARN("MutexSTM32: Failed to create mutex");
     }
 
     mHandle = static_cast<void*>(handle);
@@ -92,7 +92,7 @@ RecursiveMutexSTM32::RecursiveMutexSTM32() : mHandle(nullptr) {
     SemaphoreHandle_t handle = xSemaphoreCreateRecursiveMutex();
 
     if (handle == nullptr) {
-        FL_WARN_F("RecursiveMutexSTM32: Failed to create recursive mutex");
+        FL_WARN("RecursiveMutexSTM32: Failed to create recursive mutex");
     }
 
     mHandle = static_cast<void*>(handle);

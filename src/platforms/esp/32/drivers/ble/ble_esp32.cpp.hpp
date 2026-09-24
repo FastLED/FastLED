@@ -173,15 +173,15 @@ static int fl_ble_gatt_access_cb(u16 conn_handle, u16 attr_handle, // ok no noex
         u16 out_len = 0;
         int rc = ble_hs_mbuf_to_flat(ctxt->om, &val[0], om_len, &out_len);
         if (rc != 0) {
-            FL_WARN_F("[BLE RX] mbuf_to_flat failed rc=%s", rc);
+            FL_WARN("[BLE RX] mbuf_to_flat failed rc=%s", rc);
             return BLE_ATT_ERR_UNLIKELY;
         }
         val.resize(out_len);
 
-        FL_WARN_F("[BLE RX] onWrite len=%s: %s", val.size(), val.c_str());
+        FL_WARN("[BLE RX] onWrite len=%s: %s", val.size(), val.c_str());
         int nextHead = (state->head + 1) % kBleRingBufferSize;
         if (nextHead == state->tail) {
-            FL_WARN_F("[BLE] Ring buffer full, dropping message");
+            FL_WARN("[BLE] Ring buffer full, dropping message");
             return 0;
         }
         state->ringBuffer[state->head] = val;
@@ -218,9 +218,9 @@ static int fl_ble_gap_event_cb(struct ble_gap_event *event, void *arg) { // ok n
         if (event->connect.status == 0) {
             state->connHandle = event->connect.conn_handle;
             state->connected = true;
-            FL_WARN_F("[BLE] Client connected, conn_handle=%s", event->connect.conn_handle);
+            FL_WARN("[BLE] Client connected, conn_handle=%s", event->connect.conn_handle);
         } else {
-            FL_WARN_F("[BLE] Connection failed, status=%s — restarting advertising", event->connect.status);
+            FL_WARN("[BLE] Connection failed, status=%s — restarting advertising", event->connect.status);
             fl_ble_start_advertise(state);
         }
         break;
@@ -228,24 +228,24 @@ static int fl_ble_gap_event_cb(struct ble_gap_event *event, void *arg) { // ok n
     case BLE_GAP_EVENT_DISCONNECT:
         state->connected = false;
         state->connHandle = BLE_HS_CONN_HANDLE_NONE;
-        FL_WARN_F("[BLE] Client disconnected, reason=%s — restarting advertising", event->disconnect.reason);
+        FL_WARN("[BLE] Client disconnected, reason=%s — restarting advertising", event->disconnect.reason);
         fl_ble_start_advertise(state);
         break;
 
     case BLE_GAP_EVENT_ADV_COMPLETE:
         // Advertising timed out without connection — restart
-        FL_WARN_F("[BLE] Advertising complete — restarting");
+        FL_WARN("[BLE] Advertising complete — restarting");
         fl_ble_start_advertise(state);
         break;
 
     case BLE_GAP_EVENT_SUBSCRIBE:
-        FL_WARN_F("[BLE TX] subscribe event: cur_notify=%s cur_indicate=%s", (int)event->subscribe.cur_notify, (int)event->subscribe.cur_indicate);
+        FL_WARN("[BLE TX] subscribe event: cur_notify=%s cur_indicate=%s", (int)event->subscribe.cur_notify, (int)event->subscribe.cur_indicate);
         break;
 
     case BLE_GAP_EVENT_NOTIFY_TX:
         if (event->notify_tx.status != 0
             && event->notify_tx.status != BLE_HS_EDONE) {
-            FL_WARN_F("[BLE TX] notify failed, status=%s", event->notify_tx.status);
+            FL_WARN("[BLE TX] notify failed, status=%s", event->notify_tx.status);
         }
         break;
 
@@ -272,7 +272,7 @@ static void fl_ble_start_advertise(TransportState *state) FL_NO_EXCEPT {
 
     int rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0) {
-        FL_WARN_F("[BLE] adv_set_fields failed rc=%s", rc);
+        FL_WARN("[BLE] adv_set_fields failed rc=%s", rc);
         return;
     }
 
@@ -283,7 +283,7 @@ static void fl_ble_start_advertise(TransportState *state) FL_NO_EXCEPT {
     rsp_fields.uuids128_is_complete = 1;
     rc = ble_gap_adv_rsp_set_fields(&rsp_fields);
     if (rc != 0) {
-        FL_WARN_F("[BLE] adv_rsp_set_fields failed rc=%s", rc);
+        FL_WARN("[BLE] adv_rsp_set_fields failed rc=%s", rc);
     }
 
     struct ble_gap_adv_params adv_params = {};
@@ -293,14 +293,14 @@ static void fl_ble_start_advertise(TransportState *state) FL_NO_EXCEPT {
     u8 addr_type;
     rc = ble_hs_id_infer_auto(0, &addr_type);
     if (rc != 0) {
-        FL_WARN_F("[BLE] id_infer_auto failed rc=%s", rc);
+        FL_WARN("[BLE] id_infer_auto failed rc=%s", rc);
         return;
     }
 
     rc = ble_gap_adv_start(addr_type, nullptr, BLE_HS_FOREVER, &adv_params,
                            fl_ble_gap_event_cb, state);
     if (rc != 0 && rc != BLE_HS_EALREADY) {
-        FL_WARN_F("[BLE] adv_start failed rc=%s", rc);
+        FL_WARN("[BLE] adv_start failed rc=%s", rc);
     }
 }
 
@@ -312,7 +312,7 @@ static void fl_ble_on_sync(void) { // ok no noexcept
     // Use best available address
     int rc = ble_hs_util_ensure_addr(0);
     if (rc != 0) {
-        FL_WARN_F("[BLE] ensure_addr failed rc=%s", rc);
+        FL_WARN("[BLE] ensure_addr failed rc=%s", rc);
         return;
     }
 
@@ -345,7 +345,7 @@ TransportState* createTransport(const char* deviceName) FL_NO_EXCEPT {
     // Initialize NimBLE stack (IDF 5+ API)
     int rc = nimble_port_init();
     if (rc != 0) {
-        FL_WARN_F("[BLE] nimble_port_init failed rc=%s", rc);
+        FL_WARN("[BLE] nimble_port_init failed rc=%s", rc);
         s_bleState = nullptr;
         return nullptr;
     }
@@ -361,14 +361,14 @@ TransportState* createTransport(const char* deviceName) FL_NO_EXCEPT {
     fl_ble_patch_gatt_table(state);
     rc = ble_gatts_count_cfg(fl_gatt_svr_svcs_mut);
     if (rc != 0) {
-        FL_WARN_F("[BLE] gatts_count_cfg failed rc=%s", rc);
+        FL_WARN("[BLE] gatts_count_cfg failed rc=%s", rc);
         nimble_port_deinit();
         s_bleState = nullptr;
         return nullptr;
     }
     rc = ble_gatts_add_svcs(fl_gatt_svr_svcs_mut);
     if (rc != 0) {
-        FL_WARN_F("[BLE] gatts_add_svcs failed rc=%s", rc);
+        FL_WARN("[BLE] gatts_add_svcs failed rc=%s", rc);
         nimble_port_deinit();
         s_bleState = nullptr;
         return nullptr;
@@ -377,13 +377,13 @@ TransportState* createTransport(const char* deviceName) FL_NO_EXCEPT {
     // Set device name
     rc = ble_svc_gap_device_name_set(deviceName);
     if (rc != 0) {
-        FL_WARN_F("[BLE] device_name_set failed rc=%s", rc);
+        FL_WARN("[BLE] device_name_set failed rc=%s", rc);
     }
 
     // Start NimBLE host task on FreeRTOS
     nimble_port_freertos_init(fl_ble_host_task);
 
-    FL_WARN_F("[BLE] GATT server started: name=%s", deviceName);
+    FL_WARN("[BLE] GATT server started: name=%s", deviceName);
     uptr.release(); // caller owns the state now
     return state;
 }
@@ -398,17 +398,17 @@ void destroyTransport(TransportState* state) FL_NO_EXCEPT {
     // Signal NimBLE host task to stop
     int rc = nimble_port_stop();
     if (rc != 0) {
-        FL_WARN_F("[BLE] nimble_port_stop failed rc=%s", rc);
+        FL_WARN("[BLE] nimble_port_stop failed rc=%s", rc);
     }
 
     // Deinitialize NimBLE stack
     rc = nimble_port_deinit();
     if (rc != 0) {
-        FL_WARN_F("[BLE] nimble_port_deinit failed rc=%s", rc);
+        FL_WARN("[BLE] nimble_port_deinit failed rc=%s", rc);
     }
 
     s_bleState = nullptr;
-    FL_WARN_F("[BLE] GATT server stopped");
+    FL_WARN("[BLE] GATT server stopped");
 }
 
 StatusInfo queryStatus(const TransportState* state) FL_NO_EXCEPT {
@@ -434,7 +434,7 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         fl::string& raw = state->ringBuffer[state->tail];
         state->tail = (state->tail + 1) % kBleRingBufferSize;
 
-        FL_WARN_F("[BLE SRC] raw: %s", raw.c_str());
+        FL_WARN("[BLE SRC] raw: %s", raw.c_str());
 
         // Use string_view for zero-copy prefix stripping and trimming
         fl::string_view view = raw;
@@ -453,16 +453,16 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         }
 
         if (view.empty() || view[0] != '{') {
-            FL_WARN_F("[BLE SRC] rejected (not JSON): %s", raw.c_str());
+            FL_WARN("[BLE SRC] rejected (not JSON): %s", raw.c_str());
             return fl::nullopt;
         }
 
         fl::string input(view); // ok no noexcept
         auto parsed = fl::json::parse(input);
         if (parsed.has_value()) {
-            FL_WARN_F("[BLE SRC] parsed OK");
+            FL_WARN("[BLE SRC] parsed OK");
         } else {
-            FL_WARN_F("[BLE SRC] parse FAILED");
+            FL_WARN("[BLE SRC] parse FAILED");
         }
         return parsed;
     };
@@ -472,13 +472,13 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
     // The host should READ the TX characteristic as a fallback.
     auto responseSink = [state](const fl::json& response) {
         fl::string formatted = formatJsonResponse(response, "REMOTE: ");
-        FL_WARN_F("[BLE TX] sending (%s bytes): %s", formatted.size(), formatted.c_str());
+        FL_WARN("[BLE TX] sending (%s bytes): %s", formatted.size(), formatted.c_str());
 
         // Store for READ fallback
         state->lastTxValue = formatted;
 
         if (!state->connected || state->connHandle == BLE_HS_CONN_HANDLE_NONE) {
-            FL_WARN_F("[BLE TX] not connected, skipping notify");
+            FL_WARN("[BLE TX] not connected, skipping notify");
             return;
         }
 
@@ -486,13 +486,13 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         struct os_mbuf *om = ble_hs_mbuf_from_flat(
             formatted.c_str(), static_cast<u16>(formatted.size()));
         if (!om) {
-            FL_WARN_F("[BLE TX] mbuf alloc failed");
+            FL_WARN("[BLE TX] mbuf alloc failed");
             return;
         }
 
         int rc = ble_gatts_notify_custom(state->connHandle, state->txAttrHandle, om);
         if (rc != 0) {
-            FL_WARN_F("[BLE TX] notify_custom failed rc=%s", rc);
+            FL_WARN("[BLE TX] notify_custom failed rc=%s", rc);
         }
     };
 

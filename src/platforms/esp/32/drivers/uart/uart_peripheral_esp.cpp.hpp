@@ -70,11 +70,11 @@ UartPeripheralEsp::~UartPeripheralEsp() {
 //=============================================================================
 
 bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXCEPT {
-    FL_DBG_F("UART_PERIPH: initialize() called - uart_num=%s baud=%s", config.mUartNum, config.mBaudRate);
+    FL_DBG("UART_PERIPH: initialize() called - uart_num=%s baud=%s", config.mUartNum, config.mBaudRate);
 
     // Validate not already initialized
     if (mInitialized) {
-        FL_WARN_F("UartPeripheralEsp: Already initialized");
+        FL_WARN("UartPeripheralEsp: Already initialized");
         return false;
     }
 
@@ -95,7 +95,7 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
     case 7: uart_config.data_bits = UART_DATA_7_BITS; break;
     case 8: uart_config.data_bits = UART_DATA_8_BITS; break;
     default:
-        FL_WARN_F("UartPeripheralEsp: Invalid data bits (%s), defaulting to 8",
+        FL_WARN("UartPeripheralEsp: Invalid data bits (%s), defaulting to 8",
                   static_cast<int>(config.mDataBits));
         uart_config.data_bits = UART_DATA_8_BITS;
         break;
@@ -108,7 +108,7 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
     } else if (config.mStopBits == 2) {
         uart_config.stop_bits = UART_STOP_BITS_2;
     } else {
-        FL_WARN_F("UartPeripheralEsp: Invalid stop bits (%s), defaulting to 1", config.mStopBits);
+        FL_WARN("UartPeripheralEsp: Invalid stop bits (%s), defaulting to 1", config.mStopBits);
         uart_config.stop_bits = UART_STOP_BITS_1;
     }
 
@@ -119,10 +119,10 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
 #endif
 
     // Configure UART parameters (maps directly to ESP-IDF structure)
-    FL_DBG_F("UART_PERIPH: Calling uart_param_config()");
+    FL_DBG("UART_PERIPH: Calling uart_param_config()");
     esp_err_t err = uart_param_config(uart_num, &uart_config);
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Failed to configure UART params: %s", err);
+        FL_WARN("UartPeripheralEsp: Failed to configure UART params: %s", err);
         return false;
     }
 
@@ -132,7 +132,7 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
     // - queue_size: 0 (no event queue needed for LED control)
     // - uart_queue: NULL (no event queue)
     // - intr_alloc_flags: 0 (default interrupt priority)
-    FL_DBG_F("UART_PERIPH: Calling uart_driver_install()");
+    FL_DBG("UART_PERIPH: Calling uart_driver_install()");
     err = uart_driver_install(
         uart_num,
         config.mRxBufferSize,
@@ -142,13 +142,13 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
         0       // intr_alloc_flags
     );
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Failed to install UART driver: %s", err);
+        FL_WARN("UartPeripheralEsp: Failed to install UART driver: %s", err);
         return false;
     }
 
     // Configure GPIO pins
     // For LED control: TX-only (RX can be set to UART_PIN_NO_CHANGE or -1)
-    FL_DBG_F("UART_PERIPH: Calling uart_set_pin()");
+    FL_DBG("UART_PERIPH: Calling uart_set_pin()");
     int rx_pin = (config.mRxPin < 0) ? UART_PIN_NO_CHANGE : config.mRxPin;
     err = uart_set_pin(
         uart_num,
@@ -158,7 +158,7 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
         UART_PIN_NO_CHANGE              // CTS (not used)
     );
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Failed to set UART pins: %s", err);
+        FL_WARN("UartPeripheralEsp: Failed to set UART pins: %s", err);
         // Cleanup driver on error
         uart_driver_delete(uart_num);
         return false;
@@ -168,16 +168,16 @@ bool UartPeripheralEsp::initialize(const UartPeripheralConfig& config) FL_NO_EXC
     // Normal UART idle = HIGH, but WS2812 requires idle = LOW.
     // With TX inversion: idle=LOW, start bit=HIGH (leading edge),
     // stop bit=LOW (trailing edge). This creates correct WS2812 polarity.
-    FL_DBG_F("UART_PERIPH: Calling uart_set_line_inverse() for TX inversion");
+    FL_DBG("UART_PERIPH: Calling uart_set_line_inverse() for TX inversion");
     err = uart_set_line_inverse(uart_num, UART_SIGNAL_TXD_INV);
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Failed to set TX inversion: %s", err);
+        FL_WARN("UartPeripheralEsp: Failed to set TX inversion: %s", err);
         uart_driver_delete(uart_num);
         return false;
     }
 
     mInitialized = true;
-    FL_DBG_F("UART: Initialized (uart_num=%s, baud=%s, tx_pin=%s, tx_inverted=true)", config.mUartNum, config.mBaudRate, config.mTxPin);
+    FL_DBG("UART: Initialized (uart_num=%s, baud=%s, tx_pin=%s, tx_inverted=true)", config.mUartNum, config.mBaudRate, config.mTxPin);
 
     return true;
 }
@@ -190,22 +190,22 @@ void UartPeripheralEsp::deinitialize() FL_NO_EXCEPT {
     uart_port_t uart_num = static_cast<uart_port_t>(mConfig.mUartNum);
 
     // Wait for any pending transmissions (with timeout)
-    FL_DBG_F("UART_PERIPH: Waiting for pending transmissions...");
+    FL_DBG("UART_PERIPH: Waiting for pending transmissions...");
     esp_err_t err = uart_wait_tx_done(uart_num, pdMS_TO_TICKS(1000));
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Wait timeout during cleanup: %s", err);
+        FL_WARN("UartPeripheralEsp: Wait timeout during cleanup: %s", err);
     }
 
     // Delete UART driver
-    FL_DBG_F("UART_PERIPH: Calling uart_driver_delete()");
+    FL_DBG("UART_PERIPH: Calling uart_driver_delete()");
     err = uart_driver_delete(uart_num);
     if (err != ESP_OK) {
-        FL_WARN_F("UartPeripheralEsp: Failed to delete UART driver: %s", err);
+        FL_WARN("UartPeripheralEsp: Failed to delete UART driver: %s", err);
     }
 
     mInitialized = false;
     mResetExpireTime = 0;  // Clear reset period timer
-    FL_DBG_F("UART: Deinitialized (uart_num=%s)", mConfig.mUartNum);
+    FL_DBG("UART: Deinitialized (uart_num=%s)", mConfig.mUartNum);
 }
 
 bool UartPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
@@ -218,12 +218,12 @@ bool UartPeripheralEsp::isInitialized() const FL_NO_EXCEPT {
 
 bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("UartPeripheralEsp: Cannot write - not initialized");
+        FL_WARN("UartPeripheralEsp: Cannot write - not initialized");
         return false;
     }
 
     if (data == nullptr) {
-        FL_WARN_F("UartPeripheralEsp: Cannot write - null buffer");
+        FL_WARN("UartPeripheralEsp: Cannot write - null buffer");
         return false;
     }
 
@@ -248,13 +248,13 @@ bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT {
 
     if (written < 0) {
         // Error occurred
-        FL_WARN_F("UartPeripheralEsp: Failed to write bytes: %s", written);
+        FL_WARN("UartPeripheralEsp: Failed to write bytes: %s", written);
         return false;
     }
 
     if (static_cast<size_t>(written) != length) {
         // Partial write (shouldn't happen with blocking mode)
-        FL_WARN_F("UartPeripheralEsp: Partial write (%s of %s bytes)", written, length);
+        FL_WARN("UartPeripheralEsp: Partial write (%s of %s bytes)", written, length);
         return false;
     }
 
@@ -263,7 +263,7 @@ bool UartPeripheralEsp::writeBytes(const u8* data, size_t length) FL_NO_EXCEPT {
 
 bool UartPeripheralEsp::waitTxDone(u32 timeout_ms) FL_NO_EXCEPT {
     if (!mInitialized) {
-        FL_WARN_F("UartPeripheralEsp: Cannot wait - not initialized");
+        FL_WARN("UartPeripheralEsp: Cannot wait - not initialized");
         return false;
     }
 

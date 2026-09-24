@@ -147,17 +147,17 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN_F("LcdSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("LcdSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
     if (config.clock_gpio < 0) {
-        FL_WARN_F("LcdSpiPeripheralEsp: Invalid clock_gpio");
+        FL_WARN("LcdSpiPeripheralEsp: Invalid clock_gpio");
         return false;
     }
 
     if (config.clock_hz == 0) {
-        FL_WARN_F("LcdSpiPeripheralEsp: Invalid clock_hz: 0");
+        FL_WARN("LcdSpiPeripheralEsp: Invalid clock_hz: 0");
         return false;
     }
 
@@ -175,7 +175,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
         bus_config.dc_gpio_num = static_cast<gpio_num_t>(config.dc_gpio);
     } else {
         bus_config.dc_gpio_num = static_cast<gpio_num_t>(0);
-        FL_WARN_F("LcdSpiPeripheralEsp: dc_gpio not set, defaulting to "
+        FL_WARN("LcdSpiPeripheralEsp: dc_gpio not set, defaulting to "
                 "GPIO 0 (strapping pin). Set LcdSpiConfig::dc_gpio to "
                 "an unused pin to avoid boot issues.");
     }
@@ -205,7 +205,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
 
     esp_err_t err = esp_lcd_new_i80_bus(&bus_config, &mI80Bus);
     if (err != ESP_OK) {
-        FL_WARN_F("LcdSpiPeripheralEsp: Failed to create I80 bus: %s", err);
+        FL_WARN("LcdSpiPeripheralEsp: Failed to create I80 bus: %s", err);
         return false;
     }
 
@@ -224,7 +224,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     mLastTransmitSize = 0;
     mInitialized = true;
     mOwner = config.owner;
-    FL_DBG_F("LcdSpiPeripheralEsp: Initialized with %s lanes, %s Hz clock, owner=%s", config.num_lanes, config.clock_hz, static_cast<int>(config.owner));
+    FL_DBG("LcdSpiPeripheralEsp: Initialized with %s lanes, %s Hz clock, owner=%s", config.num_lanes, config.clock_hz, static_cast<int>(config.owner));
     return true;
 }
 
@@ -474,15 +474,15 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
     // function is task-only (xSemaphoreTake above would fail configASSERT
     // from ISR context).
     if (mLastWaitForSlotTimeout) {
-        FL_WARN_F("LcdSpiPeripheralEsp: timed out waiting for previous transmit to complete");
+        FL_WARN("LcdSpiPeripheralEsp: timed out waiting for previous transmit to complete");
         mLastWaitForSlotTimeout = false;
     }
     if (mLastPanelIoRecreateError != ESP_OK) {
-        FL_WARN_F("LcdSpiPeripheralEsp: panel IO recreate failed: %s", static_cast<int>(mLastPanelIoRecreateError));
+        FL_WARN("LcdSpiPeripheralEsp: panel IO recreate failed: %s", static_cast<int>(mLastPanelIoRecreateError));
         mLastPanelIoRecreateError = ESP_OK;
     }
     if (mLastTxColorError != ESP_OK) {
-        FL_WARN_F("LcdSpiPeripheralEsp: tx_color failed: %s", static_cast<int>(mLastTxColorError));
+        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: %s", static_cast<int>(mLastTxColorError));
         mLastTxColorError = ESP_OK;
     }
     return true;

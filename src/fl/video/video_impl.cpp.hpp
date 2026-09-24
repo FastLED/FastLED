@@ -99,7 +99,7 @@ bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
     }
     now = mTime->update(now);
     if (!mStream) {
-        FL_WARN_F("no stream");
+        FL_WARN("no stream");
         return false;
     }
     if (!mStream->isRgb8Playback()) {
@@ -111,7 +111,7 @@ bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
     bool ok = updateBufferIfNecessary(mPrevNow, now);
     mPrevNow = now;
     if (!ok) {
-        FL_WARN_F("updateBufferIfNecessary failed");
+        FL_WARN("updateBufferIfNecessary failed");
         return false;
     }
     mFrameInterpolator->draw(now, leds);
@@ -174,7 +174,7 @@ bool VideoImpl::readSample(PixelSample *out) FL_NO_EXCEPT {
 bool VideoImpl::updateBufferFromStream(fl::u32 now) {
     FASTLED_ASSERT(mTime, "mTime is null");
     if (!mStream) {
-        FL_WARN_F("no stream");
+        FL_WARN("no stream");
         return false;
     }
     if (mStream->atEnd()) {
@@ -190,7 +190,7 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
     }
 
     if (mFrameInterpolator->capacity() == 0) {
-        FL_WARN_F("capacity == 0");
+        FL_WARN("capacity == 0");
         return false;
     }
 
@@ -213,12 +213,12 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
             bool ok =
                 mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
             if (!ok) {
-                FL_WARN_F("get_oldest_frame_number failed");
+                FL_WARN("get_oldest_frame_number failed");
                 return false;
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                FL_WARN_F("erase failed for frame: %s", frame_to_erase);
+                FL_WARN("erase failed for frame: %s", frame_to_erase);
                 return false;
             }
         }
@@ -231,14 +231,14 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
         if (!mStream->readFrame(recycled_frame.get())) {
             if (mStream->atEnd()) {
                 if (!mStream->rewind()) {
-                    FL_WARN_F("rewind failed");
+                    FL_WARN("rewind failed");
                     return false;
                 }
                 mTime->reset(now);
                 frame_to_fetch = 0;
                 if (!mStream->readFrameAt(frame_to_fetch,
                                           recycled_frame.get())) {
-                    FL_WARN_F("readFrameAt failed");
+                    FL_WARN("readFrameAt failed");
                     return false;
                 }
             } else {
@@ -248,13 +248,13 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
                 if (mStream->getType() == PixelStream::kStreaming) {
                     return true;  // Gracefully handle empty streaming buffer
                 }
-                FL_WARN_F("We failed for some other reason");
+                FL_WARN("We failed for some other reason");
                 return false;
             }
         }
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
-            FL_WARN_F("insert failed");
+            FL_WARN("insert failed");
             return false;
         }
     }
@@ -275,7 +275,7 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
         return true;
     }
     if (mFrameInterpolator->capacity() == 0) {
-        FL_WARN_F("capacity == 0");
+        FL_WARN("capacity == 0");
         return false;
     }
 
@@ -297,20 +297,20 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
                 ok = mFrameInterpolator->get_oldest_frame_number(
                     &frame_to_erase);
                 if (!ok) {
-                    FL_WARN_F("get_oldest_frame_number failed");
+                    FL_WARN("get_oldest_frame_number failed");
                     return false;
                 }
             } else {
                 ok = mFrameInterpolator->get_newest_frame_number(
                     &frame_to_erase);
                 if (!ok) {
-                    FL_WARN_F("get_newest_frame_number failed");
+                    FL_WARN("get_newest_frame_number failed");
                     return false;
                 }
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                FL_WARN_F("erase failed for frame: %s", frame_to_erase);
+                FL_WARN("erase failed for frame: %s", frame_to_erase);
                 return false;
             }
         }
@@ -328,19 +328,19 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
                 }
                 if (mStream->atEnd()) {
                     if (!mStream->rewind()) { // Is this still
-                        FL_WARN_F("rewind failed");
+                        FL_WARN("rewind failed");
                         return false;
                     }
                     mTime->reset(now);
                     frame_to_fetch = 0;
                     if (!mStream->readFrameAt(frame_to_fetch,
                                               recycled_frame.get())) {
-                        FL_WARN_F("readFrameAt failed");
+                        FL_WARN("readFrameAt failed");
                         return false;
                     }
                     break; // we have the frame, so we can break out of the loop
                 }
-                FL_WARN_F("We failed for some other reason");
+                FL_WARN("We failed for some other reason");
                 return false;
             }
             break;
@@ -348,7 +348,7 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
 
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
-            FL_WARN_F("insert failed");
+            FL_WARN("insert failed");
             return false;
         }
     }
@@ -365,7 +365,7 @@ bool VideoImpl::updateBufferIfNecessary(fl::u32 prev, fl::u32 now) {
     case PixelStream::kStreaming:
         return updateBufferFromStream(now);
     default:
-        FL_WARN_F("Unknown type: %s", fl::u32(type));
+        FL_WARN("Unknown type: %s", fl::u32(type));
         return false;
     }
 }

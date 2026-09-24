@@ -324,8 +324,8 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         u32 clock_hz = calculateI2sClockHz(ct);
         mConfig.pclk_hz = clock_hz;
 
-        FL_DBG_F("ChannelEngineI2S: Built Wave8 LUT for timing T1=%sns, T2=%sns, T3=%sns", timing.t1_ns, timing.t2_ns, timing.t3_ns);
-        FL_DBG_F("ChannelEngineI2S: I2S clock set to %s Hz", clock_hz);
+        FL_DBG("ChannelEngineI2S: Built Wave8 LUT for timing T1=%sns, T2=%sns, T3=%sns", timing.t1_ns, timing.t2_ns, timing.t3_ns);
+        FL_DBG("ChannelEngineI2S: I2S clock set to %s Hz", clock_hz);
     }
 
     // Initialize or reconfigure if needed
@@ -387,14 +387,14 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         size_t data_size = 0;
         if (!detail::calculateI2sBufferSize(
                 data_words, timing.reset_us, mConfig.pclk_hz, data_size)) {
-            FL_WARN_F("ChannelEngineI2S: DMA buffer size overflow");
+            FL_WARN("ChannelEngineI2S: DMA buffer size overflow");
             return false;
         }
         const size_t total_words = data_size / sizeof(u16);
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 
-        FL_DBG_F("ChannelEngineI2S: Wave8 buffer size = %s bytes (%s words) for %s LEDs", data_size, total_words, mNumLeds);
+        FL_DBG("ChannelEngineI2S: Wave8 buffer size = %s bytes (%s words) for %s LEDs", data_size, total_words, mNumLeds);
 #else
         // Legacy transpose encoding
         const u64 data_words =
@@ -402,7 +402,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         size_t data_size = 0;
         if (!detail::calculateI2sBufferSize(
                 data_words, timing.reset_us, mConfig.pclk_hz, data_size)) {
-            FL_WARN_F("ChannelEngineI2S: DMA buffer size overflow");
+            FL_WARN("ChannelEngineI2S: DMA buffer size overflow");
             return false;
         }
         pconfig.max_transfer_bytes = data_size;
@@ -415,12 +415,12 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         }
 
         if (!mPeripheral->initialize(pconfig)) {
-            FL_WARN_F("ChannelEngineI2S: Failed to initialize peripheral");
+            FL_WARN("ChannelEngineI2S: Failed to initialize peripheral");
             return false;
         }
         if (!mPeripheral->registerTransmitCallback(
                 reinterpret_cast<void*>(&isrTransmitDone), this)) { // ok reinterpret cast
-            FL_WARN_F("ChannelEngineI2S: registerTransmitCallback failed");
+            FL_WARN("ChannelEngineI2S: registerTransmitCallback failed");
             mPeripheral->deinitialize();
             return false;
         }
@@ -429,7 +429,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         for (int i = 0; i < 2; i++) {
             mBuffers[i] = mPeripheral->allocateBuffer(mBufferSize);
             if (mBuffers[i] == nullptr) {
-                FL_WARN_F("ChannelEngineI2S: Failed to allocate buffer");
+                FL_WARN("ChannelEngineI2S: Failed to allocate buffer");
                 return false;
             }
             // Initialize with zeros (LOW for reset)
@@ -478,7 +478,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         for (const auto& channel : channelData) {
             channel->setInUse(false);
         }
-        FL_WARN_F("ChannelEngineI2S: Failed to start transmission");
+        FL_WARN("ChannelEngineI2S: Failed to start transmission");
         return false;
     }
 

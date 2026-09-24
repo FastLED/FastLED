@@ -10,6 +10,11 @@
 
 namespace fl {
 
+// Non-template fast path for format strings with no arguments. Keeping this
+// out of line avoids instantiating sstream formatting at every literal call.
+void printf(const char* format) FL_NO_EXCEPT;
+int snprintf(char* buffer, fl::size size, const char* format) FL_NO_EXCEPT;
+
 /// @brief Printf-like formatting function that prints directly to the platform output
 /// @param format Format string with placeholders like "%d", "%s", "%f" etc.
 /// @param args Arguments to format
@@ -96,24 +101,6 @@ void printf(const char* format, const Args&... args) FL_NO_EXCEPT;
 /// @endcode
 template<typename... Args>
 int snprintf(char* buffer, fl::size size, const char* format, const Args&... args) FL_NO_EXCEPT;
-
-/// @brief Sprintf-like formatting function that writes to a buffer
-/// @param buffer Output buffer to write formatted string to
-/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
-/// @param args Arguments to format
-/// @return Number of characters written (excluding null terminator)
-/// 
-/// This function writes a formatted string to the provided buffer.
-/// The buffer size is deduced at compile time from the array reference,
-/// providing automatic safety against buffer overflows.
-///
-/// Example usage:
-/// @code
-/// char buffer[100];
-/// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
-/// @endcode
-template<fl::size N, typename... Args>
-int sprintf(char (&buffer)[N], const char* format, const Args&... args) FL_NO_EXCEPT;
 
 
 ///////////////////// IMPLEMENTATION /////////////////////
@@ -978,27 +965,6 @@ int snprintf(char* buffer, fl::size size, const char* format, const Args&... arg
     // Return the number of characters actually written (excluding null terminator)
     // This respects the buffer size limit instead of returning the full formatted length
     return static_cast<int>(copy_len);
-}
-
-/// @brief Sprintf-like formatting function that writes to a buffer
-/// @param buffer Output buffer to write formatted string to
-/// @param format Format string with placeholders like "%d", "%s", "%f" etc.
-/// @param args Arguments to format
-/// @return Number of characters written (excluding null terminator)
-/// 
-/// This function writes a formatted string to the provided buffer.
-/// The buffer size is deduced at compile time from the array reference,
-/// providing automatic safety against buffer overflows.
-///
-/// Example usage:
-/// @code
-/// char buffer[100];
-/// int len = fl::sprintf(buffer, "Value: %d, Name: %s", 42, "test");
-/// @endcode
-template<fl::size N, typename... Args>
-int sprintf(char (&buffer)[N], const char* format, const Args&... args) FL_NO_EXCEPT {
-    // Use the compile-time known buffer size for safety
-    return snprintf(buffer, N, format, args...);
 }
 
 } // namespace fl

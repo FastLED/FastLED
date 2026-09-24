@@ -132,7 +132,7 @@ public:
                                     u8 priority = 5) FL_NO_EXCEPT {
         auto* ctx = CoroutineContext::create(fl::move(function), stack_size);
         if (!ctx) {
-            FL_WARN_F("TaskCoroutineWasm: Failed to create context for '%s'", name);
+            FL_WARN("TaskCoroutineWasm: Failed to create context for '%s'", name);
             return nullptr;
         }
 

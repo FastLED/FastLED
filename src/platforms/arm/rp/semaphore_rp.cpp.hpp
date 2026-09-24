@@ -43,7 +43,7 @@ CountingSemaphoreRP<LeastMaxValue>::CountingSemaphoreRP(ptrdiff_t desired)
     int spinlock_num = spin_lock_claim_unused(true);  // true = required (panic if none available)
 
     if (spinlock_num < 0) {
-        FL_WARN_F("CountingSemaphoreRP: Failed to claim hardware spinlock");
+        FL_WARN("CountingSemaphoreRP: Failed to claim hardware spinlock");
         return;
     }
 

@@ -63,7 +63,7 @@ bool WasmFileHandle::available() const FL_NO_EXCEPT {
         return false;
     }
     if (!mData->ready(mPos)) {
-        FL_WARN_F("File is not ready yet. This is a major error because "
+        FL_WARN("File is not ready yet. This is a major error because "
                   "FastLED-wasm does not support async yet, the file "
                   "will fail to read.");
         return false;
@@ -88,7 +88,7 @@ size_t WasmFileHandle::read(char *dst, size_t bytesToRead) FL_NO_EXCEPT {
         bytesToRead = mData->capacity() - mPos;
     }
     if (!mData->ready(mPos)) {
-        FL_WARN_F("File is not ready yet. This is a major error because "
+        FL_WARN("File is not ready yet. This is a major error because "
                   "FastLED-wasm does not support async yet, the file "
                   "will fail to read.");
         return 0;

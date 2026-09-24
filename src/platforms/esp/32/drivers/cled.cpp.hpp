@@ -52,7 +52,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
     // Validate parameters
     if (config.resolution_bits > 20) {
         // ESP32 LEDC maximum is 20 bits
-        FL_WARN_F("CLED: resolution_bits > 20 not supported (requested: %s)", config.resolution_bits);
+        FL_WARN("CLED: resolution_bits > 20 not supported (requested: %s)", config.resolution_bits);
         return false;
     }
 
@@ -79,7 +79,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
 #endif
 
     if (ledc_timer_config(&timer_cfg) != ESP_OK) {
-        FL_WARN_F("CLED: LEDC timer config failed for channel %s", config.channel);
+        FL_WARN("CLED: LEDC timer config failed for channel %s", config.channel);
         return false;
     }
 
@@ -93,11 +93,11 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
     ch_cfg.hpoint = 0;
 
     if (ledc_channel_config(&ch_cfg) != ESP_OK) {
-        FL_WARN_F("CLED: LEDC channel config failed for channel %s", config.channel);
+        FL_WARN("CLED: LEDC channel config failed for channel %s", config.channel);
         return false;
     }
 
-    FL_DBG_F("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, config.frequency, config.resolution_bits);
+    FL_DBG("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, config.frequency, config.resolution_bits);
 #else
     // No driver/ledc.h on this toolchain — fall back to the Arduino LEDC
     // wrapper API, which differs between Arduino Core 2.x and 3.x.
@@ -109,25 +109,25 @@ bool CLED::begin(const CLEDConfig& config) FL_NO_EXCEPT {
     // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
     u8 assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
     if (assigned_channel == 0) {
-        FL_WARN_F("CLED: LEDC attach failed for pin %s", config.pin);
+        FL_WARN("CLED: LEDC attach failed for pin %s", config.pin);
         return false;
     }
 
     // Update internal state with auto-assigned channel
     mConfig.channel = assigned_channel;
 
-    FL_DBG_F("CLED: Initialized pin %s with auto-assigned channel %s at %s Hz, %s bits", config.pin, static_cast<int>(assigned_channel), config.frequency, config.resolution_bits);
+    FL_DBG("CLED: Initialized pin %s with auto-assigned channel %s at %s Hz, %s bits", config.pin, static_cast<int>(assigned_channel), config.frequency, config.resolution_bits);
 #else
     // Old API (Arduino Core 2.x): ledcSetup + ledcAttachPin with explicit channel
     ledcAttachPin(config.pin, config.channel);
     u32 freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
 
     if (freq == 0) {
-        FL_WARN_F("CLED: LEDC setup failed for channel %s", config.channel);
+        FL_WARN("CLED: LEDC setup failed for channel %s", config.channel);
         return false;
     }
 
-    FL_DBG_F("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, freq, config.resolution_bits);
+    FL_DBG("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, freq, config.resolution_bits);
 #endif
 #endif  // FL_CLED_HAS_LEDC
 

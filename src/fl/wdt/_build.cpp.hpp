@@ -18,8 +18,8 @@ namespace platforms {
 // here (in the unity TU) rather than in watchdog.cpp.hpp so that public
 // headers don't pull in fl/log/log.h.
 void scopedWatchdogPrintLine(fl::string_view sv) FL_NO_EXCEPT {
-    FL_UNUSED(sv);  // only consumed by FL_WARN_F, a no-op on small platforms
-    FL_WARN_F("%s", sv);
+    FL_UNUSED(sv);  // only consumed by FL_WARN, a no-op on small platforms
+    FL_WARN("%s", sv);
 }
 
 // Wraps fl::delay() — portable across stub/WASM/embedded.

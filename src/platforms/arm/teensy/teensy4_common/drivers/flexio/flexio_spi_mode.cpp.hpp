@@ -186,7 +186,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
                      u32 clock_hz) FL_NO_EXCEPT {
     using namespace detail::flexio_spi_internal;
     if (clock_hz == 0) {
-        FL_LOG_FLEXIO_F("FlexIO_SPI: init refused -- clock_hz == 0");
+        FL_LOG_FLEXIO("FlexIO_SPI: init refused -- clock_hz == 0");
         return false;
     }
     if (sSpiInitialized) {
@@ -195,16 +195,16 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
 
     // Clock-rate clamp.
     if (clock_hz < kSpiClockMinHz) {
-        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %u Hz below floor; clamping to %u Hz",
+        FL_LOG_FLEXIO("FlexIO_SPI: clock %u Hz below floor; clamping to %u Hz",
                         (unsigned)clock_hz, (unsigned)kSpiClockMinHz);
         clock_hz = kSpiClockMinHz;
     } else if (clock_hz > kSpiClockMaxHz) {
-        FL_LOG_FLEXIO_F("FlexIO_SPI: clock %u Hz above ceiling; clamping to %u Hz",
+        FL_LOG_FLEXIO("FlexIO_SPI: clock %u Hz above ceiling; clamping to %u Hz",
                         (unsigned)clock_hz, (unsigned)kSpiClockMaxHz);
         clock_hz = kSpiClockMaxHz;
     }
 
-    FL_LOG_FLEXIO_F("FlexIO_SPI: init MOSI=%d(flex %d) SCLK=%d(flex %d) @ %u Hz",
+    FL_LOG_FLEXIO("FlexIO_SPI: init MOSI=%d(flex %d) SCLK=%d(flex %d) @ %u Hz",
                     (int)pin_info.mosi_pin, (int)pin_info.mosi_flexio_pin,
                     (int)pin_info.sclk_pin, (int)pin_info.sclk_flexio_pin,
                     (unsigned)clock_hz);
@@ -270,7 +270,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
         // instead of failing.
         // TODO(#3428): expose a CCM tweak path if a real <234 kHz target
         // shows up.
-        FL_LOG_FLEXIO_F("FlexIO_SPI: baud div overflow (%u); clamping to 255 -> effective ~234 kHz",
+        FL_LOG_FLEXIO("FlexIO_SPI: baud div overflow (%u); clamping to 255 -> effective ~234 kHz",
                         (unsigned)baud_div_field);
         baud_div_field = 0xFFu;
     }
@@ -356,7 +356,7 @@ bool flexio_spi_init(const FlexIOSPIPinInfo& pin_info,
     if (sSpiDmaChannel == nullptr) {
         sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot
         if (sSpiDmaChannel == nullptr) {
-            FL_LOG_FLEXIO_F("FlexIO_SPI: failed to allocate DMA channel");
+            FL_LOG_FLEXIO("FlexIO_SPI: failed to allocate DMA channel");
             // Restore pin muxes -- without this, MOSI/SCLK stay stolen by
             // the failed init (we already switched them to ALT4|SION above)
             // and any subsequent re-init at different pins would dangle.
@@ -489,7 +489,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
             }
             SPI_FLEXIO2_SHIFTSDEN = 0;
             sSpiDmaComplete = true;
-            FL_LOG_FLEXIO_F("FlexIO_SPI: wait timed out after %u ms -- recovering",
+            FL_LOG_FLEXIO("FlexIO_SPI: wait timed out after %u ms -- recovering",
                             (unsigned)timeout_ms);
             return;
         }
@@ -504,7 +504,7 @@ void flexio_spi_wait() FL_NO_EXCEPT {
     const u32 drain_timeout_ms = 5;
     while (!(SPI_FLEXIO2_TIMSTAT & 0x1u)) {
         if ((u32)(millis() - drain_start) >= drain_timeout_ms) {
-            FL_LOG_FLEXIO_F("FlexIO_SPI: shifter drain timeout after %u ms",
+            FL_LOG_FLEXIO("FlexIO_SPI: shifter drain timeout after %u ms",
                             (unsigned)drain_timeout_ms);
             break;
         }

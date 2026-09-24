@@ -101,7 +101,7 @@ class RP2040ParallelGroup {
             sorted_pins[j + 1] = key;
         }
 
-        FL_DBG_F("Detecting pin groups from %s pins", sorted_pins.size());
+        FL_DBG("Detecting pin groups from %s pins", sorted_pins.size());
 
         // Detect consecutive runs
         fl::u32 i = 0;
@@ -137,9 +137,9 @@ class RP2040ParallelGroup {
             }
 
             if (group_size > 1) {
-                FL_DBG_F("Created %s-pin parallel group at GPIO %s", (int)group_size, (int)start_pin);
+                FL_DBG("Created %s-pin parallel group at GPIO %s", (int)group_size, (int)start_pin);
             } else {
-                FL_DBG_F("Created single-pin (sequential) group at GPIO %s", (int)start_pin);
+                FL_DBG("Created single-pin (sequential) group at GPIO %s", (int)start_pin);
             }
 
             mPinGroups.push_back(fl::move(group));
@@ -148,7 +148,7 @@ class RP2040ParallelGroup {
             i += group_size;
         }
 
-        FL_DBG_F("Total pin groups: %s", mPinGroups.size());
+        FL_DBG("Total pin groups: %s", mPinGroups.size());
     }
 
     /// @brief Show all pixels - called once per frame
@@ -171,7 +171,7 @@ class RP2040ParallelGroup {
             // DMA, and GPIO claims are made by RpPioTxPeripheral for the
             // duration of each transfer, so this path cannot retain stale
             // claims when a sketch changes its LED topology.
-            FL_DBG_F("Pin configuration changed, rebuilding groups");
+            FL_DBG("Pin configuration changed, rebuilding groups");
             detectPinGroups();
         }
 
@@ -202,7 +202,7 @@ class RP2040ParallelGroup {
         config.timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
         if (!peripheral.configure(config) ||
             !peripheral.startTxDma(words.data(), words.size())) {
-            FL_WARN_F("Unable to start %s-lane PIO transfer at GPIO %s",
+            FL_WARN("Unable to start %s-lane PIO transfer at GPIO %s",
                       (int)lanes, (int)pin);
             return false;
         }
@@ -211,14 +211,14 @@ class RP2040ParallelGroup {
         while (peripheral.isDmaBusy()) {
             if (static_cast<u32>(fl::micros() - start_us) > 1000000u) {
                 peripheral.abort();
-                FL_WARN_F("Timed out waiting for DMA at GPIO %s", (int)pin);
+                FL_WARN("Timed out waiting for DMA at GPIO %s", (int)pin);
                 return false;
             }
         }
         while (!peripheral.isTerminalComplete()) {
             if (static_cast<u32>(fl::micros() - start_us) > 1000000u) {
                 peripheral.abort();
-                FL_WARN_F("Timed out waiting for PIO completion at GPIO %s", (int)pin);
+                FL_WARN("Timed out waiting for PIO completion at GPIO %s", (int)pin);
                 return false;
             }
         }
@@ -240,7 +240,7 @@ class RP2040ParallelGroup {
             }
         }
         if (transmitWords(pin, 1, words)) {
-            FL_DBG_F("Sequential output for GPIO %s (%s bytes)",
+            FL_DBG("Sequential output for GPIO %s (%s bytes)",
                      (int)pin, led_data.size());
         }
     }
@@ -301,11 +301,11 @@ class RP2040ParallelGroup {
                 fl::transpose_2strips(strip_ptrs, group->transpose_buffer.get(), max_leds, bytes_per_led);
                 break;
             default:
-                FL_WARN_F("Invalid parallel group size: %s", (int)group->num_pins);
+                FL_WARN("Invalid parallel group size: %s", (int)group->num_pins);
                 return;
         }
 
-        FL_DBG_F("Transposed %s-pin group at GPIO %s (%s LEDs, %s bytes)", group->num_pins, (int)group->base_pin, max_leds, needed_buffer_size);
+        FL_DBG("Transposed %s-pin group at GPIO %s (%s LEDs, %s bytes)", group->num_pins, (int)group->base_pin, max_leds, needed_buffer_size);
 
         // transpose_* emits one byte per bit plane. RpPioTxPeripheral consumes
         // one 32-bit DMA word per plane, with the active lane bits in the MSB.
@@ -317,7 +317,7 @@ class RP2040ParallelGroup {
             words.push_back(plane << (32u - group->num_pins));
         }
         if (transmitWords(group->base_pin, group->num_pins, words)) {
-            FL_DBG_F("Parallel output for %s pins starting at GPIO %s (%s bytes)",
+            FL_DBG("Parallel output for %s pins starting at GPIO %s (%s bytes)",
                      group->num_pins, (int)group->base_pin, needed_buffer_size);
         }
     }

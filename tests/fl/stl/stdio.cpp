@@ -127,6 +127,17 @@ FL_TEST_CASE("fl::printf basic functionality") {
         fl::string expected = fl::string("50% complete");
         FL_REQUIRE_EQ(fl::strcmp(result.c_str(), expected.c_str()), 0);
     }
+
+    FL_SUBCASE("literal longer than the fixed output chunk") {
+        test_helper::clear_capture();
+        const char* expected =
+            "012345678901234567890123456789012345678901234567890123456789012"
+            "3456789";
+        fl::printf(expected);
+        const fl::string result = test_helper::get_capture();
+        FL_REQUIRE_EQ(result.size(), fl::strlen(expected));
+        FL_REQUIRE_EQ(fl::strcmp(result.c_str(), expected), 0);
+    }
     
     FL_SUBCASE("unsigned integers") {
         test_helper::clear_capture();
@@ -396,89 +407,89 @@ FL_TEST_CASE("fl::snprintf edge cases") {
     }
 }
 
-FL_TEST_CASE("fl::sprintf basic functionality") {
+FL_TEST_CASE("fl::snprintf basic functionality") {
     FL_SUBCASE("simple string formatting") {
         char buffer[100];
-        int result = fl::sprintf(buffer, "Hello, %s!", "world");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
         FL_REQUIRE_EQ(result, 13); // "Hello, world!" is 13 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Hello, world!"), 0);
     }
     
     FL_SUBCASE("integer formatting") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "Value: %d", 42);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Value: %d", 42);
         FL_REQUIRE_EQ(result, 9); // "Value: 42" is 9 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Value: 42"), 0);
     }
     
     FL_SUBCASE("multiple arguments") {
         char buffer[100];
-        int result = fl::sprintf(buffer, "Name: %s, Age: %d", "Alice", 25);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Name: %s, Age: %d", "Alice", 25);
         FL_REQUIRE_EQ(result, 20); // "Name: Alice, Age: 25" is 20 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Name: Alice, Age: 25"), 0);
     }
     
     FL_SUBCASE("floating point") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "Pi: %f", 3.14159f);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Pi: %f", 3.14159f);
         FL_REQUIRE_GT(result, 0);
         FL_REQUIRE(fl::strstr(buffer, "3.14") != nullptr);
     }
     
     FL_SUBCASE("floating point with precision") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "Pi: %.2f", 3.14159f);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Pi: %.2f", 3.14159f);
         FL_REQUIRE_EQ(result, 8); // "Pi: 3.14" is 8 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Pi: 3.14"), 0);
     }
     
     FL_SUBCASE("character formatting") {
         char buffer[20];
-        int result = fl::sprintf(buffer, "Letter: %c", 'A');
+        int result = fl::snprintf(buffer, sizeof(buffer), "Letter: %c", 'A');
         FL_REQUIRE_EQ(result, 9); // "Letter: A" is 9 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Letter: A"), 0);
     }
     
     FL_SUBCASE("hexadecimal formatting") {
         char buffer[20];
-        int result = fl::sprintf(buffer, "Hex: %x", 255);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Hex: %x", 255);
         FL_REQUIRE_EQ(result, 7); // "Hex: ff" is 7 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Hex: ff"), 0);
     }
     
     FL_SUBCASE("uppercase hexadecimal") {
         char buffer[20];
-        int result = fl::sprintf(buffer, "HEX: %X", 255);
+        int result = fl::snprintf(buffer, sizeof(buffer), "HEX: %X", 255);
         FL_REQUIRE_EQ(result, 7); // "HEX: FF" is 7 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "HEX: FF"), 0);
     }
     
     FL_SUBCASE("literal percent") {
         char buffer[20];
-        int result = fl::sprintf(buffer, "50%% complete");
+        int result = fl::snprintf(buffer, sizeof(buffer), "50%% complete");
         FL_REQUIRE_EQ(result, 12); // "50% complete" is 12 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "50% complete"), 0);
     }
     
     FL_SUBCASE("unsigned integers") {
         char buffer[30];
-        int result = fl::sprintf(buffer, "Unsigned: %u", 4294967295U);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Unsigned: %u", 4294967295U);
         FL_REQUIRE_EQ(result, 20); // "Unsigned: 4294967295" is 20 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Unsigned: 4294967295"), 0);
     }
 }
 
-FL_TEST_CASE("fl::sprintf buffer management") {
+FL_TEST_CASE("fl::snprintf buffer management") {
     FL_SUBCASE("exact buffer size") {
         char buffer[14]; // Exact size for "Hello, world!" + null terminator
-        int result = fl::sprintf(buffer, "Hello, %s!", "world");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
         FL_REQUIRE_EQ(result, 13); // Should return length written
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Hello, world!"), 0);
     }
     
     FL_SUBCASE("large buffer") {
         char buffer[100]; // Much larger than needed
-        int result = fl::sprintf(buffer, "Hello, %s!", "world");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
         FL_REQUIRE_EQ(result, 13); // Should return actual length written
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Hello, world!"), 0);
     }
@@ -486,7 +497,7 @@ FL_TEST_CASE("fl::sprintf buffer management") {
     
     FL_SUBCASE("very long string") {
         char buffer[100]; // Large enough buffer
-        int result = fl::sprintf(buffer, "This is a very long string that will fit in the buffer");
+        int result = fl::snprintf(buffer, sizeof(buffer), "This is a very long string that will fit in the buffer");
         const char* expected = "This is a very long string that will fit in the buffer";
         int expected_len = fl::strlen(expected);
         
@@ -496,7 +507,7 @@ FL_TEST_CASE("fl::sprintf buffer management") {
 
     FL_SUBCASE("overflow") {
         char buffer[10];
-        int result = fl::sprintf(buffer, "Hello, %s!", "world");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Hello, %s!", "world");
         FL_REQUIRE_EQ(result, 9); // Should return the number of characters actually written (excluding null terminator)
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Hello, wo"), 0); // Should be truncated to fit in buffer
         FL_REQUIRE_EQ(fl::string("Hello, wo"), buffer);
@@ -504,24 +515,24 @@ FL_TEST_CASE("fl::sprintf buffer management") {
     
 }
 
-FL_TEST_CASE("fl::sprintf edge cases") {
+FL_TEST_CASE("fl::snprintf edge cases") {
     FL_SUBCASE("empty format string") {
         char buffer[10];
-        int result = fl::sprintf(buffer, "");
+        int result = fl::snprintf(buffer, sizeof(buffer), "");
         FL_REQUIRE_EQ(result, 0);
         FL_REQUIRE_EQ(fl::strcmp(buffer, ""), 0);
     }
     
     FL_SUBCASE("no arguments") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "No placeholders here");
+        int result = fl::snprintf(buffer, sizeof(buffer), "No placeholders here");
         FL_REQUIRE_EQ(result, 20); // "No placeholders here" is 20 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "No placeholders here"), 0);
     }
     
     FL_SUBCASE("missing arguments") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "Value: %d");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Value: %d");
         FL_REQUIRE_GT(result, 0);
         FL_REQUIRE(fl::strstr(buffer, "<missing_arg>") != nullptr);
     }
@@ -529,54 +540,54 @@ FL_TEST_CASE("fl::sprintf edge cases") {
     FL_SUBCASE("extra arguments") {
         char buffer[50];
         // Extra arguments should be ignored
-        int result = fl::sprintf(buffer, "Value: %d", 42, 99);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Value: %d", 42, 99);
         FL_REQUIRE_EQ(result, 9); // "Value: 42" is 9 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Value: 42"), 0);
     }
     
     FL_SUBCASE("zero values") {
         char buffer[50];
-        int result = fl::sprintf(buffer, "Zero: %d, Hex: %x", 0, 0);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Zero: %d, Hex: %x", 0, 0);
         FL_REQUIRE_EQ(result, 15); // "Zero: 0, Hex: 0" is 15 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Zero: 0, Hex: 0"), 0);
     }
     
     FL_SUBCASE("negative integers") {
         char buffer[20];
-        int result = fl::sprintf(buffer, "Negative: %d", -42);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Negative: %d", -42);
         FL_REQUIRE_EQ(result, 13); // "Negative: -42" is 13 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Negative: -42"), 0);
     }
     
     FL_SUBCASE("large integers") {
         char buffer[30];
-        int result = fl::sprintf(buffer, "Large: %d", 2147483647);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Large: %d", 2147483647);
         FL_REQUIRE_EQ(result, 17); // "Large: 2147483647" is 17 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Large: 2147483647"), 0);
     }
 }
 
-FL_TEST_CASE("fl::sprintf comprehensive functionality") {
-    // These tests verify that sprintf works correctly with various buffer sizes
+FL_TEST_CASE("fl::snprintf comprehensive functionality") {
+    // These tests verify that snprintf works correctly with various buffer sizes
     // and formatting scenarios
     
     FL_SUBCASE("small string") {
         char buffer[10];
-        int result = fl::sprintf(buffer, "Test");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Test");
         FL_REQUIRE_EQ(result, 4); // "Test" is 4 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Test"), 0);
     }
     
     FL_SUBCASE("medium string with formatting") {
         char buffer[30];
-        int result = fl::sprintf(buffer, "Medium: %d", 123);
+        int result = fl::snprintf(buffer, sizeof(buffer), "Medium: %d", 123);
         FL_REQUIRE_EQ(result, 11); // "Medium: 123" is 11 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "Medium: 123"), 0);
     }
     
     FL_SUBCASE("large string with multiple arguments") {
         char buffer[200];
-        int result = fl::sprintf(buffer, "Large buffer test with number: %d and string: %s", 42, "hello");
+        int result = fl::snprintf(buffer, sizeof(buffer), "Large buffer test with number: %d and string: %s", 42, "hello");
         const char* expected = "Large buffer test with number: 42 and string: hello";
         int expected_len = fl::strlen(expected);
         
@@ -586,14 +597,14 @@ FL_TEST_CASE("fl::sprintf comprehensive functionality") {
     
     FL_SUBCASE("exact content length") {
         char buffer[10]; // Exactly "hello" + extra space + null terminator
-        int result = fl::sprintf(buffer, "hello");
+        int result = fl::snprintf(buffer, sizeof(buffer), "hello");
         FL_REQUIRE_EQ(result, 5); // "hello" is 5 characters
         FL_REQUIRE_EQ(fl::strcmp(buffer, "hello"), 0);
     }
     
     FL_SUBCASE("complex formatting") {
         char buffer[100];
-        int result = fl::sprintf(buffer, "Int: %d, Float: %.2f, Hex: %x, Char: %c", 123, 3.14159f, 255, 'A');
+        int result = fl::snprintf(buffer, sizeof(buffer), "Int: %d, Float: %.2f, Hex: %x, Char: %c", 123, 3.14159f, 255, 'A');
         FL_REQUIRE_GT(result, 0);
         FL_REQUIRE(fl::strstr(buffer, "Int: 123") != nullptr);
         FL_REQUIRE(fl::strstr(buffer, "Float: 3.14") != nullptr);
@@ -602,25 +613,25 @@ FL_TEST_CASE("fl::sprintf comprehensive functionality") {
     }
 }
 
-FL_TEST_CASE("fl::sprintf vs fl::snprintf comparison") {
-    // Test that sprintf behaves similarly to snprintf when buffer is large enough
+FL_TEST_CASE("fl::snprintf vs fl::snprintf comparison") {
+    // Test that snprintf behaves similarly to snprintf when buffer is large enough
     
     FL_SUBCASE("identical behavior for basic formatting") {
         char buffer1[50];
         char buffer2[50];
         
-        int result1 = fl::sprintf(buffer1, "Test: %d, %s", 42, "hello");
+        int result1 = fl::snprintf(buffer1, sizeof(buffer1), "Test: %d, %s", 42, "hello");
         int result2 = fl::snprintf(buffer2, 50, "Test: %d, %s", 42, "hello");
         
         FL_REQUIRE_EQ(result1, result2);
         FL_REQUIRE_EQ(fl::strcmp(buffer1, buffer2), 0);
     }
     
-    FL_SUBCASE("sprintf writes full string when buffer is large enough") {
+    FL_SUBCASE("snprintf writes full string when buffer is large enough") {
         char buffer1[100];
         char buffer2[100];
         
-        int result1 = fl::sprintf(buffer1, "This is a moderately long string");
+        int result1 = fl::snprintf(buffer1, sizeof(buffer1), "This is a moderately long string");
         int result2 = fl::snprintf(buffer2, 100, "This is a moderately long string");
         
         FL_REQUIRE_EQ(result1, result2);
@@ -631,7 +642,7 @@ FL_TEST_CASE("fl::sprintf vs fl::snprintf comparison") {
         char buffer1[100];
         char buffer2[100];
         
-        int result1 = fl::sprintf(buffer1, "Int: %d, Float: %.2f, Hex: %x, Char: %c", 123, 3.14159f, 255, 'A');
+        int result1 = fl::snprintf(buffer1, sizeof(buffer1), "Int: %d, Float: %.2f, Hex: %x, Char: %c", 123, 3.14159f, 255, 'A');
         int result2 = fl::snprintf(buffer2, 100, "Int: %d, Float: %.2f, Hex: %x, Char: %c", 123, 3.14159f, 255, 'A');
         
         FL_REQUIRE_EQ(result1, result2);
@@ -1314,9 +1325,9 @@ FL_TEST_CASE("fl::snprintf {} respects buffer boundaries") {
         FL_CHECK(written == 0);
     }
 
-    FL_SUBCASE("fl::sprintf deduces size and truncates safely") {
+    FL_SUBCASE("fl::snprintf deduces size and truncates safely") {
         char buf[10];
-        fl::sprintf(buf, "abc={}", 123456789);
+        fl::snprintf(buf, sizeof(buf), "abc={}", 123456789);
         FL_CHECK(fl::strlen(buf) == 9);
         FL_CHECK(buf[9] == '\0');
         FL_CHECK(fl::string(buf) == "abc=12345");

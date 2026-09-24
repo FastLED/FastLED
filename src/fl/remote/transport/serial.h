@@ -5,7 +5,7 @@
 #pragma once
 
 #include "fl/stl/json.h"
-#include "fl/log/log.h"  // IWYU pragma: keep -- FL_WARN_F
+#include "fl/log/log.h"  // IWYU pragma: keep -- FL_WARN
 #include "fl/system/delay.h"
 #include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
@@ -169,7 +169,7 @@ createSerialRequestSource(const char* prefix = "") {
             // so a 64-byte line can fall under the threshold and stay silent,
             // and the reported count would understate what was received.
             if (line->size() >= kDroppedRequestWarnBytes) {
-                FL_WARN_F("[RPC] discarded a %u byte line that does not begin "
+                FL_WARN("[RPC] discarded a %u byte line that does not begin "
                           "with '{'; a request that arrived truncated looks "
                           "exactly like this",
                           static_cast<unsigned>(line->size()));

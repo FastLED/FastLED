@@ -33,7 +33,7 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG_F("STM32: Platform initialization starting");
+    FL_DBG("STM32: Platform initialization starting");
 
     // Trigger weak linkage initialization for SPI hardware controllers
     // This ensures the static vectors are populated early for consistent behavior
@@ -43,7 +43,7 @@ void init() {
     (void)fl::SpiHw8::getAll();
 
     initialized = true;
-    FL_DBG_F("STM32: Platform initialization complete");
+    FL_DBG("STM32: Platform initialization complete");
 }
 
 } // namespace platforms

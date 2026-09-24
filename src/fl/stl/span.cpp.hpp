@@ -8,7 +8,7 @@ namespace fl {
 namespace detail {
 
 void span_invalid_pointer_range() FL_NO_EXCEPT {
-    FL_ERROR_F("fl::span pointer range has end before begin");
+    FL_ERROR("fl::span pointer range has end before begin");
 }
 
 } // namespace detail

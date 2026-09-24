@@ -187,7 +187,7 @@ struct ChannelOptions {
             mTemperature != UncorrectedTemperature ||
             mGamma.has_value();
         if (!had_profile && clearing_legacy && !mWarnedLegacyCleared) {
-            FL_WARN_F("Color profile clears legacy correction/temperature/gamma");
+            FL_WARN("Color profile clears legacy correction/temperature/gamma");
             ChannelEvents::instance().onColorProfileWarning(
                 ColorProfileEvent{-1, {}, ColorProfileWarning::LegacyClearedByProfile});
             mWarnedLegacyCleared = true;
@@ -305,7 +305,7 @@ private:
     void warnProfileCleared() FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
         if (hasColorProfile() && !mWarnedProfileCleared) {
-            FL_WARN_F("Legacy correction/temperature clears color profile");
+            FL_WARN("Legacy correction/temperature clears color profile");
             notifyColorProfileClearedByLegacy();
             mWarnedProfileCleared = true;
         }

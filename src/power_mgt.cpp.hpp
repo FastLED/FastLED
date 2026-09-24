@@ -320,7 +320,7 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& r
     // there is nothing to charge the fourth diode at.
     if (!rgbw.active() || white_mW == 0) {
         if (rgbw.active()) {
-            FL_WARN_F_ONCE("power: controller is in RGBW mode but the power model "
+            FL_WARN_ONCE("power: controller is in RGBW mode but the power model "
                          "declares no white emitter, so the budget covers three "
                          "of its four diodes. Call "
                          "FastLED.setPowerModel(PowerModelRGBW(...)) to fix it.");

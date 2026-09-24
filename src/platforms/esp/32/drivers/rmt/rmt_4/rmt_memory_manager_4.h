@@ -100,7 +100,7 @@ class RmtMemoryManager4 {
                        size_t &out_words) FL_NO_EXCEPT {
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && alloc.is_tx) {
-                FL_WARN_F("RmtMemoryManager4: TX channel %s already allocated",
+                FL_WARN("RmtMemoryManager4: TX channel %s already allocated",
                           channel_id);
                 return false;
             }
@@ -114,7 +114,7 @@ class RmtMemoryManager4 {
                 detail::kRmt4TxIdleWords <= availableWords()) {
                 desired = detail::kRmt4TxIdleWords; // Graceful demotion.
             } else {
-                FL_WARN_F("RmtMemoryManager4: TX allocation refused, pool "
+                FL_WARN("RmtMemoryManager4: TX allocation refused, pool "
                           "exhausted (want %s, have %s / %s)",
                           desired, availableWords(), mPoolWords);
                 return false;
@@ -135,17 +135,17 @@ class RmtMemoryManager4 {
                        size_t &out_words) FL_NO_EXCEPT {
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && !alloc.is_tx) {
-                FL_WARN_F("RmtMemoryManager4: RX channel %s already allocated",
+                FL_WARN("RmtMemoryManager4: RX channel %s already allocated",
                           channel_id);
                 return false;
             }
         }
         if (symbols == 0) {
-            FL_WARN_F("RmtMemoryManager4: RX allocation refused, zero symbols");
+            FL_WARN("RmtMemoryManager4: RX allocation refused, zero symbols");
             return false;
         }
         if (symbols > availableWords()) {
-            FL_WARN_F(
+            FL_WARN(
                 "RmtMemoryManager4: RX allocation refused, pool exhausted "
                 "(want %s, have %s / %s)",
                 symbols, availableWords(), mPoolWords);

@@ -89,9 +89,9 @@ public:
         // This may indicate missing platform-specific optimizations
         static bool warned = false;  // okay static in header
         if (!warned) {
-            FL_WARN_F("Using GENERIC fallback clockless controller - platform-specific driver not available!");
-            FL_WARN_F("  This may result in reduced performance or timing issues.");
-            FL_WARN_F("  Expected platforms (ESP32/Teensy/etc) should use hardware drivers.");
+            FL_WARN("Using GENERIC fallback clockless controller - platform-specific driver not available!");
+            FL_WARN("  This may result in reduced performance or timing issues.");
+            FL_WARN("  Expected platforms (ESP32/Teensy/etc) should use hardware drivers.");
             warned = true;
         }
 
@@ -118,7 +118,7 @@ protected:
         fl::vector<u8> encoded;
         if (pixels.mLen > 0 &&
             !encodePixelData(pixels, this->getRgbw(), &encoded)) {
-            FL_WARN_F("GENERIC clockless controller could not allocate its "
+            FL_WARN("GENERIC clockless controller could not allocate its "
                       "encoded frame; output was skipped");
             return;
         }

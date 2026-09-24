@@ -34,7 +34,7 @@ void initSpiHardware() {
     }
     initialized = true;
 
-    FL_DBG_F("SAMD51: No validated multi-lane SPI hardware to register");
+    FL_DBG("SAMD51: No validated multi-lane SPI hardware to register");
 
     // SPIQuadSAMD51 uses the flash-oriented QSPI peripheral. QSPI quad mode
     // serializes each byte across four data pins; it does not transmit one bit

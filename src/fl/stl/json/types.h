@@ -169,7 +169,7 @@ struct int_conversion_visitor {
         const i64 min_val = static_cast<i64>((fl::numeric_limits<Target>::min)());
         const i64 max_val = static_cast<i64>((fl::numeric_limits<Target>::max)());
         if (value < min_val || value > max_val) {
-            FL_WARN_F("JSON integer overflow: value %s does not fit in target type (range: %s to %s), truncating", value, min_val, max_val);
+            FL_WARN("JSON integer overflow: value %s does not fit in target type (range: %s to %s), truncating", value, min_val, max_val);
             return true;
         }
         return false;
@@ -180,7 +180,7 @@ struct int_conversion_visitor {
     is_i64_out_of_range(const i64& value) FL_NO_EXCEPT {
         const u64 max_val = static_cast<u64>((fl::numeric_limits<Target>::max)());
         if (value < 0 || static_cast<u64>(value) > max_val) {
-            FL_WARN_F("JSON integer overflow: value %s does not fit in target type (range: 0 to %s), truncating", value, max_val);
+            FL_WARN("JSON integer overflow: value %s does not fit in target type (range: 0 to %s), truncating", value, max_val);
             return true;
         }
         return false;

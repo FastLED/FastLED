@@ -680,7 +680,7 @@ struct PixelController {
         fl::u8 *ww_out, fl::u8 *wc_out) {
 #ifdef FL_IS_AVR
         FL_UNUSED(rgbww);
-        FL_WARN_F_ONCE("RGBWW colorimetric is not supported on AVR -- the warm "
+        FL_WARN_ONCE("RGBWW colorimetric is not supported on AVR -- the warm "
                      "and cool white channels will be black. Use an ESP32 / "
                      "Teensy / RP2040 target for full RGBWW support.");
         *r_out = loadAndScaleChannel(0);
@@ -752,7 +752,7 @@ struct PixelController {
         // Surface this with a FL_WARN_ONCE so the silent dropout is visible
         // when debugging â€” a user configuring RGBWW on an AVR target almost
         // certainly didn't expect their warm/cool W channels to be inert.
-        FL_WARN_F_ONCE("RGBWW colorimetric is not supported on AVR â€” the warm "
+        FL_WARN_ONCE("RGBWW colorimetric is not supported on AVR â€” the warm "
                      "and cool white channels will be black. Use an ESP32 / "
                      "Teensy / RP2040 target for full RGBWW support.");
         fl::u8 r_pre = loadAndScale0();

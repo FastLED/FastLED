@@ -78,12 +78,12 @@ bool ensureDriver() FL_NO_EXCEPT {
     WifiState& state = wifiState();
     esp_err_t err = esp_netif_init();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN_F("wifi: esp_netif_init failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: esp_netif_init failed: %s", esp_err_to_name(err));
         return false;
     }
     err = esp_event_loop_create_default();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN_F("wifi: event loop create failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: event loop create failed: %s", esp_err_to_name(err));
         return false;
     }
     if (!state.handlers_registered) {
@@ -93,7 +93,7 @@ bool ensureDriver() FL_NO_EXCEPT {
             esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
                                                 &wifiEventHandler, nullptr,
                                                 nullptr) != ESP_OK) {
-            FL_WARN_F("wifi: event handler registration failed");
+            FL_WARN("wifi: event handler registration failed");
             return false;
         }
         state.handlers_registered = true;
@@ -101,7 +101,7 @@ bool ensureDriver() FL_NO_EXCEPT {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     err = esp_wifi_init(&cfg);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN_F("wifi: esp_wifi_init failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: esp_wifi_init failed: %s", esp_err_to_name(err));
         return false;
     }
     return true;
@@ -119,7 +119,7 @@ bool applyMode() FL_NO_EXCEPT {
     }
     esp_err_t err = esp_wifi_set_mode(mode);
     if (err != ESP_OK) {
-        FL_WARN_F("wifi: set_mode failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: set_mode failed: %s", esp_err_to_name(err));
         return false;
     }
     return true;
@@ -152,7 +152,7 @@ bool connectSta(const char *ssid, const char *password) FL_NO_EXCEPT {
     if (state.sta_netif == nullptr) {
         state.sta_netif = esp_netif_create_default_wifi_sta();
         if (state.sta_netif == nullptr) {
-            FL_WARN_F("wifi: STA netif creation failed");
+            FL_WARN("wifi: STA netif creation failed");
             return false;
         }
     }
@@ -174,12 +174,12 @@ bool connectSta(const char *ssid, const char *password) FL_NO_EXCEPT {
     }
     esp_err_t err = esp_wifi_set_config(WIFI_IF_STA, &cfg);
     if (err != ESP_OK) {
-        FL_WARN_F("wifi: STA set_config failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: STA set_config failed: %s", esp_err_to_name(err));
         return false;
     }
     err = esp_wifi_start();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN_F("wifi: start failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: start failed: %s", esp_err_to_name(err));
         return false;
     }
     if (state.driver_started) {
@@ -202,7 +202,7 @@ bool startAp(const char *ssid, const char *password, u8 channel) FL_NO_EXCEPT {
     if (state.ap_netif == nullptr) {
         state.ap_netif = esp_netif_create_default_wifi_ap();
         if (state.ap_netif == nullptr) {
-            FL_WARN_F("wifi: AP netif creation failed");
+            FL_WARN("wifi: AP netif creation failed");
             return false;
         }
     }
@@ -229,13 +229,13 @@ bool startAp(const char *ssid, const char *password, u8 channel) FL_NO_EXCEPT {
     }
     esp_err_t err = esp_wifi_set_config(WIFI_IF_AP, &cfg);
     if (err != ESP_OK) {
-        FL_WARN_F("wifi: AP set_config failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: AP set_config failed: %s", esp_err_to_name(err));
         state.ap_active = false;
         return false;
     }
     err = esp_wifi_start();
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        FL_WARN_F("wifi: start failed: %s", esp_err_to_name(err));
+        FL_WARN("wifi: start failed: %s", esp_err_to_name(err));
         state.ap_active = false;
         return false;
     }

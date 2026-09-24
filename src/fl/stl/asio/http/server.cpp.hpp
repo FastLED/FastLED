@@ -981,7 +981,7 @@ bool Server::start(int port) {
     config.server_port = static_cast<u16>(port);
     if (mRoutes.size() > (fl::numeric_limits<u16>::max)()) {
         mLastError = "Too many HTTP routes";
-        FL_WARN_F("%s", "[HTTP] Too many routes for ESP-IDF HTTP server");
+        FL_WARN("%s", "[HTTP] Too many routes for ESP-IDF HTTP server");
         task::Executor::instance().unregister_runner(mAsyncRunner.get());
         mAsyncRunner.reset();
         return false;
@@ -1001,7 +1001,7 @@ bool Server::start(int port) {
     esp_err_t err = httpd_start(&s_esp_httpd, &config);
     if (err != ESP_OK) {
         mLastError = "httpd_start failed";
-        FL_WARN_F("[HTTP] httpd_start failed: %s", esp_err_to_name(err));
+        FL_WARN("[HTTP] httpd_start failed: %s", esp_err_to_name(err));
         task::Executor::instance().unregister_runner(mAsyncRunner.get());
         mAsyncRunner.reset();
         return false;
@@ -1020,7 +1020,7 @@ bool Server::start(int port) {
         esp_err_t reg_err = httpd_register_uri_handler(s_esp_httpd, &uri_handler);
         if (reg_err != ESP_OK) {
             mLastError = "Failed to register route " + mRoutes[i].path;
-            FL_WARN_F("[HTTP] Failed to register route %s: %s",
+            FL_WARN("[HTTP] Failed to register route %s: %s",
                       mRoutes[i].path.c_str(), esp_err_to_name(reg_err));
             httpd_stop(s_esp_httpd);
             s_esp_httpd = nullptr;
@@ -1036,7 +1036,7 @@ bool Server::start(int port) {
     mRunning = true;
     mLastError.clear();
 
-    FL_WARN_F("[HTTP] Server started on port %s", port);
+    FL_WARN("[HTTP] Server started on port %s", port);
     return true;
 }
 
@@ -1062,7 +1062,7 @@ void Server::stop() {
     mRoutes.clear();
 
     mRunning = false;
-    FL_WARN_F("[HTTP] Server stopped");
+    FL_WARN("[HTTP] Server stopped");
 }
 
 void Server::route(const string& method, const string& path, RouteHandler handler) {

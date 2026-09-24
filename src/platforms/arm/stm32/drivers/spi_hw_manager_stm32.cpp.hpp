@@ -45,7 +45,7 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lowest (2-lane dual-SPI)
 /// @brief Register STM32 SpiHw2 instances if available
 static void addSpiHw2IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_2
-    FL_DBG_F("STM32: Registering SpiHw2 instances");
+    FL_DBG("STM32: Registering SpiHw2 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
     static auto controller0 = fl::make_shared<SPIDualSTM32>(0, "DSPI0");
@@ -54,17 +54,17 @@ static void addSpiHw2IfPossible() {
     SpiHw2::registerInstance(controller0);
     SpiHw2::registerInstance(controller1);
 
-    FL_DBG_F("STM32: SpiHw2 instances registered");
+    FL_DBG("STM32: SpiHw2 instances registered");
 #else
     // No-op if FL_STM32_HAS_SPI_HW_2 not defined
-    FL_DBG_F("STM32: SpiHw2 not available (stream-based DMA required)");
+    FL_DBG("STM32: SpiHw2 not available (stream-based DMA required)");
 #endif
 }
 
 /// @brief Register STM32 SpiHw4 instances if available
 static void addSpiHw4IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_4
-    FL_DBG_F("STM32: Registering SpiHw4 instances");
+    FL_DBG("STM32: Registering SpiHw4 instances");
 
     // Create logical SPI buses based on available Timer/DMA resources
     static auto controller0 = fl::make_shared<SPIQuadSTM32>(0, "QSPI0");
@@ -73,17 +73,17 @@ static void addSpiHw4IfPossible() {
     SpiHw4::registerInstance(controller0);
     SpiHw4::registerInstance(controller1);
 
-    FL_DBG_F("STM32: SpiHw4 instances registered");
+    FL_DBG("STM32: SpiHw4 instances registered");
 #else
     // No-op if FL_STM32_HAS_SPI_HW_4 not defined
-    FL_DBG_F("STM32: SpiHw4 not available (stream-based DMA required)");
+    FL_DBG("STM32: SpiHw4 not available (stream-based DMA required)");
 #endif
 }
 
 /// @brief Register STM32 SpiHw8 instances if available
 static void addSpiHw8IfPossible() {
 #ifdef FL_STM32_HAS_SPI_HW_8
-    FL_DBG_F("STM32: Registering SpiHw8 instances");
+    FL_DBG("STM32: Registering SpiHw8 instances");
 
     // Create 2 logical octal-SPI buses
     static auto controller0 = fl::make_shared<SPIOctalSTM32>(0, "OSPI0");
@@ -92,10 +92,10 @@ static void addSpiHw8IfPossible() {
     SpiHw8::registerInstance(controller0);
     SpiHw8::registerInstance(controller1);
 
-    FL_DBG_F("STM32: SpiHw8 instances registered");
+    FL_DBG("STM32: SpiHw8 instances registered");
 #else
     // No-op if FL_STM32_HAS_SPI_HW_8 not defined
-    FL_DBG_F("STM32: SpiHw8 not available (stream-based DMA required)");
+    FL_DBG("STM32: SpiHw8 not available (stream-based DMA required)");
 #endif
 }
 
@@ -125,14 +125,14 @@ namespace platforms {
 /// - STM32F1/G4/U5: None (channel-based DMA not yet implemented)
 #if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
 void initSpiHardware() {
-    FL_DBG_F("STM32: Initializing SPI hardware");
+    FL_DBG("STM32: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
     detail::addSpiHw8IfPossible();  // Priority 8
     detail::addSpiHw4IfPossible();  // Priority 7
     detail::addSpiHw2IfPossible();  // Priority 6
 
-    FL_DBG_F("STM32: SPI hardware initialized");
+    FL_DBG("STM32: SPI hardware initialized");
 }
 #else
 // Stub implementation for STM32 platforms without hardware SPI support

@@ -34,7 +34,7 @@ ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral,
       mUartNum(uart_num),
       mCurrentGroupIndex(0) {
     if (!mPeripheral) {
-        FL_WARN_F("UART: Null peripheral pointer in constructor");
+        FL_WARN("UART: Null peripheral pointer in constructor");
     }
 }
 
@@ -235,16 +235,16 @@ const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& tim
 void ChannelEngineUART::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) FL_NO_EXCEPT {
 
-    FL_DBG_F("UART: beginTransmission() called with %s channel(s)", channelData.size());
+    FL_DBG("UART: beginTransmission() called with %s channel(s)", channelData.size());
 
     if (channelData.size() == 0) {
-        FL_DBG_F("UART: No channels to transmit (size==0)");
+        FL_DBG("UART: No channels to transmit (size==0)");
         return;
     }
 
     // UART is single-lane only - show() guarantees single channel per transmission
     if (channelData.size() != 1) {
-        FL_WARN_F("UART: Expected exactly 1 channel, got %s (internal error)", channelData.size());
+        FL_WARN("UART: Expected exactly 1 channel, got %s (internal error)", channelData.size());
         return;
     }
 
@@ -253,7 +253,7 @@ void ChannelEngineUART::beginTransmission(
     const ChipsetTimingConfig& timing = channel->getTiming();
     size_t dataSize = channel->getSize();
 
-    FL_DBG_F("UART: Channel pin=%s, dataSize=%s", pin, dataSize);
+    FL_DBG("UART: Channel pin=%s, dataSize=%s", pin, dataSize);
 
     if (dataSize == 0) {
         return;
@@ -265,7 +265,7 @@ void ChannelEngineUART::beginTransmission(
     // the UART word length.
     const Wave10Lut& lut = getOrBuildLut(timing);
     if (lut.pulses_per_bit == 0) {
-        FL_WARN_F("UART: timing not representable by any wave geometry");
+        FL_WARN("UART: timing not representable by any wave geometry");
         return;
     }
     const u32 required_baud = lut.baudRate(timing);
@@ -276,12 +276,12 @@ void ChannelEngineUART::beginTransmission(
         mCurrentDataBits != required_data_bits) {
         if (mInitialized) {
             // Reinitialize with new baud rate / word length
-            FL_DBG_F("UART: Reinitializing peripheral (baud change: %s -> %s)", mCurrentBaudRate, required_baud);
+            FL_DBG("UART: Reinitializing peripheral (baud change: %s -> %s)", mCurrentBaudRate, required_baud);
             mPeripheral->deinitialize();
             mInitialized = false;
         }
 
-        FL_DBG_F("UART: Initializing peripheral with baud=%s, pin=%s", required_baud, pin);
+        FL_DBG("UART: Initializing peripheral with baud=%s, pin=%s", required_baud, pin);
 
         UartPeripheralConfig config(
             required_baud,      // mBaudRate (derived from timing + geometry)
@@ -295,11 +295,11 @@ void ChannelEngineUART::beginTransmission(
         );
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN_F("UART: Peripheral initialization failed");
+            FL_WARN("UART: Peripheral initialization failed");
             return;
         }
 
-        FL_DBG_F("UART: Peripheral initialized successfully");
+        FL_DBG("UART: Peripheral initialized successfully");
         mInitialized = true;
         mCurrentBaudRate = required_baud;
         mCurrentDataBits = required_data_bits;
@@ -319,21 +319,21 @@ void ChannelEngineUART::beginTransmission(
         mEncodedBuffer.size(),
         lut);
 
-    FL_DBG_F("UART: Encoded %s bytes from %s LED bytes", encoded_bytes, dataSize);
+    FL_DBG("UART: Encoded %s bytes from %s LED bytes", encoded_bytes, dataSize);
 
     if (encoded_bytes == 0) {
-        FL_WARN_F("UART: Encoding failed (required=%s bytes)", required_encoded_size);
+        FL_WARN("UART: Encoding failed (required=%s bytes)", required_encoded_size);
         return;
     }
 
     // Submit encoded data to UART peripheral
-    FL_DBG_F("UART: Writing %s bytes to peripheral", encoded_bytes);
+    FL_DBG("UART: Writing %s bytes to peripheral", encoded_bytes);
     if (!mPeripheral->writeBytes(mEncodedBuffer.data(), encoded_bytes)) {
-        FL_WARN_F("UART: Write failed (size=%s bytes)", encoded_bytes);
+        FL_WARN("UART: Write failed (size=%s bytes)", encoded_bytes);
         return;
     }
 
-    FL_DBG_F("UART: Write successful, transmission started (non-blocking DMA)");
+    FL_DBG("UART: Write successful, transmission started (non-blocking DMA)");
 }
 
 void ChannelEngineUART::prepareScratchBuffer(

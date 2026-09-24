@@ -2008,7 +2008,7 @@ extern CFastLED FastLED;
 
 #include "fl/math/math.h"  // fl::clamp, fl::map_range, fl::min, fl::max, etc.
 
-#include "fl/log/log.h"  // FL_WARN_F("time now: %s", millis()), FL_WARN_F_IF(...), FL_PRINT_F(...), FL_LOG_*() category-specific logging
+#include "fl/log/log.h"  // FL_WARN("time now: %s", millis()), FL_WARN_IF(...), FL_PRINT(...), FL_LOG_*() category-specific logging
 #include "fl/system/serial.h"  // Arduino-compatible Serial API: fl::Serial.print(), fl::Serial.read(), etc.
 #include "fl/stl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/stl/sstream.h"  // fl::sstream for string stream operations

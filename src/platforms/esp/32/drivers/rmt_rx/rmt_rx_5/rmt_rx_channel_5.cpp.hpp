@@ -157,11 +157,11 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Reset pulse should have level=0 (low) for the long duration
     // Check duration0 with level0=0, or duration1 with level1=0
     if (rmt_sym.level0 == 0 && duration0_ns >= reset_min_ns) {
-        FL_WARN_F("isResetPulse DETECTED: duration0=%sns (level0=0), reset_min=%sns (%sus)", duration0_ns, reset_min_ns, timing.reset_min_us);
+        FL_WARN("isResetPulse DETECTED: duration0=%sns (level0=0), reset_min=%sns (%sus)", duration0_ns, reset_min_ns, timing.reset_min_us);
         return true;
     }
     if (rmt_sym.level1 == 0 && duration1_ns >= reset_min_ns) {
-        FL_WARN_F("isResetPulse DETECTED: duration1=%sns (level1=0), reset_min=%sns (%sus)", duration1_ns, reset_min_ns, timing.reset_min_us);
+        FL_WARN("isResetPulse DETECTED: duration1=%sns (level1=0), reset_min=%sns (%sus)", duration1_ns, reset_min_ns, timing.reset_min_us);
         return true;
     }
 
@@ -206,14 +206,14 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check duration1 (most common case - gap at end of bit sequence)
     if (rmt_sym.level1 == 0 && duration1_ns > timing.t0l_max_ns &&
         duration1_ns <= timing.gap_tolerance_ns) {
-        FL_WARN_F("isGapPulse DETECTED: duration1=%sns (level1=0), t0l_max=%sns, gap_tolerance=%sns", duration1_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
+        FL_WARN("isGapPulse DETECTED: duration1=%sns (level1=0), t0l_max=%sns, gap_tolerance=%sns", duration1_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
         return true;
     }
 
     // Check duration0 (less common - gap at start)
     if (rmt_sym.level0 == 0 && duration0_ns > timing.t0l_max_ns &&
         duration0_ns <= timing.gap_tolerance_ns) {
-        FL_WARN_F("isGapPulse DETECTED: duration0=%sns (level0=0), t0l_max=%sns, gap_tolerance=%sns", duration0_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
+        FL_WARN("isGapPulse DETECTED: duration0=%sns (level0=0), t0l_max=%sns, gap_tolerance=%sns", duration0_ns, timing.t0l_max_ns, timing.gap_tolerance_ns);
         return true;
     }
 
@@ -243,7 +243,7 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     // Check if levels match expected pattern (high=1, low=0)
     if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
         // Unexpected level pattern - possibly inverted signal or noise
-        FL_WARN_F("decodeBit REJECTED: Invalid level pattern (level0=%s, level1=%s) - expected level0=1, level1=0", static_cast<int>(rmt_sym.level0), static_cast<int>(rmt_sym.level1));
+        FL_WARN("decodeBit REJECTED: Invalid level pattern (level0=%s, level1=%s) - expected level0=1, level1=0", static_cast<int>(rmt_sym.level0), static_cast<int>(rmt_sym.level1));
         return -1;
     }
 
@@ -268,9 +268,9 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     }
 
     // Timing doesn't match either pattern - log detailed rejection reason
-    FL_WARN_F("decodeBit REJECTED: Timing mismatch (high=%sns, low=%sns)", high_ns, low_ns);
-    FL_WARN_F("  Bit0 thresholds: t0h=[%s-%s]ns (match=%s), t0l=[%s-%s]ns (match=%s)", timing.t0h_min_ns, timing.t0h_max_ns, t0h_match, timing.t0l_min_ns, timing.t0l_max_ns, t0l_match);
-    FL_WARN_F("  Bit1 thresholds: t1h=[%s-%s]ns (match=%s), t1l=[%s-%s]ns (match=%s)", timing.t1h_min_ns, timing.t1h_max_ns, t1h_match, timing.t1l_min_ns, timing.t1l_max_ns, t1l_match);
+    FL_WARN("decodeBit REJECTED: Timing mismatch (high=%sns, low=%sns)", high_ns, low_ns);
+    FL_WARN("  Bit0 thresholds: t0h=[%s-%s]ns (match=%s), t0l=[%s-%s]ns (match=%s)", timing.t0h_min_ns, timing.t0h_max_ns, t0h_match, timing.t0l_min_ns, timing.t0l_max_ns, t0l_match);
+    FL_WARN("  Bit1 thresholds: t1h=[%s-%s]ns (match=%s), t1l=[%s-%s]ns (match=%s)", timing.t1h_min_ns, timing.t1h_max_ns, t1h_match, timing.t1l_min_ns, timing.t1l_max_ns, t1l_match);
 
     return -1; // Invalid
 }
@@ -290,13 +290,13 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
                  fl::span<const RmtSymbol> symbols, fl::span<u8> bytes_out,
                  bool start_low = true) {
     if (symbols.empty()) {
-        FL_WARN_F("decodeRmtSymbols: symbols span is empty");
+        FL_WARN("decodeRmtSymbols: symbols span is empty");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_out.empty()) {
-        FL_WARN_F("decodeRmtSymbols: bytes_out span is empty");
+        FL_WARN("decodeRmtSymbols: bytes_out span is empty");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);
     }
@@ -382,7 +382,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 
             // Flush partial byte if needed
             if (bit_index != 0) {
-                FL_WARN_F("decodeRmtSymbols: partial byte at reset (bit_index=%s), flushing", bit_index);
+                FL_WARN("decodeRmtSymbols: partial byte at reset (bit_index=%s), flushing", bit_index);
                 // Shift remaining bits to MSB position
                 current_byte <<= (8 - bit_index);
 
@@ -483,7 +483,7 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 #endif
             } else {
                 // Buffer full, stop decoding
-                FL_WARN_F("decodeRmtSymbols: output buffer overflow at byte %s", bytes_decoded);
+                FL_WARN("decodeRmtSymbols: output buffer overflow at byte %s", bytes_decoded);
                 buffer_overflow = true;
                 break;
             }
@@ -517,13 +517,13 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
 
     // Determine error type and return Result
     if (buffer_overflow) {
-        FL_WARN_F("decodeRmtSymbols: buffer overflow - output buffer too small");
+        FL_WARN("decodeRmtSymbols: buffer overflow - output buffer too small");
         return fl::result<u32, DecodeError>::failure(
             DecodeError::BUFFER_OVERFLOW);
     }
 
     if (error_count >= (symbols.size() / 10)) {
-        FL_WARN_F("decodeRmtSymbols: high error rate: %s/%s symbols (%s%)", error_count, symbols.size(), (100 * error_count / symbols.size()));
+        FL_WARN("decodeRmtSymbols: high error rate: %s/%s symbols (%s%)", error_count, symbols.size(), (100 * error_count / symbols.size()));
         return fl::result<u32, DecodeError>::failure(
             DecodeError::HIGH_ERROR_RATE);
     }
@@ -654,7 +654,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
                       << static_cast<int>(mMemoryChannelId) << ")");
         } else {
-            FL_WARN_F("RMT RX failed to pre-register with memory manager (channel_id=%s)", static_cast<int>(mMemoryChannelId));
+            FL_WARN("RMT RX failed to pre-register with memory manager (channel_id=%s)", static_cast<int>(mMemoryChannelId));
         }
     }
 
@@ -703,7 +703,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // DMA). DMA only extends the capture window; a shorter window
         // beats no capture, so retry once in non-DMA mode.
         if (config.use_dma) {
-            FL_WARN_F("[RMT RX] begin() failed in DMA mode — retrying without DMA");
+            FL_WARN("[RMT RX] begin() failed in DMA mode — retrying without DMA");
             RxConfig retry = config;
             retry.use_dma = false;
             return beginImpl(retry);
@@ -723,7 +723,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         bool use_dma_req = config.use_dma;
 #if !SOC_RMT_SUPPORT_DMA
         if (use_dma_req) {
-            FL_WARN_F("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
+            FL_WARN("[RMT RX] DMA requested but unsupported on this chip — using non-DMA mode");
             use_dma_req = false;
         }
 #endif
@@ -738,7 +738,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         const bool io_loop_back_changed =
             config.io_loop_back != mIoLoopBack;
         if (mChannel && (use_dma_changed || io_loop_back_changed)) {
-            FL_WARN_F(
+            FL_WARN(
                 "[RMT RX] channel flags changed "
                 "(use_dma %s -> %s, io_loop_back %s -> %s) - rebuilding",
                 (mUseDma ? "true" : "false"),
@@ -770,7 +770,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // First-time initialization - extract hardware parameters from
             // config
             if (config.buffer_size == 0) {
-                FL_WARN_F("RX begin: Invalid buffer_size in config (buffer_size=0)");
+                FL_WARN("RX begin: Invalid buffer_size in config (buffer_size=0)");
                 return false;
             }
 
@@ -892,7 +892,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // rmt_new_rx_channel() time; toggling later requires rebuilding.
         rx_config.flags.with_dma = mUseDma ? 1 : 0;
         if (mUseDma) {
-            FL_WARN_F("[RMT RX] DMA streaming mode requested on GPIO %s (mem_block_symbols=%s)", static_cast<int>(mPin), rx_config.mem_block_symbols);
+            FL_WARN("[RMT RX] DMA streaming mode requested on GPIO %s (mem_block_symbols=%s)", static_cast<int>(mPin), rx_config.mem_block_symbols);
         }
         // Internal loopback configuration:
         // When io_loop_back=true, RX receives from TX output internally (same GPIO).
@@ -904,7 +904,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.flags.io_loop_back = mIoLoopBack ? 1 : 0;
 #endif
         if (mIoLoopBack) {
-            FL_WARN_F("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO %s", static_cast<int>(mPin));
+            FL_WARN("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO %s", static_cast<int>(mPin));
         }
 
         // Note: RX channel is already registered with RmtMemoryManager in constructor
@@ -912,7 +912,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // The registration happens early so that TX channels disable DMA when RX is active
         // (ESP32-S3 has shared DMA channel between TX and RX).
         if (!mMemoryRegistered) {
-            FL_WARN_F("RMT RX was not pre-registered in constructor - registering now");
+            FL_WARN("RMT RX was not pre-registered in constructor - registering now");
             auto &memMgr = RmtMemoryManager::instance();
             mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
             // Pass use_dma=true when DMA mode is on so the memory manager
@@ -924,7 +924,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             if (!memMgr.tryAllocateRx(mMemoryChannelId,
                                        mUseDma ? rx_config.mem_block_symbols : 64,
                                        mUseDma, rx_alloc_words)) {
-                FL_WARN_F("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
+                FL_WARN("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
                 return false;
             }
             mMemoryRegistered = true;
@@ -947,11 +947,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 // kNonDmaRxSymbols.
             } else if (memMgr.tryAllocateRx(mMemoryChannelId, 64, false,
                                              rx_alloc_words)) {
-                FL_WARN_F("[RMT RX] %s-symbol claim unavailable — falling back to 64-symbol capture window",
+                FL_WARN("[RMT RX] %s-symbol claim unavailable — falling back to 64-symbol capture window",
                           static_cast<int>(kNonDmaRxSymbols));
                 rx_config.mem_block_symbols = 64;
             } else {
-                FL_WARN_F("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
+                FL_WARN("RMT RX memory allocation failed for channel %s", static_cast<int>(mMemoryChannelId));
                 mMemoryRegistered = false;
                 return false;
             }
@@ -964,7 +964,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mUseDma) {
             auto &memMgr = RmtMemoryManager::instance();
             if (!memMgr.allocateDMA(mMemoryChannelId, false)) {
-                FL_WARN_F("[RMT RX] Shared DMA slot unavailable â€” falling back to non-DMA mode");
+                FL_WARN("[RMT RX] Shared DMA slot unavailable â€” falling back to non-DMA mode");
                 mUseDma = false;
                 rx_config.flags.with_dma = 0;
                 rx_config.mem_block_symbols = kNonDmaRxSymbols;
@@ -979,7 +979,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Create RX channel
         esp_err_t err = rmt_new_rx_channel(&rx_config, &mChannel);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to create RX channel: %s (%s)", static_cast<int>(err), esp_err_to_name(err));
+            FL_WARN("Failed to create RX channel: %s (%s)", static_cast<int>(err), esp_err_to_name(err));
             mDebug->begin_dbg[3] = 2; // stage: rmt_new_rx_channel failed
             // Unregister from memory manager on failure
             if (mMemoryRegistered) {
@@ -998,7 +998,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         err = rmt_rx_register_event_callbacks(mChannel, &callbacks, this);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to register RX callbacks: %s", static_cast<int>(err));
+            FL_WARN("Failed to register RX callbacks: %s", static_cast<int>(err));
             rmt_del_channel(mChannel);
             mChannel = nullptr;
             return false;
@@ -1010,7 +1010,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // state The channel is created in "init" state by rmt_new_rx_channel()
         // We must call rmt_enable() before calling rmt_receive()
         if (!enable()) {
-            FL_WARN_F("Failed to enable RX channel");
+            FL_WARN("Failed to enable RX channel");
             mDebug->begin_dbg[3] = 3; // stage: enable failed
             rmt_del_channel(mChannel);
             mChannel = nullptr;
@@ -1022,7 +1022,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // the ISR so no pre-capture drain is required (see rxDoneCallback).
         if (!mUseDma) {
             if (!handleSkipPhase()) {
-                FL_WARN_F("Failed to handle skip phase in begin()");
+                FL_WARN("Failed to handle skip phase in begin()");
                 mDebug->begin_dbg[3] = 4; // stage: skip phase failed
                 rmt_disable(mChannel);
                 rmt_del_channel(mChannel);
@@ -1033,7 +1033,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Allocate buffer and arm receiver for actual capture
         if (!allocateAndArm()) {
-            FL_WARN_F("Failed to arm receiver in begin()");
+            FL_WARN("Failed to arm receiver in begin()");
             mDebug->begin_dbg[3] = 5; // stage: arm failed
             if (mUseDma) { mDebug->dma_tally[3] = mDebug->dma_tally[3] + 1; }
             rmt_disable(mChannel);
@@ -1065,7 +1065,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override {
         if (!mChannel) {
-            FL_WARN_F("wait(): channel not initialized");
+            FL_WARN("wait(): channel not initialized");
             return RxWaitResult::TIMEOUT; // Treat as timeout
         }
 
@@ -1079,7 +1079,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mAccumulationBuffer.empty()) {
             // Allocate buffer and arm receiver
             if (!allocateAndArm()) {
-                FL_WARN_F("wait(): failed to allocate and arm");
+                FL_WARN("wait(): failed to allocate and arm");
                 mDebug->wait_dbg[1] = 1; // exit: arm failure
                 return RxWaitResult::TIMEOUT; // Treat as timeout
             }
@@ -1106,8 +1106,8 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
             // Check timeout
             if (elapsed_us >= timeout_us) {
-                FL_ERROR_F("RMT RX timeout after %sus, received %s symbols (expected %s)", elapsed_us, mSymbolsReceived, mBufferSize);
-                FL_ERROR_F("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
+                FL_ERROR("RMT RX timeout after %sus, received %s symbols (expected %s)", elapsed_us, mSymbolsReceived, mBufferSize);
+                FL_ERROR("RMT RX: No data received from TX pin - check that PARLIO/SPI/RMT TX is transmitting");
                 mDebug->wait_dbg[1] = 2; // exit: timeout
                 mDebug->wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
                 mDebug->wait_dbg[3] = mCallbackCount;
@@ -1125,7 +1125,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // streams. mCallbackCount == 1 on a long-stream capture indicates
         // ESP-IDF ended the receive after one fill (likely due to idle
         // timeout from signal_range_max_ns). See issue #2254.
-        FL_WARN_F("[RMT RX] wait(): symbols=%s callbacks=%s use_dma=%s", mSymbolsReceived, mCallbackCount, (mUseDma ? "true" : "false"));
+        FL_WARN("[RMT RX] wait(): symbols=%s callbacks=%s use_dma=%s", mSymbolsReceived, mCallbackCount, (mUseDma ? "true" : "false"));
         mDebug->wait_dbg[1] = 4; // exit: natural completion
         mDebug->wait_dbg[2] = static_cast<fl::u32>(mSymbolsReceived);
         mDebug->wait_dbg[3] = mCallbackCount;
@@ -1231,13 +1231,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override {
         if (edges.empty()) {
-            FL_WARN_F("injectEdges(): empty edges span");
+            FL_WARN("injectEdges(): empty edges span");
             return false;
         }
 
         // Check if edges count is even (must have pairs for RMT symbols)
         if (edges.size() % 2 != 0) {
-            FL_WARN_F("injectEdges(): edge count must be even (got %s)", edges.size());
+            FL_WARN("injectEdges(): edge count must be even (got %s)", edges.size());
             return false;
         }
 
@@ -1252,7 +1252,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 mAccumulationBuffer.push_back(0);
             }
         } else if (mAccumulationBuffer.size() < symbol_count) {
-            FL_WARN_F("injectEdges(): accumulation buffer too small (need %s, have %s)", symbol_count, mAccumulationBuffer.size());
+            FL_WARN("injectEdges(): accumulation buffer too small (need %s, have %s)", symbol_count, mAccumulationBuffer.size());
             return false;
         }
 
@@ -1352,7 +1352,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // Start receive with discard buffer (rmt_receive will enable the RX
             // hardware internally)
             if (!startReceive(discard_buffer.data(), chunk_size)) {
-                FL_WARN_F("handleSkipPhase(): failed to start receive");
+                FL_WARN("handleSkipPhase(): failed to start receive");
                 return false;
             }
 
@@ -1365,7 +1365,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             while (!mReceiveDone) {
                 i64 elapsed_us = esp_timer_get_time() - start_time_us;
                 if (elapsed_us >= timeout_us) {
-                    FL_WARN_F("handleSkipPhase(): timeout waiting for symbols");
+                    FL_WARN("handleSkipPhase(): timeout waiting for symbols");
                     return false;
                 }
                 taskYIELD();
@@ -1382,7 +1382,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             if (mSkipCounter > 0) { // Only disable if more iterations needed
                 esp_err_t err = rmt_disable(mChannel);
                 if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    FL_WARN_F("handleSkipPhase(): failed to disable channel for "
+                    FL_WARN("handleSkipPhase(): failed to disable channel for "
                             "next iteration: %s", static_cast<int>(err));
                     return false;
                 }
@@ -1409,7 +1409,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 FL_LOG_RX("Skip phase: channel already in init state "
                        "(skip_signals=0 case)");
             } else {
-                FL_WARN_F("handleSkipPhase(): failed to disable channel after "
+                FL_WARN("handleSkipPhase(): failed to disable channel after "
                         "skip phase: %s", static_cast<int>(err));
                 return false;
             }
@@ -1476,7 +1476,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 mDmaCapableBuffer = static_cast<RmtSymbol *>(
                     heap_caps_malloc(bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL));
                 if (!mDmaCapableBuffer) {
-                    FL_WARN_F("allocateAndArm(): heap_caps_malloc(%s, DMA|INTERNAL) failed", bytes);
+                    FL_WARN("allocateAndArm(): heap_caps_malloc(%s, DMA|INTERNAL) failed", bytes);
                     mDebug->begin_dbg[3] = 1; // stage: DMA buffer alloc failed
                     mDebug->dma_fail_where = 1; // latch: DMA buffer alloc
                     return false;
@@ -1513,7 +1513,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         }
         size_t effective_size = mAccumulationBuffer.capacity();
         if (effective_size < mBufferSize) {
-            FL_WARN_F("allocateAndArm(): accumulation buffer reduced from %s to %s symbols (memory constrained)", mBufferSize, effective_size);
+            FL_WARN("allocateAndArm(): accumulation buffer reduced from %s to %s symbols (memory constrained)", mBufferSize, effective_size);
         }
         for (size_t i = mAccumulationBuffer.size(); i < effective_size; i++) {
             mAccumulationBuffer.push_back(0);
@@ -1530,7 +1530,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         RmtSymbol *hw_buffer = mUseDma ? mDmaCapableBuffer
                                         : mInternalBuffer.data();
         if (!startReceive(hw_buffer, hw_buffer_size)) {
-            FL_WARN_F("allocateAndArm(): failed to start receive");
+            FL_WARN("allocateAndArm(): failed to start receive");
             return false;
         }
 
@@ -1559,7 +1559,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
      */
     bool enable() FL_NO_EXCEPT {
         if (!mChannel) {
-            FL_WARN_F("enable(): RX channel not initialized");
+            FL_WARN("enable(): RX channel not initialized");
             return false;
         }
 
@@ -1571,7 +1571,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_LOG_RX("RX channel enabled");
             return true;
         } else {
-            FL_WARN_F("Failed to enable RX channel: %s (code: %s)", esp_err_to_name(err), static_cast<int>(err));
+            FL_WARN("Failed to enable RX channel: %s (code: %s)", esp_err_to_name(err), static_cast<int>(err));
             return false;
         }
     }
@@ -1617,12 +1617,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
      */
     bool startReceive(RmtSymbol *buffer, size_t buffer_size) FL_NO_EXCEPT {
         if (!mChannel) {
-            FL_WARN_F("RX channel not initialized (call begin() first)");
+            FL_WARN("RX channel not initialized (call begin() first)");
             return false;
         }
 
         if (!buffer || buffer_size == 0) {
-            FL_WARN_F("Invalid buffer parameters");
+            FL_WARN("Invalid buffer parameters");
             return false;
         }
 
@@ -1673,7 +1673,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             rmt_receive(mChannel, rmt_buffer,
                         buffer_size * sizeof(rmt_symbol_word_t), &rx_params);
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to start RX receive: %s", static_cast<int>(err));
+            FL_WARN("Failed to start RX receive: %s", static_cast<int>(err));
             if (mUseDma) {
                 mDebug->dma_fail_where = 2;   // latch: rmt_receive(DMA) rejected
                 mDebug->dma_receive_err = static_cast<fl::u32>(err);

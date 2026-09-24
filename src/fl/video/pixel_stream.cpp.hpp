@@ -143,7 +143,7 @@ bool PixelStream::begin(filebuf_ptr h) FL_NO_EXCEPT {
                                 close();
                                 return false;
                             }
-                            FL_WARN_F("FLED video.color rejected; using explicit best-effort RGB8 playback");
+                            FL_WARN("FLED video.color rejected; using explicit best-effort RGB8 playback");
                         }
                         // Stream is now positioned at the first frame byte.
                         return mHandle->available();
@@ -313,7 +313,7 @@ bool PixelStream::hasFrame(fl::u32 frameNumber) {
 bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
     if (!mHandle || !frame || mType == kStreaming) {
         // Streaming handle doesn't support seeking
-        FL_DBG_F("Streaming handle doesn't support seeking");
+        FL_DBG("Streaming handle doesn't support seeking");
         return false;
     }
     if (!isRgb8Playback()) {

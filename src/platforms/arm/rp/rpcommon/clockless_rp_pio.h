@@ -203,7 +203,7 @@ public:
             // claimed by other code -- Adafruit TinyUSB is the common case on
             // RP2040. Report it: silently returning here leaves the strip dark
             // with no explanation. See FastLED#1471.
-            FL_WARN_F("[RP PIO] no free PIO state machine for pin %d; "
+            FL_WARN("[RP PIO] no free PIO state machine for pin %d; "
                       "another library holds them all. Set "
                       "FASTLED_RP2040_CLOCKLESS_PIO 0 to bit-bang instead.",
                       int(DATA_PIN));
@@ -220,7 +220,7 @@ public:
         mPioOffset = offset;
 
         if (!resources.claimDmaChannel(&dma_channel)) {
-            FL_WARN_F("[RP PIO] no free DMA channel for pin %d; "
+            FL_WARN("[RP PIO] no free DMA channel for pin %d; "
                       "output disabled on this pin.",
                       int(DATA_PIN));
             remove_clockless_pio_program(mPio, static_cast<uint>(mPioOffset));
@@ -233,7 +233,7 @@ public:
         }
 
         if (!resources.claimPins(DATA_PIN, 1)) {
-            FL_WARN_F("[RP PIO] pin %d is already claimed by other code; "
+            FL_WARN("[RP PIO] pin %d is already claimed by other code; "
                       "output disabled on this pin.",
                       int(DATA_PIN));
             resources.releaseDmaChannel(dma_channel);

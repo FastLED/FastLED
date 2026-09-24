@@ -379,7 +379,7 @@ bool lpuart_show(const u8* pixel_data, u32 num_pixel_bytes) {
     // the update succeeded would leave the tail LEDs stale and
     // misreport success.
     if (num_pixel_bytes > kMaxRawBytes) {
-        FL_LOG_FLEXIO_F("LPUART: strip too large -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Rejecting frame.",
+        FL_LOG_FLEXIO("LPUART: strip too large -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Rejecting frame.",
                         (int)num_pixel_bytes, (int)kMaxRawBytes);
         return false;
     }

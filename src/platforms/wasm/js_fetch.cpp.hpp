@@ -96,7 +96,7 @@ static WasmFetchCallbackManager& getCallbackManager() {
 
 // C++ callback function that JavaScript can call when fetch completes
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, const char* content) {
-    FL_WARN_F("Fetch success callback received for request %s, content length: %s", request_id, strlen(content));
+    FL_WARN("Fetch success callback received for request %s, content length: %s", request_id, strlen(content));
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
@@ -107,7 +107,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, c
 
         (*callback_opt)(response);
     } else {
-        FL_WARN_F("Warning: No pending callback found for fetch success request %s", request_id);
+        FL_WARN("Warning: No pending callback found for fetch success request %s", request_id);
     }
     // Wake any pthread parked inside fl::platforms::await().
     fl::platforms::ICoroutineRuntime::instance().wakeWaiters();
@@ -115,7 +115,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, c
 
 // C++ error callback function that JavaScript can call when fetch fails
 extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(u32 request_id, const char* error_message) {
-    FL_WARN_F("Fetch error callback received for request %s: %s", request_id, error_message);
+    FL_WARN("Fetch error callback received for request %s: %s", request_id, error_message);
     
     auto callback_opt = getCallbackManager().takeCallback(request_id);
     if (callback_opt) {
@@ -127,14 +127,14 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(u32 request_id, con
 
         (*callback_opt)(response);
     } else {
-        FL_WARN_F("Warning: No pending callback found for fetch error request %s", request_id);
+        FL_WARN("Warning: No pending callback found for fetch error request %s", request_id);
     }
     // See note in js_fetch_success_callback above.
     fl::platforms::ICoroutineRuntime::instance().wakeWaiters();
 }
 
 void WasmFetchRequest::response(const FetchResponseCallback& callback) {
-    FL_WARN_F("Starting JavaScript-based fetch request to: %s", mUrl);
+    FL_WARN("Starting JavaScript-based fetch request to: %s", mUrl);
     
     // Generate unique request ID for this request
     u32 request_id = getCallbackManager().generateRequestId();
@@ -142,7 +142,7 @@ void WasmFetchRequest::response(const FetchResponseCallback& callback) {
     // Store the callback for when JavaScript calls back (using move semantics)
     getCallbackManager().storeCallback(request_id, FetchResponseCallback(callback));
     
-    FL_WARN_F("Stored callback for request ID: %s", request_id);
+    FL_WARN("Stored callback for request ID: %s", request_id);
     
     // Start the JavaScript fetch (non-blocking) with request ID
     js_fetch_async(request_id, mUrl.c_str());

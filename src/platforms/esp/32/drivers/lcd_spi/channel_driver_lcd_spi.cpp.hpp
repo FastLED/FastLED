@@ -69,7 +69,7 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
             // hardware or a mock with no auto-completion. Free anyway:
             // LeakSanitizer flags the alternative, and a 2 s stall already
             // indicates the DMA is lost.
-            FL_WARN_F("ChannelDriverLcdSpi: DMA wait timed out â€” "
+            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out â€” "
                     "freeing ring buffers anyway");
         }
     }
@@ -101,7 +101,7 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN_F("ChannelDriverLcdSpi: ring buffer alloc failed slot %s", i);
+            FL_WARN("ChannelDriverLcdSpi: ring buffer alloc failed slot %s", i);
             freeRingBuffers();
             return false;
         }
@@ -142,7 +142,7 @@ void ChannelDriverLcdSpi::show() FL_NO_EXCEPT {
         fl::task::run(250, fl::task::ExecFlags::SYSTEM);
     }
     if (mBusy) {
-        FL_WARN_F("ChannelDriverLcdSpi: DMA hung â€” forcing release");
+        FL_WARN("ChannelDriverLcdSpi: DMA hung â€” forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -265,7 +265,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
         // Transmit failed â€” abort stream
         ctx.mStreamComplete = true;
         self->mBusy = false;
-        FL_WARN_F("ChannelDriverLcdSpi: ISR transmit failed");
+        FL_WARN("ChannelDriverLcdSpi: ISR transmit failed");
     }
 
     return false;
@@ -345,7 +345,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN_F("ChannelDriverLcdSpi: Failed to initialize peripheral");
+            FL_WARN("ChannelDriverLcdSpi: Failed to initialize peripheral");
             return false;
         }
 
@@ -361,7 +361,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
     // Register the ISR callback for chunked streaming
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
-        FL_WARN_F("ChannelDriverLcdSpi: registerTransmitCallback failed");
+        FL_WARN("ChannelDriverLcdSpi: registerTransmitCallback failed");
         return false;
     }
 
@@ -395,7 +395,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN_F("ChannelDriverLcdSpi: Initial transmit failed");
+        FL_WARN("ChannelDriverLcdSpi: Initial transmit failed");
         return false;
     }
 

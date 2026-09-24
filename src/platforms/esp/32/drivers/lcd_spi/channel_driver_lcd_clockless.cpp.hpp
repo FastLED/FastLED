@@ -80,7 +80,7 @@ ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
         bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
         if (!done) {
-            FL_WARN_F("ChannelDriverLcdClockless: DMA wait timed out â€” "
+            FL_WARN("ChannelDriverLcdClockless: DMA wait timed out â€” "
                     "freeing ring buffers anyway");
         }
     }
@@ -113,7 +113,7 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN_F("ChannelDriverLcdClockless: ring buffer alloc failed");
+            FL_WARN("ChannelDriverLcdClockless: ring buffer alloc failed");
             freeRingBuffers();
             return false;
         }
@@ -308,7 +308,7 @@ void ChannelDriverLcdClockless::show() FL_NO_EXCEPT {
 
     (void)waitForReady(2000);
     if (mBusy) {
-        FL_WARN_F("ChannelDriverLcdClockless: DMA hung â€” forcing release");
+        FL_WARN("ChannelDriverLcdClockless: DMA hung â€” forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -462,12 +462,12 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     if (channels.size() > 16) {
-        FL_WARN_F("ChannelDriverLcdClockless: too many channels (%s), max 16 supported", channels.size());
+        FL_WARN("ChannelDriverLcdClockless: too many channels (%s), max 16 supported", channels.size());
         return false;
     }
 
     if (!ensureWorkerTask()) {
-        FL_WARN_F("ChannelDriverLcdClockless: worker task creation failed");
+        FL_WARN("ChannelDriverLcdClockless: worker task creation failed");
         return false;
     }
 
@@ -586,7 +586,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN_F("ChannelDriverLcdClockless: Failed to init peripheral");
+            FL_WARN("ChannelDriverLcdClockless: Failed to init peripheral");
             return false;
         }
 
@@ -601,7 +601,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
     // Register ISR callback
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
-        FL_WARN_F("ChannelDriverLcdClockless: registerTransmitCallback failed");
+        FL_WARN("ChannelDriverLcdClockless: registerTransmitCallback failed");
         return false;
     }
 
@@ -622,7 +622,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN_F("ChannelDriverLcdClockless: Initial transmit failed");
+        FL_WARN("ChannelDriverLcdClockless: Initial transmit failed");
         return false;
     }
     mIsrCtx.mSubmittedChunks = 1;

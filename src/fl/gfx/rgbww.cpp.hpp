@@ -371,7 +371,7 @@ void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
-    FL_WARN_F_ONCE("RGBWW: kRGBWWColorimetric requires FASTLED_RGBW_COLORIMETRIC=1 "
+    FL_WARN_ONCE("RGBWW: kRGBWWColorimetric requires FASTLED_RGBW_COLORIMETRIC=1 "
                  "(the math library that provides solve_rgbcct). Outputting zeros.");
 #endif
     zero_out(out_r, out_g, out_b, out_ww, out_wc);
@@ -385,7 +385,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
-    FL_WARN_F_ONCE("RGBWW: kRGBWWColorimetricBoosted requires FASTLED_RGBW_COLORIMETRIC=1. "
+    FL_WARN_ONCE("RGBWW: kRGBWWColorimetricBoosted requires FASTLED_RGBW_COLORIMETRIC=1. "
                  "Outputting zeros.");
 #endif
     zero_out(out_r, out_g, out_b, out_ww, out_wc);

@@ -57,11 +57,11 @@ public:
 protected:
     void showPixels(PixelController<RGB_ORDER>& pixels) override {
         if (!mDriver) {
-            FL_WARN_F_EVERY(100, "LPC UART DMA channel engine unavailable");
+            FL_WARN_EVERY(100, "LPC UART DMA channel engine unavailable");
             return;
         }
         if (mChannelData->isInUse() && !mDriver->waitForReady()) {
-            FL_ERROR_F("LPC UART DMA: engine still busy after wait");
+            FL_ERROR("LPC UART DMA: engine still busy after wait");
             return;
         }
 

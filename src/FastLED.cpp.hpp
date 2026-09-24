@@ -812,7 +812,7 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     // The warning fires at most once per process (FL_WARN_ONCE) and can be
     // disabled with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`.
     #ifndef FASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING
-    FL_WARN_F_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
+    FL_WARN_ONCE("FastLED.add(cfg): runtime-selection mode â€” enrolling every "
                  "available driver via fl::enableAllDrivers(). For minimum "
                  "binary size, prefer FastLED.addLeds<CHIPSET, PIN, ORDER, "
                  "fl::Bus::X>(leds, n) which links only the named driver. "

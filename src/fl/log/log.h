@@ -2,7 +2,7 @@
 
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
-#include "fl/stl/stdio.h"      // IWYU pragma: keep - Required by FL_*_F macros
+#include "fl/stl/stdio.h"      // IWYU pragma: keep - Required by formatted log macros
 #include "fl/stl/chrono.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_NO_INLINE for log_emit
 
@@ -182,24 +182,16 @@ enum class log_kind : fl::u8 {
     INFO  = 2,
 };
 
-inline const char* log_kind_name(log_kind kind) FL_NO_EXCEPT {
-    switch (kind) {
-        case log_kind::WARN:
-            return "WARN";
-        case log_kind::ERROR:
-            return "ERROR";
-        case log_kind::INFO:
-            return "INFO";
-    }
-    return "LOG";
-}
+const char* log_kind_name(log_kind kind) FL_NO_INLINE FL_NO_EXCEPT;
+void log_emit_prefix(log_kind kind, const char* file, int line) FL_NO_INLINE FL_NO_EXCEPT;
+void log_emit_newline() FL_NO_INLINE FL_NO_EXCEPT;
 
 template <typename... Args>
 void log_emit_f(log_kind kind, const char* file, int line, const char* format,
                 const Args&... args) FL_NO_EXCEPT {
-    fl::printf("%s(%d): %s: ", file, line, log_kind_name(kind));
+    log_emit_prefix(kind, file, line);
     fl::printf(format, args...);
-    fl::printf("\n");
+    log_emit_newline();
 }
 
 template <typename... Args>
@@ -222,6 +214,96 @@ fl::string log_format_string(const char* format, const Args&... args) FL_NO_EXCE
 // out-of-line. The noinline attribute is what makes this proposal
 // actually win bytes; bare centralisation alone isn't enough.
 void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_INLINE FL_NO_EXCEPT;
+void log_emit_literal(log_kind kind, const char* file, int line,
+                      const char* body) FL_NO_INLINE FL_NO_EXCEPT;
+
+// A one-argument log macro cannot distinguish `"literal"` from
+// `"prefix" << value` by argument count. log_seed makes that distinction in
+// the expression's type instead: a lone string literal remains a lightweight
+// log_literal, while a subsequent << materializes an sstream. This preserves
+// legacy stream syntax without charging literal call sites for an sstream.
+template <fl::size N>
+class log_literal {
+public:
+    explicit log_literal(const char (&text)[N]) FL_NO_EXCEPT : mText(text) {}
+
+    const char* c_str() const FL_NO_EXCEPT { return mText; }
+
+    template <typename T>
+    fl::sstream operator<<(const T& value) const FL_NO_EXCEPT {
+        fl::sstream body;
+        body << mText << value;
+        return body;
+    }
+
+private:
+    const char* mText;
+};
+
+class log_seed {
+public:
+    template <fl::size N>
+    log_literal<N> operator<<(const char (&text)[N]) const FL_NO_EXCEPT {
+        return log_literal<N>(text);
+    }
+
+    template <typename T>
+    fl::sstream operator<<(const T& value) const FL_NO_EXCEPT {
+        fl::sstream body;
+        body << value;
+        return body;
+    }
+};
+
+template <fl::size N>
+inline void log_emit_auto(log_kind kind, const char* file, int line,
+                          const log_literal<N>& body) FL_NO_EXCEPT {
+    // Treat a one-argument literal as data, not as a printf format string.
+    // This preserves legacy FL_WARN("100% loaded") behavior while still
+    // avoiding an sstream at the call site.
+    log_emit_literal(kind, file, line, body.c_str());
+}
+
+inline void log_emit_auto(log_kind kind, const char* file, int line,
+                          fl::sstream& body) FL_NO_EXCEPT {
+    log_emit(kind, file, line, body);
+}
+
+inline void log_emit_auto(log_kind kind, const char* file, int line,
+                          fl::sstream&& body) FL_NO_EXCEPT {
+    log_emit(kind, file, line, body);
+}
+
+template <fl::size N>
+inline void print_emit_auto(const log_literal<N>& body) FL_NO_EXCEPT {
+    fl::println(body.c_str());
+}
+
+inline void print_emit_auto(fl::sstream& body) FL_NO_EXCEPT {
+    fl::println(body.c_str());
+}
+
+inline void print_emit_auto(fl::sstream&& body) FL_NO_EXCEPT {
+    fl::println(body.c_str());
+}
+
+template <typename Logger, fl::size N>
+inline void async_log_emit_auto(Logger& logger,
+                                const log_literal<N>& body) FL_NO_EXCEPT {
+    logger.push(body.c_str());
+}
+
+template <typename Logger>
+inline void async_log_emit_auto(Logger& logger,
+                                fl::sstream& body) FL_NO_EXCEPT {
+    logger.push(body.str());
+}
+
+template <typename Logger>
+inline void async_log_emit_auto(Logger& logger,
+                                fl::sstream&& body) FL_NO_EXCEPT {
+    logger.push(body.str());
+}
 
 } } // namespace fl::detail
 
@@ -230,8 +312,8 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // =============================================================================
 // One `FL_WARN(...)` macro accepts BOTH stream-style and printf-style:
 //
-//   FL_WARN("plain literal")            // 1 arg  -> stream form  (sstream())
-//   FL_WARN("foo " << x << " bar")      // 1 arg  -> stream form  (sstream())
+//   FL_WARN("plain literal")            // 1 literal -> direct format path
+//   FL_WARN("foo " << x << " bar")      // 1 stream expression -> sstream
 //   FL_WARN("got %d items", n)          // 2 args -> printf form  (log_emit_f)
 //
 // Macro-level dispatch (rather than C++ overload resolution) is required
@@ -243,7 +325,7 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // The dispatch supports up to 16 user arguments in the printf form. The
 // filler list `_FL_M*15, _FL_S` is positioned so the (17 - argc)-th element
 // of the merged list lands at the `NAME` slot:
-//   1 user arg  -> NAME = _FL_S  (single -> stream)
+//   1 user arg  -> NAME = _FL_S  (lazy literal/stream dispatch)
 //   2..16 args -> NAME = _FL_M  (multi  -> printf)
 #define _FL_VA_PICK17( \
     _1, _2, _3, _4, _5, _6, _7, _8, \
@@ -260,10 +342,10 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // =============================================================================
 
 // Per-kind dispatch helpers - _FL_*_S = single-arg stream form; _FL_*_M = multi-arg printf form.
-#define _FL_ERROR_S(X) ::fl::detail::log_emit( \
+#define _FL_ERROR_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::ERROR, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    ::fl::sstream() << X)
+    ::fl::detail::log_seed() << X)
 #define _FL_ERROR_M(...) ::fl::detail::log_emit_f( \
     ::fl::detail::log_kind::ERROR, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
@@ -281,20 +363,14 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // FL_ERROR: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
 // via macro-level argument-count dispatch. See #3272.
 #define FL_ERROR(...) _FL_VA_DISPATCH(_FL_ERROR_S, _FL_ERROR_M, __VA_ARGS__)(__VA_ARGS__)
-// _F preserves the original explicit printf path. In particular, a one-arg
-// literal must not fall back to the sstream path selected by FL_ERROR.
-#define FL_ERROR_F(...) _FL_ERROR_M(__VA_ARGS__)
 #define FL_ERROR_IF(COND, ...) do { if (COND) FL_ERROR(__VA_ARGS__); } while(0)
-#define FL_ERROR_F_IF(COND, ...) do { if (COND) FL_ERROR_F(__VA_ARGS__); } while(0)
 #else
 // No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
 // Args are dropped entirely (matching pre-#3272 behaviour of FL_*_F). See
 // commit notes - earlier draft used `sstream_noop()` type-check but that
 // forced evaluation of args declared only under FASTLED_LOG_*_ENABLED.
 #define FL_ERROR(...) do { } while(0)
-#define FL_ERROR_F(...) do { } while(0)
 #define FL_ERROR_IF(COND, ...) do { } while(0)
-#define FL_ERROR_F_IF(COND, ...) do { } while(0)
 #endif
 #endif
 
@@ -303,10 +379,10 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // =============================================================================
 
 // Per-kind dispatch helpers - _FL_WARN_S = single-arg stream form; _FL_WARN_M = multi-arg printf form.
-#define _FL_WARN_S(X) ::fl::detail::log_emit( \
+#define _FL_WARN_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::WARN, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    ::fl::sstream() << X)
+    ::fl::detail::log_seed() << X)
 #define _FL_WARN_M(...) ::fl::detail::log_emit_f( \
     ::fl::detail::log_kind::WARN, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
@@ -323,13 +399,9 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #if FL_HAS_WARN
 // FL_WARN: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
 // via macro-level argument-count dispatch. Single-arg -> stream form (legacy
-// compatible); two-or-more args -> printf form. See #3272.
+// compatible); two-or-more args -> printf form. See #3272 and #2963.
 #define FL_WARN(...) _FL_VA_DISPATCH(_FL_WARN_S, _FL_WARN_M, __VA_ARGS__)(__VA_ARGS__)
-// _F preserves the original explicit printf path. In particular, a one-arg
-// literal must not fall back to the sstream path selected by FL_WARN.
-#define FL_WARN_F(...) _FL_WARN_M(__VA_ARGS__)
 #define FL_WARN_IF(COND, ...) do { if (COND) FL_WARN(__VA_ARGS__); } while(0)
-#define FL_WARN_F_IF(COND, ...) do { if (COND) FL_WARN_F(__VA_ARGS__); } while(0)
 
 // FL_WARN_ONCE: Emits warning only once per unique location (static flag per call site)
 // Uses static bool flag initialized to false - first call prints, subsequent calls no-op
@@ -338,13 +410,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
     if (!_warned) { \
         _warned = true; \
         FL_WARN(__VA_ARGS__); \
-    } \
-} while(0)
-#define FL_WARN_F_ONCE(...) do { \
-    static bool _warned_f = false; \
-    if (!_warned_f) { \
-        _warned_f = true; \
-        FL_WARN_F(__VA_ARGS__); \
     } \
 } while(0)
 
@@ -366,14 +431,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
         FL_WARN(__VA_ARGS__); \
     } \
 } while(0)
-#define FL_WARN_F_EVERY(MILLIS, ...) do { \
-    static fl::u32 _last_warn_f_time = 0; \
-    fl::u32 _now_f = fl::millis(); \
-    if (_now_f - _last_warn_f_time >= (MILLIS)) { \
-        _last_warn_f_time = _now_f; \
-        FL_WARN_F(__VA_ARGS__); \
-    } \
-} while(0)
 #else
 // No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
 // Args dropped entirely - see the corresponding FL_ERROR section above for
@@ -381,15 +438,11 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // FASTLED_LOG_*_ENABLED, so any `if(false)` type-check would force a build
 // error).
 #define FL_WARN(...) do { } while(0)
-#define FL_WARN_F(...) do { } while(0)
 #define FL_WARN_IF(COND, ...) do { } while(0)
-#define FL_WARN_F_IF(COND, ...) do { } while(0)
 #define FL_WARN_ONCE(...) do { } while(0)
-#define FL_WARN_F_ONCE(...) do { } while(0)
 #define FL_WARN_FMT(...) do { } while(0)
 #define FL_WARN_FMT_IF(COND, ...) do { } while(0)
 #define FL_WARN_EVERY(MILLIS, ...) do { } while(0)
-#define FL_WARN_F_EVERY(MILLIS, ...) do { } while(0)
 #endif
 #endif
 
@@ -412,10 +465,10 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // =============================================================================
 
 // Per-kind dispatch helpers - _FL_INFO_S = single-arg stream form; _FL_INFO_M = multi-arg printf form.
-#define _FL_INFO_S(X) ::fl::detail::log_emit( \
+#define _FL_INFO_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::INFO, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    ::fl::sstream() << X)
+    ::fl::detail::log_seed() << X)
 #define _FL_INFO_M(...) ::fl::detail::log_emit_f( \
     ::fl::detail::log_kind::INFO, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
@@ -487,61 +540,43 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
 // Explicit debug mode enabled - uses fl::println()
 #define FASTLED_HAS_DBG 1
-#define _FASTLED_DGB(X)                                                        \
-    fl::println(                                                               \
-        (fl::sstream() << (fl::fastled_file_offset(__FILE__))                \
-                         << "(" << int(__LINE__) << "): " << X)                     \
-            .c_str())
-#define _FASTLED_DBG_F(...) fl::detail::log_emit_f( \
+#define _FASTLED_DGB(X) ::fl::detail::log_emit_auto( \
+    ::fl::detail::log_kind::INFO, \
+    ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    ::fl::detail::log_seed() << X)
+#define _FL_DBG_M(...) fl::detail::log_emit_f( \
     fl::detail::log_kind::INFO, \
     fl::fastled_file_offset(__FILE__), int(__LINE__), \
     __VA_ARGS__)
 #endif
 
-#define FASTLED_DBG(X) _FASTLED_DGB(X)
-#ifndef _FASTLED_DBG_F
-#define _FASTLED_DBG_F(...) do { } while(0)
+#ifndef _FL_DBG_M
+#define _FL_DBG_M(...) do { } while(0)
 #endif
-#define FASTLED_DBG_F(...) _FASTLED_DBG_F(__VA_ARGS__)
+#define FASTLED_DBG(...) _FL_VA_DISPATCH(_FASTLED_DGB, _FL_DBG_M, __VA_ARGS__)(__VA_ARGS__)
 
 #ifndef FASTLED_DBG_IF
-#define FASTLED_DBG_IF(COND, MSG)                                              \
-    if (COND)                                                                  \
-    FASTLED_DBG(MSG)
+#define FASTLED_DBG_IF(COND, ...) do { if (COND) FASTLED_DBG(__VA_ARGS__); } while(0)
 #endif // FASTLED_DBG_IF
-#ifndef FASTLED_DBG_F_IF
-#define FASTLED_DBG_F_IF(COND, ...) do { if (COND) FASTLED_DBG_F(__VA_ARGS__); } while(0)
-#endif
 
 // Short-form aliases for convenience (following pattern from warn.h)
 #ifndef FL_DBG
 #define FL_DBG FASTLED_DBG
-#define FL_DBG_F FASTLED_DBG_F
 #define FL_DBG_IF FASTLED_DBG_IF
-#define FL_DBG_F_IF FASTLED_DBG_F_IF
 
 // FL_DBG_EVERY: Rate-limited debug output that prints at most once per interval
 // Uses static timestamp to track last print time - throttles output in tight loops
 #if FASTLED_HAS_DBG
-#define FL_DBG_EVERY(MILLIS, X) do { \
+#define FL_DBG_EVERY(MILLIS, ...) do { \
     static fl::u32 _last_dbg_time = 0; \
     fl::u32 _now = fl::millis(); \
     if (_now - _last_dbg_time >= (MILLIS)) { \
         _last_dbg_time = _now; \
-        FL_DBG(X); \
-    } \
-} while(0)
-#define FL_DBG_F_EVERY(MILLIS, ...) do { \
-    static fl::u32 _last_dbg_time = 0; \
-    fl::u32 _now = fl::millis(); \
-    if (_now - _last_dbg_time >= (MILLIS)) { \
-        _last_dbg_time = _now; \
-        FL_DBG_F(__VA_ARGS__); \
+        FL_DBG(__VA_ARGS__); \
     } \
 } while(0)
 #else
-#define FL_DBG_EVERY(MILLIS, X) FL_DBG_NO_OP(X)
-#define FL_DBG_F_EVERY(MILLIS, ...) do { } while(0)
+#define FL_DBG_EVERY(MILLIS, ...) do { } while(0)
 #endif
 #endif
 
@@ -581,7 +616,7 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 ///   FL_PRINT(ss.str());
 // Per-form dispatch helpers - _FL_PRINT_S = stream; _FL_PRINT_M = printf.
 // Unlike FL_WARN, no "<file>(<line>): WARN:" prefix is prepended.
-#define _FL_PRINT_S(X) ::fl::println((::fl::sstream() << X).c_str())
+#define _FL_PRINT_S(X) ::fl::detail::print_emit_auto(::fl::detail::log_seed() << X)
 #define _FL_PRINT_M(...) do { ::fl::printf(__VA_ARGS__); ::fl::printf("\n"); } while(0)
 
 #ifndef FL_PRINT
@@ -589,7 +624,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 // FL_PRINT: unified entry point - accepts both stream- and printf-style.
 // No "WARN:" / "file(line):" prefix (unlike FL_WARN). See #3272.
 #define FL_PRINT(...) _FL_VA_DISPATCH(_FL_PRINT_S, _FL_PRINT_M, __VA_ARGS__)(__VA_ARGS__)
-#define FL_PRINT_F(...) _FL_PRINT_M(__VA_ARGS__)
 
 // FL_PRINT_EVERY: Rate-limited print that outputs at most once per interval
 // Uses static timestamp to track last print time - throttles output in tight loops
@@ -601,20 +635,10 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
         FL_PRINT(__VA_ARGS__); \
     } \
 } while(0)
-#define FL_PRINT_F_EVERY(MILLIS, ...) do { \
-    static fl::u32 _last_print_f_time = 0; \
-    fl::u32 _now_f = fl::millis(); \
-    if (_now_f - _last_print_f_time >= (MILLIS)) { \
-        _last_print_f_time = _now_f; \
-        FL_PRINT_F(__VA_ARGS__); \
-    } \
-} while(0)
 #else
 // No-op macro for memory-constrained platforms
 #define FL_PRINT(...) do { } while(0)
-#define FL_PRINT_F(...) do { } while(0)
 #define FL_PRINT_EVERY(MILLIS, ...) do { } while(0)
-#define FL_PRINT_F_EVERY(MILLIS, ...) do { } while(0)
 #endif
 #endif
 
@@ -629,10 +653,8 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 /// Logs SPI configuration, initialization, and transfers
 #ifdef FASTLED_LOG_SPI_ENABLED
     #define FL_LOG_SPI(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_SPI_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_SPI(...) do { } while(0)
-    #define FL_LOG_SPI_F(...) FL_LOG_SPI(__VA_ARGS__)
 #endif
 
 /// @brief Remote Control Module (RMT) logging (ESP32)
@@ -640,61 +662,49 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #if defined(FASTLED_LOG_RMT_ENABLED) && FL_HAS_WARN
     #define FL_HAS_RMT_LOG 1
     #define FL_LOG_RMT(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_RMT_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_HAS_RMT_LOG 0
     #define FL_LOG_RMT(...) do { } while(0)
-    #define FL_LOG_RMT_F(...) FL_LOG_RMT(__VA_ARGS__)
 #endif
 
 /// @brief Parallel I/O (Parlio) logging (ESP32-P4)
 /// Logs Parlio configuration, GPIO setup, and parallel transfers
 #ifdef FASTLED_LOG_PARLIO_ENABLED
     #define FL_LOG_PARLIO(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_PARLIO_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_PARLIO(...) do { } while(0)
-    #define FL_LOG_PARLIO_F(...) FL_LOG_PARLIO(__VA_ARGS__)
 #endif
 
 /// @brief Audio processing logging
 /// Logs audio sample processing, FFT computation, beat detection, and detector updates
 #ifdef FASTLED_LOG_AUDIO_ENABLED
     #define FL_LOG_AUDIO(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_AUDIO_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_AUDIO(...) do { } while(0)
-    #define FL_LOG_AUDIO_F(...) FL_LOG_AUDIO(__VA_ARGS__)
 #endif
 
 /// @brief Interrupt handling logging
 /// Logs interrupt installation, handler registration, and ISR events
 #ifdef FASTLED_LOG_INTERRUPT_ENABLED
     #define FL_LOG_INTERRUPT(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_INTERRUPT_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_INTERRUPT(...) do { } while(0)
-    #define FL_LOG_INTERRUPT_F(...) FL_LOG_INTERRUPT(__VA_ARGS__)
 #endif
 
 /// @brief FlexIO logging (Teensy 4.x)
 /// Logs FlexIO configuration, pin setup, DMA, and signal generation
 #ifdef FASTLED_LOG_FLEXIO_ENABLED
     #define FL_LOG_FLEXIO(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_FLEXIO_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_FLEXIO(...) do { } while(0)
-    #define FL_LOG_FLEXIO_F(...) FL_LOG_FLEXIO(__VA_ARGS__)
 #endif
 
 /// @brief ObjectFLED logging (Teensy 4.x)
 /// Logs ObjectFLED configuration, pin mapping, and DMA transfers
 #ifdef FASTLED_LOG_OBJECTFLED_ENABLED
     #define FL_LOG_OBJECTFLED(...) FL_WARN(__VA_ARGS__)
-    #define FL_LOG_OBJECTFLED_F(...) FL_WARN_F(__VA_ARGS__)
 #else
     #define FL_LOG_OBJECTFLED(...) do { } while(0)
-    #define FL_LOG_OBJECTFLED_F(...) FL_LOG_OBJECTFLED(__VA_ARGS__)
 #endif
 
 /// @}
@@ -763,15 +773,14 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 /// @see FL_LOG_ASYNC_ISR for ISR-safe const char* only variant
 // Per-form dispatch helpers - _S = stream form, _M = printf form. Pushes the
 // composed message to the caller-provided AsyncLogger instance.
-#define _FL_LOG_ASYNC_S(logger, X) do { (logger).push((::fl::sstream() << X).str()); } while(0)
+#define _FL_LOG_ASYNC_S(logger, X) do { \
+    ::fl::detail::async_log_emit_auto((logger), ::fl::detail::log_seed() << X); \
+} while(0)
 #define _FL_LOG_ASYNC_M(logger, ...) do { (logger).push(::fl::detail::log_format_string(__VA_ARGS__)); } while(0)
 
 // Unified async-log dispatch (#3272). Single-arg payload -> stream form (legacy
 // compatible); two-or-more args -> printf form via log_format_string.
 #define FL_LOG_ASYNC(logger, ...) _FL_VA_DISPATCH(_FL_LOG_ASYNC_S, _FL_LOG_ASYNC_M, __VA_ARGS__)(logger, __VA_ARGS__)
-
-// _F preserves the original explicit printf path, including for one argument.
-#define FL_LOG_ASYNC_F(logger, ...) _FL_LOG_ASYNC_M(logger, __VA_ARGS__)
 
 /// @brief ISR-safe async logging macro (const char* literals only, zero heap allocation)
 /// @param logger Reference to AsyncLogger instance (e.g., get_parlio_async_logger_isr())
@@ -791,7 +800,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_SPI_ENABLED
     #define FL_LOG_SPI_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_spi_async_logger_isr(), X)
     #define FL_LOG_SPI_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_spi_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_SPI_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_spi_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_SPI_ASYNC_FLUSH() do { \
         fl::get_spi_async_logger_isr().flush(); \
         fl::get_spi_async_logger_main().flush(); \
@@ -799,7 +807,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_SPI_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_SPI_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_SPI_ASYNC_MAIN_F(...) FL_LOG_SPI_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_SPI_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -810,7 +817,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_RMT_ENABLED
     #define FL_LOG_RMT_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_rmt_async_logger_isr(), X)
     #define FL_LOG_RMT_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_rmt_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_RMT_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_rmt_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_RMT_ASYNC_FLUSH() do { \
         fl::get_rmt_async_logger_isr().flush(); \
         fl::get_rmt_async_logger_main().flush(); \
@@ -818,7 +824,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_RMT_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_RMT_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_RMT_ASYNC_MAIN_F(...) FL_LOG_RMT_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_RMT_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -829,7 +834,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_PARLIO_ENABLED
     #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_parlio_async_logger_isr(), X)
     #define FL_LOG_PARLIO_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_parlio_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_PARLIO_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_parlio_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_PARLIO_ASYNC_FLUSH() do { \
         fl::get_parlio_async_logger_isr().flush(); \
         fl::get_parlio_async_logger_main().flush(); \
@@ -837,7 +841,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_PARLIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_PARLIO_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_PARLIO_ASYNC_MAIN_F(...) FL_LOG_PARLIO_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_PARLIO_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -848,7 +851,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_AUDIO_ENABLED
     #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_audio_async_logger_isr(), X)
     #define FL_LOG_AUDIO_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_audio_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_AUDIO_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_audio_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_AUDIO_ASYNC_FLUSH() do { \
         fl::get_audio_async_logger_isr().flush(); \
         fl::get_audio_async_logger_main().flush(); \
@@ -856,7 +858,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_AUDIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_AUDIO_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_AUDIO_ASYNC_MAIN_F(...) FL_LOG_AUDIO_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_AUDIO_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -867,7 +868,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_INTERRUPT_ENABLED
     #define FL_LOG_INTERRUPT_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_interrupt_async_logger_isr(), X)
     #define FL_LOG_INTERRUPT_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_interrupt_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_INTERRUPT_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_interrupt_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_INTERRUPT_ASYNC_FLUSH() do { \
         fl::get_interrupt_async_logger_isr().flush(); \
         fl::get_interrupt_async_logger_main().flush(); \
@@ -875,7 +875,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_INTERRUPT_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_INTERRUPT_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_INTERRUPT_ASYNC_MAIN_F(...) FL_LOG_INTERRUPT_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_INTERRUPT_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -886,7 +885,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_FLEXIO_ENABLED
     #define FL_LOG_FLEXIO_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_flexio_async_logger_isr(), X)
     #define FL_LOG_FLEXIO_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_flexio_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_FLEXIO_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_flexio_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_FLEXIO_ASYNC_FLUSH() do { \
         fl::get_flexio_async_logger_isr().flush(); \
         fl::get_flexio_async_logger_main().flush(); \
@@ -894,7 +892,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_FLEXIO_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_FLEXIO_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_FLEXIO_ASYNC_MAIN_F(...) FL_LOG_FLEXIO_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_FLEXIO_ASYNC_FLUSH() do {} while(0)
 #endif
 
@@ -905,7 +902,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #ifdef FASTLED_LOG_OBJECTFLED_ENABLED
     #define FL_LOG_OBJECTFLED_ASYNC_ISR(X) FL_LOG_ASYNC_ISR(fl::get_objectfled_async_logger_isr(), X)
     #define FL_LOG_OBJECTFLED_ASYNC_MAIN(...) FL_LOG_ASYNC(fl::get_objectfled_async_logger_main(), __VA_ARGS__)
-    #define FL_LOG_OBJECTFLED_ASYNC_MAIN_F(...) FL_LOG_ASYNC_F(fl::get_objectfled_async_logger_main(), __VA_ARGS__)
     #define FL_LOG_OBJECTFLED_ASYNC_FLUSH() do { \
         fl::get_objectfled_async_logger_isr().flush(); \
         fl::get_objectfled_async_logger_main().flush(); \
@@ -913,7 +909,6 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #else
     #define FL_LOG_OBJECTFLED_ASYNC_ISR(X) FL_DBG_NO_OP(X)
     #define FL_LOG_OBJECTFLED_ASYNC_MAIN(...) do { } while(0)
-    #define FL_LOG_OBJECTFLED_ASYNC_MAIN_F(...) FL_LOG_OBJECTFLED_ASYNC_MAIN(__VA_ARGS__)
     #define FL_LOG_OBJECTFLED_ASYNC_FLUSH() do {} while(0)
 #endif
 

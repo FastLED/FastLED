@@ -68,7 +68,7 @@ void BitBangChannelDriver::rebuildPinConfig(
 
         int pin = ch->getPin();
         if (pin < 0 || pin > 255) {
-            FL_WARN_F("BitBangChannelDriver: pin %s out of range, skipping", pin);
+            FL_WARN("BitBangChannelDriver: pin %s out of range, skipping", pin);
             continue;
         }
 
@@ -77,7 +77,7 @@ void BitBangChannelDriver::rebuildPinConfig(
         }
 
         if (mNumActiveSlots >= 8) {
-            FL_WARN_F("BitBangChannelDriver: more than 8 unique data pins, "
+            FL_WARN("BitBangChannelDriver: more than 8 unique data pins, "
                      "pin %s will be skipped", pin);
             continue;
         }

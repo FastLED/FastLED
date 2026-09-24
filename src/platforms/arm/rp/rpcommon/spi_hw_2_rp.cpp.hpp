@@ -245,13 +245,13 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIDualRP2040: Bus ID mismatch");
+        FL_WARN("SPIDualRP2040: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN_F("SPIDualRP2040: Invalid pin configuration");
+        FL_WARN("SPIDualRP2040: Invalid pin configuration");
         return false;
     }
 
@@ -279,13 +279,13 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
     }
 
     if (mPIO == nullptr || mStateMachine == -1 || mPIOOffset == -1) {
-        FL_WARN_F("SPIDualRP2040: No available PIO resources");
+        FL_WARN("SPIDualRP2040: No available PIO resources");
         return false;
     }
 
     // Claim DMA channel
     if (!resources.claimDmaChannel(&mDMAChannel)) {
-        FL_WARN_F("SPIDualRP2040: No available DMA channel");
+        FL_WARN("SPIDualRP2040: No available DMA channel");
         resources.releasePioStateMachine(mPIO, mStateMachine);
         return false;
     }
@@ -293,7 +293,7 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
     // Configure GPIO pins for PIO
     // Data pins must be consecutive
     if (mData1Pin != mData0Pin + 1) {
-        FL_WARN_F("SPIDualRP2040: Data pins must be consecutive (D0, D0+1)");
+        FL_WARN("SPIDualRP2040: Data pins must be consecutive (D0, D0+1)");
         resources.releaseDmaChannel(mDMAChannel);
         resources.releasePioStateMachine(mPIO, mStateMachine);
         return false;
@@ -304,7 +304,7 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
         resources.releasePins(mClockPin, 1);
         resources.releaseDmaChannel(mDMAChannel);
         resources.releasePioStateMachine(mPIO, mStateMachine);
-        FL_WARN_F("SPIDualRP2040: Pins are already owned by another RP PIO driver");
+        FL_WARN("SPIDualRP2040: Pins are already owned by another RP PIO driver");
         return false;
     }
 

@@ -64,7 +64,7 @@ void CountingSemaphoreSAMD<LeastMaxValue>::acquire() {
     // Check if counter is zero
     if (mCounter == 0) {
         __enable_irq();
-        FL_WARN_F("CountingSemaphoreSAMD::acquire() called when counter is 0 (would deadlock on threaded system)");
+        FL_WARN("CountingSemaphoreSAMD::acquire() called when counter is 0 (would deadlock on threaded system)");
         return;
     }
 

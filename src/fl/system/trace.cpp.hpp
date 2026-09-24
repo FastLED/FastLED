@@ -97,7 +97,7 @@ fl::string ScopedTrace::dump() FL_NO_EXCEPT {
     fl::string result = "Stack trace (depth ";
 
     char depth_str[32];
-    fl::sprintf(depth_str, "%zu", (size_t)storage.stackDepth);
+    fl::snprintf(depth_str, sizeof(depth_str), "%zu", (size_t)storage.stackDepth);
     result += depth_str;
     result += "):\n";
 
@@ -110,7 +110,7 @@ fl::string ScopedTrace::dump() FL_NO_EXCEPT {
     if (storage.stackDepth > FL_STACK_TRACE_MAX_DEPTH) {
         result += "  <WARNING: Stack overflow - showing last ";
         char max_str[32];
-        fl::sprintf(max_str, "%d", FL_STACK_TRACE_MAX_DEPTH);
+        fl::snprintf(max_str, sizeof(max_str), "%d", FL_STACK_TRACE_MAX_DEPTH);
         result += max_str;
         result += " of ";
         result += depth_str;
@@ -122,9 +122,9 @@ fl::string ScopedTrace::dump() FL_NO_EXCEPT {
         const auto& entry = storage.callStack[i];
         char line_buf[256];
         if (entry.line > 0) {
-            fl::sprintf(line_buf, "  [%zu] %s(%d)\n", (size_t)i, entry.function, entry.line);
+            fl::snprintf(line_buf, sizeof(line_buf), "  [%zu] %s(%d)\n", (size_t)i, entry.function, entry.line);
         } else {
-            fl::sprintf(line_buf, "  [%zu] %s\n", (size_t)i, entry.function);
+            fl::snprintf(line_buf, sizeof(line_buf), "  [%zu] %s\n", (size_t)i, entry.function);
         }
         result += line_buf;
     }

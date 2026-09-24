@@ -37,7 +37,7 @@ namespace detail {
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)
 static void addSpiHardwareIfPossible(ChannelManager& manager) {
-    FL_DBG_F("RP2040/RP2350: Registering unified HW SPI channel driver");
+    FL_DBG("RP2040/RP2350: Registering unified HW SPI channel driver");
 
     fl::vector<fl::shared_ptr<SpiHwBase>> controllers;
     fl::vector<int> priorities;
@@ -71,12 +71,12 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 
             manager.addDriver(maxPriority, adapter);
 
-            FL_DBG_F("RP2040/RP2350: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
+            FL_DBG("RP2040/RP2350: Registered unified SPI driver with %s controllers (priority %s)", controllers.size(), maxPriority);
         } else {
-            FL_WARN_F("RP2040/RP2350: Failed to create unified SPI adapter");
+            FL_WARN("RP2040/RP2350: Failed to create unified SPI adapter");
         }
     } else {
-        FL_DBG_F("RP2040/RP2350: No SPI hardware controllers available");
+        FL_DBG("RP2040/RP2350: No SPI hardware controllers available");
     }
 }
 
@@ -89,7 +89,7 @@ namespace platforms {
 /// Called lazily on first access to ChannelManager::instance().
 /// Registers platform-specific drivers (SPI hardware) with the bus manager.
 void initChannelDrivers() {
-    FL_DBG_F("RP2040/RP2350: Lazy initialization of channel drivers");
+    FL_DBG("RP2040/RP2350: Lazy initialization of channel drivers");
 
     auto& manager = channelManager();
 
@@ -111,7 +111,7 @@ void initChannelDrivers() {
     BusTraits<Bus::FLEX_IO, 2>::registerWithManager();
 #endif
 
-    FL_DBG_F("RP2040/RP2350: Channel drivers initialized");
+    FL_DBG("RP2040/RP2350: Channel drivers initialized");
 }
 
 } // namespace platforms

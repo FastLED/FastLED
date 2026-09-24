@@ -181,11 +181,11 @@ bool objectfled_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
     if (mosi_pin >= NUM_DIGITAL_PINS) return false;
     if (sclk_pin >= NUM_DIGITAL_PINS) return false;
     if (!pin_is_gpio6(mosi_pin)) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: MOSI pin %s is not on GPIO6", (int)mosi_pin);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: MOSI pin %s is not on GPIO6", (int)mosi_pin);
         return false;
     }
     if (!pin_is_gpio6(sclk_pin)) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: SCLK pin %s is not on GPIO6", (int)sclk_pin);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: SCLK pin %s is not on GPIO6", (int)sclk_pin);
         return false;
     }
 
@@ -353,14 +353,14 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
 #ifdef FL_OBJECTFLED_SPI_HARDWARE_DISABLE
     (void)pin_info;
     (void)clock_hz;
-    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: disabled via "
+    FL_LOG_OBJECTFLED("ObjectFLED_SPI: disabled via "
                         "FL_OBJECTFLED_SPI_HARDWARE_DISABLE -- SPI "
                         "channels fall through to next bus (see #3428).");
     return false;
 #else
     sSpiLastDiag = ObjectFLEDSPIDiagnostics{};  // reset captured snapshot
     if (clock_hz == 0) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: init refused -- clock_hz == 0");
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: init refused -- clock_hz == 0");
         return false;
     }
     if (sSpiInitialized) {
@@ -368,16 +368,16 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     }
 
     if (clock_hz < kSpiClockMinHz) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: clock %s Hz below floor; clamp to %s",
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock %s Hz below floor; clamp to %s",
                             (int)clock_hz, (int)kSpiClockMinHz);
         clock_hz = kSpiClockMinHz;
     } else if (clock_hz > kSpiClockMaxHz) {
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: clock %s Hz above ceiling; clamp to %s",
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock %s Hz above ceiling; clamp to %s",
                             (int)clock_hz, (int)kSpiClockMaxHz);
         clock_hz = kSpiClockMaxHz;
     }
 
-    FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: init MOSI=%s(bit %s) SCLK=%s(bit %s) @ %s Hz",
+    FL_LOG_OBJECTFLED("ObjectFLED_SPI: init MOSI=%s(bit %s) SCLK=%s(bit %s) @ %s Hz",
                         (int)pin_info.mosi_pin, (int)pin_info.mosi_bit,
                         (int)pin_info.sclk_pin, (int)pin_info.sclk_bit,
                         (int)clock_hz);
@@ -422,11 +422,11 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     if (sSpiDmaChannel == nullptr) {
         sSpiDmaChannel = new DMAChannel();  // ok bare allocation -- one-shot, balanced in deinit
         if (sSpiDmaChannel == nullptr) {
-            FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: failed to allocate DMA channel");
+            FL_LOG_OBJECTFLED("ObjectFLED_SPI: failed to allocate DMA channel");
             return false;
         }
         if (sSpiDmaChannel->TCD == nullptr) {
-            FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: DMA channel has null TCD");
+            FL_LOG_OBJECTFLED("ObjectFLED_SPI: DMA channel has null TCD");
             delete sSpiDmaChannel;  // ok bare allocation
             sSpiDmaChannel = nullptr;
             return false;
@@ -485,7 +485,7 @@ bool objectfled_spi_show(fl::span<const u8> buffer) FL_NO_EXCEPT {
         // APA102/SK9822 frame with no caller visibility, corrupting the
         // strip output. The header documents that invalid arguments return
         // false; honor that contract.
-        FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: num_bytes=%s exceeds max %s; rejecting",
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: num_bytes=%s exceeds max %s; rejecting",
                             (int)num_bytes, (int)kSpiMaxInputBytes);
         return false;
     }
@@ -606,7 +606,7 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
             }
             TMR3_ENBL &= ~1u;  // stop QTimer3 channel 0
             sSpiDmaComplete = true;
-            FL_LOG_OBJECTFLED_F("ObjectFLED_SPI: wait timed out after %s ms -- recovering",
+            FL_LOG_OBJECTFLED("ObjectFLED_SPI: wait timed out after %s ms -- recovering",
                                 (int)timeout_ms);
             break;
         }

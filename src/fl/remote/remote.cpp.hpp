@@ -21,7 +21,7 @@ namespace fl {
 bool Remote::unbind(const fl::string& name) {
     bool removed = mRpc.unbind(name.c_str());
     if (removed) {
-        FL_DBG_F("Unregistered RPC function: %s", name);
+        FL_DBG("Unregistered RPC function: %s", name);
     }
     return removed;
 }
@@ -41,7 +41,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN_F("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: %s", method);
         return;
     }
 
@@ -57,7 +57,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG_F("Sent async response for %s (id=%s)", method, requestId);
+        FL_DBG("Sent async response for %s (id=%s)", method, requestId);
     }
 }
 
@@ -65,7 +65,7 @@ void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN_F("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: %s", method);
         return;
     }
 
@@ -84,7 +84,7 @@ void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG_F("Sent stream update for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream update for %s (id=%s)", method, requestId);
     }
 }
 
@@ -92,7 +92,7 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN_F("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: %s", method);
         return;
     }
 
@@ -112,7 +112,7 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG_F("Sent stream final for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream final for %s (id=%s)", method, requestId);
     }
 }
 #else  // !FL_PLATFORM_HAS_LARGE_MEMORY
@@ -168,7 +168,7 @@ fl::json Remote::processRpc(const fl::json& request) {
     if (timestamp != 0) {
         // Scheduled execution - result will be pushed to ResponseSink after execution
         scheduleFunction(timestamp, receivedAt, request);
-        FL_DBG_F("RPC: Scheduled function - result will be pushed after execution");
+        FL_DBG("RPC: Scheduled function - result will be pushed after execution");
 
         // Return acknowledgment with null result and "scheduled" marker
         fl::json response = fl::json::object();
@@ -193,7 +193,7 @@ fl::json Remote::processRpc(const fl::json& request) {
         fl::string methodName = request["method"].as_string().value_or("");
         int requestId = request["id"].as_int().value_or(0);
         mAsyncRequests[methodName] = {requestId, receivedAt};
-        FL_DBG_F("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
+        FL_DBG("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
     }
 #endif
 
@@ -255,7 +255,7 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jso
         }
     });
 
-    FL_DBG_F("Scheduled RPC: %s at %s", funcName, timestamp);
+    FL_DBG("Scheduled RPC: %s at %s", funcName, timestamp);
 }
 
 void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {
@@ -292,16 +292,16 @@ void Remote::clear(ClearFlags flags) {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     if ((flags & ClearFlags::Results) != ClearFlags::None) {
         mResults.clear();
-        FL_DBG_F("Cleared RPC results");
+        FL_DBG("Cleared RPC results");
     }
     if ((flags & ClearFlags::Scheduled) != ClearFlags::None) {
         mScheduler.clear();
-        FL_DBG_F("Cleared scheduled RPC calls");
+        FL_DBG("Cleared scheduled RPC calls");
     }
 #endif
     if ((flags & ClearFlags::Functions) != ClearFlags::None) {
         mRpc.clear();
-        FL_DBG_F("Cleared registered RPC functions");
+        FL_DBG("Cleared registered RPC functions");
     }
 }
 

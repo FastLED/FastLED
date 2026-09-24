@@ -160,11 +160,12 @@ constexpr int kX = 5;
                 "*/ snprintf(buf, sizeof(buf), \"%d\", value);\n",
                 "/* snprintf(buf, sizeof(buf), \"%d\", value); */\n",
                 "snprintf(buf, sizeof(buf), \"%d\", value); // ok snprintf\n",
+                "fl::sprintf(buf, \"%d\", value);\n",
             ),
         ));
         assert_eq!(
             hits.iter().map(|hit| hit.0).collect::<Vec<_>>(),
-            vec![1, 3]
+            vec![1, 3, 6]
         );
     }
 
@@ -174,10 +175,10 @@ constexpr int kX = 5;
         let hits = checker.check_file_content(&file(
             "src/fl/example.cpp",
             concat!(
-                "FL_WARN(\"before\"); /* comment starts\n",
-                "still commented FL_WARN(\"hidden\");\n",
-                "*/ FL_ERROR(\"after\");\n",
-                "/* FL_DBG(\"hidden\"); */\n",
+                "FL_WARN_F(\"before\"); /* comment starts\n",
+                "still commented FL_WARN_F(\"hidden\");\n",
+                "*/ FL_ERROR_F(\"after\");\n",
+                "/* FL_DBG_F(\"hidden\"); */\n",
                 "#define FL_WARN(...)\n",
             ),
         ));
@@ -728,4 +729,3 @@ int b = 2;
         let visible = scan_visible(&src);
         assert!(visible[0].contains("after_ident"), "{visible:?}");
     }
-

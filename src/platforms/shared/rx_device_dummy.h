@@ -75,7 +75,7 @@ public:
 private:
     void warnOnce() const FL_NO_EXCEPT {
         if (!mWarned) {
-            FL_ERROR_F("RxDevice not available: %s, falling back to DummyRxDevice", mReason);
+            FL_ERROR("RxDevice not available: %s, falling back to DummyRxDevice", mReason);
             mWarned = true;
         }
     }

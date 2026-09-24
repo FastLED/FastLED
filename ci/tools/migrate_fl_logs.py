@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Mechanical migration helper for legacy FastLED logging macros.
 
-This handles straightforward stream chains by converting them to printf-style
-`FL_*_F` calls with `%s` placeholders. It intentionally skips harder cases
-such as stream manipulators so the linter can report them for manual cleanup.
+This removes obsolete `_F` suffixes. Unified logging macros accept both legacy
+stream expressions and printf-style argument lists, so arguments are preserved.
 """
 
 from __future__ import annotations
@@ -18,34 +17,32 @@ SRC = ROOT / "src"
 CPP_EXTS = {".cpp", ".h", ".hpp"}
 
 MACROS: dict[str, str] = {
-    "FL_WARN": "FL_WARN_F",
-    "FL_WARN_IF": "FL_WARN_F_IF",
-    "FL_WARN_ONCE": "FL_WARN_F_ONCE",
-    "FL_WARN_EVERY": "FL_WARN_F_EVERY",
-    "FL_WARN_FMT": "FL_WARN_F",
-    "FL_WARN_FMT_IF": "FL_WARN_F_IF",
-    "FL_PRINT": "FL_PRINT_F",
-    "FL_PRINT_EVERY": "FL_PRINT_F_EVERY",
-    "FL_DBG": "FL_DBG_F",
-    "FL_DBG_IF": "FL_DBG_F_IF",
-    "FL_DBG_EVERY": "FL_DBG_F_EVERY",
-    "FL_ERROR": "FL_ERROR_F",
-    "FL_ERROR_IF": "FL_ERROR_F_IF",
-    "FL_LOG_SPI": "FL_LOG_SPI_F",
-    "FL_LOG_RMT": "FL_LOG_RMT_F",
-    "FL_LOG_PARLIO": "FL_LOG_PARLIO_F",
-    "FL_LOG_AUDIO": "FL_LOG_AUDIO_F",
-    "FL_LOG_INTERRUPT": "FL_LOG_INTERRUPT_F",
-    "FL_LOG_FLEXIO": "FL_LOG_FLEXIO_F",
-    "FL_LOG_OBJECTFLED": "FL_LOG_OBJECTFLED_F",
-    "FL_LOG_ASYNC": "FL_LOG_ASYNC_F",
-    "FL_LOG_SPI_ASYNC_MAIN": "FL_LOG_SPI_ASYNC_MAIN_F",
-    "FL_LOG_RMT_ASYNC_MAIN": "FL_LOG_RMT_ASYNC_MAIN_F",
-    "FL_LOG_PARLIO_ASYNC_MAIN": "FL_LOG_PARLIO_ASYNC_MAIN_F",
-    "FL_LOG_AUDIO_ASYNC_MAIN": "FL_LOG_AUDIO_ASYNC_MAIN_F",
-    "FL_LOG_INTERRUPT_ASYNC_MAIN": "FL_LOG_INTERRUPT_ASYNC_MAIN_F",
-    "FL_LOG_FLEXIO_ASYNC_MAIN": "FL_LOG_FLEXIO_ASYNC_MAIN_F",
-    "FL_LOG_OBJECTFLED_ASYNC_MAIN": "FL_LOG_OBJECTFLED_ASYNC_MAIN_F",
+    "FL_WARN_F": "FL_WARN",
+    "FL_WARN_F_IF": "FL_WARN_IF",
+    "FL_WARN_F_ONCE": "FL_WARN_ONCE",
+    "FL_WARN_F_EVERY": "FL_WARN_EVERY",
+    "FL_PRINT_F": "FL_PRINT",
+    "FL_PRINT_F_EVERY": "FL_PRINT_EVERY",
+    "FL_DBG_F": "FL_DBG",
+    "FL_DBG_F_IF": "FL_DBG_IF",
+    "FL_DBG_F_EVERY": "FL_DBG_EVERY",
+    "FL_ERROR_F": "FL_ERROR",
+    "FL_ERROR_F_IF": "FL_ERROR_IF",
+    "FL_LOG_SPI_F": "FL_LOG_SPI",
+    "FL_LOG_RMT_F": "FL_LOG_RMT",
+    "FL_LOG_PARLIO_F": "FL_LOG_PARLIO",
+    "FL_LOG_AUDIO_F": "FL_LOG_AUDIO",
+    "FL_LOG_INTERRUPT_F": "FL_LOG_INTERRUPT",
+    "FL_LOG_FLEXIO_F": "FL_LOG_FLEXIO",
+    "FL_LOG_OBJECTFLED_F": "FL_LOG_OBJECTFLED",
+    "FL_LOG_ASYNC_F": "FL_LOG_ASYNC",
+    "FL_LOG_SPI_ASYNC_MAIN_F": "FL_LOG_SPI_ASYNC_MAIN",
+    "FL_LOG_RMT_ASYNC_MAIN_F": "FL_LOG_RMT_ASYNC_MAIN",
+    "FL_LOG_PARLIO_ASYNC_MAIN_F": "FL_LOG_PARLIO_ASYNC_MAIN",
+    "FL_LOG_AUDIO_ASYNC_MAIN_F": "FL_LOG_AUDIO_ASYNC_MAIN",
+    "FL_LOG_INTERRUPT_ASYNC_MAIN_F": "FL_LOG_INTERRUPT_ASYNC_MAIN",
+    "FL_LOG_FLEXIO_ASYNC_MAIN_F": "FL_LOG_FLEXIO_ASYNC_MAIN",
+    "FL_LOG_OBJECTFLED_ASYNC_MAIN_F": "FL_LOG_OBJECTFLED_ASYNC_MAIN",
 }
 
 _SORTED_MACRO_KEYS: list[str] = sorted(MACROS, key=lambda s: len(s), reverse=True)
@@ -188,26 +185,8 @@ def convert_stream_expr(expr: str) -> str | None:
 
 
 def convert_args(macro: str, args_text: str) -> str | None:
-    if macro in {"FL_WARN_IF", "FL_WARN_FMT_IF", "FL_DBG_IF", "FL_ERROR_IF"}:
-        args = split_top_level(args_text, ",")
-        if len(args) != 2:
-            return None
-        converted = convert_stream_expr(args[1])
-        return f"{args[0]}, {converted}" if converted else None
-    if macro in {"FL_WARN_EVERY", "FL_PRINT_EVERY", "FL_DBG_EVERY"}:
-        args = split_top_level(args_text, ",")
-        if len(args) != 2:
-            return None
-        converted = convert_stream_expr(args[1])
-        return f"{args[0]}, {converted}" if converted else None
-    if macro == "FL_LOG_ASYNC":
-        args = split_top_level(args_text, ",")
-        if len(args) != 2:
-            return None
-        converted = convert_stream_expr(args[1])
-        return f"{args[0]}, {converted}" if converted else None
-    converted = convert_stream_expr(args_text)
-    return converted
+    del macro
+    return args_text
 
 
 def convert_file(path: Path) -> int:
@@ -217,8 +196,6 @@ def convert_file(path: Path) -> int:
     changes = 0
     for match in MACRO_RE.finditer(text):
         macro = match.group(1)
-        if macro.endswith("_F"):
-            continue
         line_start = text.rfind("\n", 0, match.start()) + 1
         line_prefix = text[line_start : match.start()]
         if line_prefix.lstrip().startswith("//") or line_prefix.lstrip().startswith(

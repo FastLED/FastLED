@@ -457,9 +457,9 @@ FL_TEST_CASE("FL_WARN unified - printf-style without _F suffix") {
         FL_CHECK(true);
     }
 
-    FL_SUBCASE("FL_WARN_F alias still compiles") {
+    FL_SUBCASE("FL_WARN alias still compiles") {
         int n = 5;
-        FL_WARN_F("Legacy: %d", n);
+        FL_WARN("Legacy: %d", n);
         FL_CHECK(true);
     }
 
@@ -472,8 +472,8 @@ FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
         FL_CHECK(true);
     }
 
-    FL_SUBCASE("FL_ERROR_F alias still compiles") {
-        FL_ERROR_F("Legacy err: %s", "oops");
+    FL_SUBCASE("FL_ERROR alias still compiles") {
+        FL_ERROR("Legacy err: %s", "oops");
         FL_CHECK(true);
     }
 
@@ -487,25 +487,33 @@ FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
 #define FL_TEST_STRINGIZE_IMPL(...) #__VA_ARGS__
 #define FL_TEST_STRINGIZE(...) FL_TEST_STRINGIZE_IMPL(__VA_ARGS__)
 
-FL_TEST_CASE("explicit _F logging macros bypass stream dispatch") {
-    const fl::string warn = FL_TEST_STRINGIZE(FL_WARN_F("literal"));
-    const fl::string error = FL_TEST_STRINGIZE(FL_ERROR_F("literal"));
-    const fl::string print = FL_TEST_STRINGIZE(FL_PRINT_F("literal"));
-    const fl::string async =
-        FL_TEST_STRINGIZE(FL_LOG_ASYNC_F(logger, "literal"));
-    const fl::string warn_if =
-        FL_TEST_STRINGIZE(FL_WARN_F_IF(true, "literal"));
-    const fl::string warn_once = FL_TEST_STRINGIZE(FL_WARN_F_ONCE("literal"));
-    const fl::string warn_every =
-        FL_TEST_STRINGIZE(FL_WARN_F_EVERY(10, "literal"));
+FL_TEST_CASE("unified logging keeps literals off the stream path") {
+    const fl::string literal = FL_TEST_STRINGIZE(FL_WARN("literal"));
 
-    FL_CHECK_NE(warn.find("log_emit_f"), fl::string::npos);
-    FL_CHECK_NE(error.find("log_emit_f"), fl::string::npos);
-    FL_CHECK_NE(print.find("fl::printf"), fl::string::npos);
-    FL_CHECK_NE(async.find("log_format_string"), fl::string::npos);
-    FL_CHECK_NE(warn_if.find("log_emit_f"), fl::string::npos);
-    FL_CHECK_NE(warn_once.find("log_emit_f"), fl::string::npos);
-    FL_CHECK_NE(warn_every.find("log_emit_f"), fl::string::npos);
+    FL_CHECK_NE(literal.find("log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(literal.find("log_seed"), fl::string::npos);
+    FL_CHECK_EQ(literal.find("sstream"), fl::string::npos);
+}
+
+FL_TEST_CASE("unified logging wrappers keep literals off the stream path") {
+    const fl::string warn = FL_TEST_STRINGIZE(FL_WARN("literal"));
+    const fl::string error = FL_TEST_STRINGIZE(FL_ERROR("literal"));
+    const fl::string print = FL_TEST_STRINGIZE(FL_PRINT("literal"));
+    const fl::string async =
+        FL_TEST_STRINGIZE(FL_LOG_ASYNC(logger, "literal"));
+    const fl::string warn_if =
+        FL_TEST_STRINGIZE(FL_WARN_IF(true, "literal"));
+    const fl::string warn_once = FL_TEST_STRINGIZE(FL_WARN_ONCE("literal"));
+    const fl::string warn_every =
+        FL_TEST_STRINGIZE(FL_WARN_EVERY(10, "literal"));
+
+    FL_CHECK_NE(warn.find("log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(error.find("log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(print.find("print_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(async.find("async_log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(warn_if.find("log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(warn_once.find("log_emit_auto"), fl::string::npos);
+    FL_CHECK_NE(warn_every.find("log_emit_auto"), fl::string::npos);
 
     FL_CHECK_EQ(warn.find("sstream"), fl::string::npos);
     FL_CHECK_EQ(error.find("sstream"), fl::string::npos);
@@ -551,8 +559,8 @@ FL_TEST_CASE("FL_PRINT unified - printf-style") {
         FL_CHECK(true);
     }
 
-    FL_SUBCASE("FL_PRINT_F alias still compiles") {
-        FL_PRINT_F("Legacy: %s", "abc");
+    FL_SUBCASE("FL_PRINT alias still compiles") {
+        FL_PRINT("Legacy: %s", "abc");
         FL_CHECK(true);
     }
 }
