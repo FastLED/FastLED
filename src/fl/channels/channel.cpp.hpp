@@ -226,6 +226,62 @@ static void emitDisabledDriverError(const fl::string& channelName,
 
 }  // anonymous namespace
 
+Channel::PixelEncoder
+Channel::selectPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
+    if (const ClocklessChipset* clockless = chipset.ptr<ClocklessChipset>()) {
+        switch (clockless->encoder) {
+            case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
+                return &Channel::encodeWS2812;
+            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
+                return &Channel::encodeTM1812RGBWW;
+            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
+                return &Channel::encodeTM1908;
+#if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
+            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
+            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
+            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
+                return &Channel::encodeUCS7604;
+#endif
+        }
+    } else if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
+#if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
+        switch (spi->timing.chipset) {
+            case SpiChipset::APA102:
+            case SpiChipset::DOTSTAR:
+            case SpiChipset::APA102HD:
+            case SpiChipset::DOTSTARHD:
+            case SpiChipset::HD107:
+            case SpiChipset::HD107HD:
+                return &Channel::encodeAPA102;
+            case SpiChipset::SK9822:
+            case SpiChipset::SK9822HD:
+                return &Channel::encodeSK9822;
+            case SpiChipset::WS2801:
+                return &Channel::encodeWS2801;
+            case SpiChipset::WS2803:
+                return &Channel::encodeWS2803;
+            case SpiChipset::P9813:
+                return &Channel::encodeP9813;
+            case SpiChipset::LPD8806:
+                return &Channel::encodeLPD8806;
+            case SpiChipset::LPD6803:
+                return &Channel::encodeLPD6803;
+            case SpiChipset::SM16716:
+                return &Channel::encodeSM16716;
+            case SpiChipset::MY9221:
+                return &Channel::encodeMY9221;
+            case SpiChipset::HD108:
+                return &Channel::encodeHD108;
+        }
+#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
+    }
+    return nullptr;
+}
+
+Channel::PixelEncoder Channel::ws2812PixelEncoder() FL_NO_EXCEPT {
+    return &Channel::encodeWS2812;
+}
+
 
 i32 Channel::nextId() {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
@@ -289,8 +345,13 @@ const ChipsetTimingConfig& Channel::getTiming() const {
 }
 
 Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT
+    : Channel(chipset, rgbOrder, mode, selectPixelEncoder(chipset)) {}
+
+Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder,
+                 RegistrationMode mode, PixelEncoder pixelEncoder) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(mode)
     , mChipset(chipset)
+    , mPixelEncoder(pixelEncoder)
     , mRgbOrder(rgbOrder)
     , mDriver()
     , mBus(Bus::AUTO)
@@ -306,6 +367,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(chipset)
+    , mPixelEncoder(selectPixelEncoder(chipset))
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)
@@ -340,6 +402,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
                  EOrder rgbOrder, const ChannelOptions& options) FL_NO_EXCEPT
     : CPixelLEDController<RGB>(RegistrationMode::DeferRegister)  // Defer registration until FastLED.add()
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
+    , mPixelEncoder(selectPixelEncoder(mChipset))
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
     , mBus(options.mBus)  // Bus selection (#2459)
@@ -583,6 +646,178 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 
 } // anonymous namespace
 
+namespace {
+
+/// Shared color-managed SPI override check. Keeping it out of the per-chipset
+/// leaves avoids duplicating the optional pipeline hook in every writer.
+FL_NO_INLINE
+bool tryEncodeManagedSpi(Channel& channel, PixelIterator& pixels,
+                         bool managed, fl::vector_psram<u8>& output,
+                         SpiChipset chipset)
+    FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+    if (!managed) {
+        return false;
+    }
+    const ColorPipelineHooks& hooks = colorPipelineHooks();
+    return hooks.encodeManagedSpi != nullptr &&
+           hooks.encodeManagedSpi(pixels, &output, chipset, channel);
+#else
+    FL_UNUSED(channel);
+    FL_UNUSED(pixels);
+    FL_UNUSED(managed);
+    FL_UNUSED(output);
+    FL_UNUSED(chipset);
+    return false;
+#endif
+}
+
+SpiChipset spiChipsetFor(const Channel& channel) FL_NO_EXCEPT {
+    const SpiChipsetConfig* spi =
+        channel.getChipset().ptr<SpiChipsetConfig>();
+    return spi->timing.chipset;
+}
+
+}  // anonymous namespace
+
+FL_NO_INLINE
+void Channel::encodeWS2812(Channel&, PixelIterator& pixels,
+                           bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    pixels.writeWS2812(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeTM1812RGBWW(Channel&, PixelIterator& pixels,
+                                bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    pixels.writeTM1812RGBWW(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeTM1908(Channel&, PixelIterator& pixels,
+                           bool, fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    pixels.writeTM1908(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeUCS7604(Channel& channel, PixelIterator& pixels,
+                            bool managed,
+                            fl::vector_psram<u8>& output) FL_NO_EXCEPT {
+    const ClocklessChipset* clockless =
+        channel.mChipset.ptr<ClocklessChipset>();
+    writeUCS7604(&output, pixels, clockless->encoder, channel.mSettings,
+                 channel.mRgbOrder, managed);
+}
+
+FL_NO_INLINE
+void Channel::encodeAPA102(Channel& channel, PixelIterator& pixels,
+                           bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    const SpiChipset chipset = spiChipsetFor(channel);
+    if (tryEncodeManagedSpi(channel, pixels, managed, output, chipset)) {
+        return;
+    }
+    const bool hdGamma = chipset == SpiChipset::APA102HD ||
+                         chipset == SpiChipset::DOTSTARHD ||
+                         chipset == SpiChipset::HD107HD;
+    pixels.writeAPA102(&output, hdGamma);
+}
+
+FL_NO_INLINE
+void Channel::encodeSK9822(Channel& channel, PixelIterator& pixels,
+                           bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    const SpiChipset chipset = spiChipsetFor(channel);
+    if (tryEncodeManagedSpi(channel, pixels, managed, output, chipset)) {
+        return;
+    }
+    pixels.writeSK9822(&output, chipset == SpiChipset::SK9822HD);
+}
+
+FL_NO_INLINE
+void Channel::encodeWS2801(Channel& channel, PixelIterator& pixels,
+                           bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeWS2801(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeWS2803(Channel& channel, PixelIterator& pixels,
+                           bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeWS2803(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeP9813(Channel& channel, PixelIterator& pixels,
+                          bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeP9813(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeLPD8806(Channel& channel, PixelIterator& pixels,
+                            bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeLPD8806(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeLPD6803(Channel& channel, PixelIterator& pixels,
+                            bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeLPD6803(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeSM16716(Channel& channel, PixelIterator& pixels,
+                            bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeSM16716(&output);
+}
+
+FL_NO_INLINE
+void Channel::encodeHD108(Channel& channel, PixelIterator& pixels,
+                          bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    if (tryEncodeManagedSpi(channel, pixels, managed, output,
+                           spiChipsetFor(channel))) {
+        return;
+    }
+    pixels.writeHD108(&output, managed);
+}
+
+FL_NO_INLINE
+void Channel::encodeMY9221(Channel& channel, PixelIterator& pixels,
+                           bool managed, fl::vector_psram<u8>& output)
+    FL_NO_EXCEPT {
+    (void)tryEncodeManagedSpi(channel, pixels, managed, output,
+                             spiChipsetFor(channel));
+}
+
 /// @brief Cold fallback for the non-pre-bound driver path. Handles dynamic
 ///        `ChannelManager::selectDriverForChannel` lookup AND the
 ///        bus-key-miss diagnostic chain. Hoisted out of `showPixels` so the
@@ -745,7 +980,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                                         pixels.mColorAdjustment.premixed.r);
     PixelIterator& pixelIterator = iterator.get();
 
-    // Encode pixels based on chipset type
+    // Encode pixels with the writer selected once from the immutable chipset.
     auto& data = mChannelData->getData();
     data.clear();
     if (mSettings.isRgbww()) {
@@ -756,133 +991,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGB);
     }
 
-    if (mChipset.is<ClocklessChipset>()) {
-        // Clockless chipsets: dispatch based on encoder type
-        const ClocklessChipset* clockless = mChipset.ptr<ClocklessChipset>();
-        switch (clockless->encoder) {
-            case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
-                pixelIterator.writeWS2812(&data);
-                break;
-            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1812_RGBWW:
-                pixelIterator.writeTM1812RGBWW(&data);
-                break;
-            case ClocklessEncoder::CLOCKLESS_ENCODER_TM1908:
-                pixelIterator.writeTM1908(&data);
-                break;
-#if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
-            // Gated by FASTLED_DISABLE_UCS7604 (#2920). For WS2812-only
-            // sketches the UCS7604 case is dead at runtime, but each
-            // `writeUCS7604(...)` reference is statically reachable,
-            // keeping the encoder bodies linked. Setting
-            // `-DFASTLED_DISABLE_UCS7604=1` drops the case + the
-            // `encodeUCS7604_16bit_RGB` / `encodeUCS7604_16bit_RGBW`
-            // template instantiations (~400-600 B). When the gate is
-            // enabled, calling showPixels() on a UCS7604 channel
-            // silently emits nothing.
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
-            case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
-                writeUCS7604(&data, pixelIterator, clockless->encoder,
-                             mSettings, mRgbOrder, iterator.isManaged());
-                break;
-#endif  // !FASTLED_DISABLE_UCS7604
-        }
-#if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
-    } else if (mChipset.is<SpiChipsetConfig>()) {
-        // SPI chipsets: dispatch based on chipset type (zero allocation).
-        //
-        // Gated by FASTLED_DISABLE_SPI_CHIPSETS (#2913). For NEOPIXEL-only
-        // sketches on ESP32-S3 the SPI branch is dead at runtime, but the
-        // compiler cannot prove that â€” each pixelIterator.writeXXX(...)
-        // reference below is statically reachable, keeping ~720 B of
-        // encoder bodies (writeAPA102, writeSK9822, writeLPD8806,
-        // writeSM16716) plus the 11-case switch table linked. Setting
-        // `-DFASTLED_DISABLE_SPI_CHIPSETS=1` in build_flags drops the
-        // whole branch and recovers ~1.0-1.2 KB on a NEOPIXEL Blink.
-        //
-        // When the gate is enabled, calling showPixels() on an
-        // SpiChipsetConfig channel silently emits nothing â€” the user
-        // accepts that constraint by setting the flag.
-        const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
-        const SpiEncoder& config = spi->timing;
-
-        // A colour-managed channel's chipset-specific quantization, where
-        // the 8-bit path cannot do it in one step (#4042): B1's joint
-        // code/field solve on APA102-class HD chips, and a single
-        // quantization to LPD8806's 7 / LPD6803's 5 bits (B3). Through the
-        // hook, so a sketch that binds no profile links none of it; a chip it
-        // does not handle, or an HD field held fixed, falls through to the
-        // switch.
-        bool managed_encoded = false;
-#if FL_COLOR_PROFILE_RUNTIME
-        if (iterator.isManaged()) {
-            const ColorPipelineHooks& spi_hooks = colorPipelineHooks();
-            managed_encoded = spi_hooks.encodeManagedSpi != nullptr &&
-                              spi_hooks.encodeManagedSpi(pixelIterator, &data,
-                                                         config.chipset, *this);
-        }
-#endif
-
-        // Switch on enum WITHOUT default case - compiler will warn if new enum values are added
-        // TODO: Consolidate these PixelIterator methods with template controllers in src/fl/chipsets/
-        if (!managed_encoded) switch (config.chipset) {
-            case SpiChipset::APA102:
-            case SpiChipset::DOTSTAR:
-            case SpiChipset::HD107:
-                pixelIterator.writeAPA102(&data, false);
-                break;
-
-            case SpiChipset::APA102HD:
-            case SpiChipset::DOTSTARHD:
-            case SpiChipset::HD107HD:
-                pixelIterator.writeAPA102(&data, true);
-                break;
-
-            case SpiChipset::SK9822:
-                pixelIterator.writeSK9822(&data, false);
-                break;
-
-            case SpiChipset::SK9822HD:
-                pixelIterator.writeSK9822(&data, true);
-                break;
-
-            case SpiChipset::WS2801:
-                pixelIterator.writeWS2801(&data);
-                break;
-
-            case SpiChipset::WS2803:
-                pixelIterator.writeWS2803(&data);
-                break;
-
-            case SpiChipset::P9813:
-                pixelIterator.writeP9813(&data);
-                break;
-
-            case SpiChipset::LPD8806:
-                pixelIterator.writeLPD8806(&data);
-                break;
-
-            case SpiChipset::LPD6803:
-                pixelIterator.writeLPD6803(&data);
-                break;
-
-            case SpiChipset::SM16716:
-                pixelIterator.writeSM16716(&data);
-                break;
-
-            case SpiChipset::MY9221:
-                // MY9221 samples data on every clock edge (DDR). The standard
-                // SPI channel encoder path cannot express that framing; drive
-                // it via addLeds<MY9221, DATA, CLOCK>(...) instead.
-                break;
-
-            case SpiChipset::HD108:
-                pixelIterator.writeHD108(&data, iterator.isManaged());
-                break;
-        }
-        // No default case - compiler will error if any enum value is missing
+    if (mPixelEncoder != nullptr) {
+        mPixelEncoder(*this, pixelIterator, iterator.isManaged(), data);
     }
-#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
 
     // Fire event after encoding completes
     {
