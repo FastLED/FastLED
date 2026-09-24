@@ -164,7 +164,8 @@ void SignalConditioner::applyNoiseGate(span<const i16> pcm, vector<i16>& output)
 
     for (size i = 0; i < count; ++i) {
         const i16 sample = pcm[i];
-        const i16 absSample = (sample < 0) ? -sample : sample;
+        const i32 sample32 = static_cast<i32>(sample);
+        const i32 absSample = (sample32 < 0) ? -sample32 : sample32;
 
         // Hysteresis logic: Different thresholds for opening vs closing
         if (!mNoiseGateOpen) {

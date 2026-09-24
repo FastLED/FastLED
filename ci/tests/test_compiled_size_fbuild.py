@@ -17,6 +17,7 @@ import pytest
 from ci.compiled_size import (
     _find_size_tool,
     _parse_size_tool_text,
+    main,
 )
 from ci.util.firmware_elf import find_fbuild_elf as _find_fbuild_elf
 
@@ -122,6 +123,40 @@ def test_find_fbuild_elf_picks_newer_of_release_and_debug(tmp_path: Path) -> Non
 
     board_info = {"prog_path": "irrelevant"}
     assert _find_fbuild_elf(board_info, tmp_path) == debug_elf
+
+
+def test_main_fails_when_board_metadata_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    assert main("missing-board") != 0
+    assert (
+        "build_info.json not found for board 'missing-board'" in capsys.readouterr().out
+    )
+
+
+def test_main_fails_when_board_metadata_is_malformed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    build_dir = tmp_path / ".build" / "fbuild" / "broken-board"
+    build_dir.mkdir(parents=True)
+    (build_dir / "build_info.json").write_text("{not json", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    assert main("broken-board") != 0
+    assert "Unable to parse build_info.json for broken-board" in capsys.readouterr().out
+
+
+def test_main_reports_successful_measurement(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(
+        "ci.compiled_size.check_firmware_size", lambda board, example: 42
+    )
+
+    assert main("working-board") == 0
+    assert "Firmware size for working-board: 42 bytes" in capsys.readouterr().out
 
 
 if __name__ == "__main__":

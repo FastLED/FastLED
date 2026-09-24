@@ -85,4 +85,39 @@ FL_TEST_CASE("audio::SoundLevelMeter - span overload works") {
     FL_CHECK_GT(meter.getDBFS(), -20.0);
 }
 
+FL_TEST_CASE("audio::SoundLevelMeter - smoothing initializes from first block") {
+    const fl::i16 sample = 1000;
+    const double smoothingValues[] = {0.5, 1.0};
+
+    for (double smoothing : smoothingValues) {
+        audio::SoundLevelMeter meter(33.0, smoothing);
+        meter.processBlock(&sample, 1);
+        FL_CHECK_GT(meter.getDBFS(), -120.0);
+        FL_CHECK_LT(meter.getDBFS(), 0.0);
+        FL_CHECK_GT(meter.getSPL(), 0.0);
+        FL_CHECK_LT(meter.getSPL(), 120.0);
+
+        meter.processBlock(&sample, 1);
+        FL_CHECK_GT(meter.getDBFS(), -120.0);
+        FL_CHECK_LT(meter.getDBFS(), 0.0);
+        FL_CHECK_GT(meter.getSPL(), 0.0);
+        FL_CHECK_LT(meter.getSPL(), 120.0);
+    }
+}
+
+FL_TEST_CASE("audio::SoundLevelMeter - empty blocks preserve readings") {
+    audio::SoundLevelMeter meter(33.0, 0.5);
+    meter.processBlock(nullptr, 0);
+    FL_CHECK_EQ(meter.getDBFS(), 0.0);
+    FL_CHECK_EQ(meter.getSPL(), 33.0);
+
+    const fl::i16 sample = 1000;
+    meter.processBlock(&sample, 1);
+    const double dbfs = meter.getDBFS();
+    const double spl = meter.getSPL();
+    meter.processBlock(nullptr, 0);
+    FL_CHECK_EQ(meter.getDBFS(), dbfs);
+    FL_CHECK_EQ(meter.getSPL(), spl);
+}
+
 } // FL_TEST_FILE

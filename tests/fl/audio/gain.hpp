@@ -171,3 +171,23 @@ FL_TEST_CASE("applyGain - preserves timestamp") {
     sample.applyGain(2.0f);
     FL_CHECK_EQ(sample.timestamp(), 12345u);
 }
+
+FL_TEST_CASE("applyGain - invalidates cached RMS") {
+    vector<i16> data = {1000, -1000};
+    audio::Sample sample(data, 0);
+    FL_CHECK_EQ(sample.rms(), 1000.0f);
+
+    sample.applyGain(2.0f);
+    FL_CHECK_EQ(sample.rms(), 2000.0f);
+    FL_CHECK_EQ(sample.rms(), 2000.0f);
+}
+
+FL_TEST_CASE("applyGain - invalidates cached zero crossing factor") {
+    vector<i16> data = {1, -1};
+    audio::Sample sample(data, 0);
+    FL_CHECK_EQ(sample.zcf(), 1.0f);
+
+    sample.applyGain(0.0f);
+    FL_CHECK_EQ(sample.zcf(), 0.0f);
+    FL_CHECK_EQ(sample.zcf(), 0.0f);
+}

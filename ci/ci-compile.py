@@ -12,12 +12,28 @@ native ``test-emu`` command. This compiler does not assemble emulator images.
 """
 
 import os
+import shutil
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
     from ci.compiler.argument_parser import CompilationConfig
+
+
+def _copy_requested_build_info(source: Path, destination: Path) -> bool:
+    """Copy requested build metadata, failing without creating an error-shaped file."""
+    if not source.exists():
+        print(f"ERROR: Build info not found at {source}")
+        return False
+    try:
+        shutil.copy(source, destination)
+    except OSError as e:
+        print(f"ERROR: Failed to write build info: {e}")
+        return False
+    print(f"Build info written to: {destination}")
+    return True
 
 
 # handle_docker_compilation() removed in #2812 — compilation Docker has been
@@ -96,8 +112,6 @@ def _wasm_fast_path() -> int | None:
 
     # Compile-only fast path: call wasm_build.build() directly,
     # skipping both wasm_compile and argparse (~47ms saved)
-    from pathlib import Path
-
     from ci.wasm_build import resolve_example_dir
 
     output_dir = resolve_example_dir(example) / "fastled_js"
@@ -410,9 +424,6 @@ def main() -> int:
 
         # Write build info to file if requested
         if config.build_info and boards and examples:
-            import json
-            import shutil
-
             from ci.compiler.path_manager import board_build_dir
 
             board_name = boards[0].board_name
@@ -423,24 +434,7 @@ def main() -> int:
                 board_build_dir(board_name) / f"build_info_{example_name}.json"
             )
 
-            try:
-                if build_info_path.exists():
-                    shutil.copy(build_info_path, config.build_info)
-                    print(f"Build info written to: {config.build_info}")
-                else:
-                    with open(config.build_info, "w") as f:
-                        json.dump(
-                            {"error": f"Build info not found at {build_info_path}"},
-                            f,
-                            indent=2,
-                        )
-                    print(
-                        yellow_text(
-                            f"Warning: Build info not found at {build_info_path}"
-                        )
-                    )
-            except OSError as e:
-                print(red_text(f"ERROR: Failed to write build info: {e}"))
+            if not _copy_requested_build_info(build_info_path, config.build_info):
                 return 1
 
         return 0

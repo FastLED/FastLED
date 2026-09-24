@@ -8,6 +8,33 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+class dereference_counting_iterator {
+  public:
+    dereference_counting_iterator(int *pointer, int *dereference_count)
+        : mPointer(pointer), mDereferenceCount(dereference_count) {}
+
+    int &operator*() const {
+        ++*mDereferenceCount;
+        return *mPointer;
+    }
+
+    fl::ptrdiff operator-(const dereference_counting_iterator &other) const {
+        return mPointer - other.mPointer;
+    }
+
+    bool operator==(const dereference_counting_iterator &other) const {
+        return mPointer == other.mPointer;
+    }
+
+    bool operator!=(const dereference_counting_iterator &other) const {
+        return !(*this == other);
+    }
+
+  private:
+    int *mPointer;
+    int *mDereferenceCount;
+};
+
 
 FL_TEST_CASE("fl::span explicit conversions work correctly") {
     FL_SUBCASE("fl::vector to fl::span conversions") {
@@ -126,6 +153,33 @@ FL_TEST_CASE("fl::span non-template function conversions work") {
         FL_CHECK(c_array[0] == 8);
         FL_CHECK(c_array[2] == 22);
     }
+}
+
+FL_TEST_CASE("fl::span accepts empty iterator ranges") {
+    int value = 42;
+    fl::span<int> pointer_span(&value, &value);
+    FL_CHECK_EQ(pointer_span.size(), 0u);
+    FL_CHECK_EQ(pointer_span.begin(), pointer_span.end());
+    FL_CHECK_EQ(pointer_span.data(), &value);
+
+    fl::span<const int> const_pointer_span(&value, &value);
+    FL_CHECK_EQ(const_pointer_span.size(), 0u);
+    FL_CHECK_EQ(const_pointer_span.data(), &value);
+
+    int reversed_values[] = {1, 2};
+    fl::span<int> reversed_pointer_span(reversed_values + 1, reversed_values);
+    FL_CHECK_EQ(reversed_pointer_span.size(), 0u);
+
+    fl::vector<int> values;
+    fl::span<int> vector_span(values.begin(), values.end());
+    FL_CHECK_EQ(vector_span.size(), 0u);
+    FL_CHECK_EQ(vector_span.begin(), vector_span.end());
+
+    int dereference_count = 0;
+    dereference_counting_iterator empty(&value, &dereference_count);
+    fl::span<int> counted_span(empty, empty);
+    FL_CHECK_EQ(counted_span.size(), 0u);
+    FL_CHECK_EQ(dereference_count, 0);
 }
 
 // P2447R6 initializer_list constructor is deleted because the backing array

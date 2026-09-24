@@ -175,19 +175,23 @@ def check_firmware_size(board: str, example: str | None = None) -> int:
     )
 
 
-def main(board: str, example: str | None = None):
+def main(board: str, example: str | None = None) -> int:
     try:
         size = check_firmware_size(board, example)
         print(f"Firmware size for {board}: {size} bytes")
+        return 0
     except FileNotFoundError as e:
         print(f"Error: {e}")
+        return 1
     except json.JSONDecodeError:
         print(f"Error: Unable to parse build_info.json for {board}")
+        return 1
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+        return 1
 
 
 if __name__ == "__main__":
@@ -202,4 +206,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(args.board, args.example)
+    raise SystemExit(main(args.board, args.example))
