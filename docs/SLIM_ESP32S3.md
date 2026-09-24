@@ -139,6 +139,17 @@ This emits:
 - `.build/symbols/esp32s3/report.json` — per-symbol attribution.
 - `.build/symbols/esp32s3/report.md` — human-readable top-N table.
 
+### Reproducible slim profile
+
+```bash
+bash bloat esp32s3 --build --profile slim   # log-off + smallest sdkconfig overlay
+bash bloat esp32s3 --build --compare        # default vs. slim, side by side
+```
+
+**Note:** the default `bash bloat esp32s3` image is built **without** `-DNDEBUG` / `FASTLED_LOG_VERBOSITY=0`, so log verbosity resolves to 1 (see `src/fl/log/log.h`). It is not the log-off release config described above. For reference, default Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin` (#4564).
+
+The slim profile applies `FASTLED_LOG_VERBOSITY=0` plus `tools/sdkconfig_for_smallest_fastled.defaults`, and fails if `libespcoredump.a` or `diag_log_add` remain linked. It writes `.build/symbols/esp32s3-slim/` (`report.json`, `report.md`, and `provenance.json` recording the applied flags and overlay). Because slim disables field-debug logs and coredumps it is opt-in; the ordinary ratchet baseline `tests/data/esp32s3_bloat_baseline.txt` still tracks the default image and is unchanged.
+
 Compare two builds with `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` (added / removed / grew / shrunk symbols per archive). The full tooling reference is in [`agents/docs/binary-size-analysis.md`](../agents/docs/binary-size-analysis.md).
 
 ## Roadmap

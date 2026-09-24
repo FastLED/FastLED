@@ -23,6 +23,22 @@ bash bloat esp32s3 --build
 bash bloat esp32s3 --no-summary
 ```
 
+### Slim ESP32-S3 profile (#4564)
+
+```bash
+# Build + analyze the documented log-off release config
+bash bloat esp32s3 --build --profile slim
+
+# Build both default and slim, report them side by side
+bash bloat esp32s3 --build --compare
+```
+
+**The default `bash bloat` image is NOT the documented release config.** It is built without `-DNDEBUG` and without `FASTLED_LOG_VERBOSITY=0`, so `src/fl/log/log.h` resolves log verbosity to 1 and the `FL_WARN` string pool stays linked. Reference default-image numbers from the issue: Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin`.
+
+`--profile slim` applies `-DFASTLED_LOG_VERBOSITY=0` plus `tools/sdkconfig_for_smallest_fastled.defaults`, and fails the run if `libespcoredump.a` or `diag_log_add` are still linked (proof the overlay actually took effect). Output goes to `.build/symbols/esp32s3-slim/` alongside a `provenance.json` recording the flags and overlay used.
+
+Slim disables field-debug logs and coredumps, so it is opt-in only. The ordinary ratchet baseline `tests/data/esp32s3_bloat_baseline.txt` still tracks the default image and is unchanged.
+
 `bash bloat <board>` hides every choice that was previously a per-invocation footgun — toolchain prefix, ELF path, `--nm` override, output directory. Use it instead of running `nm`/`size`/`xtensa-esp32s3-elf-nm` by hand.
 
 The wrapper recognizes fbuild's artifact layout, `.build/fbuild/<board>/.fbuild/build/release/firmware.elf`, and lets fbuild resolve the toolchain there.
