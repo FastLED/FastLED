@@ -445,9 +445,67 @@ pointer_to_uptr(const T&) FL_NO_EXCEPT {
     return 0; // Never executed - runtime check prevents this
 }
 
-// Format non-pointer types (d, i, u, o, x, X, f, c, s)
+// Normalized form of a built-in scalar argument. Every arithmetic type that
+// printf commonly sees is squeezed into this struct so the specifier switch
+// exists once, out of line, instead of once per argument type (#4565).
+struct ScalarArg {
+    enum Kind : fl::u8 { kSigned, kUnsigned, kBool, kChar, kFloat, kDouble };
+    Kind kind;
+    fl::u8 size;   // sizeof the original type (selects the hex width)
+    fl::i64 s;     // integral kinds: value as i64
+    fl::u64 u;     // integral kinds: value as u64 (same bits as the original cast)
+    float f;       // kFloat
+    double d;      // kDouble
+};
+
+// The shared specifier switch. Defined in `stdio.cpp.hpp`.
+void format_scalar(sstream& stream, const FormatSpec& spec, const ScalarArg& a) FL_NO_EXCEPT;
+
+// Maps a built-in type to its ScalarArg::Kind; -1 keeps the generic template.
+template<typename T> struct scalar_kind { enum : int { value = -1 }; };
+template<> struct scalar_kind<bool> { enum : int { value = ScalarArg::kBool }; };
+template<> struct scalar_kind<char> { enum : int { value = ScalarArg::kChar }; };
+template<> struct scalar_kind<signed char> { enum : int { value = ScalarArg::kSigned }; };
+template<> struct scalar_kind<unsigned char> { enum : int { value = ScalarArg::kUnsigned }; };
+template<> struct scalar_kind<short> { enum : int { value = ScalarArg::kSigned }; };
+template<> struct scalar_kind<unsigned short> { enum : int { value = ScalarArg::kUnsigned }; };
+template<> struct scalar_kind<int> { enum : int { value = ScalarArg::kSigned }; };
+template<> struct scalar_kind<unsigned int> { enum : int { value = ScalarArg::kUnsigned }; };
+template<> struct scalar_kind<long> { enum : int { value = ScalarArg::kSigned }; };
+template<> struct scalar_kind<unsigned long> { enum : int { value = ScalarArg::kUnsigned }; };
+template<> struct scalar_kind<long long> { enum : int { value = ScalarArg::kSigned }; };
+template<> struct scalar_kind<unsigned long long> { enum : int { value = ScalarArg::kUnsigned }; };
+template<> struct scalar_kind<float> { enum : int { value = ScalarArg::kFloat }; };
+template<> struct scalar_kind<double> { enum : int { value = ScalarArg::kDouble }; };
+
 template<typename T>
-typename fl::enable_if<!fl::is_pointer<T>::value>::type
+typename fl::enable_if<fl::is_integral<T>::value>::type
+fill_scalar_arg(ScalarArg& a, const T& arg) FL_NO_EXCEPT {
+    a.s = static_cast<fl::i64>(arg);
+    a.u = static_cast<fl::u64>(arg);
+}
+
+template<typename T>
+typename fl::enable_if<fl::is_floating_point<T>::value>::type
+fill_scalar_arg(ScalarArg& a, const T& arg) FL_NO_EXCEPT {
+    a.f = static_cast<float>(arg);
+    a.d = static_cast<double>(arg);
+}
+
+// Format built-in scalar types: thin adapter onto format_scalar.
+template<typename T>
+typename fl::enable_if<(scalar_kind<T>::value >= 0)>::type
+format_arg(sstream& stream, const FormatSpec& spec, const T& arg) FL_NO_EXCEPT {
+    ScalarArg a = {};
+    a.kind = static_cast<ScalarArg::Kind>(scalar_kind<T>::value);
+    a.size = static_cast<fl::u8>(sizeof(T));
+    fill_scalar_arg(a, arg);
+    format_scalar(stream, spec, a);
+}
+
+// Format other non-pointer types (enums, user types) (d, i, u, o, x, X, f, c, s)
+template<typename T>
+typename fl::enable_if<!fl::is_pointer<T>::value && (scalar_kind<T>::value < 0)>::type
 format_arg(sstream& stream, const FormatSpec& spec, const T& arg) FL_NO_EXCEPT {
     fl::string result;
     bool is_numeric = false;

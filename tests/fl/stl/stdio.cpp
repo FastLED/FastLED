@@ -1334,4 +1334,200 @@ FL_TEST_CASE("fl::snprintf {} respects buffer boundaries") {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Characterization of the scalar format_arg matrix (issue 4565).
+//
+// These pin the CURRENT byte-for-byte output of
+// fl::printf_detail::format_arg (src/fl/stl/stdio.h) so that sharing the
+// scalar code across types cannot silently change what any type prints.
+// Some pinned values are quirks rather than printf-conformant output; they
+// are marked as such and must only change deliberately.
+///////////////////////////////////////////////////////////////////////////////
+
+FL_TEST_CASE("printf scalar format_arg matrix (issue 4565)") {
+    char buf[128];
+
+    FL_SUBCASE("int with %d %i and sign flags") {
+        fl::snprintf(buf, sizeof(buf), "%d|%i", 42, -42);
+        FL_CHECK(fl::string(buf) == "42|-42");
+        fl::snprintf(buf, sizeof(buf), "%+d|%+d", 42, -42);
+        FL_CHECK(fl::string(buf) == "+42|-42");
+        fl::snprintf(buf, sizeof(buf), "% d|% d", 42, -42);
+        FL_CHECK(fl::string(buf) == " 42|-42");
+        fl::snprintf(buf, sizeof(buf), "%+05d", 42);
+        FL_CHECK(fl::string(buf) == "+0042");
+        fl::snprintf(buf, sizeof(buf), "% 05d", 42);
+        FL_CHECK(fl::string(buf) == " 0042");
+    }
+
+    FL_SUBCASE("int widths smaller, equal, larger than content") {
+        fl::snprintf(buf, sizeof(buf), "[%2d]", 12345);
+        FL_CHECK(fl::string(buf) == "[12345]");
+        fl::snprintf(buf, sizeof(buf), "[%5d]", 12345);
+        FL_CHECK(fl::string(buf) == "[12345]");
+        fl::snprintf(buf, sizeof(buf), "[%7d]", 12345);
+        FL_CHECK(fl::string(buf) == "[  12345]");
+        fl::snprintf(buf, sizeof(buf), "[%-7d]", 12345);
+        FL_CHECK(fl::string(buf) == "[12345  ]");
+    }
+
+    FL_SUBCASE("negative zero-pad keeps sign first") {
+        fl::snprintf(buf, sizeof(buf), "%05d", -42);
+        FL_CHECK(fl::string(buf) == "-0042");
+        // '-' wins over '0': apply_width skips zero padding when left-aligned.
+        fl::snprintf(buf, sizeof(buf), "[%-05d]", -42);
+        FL_CHECK(fl::string(buf) == "[-42  ]");
+    }
+
+    FL_SUBCASE("int boundaries") {
+        fl::snprintf(buf, sizeof(buf), "%d|%d", 2147483647, -2147483647 - 1);
+        FL_CHECK(fl::string(buf) == "2147483647|-2147483648");
+        fl::snprintf(buf, sizeof(buf), "%u", 4294967295u);
+        FL_CHECK(fl::string(buf) == "4294967295");
+        fl::snprintf(buf, sizeof(buf), "%llu", 18446744073709551615ull);
+        FL_CHECK(fl::string(buf) == "18446744073709551615");
+        fl::snprintf(buf, sizeof(buf), "%lld", -9223372036854775807ll - 1);
+        FL_CHECK(fl::string(buf) == "-9223372036854775808");
+    }
+
+    FL_SUBCASE("long and long long") {
+        fl::snprintf(buf, sizeof(buf), "%ld|%lld", 123456L, -1234567890123LL);
+        FL_CHECK(fl::string(buf) == "123456|-1234567890123");
+        fl::snprintf(buf, sizeof(buf), "%08ld", -123L);
+        FL_CHECK(fl::string(buf) == "-0000123");
+    }
+
+    FL_SUBCASE("%u does not add sign, and prints a signed arg as signed") {
+        fl::snprintf(buf, sizeof(buf), "%+u", 42u);
+        FL_CHECK(fl::string(buf) == "42");
+        // derived from format_arg case 'u' at src/fl/stl/stdio.h: streams the
+        // arg as-is, so a negative int is NOT reinterpreted as unsigned.
+        fl::snprintf(buf, sizeof(buf), "%u", -1);
+        FL_CHECK(fl::string(buf) == "-1");
+    }
+
+    FL_SUBCASE("unsigned with %+d gets a plus") {
+        fl::snprintf(buf, sizeof(buf), "%+d", 42u);
+        FL_CHECK(fl::string(buf) == "+42");
+    }
+
+    FL_SUBCASE("fixed-width small integer types") {
+        fl::snprintf(buf, sizeof(buf), "%d|%d", fl::i8(-5), fl::u8(200));
+        FL_CHECK(fl::string(buf) == "-5|200");
+        fl::snprintf(buf, sizeof(buf), "%d|%u", fl::i16(-1234), fl::u16(65535));
+        FL_CHECK(fl::string(buf) == "-1234|65535");
+        fl::snprintf(buf, sizeof(buf), "%04d", fl::u8(7));
+        FL_CHECK(fl::string(buf) == "0007");
+        fl::snprintf(buf, sizeof(buf), "%x|%X", fl::u8(0xab), fl::u16(0xbeef));
+        FL_CHECK(fl::string(buf) == "ab|BEEF");
+    }
+
+    FL_SUBCASE("char under %c %s %d") {
+        fl::snprintf(buf, sizeof(buf), "%c|%s", 'A', 'B');
+        FL_CHECK(fl::string(buf) == "A|B");
+        fl::snprintf(buf, sizeof(buf), "[%3c]|[%-3c]", 'A', 'A');
+        FL_CHECK(fl::string(buf) == "[  A]|[A  ]");
+        // '0' flag is ignored for %c: is_numeric is false there.
+        fl::snprintf(buf, sizeof(buf), "[%03c]", 'A');
+        FL_CHECK(fl::string(buf) == "[  A]");
+        fl::snprintf(buf, sizeof(buf), "%c", 65);
+        FL_CHECK(fl::string(buf) == "A");
+        // derived from sstream::operator<<(char) at src/fl/stl/strstream.h:
+        // mTreatCharAsInt defaults to false, so %d of a plain char prints the
+        // character, not its code. Quirk, pinned deliberately.
+        fl::snprintf(buf, sizeof(buf), "%d", 'A');
+        FL_CHECK(fl::string(buf) == "A");
+    }
+
+    FL_SUBCASE("bool") {
+        // derived from sstream::operator<<(bool) at src/fl/stl/strstream.h,
+        // reached through format_arg case 'd'/'s' (bool is integral).
+        fl::snprintf(buf, sizeof(buf), "%d|%s", true, false);
+        FL_CHECK(fl::string(buf) == "true|false");
+        fl::snprintf(buf, sizeof(buf), "%c", true);
+        FL_CHECK(fl::string(buf) == fl::string("\x01"));
+    }
+
+    FL_SUBCASE("%s of integers ignores '0' flag") {
+        fl::snprintf(buf, sizeof(buf), "[%05s]|[%-5s]", 42, 42);
+        FL_CHECK(fl::string(buf) == "[   42]|[42   ]");
+    }
+
+    FL_SUBCASE("octal") {
+        fl::snprintf(buf, sizeof(buf), "%o|%#o|%#o", 8, 8, 0);
+        FL_CHECK(fl::string(buf) == "10|010|0");
+        fl::snprintf(buf, sizeof(buf), "%05o", 8);
+        FL_CHECK(fl::string(buf) == "00010");
+        // derived from to_octal at src/fl/stl/stdio.h: widens through
+        // unsigned long long, so -1 prints all 64 bits.
+        fl::snprintf(buf, sizeof(buf), "%o", -1);
+        FL_CHECK(fl::string(buf) == "1777777777777777777777");
+    }
+
+    FL_SUBCASE("hex") {
+        fl::snprintf(buf, sizeof(buf), "%x|%X|%#x|%#X", 255, 255, 255, 255);
+        FL_CHECK(fl::string(buf) == "ff|FF|0xff|0XFF");
+        fl::snprintf(buf, sizeof(buf), "%#x|%x", 0, 0);
+        FL_CHECK(fl::string(buf) == "0|0");
+        fl::snprintf(buf, sizeof(buf), "%#08x|%#08X", 255, 255);
+        FL_CHECK(fl::string(buf) == "0x0000ff|0X0000FF");
+        fl::snprintf(buf, sizeof(buf), "%08x|[%-6x]|[%6x]", 255, 255, 255);
+        FL_CHECK(fl::string(buf) == "000000ff|[ff    ]|[    ff]");
+        fl::snprintf(buf, sizeof(buf), "%llx", 0x123456789abcdefull);
+        FL_CHECK(fl::string(buf) == "123456789abcdef");
+        // derived from fl::to_hex at src/fl/stl/string.h: signed negatives
+        // print as '-' + magnitude (charconv.h documents to_hex(-16) == "-10").
+        fl::snprintf(buf, sizeof(buf), "%x", -16);
+        FL_CHECK(fl::string(buf) == "-10");
+        // derived from fl::to_hex at src/fl/stl/string.h: the negativity test
+        // is static_cast<i64>(value) < 0, so UINT64_MAX is seen as -1. Quirk.
+        fl::snprintf(buf, sizeof(buf), "%llx", 18446744073709551615ull);
+        FL_CHECK(fl::string(buf) == "-1");
+    }
+
+    FL_SUBCASE("%f with non-floats and floats") {
+        fl::snprintf(buf, sizeof(buf), "%.2f", 42);
+        FL_CHECK(fl::string(buf) == "<type_error>");
+        fl::snprintf(buf, sizeof(buf), "%f", fl::u8(1));
+        FL_CHECK(fl::string(buf) == "<type_error>");
+        fl::snprintf(buf, sizeof(buf), "%.2f|%8.2f|%-8.2f|", 1.5f, 1.5f, 1.5f);
+        FL_CHECK(fl::string(buf) == "1.50|    1.50|1.50    |");
+        fl::snprintf(buf, sizeof(buf), "%08.2f", -1.5f);
+        FL_CHECK(fl::string(buf) == "-0001.50");
+    }
+
+    FL_SUBCASE("type errors for integer specifiers on floats") {
+        fl::snprintf(buf, sizeof(buf), "%i|%u|%o|%c", 1.5f, 1.5f, 1.5f, 1.5f);
+        FL_CHECK(fl::string(buf) ==
+                 "<type_error>|<type_error>|<type_error>|<type_error>");
+        // Width still applies to the sentinel; it is not numeric so no zeros.
+        fl::snprintf(buf, sizeof(buf), "[%014d]", 1.5f);
+        FL_CHECK(fl::string(buf) == "[  <type_error>]");
+    }
+
+    FL_SUBCASE("pointer args") {
+        int* null_ptr = nullptr;
+        fl::snprintf(buf, sizeof(buf), "%p", null_ptr);
+        FL_CHECK(fl::string(buf) == "0x0");
+        fl::snprintf(buf, sizeof(buf), "[%10p]|[%-10p]", null_ptr, null_ptr);
+        FL_CHECK(fl::string(buf) == "[       0x0]|[0x0       ]");
+        fl::snprintf(buf, sizeof(buf), "%010p", null_ptr);
+        FL_CHECK(fl::string(buf) == "0x00000000");
+
+        int* known = reinterpret_cast<int*>(fl::uptr(0x1234)); // ok reinterpret cast
+        fl::snprintf(buf, sizeof(buf), "%p|[%8p]", known, known);
+        FL_CHECK(fl::string(buf) == "0x1234|[  0x1234]");
+
+        fl::snprintf(buf, sizeof(buf), "%d|%x|%s", known, known, known);
+        FL_CHECK(fl::string(buf) == "<type_error>|<type_error>|<type_error>");
+    }
+
+    FL_SUBCASE("unknown specifiers on non-pointer scalars") {
+        fl::snprintf(buf, sizeof(buf), "%p|%q", 42u, fl::i16(1));
+        FL_CHECK(fl::string(buf) == "<unknown_format>|<unknown_format>");
+        fl::snprintf(buf, sizeof(buf), "[%18q]", 42);
+        FL_CHECK(fl::string(buf) == "[  <unknown_format>]");
+    }
+}
+
 } // FL_TEST_FILE
