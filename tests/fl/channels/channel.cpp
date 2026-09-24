@@ -1297,9 +1297,11 @@ FL_TEST_CASE("[#4034] and binding a profile does change them") {
 namespace {
 
 /// Show `pixels` once through a fresh dynamic channel bound to a fresh
-/// ByteCapturingMockEngine and return the encoded bytes.
-fl::vector<u8> showOnce4566(fl::span<CRGB> pixels, u8 brightness,
-                            const ChannelOptions& options) {
+/// ByteCapturingMockEngine and write the encoded bytes into `out`, which the
+/// caller owns and may reuse across calls (its capacity is kept).
+void showOnce4566(fl::span<CRGB> pixels, u8 brightness,
+                  const ChannelOptions& options, fl::vector<u8>& out) {
+    out.clear();
     auto& mgr = ChannelManager::instance();
     mgr.clearAllDrivers();
     auto driver = fl::make_shared<ByteCapturingMockEngine>("PARITY_4566");
@@ -1308,18 +1310,14 @@ fl::vector<u8> showOnce4566(fl::span<CRGB> pixels, u8 brightness,
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelPtr ch = Channel::create(ChannelConfig(140, timing, pixels, GRB, options));
-    fl::vector<u8> out;
     if (!ch) {
-        return out;
+        return;
     }
     ch->showLeds(brightness);
     if (!driver->mCapturedChannels.empty()) {
         const auto& d = driver->mCapturedChannels[0]->getData();
-        for (fl::size i = 0; i < d.size(); ++i) {
-            out.push_back(d[i]);
-        }
+        out.assign(d.begin(), d.end());
     }
-    return out;
 }
 
 }  // namespace
@@ -1372,8 +1370,10 @@ FL_TEST_CASE("[#4566] identical pixels produce identical bytes across fresh chan
     CRGB b[3] = {CRGB(10, 20, 30), CRGB(255, 0, 128), CRGB(7, 7, 7)};
     ChannelOptions options;
     options.mDitherMode = DISABLE_DITHER;
-    fl::vector<u8> first = showOnce4566(fl::span<CRGB>(a, 3), 200, options);
-    fl::vector<u8> second = showOnce4566(fl::span<CRGB>(b, 3), 200, options);
+    fl::vector<u8> first;
+    fl::vector<u8> second;
+    showOnce4566(fl::span<CRGB>(a, 3), 200, options, first);
+    showOnce4566(fl::span<CRGB>(b, 3), 200, options, second);
     FL_REQUIRE_EQ((int)first.size(), 9);
     FL_CHECK_EQ(first, second);
 }
@@ -1434,7 +1434,8 @@ FL_TEST_CASE("[#4566] no resolvable driver: no enqueue and dither phase holds") 
 
     // A fresh channel's first accepted frame must match byte-for-byte.
     CRGB fresh[2] = {CRGB(201, 99, 37), CRGB(3, 130, 77)};
-    fl::vector<u8> expected = showOnce4566(fl::span<CRGB>(fresh, 2), 100, options);
+    fl::vector<u8> expected;
+    showOnce4566(fl::span<CRGB>(fresh, 2), 100, options, expected);
     FL_CHECK_EQ(got, expected);
 }
 
@@ -1445,7 +1446,8 @@ FL_TEST_CASE("[#4566] a pre-bound mBus channel matches the dynamic path byte-for
 
     // Dynamic (AUTO) reference bytes for the same pixels.
     CRGB ref[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
-    fl::vector<u8> expected = showOnce4566(fl::span<CRGB>(ref, 2), 255, options);
+    fl::vector<u8> expected;
+    showOnce4566(fl::span<CRGB>(ref, 2), 255, options, expected);
     FL_REQUIRE_EQ(expected, fl::vector<u8>({100, 200, 50, 2, 1, 3}));
 
     // Pre-bound: a capturing driver registered under the RMT bus name, with
