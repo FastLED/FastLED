@@ -23,12 +23,12 @@ public:
     
     void init(int dataPin) FL_NO_EXCEPT override {
         FL_UNUSED(dataPin);
-        FL_WARN_F("Please install adafruit neopixel package to use this api bridge.");
+        FL_WARN("Please install adafruit neopixel package to use this api bridge.");
     }
     
     void showPixels(PixelIterator& pixelIterator) FL_NO_EXCEPT override {
         FL_UNUSED(pixelIterator);
-        FL_WARN_F("Please install adafruit neopixel package to use this api bridge.");
+        FL_WARN("Please install adafruit neopixel package to use this api bridge.");
     }
 };
 

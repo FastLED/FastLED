@@ -84,7 +84,7 @@ public:
 protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override {
         if (!mDriver) {
-            FL_WARN_F_EVERY(100, "LPC channel engine unavailable");
+            FL_WARN_EVERY(100, "LPC channel engine unavailable");
             return;
         }
         // Wait for any prior transmission to release the buffer. Prevents
@@ -92,7 +92,7 @@ protected:
         if (mChannelData->isInUse()) {
             bool finished = mDriver->waitForReady();
             if (!finished) {
-                FL_ERROR_F("LPC clockless: engine still busy after wait");
+                FL_ERROR("LPC clockless: engine still busy after wait");
                 return;
             }
         }

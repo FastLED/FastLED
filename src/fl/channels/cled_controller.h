@@ -86,12 +86,12 @@ protected:
     }
 
     bool rejectFixedWhiteChannelChange(const char* operation) const FL_NO_EXCEPT {
-        FL_UNUSED(operation);  // only consumed by FL_WARN_F, a no-op on small platforms
+        FL_UNUSED(operation);  // only consumed by FL_WARN, a no-op on small platforms
         const char* chipset = fixedWhiteChannelChipset();
         if (chipset == nullptr) {
             return false;
         }
-        FL_WARN_F("%s has fixed R,G,B,W output; %s is unsupported and was "
+        FL_WARN("%s has fixed R,G,B,W output; %s is unsupported and was "
                   "ignored",
                   chipset, operation);
         return true;

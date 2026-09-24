@@ -79,7 +79,7 @@ protected:
         // with `cfg.options.mBus` -- the manager-driven Channel path stays.
         fl::shared_ptr<IChannelDriver> driver = mDriver.lock();
         if (!driver) {
-            FL_ERROR_F("ClocklessController(stub): No compatible driver found - cannot transmit");
+            FL_ERROR("ClocklessController(stub): No compatible driver found - cannot transmit");
             return;
         }
 
@@ -93,7 +93,7 @@ protected:
             // Warn every second if still waiting (possible deadlock or hardware issue)
             u32 elapsed = fl::millis() - startTime;
             if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
-                FL_WARN_F("ClocklessController(stub): Buffer still busy after %sms total - possible deadlock or slow hardware", elapsed);
+                FL_WARN("ClocklessController(stub): Buffer still busy after %sms total - possible deadlock or slow hardware", elapsed);
                 lastWarnTime = fl::millis();
             }
         }

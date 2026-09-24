@@ -213,7 +213,7 @@ bool ChannelEngineLpcUartDma::beginTransmission(
         data.data(), data.size(), mEncodedBuffer.data(), mEncodedBuffer.size(),
         lut);
     if (written == 0) {
-        FL_WARN_F("LPC UART DMA: encode failed for %u bytes",
+        FL_WARN("LPC UART DMA: encode failed for %u bytes",
                   static_cast<unsigned>(data.size()));
         return false;
     }
@@ -222,7 +222,7 @@ bool ChannelEngineLpcUartDma::beginTransmission(
         static_cast<u8>(channel->getPin()), lut.baud, /*invertTx=*/true);
     if (!lpc::LpcUartDmaRuntime::kickDmaStreamAsync(
             mEncodedBuffer.data(), static_cast<u32>(written))) {
-        FL_WARN_F("LPC UART DMA: DMA stream kick failed");
+        FL_WARN("LPC UART DMA: DMA stream kick failed");
         return false;
     }
     channel->setInUse(true);

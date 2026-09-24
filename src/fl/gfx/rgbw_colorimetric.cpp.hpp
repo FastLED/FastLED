@@ -94,7 +94,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     const bool ok_rbw = invert3x3(P_RBW, cache->P_RBW_inv);
     const bool ok_bgw = invert3x3(P_BGW, cache->P_BGW_inv);
     if (!(ok_rgb && ok_rgw && ok_rbw && ok_bgw)) {
-        FL_WARN_F_ONCE("RGBW colorimetric: profile has degenerate primaries â€” "
+        FL_WARN_ONCE("RGBW colorimetric: profile has degenerate primaries â€” "
                      "one or more sub-gamut matrix inversions failed. Output "
                      "colors will be incorrect. Check DiodeProfile xy/lum values.");
         // Zero-init any failed inverse so downstream matvec3() output is

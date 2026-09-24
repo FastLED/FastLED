@@ -119,7 +119,7 @@ const BANNED_HEADER_RECOMMENDATIONS: &[(&str, &str)] = &[
     ("iostream", "fl/stl/iostream.h or fl/str.h"),
     (
         "stdio.h",
-        "fl/stl/stdio.h (provides fl::printf, fl::snprintf, fl::sprintf)",
+        "fl/stl/stdio.h (provides fl::printf and fl::snprintf)",
     ),
     (
         "cstdio",
@@ -297,4 +297,3 @@ const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
     ("cstdio", "platforms/wasm/compiler/wasm_pch.h"),
     ("cstdlib", "fl/stl/cstdlib.cpp.hpp"),
 ];
-

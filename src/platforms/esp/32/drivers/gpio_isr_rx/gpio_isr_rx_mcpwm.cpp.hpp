@@ -100,7 +100,7 @@ namespace {
  * @return true on success, false on failure
  */
 bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* interrupt_handle) FL_NO_EXCEPT {
-    FL_DBG_F("Installing direct GPIO ISR for pin %s", gpio_num);
+    FL_DBG("Installing direct GPIO ISR for pin %s", gpio_num);
 
     // Step 1: Determine GPIO interrupt source
     // ESP32-P4 has per-CPU GPIO interrupt sources (ETS_GPIO_INTR0_SOURCE..3)
@@ -110,7 +110,7 @@ bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* int
 #else
     int intr_source = ETS_GPIO_INTR_SOURCE;
 #endif
-    FL_DBG_F("GPIO interrupt source: %s", intr_source);
+    FL_DBG("GPIO interrupt source: %s", intr_source);
 
     // Step 2: Allocate interrupt with high priority (Level 3-5)
     // ESP_INTR_FLAG_LEVEL3 = Higher priority than default (Level 1)
@@ -126,11 +126,11 @@ bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* int
     );
 
     if (err != ESP_OK) {
-        FL_WARN_F("esp_intr_alloc failed: %s", esp_err_to_name(err));
+        FL_WARN("esp_intr_alloc failed: %s", esp_err_to_name(err));
         return false;
     }
 
-    FL_DBG_F("Allocated interrupt handle: %s", *interrupt_handle);
+    FL_DBG("Allocated interrupt handle: %s", *interrupt_handle);
 
     // Step 3: Configure GPIO pin
     gpio_config_t io_conf = {};
@@ -142,7 +142,7 @@ bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* int
 
     err = gpio_config(&io_conf);
     if (err != ESP_OK) {
-        FL_WARN_F("gpio_config failed: %s", esp_err_to_name(err));
+        FL_WARN("gpio_config failed: %s", esp_err_to_name(err));
         esp_intr_free(*interrupt_handle);
         *interrupt_handle = nullptr;
         return false;
@@ -151,13 +151,13 @@ bool install_direct_gpio_isr(int gpio_num, void* isr_context, intr_handle_t* int
     // Step 4: Enable GPIO interrupt
     err = gpio_intr_enable(static_cast<gpio_num_t>(gpio_num));
     if (err != ESP_OK) {
-        FL_WARN_F("gpio_intr_enable failed: %s", esp_err_to_name(err));
+        FL_WARN("gpio_intr_enable failed: %s", esp_err_to_name(err));
         esp_intr_free(*interrupt_handle);
         *interrupt_handle = nullptr;
         return false;
     }
 
-    FL_DBG_F("Direct GPIO ISR installed successfully (expected latency: ~300-400ns)");
+    FL_DBG("Direct GPIO ISR installed successfully (expected latency: ~300-400ns)");
     return true;
 }
 
@@ -246,16 +246,16 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
     const size_t bytes_capacity = bytes_out.size();
 
     if (edge_count == 0) {
-        FL_WARN_F("decodeEdgeTimestamps: edges span is empty");
+        FL_WARN("decodeEdgeTimestamps: edges span is empty");
         return fl::result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
     if (bytes_capacity == 0) {
-        FL_WARN_F("decodeEdgeTimestamps: bytes_out span is empty");
+        FL_WARN("decodeEdgeTimestamps: bytes_out span is empty");
         return fl::result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
 
-    FL_DBG_F("decodeEdgeTimestamps: decoding %s edges into buffer of %s bytes", edge_count, bytes_capacity);
+    FL_DBG("decodeEdgeTimestamps: decoding %s edges into buffer of %s bytes", edge_count, bytes_capacity);
 
     // Decoding state
     size_t error_count = 0;
@@ -280,16 +280,16 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
         // Check for reset pulse (long low period indicates frame end)
         u32 pulse0_duration = edge1.time_ns - edge0.time_ns;
         if (edge0.level == 0 && pulse0_duration >= reset_min_ns) {
-            FL_DBG_F("decodeEdgeTimestamps: reset pulse detected at edge %s", i);
+            FL_DBG("decodeEdgeTimestamps: reset pulse detected at edge %s", i);
 
             // Flush partial byte if needed
             if (bit_index != 0) {
-                FL_WARN_F("decodeEdgeTimestamps: partial byte at reset (bit_index=%s)", bit_index);
+                FL_WARN("decodeEdgeTimestamps: partial byte at reset (bit_index=%s)", bit_index);
                 current_byte <<= (8 - bit_index);
                 if (bytes_decoded < bytes_capacity) {
                     out_ptr[bytes_decoded++] = current_byte;
                 } else {
-                    FL_WARN_F("decodeEdgeTimestamps: buffer overflow");
+                    FL_WARN("decodeEdgeTimestamps: buffer overflow");
                     return fl::result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
                 }
             }
@@ -298,7 +298,7 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
 
         // WS2812B protocol: expect HIGH -> LOW pattern
         if (edge0.level != 1 || edge1.level != 0) {
-            FL_DBG_F("decodeEdgeTimestamps: unexpected edge pattern at %s", i);
+            FL_DBG("decodeEdgeTimestamps: unexpected edge pattern at %s", i);
             error_count++;
             i++;
             continue;
@@ -324,7 +324,7 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
 
         if (bit < 0) {
             error_count++;
-            FL_DBG_F("decodeEdgeTimestamps: invalid pulse at edge %s", i);
+            FL_DBG("decodeEdgeTimestamps: invalid pulse at edge %s", i);
             i += 2;
             continue;
         }
@@ -336,7 +336,7 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
         // Byte complete?
         if (bit_index == 8) {
             if (bytes_decoded >= bytes_capacity) {
-                FL_WARN_F("decodeEdgeTimestamps: buffer overflow at byte %s", bytes_decoded);
+                FL_WARN("decodeEdgeTimestamps: buffer overflow at byte %s", bytes_decoded);
                 return fl::result<u32, DecodeError>::failure(DecodeError::BUFFER_OVERFLOW);
             }
             out_ptr[bytes_decoded++] = current_byte;
@@ -349,7 +349,7 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
 
     // Flush partial byte if we reached end
     if (bit_index != 0) {
-        FL_WARN_F("decodeEdgeTimestamps: partial byte at end (bit_index=%s)", bit_index);
+        FL_WARN("decodeEdgeTimestamps: partial byte at end (bit_index=%s)", bit_index);
         current_byte <<= (8 - bit_index);
         if (bytes_decoded < bytes_capacity) {
             out_ptr[bytes_decoded++] = current_byte;
@@ -358,12 +358,12 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
         }
     }
 
-    FL_DBG_F("decodeEdgeTimestamps: decoded %s bytes, %s errors", bytes_decoded, error_count);
+    FL_DBG("decodeEdgeTimestamps: decoded %s bytes, %s errors", bytes_decoded, error_count);
 
     // Calculate error rate (avoid division by zero)
     size_t total_pulses = edge_count / 2;
     if (total_pulses > 0 && error_count >= (total_pulses / 10)) {
-        FL_WARN_F("decodeEdgeTimestamps: high error rate: %s/%s", error_count, total_pulses);
+        FL_WARN("decodeEdgeTimestamps: high error rate: %s/%s", error_count, total_pulses);
         return fl::result<u32, DecodeError>::failure(DecodeError::HIGH_ERROR_RATE);
     }
 
@@ -393,7 +393,7 @@ public:
         , mIsrContext{}
         , mInitialized(false)
     {
-        FL_DBG_F("GpioIsrRxMcpwm constructed with pin=%s", pin);
+        FL_DBG("GpioIsrRxMcpwm constructed with pin=%s", pin);
     }
 
     ~GpioIsrRxMcpwm() override {
@@ -403,19 +403,19 @@ public:
     bool begin(const RxConfig& config) FL_NO_EXCEPT override {
         // Validate pin
         if (!isValidGpioPin(static_cast<int>(mPin))) {
-            FL_ERROR_F("GPIO ISR RX MCPWM: Invalid pin %s - pin is reserved for UART, flash, or other system use", static_cast<int>(mPin));
+            FL_ERROR("GPIO ISR RX MCPWM: Invalid pin %s - pin is reserved for UART, flash, or other system use", static_cast<int>(mPin));
             return false;
         }
 
         // Validate buffer size
         if (config.buffer_size == 0) {
-            FL_WARN_F("GPIO ISR RX MCPWM begin: Invalid buffer_size (must be > 0)");
+            FL_WARN("GPIO ISR RX MCPWM begin: Invalid buffer_size (must be > 0)");
             return false;
         }
 
         // Buffer size must be power of 2 for fast modulo optimization
         if ((config.buffer_size & (config.buffer_size - 1)) != 0) {
-            FL_ERROR_F("GPIO ISR RX MCPWM begin: buffer_size must be power of 2 (got %s)", config.buffer_size);
+            FL_ERROR("GPIO ISR RX MCPWM begin: buffer_size must be power of 2 (got %s)", config.buffer_size);
             return false;
         }
 
@@ -424,7 +424,7 @@ public:
             mBufferSize = config.buffer_size;
             mOutputBufferSize = config.buffer_size;  // Same size for simplicity
 
-            FL_DBG_F("GPIO ISR RX MCPWM first-time init: pin=%s, buffer_size=%s", static_cast<int>(mPin), mBufferSize);
+            FL_DBG("GPIO ISR RX MCPWM first-time init: pin=%s, buffer_size=%s", static_cast<int>(mPin), mBufferSize);
 
             // Allocate circular buffer
             mEdgeBuffer.clear();
@@ -465,7 +465,7 @@ public:
             io_conf.intr_type = GPIO_INTR_ANYEDGE;
             esp_err_t err = gpio_config(&io_conf);
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to configure GPIO: %s", static_cast<int>(err));
+                FL_WARN("Failed to configure GPIO: %s", static_cast<int>(err));
                 return false;
             }
 
@@ -486,7 +486,7 @@ public:
 
             // Initialize MCPWM timer
             if (mcpwm_timer_init(&mIsrContext, static_cast<int>(mPin)) != 0) {
-                FL_WARN_F("Failed to initialize MCPWM timer");
+                FL_WARN("Failed to initialize MCPWM timer");
                 return false;
             }
 
@@ -499,7 +499,7 @@ public:
 
             err = gptimer_new_timer(&timer_config, reinterpret_cast<gptimer_handle_t*>(&mIsrContext.gptimer_handle)); // ok reinterpret cast
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to create GPTimer: %s", static_cast<int>(err));
+                FL_WARN("Failed to create GPTimer: %s", static_cast<int>(err));
                 mcpwm_timer_cleanup();
                 return false;
             }
@@ -513,7 +513,7 @@ public:
                 &cbs,
                 &mIsrContext);
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to register GPTimer callback: %s", static_cast<int>(err));
+                FL_WARN("Failed to register GPTimer callback: %s", static_cast<int>(err));
                 gptimer_del_timer(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 mIsrContext.gptimer_handle = nullptr;
                 mcpwm_timer_cleanup();
@@ -532,7 +532,7 @@ public:
                 reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle), // ok reinterpret cast
                 &alarm_config);
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to set GPTimer alarm: %s", static_cast<int>(err));
+                FL_WARN("Failed to set GPTimer alarm: %s", static_cast<int>(err));
                 gptimer_del_timer(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 mIsrContext.gptimer_handle = nullptr;
                 mcpwm_timer_cleanup();
@@ -542,7 +542,7 @@ public:
             // Enable GPTimer
             err = gptimer_enable(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to enable GPTimer: %s", static_cast<int>(err));
+                FL_WARN("Failed to enable GPTimer: %s", static_cast<int>(err));
                 gptimer_del_timer(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 mIsrContext.gptimer_handle = nullptr;
                 mcpwm_timer_cleanup();
@@ -555,7 +555,7 @@ public:
             // This provides low-latency interrupt handling (~300-400ns) while remaining
             // fully compatible with ESP-IDF's interrupt system
             if (!install_direct_gpio_isr(static_cast<int>(mPin), &mIsrContext, &mInterruptHandle)) {
-                FL_WARN_F("Failed to install direct GPIO ISR for pin %s", static_cast<int>(mPin));
+                FL_WARN("Failed to install direct GPIO ISR for pin %s", static_cast<int>(mPin));
                 gptimer_disable(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 gptimer_del_timer(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 mIsrContext.gptimer_handle = nullptr;
@@ -563,7 +563,7 @@ public:
                 return false;
             }
 
-            FL_DBG_F("Using RISC-V high-priority ISR (Level 3) - expect ~300-400ns latency");
+            FL_DBG("Using RISC-V high-priority ISR (Level 3) - expect ~300-400ns latency");
             #else
             // Xtensa: Use ESP-IDF interrupt allocation (existing implementation)
             // Direct allocation with esp_intr_alloc() is required for assembly ISR handlers
@@ -574,7 +574,7 @@ public:
             // "Must be NULL when an interrupt of level >3 is requested"
             int flags = ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL5;
 
-            FL_DBG_F("Allocating GPIO interrupt: source=%s flags=0x%x handler=nullptr (Level 5 requires nullptr per ESP-IDF docs) arg=nullptr (cannot pass context with nullptr handler)",
+            FL_DBG("Allocating GPIO interrupt: source=%s flags=0x%x handler=nullptr (Level 5 requires nullptr per ESP-IDF docs) arg=nullptr (cannot pass context with nullptr handler)",
                      ETS_GPIO_INTR_SOURCE, flags);
 
             err = esp_intr_alloc(
@@ -585,10 +585,10 @@ public:
                 reinterpret_cast<intr_handle_t*>(&mIsrContext.intr_handle)  // ok reinterpret cast  // Store handle
             );
 
-            FL_DBG_F("esp_intr_alloc result: %s (0x%x)", esp_err_to_name(err), err);
+            FL_DBG("esp_intr_alloc result: %s (0x%x)", esp_err_to_name(err), err);
 
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to register GPIO interrupt: %s - interrupt source=%s flags=0x%x",
+                FL_WARN("Failed to register GPIO interrupt: %s - interrupt source=%s flags=0x%x",
                           esp_err_to_name(err), ETS_GPIO_INTR_SOURCE, flags);
                 gptimer_disable(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
                 gptimer_del_timer(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
@@ -600,7 +600,7 @@ public:
             // Enable GPIO interrupt
             err = gpio_intr_enable(mPin);
             if (err != ESP_OK) {
-                FL_WARN_F("Failed to enable GPIO interrupt: %s", esp_err_to_name(err));
+                FL_WARN("Failed to enable GPIO interrupt: %s", esp_err_to_name(err));
                 esp_intr_free(reinterpret_cast<intr_handle_t>(mIsrContext.intr_handle)); // ok reinterpret cast
                 mIsrContext.intr_handle = nullptr;
                 gptimer_disable(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
@@ -610,11 +610,11 @@ public:
                 return false;
             }
 
-            FL_DBG_F("GPIO interrupt allocated successfully at Level 5 (Xtensa)");
+            FL_DBG("GPIO interrupt allocated successfully at Level 5 (Xtensa)");
             #endif
 
             mInitialized = true;
-            FL_DBG_F("GPIO ISR RX MCPWM initialized successfully");
+            FL_DBG("GPIO ISR RX MCPWM initialized successfully");
         }
 
         // Store configuration parameters
@@ -629,7 +629,7 @@ public:
             mIsrContext.min_pulse_ticks = 1;  // Minimum 1 tick
         }
 
-        FL_DBG_F("GPIO ISR RX MCPWM begin: signal_range_min=%sns (%s ticks), signal_range_max=%sns (%s ticks), skip_signals=%s", config.signal_range_min_ns, mIsrContext.min_pulse_ticks, config.signal_range_max_ns, mIsrContext.timeout_ticks, config.skip_signals);
+        FL_DBG("GPIO ISR RX MCPWM begin: signal_range_min=%sns (%s ticks), signal_range_max=%sns (%s ticks), skip_signals=%s", config.signal_range_min_ns, mIsrContext.min_pulse_ticks, config.signal_range_max_ns, mIsrContext.timeout_ticks, config.skip_signals);
 
         // Clear receive state
         mIsrContext.write_index = 0;
@@ -641,14 +641,14 @@ public:
 
         // Start MCPWM timer
         if (mcpwm_timer_start() != 0) {
-            FL_WARN_F("Failed to start MCPWM timer");
+            FL_WARN("Failed to start MCPWM timer");
             return false;
         }
 
         // Start GPTimer
         esp_err_t err = gptimer_start(reinterpret_cast<gptimer_handle_t>(mIsrContext.gptimer_handle)); // ok reinterpret cast
         if (err != ESP_OK) {
-            FL_WARN_F("Failed to start GPTimer: %s", static_cast<int>(err));
+            FL_WARN("Failed to start GPTimer: %s", static_cast<int>(err));
             mcpwm_timer_stop();
             return false;
         }
@@ -656,7 +656,7 @@ public:
         // Arm fast ISR (atomic store with release semantics)
         __atomic_store_n(&mIsrContext.armed, true, __ATOMIC_RELEASE);
 
-        FL_DBG_F("GPIO ISR RX MCPWM armed and ready");
+        FL_DBG("GPIO ISR RX MCPWM armed and ready");
         return true;
     }
 
@@ -667,11 +667,11 @@ public:
 
     RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override {
         if (!mInitialized) {
-            FL_WARN_F("wait(): GPIO ISR RX MCPWM not initialized");
+            FL_WARN("wait(): GPIO ISR RX MCPWM not initialized");
             return RxWaitResult::TIMEOUT;
         }
 
-        FL_DBG_F("wait(): timeout_ms=%s", timeout_ms);
+        FL_DBG("wait(): timeout_ms=%s", timeout_ms);
 
         // Convert timeout to microseconds
         i64 timeout_us = static_cast<i64>(timeout_ms) * 1000;
@@ -683,7 +683,7 @@ public:
 
             // Check wait timeout
             if (elapsed_us >= timeout_us) {
-                FL_WARN_F("wait(): timeout after %sus, captured %s edges", elapsed_us, mIsrContext.output_count);
+                FL_WARN("wait(): timeout after %sus, captured %s edges", elapsed_us, mIsrContext.output_count);
                 return RxWaitResult::TIMEOUT;
             }
 
@@ -691,7 +691,7 @@ public:
         }
 
         // Receive completed
-        FL_DBG_F("wait(): receive done, count=%s", mIsrContext.output_count);
+        FL_DBG("wait(): receive done, count=%s", mIsrContext.output_count);
         return RxWaitResult::SUCCESS;
     }
 
@@ -946,7 +946,7 @@ private:
         mcpwm_timer_cleanup();
 
         mInitialized = false;
-        FL_DBG_F("GPIO ISR RX MCPWM cleaned up");
+        FL_DBG("GPIO ISR RX MCPWM cleaned up");
     }
 
     gpio_num_t mPin;

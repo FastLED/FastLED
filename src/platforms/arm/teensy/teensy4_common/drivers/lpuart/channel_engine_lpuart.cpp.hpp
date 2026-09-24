@@ -116,7 +116,7 @@ void ChannelEngineLPUART::show() FL_NO_EXCEPT {
                 pin, total_leds, /*is_rgbw=*/false,
                 timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us);
             if (!candidate) {
-                FL_LOG_FLEXIO_F("ChannelEngineLPUART: createInstance failed on pin %d", (int)pin);
+                FL_LOG_FLEXIO("ChannelEngineLPUART: createInstance failed on pin %d", (int)pin);
                 continue;
             }
             mInstance = fl::move(candidate);

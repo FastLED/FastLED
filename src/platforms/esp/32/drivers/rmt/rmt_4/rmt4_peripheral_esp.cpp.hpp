@@ -53,7 +53,7 @@ bool Rmt4PeripheralESP::configureChannel(const detail::Rmt4ChannelConfig &cfg)
 
     esp_err_t err = rmt_config(&rmt_tx);
     if (err != ESP_OK) {
-        FL_WARN_F(
+        FL_WARN(
             "Rmt4PeripheralESP: rmt_config failed on channel %s, error=%s",
             cfg.mChannel, err);
         return false;
@@ -65,7 +65,7 @@ bool Rmt4PeripheralESP::installDriver(int channel) FL_NO_EXCEPT {
     esp_err_t err =
         rmt_driver_install(static_cast<rmt_channel_t>(channel), 0, 0);
     if (err != ESP_OK) {
-        FL_WARN_F("Rmt4PeripheralESP: rmt_driver_install failed on channel %s, "
+        FL_WARN("Rmt4PeripheralESP: rmt_driver_install failed on channel %s, "
                   "error=%s",
                   channel, err);
         return false;
@@ -83,7 +83,7 @@ bool Rmt4PeripheralESP::setTxThresholdIntrEnable(int channel, bool enable,
     esp_err_t err = rmt_set_tx_thr_intr_en(static_cast<rmt_channel_t>(channel),
                                            enable, threshold);
     if (err != ESP_OK) {
-        FL_WARN_F("Rmt4PeripheralESP: rmt_set_tx_thr_intr_en failed on channel "
+        FL_WARN("Rmt4PeripheralESP: rmt_set_tx_thr_intr_en failed on channel "
                   "%s, error=%s",
                   channel, err);
         return false;
@@ -95,7 +95,7 @@ bool Rmt4PeripheralESP::setTxIntrEnable(int channel, bool enable) FL_NO_EXCEPT {
     esp_err_t err =
         rmt_set_tx_intr_en(static_cast<rmt_channel_t>(channel), enable);
     if (err != ESP_OK) {
-        FL_WARN_F("Rmt4PeripheralESP: rmt_set_tx_intr_en failed on channel %s, "
+        FL_WARN("Rmt4PeripheralESP: rmt_set_tx_intr_en failed on channel %s, "
                   "error=%s",
                   channel, err);
         return false;
@@ -115,7 +115,7 @@ bool Rmt4PeripheralESP::setGpio(int channel, int gpio_pin,
                       static_cast<gpio_num_t>(gpio_pin));
 #endif
     if (err != ESP_OK) {
-        FL_WARN_F("Rmt4PeripheralESP: rmt_set_gpio/rmt_set_pin failed on "
+        FL_WARN("Rmt4PeripheralESP: rmt_set_gpio/rmt_set_pin failed on "
                   "channel %s pin %s, error=%s",
                   channel, gpio_pin, err);
         return false;
@@ -133,7 +133,7 @@ bool Rmt4PeripheralESP::installIsr(detail::Rmt4IsrHandler handler, void *arg,
                                    ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
                                    handler, arg, &handle);
     if (err != ESP_OK) {
-        FL_WARN_F("Rmt4PeripheralESP: esp_intr_alloc failed, error=%s", err);
+        FL_WARN("Rmt4PeripheralESP: esp_intr_alloc failed, error=%s", err);
         *out_handle = nullptr;
         return false;
     }

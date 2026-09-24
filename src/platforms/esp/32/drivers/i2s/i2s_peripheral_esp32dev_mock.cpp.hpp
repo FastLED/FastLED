@@ -97,7 +97,7 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
                 return;
             }
         }
-        FL_WARN_F("I2sPeripheralEsp32DevMock: freeBuffer() on unknown ptr");
+        FL_WARN("I2sPeripheralEsp32DevMock: freeBuffer() on unknown ptr");
     }
 
     bool transmit(const u8 *buffer, size_t size_bytes) FL_NO_EXCEPT override {
@@ -114,7 +114,7 @@ class I2sPeripheralEsp32DevMockImpl : public I2sPeripheralEsp32DevMock {
             return false;
         }
         if (mBusy) {
-            FL_WARN_F(
+            FL_WARN(
                 "I2sPeripheralEsp32DevMock: transmit() while already busy");
             return false;
         }

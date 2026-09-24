@@ -52,7 +52,7 @@ ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
       mWave8LutValid(false),
       mI2sPort(i2s_port) {
     if (!mPeripheral) {
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: null peripheral injected — inert");
+        FL_WARN("ChannelEngineI2sEsp32Dev: null peripheral injected — inert");
         return;
     }
     // Register our completion callback up front. Real hardware fires
@@ -179,7 +179,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         if (data->isSpi()) has_spi = true;
     }
     if (has_spi && has_clockless) {
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: mixed clockless+SPI batches not supported yet — FastLED#3526 Phase 2c stub");
+        FL_WARN("ChannelEngineI2sEsp32Dev: mixed clockless+SPI batches not supported yet — FastLED#3526 Phase 2c stub");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);
@@ -201,7 +201,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
             mSpiDelegate = fl::createI2sSpiEngine();
         }
         if (!mSpiDelegate) {
-            FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI delegate unavailable");
+            FL_WARN("ChannelEngineI2sEsp32Dev: SPI delegate unavailable");
             for (auto &data : mInFlightChannels) {
                 if (data) {
                     data->setInUse(false);
@@ -225,7 +225,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         mState = DriverState::BUSY;
         return;
 #else
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: SPI mode unavailable on this target");
+        FL_WARN("ChannelEngineI2sEsp32Dev: SPI mode unavailable on this target");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);
@@ -263,7 +263,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
             /*clk=*/pixel_clk_hz,
             /*width=*/static_cast<u8>(mInFlightChannels.size()));
         if (!mPeripheral->initialize(cfg)) {
-            FL_WARN_F("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
+            FL_WARN("ChannelEngineI2sEsp32Dev: peripheral initialize failed");
             for (auto &data : mInFlightChannels) {
                 if (data) {
                     data->setInUse(false);
@@ -321,7 +321,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         return;
     }
     if (!ensureScratchBuffer(required)) {
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: scratch buffer allocation failed");
+        FL_WARN("ChannelEngineI2sEsp32Dev: scratch buffer allocation failed");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);
@@ -344,7 +344,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
 
     mTransmitCompleted = false;
     if (!mPeripheral->transmit(mScratchBuffer, written)) {
-        FL_WARN_F("ChannelEngineI2sEsp32Dev: transmit() refused");
+        FL_WARN("ChannelEngineI2sEsp32Dev: transmit() refused");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);

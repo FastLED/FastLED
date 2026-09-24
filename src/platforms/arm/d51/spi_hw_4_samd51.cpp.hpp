@@ -205,13 +205,13 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
     // Validate bus_num against mBusId if driver has pre-assigned ID
     // SAMD51 only has one QSPI peripheral (bus 0)
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIQuadSAMD51: Bus ID mismatch");
+        FL_WARN("SPIQuadSAMD51: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments - at least clock and D0 must be set
     if (config.clock_pin < 0 || config.data0_pin < 0) {
-        FL_WARN_F("SPIQuadSAMD51: Invalid pin configuration (clock and D0 required)");
+        FL_WARN("SPIQuadSAMD51: Invalid pin configuration (clock and D0 required)");
         return false;
     }
 
@@ -234,7 +234,7 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
         (config.data2_pin < 0 || config.data1_pin >= 0) &&
         (config.data3_pin < 0 || config.data2_pin >= 0);
     if (!pins_are_contiguous || mActiveLanes == 3) {
-        FL_WARN_F("SPIQuadSAMD51: QSPI requires 1, 2, or 4 contiguous data lanes");
+        FL_WARN("SPIQuadSAMD51: QSPI requires 1, 2, or 4 contiguous data lanes");
         return false;
     }
 
@@ -440,7 +440,7 @@ bool SPIQuadSAMD51::transmit(TransmitMode mode) {
         while (!QSPI->INTFLAG.bit.DRE) {
             // Check for error condition
             if (QSPI->INTFLAG.bit.ERROR) {
-                FL_WARN_F("QSPI ERROR flag set during transmission");
+                FL_WARN("QSPI ERROR flag set during transmission");
                 // Clear ERROR flag
                 QSPI->INTFLAG.reg = QSPI_INTFLAG_ERROR;
                 mTransactionActive = false;
@@ -486,12 +486,12 @@ bool SPIQuadSAMD51::waitComplete(u32 timeout_ms) {
     // Check INSTREND (Instruction End) flag in INTFLAG register
     while (!QSPI->INTFLAG.bit.INSTREND) {
         if ((fl::millis() - start_time) >= timeout_ms) {
-            FL_WARN_F("SPIQuadSAMD51: waitComplete timeout");
+            FL_WARN("SPIQuadSAMD51: waitComplete timeout");
             return false;  // Timeout
         }
         // Check for error condition
         if (QSPI->INTFLAG.bit.ERROR) {
-            FL_WARN_F("SPIQuadSAMD51: QSPI error during waitComplete");
+            FL_WARN("SPIQuadSAMD51: QSPI error during waitComplete");
             QSPI->INTFLAG.reg = QSPI_INTFLAG_ERROR;  // Clear error
             return false;
         }

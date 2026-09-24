@@ -39,7 +39,7 @@ Video &Video::operator=(const Video &) FL_NO_EXCEPT = default;
 
 bool Video::begin(filebuf_ptr handle) {
     if (!mImpl) {
-        FL_WARN_F("Video::begin: mImpl is null, manually constructed videos "
+        FL_WARN("Video::begin: mImpl is null, manually constructed videos "
                      "must include full parameters.");
         return false;
     }
@@ -52,11 +52,11 @@ bool Video::begin(filebuf_ptr handle) {
     }
     if (!handle) {
         setAdmissionError("filebuf is null");
-        FL_DBG_F("%s", mError.c_str());
+        FL_DBG("%s", mError.c_str());
         return false;
     }
     if (mError.size()) {
-        FL_DBG_F("%s", mError.c_str());
+        FL_DBG("%s", mError.c_str());
         return false;
     }
     if (!mImpl->begin(handle)) {
@@ -74,7 +74,7 @@ bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
         return false;
     }
     if (!mImpl) {
-        FL_WARN_F_IF(!mError.empty(), "%s", mError.c_str());
+        FL_WARN_IF(!mError.empty(), "%s", mError.c_str());
         return false;
     }
     bool ok = mImpl->draw(now, leds);
@@ -185,7 +185,7 @@ bool Video::rewind() {
 
 VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
-        FL_WARN_F("VideoFxWrapper: Fx does not have a fixed frame rate, "
+        FL_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, "
                      "assuming 30fps.");
         mFps = 30.0f;
     }
@@ -211,7 +211,7 @@ void VideoFxWrapper::draw(DrawContext context) {
     }
     bool ok = mVideo->draw(context.now, context.leds);
     if (!ok) {
-        FL_WARN_F("VideoFxWrapper: draw failed.");
+        FL_WARN("VideoFxWrapper: draw failed.");
     }
 }
 

@@ -76,7 +76,7 @@ RxWaitResult NativeRxDevice::wait(u32 timeout_ms) FL_NO_EXCEPT {
     }
     mFinished = true;
     if (mEdges.empty()) {
-        FL_WARN_F("NativeRxDevice: No edges captured for pin %s - stub channel engine may not have called simulateWS2812Output()", mPin);
+        FL_WARN("NativeRxDevice: No edges captured for pin %s - stub channel engine may not have called simulateWS2812Output()", mPin);
         return RxWaitResult::TIMEOUT;
     }
     return RxWaitResult::SUCCESS;
@@ -100,7 +100,7 @@ void NativeRxDevice::onEdge(bool high, u32 duration_ns) FL_NO_EXCEPT {
 fl::result<u32, DecodeError> NativeRxDevice::decode(const ChipsetTiming4Phase& timing,
                                                      fl::span<u8> out) FL_NO_EXCEPT {
     if (mEdges.empty()) {
-        FL_WARN_F("NativeRxDevice::decode: No edges recorded for pin %s", mPin);
+        FL_WARN("NativeRxDevice::decode: No edges recorded for pin %s", mPin);
         return fl::result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
     return fl::channels::rx::decodeWs2812Edges(

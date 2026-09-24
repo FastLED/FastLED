@@ -96,7 +96,7 @@ class ReorderingPixelIteratorAny {
         FL_UNUSED(pipeline);
         FL_UNUSED(ditherPhase);  // read only by the colour-managed source
         FL_UNUSED(brightness);   // read only by the colour-managed source
-        FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
+        FL_UNUSED(channelName);  // only consumed by FL_ERROR, a no-op on small platforms
 
         // Apply addressing transformation if configured
         if (addressing) {
@@ -107,7 +107,7 @@ class ReorderingPixelIteratorAny {
 
             // Validate that XYMap dimensions match channel LED count
             if (expectedLeds != numLeds) {
-                FL_ERROR_F("Channel '%s': XYMap dimensions (%sx%s=%s) don't match LED count (%s). Addressing transformation may produce unexpected results.", channelName, width, height, expectedLeds, numLeds);
+                FL_ERROR("Channel '%s': XYMap dimensions (%sx%s=%s) don't match LED count (%s). Addressing transformation may produce unexpected results.", channelName, width, height, expectedLeds, numLeds);
             }
 
             // Cast mData to CRGB array
@@ -215,12 +215,12 @@ FL_NO_INLINE
 static void emitDisabledDriverError(const fl::string& channelName,
                                     const fl::string& driverName,
                                     const fl::string& exclusive) FL_NO_EXCEPT {
-    FL_UNUSED(channelName);  // only consumed by FL_ERROR_F, a no-op on small platforms
+    FL_UNUSED(channelName);  // only consumed by FL_ERROR, a no-op on small platforms
     FL_UNUSED(driverName);
     if (!exclusive.empty()) {
-        FL_ERROR_F("Channel '%s': bound driver '%s' is currently DISABLED by exclusive-driver selection '%s'. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, exclusive, driverName);
+        FL_ERROR("Channel '%s': bound driver '%s' is currently DISABLED by exclusive-driver selection '%s'. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, exclusive, driverName);
     } else {
-        FL_ERROR_F("Channel '%s': bound driver '%s' is currently DISABLED. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, driverName);
+        FL_ERROR("Channel '%s': bound driver '%s' is currently DISABLED. Frame will be silently dropped. Resolve with: FastLED.enableDrivers<fl::Bus::%s>() or FastLED.enableAllDrivers().", channelName, driverName, driverName);
     }
 }
 
@@ -382,10 +382,10 @@ void Channel::raiseColorProfileFallback(const char* reason) FL_NO_EXCEPT {
         return;
     }
     if (mProfileBindingAccepted) {
-        FL_WARN_F("Channel %d: color management requested but %s; "
+        FL_WARN("Channel %d: color management requested but %s; "
                   "falling back to the legacy path", id(), reason);
     } else {
-        FL_WARN_F("Channel %d: color management requested but %s; "
+        FL_WARN("Channel %d: color management requested but %s; "
                   "strict mode disables this channel", id(), reason);
     }
     mWarnedColorProfileFallback = true;
@@ -569,7 +569,7 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
     // continues to emit RGB-only bytes (is_rgbw=false) so the strip still
     // lights up, just without the W diode.
     if (pixelIterator.get_rgbww().active() && !is_rgbw) {
-        FL_WARN_F_ONCE("UCS7604 cannot carry 5-channel RGBWW â€” this chipset "
+        FL_WARN_ONCE("UCS7604 cannot carry 5-channel RGBWW â€” this chipset "
                      "always emits 4-channel RGBW. The warm/cool white "
                      "channels in your Rgbww config will be dropped. "
                      "Set ChannelOptions.mWhiteCfg = Rgbw{...} instead to "
@@ -624,15 +624,15 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
         if (!busDriver) {
             // Typed Bus miss â€” emit the actionable hint with the three
             // currently-shipping remediations (option 3 added in #2460).
-            FL_ERROR_F("Channel '%s': Driver '%s' wasn't instantiated. Resolve with: (1) fl::enableDrivers<fl::Bus::%s>() (links only this driver), (2) FastLED.enableAllDrivers() (links every driver), or (3) FastLED.addLeds<..., fl::Bus::%s>(...) (legacy API; pins Bus + triggers linker keep-alive). Defaulting to AUTO/priority dispatch.", mName, busKey, busKey, busKey);
+            FL_ERROR("Channel '%s': Driver '%s' wasn't instantiated. Resolve with: (1) fl::enableDrivers<fl::Bus::%s>() (links only this driver), (2) FastLED.enableAllDrivers() (links every driver), or (3) FastLED.addLeds<..., fl::Bus::%s>(...) (legacy API; pins Bus + triggers linker keep-alive). Defaulting to AUTO/priority dispatch.", mName, busKey, busKey, busKey);
         } else {
             // Registered, but canHandle() said no â€” bus/chipset mismatch.
-            FL_ERROR_F("Channel '%s': Driver '%s' is registered but cannot handle this channel's chipset (bus/chipset mismatch). Defaulting to AUTO/priority dispatch.", mName, busKey);
+            FL_ERROR("Channel '%s': Driver '%s' is registered but cannot handle this channel's chipset (bus/chipset mismatch). Defaulting to AUTO/priority dispatch.", mName, busKey);
         }
         mBusWarned = true;
     }
     if (!driver) {
-        FL_ERROR_F("Channel '%s': No compatible driver found - cannot transmit", mName);
+        FL_ERROR("Channel '%s': No compatible driver found - cannot transmit", mName);
     }
 #endif  // FASTLED_LOG_RUNTIME_ENABLED â€” release skips the per-frame
         // driver->getName() != busKey compare + the silent
@@ -648,19 +648,19 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
     // Safety check: don't modify buffer if driver is currently transmitting it
     if (mChannelData->isInUse()) {
-        FL_WARN_F("Channel '%s': showPixels() called while mChannelData is in use by driver, attempting to wait", mName);
+        FL_WARN("Channel '%s': showPixels() called while mChannelData is in use by driver, attempting to wait", mName);
         auto driver = mDriver.lock();
         if (!driver) {
-            FL_ERROR_F("Channel '%s': No driver bound yet the mChannelData is in use - cannot transmit", mName);
+            FL_ERROR("Channel '%s': No driver bound yet the mChannelData is in use - cannot transmit", mName);
             return;
         }
         // wait until the driver is in a READY state.
         bool ok = driver->waitForReady();
         if (!ok) {
-            FL_ERROR_F("Channel '%s': Timeout occurred while waiting for driver to become READY", mName);
+            FL_ERROR("Channel '%s': Timeout occurred while waiting for driver to become READY", mName);
             return;
         }
-        FL_WARN_F("Channel '%s': Engine became READY after waiting", mName);
+        FL_WARN("Channel '%s': Engine became READY after waiting", mName);
     }
 
     // Phase 5b of #2428: if the driver was pre-bound via setDriver() (legacy
@@ -958,7 +958,7 @@ public:
         // No-op: stub driver does nothing
         static bool warned = false;
         if (!warned) {
-            FL_DBG_F("StubChannelEngine: No-op enqueue (use for testing or unsupported platforms)");
+            FL_DBG("StubChannelEngine: No-op enqueue (use for testing or unsupported platforms)");
             warned = true;
         }
     }
@@ -990,7 +990,7 @@ IChannelDriver* getStubChannelEngine() {
 // Re-exposed protected base class methods
 void Channel::addToDrawList() {
     if (isInList()) {
-        FL_WARN_F("Channel '%s': Skipping addToDrawList() - already in draw list", mName);
+        FL_WARN("Channel '%s': Skipping addToDrawList() - already in draw list", mName);
         return;
     }
     CPixelLEDController<RGB>::addToList();
@@ -1001,7 +1001,7 @@ void Channel::addToDrawList() {
 
 void Channel::removeFromDrawList() {
     if (!isInList()) {
-        FL_WARN_F("Channel '%s': Skipping removeFromDrawList() - not in draw list", mName);
+        FL_WARN("Channel '%s': Skipping removeFromDrawList() - not in draw list", mName);
         return;
     }
     CPixelLEDController<RGB>::removeFromDrawList();

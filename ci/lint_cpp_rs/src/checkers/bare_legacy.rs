@@ -60,7 +60,8 @@ impl FileContentChecker for BareNoInlineChecker {
 
 // --- BareSnprintfChecker -----------------------------------------------------
 //
-// Bans bare C ::snprintf / ::printf / ::sprintf family in src/.
+// Bans bare C ::snprintf / ::printf / ::sprintf family in src/, and bans the
+// removed fl::sprintf API. Bounded fl::snprintf is the only buffer formatter.
 // Origin: ci/lint_cpp/bare_snprintf_checker.py (FastLED #2773 item 1.5).
 
 const BARE_SNPRINTF_EXEMPT_SUFFIXES: &[&str] = &[
@@ -111,6 +112,12 @@ impl FileContentChecker for BareSnprintfChecker {
             let code = split_line_comment(&visible);
             for mat in regex_bare_snprintf().find_iter(code) {
                 if printf_family_has_qualifier_prefix(code, mat.start()) {
+                    let prefix = code[..mat.start()].trim_end();
+                    if mat.as_str().starts_with("sprintf")
+                        && prefix.ends_with("fl::")
+                    {
+                        violations.push((index + 1, line.trim_end().to_string()));
+                    }
                     continue;
                 }
                 violations.push((index + 1, line.trim_end().to_string()));
@@ -254,27 +261,10 @@ impl FileContentChecker for FlNoUnderscoreChecker {
 
 // --- LegacyLogMacroChecker ---------------------------------------------------
 //
-// Requires the `_F` spelling of the FastLED logging macros (FL_WARN, FL_PRINT,
-// FL_DBG, FL_ERROR, FL_LOG_*) in src/. Origin:
+// Rejects the obsolete `_F` spelling of FastLED logging macros in src/. The
+// unified unsuffixed macros select stream or printf behavior by argument count.
+// Origin:
 // ci/lint_cpp/legacy_log_macro_checker.py.
-//
-// This used to say the `_F` form "puts the formatter in fl::printf instead of
-// a fresh fl::sstream chain per call site". That is not achievable by the
-// spelling, and saying so here sent readers looking for a cost that the
-// suffix does not control. `src/fl/log/log.h:330` is:
-//
-//     #define FL_WARN_F(...) FL_WARN(__VA_ARGS__)
-//
-// so the two are the same token sequence. What selects `log_emit_f` over
-// `log_emit` is the argument count -- one argument builds an `fl::sstream`,
-// two or more do not -- and the suffix has no bearing on it.
-//
-// So what this rule enforces is a spelling, for consistency. Whether that is
-// the right rule is open: `log.h` tells new code to drop the suffix and "rely
-// on argument-count dispatch", which is the opposite instruction, and more
-// than half the `_F` calls this rule approves are single-argument ones that
-// build the sstream anyway. FastLED#4297 has the counts and the options; do
-// not resolve that by editing this comment.
 
 struct LegacyLogMacroChecker;
 
@@ -337,28 +327,7 @@ impl FileContentChecker for LegacyLogMacroChecker {
 }
 
 fn legacy_log_replacement(macro_name: &str) -> String {
-    if macro_name.ends_with("_ASYNC_MAIN") {
-        return format!("{macro_name}_F");
-    }
-    if macro_name == "FL_LOG_ASYNC" {
-        return "FL_LOG_ASYNC_F".to_string();
-    }
-    if let Some(prefix) = macro_name.strip_suffix("_FMT_IF") {
-        return format!("{prefix}_F_IF");
-    }
-    if let Some(prefix) = macro_name.strip_suffix("_FMT") {
-        return format!("{prefix}_F");
-    }
-    if let Some(prefix) = macro_name.strip_suffix("_IF") {
-        return format!("{prefix}_F_IF");
-    }
-    if let Some(prefix) = macro_name.strip_suffix("_ONCE") {
-        return format!("{prefix}_F_ONCE");
-    }
-    if let Some(prefix) = macro_name.strip_suffix("_EVERY") {
-        return format!("{prefix}_F_EVERY");
-    }
-    format!("{macro_name}_F")
+    macro_name.replacen("_F", "", 1)
 }
 
 // --- IwyuPragmaPrivateChecker -----------------------------------------------

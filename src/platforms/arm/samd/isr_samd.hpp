@@ -321,26 +321,26 @@ extern "C" {
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NO_EXCEPT {
     if (!config.handler) {
-        FL_WARN_F("attachTimerHandler: handler is null");
+        FL_WARN("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (config.frequency_hz == 0) {
-        FL_WARN_F("attachTimerHandler: frequency_hz is 0");
+        FL_WARN("attachTimerHandler: frequency_hz is 0");
         return -2;  // Invalid frequency
     }
 
     // Allocate a free timer
     u8 timer_idx = 0;
     if (!allocate_timer(timer_idx)) {
-        FL_WARN_F("attachTimerHandler: no free timers");
+        FL_WARN("attachTimerHandler: no free timers");
         return -3;  // Out of resources
     }
 
     Tc* timer = get_timer_instance(timer_idx);
     if (!timer) {
         free_timer(timer_idx);
-        FL_WARN_F("attachTimerHandler: invalid timer instance");
+        FL_WARN("attachTimerHandler: invalid timer instance");
         return -4;  // Internal error
     }
 
@@ -349,7 +349,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_timer(timer_idx);
-        FL_WARN_F("attachTimerHandler: failed to allocate handle data");
+        FL_WARN("attachTimerHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -459,7 +459,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     timer->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
     tc_wait_sync(timer);
 
-    FL_DBG_F("Timer started at %s Hz on TC%s", config.frequency_hz, static_cast<int>(timer_idx));
+    FL_DBG("Timer started at %s Hz on TC%s", config.frequency_hz, static_cast<int>(timer_idx));
 
     // Release ownership - pointer is now managed by the C API (timer_handles + out_handle)
     handle_owner.release();
@@ -508,13 +508,13 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
 
 int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN_F("detachHandler: invalid handle");
+        FL_WARN("detachHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("detachHandler: null handle data");
+        FL_WARN("detachHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -535,19 +535,19 @@ int detach_handler(isr_handle_t& handle) FL_NO_EXCEPT {
     handle.platform_handle = nullptr;
     handle.platform_id = 0;
 
-    FL_DBG_F("Handler detached");
+    FL_DBG("Handler detached");
     return 0;  // Success
 }
 
 int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN_F("enableHandler: invalid handle");
+        FL_WARN("enableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("enableHandler: null handle data");
+        FL_WARN("enableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -569,13 +569,13 @@ int enable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
 
 int disable_handler(const isr_handle_t& handle) FL_NO_EXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN_F("disableHandler: invalid handle");
+        FL_WARN("disableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN_F("disableHandler: null handle data");
+        FL_WARN("disableHandler: null handle data");
         return -1;  // Invalid handle
     }
 

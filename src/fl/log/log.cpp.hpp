@@ -10,6 +10,22 @@
 namespace fl {
 namespace detail {
 
+FL_NO_INLINE const char* log_kind_name(log_kind kind) FL_NO_EXCEPT {
+    switch (kind) {
+    case log_kind::WARN:  return "WARN";
+    case log_kind::ERROR: return "ERROR";
+    case log_kind::INFO:  return "INFO";
+    }
+    return "LOG";
+}
+
+FL_NO_INLINE void log_emit_prefix(log_kind kind, const char* file,
+                                  int line) FL_NO_EXCEPT {
+    fl::printf("%s(%d): %s: ", file, line, log_kind_name(kind));
+}
+
+FL_NO_INLINE void log_emit_newline() FL_NO_EXCEPT { fl::printf("\n"); }
+
 // =============================================================================
 // Centralised log emit (#2963 Proposal B, Option 3)
 // =============================================================================
@@ -45,6 +61,15 @@ FL_NO_INLINE void log_emit(log_kind kind, const char* file, int line, fl::sstrea
     body.clear();
     body << file << "(" << line << tag << user_payload.c_str();
     fl::println(body.c_str());
+}
+
+FL_NO_INLINE void log_emit_literal(log_kind kind, const char* file, int line,
+                                   const char* body) FL_NO_EXCEPT {
+    // Mirror log_emit_f's existing printf specializations so this safe
+    // literal path adds no large four-argument formatter instantiation.
+    log_emit_prefix(kind, file, line);
+    fl::print(body);
+    log_emit_newline();
 }
 
 } // namespace detail

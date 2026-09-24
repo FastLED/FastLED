@@ -57,13 +57,13 @@ bool SPIDualNRF52::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SPIDualNRF52: Bus ID mismatch");
+        FL_WARN("SPIDualNRF52: Bus ID mismatch");
         return false;
     }
 
     // Validate pin assignments
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN_F("SPIDualNRF52: Invalid pin configuration");
+        FL_WARN("SPIDualNRF52: Invalid pin configuration");
         return false;
     }
 
@@ -206,13 +206,13 @@ bool SPIDualNRF52::allocateDMABuffers(size_t required_size) {
     // Allocate new buffers in RAM (required for EasyDMA)
     mLane0Buffer = (u8*)fl::malloc(required_size);
     if (mLane0Buffer == nullptr) {
-        FL_WARN_F("SPIDualNRF52: Failed to allocate lane 0 DMA buffer");
+        FL_WARN("SPIDualNRF52: Failed to allocate lane 0 DMA buffer");
         return false;
     }
 
     mLane1Buffer = (u8*)fl::malloc(required_size);
     if (mLane1Buffer == nullptr) {
-        FL_WARN_F("SPIDualNRF52: Failed to allocate lane 1 DMA buffer");
+        FL_WARN("SPIDualNRF52: Failed to allocate lane 1 DMA buffer");
         fl::free(mLane0Buffer);
         mLane0Buffer = nullptr;
         return false;
@@ -291,7 +291,7 @@ bool SPIDualNRF52::waitComplete(u32 timeout_ms) {
     // Use (max)() to prevent macro expansion by Arduino.h's max macro
     bool timed_out = (timeout_ms != (fl::numeric_limits<u32>::max)()) && (iterations >= timeout_iterations);
     if (timed_out) {
-        FL_WARN_F("SPIDualNRF52: Transaction timeout");
+        FL_WARN("SPIDualNRF52: Transaction timeout");
         // Clear state even on timeout
         mTransactionActive = false;
         return false;

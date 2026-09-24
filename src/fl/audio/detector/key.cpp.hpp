@@ -167,7 +167,7 @@ void KeyDetector::update(shared_ptr<Context> context) {
             mKeyStartTime = timestamp;
             mKeyActive = true;
 
-            FL_DBG_F("Key change: %s %s (confidence: %s)", mCurrentKey.getRootName(), mCurrentKey.getQuality(), mCurrentKey.confidence);
+            FL_DBG("Key change: %s %s (confidence: %s)", mCurrentKey.getRootName(), mCurrentKey.getQuality(), mCurrentKey.confidence);
 
             mFireKeyChange = true;
         }
@@ -175,7 +175,7 @@ void KeyDetector::update(shared_ptr<Context> context) {
 
     // Check for key end (confidence drop)
     if (mKeyActive && detectedKey.confidence < mConfidenceThreshold * 0.5f) {
-        FL_DBG_F("Key ended: %s %s", mCurrentKey.getRootName(), mCurrentKey.getQuality());
+        FL_DBG("Key ended: %s %s", mCurrentKey.getRootName(), mCurrentKey.getQuality());
 
         mFireKeyEnd = true;
         mKeyActive = false;

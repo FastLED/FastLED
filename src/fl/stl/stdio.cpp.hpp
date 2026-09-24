@@ -68,3 +68,103 @@ void format_arg(sstream& stream, const FormatSpec& spec, const fl::string_view& 
 }
 
 } } // namespace fl::printf_detail
+
+namespace fl {
+
+void printf(const char* format) FL_NO_EXCEPT {
+    char output[64];
+    fl::size used = 0;
+    const auto flush_buffer = [&]() {
+        if (used == 0) {
+            return;
+        }
+        output[used] = '\0';
+        fl::print(output);
+        // `append` resumes writing only after this shared cursor is reset.
+        used = 0;
+    };
+    const auto append = [&](const char* text) {
+        while (*text) {
+            if (used == sizeof(output) - 1) {
+                flush_buffer();
+            }
+            output[used++] = *text++;
+        }
+    };
+
+    while (*format) {
+        if (*format == '%') {
+            printf_detail::FormatSpec spec =
+                printf_detail::parse_format_spec(format);
+            append(spec.type == '%' ? "%" : "<missing_arg>");
+            continue;
+        }
+        if (format[0] == '{' && format[1] == '{') {
+            append("{");
+            format += 2;
+            continue;
+        }
+        if (format[0] == '}' && format[1] == '}') {
+            append("}");
+            format += 2;
+            continue;
+        }
+        if (format[0] == '{' && format[1] == '}') {
+            append("<missing_arg>");
+            format += 2;
+            continue;
+        }
+        if (used == sizeof(output) - 1) {
+            flush_buffer();
+        }
+        output[used++] = *format++;
+    }
+    flush_buffer();
+}
+
+int snprintf(char* buffer, fl::size size, const char* format) FL_NO_EXCEPT {
+    if (!buffer || size == 0) {
+        return 0;
+    }
+
+    fl::size written = 0;
+    const auto append_char = [&](char value) {
+        if (written < size - 1) {
+            buffer[written++] = value;
+        }
+    };
+    const auto append_text = [&](const char* text) {
+        while (*text && written < size - 1) {
+            buffer[written++] = *text++;
+        }
+    };
+
+    while (*format && written < size - 1) {
+        if (*format == '%') {
+            printf_detail::FormatSpec spec =
+                printf_detail::parse_format_spec(format);
+            append_text(spec.type == '%' ? "%" : "<missing_arg>");
+            continue;
+        }
+        if (format[0] == '{' && format[1] == '{') {
+            append_char('{');
+            format += 2;
+            continue;
+        }
+        if (format[0] == '}' && format[1] == '}') {
+            append_char('}');
+            format += 2;
+            continue;
+        }
+        if (format[0] == '{' && format[1] == '}') {
+            append_text("<missing_arg>");
+            format += 2;
+            continue;
+        }
+        append_char(*format++);
+    }
+    buffer[written] = '\0';
+    return static_cast<int>(written);
+}
+
+} // namespace fl

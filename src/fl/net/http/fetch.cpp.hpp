@@ -120,7 +120,7 @@ response perform_http_request(const fl::string& url, const FetchOptions& request
     }
 
     // Resolve hostname
-    FL_WARN_F("[FETCH] Resolving hostname: %s", parsed.host);
+    FL_WARN("[FETCH] Resolving hostname: %s", parsed.host);
     struct hostent* server = gethostbyname(parsed.host.c_str());
     if (server == nullptr) {
         close(sock);
@@ -168,7 +168,7 @@ response perform_http_request(const fl::string& url, const FetchOptions& request
         FD_SET(sock, &write_fds);
 
         // Wait for connection with async pumping
-        FL_WARN_F("[FETCH] Waiting for connection to %s:%s", parsed.host, parsed.port);
+        FL_WARN("[FETCH] Waiting for connection to %s:%s", parsed.host, parsed.port);
         while (true) {
             timeout.tv_sec = 0;
             timeout.tv_usec = 10000;  // 10ms
@@ -228,7 +228,7 @@ response perform_http_request(const fl::string& url, const FetchOptions& request
     }
 
     // Read response (non-blocking with async pumping)
-    FL_WARN_F("[FETCH] Waiting for HTTP response...");
+    FL_WARN("[FETCH] Waiting for HTTP response...");
     fl::string response_data;
     char buffer[4096];
     int retries = 0;
@@ -410,8 +410,8 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
 
 fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) {
     FL_UNUSED(request);
-    FL_UNUSED(url);  // only consumed by FL_WARN_F, a no-op on small platforms
-    FL_WARN_F("HTTP fetch is not supported on this platform. URL: %s", url);
+    FL_UNUSED(url);  // only consumed by FL_WARN, a no-op on small platforms
+    FL_WARN("HTTP fetch is not supported on this platform. URL: %s", url);
     Response error_response(501, "Not Implemented");
     error_response.set_body("HTTP fetch is not available on this platform.");
     return fl::task::Promise<Response>::resolve(error_response);
@@ -653,7 +653,7 @@ fl::json Response::json() const {
         if (is_json() || mBody.find("{") != fl::string::npos || mBody.find("[") != fl::string::npos) {
             mCachedJson = parse_json_body();
         } else {
-            FL_WARN_F("Response is not JSON: %s", mBody);
+            FL_WARN("Response is not JSON: %s", mBody);
             mCachedJson = fl::json(nullptr);  // Not JSON content
         }
         mJsonParsed = true;

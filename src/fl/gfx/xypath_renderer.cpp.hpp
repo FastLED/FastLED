@@ -24,7 +24,7 @@ vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) {
 Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     if (!mDrawBoundsSet) {
-        FL_WARN_F("XYPathRenderer::at_subpixel: draw bounds not set");
+        FL_WARN("XYPathRenderer::at_subpixel: draw bounds not set");
         return Tile2x2_u8();
     }
     vec2f xy = at(alpha);

@@ -325,7 +325,7 @@ class I2sRxSampler final : public RxDevice {
             mDescs = static_cast<lldesc_t *>(heap_caps_malloc(
                 kRxDescCount * sizeof(lldesc_t), MALLOC_CAP_DMA));
             if (mRingMem == nullptr || mDescs == nullptr) {
-                FL_WARN_F("I2sRxSampler: DMA ring alloc failed");
+                FL_WARN("I2sRxSampler: DMA ring alloc failed");
                 freeRing();
                 return false;
             }

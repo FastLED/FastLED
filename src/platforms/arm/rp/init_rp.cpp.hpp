@@ -29,14 +29,14 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG_F("RP2040/RP2350: Platform initialization starting");
+    FL_DBG("RP2040/RP2350: Platform initialization starting");
 
     // PIO parallel group singleton is initialized lazily on first use when
     // FastLED.addLeds() is called. No explicit initialization needed here.
     // ISR alarm lock and ADC are also initialized on-demand.
 
     initialized = true;
-    FL_DBG_F("RP2040/RP2350: Platform initialization complete");
+    FL_DBG("RP2040/RP2350: Platform initialization complete");
 }
 
 } // namespace platforms

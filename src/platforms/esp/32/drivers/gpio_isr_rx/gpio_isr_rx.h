@@ -71,7 +71,7 @@ struct EdgeTimestamp {
  * config.skip_signals = 0;
  *
  * if (!rx->begin(config)) {
- *     FL_WARN_F("GPIO ISR RX init failed");
+ *     FL_WARN("GPIO ISR RX init failed");
  *     return;
  * }
  *
@@ -79,7 +79,7 @@ struct EdgeTimestamp {
  * if (rx->wait(100) == RxWaitResult::SUCCESS) {
  *     // Get captured edges
  *     fl::span<const EdgeTimestamp> edges = rx->getEdges();
- *     FL_DBG_F("Captured %s edges", edges.size());
+ *     FL_DBG("Captured %s edges", edges.size());
  * }
  * @endcode
  */

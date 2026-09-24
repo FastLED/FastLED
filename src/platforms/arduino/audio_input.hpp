@@ -74,7 +74,7 @@ public:
 
     void start() FL_NO_EXCEPT override {
         if (mInitialized) {
-            FL_WARN_F("Arduino I2S is already initialized");
+            FL_WARN("Arduino I2S is already initialized");
             return;
         }
 
@@ -93,13 +93,13 @@ public:
         if (!success) {
             mHasError = true;
             mErrorMessage = "Failed to initialize Arduino I2S";
-            FL_WARN_F("%s", mErrorMessage.c_str());
+            FL_WARN("%s", mErrorMessage.c_str());
             return;
         }
 
         mInitialized = true;
         mTotalSamplesRead = 0;
-        FL_WARN_F("Arduino I2S audio input started successfully");
+        FL_WARN("Arduino I2S audio input started successfully");
     }
 
     void stop() FL_NO_EXCEPT override {
@@ -110,7 +110,7 @@ public:
         I2S.end();
         mInitialized = false;
         mTotalSamplesRead = 0;
-        FL_WARN_F("Arduino I2S audio input stopped");
+        FL_WARN("Arduino I2S audio input stopped");
     }
 
     bool error(fl::string *msg = nullptr) FL_NO_EXCEPT override {
@@ -122,7 +122,7 @@ public:
 
     audio::Sample read() FL_NO_EXCEPT override {
         if (!mInitialized) {
-            FL_WARN_F("Arduino I2S is not initialized");
+            FL_WARN("Arduino I2S is not initialized");
             return audio::Sample();  // Invalid sample
         }
 
@@ -204,12 +204,12 @@ private:
 // Platform-specific audio input creation function for Arduino
 fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& config, fl::string* error_message = nullptr) FL_NO_EXCEPT {
     if (config.is<audio::ConfigI2S>()) {
-        FL_WARN_F("Creating Arduino I2S audio source");
+        FL_WARN("Creating Arduino I2S audio source");
         audio::ConfigI2S i2s_config = config.get<audio::ConfigI2S>();
         return fl::make_shared<Arduino_I2S_Audio>(i2s_config);
     } else if (config.is<audio::ConfigPdm>()) {
         const char* ERROR_MESSAGE = "PDM audio not supported in Arduino I2S implementation";
-        FL_WARN_F("%s", ERROR_MESSAGE);
+        FL_WARN("%s", ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -217,7 +217,7 @@ fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& co
     }
 
     const char* ERROR_MESSAGE = "Unsupported audio configuration for Arduino";
-    FL_WARN_F("%s", ERROR_MESSAGE);
+    FL_WARN("%s", ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }
@@ -234,7 +234,7 @@ fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& co
 #else
     const char* ERROR_MESSAGE = "Arduino I2S library not available - please install I2S library";
 #endif
-    FL_WARN_F("%s", ERROR_MESSAGE);
+    FL_WARN("%s", ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }

@@ -126,7 +126,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SpiHw2MXRT1062: Bus mismatch - expected %s, got %s", mBusId, static_cast<int>(config.bus_num));
+        FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected %s, got %s", mBusId, static_cast<int>(config.bus_num));
         return false;
     }
 
@@ -146,13 +146,13 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_WARN_F("SpiHw2MXRT1062: Invalid bus number %s", static_cast<int>(bus_num));
+            FL_WARN("SpiHw2MXRT1062: Invalid bus number %s", static_cast<int>(bus_num));
             return false;
     }
 
     // Validate that both data pins are specified
     if (config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN_F("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
+        FL_WARN("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
         return false;
     }
 
@@ -186,9 +186,9 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     }
 
     if (!pins_valid) {
-        FL_WARN_F("SpiHw2MXRT1062: Invalid pin combination for bus %s", mBusId);
-        FL_WARN_F("  Expected: SCK=%s D0=%s D1=%s", (int)valid_pins[mBusId].sck, (int)valid_pins[mBusId].mosi, (int)valid_pins[mBusId].miso);
-        FL_WARN_F("  Got: SCK=%s D0=%s D1=%s", (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
+        FL_WARN("SpiHw2MXRT1062: Invalid pin combination for bus %s", mBusId);
+        FL_WARN("  Expected: SCK=%s D0=%s D1=%s", (int)valid_pins[mBusId].sck, (int)valid_pins[mBusId].mosi, (int)valid_pins[mBusId].miso);
+        FL_WARN("  Got: SCK=%s D0=%s D1=%s", (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
         return false;
     }
 
@@ -228,10 +228,10 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
         port->CFGR1 = cfgr1;
 
-        FL_LOG_SPI_F("SpiHw2MXRT1062: Configured CFGR1=%s (OUTCFG enabled for dual-mode)", cfgr1);
+        FL_LOG_SPI("SpiHw2MXRT1062: Configured CFGR1=%s (OUTCFG enabled for dual-mode)", cfgr1);
     }
 
-    FL_LOG_SPI_F("SpiHw2MXRT1062: Initialized on bus %s clock=%sHz pins: CLK=%s D0=%s D1=%s", mBusId, mClockSpeed, (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
+    FL_LOG_SPI("SpiHw2MXRT1062: Initialized on bus %s clock=%sHz pins: CLK=%s D0=%s D1=%s", mBusId, mClockSpeed, (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
 
     mInitialized = true;
     mTransactionActive = false;
@@ -290,7 +290,7 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
         return true;  // Nothing to transmit
     }
 
-    FL_LOG_SPI_F("SpiHw2MXRT1062: Transmitting %s bytes via LPSPI bus %s", mCurrentTotalSize, mBusId);
+    FL_LOG_SPI("SpiHw2MXRT1062: Transmitting %s bytes via LPSPI bus %s", mCurrentTotalSize, mBusId);
 
     // Begin SPI transaction with configured clock speed
     mSPI->beginTransaction(fl::platforms::teensy::LpspiSettings(mClockSpeed, MSBFIRST, SPI_MODE0));

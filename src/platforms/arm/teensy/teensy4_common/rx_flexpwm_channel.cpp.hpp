@@ -26,7 +26,7 @@
 #if defined(FL_IS_TEENSY_4X)
 
 // FastLED #3219: the per-frame `[FlexPWM CFG]`/`DMA`/`RAW`/`EDGE`/`E`/
-// `DECODE` FL_WARN_F dumps that PR #3216 enabled by default in this
+// `DECODE` FL_WARN dumps that PR #3216 enabled by default in this
 // file have been removed. They were instrumentation added during the
 // bimodal-edge investigation (#3066 Phase 4) and produced 18 of the
 // 75 serial lines per OBJECT_FLED autoresearch frame -- ~24 % of the
@@ -465,7 +465,7 @@ FlexPwmRxChannelImpl *FlexPwmRxChannelImpl::sActiveInstance = nullptr;
 bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupPin(mPin);
     if (!mPinInfo) {
-        FL_WARN_F("Pin %s does not support FlexPWM capture on Teensy 4.x", mPin);
+        FL_WARN("Pin %s does not support FlexPWM capture on Teensy 4.x", mPin);
         return false;
     }
 
@@ -873,11 +873,11 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
     mEdges.push_back(EdgeTime(true, final_high_ns));
 
 #ifdef FL_DEBUG
-    FL_WARN_F("[FlexPWM EDGE] total=%s", mEdges.size());
+    FL_WARN("[FlexPWM EDGE] total=%s", mEdges.size());
     if (mEdges.size() >= 8) {
-        FL_WARN_F("[FlexPWM E] 0:%s%s 1:%s%s 2:%s%s 3:%s%s", (mEdges[0].high?"H":"L"), mEdges[0].ns, (mEdges[1].high?"H":"L"), mEdges[1].ns, (mEdges[2].high?"H":"L"), mEdges[2].ns, (mEdges[3].high?"H":"L"), mEdges[3].ns);
+        FL_WARN("[FlexPWM E] 0:%s%s 1:%s%s 2:%s%s 3:%s%s", (mEdges[0].high?"H":"L"), mEdges[0].ns, (mEdges[1].high?"H":"L"), mEdges[1].ns, (mEdges[2].high?"H":"L"), mEdges[2].ns, (mEdges[3].high?"H":"L"), mEdges[3].ns);
         size_t mid = mEdges.size() / 2;
-        FL_WARN_F("[FlexPWM E@%s] %s%s %s%s %s%s %s%s", mid, (mEdges[mid].high?"H":"L"), mEdges[mid].ns, (mEdges[mid+1].high?"H":"L"), mEdges[mid+1].ns, (mEdges[mid+2].high?"H":"L"), mEdges[mid+2].ns, (mEdges[mid+3].high?"H":"L"), mEdges[mid+3].ns);
+        FL_WARN("[FlexPWM E@%s] %s%s %s%s %s%s %s%s", mid, (mEdges[mid].high?"H":"L"), mEdges[mid].ns, (mEdges[mid+1].high?"H":"L"), mEdges[mid+1].ns, (mEdges[mid+2].high?"H":"L"), mEdges[mid+2].ns, (mEdges[mid+3].high?"H":"L"), mEdges[mid+3].ns);
     }
 #endif
 
@@ -949,7 +949,7 @@ bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
     const FlexPwmPinInfo *info = lookupPin(pin);
     if (!info) {
-        FL_WARN_F("Pin %s does not support FlexPWM capture on Teensy 4.x", pin);
+        FL_WARN("Pin %s does not support FlexPWM capture on Teensy 4.x", pin);
         return fl::shared_ptr<FlexPwmRxChannel>();
     }
     return fl::make_shared<FlexPwmRxChannelImpl>(pin);

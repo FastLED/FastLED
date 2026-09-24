@@ -298,7 +298,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
             esp_err_t err = rmt_rx_start(static_cast<rmt_channel_t>(mChannel),
                                          /*rx_idx_rst=*/true);
             if (err != ESP_OK) {
-                FL_WARN_F("[RMT4 RX] rmt_rx_start re-arm failed, err=%s", err);
+                FL_WARN("[RMT4 RX] rmt_rx_start re-arm failed, err=%s", err);
                 return false;
             }
             return true;
@@ -308,7 +308,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         if (mChannel < 0) {
             mChannel = allocateRxChannel();
             if (mChannel < 0) {
-                FL_WARN_F("[RMT4 RX] no free RMT channel available");
+                FL_WARN("[RMT4 RX] no free RMT channel available");
                 return false;
             }
         }
@@ -343,7 +343,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         esp_err_t err = rmt_config(&cfg);
         if (err != ESP_OK) {
-            FL_WARN_F(
+            FL_WARN(
                 "[RMT4 RX] rmt_config failed on channel %s pin %s, err=%s",
                 mChannel, static_cast<int>(mPin), err);
             return false;
@@ -356,7 +356,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         err = rmt_driver_install(static_cast<rmt_channel_t>(mChannel),
                                  rx_buf_bytes, 0);
         if (err != ESP_OK) {
-            FL_WARN_F(
+            FL_WARN(
                 "[RMT4 RX] rmt_driver_install failed on channel %s, err=%s",
                 mChannel, err);
             return false;
@@ -367,7 +367,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         err = rmt_get_ringbuf_handle(static_cast<rmt_channel_t>(mChannel),
                                      &mRingbufHandle);
         if (err != ESP_OK || mRingbufHandle == nullptr) {
-            FL_WARN_F(
+            FL_WARN(
                 "[RMT4 RX] rmt_get_ringbuf_handle failed on channel %s, err=%s",
                 mChannel, err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
@@ -386,7 +386,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                           mPin);
 #endif
         if (err != ESP_OK) {
-            FL_WARN_F("[RMT4 RX] rmt_set_gpio/pin failed on channel %s pin %s, "
+            FL_WARN("[RMT4 RX] rmt_set_gpio/pin failed on channel %s pin %s, "
                       "err=%s",
                       mChannel, static_cast<int>(mPin), err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
@@ -398,7 +398,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         err = rmt_rx_start(static_cast<rmt_channel_t>(mChannel),
                            /*rx_idx_rst=*/true);
         if (err != ESP_OK) {
-            FL_WARN_F("[RMT4 RX] rmt_rx_start failed on channel %s, err=%s",
+            FL_WARN("[RMT4 RX] rmt_rx_start failed on channel %s, err=%s",
                       mChannel, err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
             mInstalled = false;
@@ -599,7 +599,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
 fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
     if (pin < 0) {
-        FL_WARN_F("[RMT4 RX] create() refused: pin %s is negative", pin);
+        FL_WARN("[RMT4 RX] create() refused: pin %s is negative", pin);
         return nullptr;
     }
     return fl::shared_ptr<RmtRxChannel>(new RmtRxChannelImpl(pin)); // ok bare allocation — RmtRxChannelImpl is private, cannot construct externally via make_shared without exposing type

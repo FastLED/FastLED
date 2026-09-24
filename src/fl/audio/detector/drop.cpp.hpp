@@ -66,7 +66,7 @@ void DropDetector::update(shared_ptr<Context> context) {
         mLastDrop = dropEvent;
         mDropDetectedThisFrame = true;
 
-        FL_DBG_F("DropDetector: Drop detected! Impact=%s, Bass=%s, Energy flux=%s", impact, bassEnergy, energyFlux);
+        FL_DBG("DropDetector: Drop detected! Impact=%s, Bass=%s, Energy flux=%s", impact, bassEnergy, energyFlux);
     }
 
     // Update baselines (exponential moving average)

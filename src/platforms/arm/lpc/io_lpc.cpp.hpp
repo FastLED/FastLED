@@ -40,7 +40,7 @@ void println(const char* str) FL_NO_EXCEPT {
     if (!Serial) return;
     // FastLED #3313: Serial.println silently drops on LPC8xx -- bytes
     // never reach the USB-VCOM bridge. Empirically, splitting into two
-    // Serial.print calls (the same byte-write path FL_DBG_F uses via
+    // Serial.print calls (the same byte-write path FL_DBG uses via
     // fl::printf -> platforms::print) reaches the host reliably. Root
     // cause is in Print::println's path in the Arduino core; filed
     // separately. This workaround unblocks every fl::println / FL_WARN_LIT

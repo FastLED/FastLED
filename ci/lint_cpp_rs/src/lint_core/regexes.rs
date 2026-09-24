@@ -640,38 +640,19 @@ fn regex_simple_identifier() -> &'static Regex {
 fn regex_legacy_log_macro() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {
-        // Order matters: longer names come first so regex alternation prefers
-        // them (e.g. FL_LOG_RMT_ASYNC_MAIN must beat FL_LOG_RMT). The list
-        // mirrors LEGACY_MACROS in the Python source.
+        // Obsolete formatted spellings. The unsuffixed macros now accept both
+        // stream expressions and printf-style argument lists.
         const MACROS: &[&str] = &[
-            "FL_LOG_OBJECTFLED_ASYNC_MAIN",
-            "FL_LOG_INTERRUPT_ASYNC_MAIN",
-            "FL_LOG_PARLIO_ASYNC_MAIN",
-            "FL_LOG_AUDIO_ASYNC_MAIN",
-            "FL_LOG_FLEXIO_ASYNC_MAIN",
-            "FL_LOG_SPI_ASYNC_MAIN",
-            "FL_LOG_RMT_ASYNC_MAIN",
-            "FL_LOG_OBJECTFLED",
-            "FL_LOG_INTERRUPT",
-            "FL_LOG_FLEXIO",
-            "FL_LOG_PARLIO",
-            "FL_LOG_AUDIO",
-            "FL_LOG_ASYNC",
-            "FL_WARN_FMT_IF",
-            "FL_WARN_EVERY",
-            "FL_PRINT_EVERY",
-            "FL_DBG_EVERY",
-            "FL_LOG_SPI",
-            "FL_LOG_RMT",
-            "FL_WARN_ONCE",
-            "FL_WARN_FMT",
-            "FL_ERROR_IF",
-            "FL_WARN_IF",
-            "FL_DBG_IF",
-            "FL_PRINT",
-            "FL_ERROR",
-            "FL_WARN",
-            "FL_DBG",
+            "FL_LOG_OBJECTFLED_ASYNC_MAIN_F", "FL_LOG_INTERRUPT_ASYNC_MAIN_F",
+            "FL_LOG_PARLIO_ASYNC_MAIN_F", "FL_LOG_AUDIO_ASYNC_MAIN_F",
+            "FL_LOG_FLEXIO_ASYNC_MAIN_F", "FL_LOG_SPI_ASYNC_MAIN_F",
+            "FL_LOG_RMT_ASYNC_MAIN_F", "FL_LOG_OBJECTFLED_F",
+            "FL_LOG_INTERRUPT_F", "FL_LOG_FLEXIO_F", "FL_LOG_PARLIO_F",
+            "FL_LOG_AUDIO_F", "FL_LOG_ASYNC_F", "FL_WARN_F_EVERY",
+            "FL_PRINT_F_EVERY", "FL_DBG_F_EVERY", "FL_WARN_F_ONCE",
+            "FL_ERROR_F_IF", "FL_WARN_F_IF", "FL_DBG_F_IF",
+            "FL_LOG_SPI_F", "FL_LOG_RMT_F", "FL_PRINT_F", "FL_ERROR_F",
+            "FL_WARN_F", "FL_DBG_F",
         ];
         Regex::new(&format!(r"\b({})\s*\(", MACROS.join("|"))).unwrap()
     })

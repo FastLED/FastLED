@@ -83,7 +83,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override
     {
         if (!mDriver) {
-            FL_WARN_F_EVERY(100, "No Engine");
+            FL_WARN_EVERY(100, "No Engine");
             return;
         }
         // Wait for previous transmission to complete and release buffer
@@ -91,10 +91,10 @@ protected:
         u32 startTime = fl::millis();
         u32 lastWarnTime = startTime;
         if (mChannelData->isInUse()) {
-            FL_WARN_F_EVERY(100, "ClocklessIdf4: driver should have finished transmitting by now - waiting");
+            FL_WARN_EVERY(100, "ClocklessIdf4: driver should have finished transmitting by now - waiting");
             bool finished = mDriver->waitForReady();
             if (!finished) {
-                FL_ERROR_F("ClocklessIdf4: Engine still busy after %sms", fl::millis() - startTime);
+                FL_ERROR("ClocklessIdf4: Engine still busy after %sms", fl::millis() - startTime);
                 return;
             }
 

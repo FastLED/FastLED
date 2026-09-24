@@ -101,7 +101,7 @@ class FsImplWasm : public fl::FsImpl {
                 // FL_DBG("Opened file: " << _path);
             } else {
                 out = fl::filebuf_ptr();
-                FL_DBG_F("File not found: %s", _path);
+                FL_DBG("File not found: %s", _path);
             }
         }
         return out;
@@ -232,7 +232,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const fl::u8 *data,
 
     auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
-        FL_WARN_F("File can only be injected once.");
+        FL_WARN("File can only be injected once.");
         return false;
     }
     inserted->append(data, len);
@@ -244,7 +244,7 @@ EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const fl::u8 *data,
                                        size_t len) {
     auto entry = fl::_findIfExists(fl::string(path));
     if (!entry) {
-        FL_WARN_F("File must be declared before it can be appended.");
+        FL_WARN("File must be declared before it can be appended.");
         return false;
     }
     entry->append(data, len);
@@ -256,7 +256,7 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
     auto inserted = fl::_createIfNotExists(fl::string(path), len);
     if (!inserted) {
-        FL_WARN_F("File can only be declared once.");
+        FL_WARN("File can only be declared once.");
         return false;
     }
     return true;
@@ -264,10 +264,10 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
     fl::wasm::declareManifestFiles(jsonStr, [](const fl::string &path, size_t size) {
-        FL_DBG_F("Declaring file %s with size %zu. These will become available "
+        FL_DBG("Declaring file %s with size %zu. These will become available "
                  "as File system paths within the app.", path.c_str(), size);
         if (!jsDeclareFile(path.c_str(), size)) {
-            FL_WARN_F("Failed to declare manifest file: %s", path.c_str());
+            FL_WARN("Failed to declare manifest file: %s", path.c_str());
         }
     });
 }

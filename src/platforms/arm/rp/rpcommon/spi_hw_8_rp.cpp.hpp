@@ -256,7 +256,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN_F("SpiHw8RP2040: Bus ID mismatch");
+        FL_WARN("SpiHw8RP2040: Bus ID mismatch");
         return false;
     }
 
@@ -264,7 +264,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
     if (config.clock_pin < 0 || config.data0_pin < 0 || config.data1_pin < 0 ||
         config.data2_pin < 0 || config.data3_pin < 0 || config.data4_pin < 0 ||
         config.data5_pin < 0 || config.data6_pin < 0 || config.data7_pin < 0) {
-        FL_WARN_F("SpiHw8RP2040: Invalid pin configuration (all 8 data pins + clock required)");
+        FL_WARN("SpiHw8RP2040: Invalid pin configuration (all 8 data pins + clock required)");
         return false;
     }
 
@@ -282,7 +282,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
     // Validate that all 8 data pins are consecutive
     for (int i = 1; i < 8; ++i) {
         if (mDataPins[i] != mDataPins[0] + i) {
-            FL_WARN_F("SpiHw8RP2040: Data pins must be consecutive (D0, D0+1, ..., D0+7)");
+            FL_WARN("SpiHw8RP2040: Data pins must be consecutive (D0, D0+1, ..., D0+7)");
             return false;
         }
     }
@@ -306,13 +306,13 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
     }
 
     if (mPIO == nullptr || mStateMachine == -1 || mPIOOffset == -1) {
-        FL_WARN_F("SpiHw8RP2040: No available PIO resources");
+        FL_WARN("SpiHw8RP2040: No available PIO resources");
         return false;
     }
 
     // Claim DMA channel
     if (!resources.claimDmaChannel(&mDMAChannel)) {
-        FL_WARN_F("SpiHw8RP2040: No available DMA channel");
+        FL_WARN("SpiHw8RP2040: No available DMA channel");
         resources.releasePioStateMachine(mPIO, mStateMachine);
         return false;
     }
@@ -322,7 +322,7 @@ bool SpiHw8RP2040::begin(const SpiHw8::Config& config) {
         resources.releasePins(mClockPin, 1);
         resources.releaseDmaChannel(mDMAChannel);
         resources.releasePioStateMachine(mPIO, mStateMachine);
-        FL_WARN_F("SpiHw8RP2040: Pins are already owned by another RP PIO driver");
+        FL_WARN("SpiHw8RP2040: Pins are already owned by another RP PIO driver");
         return false;
     }
 

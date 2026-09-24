@@ -75,17 +75,17 @@ static bool pinsEqual(const fl::FixedVector<u8, 50>& a,
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED()
  FL_NO_EXCEPT : mPeripheral(IObjectFLEDPeripheral::create()) {
-    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created");
+    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created");
 }
 
 ChannelEngineObjectFLED::ChannelEngineObjectFLED(
         fl::shared_ptr<IObjectFLEDPeripheral> peripheral)
  FL_NO_EXCEPT : mPeripheral(fl::move(peripheral)) {
-    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: created with injected peripheral");
+    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: created with injected peripheral");
 }
 
 ChannelEngineObjectFLED::~ChannelEngineObjectFLED() {
-    FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: destroyed");
+    FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: destroyed");
 }
 
 // Moved out of the header per `src/**/*.h` header-discipline (CodeRabbit #3432).
@@ -224,7 +224,7 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         // Validate pin
         auto validation = mPeripheral->validatePin(pin);
         if (!validation.valid) {
-            FL_LOG_OBJECTFLED_F("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
+            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
             continue;
         }
 
