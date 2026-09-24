@@ -66,6 +66,9 @@ jobs:
         run: ./install
         shell: bash
 
+      - name: Install reld native linker
+        run: uv run python ci/tools/install_native_linker.py
+
       - name: Compile ${{ inputs.example-group }}
         env:
           FASTLED_BUILD_MODE: ${{ inputs.build-mode }}

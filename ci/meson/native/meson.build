@@ -245,8 +245,16 @@ endforeach
 # Core link arguments (shared by all targets)
 # ============================================================================
 core_link_args = ['-fuse-ld=lld']
+native_linker = get_option('native_linker')
 if is_macos and build_mode == 'debug'
   core_link_args = []
+endif
+if native_linker != 'lld'
+  if meson.is_cross_build()
+    error('native_linker override requires a native build')
+  endif
+  # setup_meson_build validates the absolute path using the host OS rules.
+  core_link_args = ['-fuse-ld=lld', '--ld-path=' + native_linker]
 endif
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds

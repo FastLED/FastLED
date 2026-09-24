@@ -36,6 +36,7 @@ class MarkerPaths:
     debug: Path
     check: Path
     build_mode: Path
+    native_linker: Path
     compiler_version: Path
     zccache_version: Path
     enable_examples: Path
@@ -52,6 +53,7 @@ class MarkerPaths:
             debug=build_dir / ".debug_config",
             check=build_dir / ".check_config",
             build_mode=build_dir / ".build_mode_config",
+            native_linker=build_dir / ".native_linker_config",
             compiler_version=build_dir / ".compiler_version_config",
             zccache_version=build_dir / ".zccache_version_config",
             enable_examples=build_dir / ".enable_examples_config",
@@ -169,6 +171,7 @@ def check_reconfigure_markers(
     debug: bool,
     check: bool,
     build_mode: str,
+    native_linker_identity: str = "lld",
     enable_examples: bool,
     enable_full_examples: bool,
     enable_unit_tests: bool,
@@ -305,6 +308,15 @@ def check_reconfigure_markers(
             decision.reasons.append("build_mode marker unreadable")
     else:
         decision.reasons.append("build_mode marker missing")
+
+    if markers.native_linker.exists():
+        try:
+            if markers.native_linker.read_text().strip() != native_linker_identity:
+                decision.reasons.append("native linker changed")
+        except OSError:
+            decision.reasons.append("native linker marker unreadable")
+    else:
+        decision.reasons.append("native linker marker missing")
 
     # enable_examples marker
     if markers.enable_examples.exists():

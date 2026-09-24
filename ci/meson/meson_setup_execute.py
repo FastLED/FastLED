@@ -8,8 +8,10 @@ construction, the skip-setup branch, and the actual ``meson setup`` call.
 """
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
+import hashlib
 import os
 import platform
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -46,6 +48,48 @@ from ci.meson.path_normalization import (
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+def resolve_native_linker(build_mode: str) -> tuple[str, str]:
+    """Validate the optional native linker and identify its linked contents."""
+    requested = os.environ.get("FASTLED_NATIVE_LINKER")
+    if requested is None:
+        return "lld", "lld"
+    path = Path(requested)
+    if not path.is_absolute():
+        raise ValueError("FASTLED_NATIVE_LINKER must be an absolute path")
+    if not path.is_file() or not os.access(path, os.X_OK):
+        raise ValueError("FASTLED_NATIVE_LINKER must name an executable file")
+    digest = hashlib.sha256()
+    linked_files = [path] + [
+        path.parent / name
+        for name in ("libllvm_ld.so", "libllvm_ld.dylib", "llvm_ld.dll")
+    ]
+    for linked_file in linked_files:
+        if linked_file != path:
+            if not linked_file.is_file():
+                continue
+            digest.update(linked_file.name.encode("utf-8"))
+        with linked_file.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+    return str(path), f"{path}:{digest.hexdigest()}"
+
+
+def invalidate_native_link_outputs(build_dir: Path) -> int:
+    """Relink when linker contents changed without discarding compiled objects."""
+    graph = (build_dir / "build.ninja").read_text(encoding="utf-8")
+    outputs = re.findall(r"^build ([^ :]+): cpp_LINKER\b", graph, re.MULTILINE)
+    count = 0
+    for output in outputs:
+        relative = Path(output)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError(f"Unsafe native link output in Ninja graph: {output}")
+        target = build_dir / relative
+        if target.is_file():
+            target.unlink()
+            count += 1
+    return count
 
 
 def _resolve_xcode_tool(tool: str) -> str:
@@ -362,6 +406,7 @@ def handle_skip_meson_setup(
     debug: bool,
     check: bool,
     build_mode: str,
+    native_linker_identity: str,
     enable_examples: bool,
     enable_full_examples: bool,
     enable_unit_tests: bool,
@@ -393,6 +438,8 @@ def handle_skip_meson_setup(
     _write_configuration_markers(
         build_mode_marker=markers.build_mode,
         build_mode=build_mode,
+        native_linker_marker=markers.native_linker,
+        native_linker_identity=native_linker_identity,
         thin_archive_marker=markers.thin_archive,
         use_thin_archives=use_thin_archives,
         debug_marker=markers.debug,
@@ -526,6 +573,7 @@ def _write_zccache_input_sidecar(
     build_dir: Path,
     build_mode: str,
     source_hashes: "SourceHashes",
+    native_linker_identity: str = "lld",
 ) -> Optional[Path]:
     """Persist FastLED's source/test/example hashes to a sidecar file the
     zccache configure-cache wrapper can hash via ``--input-file``.
@@ -548,6 +596,7 @@ def _write_zccache_input_sidecar(
             f"src={source_hashes.src_hash}",
             f"test={source_hashes.test_hash}",
             f"source={source_hashes.source_hash}",
+            f"native_linker={native_linker_identity}",
         ]
     )
     try:
@@ -562,6 +611,8 @@ def build_meson_setup_cmd(
     native_file_path: Path,
     build_dir: Path,
     build_mode: str,
+    native_linker: str = "lld",
+    native_linker_identity: str = "lld",
     enable_examples: bool,
     enable_unit_tests: bool,
     reconfigure: bool,
@@ -599,6 +650,7 @@ def build_meson_setup_cmd(
         "--native-file",
         str(native_file_path),
         f"-Dbuild_mode={build_mode}",
+        f"-Dnative_linker={native_linker}",
         f"-Denable_examples={str(enable_examples).lower()}",
         f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
         f"-Denable_full_examples={str(enable_full_examples).lower()}",
@@ -611,6 +663,7 @@ def build_meson_setup_cmd(
             build_dir=build_dir,
             build_mode=build_mode,
             source_hashes=source_hashes,
+            native_linker_identity=native_linker_identity,
         )
 
     # Wrapper path: requires zccache+wrapper. The sidecar is OPTIONAL —
@@ -660,6 +713,50 @@ _ZCCACHE_MESON_HIT_MARKER = "[zccache-meson] hit"
 _PCH_ARTIFACT_SUFFIXES = (".pch", ".pch.input_hash", ".d.cache")
 
 
+def _migrate_native_linker_option(
+    *,
+    build_dir: Path,
+    marker: Path,
+    native_linker: str,
+    source_dir: Path,
+    env: dict[str, str],
+) -> bool:
+    """Register the new project option in build dirs created before it existed."""
+    if marker.exists() or not (build_dir / "build.ninja").exists():
+        return True
+    _ts_print("[MESON] Registering native_linker option in existing build directory")
+    bootstrap = RunningProcess(
+        [get_meson_executable(), "setup", "--reconfigure", str(build_dir)],
+        cwd=source_dir,
+        timeout=600,
+        auto_run=True,
+        check=False,
+        env=env,
+        output_formatter=TimestampFormatter(),
+    )
+    if bootstrap.wait(echo=True) != 0:
+        _ts_print("[MESON] Native linker option migration failed", file=sys.stderr)
+        return False
+    proc = RunningProcess(
+        [
+            get_meson_executable(),
+            "configure",
+            str(build_dir),
+            f"-Dnative_linker={native_linker}",
+        ],
+        cwd=source_dir,
+        timeout=600,
+        auto_run=True,
+        check=False,
+        env=env,
+        output_formatter=TimestampFormatter(),
+    )
+    if proc.wait(echo=True) != 0:
+        _ts_print("[MESON] Native linker option migration failed", file=sys.stderr)
+        return False
+    return True
+
+
 def _purge_restored_pch_artifacts(build_dir: Path) -> None:
     """Delete PCH binaries and their compile_pch.py sidecars from build_dir.
 
@@ -700,6 +797,9 @@ def run_meson_setup_command(
     debug: bool,
     check: bool,
     build_mode: str,
+    native_linker: str,
+    native_linker_identity: str,
+    native_linker_changed: bool,
     enable_examples: bool,
     enable_full_examples: bool,
     enable_unit_tests: bool,
@@ -708,6 +808,15 @@ def run_meson_setup_command(
 ) -> bool:
     """Run ``meson setup``, with one self-healing retry, then persist markers."""
     print_banner("MESON CONFIGURATION", "⚙️")
+
+    if not _migrate_native_linker_option(
+        build_dir=build_dir,
+        marker=markers.native_linker,
+        native_linker=native_linker,
+        source_dir=source_dir,
+        env=env,
+    ):
+        return False
 
     def _run_meson_setup() -> tuple[int, str]:
         proc = RunningProcess(
@@ -761,9 +870,19 @@ def run_meson_setup_command(
         if _ZCCACHE_MESON_HIT_MARKER in stdout:
             _purge_restored_pch_artifacts(build_dir)
 
+        # Keep the previous identity marker until stale outputs are gone. If
+        # setup is interrupted here, the next invocation must retry the relink.
+        if native_linker_changed:
+            removed = invalidate_native_link_outputs(build_dir)
+            _ts_print(
+                f"[MESON] Native linker changed; invalidated {removed} link outputs"
+            )
+
         _write_configuration_markers(
             build_mode_marker=markers.build_mode,
             build_mode=build_mode,
+            native_linker_marker=markers.native_linker,
+            native_linker_identity=native_linker_identity,
             thin_archive_marker=markers.thin_archive,
             use_thin_archives=use_thin_archives,
             debug_marker=markers.debug,

@@ -16,6 +16,7 @@ from ci.util.test_types import (
     calculate_fingerprint,
     calculate_python_test_fingerprint,
     calculate_wasm_fingerprint,
+    native_linker_signature,
 )
 from ci.util.timestamp_print import ts_print
 
@@ -104,6 +105,7 @@ class FingerprintManager:
                         num_examples_run=data.get("num_examples_run"),
                         num_examples_passed=data.get("num_examples_passed"),
                         examples_included=data.get("examples_included"),
+                        native_linker_signature=data.get("native_linker_signature"),
                     )
                 except json.JSONDecodeError:
                     ts_print(f"Invalid {name} fingerprint file. Recalculating...")
@@ -135,6 +137,10 @@ class FingerprintManager:
             fingerprint_dict["num_examples_passed"] = fingerprint.num_examples_passed
         if fingerprint.examples_included is not None:
             fingerprint_dict["examples_included"] = fingerprint.examples_included
+        if fingerprint.native_linker_signature is not None:
+            fingerprint_dict["native_linker_signature"] = (
+                fingerprint.native_linker_signature
+            )
         with open(fingerprint_file, "w") as f:
             json.dump(fingerprint_dict, f, indent=2)
 
@@ -270,6 +276,10 @@ class FingerprintManager:
             # before this field existed) simply takes the slow path once.
             if prev.source_max_mtime is None:
                 return False
+            if name in ("cpp_test", "examples") and (
+                (prev.native_linker_signature or "") != native_linker_signature()
+            ):
+                return False
             if max_file_mtime > prev.source_max_mtime:
                 return False  # a source file changed after the cached run began
             # Fast-path fires: nothing will be rebuilt, so do NOT advance the
@@ -277,7 +287,9 @@ class FingerprintManager:
             self._observed_max_mtime.pop(name, None)
             self._prev_fingerprints[name] = prev
             self._fingerprints[name] = FingerprintResult(
-                hash=prev.hash, source_max_mtime=prev.source_max_mtime
+                hash=prev.hash,
+                source_max_mtime=prev.source_max_mtime,
+                native_linker_signature=prev.native_linker_signature,
             )
             return True
         except OSError:
