@@ -1,11 +1,12 @@
 """Meson compilation utilities."""
 
+import math
 import os
 import re
 import sys
 import time
 from collections import deque
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, cast
@@ -46,7 +47,7 @@ _ZCCACHE_TRANSIENT_MAX_RETRIES = 2
 
 # The cold full-debug/ASan build in #4529 took 1130.84s. Leave headroom for
 # slower hosted runners, but keep an absolute bound inside the 45-minute job.
-_COMPILE_HARD_TIMEOUT_SECONDS = 1800.0
+_COMPILE_HARD_TIMEOUT_SECONDS = 1800
 _COMPILE_QUIET_WARNING_SECONDS = 300.0
 _COMPILE_QUIET_DUMP_SECONDS = 600.0
 _COMPILE_POLL_SECONDS = 1.0
@@ -85,7 +86,7 @@ def _monitored_compile_lines(
     target: str | None,
     started: float,
     deadline_seconds: float | None = None,
-) -> Iterator[str]:
+) -> Generator[str, None, None]:
     """Drain output while enforcing a wall deadline and quiet diagnostics."""
     if deadline_seconds is None:
         deadline_seconds = _COMPILE_HARD_TIMEOUT_SECONDS
@@ -462,7 +463,9 @@ def _retry_ninja(
         try:
             retry_proc = RunningProcess(
                 cmd,
-                timeout=deadline_seconds,
+                timeout=max(
+                    1, math.ceil(deadline_seconds - (time.monotonic() - started))
+                ),
                 auto_run=True,
                 check=False,
                 env=env,

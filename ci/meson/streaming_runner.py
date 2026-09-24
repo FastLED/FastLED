@@ -11,6 +11,7 @@ zombie-process tracking, the proactive ``all-with-examples`` target check,
 stale-build recovery retry, and the no-tests-ran fallback.
 """
 
+import math
 import os
 import sys
 import threading
@@ -464,7 +465,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
                     test_callback=test_callback,
                     target=compile_target,
                     verbose=ctx.verbose,
-                    compile_timeout=remaining,
+                    compile_timeout=max(1, math.ceil(remaining)),
                     build_optimizer=ctx.build_optimizer,
                     test_file_filter=ctx.test_file_filter,
                     build_timer=ctx.build_timer,
