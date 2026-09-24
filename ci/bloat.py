@@ -345,13 +345,29 @@ def toolchain_from_compile_commands(
 def verify_slim(
     report: dict[str, Any], compile_commands: list[dict[str, Any]]
 ) -> list[str]:
-    """Return failure strings for a slim-profile build; empty means OK."""
+    """Return failure strings for a slim-profile build; empty means OK.
+
+    Only FastLED-controlled settings are hard failures. Residue from the
+    prebuilt ESP-IDF framework (coredump, diagnostics) cannot be removed by
+    sdkconfig overrides and is reported by `slim_framework_residue` instead.
+    """
     failures: list[str] = []
     verbosity = effective_log_verbosity(compile_commands)
     if verbosity != "0":
         failures.append(
             f"FASTLED_LOG_VERBOSITY=0 not in effect (effective: {verbosity})"
         )
+    return failures
+
+
+def slim_framework_residue(report: dict[str, Any]) -> list[str]:
+    """Warnings for framework code a slim build would ideally drop.
+
+    The prebuilt Arduino-ESP32 framework archives are compiled with their own
+    sdkconfig, so CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=n and similar settings
+    cannot unlink them; this residue is reported, not failed.
+    """
+    failures: list[str] = []
     symbols = cast(list[dict[str, Any]], report.get("symbols") or [])
     coredump = sum(
         int(s.get("size", 0))
@@ -570,6 +586,8 @@ def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
             raise SystemExit(
                 "Bloat: slim profile verification FAILED:\n  " + "\n  ".join(failures)
             )
+        for warning in slim_framework_residue(report):
+            print(f"Bloat: slim profile warning (prebuilt framework): {warning}")
         print("Slim profile verified.")
 
     if not args.no_summary:

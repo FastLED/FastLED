@@ -10,7 +10,7 @@ from typing import Any
 
 from typeguard import typechecked
 
-from ci.bloat import effective_log_verbosity, verify_slim
+from ci.bloat import effective_log_verbosity, slim_framework_residue, verify_slim
 
 
 @typechecked
@@ -74,19 +74,20 @@ def test_verbosity_zero_in_command_and_arguments_forms() -> None:
 
 
 @typechecked
-def test_coredump_archive_fails() -> None:
+def test_coredump_archive_warns_not_fails() -> None:
     report = _report([_symbol(4096, "esp_core_dump_init", "/sdk/lib/libespcoredump.a")])
-    failures = verify_slim(report, _VERBOSITY_ZERO)
-    assert any("coredump" in f for f in failures)
+    assert verify_slim(report, _VERBOSITY_ZERO) == []
+    assert any("coredump" in w for w in slim_framework_residue(report))
 
 
 @typechecked
-def test_diag_log_add_fails() -> None:
+def test_diag_log_add_warns_not_fails() -> None:
     report = _report([_symbol(512, "diag_log_add", "libesp_diagnostics.a")])
-    failures = verify_slim(report, _VERBOSITY_ZERO)
-    assert any("diag_log_add" in f for f in failures)
+    assert verify_slim(report, _VERBOSITY_ZERO) == []
+    assert any("diag_log_add" in w for w in slim_framework_residue(report))
 
 
 @typechecked
 def test_clean_slim_report_passes() -> None:
     assert verify_slim(_CLEAN, _VERBOSITY_ZERO) == []
+    assert slim_framework_residue(_CLEAN) == []
