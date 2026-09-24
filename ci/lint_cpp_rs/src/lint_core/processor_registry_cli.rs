@@ -273,6 +273,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "include_paths",
         "impl_hpp_includes",
         "logging_in_iram",
+        "macro_prefix",
         "is_header_include",
         "iwyu_pragma_block",
         "iwyu_pragma_private",
@@ -360,6 +361,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "IwyuPragmaBlockChecker",
         "IwyuPragmaPrivateChecker",
         "LoggingInIramChecker",
+        "MacroPrefixChecker",
         "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
         "NamespaceIncludesChecker",
@@ -510,6 +512,7 @@ pub fn create_checkers(
         ("iwyu_pragma_block", Box::new(IwyuPragmaBlockChecker)),
         ("iwyu_pragma_private", Box::new(IwyuPragmaPrivateChecker)),
         ("logging_in_iram", Box::new(LoggingInIramChecker)),
+        ("macro_prefix", Box::new(MacroPrefixChecker::production())),
         ("member_style", Box::new(MemberStyleChecker)),
         (
             "namespace_fl_declaration",

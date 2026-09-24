@@ -57,7 +57,8 @@
         "examples/**/*.h",
         "examples/**/*.hpp",
         "ci/lint_cpp/*.py",
-        "ci/lint_cpp_rs/file_legal_policy.yaml"
+        "ci/lint_cpp_rs/file_legal_policy.yaml",
+        "ci/lint_cpp_rs/legacy_macro_amnesty.txt"
       ],
       "tools": [
         "clang-format",

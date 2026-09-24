@@ -38,6 +38,7 @@ _DEFAULT_CPP_LINT_GLOBS = [
     "ci/lint_cpp_rs/Cargo.lock",
     "ci/lint_cpp_rs/src/**/*.rs",
     "ci/lint_cpp_rs/file_legal_policy.yaml",
+    "ci/lint_cpp_rs/legacy_macro_amnesty.txt",
 ]
 
 
@@ -63,6 +64,7 @@ def _get_cpp_lint_patterns() -> tuple[list[str], list[str]]:
             "ci/lint_cpp_rs/Cargo.lock",
             "ci/lint_cpp_rs/src/**/*.rs",
             "ci/lint_cpp_rs/file_legal_policy.yaml",
+            "ci/lint_cpp_rs/legacy_macro_amnesty.txt",
         ]
         for pattern in extra_includes:
             if pattern not in include:

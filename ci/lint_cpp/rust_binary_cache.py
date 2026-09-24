@@ -59,6 +59,7 @@ _FINGERPRINT_INPUTS = (
     "ci/lint_cpp_rs/Cargo.toml",
     "ci/lint_cpp_rs/Cargo.lock",
     "ci/lint_cpp_rs/file_legal_policy.yaml",
+    "ci/lint_cpp_rs/legacy_macro_amnesty.txt",
 )
 _SRC_DIR = RUST_CRATE_DIR / "src"
 

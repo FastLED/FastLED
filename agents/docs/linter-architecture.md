@@ -156,7 +156,7 @@ As of PR #3293, **all single-file content checkers and cross-file structural che
 
 - **AST ratchets only**: `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py`, backed by `ci/lint_cpp/noexcept_checker.py`, `ci/tools/check_noexcept.py`, and `ci/tools/check_array_params.py`. These compare AST query output against a checked-in baseline so the violation count can only drop, not grow.
 
-Everything else — unity-build structure, test aggregation, PCH file shape, `BareLibmChecker`, `BareNoInlineChecker`, `BareSnprintfChecker`, `LegacyLogMacroChecker`, `PublicSettingsPatternChecker`, `FlNoUnderscoreChecker`, etc. — now lives under `ci/lint_cpp_rs/src/checkers/`.
+Everything else — unity-build structure, test aggregation, PCH file shape, `BareLibmChecker`, `BareNoInlineChecker`, `BareSnprintfChecker`, `LegacyLogMacroChecker`, `MacroPrefixChecker`, `PublicSettingsPatternChecker`, `FlNoUnderscoreChecker`, etc. — now lives under `ci/lint_cpp_rs/src/checkers/`.
 
 If your rule is single-file and content-based, write it in Rust. Cross-file structural rules also belong in Rust (see `ci/lint_cpp_rs/src/checkers/unity_build.rs` and `structural_passes.rs`).
 
