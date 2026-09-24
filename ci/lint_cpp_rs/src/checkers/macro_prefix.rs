@@ -28,7 +28,10 @@ impl FileContentChecker for MacroPrefixChecker {
         let normalized = normalize_path(file_path);
         is_under_project_subpath(&normalized, project_root, "src")
             && !is_under_dir(&normalized, "third_party")
-            && ends_with_any(&normalized, &[".h", ".hpp", ".cpp", ".cpp.hpp"])
+            && ends_with_any(
+                &normalized,
+                &[".h", ".hpp", ".cpp", ".cpp.hpp", ".c", ".s", ".S"],
+            )
     }
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {

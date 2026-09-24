@@ -282,7 +282,11 @@ mod tests {
         let checker = MacroPrefixChecker::production();
         let root = Path::new("/repo");
         assert!(checker.should_process_file("/repo/src/fl/example.h", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.c", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.s", root));
+        assert!(checker.should_process_file("/repo/src/fl/example.S", root));
         assert!(!checker.should_process_file("/repo/src/third_party/vendor.h", root));
+        assert!(!checker.should_process_file("/repo/src/third_party/vendor.S", root));
         assert!(!checker.should_process_file("/repo/examples/Demo/src/helper.cpp", root));
         assert!(!checker.should_process_file("/repo/tests/fixture/src/main.cpp", root));
     }
