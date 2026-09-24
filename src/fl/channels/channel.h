@@ -33,6 +33,8 @@ namespace fl {
 // Forward declarations
 class IChannelDriver;
 class ChannelData;
+class PixelIterator;
+template <typename T> class vector_psram;
 struct ChannelOptions;  // IWYU pragma: keep
 class Channel;
 template<const EmitterProfile& Profile> class StaticProfileChannel;
@@ -301,12 +303,19 @@ protected:
     // (e.g., UCS7604's DelegateController) can call through the base class chain.
     void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
     void init() override;
+    using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
+                                  fl::vector_psram<u8>&);
+    /// Compile-time controller adapters can bind a known encoder directly,
+    /// avoiding references to the runtime selector and unrelated writers.
+    static PixelEncoder ws2812PixelEncoder() FL_NO_EXCEPT;
     /// @brief Protected constructor for template subclasses (e.g., ClocklessIdf5)
     /// @param chipset Chipset configuration (clockless or SPI)
     /// @param rgbOrder RGB channel ordering
     /// @param mode Registration mode (AutoRegister or DeferRegister)
     /// @note Does not set LED data or channel options - caller must do that
     Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT;
+    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode,
+            PixelEncoder pixelEncoder) FL_NO_EXCEPT;
 
 private:
     /// @brief Cold slow-path helper for `showPixels()` when the driver was
@@ -318,6 +327,40 @@ private:
     /// see #2773 item 2.1. Returns `nullptr` on a hard miss (caller should
     /// silently bail).
     FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver();
+
+    /// The chipset is fixed when a Channel is constructed, so bind its pixel
+    /// encoder once instead of switching over every supported chipset on
+    /// every frame. The encoder callbacks remain channel-side: drivers receive
+    /// ChannelData only after it has been encoded.
+    static PixelEncoder selectPixelEncoder(const ChipsetVariant&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeWS2812(Channel&, PixelIterator&, bool,
+                                         fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeTM1812RGBWW(Channel&, PixelIterator&, bool,
+                                               fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeTM1908(Channel&, PixelIterator&, bool,
+                                         fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeUCS7604(Channel&, PixelIterator&, bool,
+                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeAPA102(Channel&, PixelIterator&, bool,
+                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeSK9822(Channel&, PixelIterator&, bool,
+                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeWS2801(Channel&, PixelIterator&, bool,
+                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeWS2803(Channel&, PixelIterator&, bool,
+                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeP9813(Channel&, PixelIterator&, bool,
+                                         fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeLPD8806(Channel&, PixelIterator&, bool,
+                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeLPD6803(Channel&, PixelIterator&, bool,
+                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeSM16716(Channel&, PixelIterator&, bool,
+                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeHD108(Channel&, PixelIterator&, bool,
+                                         fl::vector_psram<u8>&) FL_NO_EXCEPT;
+    FL_NO_INLINE static void encodeMY9221(Channel&, PixelIterator&, bool,
+                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
 protected:
 
     /// @brief Pre-bind a driver, bypassing `ChannelManager::selectDriverForChannel()`
@@ -361,6 +404,7 @@ private:
     static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>());
 
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
+    PixelEncoder mPixelEncoder = nullptr;  // Bound once from mChipset at construction.
     EOrder mRgbOrder;
 #if FL_COLOR_PROFILE_RUNTIME
     /// The colour pipeline this channel's binding describes, or null when

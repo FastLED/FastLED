@@ -31,7 +31,8 @@ class ClocklessIdf5 : public Channel
 
 public:
     ClocklessIdf5() FL_NO_EXCEPT
-        : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
+        : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister,
+                  ws2812PixelEncoder())
     {
         // Register the RMT5 driver with ChannelManager so onEndFrame() will
         // iterate mDrivers and call driver->show() to actually transmit. The
