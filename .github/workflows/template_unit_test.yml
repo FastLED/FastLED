@@ -63,6 +63,10 @@ jobs:
         run: ./install
         shell: bash
 
+      - name: Install Wild native linker (Linux only)
+        if: runner.os == 'Linux'
+        run: uv run python ci/tools/install_native_linker.py
+
       - name: Cache Rust C++ linter build
         # Skips the ~60-180s soldr cargo build on every CI run when the
         # crate sources haven't changed. Keyed on Cargo.lock + every .rs

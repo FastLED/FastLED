@@ -306,6 +306,7 @@ class FingerprintResult:
     num_examples_run: Optional[int] = None
     num_examples_passed: Optional[int] = None
     examples_included: Optional[bool] = None
+    native_linker_signature: Optional[str] = None
 
     def get_cache_summary(self) -> str:
         """Get a human-readable summary of cached test results"""
@@ -579,6 +580,26 @@ def calculate_fingerprint(root_dir: Optional[Path] = None) -> FingerprintResult:
     return result
 
 
+def native_linker_signature() -> str:
+    """Identify the selected native linker by path and bytes, when overridden."""
+    selected = os.environ.get("FASTLED_NATIVE_LINKER")
+    if selected is None:
+        return ""
+    import hashlib  # noqa: PLC0415 - only needed for an explicit override
+
+    path = Path(selected).resolve()
+    hasher = hashlib.sha256()
+    hasher.update(str(path).encode("utf-8"))
+    try:
+        with path.open("rb") as linker:
+            for chunk in iter(lambda: linker.read(1024 * 1024), b""):
+                hasher.update(chunk)
+    except OSError:
+        # A missing or unreadable override must never reuse a passing cache.
+        hasher.update(b"unreadable")
+    return hasher.hexdigest()
+
+
 def calculate_cpp_test_fingerprint(
     args: Optional[TestArgs] = None,
 ) -> FingerprintResult:
@@ -598,6 +619,9 @@ def calculate_cpp_test_fingerprint(
 
     # Combine fingerprints from both src/ and tests/ directories
     hasher = hashlib.sha256()
+    linker_signature = native_linker_signature()
+    if linker_signature:
+        hasher.update(f"native_linker:{linker_signature}".encode("utf-8"))
 
     # Process src/ directory (C++ source files)
     src_dir = cwd / "src"
@@ -641,7 +665,10 @@ def calculate_cpp_test_fingerprint(
     elapsed_time = time.time() - start_time
 
     return FingerprintResult(
-        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+        hash=hasher.hexdigest(),
+        elapsed_seconds=f"{elapsed_time:.2f}",
+        status="success",
+        native_linker_signature=linker_signature,
     )
 
 
@@ -664,6 +691,9 @@ def calculate_examples_fingerprint(
 
     # Combine fingerprints from relevant directories
     hasher = hashlib.sha256()
+    linker_signature = native_linker_signature()
+    if linker_signature:
+        hasher.update(f"native_linker:{linker_signature}".encode("utf-8"))
 
     # Process src/ directory (affects example compilation)
     src_dir = cwd / "src"
@@ -723,7 +753,10 @@ def calculate_examples_fingerprint(
     elapsed_time = time.time() - start_time
 
     return FingerprintResult(
-        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+        hash=hasher.hexdigest(),
+        elapsed_seconds=f"{elapsed_time:.2f}",
+        status="success",
+        native_linker_signature=linker_signature,
     )
 
 

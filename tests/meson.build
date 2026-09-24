@@ -161,11 +161,8 @@ all_test_runners = []
 # Environment for test execution - ensure fastled.dll and runtime DLLs are discoverable
 test_env = environment()
 test_env.prepend('PATH', fastled_lib_dir)
-# Clang-tool-chain runtime DLL PATH injection removed as probe (#3129 A6).
-# ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy (zccache#33) is the
-# upstream-blessed replacement. If ASan/MinGW DLLs go missing in CI,
-# revert this hunk + ci/meson/native/meson.build to re-enable the
-# belt-and-suspenders injection.
+# Windows GNU runtime DLLs are copied beside link outputs by the zccache
+# deploy hook. Linux/macOS use their linked runtime search paths instead.
 
 # ============================================================================
 # SHARED TEST OBJECTS (compiled once, reused by all test DLLs)

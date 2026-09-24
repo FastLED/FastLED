@@ -26,6 +26,8 @@ def _write_configuration_markers(
     *,
     build_mode_marker: Path,
     build_mode: str,
+    native_linker_marker: Path,
+    native_linker_identity: str,
     thin_archive_marker: Path,
     use_thin_archives: bool,
     debug_marker: Path,
@@ -61,6 +63,7 @@ def _write_configuration_markers(
     """
     markers: list[tuple[Path, str, str]] = [
         (build_mode_marker, build_mode, f"build_mode: {build_mode}"),
+        (native_linker_marker, native_linker_identity, "native linker identity"),
         (
             thin_archive_marker,
             str(use_thin_archives),

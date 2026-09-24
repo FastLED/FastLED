@@ -483,6 +483,8 @@ def check_single_test_cached(test_name_raw: str, build_dir: Path) -> bool:
     Returns:
         True if the test is fully cached and can be skipped, False otherwise.
     """
+    if "FASTLED_NATIVE_LINKER" in os.environ:
+        return False
     cached_names = load_test_names(build_dir)
     if not cached_names:
         return False
@@ -578,6 +580,8 @@ def argv_ultra_early_exit(start_time: float) -> None:
         start_time: Time when test.py started (used for elapsed time reporting).
     """
     if pytest_addopts_active():
+        return
+    if "FASTLED_NATIVE_LINKER" in os.environ:
         return
 
     argv = sys.argv[1:]

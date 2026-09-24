@@ -458,3 +458,17 @@
   unused grant from a reusable workflow, update callers and callees together
   and test the permission contract so an old callee declaration cannot turn a
   least-privilege caller into a startup failure.
+- Do not extrapolate a Linux ELF linker benchmark into macOS or Windows
+  policy. A tool that has releases for multiple hosts may still route those
+  hosts through different engines, and Windows GNU can depend on special
+  linker/DLL injection. Keep the override scoped to the host the user chose,
+  preserve the other platforms' established linkers, and distinguish raw-link
+  speed from end-to-end job speed.
+- A native compiler executable does not prove its whole link path is native.
+  `ctc-clang++` was launched by zccache, but FastLED set the global
+  `ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy` hook, which started
+  Python after every cache-miss test/example link on Linux. I incorrectly
+  attributed the roughly one-second cadence to generic wrapper overhead.
+  Inspect child processes and post-link hooks before explaining a link-time
+  bottleneck; then compare the same linker with and without the hook before
+  attributing end-to-end gains to a linker switch.
