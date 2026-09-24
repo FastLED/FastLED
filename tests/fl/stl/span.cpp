@@ -162,6 +162,14 @@ FL_TEST_CASE("fl::span accepts empty iterator ranges") {
     FL_CHECK_EQ(pointer_span.begin(), pointer_span.end());
     FL_CHECK_EQ(pointer_span.data(), &value);
 
+    fl::span<const int> const_pointer_span(&value, &value);
+    FL_CHECK_EQ(const_pointer_span.size(), 0u);
+    FL_CHECK_EQ(const_pointer_span.data(), &value);
+
+    int reversed_values[] = {1, 2};
+    fl::span<int> reversed_pointer_span(reversed_values + 1, reversed_values);
+    FL_CHECK_EQ(reversed_pointer_span.size(), 0u);
+
     fl::vector<int> values;
     fl::span<int> vector_span(values.begin(), values.end());
     FL_CHECK_EQ(vector_span.size(), 0u);

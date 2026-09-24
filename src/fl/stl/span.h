@@ -11,6 +11,10 @@
 
 namespace fl {
 
+namespace detail {
+void span_invalid_pointer_range() FL_NO_EXCEPT;
+}
+
 template <typename T, fl::size INLINED_SIZE> class FixedVector;
 
 template <typename T> class vector;
@@ -199,11 +203,19 @@ template <typename T> class span<T, dynamic_extent> {
         : mData(array), mSize(ARRAYSIZE) {}
 
     // ======= ITERATOR CONVERSIONS =======
-    span(T *begin, T *end) FL_NO_EXCEPT
-        : mData(begin), mSize(end - begin) {}
+    template <typename U>
+    span(U *begin, U *end,
+         typename fl::enable_if<
+             fl::is_same<typename fl::remove_const<U>::type,
+                         typename fl::remove_const<T>::type>::value &&
+                 (!fl::is_const<U>::value || fl::is_const<T>::value)>::type * =
+             nullptr) FL_NO_EXCEPT
+        : mData(begin), mSize(pointer_range_size(begin, end)) {}
 
     template <typename Iterator>
-    span(Iterator begin, Iterator end) FL_NO_EXCEPT
+    span(Iterator begin, Iterator end,
+         typename fl::enable_if<!fl::is_pointer<Iterator>::value>::type * =
+             nullptr) FL_NO_EXCEPT
         : mData(begin == end ? nullptr : &(*begin)),
           mSize(begin == end ? 0 : end - begin) {}
 
@@ -379,6 +391,15 @@ template <typename T> class span<T, dynamic_extent> {
     }
 
   private:
+    template <typename U>
+    static fl::size pointer_range_size(U *begin, U *end) FL_NO_EXCEPT {
+        if (end < begin) {
+            detail::span_invalid_pointer_range();
+            return 0;
+        }
+        return static_cast<fl::size>(end - begin);
+    }
+
     T *mData;
     fl::size mSize;
 };
