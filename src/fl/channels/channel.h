@@ -328,6 +328,20 @@ private:
     /// silently bail).
     FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver();
 
+    /// @brief Cold helper for `showPixels()` when mChannelData is still in use
+    ///        by the driver: warns and waits for READY (#4566).
+    /// @return false if `showPixels()` must drop the frame
+    FL_NO_INLINE bool waitForInUseBuffer();
+
+    /// @brief Encode `pixels` into mChannelData and fire
+    ///        `onChannelDataEncoded` (#4566).
+    FL_NO_INLINE void encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF>& pixels);
+
+    /// @brief Submit the encoded frame to `driver`: disabled-driver drop +
+    ///        one-shot diagnostic, enqueue, dither advance, and
+    ///        `onChannelEnqueued` (#4566).
+    FL_NO_INLINE void submitFrame(const fl::shared_ptr<IChannelDriver>& driver);
+
     /// The chipset is fixed when a Channel is constructed, so bind its pixel
     /// encoder once instead of switching over every supported chipset on
     /// every frame. The encoder callbacks remain channel-side: drivers receive
