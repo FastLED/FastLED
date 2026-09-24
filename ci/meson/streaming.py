@@ -6,6 +6,7 @@ import re
 import sys
 import threading
 import time
+from contextlib import closing
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional, cast
@@ -16,8 +17,10 @@ from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.compile import (
     _LLD_PERM_DENIED_MAX_RETRIES,
     _ZCCACHE_TRANSIENT_MAX_RETRIES,
+    _CompileDeadlineExceeded,
     _create_error_context_filter,
     _is_compilation_error,
+    _monitored_compile_lines,
     _retry_ninja,
 )
 from ci.meson.compiler import get_meson_executable
@@ -268,6 +271,7 @@ def stream_compile_only(
 
         # Create tee for error log capture
         stderr_tee = StreamTee(error_log_path, echo=False)
+        tee_closed = False
         last_error_lines: list[str] = []
 
         # Track progress for periodic updates during long silent compilations
@@ -287,7 +291,16 @@ def stream_compile_only(
             )
 
             # Stream output line by line
-            with proc.line_iter(timeout=None) as it:
+            compile_started = time.monotonic()
+            with closing(
+                _monitored_compile_lines(
+                    proc,
+                    command=cmd,
+                    target=target,
+                    started=compile_started,
+                    deadline_seconds=float(compile_timeout),
+                )
+            ) as it:
                 for line in it:
                     # Write to error log
                     stderr_tee.write_line(line)
@@ -451,11 +464,12 @@ def stream_compile_only(
                         compiled_tests.append(test_path)
 
             # Check compilation result
-            returncode = cast(int, proc.wait())
+            returncode = cast(int, proc.wait(timeout=1))
 
             # Write standardized footer to error log
             stderr_tee.write_footer(returncode)
             stderr_tee.close()
+            tee_closed = True
 
             # Save last error snippet if compilation failed
             if returncode != 0 and last_error_lines:
@@ -510,7 +524,8 @@ def stream_compile_only(
                     describe=_describe_lld,
                     before_retry=_before_lld_retry,
                     label="Link",
-                    timeout=compile_timeout,
+                    started=compile_started,
+                    deadline_seconds=float(compile_timeout),
                     env=os.environ.copy(),
                     output_formatter=None,
                 )
@@ -541,7 +556,8 @@ def stream_compile_only(
                     describe=_describe_zccache,
                     before_retry=None,
                     label="zccache",
-                    timeout=compile_timeout,
+                    started=compile_started,
+                    deadline_seconds=float(compile_timeout),
                     env=os.environ.copy(),
                     output_formatter=None,
                 )
@@ -601,6 +617,17 @@ def stream_compile_only(
                 if verbose:
                     _ts_print(f"[MESON] Compilation completed successfully")
 
+        except _CompileDeadlineExceeded as exc:
+            compilation_failed = True
+            compilation_output = str(exc)
+            if not tee_closed:
+                stderr_tee.write_line(compilation_output)
+                stderr_tee.write_footer(-1)
+                stderr_tee.close()
+            else:
+                with error_log_path.open("a", encoding="utf-8") as error_log:
+                    error_log.write(compilation_output + "\n")
+            _ts_print(f"[MESON] {compilation_output}", file=sys.stderr)
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise

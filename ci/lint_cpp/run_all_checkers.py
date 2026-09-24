@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+from running_process import PIPE, RunningProcess
+
 from ci.lint_cpp.rust_bridge import (
     merge_checker_results,
     run_rust_linter,
@@ -23,6 +25,7 @@ from ci.util.check_files import (
     MultiCheckerFileProcessor,
     collect_files_to_check,
 )
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -397,25 +400,47 @@ def format_and_print_results(
         return 0
 
 
-def _ast_tool_unavailable(message: str) -> bool:
-    """Return True iff *message* signals that the clang-query AST tool is
-    absent from the runtime (vs. an actual lint violation).
+def _require_ast_tool() -> None:
+    """Verify clang-query before consulting cached AST results.
 
-    Captures both the "tool not found at resolve time" path inside
-    ``_find_clang_query`` and the "uv resolved but couldn't spawn the
-    inner binary" path that surfaces on CI runners without the full
-    clang-tool-chain wheel installed.
+    A cached successful run must not make a required CI lint green when the
+    tool is no longer available.  Checking the actual command also catches
+    uv's fallback wrapper when its inner binary cannot be spawned.
     """
-    lower = message.lower()
-    tool_named = "clang-query" in lower or "clang-tool-chain-query" in lower
-    return tool_named and ("not found" in lower or "failed to spawn" in lower)
+    from ci.tools.check_noexcept import NoexceptCheckError, _find_clang_query
+
+    command = _find_clang_query()
+    if not command:
+        raise NoexceptCheckError(
+            "clang-query not found. Install LLVM or the clang-tool-chain package."
+        )
+    try:
+        result = RunningProcess.run(
+            [*command, "--version"],
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            cwd=str(PROJECT_ROOT),
+            timeout=30,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as exc:
+        raise NoexceptCheckError(f"clang-query could not start: {exc}") from exc
+    if result.returncode != 0:
+        diagnostic = (result.stderr or result.stdout).strip()
+        raise NoexceptCheckError(
+            f"clang-query could not start: {diagnostic or f'exit {result.returncode}'}"
+        )
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     """Run the clang-query FL_NO_EXCEPT ratchet used by default C++ lint."""
     from ci.tools.check_noexcept import (
         DEFAULT_BASELINE,
-        NoexceptCheckError,
         diff_against_baseline,
         find_missing_noexcept,
         load_baseline,
@@ -436,30 +461,11 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             # Outside owned src scopes — nothing to check for this file.
             return CheckerResults()
 
+    _require_ast_tool()
+
     def _run() -> CheckerResults:
         results = CheckerResults()
-        try:
-            hits = find_missing_noexcept(scope)
-        except NoexceptCheckError as exc:
-            # If the underlying clang-query tool simply isn't on PATH (common on
-            # CI runners without a full LLVM toolchain install), skip the AST
-            # ratchet with a stderr warning rather than turning it into a hard
-            # lint failure. The ratchet is one of the Tier-4 entries explicitly
-            # out-of-scope per #3288 and is best effort outside dev boxes.
-            # The two flavors we see in the wild:
-            #   - "clang-query not found. Install LLVM or the clang-tool-chain ..."
-            #     (raised by _find_clang_query returning empty)
-            #   - "error: Failed to spawn: `clang-tool-chain-query` Caused by ..."
-            #     (raised by uv when it can resolve uv itself but not the inner
-            #     clang-tool-chain entry-point)
-            message = str(exc)
-            if _ast_tool_unavailable(message):
-                print(
-                    f"⚠️  Skipping FL_NO_EXCEPT AST ratchet — {message}", file=sys.stderr
-                )
-                return results
-            results.add_violation("ci/tools/check_noexcept.py", 0, message)
-            return results
+        hits = find_missing_noexcept(scope)
 
         if rel_file is not None:
             hits = [hit for hit in hits if hit.path == rel_file]
@@ -483,7 +489,10 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     return cached_ast_check(
         name="noexcept_ast",
         scope=scope,
-        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py"],
+        tool_sources=[
+            PROJECT_ROOT / "ci" / "lint_cpp" / "run_all_checkers.py",
+            PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
+        ],
         baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
         runner=_run,
     )
@@ -556,7 +565,6 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         DEFAULT_BASELINE as ARRAY_BASELINE,
     )
     from ci.tools.check_array_params import (
-        ArrayParamCheckError,
         _diagnostic_for_hit,
     )
     from ci.tools.check_array_params import (
@@ -570,30 +578,18 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         DEFAULT_BASELINE as NOEXCEPT_BASELINE,
     )
     from ci.tools.check_noexcept import (
-        NoexceptCheckError,
-    )
-    from ci.tools.check_noexcept import (
         diff_against_baseline as noexcept_diff,
     )
     from ci.tools.check_noexcept import (
         load_baseline as load_noexcept_baseline,
     )
 
+    _require_ast_tool()
+
     def _shape() -> tuple[CheckerResults, CheckerResults]:
         noexcept_results = CheckerResults()
         array_param_results = CheckerResults()
-        try:
-            noexcept_hits, array_param_hits = find_combined_hits("all")
-        except (NoexceptCheckError, ArrayParamCheckError) as exc:
-            message = str(exc)
-            if _ast_tool_unavailable(message):
-                print(
-                    f"⚠️  Skipping combined AST ratchet — {message}",
-                    file=sys.stderr,
-                )
-                return noexcept_results, array_param_results
-            noexcept_results.add_violation("ci/tools/check_ast_combined.py", 0, message)
-            return noexcept_results, array_param_results
+        noexcept_hits, array_param_hits = find_combined_hits("all")
 
         new_noexcept, _stale_n = noexcept_diff(
             noexcept_hits, load_noexcept_baseline(NOEXCEPT_BASELINE)
@@ -612,6 +608,7 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
             array_param_results.add_violation(
                 abs_path, hit.line, _diagnostic_for_hit(hit)
             )
+        print("✅ Combined clang-query AST ratchet ran successfully")
         return noexcept_results, array_param_results
 
     # Cache wrapper. Fingerprint over the same inputs both checks share
@@ -633,6 +630,7 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         return cache["value"][1]
 
     tool_sources = [
+        PROJECT_ROOT / "ci" / "lint_cpp" / "run_all_checkers.py",
         PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
         PROJECT_ROOT / "ci" / "tools" / "check_array_params.py",
         PROJECT_ROOT / "ci" / "tools" / "check_ast_combined.py",
@@ -658,7 +656,6 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
     """Run the clang-query decayed array parameter ratchet."""
     from ci.tools.check_array_params import (
         DEFAULT_BASELINE,
-        ArrayParamCheckError,
         _diagnostic_for_hit,
         diff_against_baseline,
         find_decayed_array_params,
@@ -679,22 +676,11 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
         else:
             return CheckerResults()
 
+    _require_ast_tool()
+
     def _run() -> CheckerResults:
         results = CheckerResults()
-        try:
-            hits = find_decayed_array_params(scope)
-        except ArrayParamCheckError as exc:
-            # Same fallback as run_noexcept_ast_check above — skip when the
-            # underlying tool is missing rather than failing the whole lint.
-            message = str(exc)
-            if _ast_tool_unavailable(message):
-                print(
-                    f"⚠️  Skipping decayed-array-param AST ratchet — {message}",
-                    file=sys.stderr,
-                )
-                return results
-            results.add_violation("ci/tools/check_array_params.py", 0, message)
-            return results
+        hits = find_decayed_array_params(scope)
 
         if rel_file is not None:
             hits = [hit for hit in hits if hit.path == rel_file]
@@ -713,7 +699,10 @@ def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
     return cached_ast_check(
         name="array_param_ast",
         scope=scope,
-        tool_sources=[PROJECT_ROOT / "ci" / "tools" / "check_array_params.py"],
+        tool_sources=[
+            PROJECT_ROOT / "ci" / "lint_cpp" / "run_all_checkers.py",
+            PROJECT_ROOT / "ci" / "tools" / "check_array_params.py",
+        ],
         baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
         runner=_run,
     )
@@ -1077,4 +1066,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from ci.tools.check_array_params import ArrayParamCheckError
+    from ci.tools.check_noexcept import NoexceptCheckError
+
+    try:
+        sys.exit(main())
+    except (NoexceptCheckError, ArrayParamCheckError) as exc:
+        print(f"❌ Required clang-query AST ratchet failed: {exc}", file=sys.stderr)
+        sys.exit(1)
