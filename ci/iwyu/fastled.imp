@@ -99,15 +99,12 @@
   { include: ['"fl/stl/isr/critical_section.h"', 'private', '"fl/stl/isr.h"', 'public'] },
 
   # fl/net/net.h umbrella
-  { include: ['"fl/net/http.h"', 'private', '"fl/net/net.h"', 'public'] },
   { include: ['"fl/net/ble.h"', 'private', '"fl/net/net.h"', 'public'] },
   { include: ['"fl/net/ota.h"', 'private', '"fl/net/net.h"', 'public'] },
   { include: ['"fl/net/rpc.h"', 'private', '"fl/net/net.h"', 'public'] },
 
   # fl/net/http.h umbrella
   { include: ['"fl/net/http/fetch.h"', 'private', '"fl/net/http.h"', 'public'] },
-  { include: ['"fl/net/http/stream_client.h"', 'private', '"fl/net/http.h"', 'public'] },
-  { include: ['"fl/net/http/stream_server.h"', 'private', '"fl/net/http.h"', 'public'] },
 
   # fl/channels/spi.h umbrella
   { include: ['"fl/channels/spi/config.h"', 'private', '"fl/channels/spi.h"', 'public'] },
@@ -117,8 +114,8 @@
   { include: ['"fl/channels/spi/write_result.h"', 'private', '"fl/channels/spi.h"', 'public'] },
   { include: ['"fl/channels/spi/multi_lane_device.h"', 'private', '"fl/channels/spi.h"', 'public'] },
 
-  # fl/fx/2d/animartrix_detail/ sub-headers → animartrix_detail.h
-  { include: ['@"fl/fx/2d/animartrix_detail/.*"', 'private', '"fl/fx/2d/animartrix_detail.h"', 'public'] },
+  # fl/fx/2d/animartrix_detail/ sub-headers → animartrix.hpp (animartrix_detail.h is itself private)
+  { include: ['@"fl/fx/2d/animartrix_detail/.*"', 'private', '"fl/fx/2d/animartrix.hpp"', 'public'] },
 
   # fl/math/noise.h umbrella
   { include: ['"fl/math/noise/noise_woryley.h"', 'private', '"fl/math/noise.h"', 'public'] },

@@ -2,6 +2,28 @@
 
 <!-- Add tasks here as checkable items -->
 
+## ESP32-S3 binary-size Batch 3 (#2856)
+
+- [x] Audit every tracking item against current master and merged PR history.
+- [ ] Resolve item 3.6 with a focused fixed-capacity ledger PR and regression tests.
+- [x] Include same-configuration before/after firmware and per-symbol bloat evidence.
+- [ ] Run focused tests, full lint/C++ gates, and the pre-push review gate.
+- [ ] Push, wait for required CI/review, merge, and rebase onto `origin/master`.
+- [ ] Resolve item 3.1 in a separately validated, measured PR.
+- [ ] Close #2856 only after all remaining acceptance criteria are proven.
+
+### Plan
+
+- Start with 3.6 because it is the bounded remaining change. Static mode's
+  contract permits exactly one FastLED TX strip and no RMT5 RX allocation, so
+  the fixed ledger holds one record; dynamic mode keeps the full TX/RX ledger.
+  Check `vector_fixed::insert` capacity before accounting changes and add
+  static-mode regressions. Compare ESP32-S3 Blink with
+  `FL_RMT_STATIC_ALLOCATION=1` at identical revisions/configuration; retain
+  the legacy `FASTLED_RMT_STATIC_ALLOCATION` alias in compatibility coverage.
+- Treat 3.1 as a separate architectural slice after 3.6 is merged and the
+  checkout has been rebased onto `origin/master`.
+
 ## Meta issue #4528: ten verified bug fixes
 
 - [x] Audio slice: resolve #4518-#4521 with focused RED→GREEN regressions.

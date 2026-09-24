@@ -641,7 +641,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             retry_count++;
 
             // Free previous allocation attempt
-            memMgr.free(state->memoryChannelId, true);
+            memMgr.rollbackAllocation(state->memoryChannelId, true);
 
             Rmt5ChannelConfig retry_config(pin, FASTLED_RMT5_CLOCK_HZ,
                                             reduced_symbols, 1, false, intr_priority);
@@ -674,7 +674,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                                        min_symbols, static_cast<int>(pin));
 
             state->channel = nullptr;
-            memMgr.free(state->memoryChannelId, true);
+            memMgr.rollbackAllocation(state->memoryChannelId, true);
             return false;
         }
 
@@ -751,12 +751,12 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         auto &memMgr = RmtMemoryManager::instance();
 
         // Get current Network state for memory allocation.
-        // Under FASTLED_RMT_STATIC_ALLOCATION the user has asserted no
+        // Under FL_RMT_STATIC_ALLOCATION the user has asserted no
         // network during LED transmission, so this resolves to a compile-
         // time constant â€” the linker then drops the entire NetworkDetector
         // singleton + WiFi-state-reading chain from the binary. See #2856
         // item 3.3.
-#if FASTLED_RMT_STATIC_ALLOCATION
+#if FL_RMT_STATIC_ALLOCATION
         constexpr bool networkActive = false;
 #else
         bool networkActive = NetworkDetector::isAnyNetworkActive();
@@ -857,7 +857,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #endif
                     mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
-                    memMgr.free(state->memoryChannelId, true);
+                    memMgr.rollbackAllocation(state->memoryChannelId, true);
                     return false;
                 }
 
@@ -878,8 +878,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
                     // Free DMA and memory allocation
-                    memMgr.freeDMA(state->memoryChannelId, true);
-                    memMgr.free(state->memoryChannelId, true);
+                    memMgr.rollbackDMA(state->memoryChannelId, true);
+                    memMgr.rollbackAllocation(state->memoryChannelId, true);
                     return false;
                 }
 
@@ -888,7 +888,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             } else {
                 // DMA FAILED - free memory and fall through to non-DMA
                 // Free memory allocation
-                memMgr.free(state->memoryChannelId, true);
+                memMgr.rollbackAllocation(state->memoryChannelId, true);
 #if FL_HAS_WARN
                 emitRmtChannelWarning(
                     RmtChannelWarning::DMA_CHANNEL_CREATION_FAILED);
@@ -980,7 +980,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Non-recoverable error (already at minimum or other failure)
             FL_LOG_RMT("Failed to create non-DMA RMT channel on pin %s", static_cast<int>(pin));
             state->channel = nullptr;
-            memMgr.free(state->memoryChannelId, true);
+            memMgr.rollbackAllocation(state->memoryChannelId, true);
             return false;
         }
 
@@ -1002,7 +1002,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             mPeripheral.deleteChannel(state->channel);
             state->channel = nullptr;
             // Free memory allocation
-            memMgr.free(state->memoryChannelId, true);
+            memMgr.rollbackAllocation(state->memoryChannelId, true);
             return false;
         }
 
@@ -1047,11 +1047,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Free DMA and memory allocation
             auto &memMgr = RmtMemoryManager::instance();
             if (state->useDMA) {
-                memMgr.freeDMA(state->memoryChannelId,
-                               true); // true = TX channel
+                memMgr.rollbackDMA(state->memoryChannelId,
+                                   true); // true = TX channel
                 mDMAChannelsInUse--;
             }
-            memMgr.free(state->memoryChannelId, true);
+            memMgr.rollbackAllocation(state->memoryChannelId, true);
 
             state->useDMA = false;
         }
@@ -1083,10 +1083,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // Free DMA and memory allocation
                 auto &memMgr = RmtMemoryManager::instance();
                 if (state->useDMA) {
-                    memMgr.freeDMA(state->memoryChannelId, true);
+                    memMgr.rollbackDMA(state->memoryChannelId, true);
                     mDMAChannelsInUse--;
                 }
-                memMgr.free(state->memoryChannelId, true);
+                memMgr.rollbackAllocation(state->memoryChannelId, true);
 
                 state->useDMA = false;
                 return;
@@ -1119,11 +1119,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // Free DMA and memory allocation
                 auto &memMgr = RmtMemoryManager::instance();
                 if (state->useDMA) {
-                    memMgr.freeDMA(state->memoryChannelId,
-                                   true); // true = TX channel
+                    memMgr.rollbackDMA(state->memoryChannelId,
+                                       true); // true = TX channel
                     mDMAChannelsInUse--;
                 }
-                memMgr.free(state->memoryChannelId, true);
+                memMgr.rollbackAllocation(state->memoryChannelId, true);
 
                 state->useDMA = false;
                 return;
@@ -1149,6 +1149,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         releaseChannel(channel);
     }
 
+    bool hasChannelInUse() const FL_NO_EXCEPT {
+        for (const auto &ch : mChannels) {
+            if (ch.inUse) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels() FL_NO_EXCEPT {
         if (mPendingChannels.empty()) {
@@ -1165,7 +1174,24 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             // Acquire channel for this transmission
             ChannelState* channel = acquireChannel(pending.pin, pending.timing, dataSize);
             if (!channel) {
-                ++i;  // No HW available, leave in queue
+                if (mAllocationFailed && !hasChannelInUse()) {
+                    // A failed setup with no active transmission cannot make
+                    // progress until the next frame, when acquireChannel() is
+                    // allowed to retry. Drop this pending item so poll() can
+                    // return READY and clear its ChannelData in-use flag
+                    // instead of pinning the driver in BUSY forever. While a
+                    // channel is in use, keep waiting: its release lets this
+                    // strip reuse the channel (more strips than channels).
+                    if (i < mPendingChannels.size() - 1) {
+                        mPendingChannels[i] = mPendingChannels.back();
+                    }
+                    mPendingChannels.pop_back();
+                    // The failure belonged to the dropped strip; give each
+                    // remaining strip its own setup attempt this frame.
+                    mAllocationFailed = false;
+                    continue;
+                }
+                ++i;  // Channels may still become available after active TX completes.
                 continue;
             }
 
@@ -1335,11 +1361,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             state.encoder = nullptr;
         }
         if (state.useDMA) {
-            memMgr.freeDMA(state.memoryChannelId, true);
+            memMgr.rollbackDMA(state.memoryChannelId, true);
             mDMAChannelsInUse--;
             state.useDMA = false;
         }
-        memMgr.free(state.memoryChannelId, true);
+        memMgr.rollbackAllocation(state.memoryChannelId, true);
     }
 
     /// @brief Reconfigure channels for network state change (destroy/recreate
@@ -1409,13 +1435,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             // Free DMA if this channel was using it
             if (state.useDMA) {
-                memMgr.freeDMA(state.memoryChannelId, true);  // true = TX channel
+                memMgr.rollbackDMA(state.memoryChannelId,
+                                   true);  // true = TX channel
                 mDMAChannelsInUse--;
                 state.useDMA = false;
             }
 
             // Free memory allocation
-            memMgr.free(state.memoryChannelId, true);  // true = TX channel
+            memMgr.rollbackAllocation(state.memoryChannelId,
+                                      true);  // true = TX channel
 
             // Recreate channel with Network-appropriate memory allocation
             // Note: createChannel() will call memMgr.allocateTx() with current Network state
@@ -1507,13 +1535,20 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
     for (auto &ch : mChannels) {
         if (!ch.inUse && ch.channel && ch.pin == pin) {
             ch.inUse = true;
+#if FL_RMT_STATIC_ALLOCATION
+            // The static-allocation contract keeps the channel's pin and
+            // timing immutable after setup, so reuse it without the dynamic
+            // reconfiguration path.
+#else
             configureChannel(&ch, pin, timing, dataSize);
+#endif
             FL_LOG_RMT("Reusing %s channel for pin %s", (ch.useDMA ? "DMA" : "non-DMA"), static_cast<int>(pin));
             return &ch;
         }
     }
 
     // Strategy 2: Find any idle non-DMA channel (requires reconfiguration)
+#if !FL_RMT_STATIC_ALLOCATION
     for (auto &ch : mChannels) {
         if (!ch.inUse && ch.channel && !ch.useDMA) {
             ch.inUse = true;
@@ -1522,6 +1557,7 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
             return &ch;
         }
     }
+#endif
 
     // Strategy 3: Create new channel if HW available
     // BUT: Skip if allocation previously failed (reset at start of next frame
@@ -1545,10 +1581,10 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
             // Free memory allocation that createChannel() made
             auto &memMgr = RmtMemoryManager::instance();
             if (stablePtr->useDMA) {
-                memMgr.freeDMA(stablePtr->memoryChannelId, true);
+                memMgr.rollbackDMA(stablePtr->memoryChannelId, true);
                 mDMAChannelsInUse--;
             }
-            memMgr.free(stablePtr->memoryChannelId, true);
+            memMgr.rollbackAllocation(stablePtr->memoryChannelId, true);
             mPeripheral.deleteChannel(stablePtr->channel);
             mChannels.pop_back();
             mAllocationFailed = true; // Mark failure

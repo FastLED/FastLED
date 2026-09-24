@@ -2,6 +2,7 @@
 
 // IWYU pragma: private
 
+#include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 #include "platforms/esp/is_esp.h"
 
 // ok no namespace fl
@@ -178,7 +179,7 @@ FL_EXTERN_C_END
 #define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / FASTLED_RMT_MEM_BLOCKS)  // Half buffer
 
 // ============================================================================
-// FASTLED_RMT_STATIC_ALLOCATION — opt-in size-trim for fixed single-strip sketches
+// FL_RMT_STATIC_ALLOCATION — opt-in size-trim for fixed single-strip sketches
 // ============================================================================
 //
 // Default (0): the RmtMemoryManager runs its full adaptive planner —
@@ -189,25 +190,24 @@ FL_EXTERN_C_END
 //
 // Opt in (1): the planner collapses to a constant. calculateMemoryBlocks
 // returns FASTLED_RMT_MEM_BLOCKS unconditionally, allocateTx skips the
-// fallback retry + diagnostic block, and freeDMA becomes a no-op. This
+// fallback retry + diagnostic block, and free/freeDMA teardown becomes a
+// no-op. The fixed allocation ledger remains active for accounting. This
 // is a contractual opt-in: the user is responsible for ensuring the
 // following constraints hold, since they are NOT enforced by
 // static_assert or any preprocessor check. Violating them produces
 // runtime misbehavior (e.g. failed RMT allocation with no recovery, no
 // network-mode buffering), not a compile error:
-//   - Exactly one addLeds<>() call, made before setup() returns
+//   - Exactly one addLeds<>() call, made before setup() returns (one TX entry)
 //   - No removeLeds() / late addLeds()
+//   - No runtime pin or timing reconfiguration
+//   - No RMT5 RX allocation through RmtMemoryManager
 //   - No WiFi / Ethernet / Bluetooth during LED transmission
 //
+// Prefer FL_RMT_STATIC_ALLOCATION for new code and build flags. The legacy
+// FASTLED_RMT_STATIC_ALLOCATION setting remains a compatibility alias.
 // In exchange the user gets ~2-3 KB shaved off the .text segment on
 // ESP32-S3 NEOPIXEL Blink (additive on top of FASTLED_LOG_VERBOSITY=0).
 // See FastLED #2773 item 2.5 for the design notes.
-#ifndef FASTLED_RMT_STATIC_ALLOCATION
-#define FASTLED_RMT_STATIC_ALLOCATION 0
-#endif
-
-
-
 // === Platform-Specific Signal Routing ===
 
 // RMT signal routing for GPIO matrix

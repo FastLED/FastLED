@@ -53,7 +53,7 @@ These are the gotchas the wrapper handles for you. They are documented here so t
    | `FASTLED_LOG_VERBOSITY=0` | Now the release default (NDEBUG); explicit `-DFASTLED_LOG_VERBOSITY=1` to restore | ~43-58 KB | #2791 + #2890 |
    | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print + **switches newlib to nano printf (#2915 — biggest single lever)** | ~30-45 KB | #2895 + #2915 (Stage 3) |
    | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
-   | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never remove | ~22-43 KB | #2846 |
+   | `-DFL_RMT_STATIC_ALLOCATION=1` | `build_flags`; exactly one fixed TX strip, no late add/remove, runtime reconfiguration, or RMT5 RX allocation | −4,395 B symbol flash and −108 B RAM versus default dynamic Blink; whole `firmware.bin` is 4,640 B smaller on the same candidate. The isolated ledger before/after results (including its 192 B whole-bin increase) are in `docs/SLIM_ESP32S3.md`. | #2846; issue #4567 |
 
    The user-facing copy of this table — same content, written for end users rather than agents, with platformio.ini snippets — lives at [`docs/SLIM_ESP32S3.md`](../../docs/SLIM_ESP32S3.md). When a new knob lands, update both: this table for the agent reference, and `docs/SLIM_ESP32S3.md` for the user copy.
 

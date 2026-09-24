@@ -5,6 +5,115 @@
 /// using the test constructor to mock different platform configurations.
 
 #include "test.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_allocation_ledger.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+using namespace fl;
+
+FL_TEST_CASE("RMT fixed allocation ledger rejects overflow and resets") {
+    fl::vector_fixed<int, 2> ledger;
+
+    FL_CHECK_EQ(ledger.size(), 0u);
+    FL_REQUIRE(ledger.insert(ledger.end(), 17));
+    FL_REQUIRE(ledger.insert(ledger.end(), 29));
+    FL_CHECK_EQ(ledger.size(), ledger.capacity());
+    FL_CHECK_EQ(ledger.size(), 2u);
+    FL_CHECK_EQ(*ledger.begin(), 17);
+    FL_CHECK_EQ(*(ledger.end() - 1), 29);
+
+    FL_CHECK_FALSE(ledger.insert(ledger.end(), 41));
+    FL_CHECK_EQ(ledger.size(), 2u);
+
+    ledger.clear();
+    FL_CHECK(ledger.empty());
+    FL_REQUIRE(ledger.insert(ledger.end(), 41));
+    FL_CHECK_EQ(*ledger.begin(), 41);
+}
+
+FL_TEST_CASE("RMT static allocation ledger is bounded to one strip") {
+    FL_CHECK_EQ(FL_RMT_ALLOCATION_LEDGER_CAPACITY, 1);
+
+    fl::vector_fixed<int, FL_RMT_ALLOCATION_LEDGER_CAPACITY> ledger;
+    FL_REQUIRE(ledger.insert(ledger.end(), 17));
+    FL_CHECK_FALSE(ledger.insert(ledger.end(), 29));
+    FL_CHECK_EQ(ledger.size(), 1u);
+    FL_CHECK_EQ(ledger.front(), 17);
+}
+
+FL_TEST_CASE("RMT fixed ledger rollback allows a failed channel allocation to retry") {
+    struct Allocation {
+        u8 channel_id;
+        size_t words;
+        bool is_tx;
+        bool is_dma;
+    };
+
+    fl::vector_fixed<Allocation, 2> ledger;
+    FL_REQUIRE(ledger.insert(ledger.end(), Allocation{0, 96, true, false}));
+    size_t allocated_words = 96;
+
+    Allocation removed = {};
+    FL_REQUIRE(fl::detail::rollbackLastRmtAllocation(ledger, 0, true,
+                                                     removed));
+    allocated_words -= removed.words;
+    FL_CHECK_EQ(ledger.size(), 0u);
+    FL_CHECK_EQ(allocated_words, 0u);
+
+    FL_REQUIRE(ledger.insert(ledger.end(), Allocation{0, 48, true, false}));
+    allocated_words += 48;
+    FL_CHECK_EQ(ledger.size(), 1u);
+    FL_CHECK_EQ(allocated_words, 48u);
+}
+
+FL_TEST_CASE("RMT fixed ledger rollback only removes the newest allocation") {
+    struct Allocation {
+        u8 channel_id;
+        size_t words;
+        bool is_tx;
+        bool is_dma;
+    };
+
+    fl::vector_fixed<Allocation, 2> ledger;
+    FL_REQUIRE(ledger.insert(ledger.end(), Allocation{0, 96, true, false}));
+    FL_REQUIRE(ledger.insert(ledger.end(), Allocation{1, 48, true, false}));
+
+    Allocation removed = {};
+    FL_CHECK_FALSE(fl::detail::rollbackLastRmtAllocation(
+        ledger, 0, true, removed));
+    FL_CHECK_EQ(ledger.size(), 2u);
+
+    FL_CHECK(fl::detail::rollbackLastRmtAllocation(
+        ledger, 1, true, removed));
+    FL_CHECK_EQ(ledger.size(), 1u);
+    FL_CHECK_EQ(removed.channel_id, 1);
+    FL_CHECK_EQ(removed.words, 48u);
+
+    FL_REQUIRE(ledger.insert(ledger.end(), Allocation{1, 64, true, false}));
+    FL_CHECK_EQ(ledger.size(), 2u);
+    FL_CHECK_EQ(ledger.back().words, 64u);
+}
+
+FL_TEST_CASE("RMT fixed ledger rollback releases only its matching DMA slot") {
+    struct DMAAllocation {
+        u8 channel_id;
+        bool is_tx;
+        bool allocated;
+    };
+
+    DMAAllocation allocation = {3, true, true};
+    FL_CHECK_FALSE(
+        fl::detail::releaseRmtDmaAllocation(allocation, 2, true));
+    FL_CHECK(allocation.allocated);
+
+    FL_CHECK(fl::detail::releaseRmtDmaAllocation(allocation, 3, true));
+    FL_CHECK_FALSE(allocation.allocated);
+    FL_CHECK_EQ(allocation.channel_id, 0);
+    FL_CHECK_FALSE(allocation.is_tx);
+}
+
+} // FL_TEST_FILE
 
 #ifdef ESP32
 
@@ -18,6 +127,80 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
+FL_TEST_CASE("RMT failed channel creation rollback releases reservation for retry") {
+    RmtMemoryManager mgr(96, 96, false);
+
+    auto first = mgr.allocateTx(0, false, false);
+    FL_REQUIRE(first.ok());
+    FL_CHECK_EQ(first.value(), 96);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 96);
+
+#if FL_RMT_STATIC_ALLOCATION
+    // Ordinary teardown intentionally retains allocations under the static
+    // allocation contract; failed creation must use the explicit rollback API.
+    mgr.free(0, true);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 96);
+#endif
+
+    mgr.rollbackAllocation(0, true);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 0);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0);
+    FL_CHECK_EQ(mgr.availableTxWords(), 96);
+
+    auto retry = mgr.allocateTx(0, false, false);
+    FL_REQUIRE(retry.ok());
+    FL_CHECK_EQ(retry.value(), 96);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 96);
+}
+
+#if FL_RMT_STATIC_ALLOCATION && defined(FL_IS_ESP_32S3)
+FL_TEST_CASE("RMT static allocation explicitly rolls back failed DMA setup") {
+    RmtMemoryManager mgr(192, 192, false);
+
+    FL_REQUIRE(mgr.allocateDMA(0, true));
+    FL_CHECK_EQ(mgr.getDMAChannelsInUse(), 1);
+
+    mgr.freeDMA(0, true);
+    FL_CHECK_EQ(mgr.getDMAChannelsInUse(), 1);
+
+    mgr.rollbackDMA(0, true);
+    FL_CHECK_EQ(mgr.getDMAChannelsInUse(), 0);
+    FL_CHECK(mgr.isDMAAvailable());
+}
+
+FL_TEST_CASE("RMT static ledger bounds setup allocation and reset accounting") {
+    RmtMemoryManager mgr(256, 256, false);
+
+    auto first = mgr.allocateTx(0, false, false);
+    FL_REQUIRE(first.ok());
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1u);
+    FL_CHECK_GT(mgr.getAllocatedTxWords(), 0u);
+
+    auto late_add = mgr.allocateTx(1, false, false);
+    FL_CHECK_FALSE(late_add.ok());
+    FL_CHECK_EQ(late_add.error(), RmtMemoryError::ALLOCATION_LEDGER_FULL);
+
+    // Static mode excludes RMT RX use alongside the fixed FastLED TX strip.
+    auto rx = mgr.allocateRx(0, 8, false);
+    FL_CHECK_FALSE(rx.ok());
+    FL_CHECK_EQ(rx.error(), RmtMemoryError::ALLOCATION_LEDGER_FULL);
+
+    // Normal teardown is outside the static contract and deliberately retains
+    // the ledger entry; reset is reserved for explicit recovery/test setup.
+    mgr.free(0, true);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1u);
+
+    mgr.reset();
+    FL_CHECK_EQ(mgr.getAllocationCount(), 0u);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0u);
+    FL_CHECK_EQ(mgr.availableTxWords(), 256u);
+}
+#endif
+
+#if !FL_RMT_STATIC_ALLOCATION
 // ============================================================================
 // Test Suite 1: Basic Allocation Tests
 // ============================================================================
@@ -716,6 +899,7 @@ FL_TEST_CASE("RMT Memory Manager: calculateMemoryBlocks integration with custom 
     // Restore default strategy after all subcases
     mgr.setMemoryBlockStrategy(saved_idle, saved_network);
 }
+#endif // !FL_RMT_STATIC_ALLOCATION
 
 } // FL_TEST_FILE
 

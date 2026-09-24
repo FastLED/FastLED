@@ -17,6 +17,8 @@
 // IWYU pragma: private
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
@@ -37,7 +39,8 @@ enum class RmtMemoryError : u8 {
     INSUFFICIENT_RX_MEMORY = 2,  ///< Not enough RX memory available
     CHANNEL_ALREADY_ALLOCATED = 3,  ///< Channel already has an allocation
     CHANNEL_NOT_FOUND = 4,  ///< Channel not found in allocations
-    INVALID_CHANNEL_ID = 5  ///< Channel ID out of range
+    INVALID_CHANNEL_ID = 5,  ///< Channel ID out of range
+    ALLOCATION_LEDGER_FULL = 6  ///< Static allocation ledger has no free slots
 };
 
 /// @brief RMT Memory Manager - Centralized allocation ledger for TX and RX channels
@@ -190,6 +193,11 @@ public:
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel
     void free(u8 channel_id, bool is_tx) FL_NO_EXCEPT;  // ok bare allocation
+
+    /// @brief Roll back an allocation after a failed create/retry path.
+    /// Unlike free(), this always releases ledger state in static-allocation
+    /// mode; free() remains a no-op for normal teardown there.
+    void rollbackAllocation(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
 
     /// @brief Record allocation after recovery (channel already created externally)
     /// @param channel_id RMT channel ID
@@ -363,6 +371,11 @@ public:
     /// Allows another channel to use DMA after this channel releases it.
     void freeDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
 
+    /// @brief Release a DMA slot after a failed create/retry path.
+    /// Unlike freeDMA(), this always releases slot state in static-allocation
+    /// mode; freeDMA() remains a no-op for normal teardown there.
+    void rollbackDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
+
     /// @brief Get current DMA allocation info (debug/logging)
     /// @return Number of DMA channels in use (0 or 1)
     int getDMAChannelsInUse() const FL_NO_EXCEPT;
@@ -387,6 +400,19 @@ private:
             : channel_id(id), words(w), is_tx(tx), is_dma(dma) {}
     };
 
+#if FL_RMT_STATIC_ALLOCATION
+    // Static mode documents exactly one FastLED TX strip. Keep the one-record
+    // vector storage bounded so the opt-in saves static RAM on 32-bit ESP32s.
+    using AllocationLedger =
+        fl::vector_fixed<ChannelAllocation,
+                         FL_RMT_ALLOCATION_LEDGER_CAPACITY>;
+    FL_STATIC_ASSERT(sizeof(AllocationLedger) <= 32,
+                     "Static RMT allocation ledger exceeded its 32-byte budget");
+#else
+    // Dynamic mode must account for simultaneous TX and RX channel allocations.
+    using AllocationLedger = fl::vector_inlined<ChannelAllocation, 8>;
+#endif
+
     /// @brief Memory accounting ledger
     ///
     /// Supports two architectures:
@@ -409,7 +435,7 @@ private:
         size_t reserved_tx_words;   ///< TX words reserved for external RMT usage
         size_t reserved_rx_words;   ///< RX words reserved for external RMT usage
 
-        fl::vector_inlined<ChannelAllocation, 8> allocations;  ///< Active allocations
+        AllocationLedger allocations;  ///< Active allocations
 
         MemoryLedger() FL_NO_EXCEPT;
     };
@@ -436,6 +462,14 @@ private:
 
     /// @brief Find allocation record for a channel (const version)
     const ChannelAllocation* findAllocation(u8 channel_id, bool is_tx) const FL_NO_EXCEPT;
+
+    /// Record an allocation without allowing static mode to spill past its
+    /// hardware-bounded ledger.
+    void recordAllocation(const ChannelAllocation& allocation) FL_NO_EXCEPT;
+    bool hasAllocationCapacity() const FL_NO_EXCEPT;
+#if !FL_RMT_STATIC_ALLOCATION
+    void releaseAllocation(u8 channel_id, bool is_tx) FL_NO_EXCEPT;
+#endif
 
     /// @brief Initialize platform-specific memory limits
     static void initPlatformLimits(size_t& total_tx, size_t& total_rx) FL_NO_EXCEPT;
