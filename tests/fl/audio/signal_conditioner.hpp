@@ -131,6 +131,28 @@ FL_TEST_CASE("audio::SignalConditioner - noise gate hysteresis per-sample") {
     FL_CHECK_EQ(pcm[511], 0);
 }
 
+FL_TEST_CASE("audio::SignalConditioner - noise gate preserves i16 minimum") {
+    audio::SignalConditioner conditioner;
+    audio::SignalConditionerConfig config;
+    config.enableDCRemoval = false;
+    config.enableSpikeFilter = false;
+    config.enableNoiseGate = true;
+    config.noiseGateOpenThreshold = 500;
+    config.noiseGateCloseThreshold = 300;
+    conditioner.configure(config);
+
+    vector<i16> samples = {-32768, -499, 500};
+    audio::Sample cleaned = conditioner.processSample(
+        createSample_SignalConditioner(samples));
+    const auto &pcm = cleaned.pcm();
+
+    FL_REQUIRE_EQ(pcm.size(), samples.size());
+    FL_CHECK_EQ(pcm[0], -32768);
+    FL_CHECK_EQ(pcm[1], 0);
+    FL_CHECK_EQ(pcm[2], 500);
+    FL_CHECK_TRUE(conditioner.getStats().noiseGateOpen);
+}
+
 // SC-4: DC Removal With Spikes - Spikes Excluded From Mean
 FL_TEST_CASE("audio::SignalConditioner - DC removal excludes spikes from mean") {
     audio::SignalConditioner conditioner;
