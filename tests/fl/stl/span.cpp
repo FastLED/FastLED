@@ -22,6 +22,14 @@ class dereference_counting_iterator {
         return mPointer - other.mPointer;
     }
 
+    bool operator==(const dereference_counting_iterator &other) const {
+        return mPointer == other.mPointer;
+    }
+
+    bool operator!=(const dereference_counting_iterator &other) const {
+        return !(*this == other);
+    }
+
   private:
     int *mPointer;
     int *mDereferenceCount;
