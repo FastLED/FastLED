@@ -85,9 +85,9 @@ def summarize(runs: list[dict], jobs_by_run: dict[int, list[dict]]) -> dict:
                 "run_id": run["id"],
                 "workflow": run["name"],
                 "event": run["event"],
-                "attempt": run["run_attempt"],
-                "conclusion": run.get("conclusion"),
-                "runner_seconds": seconds,
+                "latest_attempt": run["run_attempt"],
+                "latest_conclusion": run.get("conclusion"),
+                "runner_seconds_all_attempts": seconds,
             }
         )
     return {
@@ -109,27 +109,26 @@ def main() -> None:
     parser.add_argument("repository", help="OWNER/REPO")
     parser.add_argument("sha", help="Exact 40-character commit SHA")
     args = parser.parse_args()
-    if len(args.sha) != 40 or any(
-        c not in "0123456789abcdef" for c in args.sha.lower()
-    ):
+    sha = args.sha.lower()
+    if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
         parser.error("sha must be a full 40-character hexadecimal commit SHA")
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if not token:
         parser.error("GITHUB_TOKEN or GH_TOKEN is required")
     base = f"https://api.github.com/repos/{args.repository}"
     runs = pages(
-        f"{base}/actions/runs?{urlencode({'head_sha': args.sha})}",
+        f"{base}/actions/runs?{urlencode({'head_sha': sha})}",
         token,
         max_results=1000,
     )
-    runs = [run for run in runs if run["head_sha"] == args.sha]
+    runs = [run for run in runs if run["head_sha"].lower() == sha]
     jobs = {
         run["id"]: pages(f"{base}/actions/runs/{run['id']}/jobs?filter=all", token)
         for run in runs
     }
     print(
         json.dumps(
-            {"repository": args.repository, "sha": args.sha, **summarize(runs, jobs)},
+            {"repository": args.repository, "sha": sha, **summarize(runs, jobs)},
             indent=2,
         )
     )

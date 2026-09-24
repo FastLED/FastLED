@@ -1,12 +1,13 @@
 """Observed runner accounting stays explicit about missing event coverage."""
 
 import json
+import sys
 from io import BytesIO
 from unittest.mock import patch
 
 import pytest
 
-from ci.actions_usage import job_seconds, pages, summarize
+from ci.actions_usage import job_seconds, main, pages, summarize
 
 
 class Response(BytesIO):
@@ -54,6 +55,14 @@ def test_all_events_and_attempts_are_counted() -> None:
         "workflow_dispatch": 0,
     }
     assert [run["run_id"] for run in report["runs"]] == [1, 2, 3]
+    assert report["runs"][0] == {
+        "run_id": 1,
+        "workflow": "unit",
+        "event": "pull_request",
+        "latest_attempt": 2,
+        "latest_conclusion": "success",
+        "runner_seconds_all_attempts": 90,
+    }
     assert job_seconds(skipped) == 0
     assert report["coverage_complete"] is False
     assert "workflow_run" in report["coverage_limits"][0]
@@ -79,6 +88,36 @@ def test_active_job_is_reported_instead_of_silently_counted_as_zero() -> None:
     assert report["active_run_ids"] == [9]
     assert report["active_job_ids"] == [90]
     assert report["coverage_complete"] is False
+
+
+def test_main_normalizes_uppercase_sha(capsys: pytest.CaptureFixture[str]) -> None:
+    lowercase_sha = "abcdef0123456789abcdef0123456789abcdef01"
+    run = {
+        "id": 7,
+        "name": "unit",
+        "event": "pull_request",
+        "run_attempt": 1,
+        "conclusion": "success",
+        "head_sha": lowercase_sha,
+    }
+    responses = [
+        Response({"total_count": 1, "workflow_runs": [run]}),
+        Response({"total_count": 0, "jobs": []}),
+    ]
+    with (
+        patch("ci.actions_usage.urlopen", side_effect=responses),
+        patch("ci.actions_usage.os.environ", {"GITHUB_TOKEN": "token"}),
+        patch.object(
+            sys,
+            "argv",
+            ["actions_usage.py", "FastLED/FastLED", lowercase_sha.upper()],
+        ),
+    ):
+        main()
+
+    report = json.loads(capsys.readouterr().out)
+    assert report["sha"] == lowercase_sha
+    assert [run_detail["run_id"] for run_detail in report["runs"]] == [7]
 
 
 def test_pagination_and_search_cap() -> None:
