@@ -15,12 +15,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SHARD_COUNT = 3
 
 
-def test_esp32s3_workflow_is_one_job_smoke_on_prs_all_on_master() -> None:
+def test_esp32s3_workflow_is_one_opt_in_full_job() -> None:
     """The esp32s3 gate is a single serial job again (#4414).
 
-    Pull requests build the smoke set and master builds every example
-    (#4415). A matrix would reintroduce per-shard framework warm-up and the
-    cache-save race between shards, so this pins the shape.
+    Explicit platform or full validation builds every example. A matrix would
+    reintroduce per-shard framework warm-up and the cache-save race between
+    shards, so this pins the shape.
     """
     workflow_path = ROOT / ".github/workflows/build_esp32s3.yml"
     workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
@@ -28,9 +28,9 @@ def test_esp32s3_workflow_is_one_job_smoke_on_prs_all_on_master() -> None:
 
     assert build_job["name"] == "ESP32-S3 examples"
     assert "strategy" not in build_job
-    assert build_job["with"]["args"] == (
-        "esp32s3 ${{ github.event_name == 'pull_request' && 'smoke' || 'all' }}"
-    )
+    assert build_job["with"]["args"] == "esp32s3 all"
+    assert "ci-full" in build_job["if"]
+    assert "ci-platform:esp32s3" in build_job["if"]
 
 
 def test_all_example_shards_are_disjoint_and_exhaustive() -> None:

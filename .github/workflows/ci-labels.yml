@@ -1,0 +1,35 @@
+name: CI board selection
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.0"
+      - name: Check registry and generated board gates
+        run: bash ci-labels check
+      - name: Check GitHub label catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ci-labels labels-check
+      - name: Resolve requested board cells
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: bash ci-labels select --event-file "$GITHUB_EVENT_PATH" >> "$GITHUB_STEP_SUMMARY"

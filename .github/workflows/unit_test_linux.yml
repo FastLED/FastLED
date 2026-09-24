@@ -33,19 +33,7 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test*.yml'
-      - '.github/workflows/template_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'meson.options'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
   test:
@@ -55,3 +43,4 @@ jobs:
     with:
       os: ubuntu-latest
       build-mode: ${{ github.event_name == 'workflow_dispatch' && inputs.build-mode || 'debug-thin' }}
+      full-suite: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'ci-full') }}
