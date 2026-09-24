@@ -929,6 +929,20 @@ def _get_friendly_test_name(command: str | list[str]) -> str:
         return _extract_test_name(command)
 
 
+def failed_fingerprint_scopes(failures: list[TestFailureInfo]) -> set[str]:
+    """Identify cache scopes whose child process failed or was interrupted."""
+    scopes: set[str] = set()
+    for failure in failures:
+        command = failure.command
+        if "meson_example_runner.py" in command:
+            scopes.add("examples")
+        elif "pytest" in command and "ci/tests" in command:
+            scopes.add("python_test")
+        elif "wasm_compile.py" in command:
+            scopes.add("wasm")
+    return scopes
+
+
 @dataclass
 class FailedTestEntry:
     """A test that failed during a test run."""
@@ -1530,24 +1544,24 @@ def run_test_processes(
 
 def runner(
     args: TestArgs,
-    src_code_change: bool = True,
     cpp_test_change: bool = True,
     examples_change: bool = True,
     python_test_change: bool = True,
     wasm_change: bool = True,
     fingerprint_manager: Optional["FingerprintManager"] = None,
-) -> None:
+    failed_scopes: Optional[set[str]] = None,
+) -> set[str]:
     """
     Main test runner function that determines what to run and executes tests
 
     Args:
         args: Parsed command line arguments
-        src_code_change: Whether source code has changed since last run
         cpp_test_change: Whether C++ test-related files (src/ or tests/) have changed
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
         wasm_change: Whether WASM-related files have changed
         fingerprint_manager: Optional fingerprint manager for test metadata
+        failed_scopes: Receives scopes that failed after execution began
     """
     # Debug logging - only shown in verbose mode to reduce UI clutter
     if args.verbose:
@@ -1583,6 +1597,7 @@ def runner(
 
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
+    completed_scopes: set[str] = set()
 
     # Snapshot the tree BEFORE building/running, for whichever unit-test branch
     # runs below. Capturing after the run would absorb any file added meanwhile
@@ -1645,6 +1660,8 @@ def runner(
             )
 
             if not result.success:
+                if failed_scopes is not None:
+                    failed_scopes.add("cpp_test")
                 if result.failed_test_names:
                     summary = _format_failure_summary(
                         [
@@ -1671,6 +1688,8 @@ def runner(
                     num_examples_passed=result.num_examples_passed,
                     examples_included=result.examples_included,
                 )
+            if result.num_tests_run > 0 and not args.check:
+                completed_scopes.add("cpp_test")
 
             # Print timing summary table for unit-only mode
             # Skip zccache stats when test result came from cache (no compilation occurred)
@@ -1703,7 +1722,7 @@ def runner(
             )
             print_cache_hit(cache_msg)
 
-        return
+        return completed_scopes
 
     # For mixed test modes (unit + examples, etc.), run unit tests via Meson but continue to other tests
     # Skip if fingerprint cache indicates no changes
@@ -1771,6 +1790,10 @@ def runner(
                 )
 
             if not result.success:
+                if failed_scopes is not None:
+                    failed_scopes.add("cpp_test")
+                    if test_categories.examples:
+                        failed_scopes.add("examples")
                 if result.failed_test_names:
                     summary = _format_failure_summary(
                         [
@@ -1780,6 +1803,10 @@ def runner(
                     )
                     print(summary)
                 sys.exit(1)
+            if result.num_tests_run > 0 and not args.check:
+                completed_scopes.add("cpp_test")
+            if result.num_examples_run and not args.check:
+                completed_scopes.add("examples")
 
             # Save full-run cache after a successful COMPLETE suite run so the
             # CASE 2 ultra-early exit can fire on the next invocation.
@@ -1876,11 +1903,10 @@ def runner(
         # Skip the separate examples process when run_meson_build_and_test()
         # already compiled and executed examples in a single Ninja invocation
         # (mixed mode: unit + examples with cpp_test_change).
-        examples_already_handled = (
-            test_categories.unit and not test_categories.unit_only and cpp_test_change
-        )
+        examples_already_handled = "examples" in completed_scopes
         should_compile_examples = (
             examples_change
+            and (test_categories.examples or test_categories.examples_only)
             and not test_categories.py_only
             and not examples_already_handled
         )
@@ -1970,6 +1996,12 @@ def runner(
             parallel=will_run_parallel,
             verbose=args.verbose,
         )
+        if should_compile_examples:
+            completed_scopes.add("examples")
+        if (test_categories.py or test_categories.py_only) and python_test_change:
+            completed_scopes.add("python_test")
+        if (test_categories.wasm or test_categories.wasm_only) and wasm_change:
+            completed_scopes.add("wasm")
 
         # Display timing summary
         all_timings = timings + skipped_timings
@@ -2065,6 +2097,8 @@ def runner(
             # before multi-line content (the summary starts with \n)
             print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
+        if failed_scopes is not None:
+            failed_scopes.update(failed_fingerprint_scopes(e.failures))
         # Print failure summary table from exception details
         if e.failures:
             failed_tests = [_failed_test_entry(failure) for failure in e.failures]
@@ -2085,3 +2119,4 @@ def runner(
         else:
             exit_code = 1
         sys.exit(exit_code)
+    return completed_scopes

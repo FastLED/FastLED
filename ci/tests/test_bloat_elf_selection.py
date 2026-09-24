@@ -21,6 +21,7 @@ import time
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
+from unittest.mock import patch
 
 from typeguard import typechecked
 
@@ -61,7 +62,8 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
             _touch(layouts.debug, now)
 
             # Priority alone would return the release one, which is the bug.
-            self.assertEqual(find_elf("esp32s3", root).elf, layouts.debug)
+            with patch("ci.bloat.Path.cwd", return_value=root):
+                self.assertEqual(find_elf("esp32s3", root).elf, layouts.debug)
 
     def test_the_newer_release_elf_still_wins_when_it_is_newer(
         self: "TestFindElfPrefersTheNewest",
@@ -75,14 +77,16 @@ class TestFindElfPrefersTheNewest(unittest.TestCase):
             _touch(layouts.debug, now - 5 * 86400)
             _touch(layouts.release, now)
 
-            self.assertEqual(find_elf("esp32s3", root).elf, layouts.release)
+            with patch("ci.bloat.Path.cwd", return_value=root):
+                self.assertEqual(find_elf("esp32s3", root).elf, layouts.release)
 
     def test_a_missing_build_still_reports_where_it_looked(
         self: "TestFindElfPrefersTheNewest",
     ) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaises(SystemExit) as caught:
-                find_elf("esp32s3", Path(tmp))
+            with patch("ci.bloat.Path.cwd", return_value=Path(tmp)):
+                with self.assertRaises(SystemExit) as caught:
+                    find_elf("esp32s3", Path(tmp))
             message = str(caught.exception)
             self.assertIn("no firmware.elf found", message)
             self.assertIn(str(Path(tmp) / "fbuild" / "esp32s3"), message)
