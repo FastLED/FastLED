@@ -10,6 +10,9 @@
 option('build_mode', type: 'combo', choices: ['quick', 'debug', 'debug-thin', 'release', 'profile'], value: 'quick',
        description: 'Build mode: quick, debug (full sanitizers), debug-thin (Linux core-only sanitizers), release, or profile')
 
+option('native_linker', type: 'string', value: 'lld',
+       description: 'Linux native linker override (absolute executable path, or lld for platform default)')
+
 # Test wrapper: Enable deadlock detection with stack traces for hung tests
 # When enabled, tests that exceed timeout (20s) will have their thread stacks dumped via lldb/gdb
 # Usage: meson setup -Dtest_wrapper=false build (to disable)

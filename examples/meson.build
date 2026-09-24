@@ -339,9 +339,8 @@ foreach example_name : example_paths.keys()
     # Environment ensures fastled.dll and runtime DLLs (ASan, MinGW) are discoverable
     example_test_env = environment()
     example_test_env.prepend('PATH', fastled_lib_dir)
-    # Runtime-DLL PATH injection removed as probe (#3129 A6) —
-    # ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy is the
-    # upstream-blessed replacement (zccache#33).
+    # Windows GNU runtime DLLs are copied beside link outputs by the zccache
+    # deploy hook. Linux/macOS use their linked runtime search paths instead.
     test('example-' + example_name, example_runner_exe,
         args: [example_dll.full_path()],
         suite: ['examples', example_group_suite],

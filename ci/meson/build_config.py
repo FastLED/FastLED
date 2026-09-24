@@ -39,6 +39,7 @@ from ci.meson.meson_setup_execute import (
     build_setup_env,
     detect_compiler_and_cache,
     handle_skip_meson_setup,
+    resolve_native_linker,
     run_meson_setup_command,
     write_meson_native_file,
 )
@@ -130,6 +131,8 @@ def setup_meson_build(
     elif build_mode in ("quick", "release", "profile"):
         debug = False
 
+    native_linker, native_linker_identity = resolve_native_linker(build_mode)
+
     build_dir.mkdir(parents=True, exist_ok=True)
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
@@ -173,6 +176,11 @@ def setup_meson_build(
         )
 
     markers = MarkerPaths.for_build_dir(build_dir)
+    native_linker_changed = (
+        already_configured
+        and markers.native_linker.exists()
+        and markers.native_linker.read_text().strip() != native_linker_identity
+    )
     hashes = compute_source_hashes(source_dir, markers)
 
     # Marker-based reconfigure detection (consolidated message + cleanup).
@@ -184,6 +192,7 @@ def setup_meson_build(
             debug=debug,
             check=check,
             build_mode=build_mode,
+            native_linker_identity=native_linker_identity,
             enable_examples=enable_examples,
             enable_full_examples=enable_full_examples,
             enable_unit_tests=enable_unit_tests,
@@ -232,6 +241,8 @@ def setup_meson_build(
             native_file_path=native_file_path,
             build_dir=build_dir,
             build_mode=build_mode,
+            native_linker=native_linker,
+            native_linker_identity=native_linker_identity,
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
             enable_full_examples=enable_full_examples,
@@ -244,6 +255,8 @@ def setup_meson_build(
             native_file_path=native_file_path,
             build_dir=build_dir,
             build_mode=build_mode,
+            native_linker=native_linker,
+            native_linker_identity=native_linker_identity,
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
             enable_full_examples=enable_full_examples,
@@ -315,6 +328,8 @@ def setup_meson_build(
                 native_file_path=native_file_path,
                 build_dir=build_dir,
                 build_mode=build_mode,
+                native_linker=native_linker,
+                native_linker_identity=native_linker_identity,
                 enable_examples=enable_examples,
                 enable_unit_tests=enable_unit_tests,
                 enable_full_examples=enable_full_examples,
@@ -339,6 +354,7 @@ def setup_meson_build(
             debug=debug,
             check=check,
             build_mode=build_mode,
+            native_linker_identity=native_linker_identity,
             enable_examples=enable_examples,
             enable_full_examples=enable_full_examples,
             enable_unit_tests=enable_unit_tests,
@@ -347,7 +363,7 @@ def setup_meson_build(
         return True
 
     assert cmd is not None, "cmd should be set when not skipping meson setup"
-    return run_meson_setup_command(
+    configured = run_meson_setup_command(
         cmd=cmd,
         source_dir=source_dir,
         build_dir=build_dir,
@@ -357,12 +373,16 @@ def setup_meson_build(
         debug=debug,
         check=check,
         build_mode=build_mode,
+        native_linker=native_linker,
+        native_linker_identity=native_linker_identity,
+        native_linker_changed=native_linker_changed,
         enable_examples=enable_examples,
         enable_full_examples=enable_full_examples,
         enable_unit_tests=enable_unit_tests,
         use_thin_archives=use_thin_archives,
         compiler=compiler,
     )
+    return configured
 
 
 def perform_ninja_maintenance(build_dir: Path) -> bool:

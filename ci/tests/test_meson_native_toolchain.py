@@ -285,22 +285,30 @@ class TestMesonNativeToolchain(unittest.TestCase):
         self.assertIn("cpp = ['/venv/clang-tool-chain-cpp']", content)
         resolve_xcode.assert_not_called()
 
-    def test_apple_debug_disables_clang_tool_chain_runtime_deployer(self) -> None:
-        with (
-            patch("ci.meson.runner_helpers.sys.platform", "darwin"),
-            patch("ci.meson.runner_helpers._find_zccache_binary", return_value=None),
-            patch.dict(
-                os.environ,
-                {"ZCCACHE_LINK_DEPLOY_CMD": "clang-tool-chain-libdeploy"},
-                clear=False,
-            ),
+    def test_only_windows_enables_clang_tool_chain_runtime_deployer(self) -> None:
+        for platform, build_mode in (
+            ("linux", "debug-thin"),
+            ("linux", "quick"),
+            ("darwin", "debug"),
+            ("darwin", "quick"),
         ):
-            _start_zccache_session(Path("unused"), build_mode="debug")
-            self.assertNotIn("ZCCACHE_LINK_DEPLOY_CMD", os.environ)
+            with (
+                self.subTest(platform=platform, build_mode=build_mode),
+                patch("ci.meson.runner_helpers.sys.platform", platform),
+                patch(
+                    "ci.meson.runner_helpers._find_zccache_binary", return_value=None
+                ),
+                patch.dict(
+                    os.environ,
+                    {"ZCCACHE_LINK_DEPLOY_CMD": "clang-tool-chain-libdeploy"},
+                    clear=False,
+                ),
+            ):
+                _start_zccache_session(Path("unused"), build_mode=build_mode)
+                self.assertIsNone(os.environ.get("ZCCACHE_LINK_DEPLOY_CMD"))
 
-    def test_apple_non_debug_keeps_runtime_deployer(self) -> None:
         with (
-            patch("ci.meson.runner_helpers.sys.platform", "darwin"),
+            patch("ci.meson.runner_helpers.sys.platform", "win32"),
             patch("ci.meson.runner_helpers._find_zccache_binary", return_value=None),
             patch.dict(os.environ, {}, clear=True),
         ):
@@ -309,6 +317,17 @@ class TestMesonNativeToolchain(unittest.TestCase):
                 os.environ["ZCCACHE_LINK_DEPLOY_CMD"],
                 "clang-tool-chain-libdeploy",
             )
+
+    def test_meson_deploy_flag_is_windows_only(self) -> None:
+        meson = Path("ci/meson/native/meson.build").read_text(encoding="utf-8")
+        deploy_condition = next(
+            line
+            for line in meson.splitlines()
+            if line.startswith("if is_clang_tool_chain_wrapper")
+        )
+        self.assertEqual(
+            deploy_condition, "if is_clang_tool_chain_wrapper and is_windows"
+        )
 
 
 if __name__ == "__main__":
