@@ -160,6 +160,7 @@ FL_TEST_CASE("fl::span accepts empty iterator ranges") {
     fl::span<int> pointer_span(&value, &value);
     FL_CHECK_EQ(pointer_span.size(), 0u);
     FL_CHECK_EQ(pointer_span.begin(), pointer_span.end());
+    FL_CHECK_EQ(pointer_span.data(), &value);
 
     fl::vector<int> values;
     fl::span<int> vector_span(values.begin(), values.end());

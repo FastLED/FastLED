@@ -199,6 +199,9 @@ template <typename T> class span<T, dynamic_extent> {
         : mData(array), mSize(ARRAYSIZE) {}
 
     // ======= ITERATOR CONVERSIONS =======
+    span(T *begin, T *end) FL_NO_EXCEPT
+        : mData(begin), mSize(end - begin) {}
+
     template <typename Iterator>
     span(Iterator begin, Iterator end) FL_NO_EXCEPT
         : mData(begin == end ? nullptr : &(*begin)),
