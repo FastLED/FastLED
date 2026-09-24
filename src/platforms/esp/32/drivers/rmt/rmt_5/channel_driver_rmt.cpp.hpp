@@ -1186,6 +1186,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                         mPendingChannels[i] = mPendingChannels.back();
                     }
                     mPendingChannels.pop_back();
+                    // The failure belonged to the dropped strip; give each
+                    // remaining strip its own setup attempt this frame.
+                    mAllocationFailed = false;
                     continue;
                 }
                 ++i;  // Channels may still become available after active TX completes.

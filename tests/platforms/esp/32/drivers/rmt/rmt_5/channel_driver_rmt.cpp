@@ -333,6 +333,23 @@ FL_TEST_CASE("RMT5 driver - failed channel setup rolls back and allows retry") {
     FL_CHECK_FALSE(valid->isInUse());
 }
 
+FL_TEST_CASE("RMT5 driver - failed strip setup does not drop a valid strip") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+
+    // The larger invalid strip is attempted first; its failure must not stop
+    // the valid strip in the same frame from getting a channel.
+    auto invalid = createChannelData(-1, 10);
+    auto valid = createChannelData(18, 1);
+    driver->enqueue(invalid);
+    driver->enqueue(valid);
+    driver->show();
+
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
+    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+}
+
 FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
