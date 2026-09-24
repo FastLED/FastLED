@@ -880,7 +880,7 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
 
 // Cold path of showPixels(): the previous frame's buffer is still owned by the
 // driver. Returns false when showPixels() must drop this frame (#4566).
-bool Channel::waitForInUseBuffer() {
+bool Channel::waitForInUseBuffer() FL_NO_EXCEPT {
     FL_WARN("Channel '%s': showPixels() called while mChannelData is in use by driver, attempting to wait", mName);
     auto driver = mDriver.lock();
     if (!driver) {
@@ -949,7 +949,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
 // Encode `pixels` into mChannelData with the construction-bound encoder and
 // fire onChannelDataEncoded (#4566: out of line from showPixels()).
-void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     // Build pixel iterator with optional addressing transformation
     // (#2558) Pass both Rgbw and Rgbww from the channel options; the iterator
     // carries both, and the encoder dispatch below picks the right path based
@@ -1014,7 +1014,7 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 }
 
 // Submit the encoded frame to `driver` (#4566: out of line from showPixels()).
-void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) {
+void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EXCEPT {
     // #2517: detect the silent-drop scenario before enqueuing â€” if the
     // resolved driver is registered with ChannelManager but currently
     // disabled (typically by `FastLED.setExclusiveDriver<OtherBus>()`),
