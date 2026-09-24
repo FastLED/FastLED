@@ -1438,4 +1438,53 @@ FL_TEST_CASE("[#4566] no resolvable driver: no enqueue and dither phase holds") 
     FL_CHECK_EQ(got, expected);
 }
 
+FL_TEST_CASE("[#4566] a pre-bound mBus channel matches the dynamic path byte-for-byte") {
+    CRGB leds[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+
+    // Dynamic (AUTO) reference bytes for the same pixels.
+    CRGB ref[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
+    fl::vector<u8> expected = showOnce4566(fl::span<CRGB>(ref, 2), 255, options);
+    FL_REQUIRE_EQ(expected, fl::vector<u8>({100, 200, 50, 2, 1, 3}));
+
+    // Pre-bound: a capturing driver registered under the RMT bus name, with
+    // the channel pinned to Bus::RMT so selection takes the typed path.
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("RMT");
+    mgr.addDriver(9400, driver);
+
+    int enqueueEvents = 0;
+    fl::string lastEngine;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelEnqueued.add(
+        [&](const IChannel& ch, const fl::string& engineName) {
+            (void)ch;
+            ++enqueueEvents;
+            lastEngine = engineName;
+        });
+    auto cleanup = fl::make_scope_exit([&]() {
+        events.onChannelEnqueued.remove(listenerId);
+        mgr.clearAllDrivers();
+    });
+
+    options.mBus = Bus::RMT;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(
+        ChannelConfig(143, timing, fl::span<CRGB>(leds, 2), GRB, options));
+    FL_REQUIRE(ch != nullptr);
+
+    ch->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1);
+    FL_CHECK_EQ(enqueueEvents, 1);
+    FL_CHECK_EQ(lastEngine, fl::string::from_literal("RMT"));
+    FL_CHECK_EQ(ch->getEngineName(), fl::string::from_literal("RMT"));
+    FL_CHECK_EQ(driver->mCapturedChannels[0]->getData(), expected);
+
+    ch->showLeds(255);
+    FL_CHECK_EQ(driver->mCapturedChannels.size(), 2);
+    FL_CHECK_EQ(enqueueEvents, 2);
+}
+
 }  // FL_TEST_FILE
