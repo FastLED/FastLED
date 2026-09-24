@@ -15,6 +15,11 @@ on:
         type: string
         required: false
         default: "ubuntu-latest"
+      timeout-minutes:
+        description: 'Board-specific job timeout; only long all-example sweeps override 45.'
+        type: number
+        required: false
+        default: 45
       fbuild_version:
         type: string
         required: false
@@ -41,12 +46,13 @@ jobs:
     # (FastLED#3791). Board builds normally finish in well under 20 minutes,
     # so 45 leaves generous headroom for a cold toolchain download while still
     # turning a hang into a bounded, reportable failure.
-    timeout-minutes: 45
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Pin python version
         run: |

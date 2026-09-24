@@ -27,21 +27,7 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - 'src/**'
-      - 'examples/**'
-      - 'ci/**'
-      - 'ci/examples/example_groups.py'
-      - 'ci/meson/compile_tests/**'
-      - '.github/workflows/example_test*.yml'
-      - '.github/workflows/template_example_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'meson.options'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
   test:

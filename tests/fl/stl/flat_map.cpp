@@ -347,6 +347,40 @@ FL_TEST_CASE("flat_map: erase range") {
     FL_CHECK_NE(m.find(4), m.end());
 }
 
+FL_TEST_CASE("flat_map: erase returns immediate successor") {
+    FL_SUBCASE("iterator overload") {
+        fl::flat_map<int, int> m;
+        m.insert({1, 10});
+        m.insert({2, 20});
+        m.insert({3, 30});
+        auto first = m.erase(m.begin());
+        FL_CHECK_EQ(first->first, 2);
+
+        m.insert({1, 10});
+        auto middle = m.erase(m.begin() + 1);
+        FL_CHECK_EQ(middle->first, 3);
+
+        auto last = m.erase(m.end() - 1);
+        FL_CHECK_EQ(last, m.end());
+    }
+
+    FL_SUBCASE("const_iterator overload") {
+        fl::flat_map<int, int> m;
+        m.insert({1, 10});
+        m.insert({2, 20});
+        m.insert({3, 30});
+        auto first = m.erase(m.cbegin());
+        FL_CHECK_EQ(first->first, 2);
+
+        m.insert({1, 10});
+        auto middle = m.erase(m.cbegin() + 1);
+        FL_CHECK_EQ(middle->first, 3);
+
+        auto last = m.erase(m.cend() - 1);
+        FL_CHECK_EQ(last, m.end());
+    }
+}
+
 FL_TEST_CASE("flat_map: reserve") {
     fl::flat_map<int, int> m;
     m.reserve(100);

@@ -326,19 +326,11 @@ public:
 
     // Deletion
     iterator erase(iterator pos) FL_NO_EXCEPT {
-        // Vector erase() returns iterator in some versions, bool in others
-        // To be safe, erase and return the next element
-        iterator next = pos + 1;
-        mData.erase(pos);
-        return next;
+        return mData.erase(pos);
     }
 
     iterator erase(const_iterator pos) FL_NO_EXCEPT {
-        // Convert const_iterator to iterator and erase
-        iterator it = const_cast<iterator>(pos);
-        iterator next = it + 1;
-        mData.erase(it);
-        return next;
+        return mData.erase(const_cast<iterator>(pos));
     }
 
     iterator erase(const_iterator first, const_iterator last) FL_NO_EXCEPT {

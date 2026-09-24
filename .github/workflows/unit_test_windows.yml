@@ -24,22 +24,13 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'ci/**'
-      - '.github/workflows/build_unit_test*.yml'
-      - '.github/workflows/template_unit_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 jobs:
   test:
+    # Ordinary PR/master runs a bounded Windows smoke subset; full is opt-in.
     # Hard-block external-fork pull requests (no exceptions per #2757).
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/template_unit_test.yml
     with:
       os: windows-latest
+      full-suite: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'ci-full') }}

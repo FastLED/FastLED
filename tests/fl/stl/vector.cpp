@@ -15,6 +15,17 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+class rejecting_memory_resource : public fl::memory_resource {
+  public:
+    bool reject = false;
+
+  protected:
+    void* do_allocate(fl::size bytes) override {
+        return reject ? nullptr : fl::Malloc(bytes);
+    }
+
+    void do_deallocate(void* ptr, fl::size) override { fl::Free(ptr); }
+};
 
 
 FL_TEST_CASE("Fixed vector simple") {
@@ -531,6 +542,23 @@ FL_TEST_CASE("vector") {
     }
 }
 
+FL_TEST_CASE("vector range insert remains valid when growth fails") {
+    rejecting_memory_resource resource;
+    fl::vector<int> values(&resource);
+    values.reserve(3);
+    values.push_back(1);
+    values.push_back(2);
+
+    resource.reject = true;
+    int source[] = {7, 8, 9};
+    auto inserted = values.insert(values.begin() + 1, source, source + 3);
+
+    FL_CHECK_EQ(inserted, values.begin() + 1);
+    FL_REQUIRE_EQ(values.size(), 3u);
+    FL_CHECK_EQ(values[0], 1);
+    FL_CHECK_EQ(values[1], 7);
+    FL_CHECK_EQ(values[2], 2);
+}
 
 FL_TEST_CASE("Initializer list constructors") {
     

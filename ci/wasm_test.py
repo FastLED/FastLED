@@ -25,6 +25,12 @@ console = Console()
 stderr_console = Console(stderr=True)
 
 
+def _render_smoke_succeeded(state: dict[str, object]) -> bool:
+    """Return whether the browser has produced at least one rendered frame."""
+    frame_count = state.get("frameCount", 0)
+    return isinstance(frame_count, (int, float)) and frame_count > 0
+
+
 def parse_args():
     """Parse command-line arguments"""
     parser = argparse.ArgumentParser(
@@ -287,7 +293,7 @@ async def main() -> None:
                     call_count = result.get("frameCount", 0)
                     controller_running = result.get("controllerRunning", False)
                     worker_active = result.get("workerActive", False)
-                    is_alive = call_count > 0 or controller_running or worker_active
+                    is_alive = _render_smoke_succeeded(result)
 
                     if is_alive:
                         break
@@ -332,9 +338,12 @@ async def main() -> None:
                 else:
                     console.print()
                     console.print(
-                        f"[bold red]✗ Error:[/bold red] FastLED.js failed to initialize within {max_wait_ms // 1000} seconds",
+                        f"[bold red]✗ Error:[/bold red] FastLED.js rendered no frames "
+                        f"within {max_wait_ms // 1000} seconds "
+                        f"(frames={call_count}, controller_running={controller_running}, "
+                        f"worker_active={worker_active})",
                     )
-                    raise Exception("FastLED.js failed to initialize")
+                    raise Exception("FastLED.js failed to render a frame")
 
                 # Rendering alone is not success: any console error or uncaught
                 # page exception fails the run so runtime regressions (bad

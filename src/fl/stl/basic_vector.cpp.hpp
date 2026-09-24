@@ -72,7 +72,7 @@ void vector_basic::grow_to(fl::size new_capacity) {
     fl::size alloc_bytes = new_capacity * mElementSize;
     FASTLED_ASSERT(alloc_bytes > 0, "zero allocation in grow_to");
     void* new_buf = mResource->allocate(alloc_bytes);
-    FASTLED_ASSERT(new_buf != nullptr, "allocation failed in grow_to");
+    // Allocation failure is recoverable: callers detect unchanged capacity.
     if (!new_buf) return;
 
     // Move existing elements to new buffer

@@ -759,7 +759,11 @@ class FL_ALIGN vector : public vector_basic {
         fl::size target_idx = pos - begin();
         fl::size count = 0;
         for (InputIt it = first; it != last; ++it) {
+            fl::size old_size = mSize;
             push_back(*it);
+            if (mSize == old_size) {
+                break;
+            }
             ++count;
         }
         if (count == 0) {
