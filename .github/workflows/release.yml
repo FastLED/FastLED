@@ -1,7 +1,8 @@
 name: release
 
-# Merging the release PR (`bash release prepare --pr`) is the release. This
-# workflow turns the version on master into a tag and a GitHub release:
+# A maintainer dispatches full CI for the exact candidate SHA, then manually
+# runs this workflow. A version push alone cannot create a tag or release.
+# This workflow turns a verified version on master into a tag and release:
 #   - the tag is what the Arduino index picks up
 #   - the package registry's crawler reads the version from library.json on
 #     master, and packages the tag of the same name -- so the tag must exist
@@ -10,12 +11,16 @@ name: release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - 'library.properties'
-      - 'library.json'
+    inputs:
+      candidate_sha:
+        description: 'Exact master commit that passed the full CI dispatch sweep'
+        required: true
+        type: string
+      dry_run:
+        description: 'Verify release and full CI evidence without writing a tag'
+        required: true
+        default: true
+        type: boolean
 
 concurrency:
   group: release
@@ -23,7 +28,7 @@ concurrency:
 
 permissions:
   contents: write   # create the tag and the release
-  actions: write    # dispatch the docs build
+  actions: write    # dispatch the docs build; also reads full CI evidence
 
 jobs:
   release:
@@ -39,15 +44,39 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # the check compares against every release tag
+          persist-credentials: false
+          ref: ${{ inputs.candidate_sha }}
+
+      - name: Require candidate is current master
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/master --jq .object.sha)" = "$CANDIDATE_SHA"
+
+      - name: Install uv
+        run: pip install uv==0.12.13
+
+      - name: Verify exact candidate full CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: uv run python ci/release_gate.py verify --sha "$CANDIDATE_SHA"
 
       - name: Read the version on master
         id: v
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: |
           VERSION=$(sed -n 's/^version=//p' library.properties)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+            test "$(git rev-parse "refs/tags/$VERSION^{}")" = "$CANDIDATE_SHA" || {
+              echo "Existing version tag does not point at candidate SHA" >&2
+              exit 1
+            }
             echo "tagged=true" >> "$GITHUB_OUTPUT"
           else
             echo "tagged=false" >> "$GITHUB_OUTPUT"
@@ -62,10 +91,6 @@ jobs:
         if: steps.v.outputs.released == 'true'
         run: echo "${{ steps.v.outputs.version }} is already released."
 
-      - name: Install uv
-        if: steps.v.outputs.released == 'false'
-        run: pip install uv==0.12.13
-
       # An untagged version on master that is not a valid release fails here,
       # loudly: that is the state the registry crawler would publish as-is.
       - name: Check the tree is a valid release
@@ -77,17 +102,18 @@ jobs:
         run: PYTHONPATH=. uv run ci/release.py notes "${{ steps.v.outputs.version }}" > "$RUNNER_TEMP/notes.md"
 
       - name: Tag and create the GitHub release
-        if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
+        if: inputs.dry_run == false && steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: |
           gh release create "${{ steps.v.outputs.version }}" \
-            --target "$GITHUB_SHA" \
+            --target "$CANDIDATE_SHA" \
             --title "FastLED ${{ steps.v.outputs.version }}" \
             --notes-file "$RUNNER_TEMP/notes.md"
 
       - name: Create the GitHub release for an existing tag
-        if: steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'true'
+        if: inputs.dry_run == false && steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -99,7 +125,7 @@ jobs:
       # Events raised with the workflow token do not trigger other workflows,
       # so the docs build is dispatched rather than left to `on: release`.
       - name: Rebuild the docs
-        if: steps.v.outputs.released == 'false'
+        if: inputs.dry_run == false && steps.v.outputs.released == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run docs2.yml --ref master -f "release_tag=${{ steps.v.outputs.version }}"

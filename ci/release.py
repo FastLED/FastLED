@@ -6,7 +6,8 @@ Commands:
   check    The in-tree version strings are in a releasable state. Read-only.
   prepare  Bump every version string one step past the newest tag and make the
            release-notes heading final. With --pr: branch, commit, push, open
-           the release PR. Merging that PR is the release.
+           the release PR. After merge, dispatch exact-SHA full CI and run
+           release.yml manually once the evidence gate passes.
   notes    Print one version's section of release_notes.md.
   check-tag  A pushed X.Y.Z tag names the version the tree has, with final
            notes. Runs on tag push (see .github/workflows/check_tag.yml).
@@ -18,10 +19,9 @@ How a version reaches each registry -- nothing here uploads anything:
     GitHub release is needed to trigger it; a tag named after the version only
     decides which tree gets packaged (without one it packages the branch).
 
-So master must never show a version that is not tagged: the crawler would ship
-unreleased master under that number. ``check`` enforces that. The release PR is
-the one place the version moves ahead (``check --releasing``), and its merge
-commit has to be tagged straight away.
+The crawler can observe a merged version before exact-SHA full CI finishes.
+The release workflow therefore does not auto-tag a version push. It requires
+manual full-CI evidence on the exact merged SHA before creating a tag.
 """
 
 import argparse

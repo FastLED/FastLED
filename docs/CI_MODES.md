@@ -55,13 +55,20 @@ must prove every selected cell and every hosted Mac variant on that same SHA.
 Meson's `is_parallel` metadata. Keep smoke execution serial until selective
 parallelism has RED→GREEN exclusion tests and peak-RSS/OOM evidence.
 
-The existing `release.yml` still tags automatically on a `master` version
-change, before exact-commit full CI can pass. `ci/release.py` documents that
-the package registry crawler can publish a default-branch version without a tag.
-An explicit release worker with a candidate SHA input and a pre-tag coverage
-gate is still required; this selector PR does not provide it.
-Until the release control issue resolves that ordering, do not treat a
-version bump, an individual board dispatch, or a green minimal run as
-release approval. Release candidates need all platforms and boards, both
-hosted Intel and Apple Silicon macOS, and a complete full gate on the exact
-commit before any tag is created.
+`release.yml` is manual only. After merging a release version bump, record the
+exact `master` SHA and run `GH_TOKEN=... GITHUB_REPOSITORY=FastLED/FastLED uv run
+python ci/release_gate.py dispatch-full --sha <sha>` from a trusted checkout.
+The dispatcher requires that SHA to remain the current `master` head and
+dispatches every workflow in the board/test selector catalog plus complete
+Linux, Windows, and hosted Intel and Apple Silicon macOS unit/example suites.
+Wait for these runs to finish. Then manually run `release.yml` on `master`
+with `candidate_sha=<sha>` and `dry_run=true`. Its evidence gate reads each
+workflow's completed dispatch run, requires the same SHA and successful jobs,
+and requires both hosted macOS variants. After the dry run passes, repeat with
+`dry_run=false` to create the tag and release at that SHA. An ordinary version
+push, a green fractional run, or an individual board dispatch cannot tag.
+
+The package registry crawler may read a new default-branch version before
+the tag exists. The release gate prevents an untested GitHub tag/release, but
+cannot prevent that external crawler from reading the merged version while
+the exact-SHA full sweep runs. Plan release timing with that constraint.
