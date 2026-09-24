@@ -7,6 +7,7 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/channel_events.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
@@ -1284,6 +1285,206 @@ FL_TEST_CASE("[#4034] and binding a profile does change them") {
     const bool same = driver->last[0] == 200 && driver->last[1] == 100 &&
                       driver->last[2] == 50;
     FL_CHECK_FALSE(same);
+}
+
+// ============ showPixels helper split parity (#4566) ============
+// `Channel::showPixels` became a dispatcher over waitForInUseBuffer(),
+// resolveDynamicDriver(), encodeFrame() and submitFrame(). These pin the
+// observable contract across that split: bytes, pixel format, one enqueue per
+// accepted frame, the enqueue event's driver name, and the dither phase moving
+// only when a driver accepts a frame.
+
+namespace {
+
+/// Show `pixels` once through a fresh dynamic channel bound to a fresh
+/// ByteCapturingMockEngine and return the encoded bytes.
+fl::vector<u8> showOnce4566(fl::span<CRGB> pixels, u8 brightness,
+                            const ChannelOptions& options) {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("PARITY_4566");
+    mgr.addDriver(9400, driver);
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(ChannelConfig(140, timing, pixels, GRB, options));
+    fl::vector<u8> out;
+    if (!ch) {
+        return out;
+    }
+    ch->showLeds(brightness);
+    if (!driver->mCapturedChannels.empty()) {
+        const auto& d = driver->mCapturedChannels[0]->getData();
+        for (fl::size i = 0; i < d.size(); ++i) {
+            out.push_back(d[i]);
+        }
+    }
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#4566] dynamic WS2812 channel encodes GRB and enqueues once per show") {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("PARITY_4566_A");
+    mgr.addDriver(9400, driver);
+
+    int enqueueEvents = 0;
+    fl::string lastEngine;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelEnqueued.add(
+        [&](const IChannel& ch, const fl::string& engineName) {
+            (void)ch;
+            ++enqueueEvents;
+            lastEngine = engineName;
+        });
+    auto cleanup = fl::make_scope_exit([&]() {
+        events.onChannelEnqueued.remove(listenerId);
+        mgr.clearAllDrivers();
+    });
+
+    CRGB leds[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(
+        ChannelConfig(141, timing, fl::span<CRGB>(leds, 2), GRB, options));
+    FL_REQUIRE(ch != nullptr);
+
+    ch->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1);
+    FL_CHECK_EQ(enqueueEvents, 1);
+    FL_CHECK_EQ(lastEngine, fl::string::from_literal("PARITY_4566_A"));
+    FL_CHECK(driver->mCapturedChannels[0]->getPixelFormat() == ChannelPixelFormat::RGB);
+    FL_CHECK_EQ(driver->mCapturedChannels[0]->getData(),
+                fl::vector<u8>({100, 200, 50, 2, 1, 3}));
+
+    // Dynamic path re-resolves every frame and still enqueues exactly once.
+    ch->showLeds(255);
+    FL_CHECK_EQ(driver->mCapturedChannels.size(), 2);
+    FL_CHECK_EQ(enqueueEvents, 2);
+    FL_CHECK_EQ(ch->getEngineName(), fl::string::from_literal("PARITY_4566_A"));
+}
+
+FL_TEST_CASE("[#4566] identical pixels produce identical bytes across fresh channels") {
+    CRGB a[3] = {CRGB(10, 20, 30), CRGB(255, 0, 128), CRGB(7, 7, 7)};
+    CRGB b[3] = {CRGB(10, 20, 30), CRGB(255, 0, 128), CRGB(7, 7, 7)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    fl::vector<u8> first = showOnce4566(fl::span<CRGB>(a, 3), 200, options);
+    fl::vector<u8> second = showOnce4566(fl::span<CRGB>(b, 3), 200, options);
+    FL_REQUIRE_EQ((int)first.size(), 9);
+    FL_CHECK_EQ(first, second);
+}
+
+FL_TEST_CASE("[#4566] an RGBW channel reports RGBW and emits 4 bytes per pixel") {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("PARITY_4566_RGBW");
+    mgr.addDriver(9400, driver);
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    CRGB leds[2] = {CRGB(200, 100, 50), CRGB(0, 0, 0)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+    options.mWhiteCfg = Rgbw(fl::kRGBWDefaultColorTemp, fl::RGBW_MODE::kRGBWExactColors);
+    FL_REQUIRE(options.isRgbw());
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(
+        ChannelConfig(142, timing, fl::span<CRGB>(leds, 2), RGB, options));
+    FL_REQUIRE(ch != nullptr);
+    ch->showLeds(255);
+
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1);
+    const auto& data = driver->mCapturedChannels[0];
+    FL_CHECK(data->getPixelFormat() == ChannelPixelFormat::RGBW);
+    FL_CHECK_EQ((int)data->getData().size(), 8);
+}
+
+FL_TEST_CASE("[#4566] no resolvable driver: no enqueue and dither phase holds") {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto cleanup = fl::make_scope_exit([&mgr]() { mgr.clearAllDrivers(); });
+
+    // Default options keep dithering on, so a consumed phase would show up
+    // in the bytes of the next accepted frame.
+    CRGB leds[2] = {CRGB(201, 99, 37), CRGB(3, 130, 77)};
+    ChannelOptions options;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(
+        ChannelConfig(140, timing, fl::span<CRGB>(leds, 2), GRB, options));
+    FL_REQUIRE(ch != nullptr);
+
+    const u8 phaseBefore = ch->ditherPhase();
+    ch->showLeds(100);  // No driver registered: frame is dropped.
+    FL_CHECK_EQ((int)ch->ditherPhase(), (int)phaseBefore);
+
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("PARITY_4566");
+    mgr.addDriver(9400, driver);
+    ch->showLeds(100);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1);
+    FL_CHECK_EQ((int)ch->ditherPhase(), (int)(u8)(phaseBefore + 1));
+    fl::vector<u8> got;
+    const auto& d = driver->mCapturedChannels[0]->getData();
+    for (fl::size i = 0; i < d.size(); ++i) {
+        got.push_back(d[i]);
+    }
+    ch.reset();
+
+    // A fresh channel's first accepted frame must match byte-for-byte.
+    CRGB fresh[2] = {CRGB(201, 99, 37), CRGB(3, 130, 77)};
+    fl::vector<u8> expected = showOnce4566(fl::span<CRGB>(fresh, 2), 100, options);
+    FL_CHECK_EQ(got, expected);
+}
+
+FL_TEST_CASE("[#4566] a pre-bound mBus channel matches the dynamic path byte-for-byte") {
+    CRGB leds[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
+    ChannelOptions options;
+    options.mDitherMode = DISABLE_DITHER;
+
+    // Dynamic (AUTO) reference bytes for the same pixels.
+    CRGB ref[2] = {CRGB(200, 100, 50), CRGB(1, 2, 3)};
+    fl::vector<u8> expected = showOnce4566(fl::span<CRGB>(ref, 2), 255, options);
+    FL_REQUIRE_EQ(expected, fl::vector<u8>({100, 200, 50, 2, 1, 3}));
+
+    // Pre-bound: a capturing driver registered under the RMT bus name, with
+    // the channel pinned to Bus::RMT so selection takes the typed path.
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    auto driver = fl::make_shared<ByteCapturingMockEngine>("RMT");
+    mgr.addDriver(9400, driver);
+
+    int enqueueEvents = 0;
+    fl::string lastEngine;
+    auto& events = ChannelEvents::instance();
+    int listenerId = events.onChannelEnqueued.add(
+        [&](const IChannel& ch, const fl::string& engineName) {
+            (void)ch;
+            ++enqueueEvents;
+            lastEngine = engineName;
+        });
+    auto cleanup = fl::make_scope_exit([&]() {
+        events.onChannelEnqueued.remove(listenerId);
+        mgr.clearAllDrivers();
+    });
+
+    options.mBus = Bus::RMT;
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelPtr ch = Channel::create(
+        ChannelConfig(143, timing, fl::span<CRGB>(leds, 2), GRB, options));
+    FL_REQUIRE(ch != nullptr);
+
+    ch->showLeds(255);
+    FL_REQUIRE_EQ(driver->mCapturedChannels.size(), 1);
+    FL_CHECK_EQ(enqueueEvents, 1);
+    FL_CHECK_EQ(lastEngine, fl::string::from_literal("RMT"));
+    FL_CHECK_EQ(ch->getEngineName(), fl::string::from_literal("RMT"));
+    FL_CHECK_EQ(driver->mCapturedChannels[0]->getData(), expected);
+
+    ch->showLeds(255);
+    FL_CHECK_EQ(driver->mCapturedChannels.size(), 2);
+    FL_CHECK_EQ(enqueueEvents, 2);
 }
 
 }  // FL_TEST_FILE

@@ -878,40 +878,44 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
 #endif  // !FASTLED_DISABLE_DYNAMIC_DRIVER
 }
 
+// Cold path of showPixels(): the previous frame's buffer is still owned by the
+// driver. Returns false when showPixels() must drop this frame (#4566).
+bool Channel::waitForInUseBuffer() FL_NO_EXCEPT {
+    FL_WARN("Channel '%s': showPixels() called while mChannelData is in use by driver, attempting to wait", mName);
+    auto driver = mDriver.lock();
+    if (!driver) {
+        FL_ERROR("Channel '%s': No driver bound yet the mChannelData is in use - cannot transmit", mName);
+        return false;
+    }
+    // wait until the driver is in a READY state.
+    bool ok = driver->waitForReady();
+    if (!ok) {
+        FL_ERROR("Channel '%s': Timeout occurred while waiting for driver to become READY", mName);
+        return false;
+    }
+    FL_WARN("Channel '%s': Engine became READY after waiting", mName);
+    return true;
+}
+
+// showPixels() is only a dispatcher (#4566): in-use wait, driver resolution,
+// encodeFrame(), submitFrame(). Each helper is FL_NO_INLINE so the static
+// (pre-bound) entry stays small and the bodies exist exactly once.
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     FL_SCOPED_TRACE;
 
     // Safety check: don't modify buffer if driver is currently transmitting it
-    if (mChannelData->isInUse()) {
-        FL_WARN("Channel '%s': showPixels() called while mChannelData is in use by driver, attempting to wait", mName);
-        auto driver = mDriver.lock();
-        if (!driver) {
-            FL_ERROR("Channel '%s': No driver bound yet the mChannelData is in use - cannot transmit", mName);
-            return;
-        }
-        // wait until the driver is in a READY state.
-        bool ok = driver->waitForReady();
-        if (!ok) {
-            FL_ERROR("Channel '%s': Timeout occurred while waiting for driver to become READY", mName);
-            return;
-        }
-        FL_WARN("Channel '%s': Engine became READY after waiting", mName);
+    if (mChannelData->isInUse() && !waitForInUseBuffer()) {
+        return;
     }
 
-    // Phase 5b of #2428: if the driver was pre-bound via setDriver() (legacy
-    // addLeds<>-style controllers naming BusTraits<Bus::X>::instancePtr() in
-    // their constructor), bypass ChannelManager entirely. Channels created via
-    // the manager-based API (Channel::create(cfg) without affinity) keep their
-    // existing per-frame re-selection so users can swap drivers at runtime.
-    //
-    // **Fast path (#2773 item 2.1):** the legacy `addLeds<NEOPIXEL>` flow is
-    // by far the hot per-frame path on stock Blink. It needs no busKey
-    // construction, no dynamic driver lookup, no busKey-miss diagnostics,
-    // and no fallback `FL_ERROR` reporting â€” the driver was already pre-bound
-    // in the controller's constructor. Pulling all of that boilerplate out
-    // of `showPixels` lets the compiler keep the hot path compact and lets
-    // the slow path's `fl::string` ops / `ChannelManager::selectDriverForChannel`
-    // / diagnostic literals tree-shake on the slow-path branch's coldness.
+    // Static-vs-dynamic entry boundary (Phase 5b of #2428, #4566): if the
+    // driver was pre-bound via setDriver() (legacy addLeds<>-style controllers
+    // naming BusTraits<Bus::X>::instancePtr() in their constructor), bypass
+    // ChannelManager entirely with an inline weak_ptr lock. Channels created
+    // via the manager-based API (Channel::create(cfg) without affinity) take
+    // the cold resolveDynamicDriver() path, keeping per-frame re-selection so
+    // users can swap drivers at runtime. The busKey construction, dynamic
+    // lookup, and diagnostics all live out of line in that helper.
     fl::shared_ptr<IChannelDriver> driver;
     if (mDriverPreBound) {
         driver = mDriver.lock();
@@ -939,6 +943,13 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 #endif
     }
 
+    encodeFrame(pixels);
+    submitFrame(driver);
+}
+
+// Encode `pixels` into mChannelData with the construction-bound encoder and
+// fire onChannelDataEncoded (#4566: out of line from showPixels()).
+void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     // Build pixel iterator with optional addressing transformation
     // (#2558) Pass both Rgbw and Rgbww from the channel options; the iterator
     // carries both, and the encoder dispatch below picks the right path based
@@ -967,7 +978,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     StreamingPipelineQ16* pipeline = nullptr;
 #endif
     // Dither advances on presentation, not on attempt (#4347, R8): this
-    // channel's phase moves only when its driver accepts a frame (below), so
+    // channel's phase moves only when its driver accepts a frame (submitFrame()), so
     // a dropped submission -- no driver, a disabled one, a busy buffer --
     // does not consume a phase and the cycle's average stays unbiased. Both
     // the legacy offsets and the colour-managed temporal dither read it.
@@ -1000,9 +1011,10 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         auto& events = ChannelEvents::instance();
         events.onChannelDataEncoded(*this, *mChannelData);
     }
+}
 
-
-
+// Submit the encoded frame to `driver` (#4566: out of line from showPixels()).
+void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EXCEPT {
     // #2517: detect the silent-drop scenario before enqueuing â€” if the
     // resolved driver is registered with ChannelManager but currently
     // disabled (typically by `FastLED.setExclusiveDriver<OtherBus>()`),
@@ -1047,7 +1059,8 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // Presented, per the driver contract: an accepted enqueue is the frame.
     ++mDitherPhase;
     auto& events = ChannelEvents::instance();
-    events.onChannelEnqueued(*this, driver->getName());
+    // Reuse the name fetched for driverStatus() instead of a second getName().
+    events.onChannelEnqueued(*this, driverName);
 }
 
 void Channel::init() {
