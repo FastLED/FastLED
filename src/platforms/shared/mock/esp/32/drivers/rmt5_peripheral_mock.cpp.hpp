@@ -100,6 +100,7 @@ public:
 
     void simulateTransmitDone(void* channel_handle) FL_NO_EXCEPT override;
     void setTransmitFailure(bool should_fail) FL_NO_EXCEPT override;
+    void setMaxChannels(size_t max_channels) FL_NO_EXCEPT override;
     const fl::vector<TransmissionRecord>& getTransmissionHistory() const FL_NO_EXCEPT override;
     void clearTransmissionHistory() FL_NO_EXCEPT override;
     fl::span<const u8> getLastTransmissionData() const FL_NO_EXCEPT override;
@@ -122,6 +123,7 @@ private:
 
     // Simulation settings
     bool mShouldFailTransmit;
+    size_t mMaxChannels;  // 0 = unlimited
 
     // Waveform capture
     fl::vector<TransmissionRecord> mHistory;
@@ -152,6 +154,7 @@ Rmt5PeripheralMockImpl::Rmt5PeripheralMockImpl()
       mNextChannelId(1),
       mNextEncoderId(1),
       mShouldFailTransmit(false),
+      mMaxChannels(0),
       mHistory(),
       mTransmissionCount(0) {
 }
@@ -233,6 +236,10 @@ bool Rmt5PeripheralMockImpl::createTxChannel(const Rmt5ChannelConfig& config,
     // Validate config
     if (config.gpio_num < 0) {
         FL_WARN("Rmt5PeripheralMock: Invalid GPIO pin: %s", config.gpio_num);
+        return false;
+    }
+    if (mMaxChannels != 0 && mChannels.size() >= mMaxChannels) {
+        FL_DBG("RMT5_MOCK: TX channel limit reached (%s)", mMaxChannels);
         return false;
     }
 
@@ -514,6 +521,10 @@ void Rmt5PeripheralMockImpl::setTransmitFailure(bool should_fail) FL_NO_EXCEPT {
     FL_DBG("RMT5_MOCK: Transmit failure %s", (should_fail ? "enabled" : "disabled"));
 }
 
+void Rmt5PeripheralMockImpl::setMaxChannels(size_t max_channels) FL_NO_EXCEPT {
+    mMaxChannels = max_channels;
+}
+
 const fl::vector<Rmt5PeripheralMock::TransmissionRecord>&
 Rmt5PeripheralMockImpl::getTransmissionHistory() const FL_NO_EXCEPT {
     return mHistory;
@@ -569,6 +580,7 @@ void Rmt5PeripheralMockImpl::reset() FL_NO_EXCEPT {
     mNextChannelId = 1;
     mNextEncoderId = 1;
     mShouldFailTransmit = false;
+    mMaxChannels = 0;
     mTransmissionCount = 0;
 
     FL_DBG("RMT5_MOCK: Reset to initial state");

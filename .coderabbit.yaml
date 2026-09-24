@@ -150,6 +150,27 @@ reviews:
         Also does not apply to: per-object configuration on the object's own
         API, anything under `fl::detail::` or an anonymous namespace, or a
         header that is not part of the public surface.
+    - path: "src/**/*.{h,hpp,cpp,cpp.hpp}"
+      instructions: |
+        Fixed-capacity container reuse. When a change adds a local container
+        built from `fl::array<T, N>` (or a C array) plus a count/size field and
+        basic vector operations such as `begin()`, `end()`, `size()`,
+        `clear()`, and insertion, check whether `fl::vector_fixed<T, N>` can
+        express the same contract. Prefer the existing `fl::vector_fixed`
+        instead of introducing a one-off `vector_fixed`-like type, so bounds,
+        iteration, and lifetime behavior are not reimplemented inconsistently.
+
+        `fl::vector_fixed::push_back()` silently ignores insertion when full;
+        if capacity exhaustion must be reported, use its bool-returning
+        `insert(end(), value)` and check the result. Flag custom containers
+        only when they duplicate this ordinary fixed-capacity vector behavior.
+        A checked `size() < capacity()` followed by `push_back()` is also valid
+        when the check occurs before side effects and no concurrent mutation can
+        occur between the check and append.
+        Do not flag a specialized type whose distinct invariant, storage
+        representation, or required API cannot be implemented with
+        `fl::vector_fixed`.
+        Reference: `src/fl/stl/vector.h` (`FixedVector` / `vector_fixed`).
     - path: "src/platforms/**/drivers/**/*peripheral*mock*.{h,cpp.hpp}"
       instructions: |
         Peripheral-mock singleton rule. FastLED peripheral mocks

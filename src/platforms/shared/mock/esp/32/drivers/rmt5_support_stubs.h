@@ -95,6 +95,10 @@ public:
 
     static fl::size calculateMemoryBlocks(bool) FL_NO_EXCEPT { return 2; }
 
+    fl::size rollbackAllocationCount() const FL_NO_EXCEPT {
+        return mRollbackAllocationCount;
+    }
+
     AllocationResult allocateTx(u8, bool, bool) FL_NO_EXCEPT { return AllocationResult{}; }
     bool tryAllocateTx(u8, bool, bool, fl::size& out_words) FL_NO_EXCEPT {
         out_words = 64;
@@ -105,13 +109,18 @@ public:
         return true;
     }
     void free(u8, bool) FL_NO_EXCEPT {}  // ok bare allocation
+    void rollbackAllocation(u8, bool) FL_NO_EXCEPT { ++mRollbackAllocationCount; }
     void recordRecoveryAllocation(u8, fl::size, bool) FL_NO_EXCEPT {}
     bool isDMAAvailable() FL_NO_EXCEPT { return false; }
     bool allocateDMA(u8, bool) FL_NO_EXCEPT { return false; }
     void freeDMA(u8, bool) FL_NO_EXCEPT {}
+    void rollbackDMA(u8, bool) FL_NO_EXCEPT {}
     fl::size availableTxWords() FL_NO_EXCEPT { return 256; }
     int getDMAChannelsInUse() FL_NO_EXCEPT { return 0; }
     bool hasActiveRxChannels() const FL_NO_EXCEPT { return false; }
+
+private:
+    fl::size mRollbackAllocationCount = 0;
 };
 
 //=============================================================================

@@ -7,8 +7,8 @@ overlay, +Stage 4 RMT static allocation, and the full "stack"), runs
 table.
 
 The output table maps 1:1 onto rows 1-4 of the
-`docs/SLIM_ESP32S3.md` priority table; a follow-up doc PR feeds the
-table into the doc to flip the 📊 status flags to ✅.
+`docs/SLIM_ESP32S3.md` priority table and records bloat totals, symbol
+count, and the whole `firmware.bin` size for each configuration.
 
 USAGE
 
@@ -58,8 +58,8 @@ class OptInConfig:
     Attributes:
         name: short name (e.g. "stage2"); also the doc-row key.
         label: human-readable description shown in the comparison table.
-        build_flags: extra -D flags to append into [env:esp32s3]'s
-            build_flags. May be empty.
+        defines: compile-time defines passed directly to `bash compile`.
+            Entries use `NAME=VALUE` form without a leading `-D`.
         overlay: True iff sdkconfig_for_smallest_fastled.defaults must
             be appended to board_build.sdkconfig_defaults.
         slim_row: priority-table row in docs/SLIM_ESP32S3.md that
@@ -68,7 +68,7 @@ class OptInConfig:
 
     name: str
     label: str
-    build_flags: tuple[str, ...]
+    defines: tuple[str, ...]
     overlay: bool
     slim_row: int | None = None
 
@@ -77,50 +77,50 @@ class OptInConfig:
 # new SLIM rows ship; each new row should add a per-config entry below
 # plus appear in `max_savings`. See #2906 (original) and #2933 (this
 # extension that added the 4 post-#2906 gates + max_savings).
-_ALL_OPT_IN_FLAGS: tuple[str, ...] = (
-    "-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
-    "-DFASTLED_RMT_STATIC_ALLOCATION=1",
-    "-DFASTLED_DISABLE_SPI_CHIPSETS=1",
-    "-DFASTLED_DISABLE_UCS7604=1",
-    "-DFASTLED_DISABLE_DYNAMIC_DRIVER=1",
-    "-DFASTLED_DISABLE_CHANNEL_EVENTS=1",
+_ALL_OPT_IN_DEFINES: tuple[str, ...] = (
+    "FASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
+    "FL_RMT_STATIC_ALLOCATION=1",
+    "FASTLED_DISABLE_SPI_CHIPSETS=1",
+    "FASTLED_DISABLE_UCS7604=1",
+    "FASTLED_DISABLE_DYNAMIC_DRIVER=1",
+    "FASTLED_DISABLE_CHANNEL_EVENTS=1",
 )
 
 CONFIGS: dict[str, OptInConfig] = {
     "baseline": OptInConfig(
         name="baseline",
-        label="Stage 1 only (NDEBUG default — `FASTLED_LOG_VERBOSITY=0`)",
-        build_flags=(),
+        label="Stage 1 only (NDEBUG default - `FASTLED_LOG_VERBOSITY=0`)",
+        defines=(),
         overlay=False,
         slim_row=1,
     ),
     "stage2": OptInConfig(
         name="stage2",
         label="+ Stage 2 (`FASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1`)",
-        build_flags=("-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",),
+        defines=("FASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",),
         overlay=False,
         slim_row=4,
     ),
     "stage3": OptInConfig(
         name="stage3",
         label="+ Stage 3 (`tools/sdkconfig_for_smallest_fastled.defaults` overlay)",
-        build_flags=(),
+        defines=(),
         overlay=True,
         slim_row=2,
     ),
     "stage4": OptInConfig(
         name="stage4",
-        label="+ Stage 4 (`FASTLED_RMT_STATIC_ALLOCATION=1`)",
-        build_flags=("-DFASTLED_RMT_STATIC_ALLOCATION=1",),
+        label="+ Stage 4 (`FL_RMT_STATIC_ALLOCATION=1`)",
+        defines=("FL_RMT_STATIC_ALLOCATION=1",),
         overlay=False,
         slim_row=3,
     ),
     "stack": OptInConfig(
         name="stack",
         label="SLIM TL;DR base stack (Stages 2 + 3 + 4)",
-        build_flags=(
-            "-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
-            "-DFASTLED_RMT_STATIC_ALLOCATION=1",
+        defines=(
+            "FASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
+            "FL_RMT_STATIC_ALLOCATION=1",
         ),
         overlay=True,
         slim_row=None,
@@ -128,35 +128,35 @@ CONFIGS: dict[str, OptInConfig] = {
     "disable_spi": OptInConfig(
         name="disable_spi",
         label="+ #2914 (`FASTLED_DISABLE_SPI_CHIPSETS=1`)",
-        build_flags=("-DFASTLED_DISABLE_SPI_CHIPSETS=1",),
+        defines=("FASTLED_DISABLE_SPI_CHIPSETS=1",),
         overlay=False,
         slim_row=6,
     ),
     "disable_ucs7604": OptInConfig(
         name="disable_ucs7604",
         label="+ #2921 (`FASTLED_DISABLE_UCS7604=1`)",
-        build_flags=("-DFASTLED_DISABLE_UCS7604=1",),
+        defines=("FASTLED_DISABLE_UCS7604=1",),
         overlay=False,
         slim_row=7,
     ),
     "disable_dyndriver": OptInConfig(
         name="disable_dyndriver",
         label="+ #2927 (`FASTLED_DISABLE_DYNAMIC_DRIVER=1`)",
-        build_flags=("-DFASTLED_DISABLE_DYNAMIC_DRIVER=1",),
+        defines=("FASTLED_DISABLE_DYNAMIC_DRIVER=1",),
         overlay=False,
         slim_row=8,
     ),
     "disable_events": OptInConfig(
         name="disable_events",
         label="+ #2932 (`FASTLED_DISABLE_CHANNEL_EVENTS=1`)",
-        build_flags=("-DFASTLED_DISABLE_CHANNEL_EVENTS=1",),
+        defines=("FASTLED_DISABLE_CHANNEL_EVENTS=1",),
         overlay=False,
         slim_row=9,
     ),
     "max_savings": OptInConfig(
         name="max_savings",
         label="Max-savings stack (Stages 2/3/4 + #2914 + #2921 + #2927 + #2932)",
-        build_flags=_ALL_OPT_IN_FLAGS,
+        defines=_ALL_OPT_IN_DEFINES,
         overlay=True,
         slim_row=None,
     ),
@@ -181,9 +181,9 @@ def restore_project_ini(keep_backup: bool) -> None:
 
 
 def patch_project_ini(cfg: OptInConfig) -> None:
-    """Inject cfg's build_flags / overlay into the [env:esp32s3] block.
+    """Inject cfg's sdkconfig overlay into the [env:esp32s3] block.
 
-    This is a targeted regex patch — we don't fully re-parse INI
+    This is a targeted regex patch - we don't fully re-parse INI
     because the project INI flavor carries continuation lines and
     `${var.x}` interpolations that configparser mangles. The regex
     target is the literal `[env:esp32s3]` header through the next
@@ -199,17 +199,6 @@ def patch_project_ini(cfg: OptInConfig) -> None:
         )
         sys.exit(2)
     block = match.group(1)
-    if cfg.build_flags:
-        extra = "\n    " + "\n    ".join(cfg.build_flags)
-        if "build_flags =" in block:
-            block = re.sub(
-                r"(build_flags\s*=)",
-                r"\1" + extra,
-                block,
-                count=1,
-            )
-        else:
-            block = block.rstrip() + "\nbuild_flags =" + extra + "\n"
     if cfg.overlay:
         line = f"board_build.sdkconfig_defaults = {OVERLAY_PATH}\n"
         if "board_build.sdkconfig_defaults" in block:
@@ -224,12 +213,12 @@ def patch_project_ini(cfg: OptInConfig) -> None:
     PROJECT_INI.write_text(new_text, encoding="utf-8")
 
 
-def _run_compile_cmd(example: str) -> list[str]:
+def _run_compile_cmd(example: str, cfg: OptInConfig) -> list[str]:
     """Pick the right compile entry point per platform.
 
     On Linux/macOS: `bash compile esp32s3 --examples <example>`.
     On Windows: `<PROJECT_ROOT>/compile.bat esp32s3 --examples <example>`
-    (absolute path — Windows process spawning does not
+    (absolute path - Windows process spawning does not
     auto-resolve `.bat` files from the cwd argument). `bash` is not on
     PATH in a non-WSL Windows Python launched by `uv run`, and there is
     no `bash.exe` in the project; the project ships `compile.bat` for
@@ -238,6 +227,8 @@ def _run_compile_cmd(example: str) -> list[str]:
     import os
 
     args = ["esp32s3", "--examples", example]
+    if cfg.defines:
+        args.extend(("--defines", ",".join(cfg.defines)))
     if os.name == "nt":
         return [str(PROJECT_ROOT / "compile.bat"), *args]
     return ["bash", "compile", *args]
@@ -247,7 +238,7 @@ def _run_bloat_cmd() -> list[str]:
     """Pick the right bloat entry point per platform.
 
     On Linux/macOS: `bash bloat esp32s3 --no-summary`.
-    On Windows: `uv run ci/bloat.py esp32s3 --no-summary` — there is no
+    On Windows: `uv run ci/bloat.py esp32s3 --no-summary` - there is no
     `bloat.bat` shim, so we invoke the underlying Python entry point
     directly (the bash wrapper just does `uv run ci/bloat.py "$@"`).
     See #2935.
@@ -298,19 +289,12 @@ def _run_with_log(cmd: list[str], log_name: str) -> bool:
     return proc.returncode == 0
 
 
-def run_compile(example: str, config_name: str) -> bool:
-    return _run_with_log(_run_compile_cmd(example), f"{config_name}-compile.log")
+def run_compile(example: str, cfg: OptInConfig) -> bool:
+    return _run_with_log(_run_compile_cmd(example, cfg), f"{cfg.name}-compile.log")
 
 
 def run_bloat(config_name: str) -> bool:
     return _run_with_log(_run_bloat_cmd(), f"{config_name}-bloat.log")
-
-
-def read_total_flash() -> int | None:
-    if not REPORT_JSON.is_file():
-        return None
-    data = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
-    return int(data["total_flash"])
 
 
 def archive_report(cfg: OptInConfig) -> Path:
@@ -322,15 +306,46 @@ def archive_report(cfg: OptInConfig) -> Path:
 _ELF_ROOT = PROJECT_ROOT / ".build" / "fbuild" / "esp32s3" / ".fbuild" / "build"
 
 
+@dataclass(frozen=True)
+class BuildMeasurement:
+    total_flash: int
+    total_ram: int
+    symbol_count: int
+    firmware_bin_bytes: int
+
+
+def read_measurement() -> BuildMeasurement | None:
+    """Read symbol totals and whole-firmware size from the completed build."""
+    if not REPORT_JSON.is_file():
+        return None
+    data = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+    symbols = data.get("symbols")
+    if not isinstance(symbols, list):
+        return None
+    firmware_bins = list(_ELF_ROOT.glob("**/firmware.bin"))
+    if not firmware_bins:
+        return None
+    firmware_bin = max(firmware_bins, key=lambda path: path.stat().st_mtime_ns)
+    try:
+        return BuildMeasurement(
+            total_flash=int(data["total_flash"]),
+            total_ram=int(data["total_ram"]),
+            symbol_count=len(symbols),
+            firmware_bin_bytes=firmware_bin.stat().st_size,
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
 def _force_relink() -> None:
     """Delete the prior ELF so the link step actually runs.
 
     The build cache returns cached .o files on consecutive runs with
-    overlapping object hashes — that's the right speed/correctness
+    overlapping object hashes - that's the right speed/correctness
     trade-off. But a link step that decides whether to relink based on
     object-file timestamps, NOT on project ini / sdkconfig changes, can
     leave the previous config's ELF on disk when switching configs that
-    affect only sdkconfig (e.g. stage3 ↔ baseline) — and the downstream
+    affect only sdkconfig (e.g. stage3 <-> baseline) - and the downstream
     `bash bloat` step then measures that stale ELF.
 
     Deleting the ELF before each compile forces the link to run; the
@@ -338,54 +353,72 @@ def _force_relink() -> None:
     """
     for elf in _ELF_ROOT.glob("**/firmware.elf"):
         elf.unlink()
+        firmware_bin = elf.with_suffix(".bin")
+        if firmware_bin.is_file():
+            firmware_bin.unlink()
 
 
-def measure_one(cfg: OptInConfig, example: str) -> int | None:
-    """Build + bloat one config; return total_flash or None on failure."""
+def measure_one(cfg: OptInConfig, example: str) -> BuildMeasurement | None:
+    """Build + bloat one config; return its measured sizes or None on failure."""
     print(f"\n=== measure-opt-ins: config {cfg.name} ({cfg.label}) ===", flush=True)
     restore_project_ini(keep_backup=True)
     patch_project_ini(cfg)
     _force_relink()
-    if not run_compile(example, cfg.name):
+    if not run_compile(example, cfg):
         print(f"measure-opt-ins: compile failed for {cfg.name}", file=sys.stderr)
         return None
     if not run_bloat(cfg.name):
         print(f"measure-opt-ins: bloat run failed for {cfg.name}", file=sys.stderr)
         return None
-    total = read_total_flash()
-    if total is None:
+    measurement = read_measurement()
+    if measurement is None:
         print(
-            f"measure-opt-ins: report.json missing after {cfg.name} bloat run",
+            f"measure-opt-ins: incomplete report or firmware.bin after {cfg.name}",
             file=sys.stderr,
         )
         return None
     archived = archive_report(cfg)
     print(
-        f"measure-opt-ins: {cfg.name} total_flash = {total:,} B "
+        f"measure-opt-ins: {cfg.name}: flash={measurement.total_flash:,} B, "
+        f"RAM={measurement.total_ram:,} B, symbols={measurement.symbol_count:,}, "
+        f"firmware.bin={measurement.firmware_bin_bytes:,} B "
         f"(report archived: {archived.relative_to(PROJECT_ROOT).as_posix()})",
         flush=True,
     )
-    return total
+    return measurement
 
 
-def format_table(results: dict[str, int]) -> str:
+def format_table(results: dict[str, BuildMeasurement]) -> str:
     baseline = results.get("baseline")
     lines = [
-        "| Config | SLIM row | Label | total_flash | Δ vs baseline | Δ vs previous |",
-        "|---|:---:|---|---:|---:|---:|",
+        "| Config | SLIM row | Label | Flash | Flash delta | RAM | RAM delta | Symbols | Symbol delta | firmware.bin | Bin delta |",
+        "|---|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
-    prev: int | None = None
     for name, cfg in CONFIGS.items():
         if name not in results:
             continue
-        total = results[name]
-        dvb = "" if baseline is None else f"{total - baseline:+,} B"
-        dvp = "" if prev is None else f"{total - prev:+,} B"
-        row = "—" if cfg.slim_row is None else f"{cfg.slim_row}"
-        lines.append(
-            f"| `{name}` | {row} | {cfg.label} | {total:,} B | {dvb} | {dvp} |"
+        measurement = results[name]
+        flash_delta = (
+            "" if baseline is None else f"{measurement.total_flash - baseline.total_flash:+,} B"
         )
-        prev = total
+        ram_delta = (
+            "" if baseline is None else f"{measurement.total_ram - baseline.total_ram:+,} B"
+        )
+        symbol_delta = (
+            "" if baseline is None else f"{measurement.symbol_count - baseline.symbol_count:+,}"
+        )
+        firmware_delta = (
+            ""
+            if baseline is None
+            else f"{measurement.firmware_bin_bytes - baseline.firmware_bin_bytes:+,} B"
+        )
+        row = "-" if cfg.slim_row is None else f"{cfg.slim_row}"
+        lines.append(
+            f"| `{name}` | {row} | {cfg.label} | {measurement.total_flash:,} B | "
+            f"{flash_delta} | {measurement.total_ram:,} B | {ram_delta} | "
+            f"{measurement.symbol_count:,} | {symbol_delta} | "
+            f"{measurement.firmware_bin_bytes:,} B | {firmware_delta} |"
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -440,7 +473,7 @@ def main() -> int:
     if hasattr(signal, "SIGTERM"):
         signal.signal(signal.SIGTERM, _restore_and_exit)
 
-    results: dict[str, int] = {}
+    results: dict[str, BuildMeasurement] = {}
     failed: list[str] = []
     try:
         for name in requested:
@@ -464,7 +497,7 @@ def main() -> int:
 
     if failed:
         print(
-            f"measure-opt-ins: FAIL — config(s) failed to measure: {', '.join(failed)}",
+            f"measure-opt-ins: FAIL - config(s) failed to measure: {', '.join(failed)}",
             file=sys.stderr,
         )
         return 1

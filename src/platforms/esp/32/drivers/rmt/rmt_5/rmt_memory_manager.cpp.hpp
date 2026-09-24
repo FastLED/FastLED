@@ -4,12 +4,14 @@
 /// @brief RMT memory allocation manager implementation
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/rmt_allocation_ledger.h"
 
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 
 FL_EXTERN_C_BEGIN
@@ -215,7 +217,7 @@ bool RmtMemoryManager::isPlatformGlobalPool() FL_NO_EXCEPT {
 }
 
 size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT {
-#if FASTLED_RMT_STATIC_ALLOCATION
+#if FL_RMT_STATIC_ALLOCATION
     // Static-allocation mode: skip the runtime planner entirely.
     // User has asserted single fixed strip / no network / boot-time init.
     // See #2773 item 2.5.
@@ -355,7 +357,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     FL_DBG("calculateMemoryBlocks(networkActive=%s): using %s blocks (idle=%s, network=%s, max=%s, allocated_tx_channels=%s)", networkActive, requested_blocks, idleBlocks, networkBlocks, max_blocks, allocated_tx_channels);
 
     return requested_blocks;
-#endif // FASTLED_RMT_STATIC_ALLOCATION
+#endif // FL_RMT_STATIC_ALLOCATION
 }
 
 void RmtMemoryManager::setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) FL_NO_EXCEPT {
@@ -402,6 +404,10 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
         FL_WARN("RMT TX channel %s already allocated", static_cast<int>(channel_id));
         return result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
     }
+    if (!hasAllocationCapacity()) {
+        return result<size_t, RmtMemoryError>::failure(
+            RmtMemoryError::ALLOCATION_LEDGER_FULL);
+    }
 
     // DMA channels on ESP32-S3 still consume one memory block from on-chip RMT memory
     // Fix for issue #2156: The DMA controller needs a memory block for its descriptor/control.
@@ -422,12 +428,12 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
             FL_WARN("  Available: %s words", getAvailableWords(true));
             return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
         }
-        mLedger.allocations.push_back(ChannelAllocation(channel_id, dma_words, true, true));
+        recordAllocation(ChannelAllocation(channel_id, dma_words, true, true));
         FL_LOG_RMT("RMT TX channel %s allocated (DMA, %s words for descriptor)", static_cast<int>(channel_id), dma_words);
         return result<size_t, RmtMemoryError>::success(dma_words);
 #else
         // Other platforms (if DMA supported): Assume DMA bypasses on-chip memory
-        mLedger.allocations.push_back(ChannelAllocation(channel_id, 0, true, true));
+        recordAllocation(ChannelAllocation(channel_id, 0, true, true));
         FL_LOG_RMT("RMT TX channel %s allocated (DMA, bypasses on-chip memory)", static_cast<int>(channel_id));
         return result<size_t, RmtMemoryError>::success(0);
 #endif
@@ -446,7 +452,7 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
                                        networkActive);
     }
 
-    mLedger.allocations.push_back(ChannelAllocation(channel_id, words_needed, true, false));
+    recordAllocation(ChannelAllocation(channel_id, words_needed, true, false));
 
     FL_LOG_RMT("RMT TX channel %s allocated: %s words (%s× buffer%s)", static_cast<int>(channel_id), words_needed, mem_blocks, (networkActive ? ", Network mode" : ""));
 
@@ -478,7 +484,8 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
 #endif
 
         if (tryAllocateWords(fallback_words, true)) {
-            mLedger.allocations.push_back(ChannelAllocation(channel_id, fallback_words, true, false));
+            recordAllocation(
+                ChannelAllocation(channel_id, fallback_words, true, false));
 #if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
             emitAllocTxFallbackLog(AllocTxFallbackLog::SUCCESS, channel_id,
                                    mem_blocks, words_needed, fallback_words);
@@ -517,10 +524,14 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_
         FL_WARN("RMT RX channel %s already allocated", static_cast<int>(channel_id));
         return result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
     }
+    if (!hasAllocationCapacity()) {
+        return result<size_t, RmtMemoryError>::failure(
+            RmtMemoryError::ALLOCATION_LEDGER_FULL);
+    }
 
     // DMA channels bypass on-chip memory (use DRAM instead)
     if (use_dma) {
-        mLedger.allocations.push_back(ChannelAllocation(channel_id, 0, false, true));
+        recordAllocation(ChannelAllocation(channel_id, 0, false, true));
         FL_LOG_RMT("RMT RX channel %s allocated (DMA, bypasses on-chip memory, uses DRAM buffer)", static_cast<int>(channel_id));
         return result<size_t, RmtMemoryError>::success(0);
     }
@@ -554,7 +565,7 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_
         return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
     }
 
-    mLedger.allocations.push_back(ChannelAllocation(channel_id, words_needed, false, false));
+    recordAllocation(ChannelAllocation(channel_id, words_needed, false, false));
 
     FL_LOG_RMT("RMT RX channel %s allocated: %s words (%s symbols)", static_cast<int>(channel_id), words_needed, symbols);
 
@@ -582,16 +593,22 @@ bool RmtMemoryManager::tryAllocateRx(u8 channel_id, size_t symbols, bool use_dma
 }
 
 void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
-#if FASTLED_RMT_STATIC_ALLOCATION
+#if FL_RMT_STATIC_ALLOCATION
     // Static-allocation mode: the user has asserted no removeLeds() / late
-    // addLeds(). The destructor still calls free() at process end but the
-    // ledger isn't meaningfully tracked, so erasing from the allocations
-    // vector + emitting the FL_LOG_RMT diagnostic is dead work. Skipping it
-    // lets the linker drop fl::vector_inlined::erase + the diagnostic
-    // operator<< chain. See #2856 item 3.6.
+    // addLeds(). Keep the allocation record until reset, but skip teardown
+    // accounting and erase/log work that cannot be observed under that
+    // contract. This also lets the linker drop the fixed-vector erase and
+    // diagnostic operator<< paths. See #2856 item 3.6.
     (void)channel_id;
     (void)is_tx;
 #else
+    releaseAllocation(channel_id, is_tx);
+#endif
+}
+
+#if !FL_RMT_STATIC_ALLOCATION
+void RmtMemoryManager::releaseAllocation(u8 channel_id,
+                                         bool is_tx) FL_NO_EXCEPT {
     ChannelAllocation* alloc = findAllocation(channel_id, is_tx);
     if (!alloc) {
         FL_WARN("RMT %s channel %s not found in allocations", (is_tx ? "TX" : "RX"), static_cast<int>(channel_id));
@@ -610,6 +627,20 @@ void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
             break;
         }
     }
+}
+#endif // !FL_RMT_STATIC_ALLOCATION
+
+void RmtMemoryManager::rollbackAllocation(u8 channel_id,
+                                          bool is_tx) FL_NO_EXCEPT {
+#if FL_RMT_STATIC_ALLOCATION
+    ChannelAllocation allocation;
+    if (!detail::rollbackLastRmtAllocation(mLedger.allocations, channel_id,
+                                           is_tx, allocation)) {
+        return;
+    }
+    freeWords(allocation.words, is_tx);
+#else
+    releaseAllocation(channel_id, is_tx);
 #endif
 }
 
@@ -621,9 +652,15 @@ void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, size_t words, boo
         return;
     }
 
-    // Record the allocation in ledger
-    // Note: The words are already "used" by ESP-IDF, we're just recording it
-    mLedger.allocations.push_back(ChannelAllocation(channel_id, words, is_tx, false));
+    // The words are already "used" by ESP-IDF. This path should have a free
+    // slot after rolling back the failed allocation; keep the guard for
+    // unexpected external/reentrant allocations.
+    if (!hasAllocationCapacity()) {
+        FL_WARN("RMT recovery allocation ledger full; channel %s was not recorded",
+                static_cast<int>(channel_id));
+        return;
+    }
+    recordAllocation(ChannelAllocation(channel_id, words, is_tx, false));
 
     // Update accounting (the memory is in use even though we didn't formally allocate it)
     if (mLedger.is_global_pool) {
@@ -648,6 +685,9 @@ size_t RmtMemoryManager::availableRxWords() const FL_NO_EXCEPT {
 }
 
 bool RmtMemoryManager::canAllocateTx(bool use_dma, bool networkActive) const FL_NO_EXCEPT {
+    if (!hasAllocationCapacity()) {
+        return false;
+    }
     if (use_dma) {
         return true;  // DMA always succeeds (bypasses on-chip memory)
     }
@@ -657,7 +697,7 @@ bool RmtMemoryManager::canAllocateTx(bool use_dma, bool networkActive) const FL_
 }
 
 bool RmtMemoryManager::canAllocateRx(size_t symbols) const FL_NO_EXCEPT {
-    return symbols <= getAvailableWords(false);
+    return hasAllocationCapacity() && symbols <= getAvailableWords(false);
 }
 
 size_t RmtMemoryManager::getAllocatedWords(u8 channel_id, bool is_tx) const FL_NO_EXCEPT {
@@ -793,7 +833,7 @@ bool RmtMemoryManager::allocateDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
 }
 
 void RmtMemoryManager::freeDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
-#if FASTLED_RMT_STATIC_ALLOCATION
+#if FL_RMT_STATIC_ALLOCATION
     // Static-allocation mode: see RmtMemoryManager::free() for rationale.
     // The destructor still reaches this; skipping the mismatch-diagnostic
     // FL_WARN sites lets the linker drop the operator<< chains. See #2856
@@ -819,6 +859,19 @@ void RmtMemoryManager::freeDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
 #else
     (void)channel_id;
     (void)is_tx;
+#endif
+}
+
+void RmtMemoryManager::rollbackDMA(u8 channel_id, bool is_tx) FL_NO_EXCEPT {
+#if FL_RMT_STATIC_ALLOCATION
+#if FASTLED_RMT5_DMA_SUPPORTED
+    (void)detail::releaseRmtDmaAllocation(mDMAAllocation, channel_id, is_tx);
+#else
+    (void)channel_id;
+    (void)is_tx;
+#endif
+#else
+    freeDMA(channel_id, is_tx);
 #endif
 }
 
@@ -852,6 +905,23 @@ RmtMemoryManager::findAllocation(u8 channel_id, bool is_tx) const FL_NO_EXCEPT {
         }
     }
     return nullptr;
+}
+
+void RmtMemoryManager::recordAllocation(
+    const ChannelAllocation& allocation) FL_NO_EXCEPT {
+    // allocateTx/allocateRx check capacity before any accounting or ledger
+    // mutation; recovery does the same immediately above. These calls are
+    // synchronous and the manager is not thread-safe, so this append cannot
+    // race the capacity check.
+    mLedger.allocations.push_back(allocation);
+}
+
+bool RmtMemoryManager::hasAllocationCapacity() const FL_NO_EXCEPT {
+#if FL_RMT_STATIC_ALLOCATION
+    return mLedger.allocations.size() < mLedger.allocations.capacity();
+#else
+    return true;
+#endif
 }
 
 // ============================================================================

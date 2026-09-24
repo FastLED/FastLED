@@ -172,6 +172,12 @@ public:
     /// ```
     virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
 
+    /// @brief Limit how many TX channels can exist at once (0 = unlimited)
+    ///
+    /// Models hardware with fewer RMT TX channels than strips, so
+    /// createTxChannel() fails once the limit is reached.
+    virtual void setMaxChannels(size_t max_channels) FL_NO_EXCEPT = 0;
+
     //-------------------------------------------------------------------------
     // Waveform Capture (for validation)
     //-------------------------------------------------------------------------

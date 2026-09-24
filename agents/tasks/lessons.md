@@ -16,6 +16,16 @@
 
 <!-- Add lessons from corrections and discoveries here -->
 
+- A binary-size PR needs same-configuration before/after symbol evidence, not
+  only aggregate firmware bytes. Preserve both reports and explain which
+  symbols disappeared, shrank, grew, or moved before claiming a bloat win.
+
+- Before adding a local bounded container made from an array plus a count,
+  check whether `fl::vector_fixed` already implements the needed shape. Its
+  `push_back()` silently ignores overflow, so use the bool-returning
+  `insert(end(), value)` when capacity failure must be observable; prefer the
+  existing container and teach CodeRabbit to spot future one-off duplicates.
+
 - Before diagnosing missing functionality in a local integration checkout,
   fetch and compare it with its upstream branch; a stale checkout can omit the
   entire subsystem under test. For Meson host tools in a cross-build, branch on
