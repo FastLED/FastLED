@@ -1,3 +1,9 @@
+# 2026-09-24 (FastLED #2856 measurement prerequisite): re-pin -13,087 B,
+# 383140 -> 370053, from production fbuild CI run 35981051441 on master SHA
+# 8f02b1e7aa3c9e92ecb664e8f6a7a9408fbfd43a (fbuild 2.5.27). The prior ratchet
+# had accumulated unclaimed headroom; this records the measured current size,
+# not a saving introduced by this baseline-only change.
+
 # 2026-09-14, PR #4418 (issue #4415): +53,979 B, 336474 -> 390453.
 #
 # A measurement change, not code growth. This gate builds Blink through
@@ -255,4 +261,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-383140
+370053
