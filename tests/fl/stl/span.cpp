@@ -128,6 +128,18 @@ FL_TEST_CASE("fl::span non-template function conversions work") {
     }
 }
 
+FL_TEST_CASE("fl::span accepts empty iterator ranges") {
+    int value = 42;
+    fl::span<int> pointer_span(&value, &value);
+    FL_CHECK_EQ(pointer_span.size(), 0u);
+    FL_CHECK_EQ(pointer_span.begin(), pointer_span.end());
+
+    fl::vector<int> values;
+    fl::span<int> vector_span(values.begin(), values.end());
+    FL_CHECK_EQ(vector_span.size(), 0u);
+    FL_CHECK_EQ(vector_span.begin(), vector_span.end());
+}
+
 // P2447R6 initializer_list constructor is deleted because the backing array
 // is always a temporary, making stored spans dangle.  See span.h.
 
