@@ -54,11 +54,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, cast
 
 from running_process import PIPE, STDOUT, CalledProcessError, RunningProcess
 
@@ -279,6 +281,329 @@ def print_summary(report_json: Path, top: int) -> None:
     print(f"  MD:   {report_json.with_name('report.md')}")
 
 
+SLIM_BOARD = "esp32s3"
+SLIM_DEFINES: tuple[str, ...] = ("FASTLED_LOG_VERBOSITY=0",)
+SLIM_SDKCONFIG_OVERLAY = "tools/sdkconfig_for_smallest_fastled.defaults"
+_LOG_VERBOSITY_RE = re.compile(r"-DFASTLED_LOG_VERBOSITY=(\S+)")
+
+
+def _entry_tokens(entry: dict[str, Any]) -> list[str]:
+    """Command tokens of one compile_commands.json entry."""
+    arguments = entry.get("arguments")
+    if isinstance(arguments, list):
+        return [str(a) for a in cast(list[Any], arguments)]
+    command = entry.get("command")
+    if isinstance(command, str):
+        return command.split()
+    return []
+
+
+def _is_fastled_entry(entry: dict[str, Any]) -> bool:
+    """True for translation units that belong to FastLED or the sketch."""
+    path = str(entry.get("file", "")).replace("\\", "/")
+    return (
+        "/fastled" in path.lower()
+        or "/src/" in path
+        or path.startswith("src/")
+        or path.endswith(".ino.cpp")
+    )
+
+
+def effective_log_verbosity(compile_commands: list[dict[str, Any]]) -> str | None:
+    """FASTLED_LOG_VERBOSITY value the FastLED entries were compiled with.
+
+    Returns the value if every FastLED entry that defines it agrees, else
+    None (absent or inconsistent). Falls back to all entries when none look
+    like FastLED sources.
+    """
+    entries = [e for e in compile_commands if _is_fastled_entry(e)] or compile_commands
+    values: set[str] = set()
+    for entry in entries:
+        found: str | None = None
+        for token in _entry_tokens(entry):
+            match = _LOG_VERBOSITY_RE.fullmatch(token.strip("'\""))
+            if match:
+                found = match.group(1)
+        if found is not None:
+            values.add(found)
+    if len(values) == 1:
+        return next(iter(values))
+    return None
+
+
+def toolchain_from_compile_commands(
+    compile_commands: list[dict[str, Any]],
+) -> str | None:
+    """Compiler path (first command token) of the first entry, if any."""
+    for entry in compile_commands:
+        tokens = _entry_tokens(entry)
+        if tokens:
+            return tokens[0]
+    return None
+
+
+def verify_slim(
+    report: dict[str, Any], compile_commands: list[dict[str, Any]]
+) -> list[str]:
+    """Return failure strings for a slim-profile build; empty means OK."""
+    failures: list[str] = []
+    verbosity = effective_log_verbosity(compile_commands)
+    if verbosity != "0":
+        failures.append(
+            f"FASTLED_LOG_VERBOSITY=0 not in effect (effective: {verbosity})"
+        )
+    symbols = cast(list[dict[str, Any]], report.get("symbols") or [])
+    coredump = sum(
+        int(s.get("size", 0))
+        for s in symbols
+        if s.get("region") == "flash"
+        and Path(str(s.get("archive") or "")).name == "libespcoredump.a"
+    )
+    if coredump:
+        failures.append(
+            "SDK setting CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=n not honored by "
+            f"prebuilt framework: libespcoredump.a still linked ({coredump} B)"
+        )
+    diag = sum(
+        int(s.get("size", 0)) for s in symbols if s.get("demangled") == "diag_log_add"
+    )
+    if any(s.get("demangled") == "diag_log_add" for s in symbols):
+        failures.append(f"diag_log_add still linked ({diag} B)")
+    return failures
+
+
+def find_compile_commands(elf: Path, build_root: Path) -> Path | None:
+    """Search upward from the ELF's directory, staying within build_root."""
+    root = build_root.resolve()
+    current = elf.resolve().parent
+    while True:
+        candidate = current / "compile_commands.json"
+        if candidate.is_file():
+            return candidate
+        if current == root or root not in current.parents:
+            return None
+        current = current.parent
+
+
+def load_compile_commands(path: Path | None) -> list[dict[str, Any]]:
+    if path is None:
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, list):
+        return []
+    return cast(list[dict[str, Any]], data)
+
+
+def git_sha() -> str | None:
+    try:
+        out = RunningProcess.run(
+            ["git", "rev-parse", "HEAD"],
+            stdout=PIPE,
+            stderr=STDOUT,
+            text=True,
+            timeout=15,
+            check=True,
+            encoding="utf-8",
+            errors="replace",
+        ).stdout
+    except (FileNotFoundError, RuntimeError, CalledProcessError):
+        return None
+    return str(out).strip() or None
+
+
+def firmware_flash_bytes(report: dict[str, Any], elf: Path) -> int | None:
+    """Whole-firmware flash: fbuild's report field if present, else firmware.bin."""
+    for key in ("firmware_flash", "firmware_size"):
+        value = report.get(key)
+        if isinstance(value, int):
+            return value
+    firmware_bin = elf.with_suffix(".bin")
+    if firmware_bin.is_file():
+        return firmware_bin.stat().st_size
+    return None
+
+
+_PROJECT_INI = Path("platformio.ini")
+
+
+def _patch_sdkconfig_overlay(text: str, board: str) -> str:
+    """Set board_build.sdkconfig_defaults in [env:<board>].
+
+    Mirrors tests/measure_esp32s3_opt_ins.py::patch_project_ini.
+    """
+    block_re = re.compile(
+        rf"(\[env:{re.escape(board)}\][^\[]*?)(?=\n\[env:|\Z)", re.DOTALL
+    )
+    match = block_re.search(text)
+    if not match:
+        raise SystemExit(f"Bloat: could not locate [env:{board}] in platformio.ini")
+    block = match.group(1)
+    line = f"board_build.sdkconfig_defaults = {SLIM_SDKCONFIG_OVERLAY}"
+    if "board_build.sdkconfig_defaults" in block:
+        block = re.sub(r"board_build\.sdkconfig_defaults\s*=.*", line, block)
+    else:
+        block = block.rstrip() + "\n" + line + "\n"
+    return text[: match.start()] + block + text[match.end() :]
+
+
+def run_compile(board: str, example: str, profile: str) -> float:
+    """Run the compile wrapper for `profile`; return the build start time."""
+    compile_script = "compile.bat" if os.name == "nt" else "./compile"
+    if os.name != "nt" and not shutil.which("bash"):
+        raise SystemExit("bash not on PATH; cannot --build")
+    cmd = [compile_script, board, "--examples", example]
+    if profile == "slim":
+        cmd.extend(("--defines", ",".join(SLIM_DEFINES)))
+    print(f"$ {' '.join(cmd)}")
+    build_started = time.time()
+    # The link step does not track sdkconfig changes; drop the old ELF/bin
+    # so switching profiles (either direction) cannot reuse a stale one (#2940).
+    for elf in elf_candidates(board, Path(".build")):
+        if elf.is_file():
+            elf.unlink()
+        firmware_bin = elf.with_suffix(".bin")
+        if firmware_bin.is_file():
+            firmware_bin.unlink()
+    if profile != "slim":
+        RunningProcess.run(cmd, check=True)
+        return build_started
+    if not _PROJECT_INI.is_file():
+        raise SystemExit(f"Bloat: {_PROJECT_INI} not found; cannot apply overlay")
+    original = _PROJECT_INI.read_text(encoding="utf-8")
+    try:
+        _PROJECT_INI.write_text(
+            _patch_sdkconfig_overlay(original, board), encoding="utf-8"
+        )
+        RunningProcess.run(cmd, check=True)
+    finally:
+        _PROJECT_INI.write_text(original, encoding="utf-8")
+    return build_started
+
+
+def symbols_dir(build_root: Path, board: str, profile: str) -> Path:
+    name = board if profile == "default" else f"{board}-{profile}"
+    return build_root / "symbols" / name
+
+
+def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
+    """Build (optionally), analyse, and verify one profile; return provenance."""
+    build_root = Path(args.build_root)
+    build_started: float | None = None
+    if args.build:
+        build_started = run_compile(args.board, args.example, profile)
+
+    try:
+        location = find_elf(args.board, build_root)
+    except SystemExit:
+        if not args.allow_overflow:
+            raise
+        # Retry: build with --bloat-analysis so the over-budget ELF survives.
+        print(
+            f"Bloat: no ELF for '{args.board}'. Retrying via "
+            "`fbuild build --bloat-analysis` (FastLED/fbuild#594)..."
+        )
+        rc = run_fbuild_build_bloat(args.board, args.example)
+        if rc != 0:
+            print(
+                f"Bloat: `fbuild build --bloat-analysis` exited {rc} "
+                "(expected for over-budget builds). Checking for ELF..."
+            )
+        location = find_elf(args.board, build_root)
+
+    # Outside the block above on purpose. That `except SystemExit` means
+    # "no ELF was found, retry with --allow-overflow"; a stale-ELF refusal
+    # raised inside it would be caught and rebuilt as though the ELF were
+    # missing, which is the opposite of what it is. Checked here so it covers
+    # both the normal and the recovery selection.
+    _assert_fresh(location, build_started)
+
+    out_dir = symbols_dir(build_root, args.board, profile)
+    cc_path = find_compile_commands(location.elf, build_root)
+    compile_commands = load_compile_commands(cc_path)
+    verbosity = effective_log_verbosity(compile_commands)
+    toolchain = toolchain_from_compile_commands(compile_commands)
+    overlay = SLIM_SDKCONFIG_OVERLAY if profile == "slim" else None
+    sha = git_sha()
+
+    print(f"Board:   {args.board}")
+    print(f"Example: {args.example}")
+    print(f"ELF:     {location.elf}")
+    print("nm:      (auto-resolved by fbuild via build_info_<board>.json)")
+    print(f"Output:  {out_dir}")
+    print(f"Profile: {profile}")
+    print(f"Git SHA: {sha}")
+    print(f"FASTLED_LOG_VERBOSITY: {verbosity}")
+    print(f"sdkconfig overlay: {overlay}")
+    print(f"Toolchain: {toolchain}")
+    print()
+
+    run_fbuild_symbols(location=location, out_dir=out_dir, top=args.top)
+
+    report_json = out_dir / "report.json"
+    report = cast(dict[str, Any], json.loads(report_json.read_text(encoding="utf-8")))
+    provenance: dict[str, Any] = {
+        "profile": profile,
+        "board": args.board,
+        "example": args.example,
+        "git_sha": sha,
+        "elf": str(location.elf),
+        "fastled_log_verbosity": verbosity,
+        "sdkconfig_overlay": overlay,
+        "toolchain": toolchain,
+        "total_flash": int(report["total_flash"]),
+        "firmware_flash": firmware_flash_bytes(report, location.elf),
+    }
+    (out_dir / "provenance.json").write_text(
+        json.dumps(provenance, indent=2) + "\n", encoding="utf-8"
+    )
+    print(f"Total flash (attributed): {provenance['total_flash']:,} B")
+    print(f"Firmware flash: {provenance['firmware_flash']}")
+
+    if profile == "slim":
+        if cc_path is None:
+            raise SystemExit(
+                "Bloat: slim profile needs compile_commands.json next to "
+                f"{location.elf} (searched upward within {build_root}); not found."
+            )
+        failures = verify_slim(report, compile_commands)
+        if failures:
+            raise SystemExit(
+                "Bloat: slim profile verification FAILED:\n  " + "\n  ".join(failures)
+            )
+        print("Slim profile verified.")
+
+    if not args.no_summary:
+        print_summary(report_json, args.top)
+
+    return provenance
+
+
+def _fmt_bytes(value: int | None) -> str:
+    return "n/a" if value is None else f"{value:,} B"
+
+
+def print_compare(
+    default: dict[str, Any], slim: dict[str, Any], out_path: Path
+) -> None:
+    rows: list[tuple[str, int | None, int | None]] = [
+        ("attributed flash", default["total_flash"], slim["total_flash"]),
+        ("firmware flash", default["firmware_flash"], slim["firmware_flash"]),
+    ]
+    print()
+    print(f"{'METRIC':<18}  {'DEFAULT':>14}  {'SLIM':>14}  {'DELTA':>14}")
+    print("-" * 66)
+    compare: dict[str, Any] = {"default": default, "slim": slim, "delta": {}}
+    for name, a, b in rows:
+        delta = None if a is None or b is None else b - a
+        compare["delta"][name.replace(" ", "_")] = delta
+        delta_s = "n/a" if delta is None else f"{delta:+,} B"
+        print(f"{name:<18}  {_fmt_bytes(a):>14}  {_fmt_bytes(b):>14}  {delta_s:>14}")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(compare, indent=2) + "\n", encoding="utf-8")
+    print()
+    print(f"Compare: {out_path}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Per-symbol flash/RAM bloat analysis for FastLED builds."
@@ -322,62 +647,46 @@ def main() -> int:
         "overflow and bloat analysis can still run. See "
         "FastLED/fbuild#594.",
     )
+    parser.add_argument(
+        "--profile",
+        choices=("default", "slim"),
+        default="default",
+        help="Build profile. `slim` (esp32s3 only) adds "
+        "FASTLED_LOG_VERBOSITY=0 and the sdkconfig_for_smallest_fastled "
+        "overlay, writes to .build/symbols/<board>-slim/, and verifies the "
+        "result.",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="With --build on esp32s3: build default then slim and print "
+        "a flash delta table (writes .build/symbols/<board>-compare.json).",
+    )
     args = parser.parse_args()
 
     project_root = Path(__file__).resolve().parent.parent
     os.chdir(project_root)
 
+    if (args.profile == "slim" or args.compare) and args.board != SLIM_BOARD:
+        raise SystemExit(
+            f"Bloat: slim profile only defined for {SLIM_BOARD} (got '{args.board}')."
+        )
+    if args.compare and not args.build:
+        raise SystemExit("Bloat: --compare requires --build.")
+
     assert_fbuild_has_symbols()
 
-    build_started: float | None = None
-    if args.build:
-        compile_script = "compile.bat" if os.name == "nt" else "./compile"
-        if os.name != "nt" and not shutil.which("bash"):
-            raise SystemExit("bash not on PATH; cannot --build")
-        cmd = [compile_script, args.board, "--examples", args.example]
-        print(f"$ {' '.join(cmd)}")
-        build_started = time.time()
-        RunningProcess.run(cmd, check=True)
-
-    try:
-        location = find_elf(args.board, Path(args.build_root))
-    except SystemExit:
-        if not args.allow_overflow:
-            raise
-        # Retry: build with --bloat-analysis so the over-budget ELF survives.
-        print(
-            f"Bloat: no ELF for '{args.board}'. Retrying via "
-            "`fbuild build --bloat-analysis` (FastLED/fbuild#594)..."
+    if args.compare:
+        default = run_profile(args, "default")
+        slim = run_profile(args, "slim")
+        print_compare(
+            default,
+            slim,
+            Path(args.build_root) / "symbols" / f"{args.board}-compare.json",
         )
-        rc = run_fbuild_build_bloat(args.board, args.example)
-        if rc != 0:
-            print(
-                f"Bloat: `fbuild build --bloat-analysis` exited {rc} "
-                "(expected for over-budget builds). Checking for ELF..."
-            )
-        location = find_elf(args.board, Path(args.build_root))
+        return 0
 
-    # Outside the block above on purpose. That `except SystemExit` means
-    # "no ELF was found, retry with --allow-overflow"; a stale-ELF refusal
-    # raised inside it would be caught and rebuilt as though the ELF were
-    # missing, which is the opposite of what it is. Checked here so it covers
-    # both the normal and the recovery selection.
-    _assert_fresh(location, build_started)
-
-    out_dir = Path(args.build_root) / "symbols" / args.board
-
-    print(f"Board:   {args.board}")
-    print(f"Example: {args.example}")
-    print(f"ELF:     {location.elf}")
-    print("nm:      (auto-resolved by fbuild via build_info_<board>.json)")
-    print(f"Output:  {out_dir}")
-    print()
-
-    run_fbuild_symbols(location=location, out_dir=out_dir, top=args.top)
-
-    if not args.no_summary:
-        print_summary(out_dir / "report.json", args.top)
-
+    run_profile(args, args.profile)
     return 0
 
 

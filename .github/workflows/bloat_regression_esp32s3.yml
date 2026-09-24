@@ -115,6 +115,12 @@ jobs:
             uv run python tests/test_esp32s3_bloat_regression.py
           fi
 
+      # The slim profile is an explicit opt-in build, reported separately
+      # under .build/symbols/esp32s3-slim so it never touches the baseline
+      # above. The step fails if the slim knobs did not take effect.
+      - name: Slim profile smoke (explicit opt-in profile)
+        run: uv run ci/bloat.py esp32s3 --example Blink --build --profile slim --top 25
+
       # The gate's total is a sum over this report, and a local run of the same
       # commit has been seen to disagree with it by 4 KB (#4468). Keeping the
       # report lets a local build be diffed against CI's symbol by symbol
@@ -128,5 +134,9 @@ jobs:
           path: |
             .build/symbols/esp32s3/report.json
             .build/symbols/esp32s3/report.md
+            .build/symbols/esp32s3/provenance.json
+            .build/symbols/esp32s3-slim/report.json
+            .build/symbols/esp32s3-slim/report.md
+            .build/symbols/esp32s3-slim/provenance.json
           if-no-files-found: warn
           retention-days: 30
