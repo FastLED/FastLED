@@ -2,6 +2,40 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Meta issue #4528: ten verified bug fixes
+
+- [x] Audio slice: resolve #4518-#4521 with focused RED→GREEN regressions.
+- [x] STL slice: resolve #4522-#4524 with focused RED→GREEN regressions.
+- [x] CI/WASM slice: resolve #4525-#4527 with focused RED→GREEN regressions.
+- [x] Integrate and inspect all worker diffs in deterministic slice order.
+- [x] Run focused checks, full lint, and full Python/C++ test gates.
+- [ ] Run the pre-push review gate and address findings.
+- [ ] Push a closing PR, wait for GitHub Actions and review threads, then merge.
+- [ ] Confirm #4518-#4528 closed, remove owned worktrees/branches, and sync clean master.
+
+### Plan
+
+- Each slice owns disjoint production and test files and starts from the same
+  `origin/master` commit (`5cce0fb6f9`). Workers run lint only under the
+  orchestrated carve-out; the orchestrator records focused RED→GREEN evidence
+  and runs the combined gates.
+- Integration order is audio, STL, then CI/WASM. Any shared-file conflict is
+  resolved in this integration worktree and revalidated before publishing.
+
+### Review
+
+- RED: audio produced non-finite/stale analysis and dropped `INT16_MIN`; flat
+  containers skipped erase successors; the span constructor dereferenced an
+  empty iterator; vector allocation failure hung on an assertion/underflow;
+  all three CI/WASM checks falsely reported success.
+- GREEN: focused sanitizer tests pass for audio, flat-map, flat-set, span, and
+  vector; the full Python gate passes; lint passes; and a clean combined gate
+  passes 311/311 C++ unit tests plus 95/95 host examples.
+- The vector fix preserves the successfully appended prefix on allocation
+  failure and keeps allocation failure recoverable in debug and release modes.
+- Upstream fingerprint false-green behavior discovered during validation is
+  tracked as zackees/zccache#1650.
+
 ## Profiled color pipeline (#4032 / #4034)
 
 - [x] Revalidate current master, phase issues, and #4156 review decisions.
