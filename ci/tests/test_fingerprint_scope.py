@@ -19,10 +19,20 @@ pass.
 from __future__ import annotations
 
 import json
+import os
+import sys
+import time
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest
+
+from ci.early_exit_cache import (
+    FINGERPRINT_VALIDATION_VERSION,
+    argv_ultra_early_exit,
+    fingerprint_aux_hash,
+)
 from ci.util.fingerprint import FingerprintManager
 from ci.util.test_types import FingerprintResult
 
@@ -132,32 +142,160 @@ class TestScopeCarriedForward(unittest.TestCase):
             )
             self.assertEqual(mgr._fingerprints["cpp_test"].scope, "partial")
 
-    def test_scope_travels_with_the_counts_on_a_cache_hit(self) -> None:
-        """save_all() carries prior counts forward when nothing ran — the scope
-        that labels those counts must come with them, or a filtered result gets
-        silently relabelled as a full pass on the very next run."""
+    def test_cache_hit_keeps_prior_counts_and_scope_untouched(self) -> None:
         with TemporaryDirectory() as tmp:
             mgr = FingerprintManager(Path(tmp))
-            mgr._prev_fingerprints["cpp_test"] = _result(
+            prior = _result(
                 num_tests_run=1,
                 num_tests_passed=1,
                 num_examples_run=0,
                 num_examples_passed=0,
                 scope="partial",
+                status="success",
             )
-            # Current run produced no counts (tests were skipped).
-            mgr._fingerprints["cpp_test"] = FingerprintResult(hash="abc123")
-
-            mgr.save_all("success")
+            mgr.write("cpp_test", prior)
+            path = Path(tmp) / "fingerprint" / "cpp_test_quick.json"
+            before = path.read_bytes()
+            self.assertFalse(
+                mgr.check("cpp_test", lambda: FingerprintResult(hash="abc123"))
+            )
+            mgr.save_success("cpp_test")
 
             reloaded = mgr.read("cpp_test")
             assert reloaded is not None
             self.assertEqual(reloaded.num_tests_run, 1)
-            self.assertEqual(
-                reloaded.scope,
-                "partial",
-                "counts carried forward without their scope would read as a full pass",
+            self.assertEqual(reloaded.scope, "partial")
+            self.assertEqual(path.read_bytes(), before)
+
+    def test_python_success_does_not_certify_changed_cpp(self) -> None:
+        with TemporaryDirectory() as tmp:
+            mgr = FingerprintManager(Path(tmp))
+            mgr.write("cpp_test", FingerprintResult(hash="old-cpp", status="success"))
+            self.assertTrue(
+                mgr.check("cpp_test", lambda: FingerprintResult(hash="new-cpp"))
             )
+            self.assertTrue(
+                mgr.check("python_test", lambda: FingerprintResult(hash="new-py"))
+            )
+            mgr.save_success("python_test")
+
+            next_run = FingerprintManager(Path(tmp))
+            self.assertTrue(
+                next_run.check("cpp_test", lambda: FingerprintResult(hash="new-cpp"))
+            )
+            self.assertFalse(
+                next_run.check("python_test", lambda: FingerprintResult(hash="new-py"))
+            )
+
+    def test_cpp_success_does_not_certify_changed_python(self) -> None:
+        with TemporaryDirectory() as tmp:
+            mgr = FingerprintManager(Path(tmp))
+            mgr.write("python_test", FingerprintResult(hash="old-py", status="success"))
+            self.assertTrue(
+                mgr.check("python_test", lambda: FingerprintResult(hash="new-py"))
+            )
+            self.assertTrue(
+                mgr.check("cpp_test", lambda: FingerprintResult(hash="new-cpp"))
+            )
+            mgr.save_success("cpp_test")
+
+            next_run = FingerprintManager(Path(tmp))
+            self.assertTrue(
+                next_run.check("python_test", lambda: FingerprintResult(hash="new-py"))
+            )
+            self.assertFalse(
+                next_run.check("cpp_test", lambda: FingerprintResult(hash="new-cpp"))
+            )
+
+    def test_legacy_success_requires_revalidation(self) -> None:
+        with TemporaryDirectory() as tmp:
+            mgr = FingerprintManager(Path(tmp))
+            path = Path(tmp) / "fingerprint" / "cpp_test_quick.json"
+            path.write_text(json.dumps({"hash": "same", "status": "success"}))
+            self.assertTrue(
+                mgr.check("cpp_test", lambda: FingerprintResult(hash="same"))
+            )
+
+    def test_python_config_change_invalidates_cache(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "ci" / "tests").mkdir(parents=True)
+            config = root / "pyproject.toml"
+            config.write_text("[project]\nname = 'before'\n")
+            previous = Path.cwd()
+            try:
+                os.chdir(root)
+                mgr = FingerprintManager(root / ".cache")
+                self.assertTrue(mgr.check_python())
+                mgr.save_success("python_test")
+                self.assertFalse(FingerprintManager(root / ".cache").check_python())
+                config.write_text("[project]\nname = 'after'\n")
+                self.assertTrue(FingerprintManager(root / ".cache").check_python())
+            finally:
+                os.chdir(previous)
+
+    def test_failed_or_unexecuted_scope_is_not_rewritten(self) -> None:
+        with TemporaryDirectory() as tmp:
+            mgr = FingerprintManager(Path(tmp))
+            mgr.write("examples", FingerprintResult(hash="old", status="success"))
+            mgr.write("python_test", FingerprintResult(hash="same", status="success"))
+            path = Path(tmp) / "fingerprint" / "examples_quick.json"
+            before = path.read_bytes()
+            self.assertFalse(
+                mgr.check("python_test", lambda: FingerprintResult(hash="same"))
+            )
+            self.assertTrue(
+                mgr.check("examples", lambda: FingerprintResult(hash="new"))
+            )
+            mgr.mark_failure("python_test")
+            self.assertEqual(path.read_bytes(), before)
+            next_run = FingerprintManager(Path(tmp))
+            self.assertTrue(
+                next_run.check("examples", lambda: FingerprintResult(hash="new"))
+            )
+            self.assertTrue(
+                next_run.check("python_test", lambda: FingerprintResult(hash="same"))
+            )
+
+
+def test_default_early_exit_requires_validated_wasm(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["test.py"])
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+    for dirname in ("src", "tests", "examples", "ci", "examples/wasm"):
+        (tmp_path / dirname).mkdir(parents=True, exist_ok=True)
+    cache = tmp_path / ".cache" / "fingerprint"
+    cache.mkdir(parents=True)
+    baseline = time.time()
+    record = {
+        "hash": "ok",
+        "status": "success",
+        "validation_version": FINGERPRINT_VALIDATION_VERSION,
+        "source_max_mtime": baseline,
+    }
+    for scope, name in (
+        ("cpp_test", "cpp_test_quick"),
+        ("examples", "examples_quick"),
+        ("python_test", "python_test"),
+    ):
+        (cache / f"{name}.json").write_text(
+            json.dumps({**record, "aux_hash": fingerprint_aux_hash(scope)})
+        )
+
+    argv_ultra_early_exit(0)
+    (cache / "wasm.json").write_text(
+        json.dumps({**record, "aux_hash": fingerprint_aux_hash("wasm")})
+    )
+    with pytest.raises(SystemExit) as hit:
+        argv_ultra_early_exit(0)
+    assert hit.value.code == 0
+
+    wasm_source = tmp_path / "examples" / "wasm" / "changed.js"
+    wasm_source.write_text("changed")
+    os.utime(wasm_source, (baseline + 2, baseline + 2))
+    argv_ultra_early_exit(0)
 
 
 if __name__ == "__main__":

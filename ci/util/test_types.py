@@ -292,6 +292,8 @@ class FingerprintResult:
     # while the run was in flight looks older than the cache and gets skipped
     # on every later run while the suite still reports green.
     source_max_mtime: Optional[float] = None
+    # Content signature of the small build/config inputs outside source dirs.
+    aux_hash: Optional[str] = None
     # Provenance of the counts above: "full" when the run covered the whole
     # suite, "partial" when a filter/selection narrowed it. Cached counts are
     # replayed verbatim on later runs, so without this a subset result reads as

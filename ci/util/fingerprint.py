@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
+from ci.early_exit_cache import FINGERPRINT_VALIDATION_VERSION, fingerprint_aux_hash
 from ci.meson.cache_utils import (
     _SKIP_DIR_NAMES,
     _SKIP_DIR_PREFIXES,
@@ -23,6 +24,7 @@ from ci.util.timestamp_print import ts_print
 
 _CPP_SOURCE_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
 _PY_SOURCE_EXTS = frozenset([".py"])
+_WASM_SOURCE_EXTS = _CPP_SOURCE_EXTS | frozenset([".js", ".html"])
 
 
 def _get_max_source_file_mtime(root: Path, exts: frozenset[str] | None = None) -> float:
@@ -77,8 +79,10 @@ class FingerprintManager:
         self.fingerprint_dir.mkdir(exist_ok=True)
         self._fingerprints: dict[str, FingerprintResult] = {}
         self._prev_fingerprints: dict[str, Optional[FingerprintResult]] = {}
+        self._needs_run: dict[str, bool] = {}
         # name -> max source mtime seen at the START of this invocation's check
         self._observed_max_mtime: dict[str, float] = {}
+        self._observed_aux_hash: dict[str, str | None] = {}
 
     def _get_fingerprint_file(self, name: str) -> Path:
         # For cpp_test and examples, include build mode in filename to separate caches per build mode
@@ -95,12 +99,19 @@ class FingerprintManager:
                     return FingerprintResult(
                         hash=data.get("hash", ""),
                         elapsed_seconds=data.get("elapsed_seconds"),
-                        status=data.get("status"),
+                        status=(
+                            data.get("status")
+                            if data.get("validation_version")
+                            == FINGERPRINT_VALIDATION_VERSION
+                            and data.get("aux_hash") is not None
+                            else None
+                        ),
                         num_tests_run=data.get("num_tests_run"),
                         num_tests_passed=data.get("num_tests_passed"),
                         duration_seconds=data.get("duration_seconds"),
                         test_name=data.get("test_name"),
                         source_max_mtime=data.get("source_max_mtime"),
+                        aux_hash=data.get("aux_hash"),
                         scope=data.get("scope"),
                         num_examples_run=data.get("num_examples_run"),
                         num_examples_passed=data.get("num_examples_passed"),
@@ -114,6 +125,7 @@ class FingerprintManager:
     def write(self, name: str, fingerprint: FingerprintResult) -> None:
         fingerprint_file = self._get_fingerprint_file(name)
         fingerprint_dict: dict[str, Optional[str | int | float]] = {
+            "validation_version": FINGERPRINT_VALIDATION_VERSION,
             "hash": fingerprint.hash,
             "elapsed_seconds": fingerprint.elapsed_seconds,
             "status": fingerprint.status,
@@ -129,6 +141,9 @@ class FingerprintManager:
             fingerprint_dict["test_name"] = fingerprint.test_name
         if fingerprint.source_max_mtime is not None:
             fingerprint_dict["source_max_mtime"] = fingerprint.source_max_mtime
+        fingerprint_dict["aux_hash"] = fingerprint.aux_hash or fingerprint_aux_hash(
+            name
+        )
         if fingerprint.scope is not None:
             fingerprint_dict["scope"] = fingerprint.scope
         if fingerprint.num_examples_run is not None:
@@ -151,41 +166,39 @@ class FingerprintManager:
         fingerprint_data = calculator()
         self._fingerprints[name] = fingerprint_data
 
-        if prev_fingerprint is None:
-            return True
-        return not prev_fingerprint.should_skip(fingerprint_data)
+        needs_run = prev_fingerprint is None or not prev_fingerprint.should_skip(
+            fingerprint_data
+        )
+        self._needs_run[name] = needs_run
+        return needs_run
 
-    def save_all(self, status: str) -> None:
-        for name, fingerprint in self._fingerprints.items():
-            fingerprint.status = status
-            # Preserve test metadata from previous fingerprint if current one doesn't have it
-            # This happens when tests are skipped (cache hit) - we want to keep the old metadata
-            if fingerprint.num_tests_run is None:
-                prev_fp = self._prev_fingerprints.get(name)
-                if prev_fp is not None:
-                    fingerprint.num_tests_run = prev_fp.num_tests_run
-                    fingerprint.num_tests_passed = prev_fp.num_tests_passed
-                    fingerprint.duration_seconds = prev_fp.duration_seconds
-                    fingerprint.test_name = prev_fp.test_name
-                    # Carry scope and the unit/example split with the counts
-                    # they describe -- splitting them would relabel a filtered
-                    # or unit-only result as a full one.
-                    fingerprint.scope = prev_fp.scope
-                    fingerprint.num_examples_run = prev_fp.num_examples_run
-                    fingerprint.num_examples_passed = prev_fp.num_examples_passed
-                    fingerprint.examples_included = prev_fp.examples_included
-            # Persist the watermark from this invocation's opening scan. On a
-            # fast-path hit nothing was rebuilt, so carry the previous value
-            # forward rather than advancing it -- advancing would absorb any
-            # file added since that run into a pass it never took part in.
-            if fingerprint.source_max_mtime is None:
-                observed = self._observed_max_mtime.get(name)
-                prev_seen = self._prev_fingerprints.get(name)
-                if observed is not None:
-                    fingerprint.source_max_mtime = observed
-                elif prev_seen is not None:
-                    fingerprint.source_max_mtime = prev_seen.source_max_mtime
-            self.write(name, fingerprint)
+    def save_success(self, name: str) -> None:
+        """Persist a completed full scope; a planned cache hit stays untouched."""
+        if not self._needs_run.get(name, False):
+            return
+        fingerprint = self._fingerprints[name]
+        if fingerprint.status is not None and fingerprint.status != "success":
+            raise ValueError(f"Cannot certify failed fingerprint calculation: {name}")
+        aux_hash = self._observed_aux_hash.get(name)
+        if aux_hash is None:
+            aux_hash = fingerprint_aux_hash(name)
+        if aux_hash is None:
+            ts_print(f"Cannot persist {name} fingerprint: build input unreadable")
+            return
+        fingerprint.status = "success"
+        fingerprint.source_max_mtime = self._observed_max_mtime.get(name)
+        fingerprint.aux_hash = aux_hash
+        self.write(name, fingerprint)
+
+    def mark_failure(self, name: str) -> None:
+        """Invalidate only a scope that actually failed, including forced runs."""
+        fingerprint = self._fingerprints.get(name)
+        if fingerprint is None:
+            return
+        fingerprint.status = "failure"
+        fingerprint.source_max_mtime = self._observed_max_mtime.get(name)
+        fingerprint.aux_hash = self._observed_aux_hash.get(name)
+        self.write(name, fingerprint)
 
     def update_test_metadata(
         self,
@@ -239,8 +252,7 @@ class FingerprintManager:
         Returns True if the fast-path fired (fingerprint up-to-date, no change),
         False if the full computation is needed.
 
-        Side effects on True: populates _prev_fingerprints[name] and
-        _fingerprints[name] so that save_all() behaves correctly.
+        Side effects on True: populates the previous result and records a hit.
 
         Uses file-level mtime scanning (not directory-level) to correctly detect
         content-only modifications. On NTFS/ext4, directory mtimes do NOT update
@@ -256,16 +268,20 @@ class FingerprintManager:
         Overhead: ~20-70ms per call (file-level scanning of source files).
         Savings: ~200-400ms vs full SHA-256 computation when no changes detected.
         """
-        fp_file = self._get_fingerprint_file(name)
-        if not fp_file.exists():
-            return False
         try:
             max_file_mtime = max(
                 (_get_max_source_file_mtime(d, exts=exts) for d in dirs), default=0.0
             )
-            # Remember what this scan saw. If a run follows, save_all() persists
+            # Remember what this scan saw. If a run follows, save_success() persists
             # it as the new watermark, describing the tree at that run's START.
             self._observed_max_mtime[name] = max_file_mtime
+            current_aux_hash = fingerprint_aux_hash(name)
+            self._observed_aux_hash[name] = current_aux_hash
+            if current_aux_hash is None:
+                return False
+            fp_file = self._get_fingerprint_file(name)
+            if not fp_file.exists():
+                return False
             prev = self.read(name)
             if prev is None or prev.status != "success":
                 return False  # no previous result or previous run failed
@@ -280,6 +296,8 @@ class FingerprintManager:
                 (prev.native_linker_signature or "") != native_linker_signature()
             ):
                 return False
+            if prev.aux_hash != current_aux_hash:
+                return False
             if max_file_mtime > prev.source_max_mtime:
                 return False  # a source file changed after the cached run began
             # Fast-path fires: nothing will be rebuilt, so do NOT advance the
@@ -290,7 +308,9 @@ class FingerprintManager:
                 hash=prev.hash,
                 source_max_mtime=prev.source_max_mtime,
                 native_linker_signature=prev.native_linker_signature,
+                aux_hash=prev.aux_hash,
             )
+            self._needs_run[name] = False
             return True
         except OSError:
             return False
@@ -320,11 +340,9 @@ class FingerprintManager:
 
     def check_wasm(self) -> bool:
         cwd = Path.cwd()
-        # Fast-path: if src/ and examples/ have no structural changes since last write,
-        # skip the expensive 500ms+ rglob + SHA-256 computation.
-        # WASM tests depend on src/ C++ files and examples/wasm/ source files.
-        # Limitation: in-place file content edits (no add/remove) are not detected.
-        if self._mtime_fast_path("wasm", cwd / "src", cwd / "examples"):
+        if self._mtime_fast_path(
+            "wasm", cwd / "src", cwd / "examples" / "wasm", exts=_WASM_SOURCE_EXTS
+        ):
             return False  # no change detected via mtime fast-path
         return self.check("wasm", calculate_wasm_fingerprint)
 

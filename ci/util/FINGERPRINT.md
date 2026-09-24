@@ -37,7 +37,8 @@ rm -rf .cache/fingerprint/
 ├── examples_quick.json       # Examples (quick mode)
 ├── examples_debug.json       # Examples (debug mode)
 ├── examples_release.json     # Examples (release mode)
-└── python_test.json          # Python tests (no build modes)
+├── python_test.json          # Python tests (no build modes)
+└── wasm.json                 # WASM compilation and execution
 ```
 
 ## File Format
@@ -55,6 +56,9 @@ Each fingerprint JSON file contains:
 - `hash`: SHA256 of all monitored files (path + content)
 - `elapsed_seconds`: Time to compute the fingerprint
 - `status`: `"success"` or `"failure"` from the last run
+- `validation_version`: cache schema version; older records are revalidated
+- `source_max_mtime`: source watermark captured before the validating run
+- `aux_hash`: content hash of monitored build/config inputs outside source dirs
 
 ## How It Works
 
@@ -69,6 +73,21 @@ Tests are **run** when:
 2. Previous status was `"failure"` (retry failed tests)
 3. No previous cache exists (first run)
 4. `--no-fingerprint` or `--force` flag used
+
+### Planning and persistence
+
+The test entry point checks fingerprints to decide which suites to run. A check
+only records the candidate hash; it does not certify the suite. After an
+unfiltered suite succeeds, `save_success(name)` persists that suite's candidate
+in its own file. A cache hit leaves its prior record, counts, and run-start
+watermark unchanged. A failed invocation does not rewrite unrelated scopes.
+An executed scope that fails is recorded as failed, including a forced rerun of
+an unchanged hash, so the next invocation cannot skip it on an older success.
+`all.json` is no longer a validation record: the default fast path requires
+successful C++, examples, Python, and WASM records individually.
+The fast path also compares each record's auxiliary-input hash, so edits to
+Meson files, Python lock/config files, or WASM scripts cannot be mistaken for
+an unchanged source tree.
 
 ### What Each Fingerprint Monitors
 
@@ -127,8 +146,8 @@ class FingerprintManager:
     def check_python(self) -> bool:
         """Returns True if Python tests should run"""
 
-    def save_all(self, status: str) -> None:
-        """Save all fingerprints with success/failure status"""
+    def save_success(self, name: str) -> None:
+        """Save one successfully completed test scope"""
 ```
 
 ### FingerprintResult (test_types.py)
@@ -200,13 +219,14 @@ build_mode = args.build_mode if args.build_mode else "quick"
 fingerprint_manager = FingerprintManager(cache_dir, build_mode=build_mode)
 
 # Check if tests need to run
-src_code_change = fingerprint_manager.check_all()
 cpp_test_change = fingerprint_manager.check_cpp(args)
 examples_change = fingerprint_manager.check_examples()
 python_test_change = fingerprint_manager.check_python()
+wasm_change = fingerprint_manager.check_wasm()
 
-# After tests complete
-fingerprint_manager.save_all("success")  # or "failure"
+# After the corresponding complete suites succeed
+fingerprint_manager.save_success("cpp_test")
+fingerprint_manager.save_success("python_test")
 ```
 
 ## Performance

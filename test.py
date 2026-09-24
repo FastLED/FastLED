@@ -96,7 +96,8 @@ from ci.util.test_env import (
     setup_environment,
     setup_force_exit,
 )
-from ci.util.test_runner import _TOP_LEVEL_TEST_TIMEOUT
+from ci.util.test_exceptions import TestExecutionFailedException, TestTimeoutException
+from ci.util.test_runner import _TOP_LEVEL_TEST_TIMEOUT, failed_fingerprint_scopes
 from ci.util.test_types import (
     process_test_flags,
 )
@@ -454,7 +455,6 @@ def main() -> None:
         # machines). When --no-fingerprint is used, these values are ignored anyway because
         # rebuild_mode forces all change flags to True. Skipping saves ~2-3s per invocation.
         if args.no_fingerprint:
-            src_code_change = True
             cpp_test_change = True
             examples_change = True
             python_test_change = True
@@ -469,11 +469,6 @@ def main() -> None:
                 _fp_results[name] = fn()
 
             _fp_threads = [
-                threading.Thread(
-                    target=_fp_check,
-                    args=("all", fingerprint_manager.check_all),
-                    daemon=True,
-                ),
                 threading.Thread(
                     target=_fp_check,
                     args=("cpp", lambda: fingerprint_manager.check_cpp(args)),
@@ -499,7 +494,6 @@ def main() -> None:
                 _t.start()
             for _t in _fp_threads:
                 _t.join()
-            src_code_change = _fp_results["all"]
             cpp_test_change = _fp_results["cpp"]
             examples_change = _fp_results["examples"]
             python_test_change = _fp_results["python"]
@@ -554,6 +548,8 @@ def main() -> None:
 
         # Track test success/failure for fingerprint status
         tests_passed = False
+        completed_scopes: set[str] = set()
+        failed_scopes: set[str] = set()
 
         try:
             # Run tests using the test runner with sequential example compilation
@@ -646,6 +642,7 @@ def main() -> None:
                             pass  # Fall back to normal execution
 
                     timings = group.run()
+                    completed_scopes.update(("python_test", "examples"))
 
                     # Stop display thread if it was started
                     if display_thread:
@@ -662,6 +659,12 @@ def main() -> None:
                     _thread.interrupt_main()
                     raise
                 except Exception as e:
+                    if isinstance(
+                        e, (TestExecutionFailedException, TestTimeoutException)
+                    ):
+                        failed_scopes.update(failed_fingerprint_scopes(e.failures))
+                    else:
+                        failed_scopes.update(("python_test", "examples"))
                     ts_print(f"Parallel test execution failed: {e}")
                     sys.exit(1)
             else:
@@ -696,9 +699,6 @@ def main() -> None:
                     or rebuild_mode != RebuildMode.CACHED
                 )
                 force_wasm_change = wasm_change or rebuild_mode != RebuildMode.CACHED
-                force_src_code_change = (
-                    src_code_change or rebuild_mode != RebuildMode.CACHED
-                )
 
                 # Only show cache status when it's enabled (the notable case)
                 # When disabled (--no-fingerprint), this is the default so no message needed
@@ -708,14 +708,14 @@ def main() -> None:
                 # entirely on the ultra-early-exit path (cached test result).
                 from ci.util.test_runner import runner as test_runner
 
-                test_runner(
+                completed_scopes = test_runner(
                     args,
-                    force_src_code_change,
                     force_cpp_test_change,
                     force_examples_change,
                     force_python_test_change,
                     force_wasm_change,
                     fingerprint_manager=fingerprint_manager,
+                    failed_scopes=failed_scopes,
                 )
 
             # If we got here, tests passed
@@ -727,8 +727,7 @@ def main() -> None:
                 tests_passed = False
             raise
         finally:
-            # Only save fingerprints when running ALL tests, not specific tests
-            # This prevents running a specific test from marking the full fingerprint as valid
+            # Only full, successfully completed scopes may update their cache.
             # Note: args.examples == [] means "all examples" (e.g., --cpp mode), which is OK
             # args.examples with specific items (e.g., ['Blink']) means specific examples only
             running_specific_examples = (
@@ -738,11 +737,16 @@ def main() -> None:
                 args.test is None
                 and not running_specific_examples
                 and not args.no_fingerprint
+                and not args.check
                 and not pytest_options_active
             )
             if running_all_tests:
-                status = "success" if tests_passed else "failure"
-                fingerprint_manager.save_all(status)
+                if tests_passed:
+                    for scope in completed_scopes:
+                        fingerprint_manager.save_success(scope)
+                else:
+                    for scope in failed_scopes:
+                        fingerprint_manager.mark_failure(scope)
 
         # Set up force exit daemon and exit
         _ = setup_force_exit()
