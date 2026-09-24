@@ -55,24 +55,17 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     requested = os.environ.get("FASTLED_NATIVE_LINKER")
     if requested is None:
         return "lld", "lld"
+    if sys.platform != "linux":
+        raise ValueError("FASTLED_NATIVE_LINKER override is Linux-only")
     path = Path(requested)
     if not path.is_absolute():
         raise ValueError("FASTLED_NATIVE_LINKER must be an absolute path")
     if not path.is_file() or not os.access(path, os.X_OK):
         raise ValueError("FASTLED_NATIVE_LINKER must name an executable file")
     digest = hashlib.sha256()
-    linked_files = [path] + [
-        path.parent / name
-        for name in ("libllvm_ld.so", "libllvm_ld.dylib", "llvm_ld.dll")
-    ]
-    for linked_file in linked_files:
-        if linked_file != path:
-            if not linked_file.is_file():
-                continue
-            digest.update(linked_file.name.encode("utf-8"))
-        with linked_file.open("rb") as stream:
-            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                digest.update(chunk)
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
     return str(path), f"{path}:{digest.hexdigest()}"
 
 

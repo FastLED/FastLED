@@ -250,6 +250,9 @@ if is_macos and build_mode == 'debug'
   core_link_args = []
 endif
 if native_linker != 'lld'
+  if build_machine.system() != 'linux'
+    error('native_linker override is Linux-only')
+  endif
   if meson.is_cross_build()
     error('native_linker override requires a native build')
   endif

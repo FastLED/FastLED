@@ -98,18 +98,3 @@ def test_empty_override_is_not_treated_as_default(
     assert native_linker_signature() == ""
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", "")
     assert native_linker_signature() != ""
-
-
-def test_reld_bridge_library_affects_fingerprint(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    linker = tmp_path / "reld"
-    linker.write_bytes(b"binary")
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    without_bridge = native_linker_signature()
-    bridge = tmp_path / "libllvm_ld.so"
-    bridge.write_bytes(b"first bridge")
-    with_bridge = native_linker_signature()
-    assert with_bridge != without_bridge
-    bridge.write_bytes(b"second bridge")
-    assert native_linker_signature() != with_bridge

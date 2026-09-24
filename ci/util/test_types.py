@@ -592,13 +592,6 @@ def native_linker_signature() -> str:
         with path.open("rb") as linker:
             for chunk in iter(lambda: linker.read(1024 * 1024), b""):
                 hasher.update(chunk)
-        for name in ("libllvm_ld.so", "libllvm_ld.dylib", "llvm_ld.dll"):
-            bridge = path.parent / name
-            if bridge.is_file():
-                hasher.update(name.encode("utf-8"))
-                with bridge.open("rb") as library:
-                    for chunk in iter(lambda: library.read(1024 * 1024), b""):
-                        hasher.update(chunk)
     except OSError:
         # A missing or unreadable override must never reuse a passing cache.
         hasher.update(b"unreadable")

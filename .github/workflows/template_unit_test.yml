@@ -63,7 +63,8 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: Install reld native linker
+      - name: Install Wild native linker (Linux only)
+        if: runner.os == 'Linux'
         run: uv run python ci/tools/install_native_linker.py
 
       - name: Cache Rust C++ linter build

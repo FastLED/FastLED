@@ -1,6 +1,6 @@
 """Focused native linker selection and cache identity checks."""
 
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 
 import pytest
 
@@ -29,7 +29,8 @@ def test_native_linker_defaults_to_lld(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_native_linker_accepts_all_native_modes(
     mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    linker = tmp_path / "reld"
+    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
+    linker = tmp_path / "wild"
     linker.write_bytes(b"one")
     linker.chmod(0o755)
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
@@ -57,25 +58,17 @@ def test_native_linker_requires_absolute_executable(
         resolve_native_linker("debug-thin")
 
 
-def test_bridge_library_content_changes_identity(
+def test_native_linker_override_is_linux_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    linker = tmp_path / "reld"
+    linker = tmp_path / "wild"
     linker.write_bytes(b"one")
     linker.chmod(0o755)
-    bridge = tmp_path / "libllvm_ld.so"
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    _, absent = resolve_native_linker("quick")
-    bridge.write_bytes(b"bridge one")
-    _, first = resolve_native_linker("quick")
-    bridge.write_bytes(b"bridge two")
-    _, second = resolve_native_linker("quick")
-    assert absent != first != second
-
-
-def test_windows_drive_path_is_absolute() -> None:
-    assert PureWindowsPath(r"C:\tools\reld.exe").is_absolute()
-    assert not PureWindowsPath(r"C:tools\reld.exe").is_absolute()
+    for host in ("darwin", "win32"):
+        monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", host)
+        with pytest.raises(ValueError, match="Linux-only"):
+            resolve_native_linker("quick")
 
 
 def test_native_linker_content_change_requires_reconfigure(
@@ -182,7 +175,7 @@ def test_link_outputs_invalidate_before_linker_marker_is_committed(
         debug=True,
         check=False,
         build_mode="debug-thin",
-        native_linker="/opt/reld",
+        native_linker="/opt/wild",
         native_linker_identity="new linker identity",
         native_linker_changed=True,
         enable_examples=False,
