@@ -225,23 +225,26 @@ class TestCacheSummaryCarriesTheSplit(unittest.TestCase):
             self.assertIn("83/83 examples", reloaded.get_cache_summary())
 
     def test_split_travels_with_the_counts_on_a_cache_hit(self) -> None:
-        """save_all() carries prior counts forward when nothing ran. The split
-        must come along, or a unit-only result is relabelled as unattributed --
-        or worse, as covering examples it never touched."""
+        """A skipped run preserves the earlier split and its attribution."""
         with TemporaryDirectory() as tmp:
             mgr = FingerprintManager(Path(tmp))
-            mgr._prev_fingerprints["cpp_test"] = FingerprintResult(
-                hash="abc123",
-                num_tests_run=274,
-                num_tests_passed=274,
-                scope="full",
-                num_examples_run=0,
-                num_examples_passed=0,
-                examples_included=True,
+            mgr.write(
+                "cpp_test",
+                FingerprintResult(
+                    hash="abc123",
+                    status="success",
+                    num_tests_run=274,
+                    num_tests_passed=274,
+                    scope="full",
+                    num_examples_run=0,
+                    num_examples_passed=0,
+                    examples_included=True,
+                ),
             )
-            mgr._fingerprints["cpp_test"] = FingerprintResult(hash="abc123")
-
-            mgr.save_all("success")
+            self.assertFalse(
+                mgr.check("cpp_test", lambda: FingerprintResult(hash="abc123"))
+            )
+            mgr.save_success("cpp_test")
 
             reloaded = mgr.read("cpp_test")
             assert reloaded is not None
