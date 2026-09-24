@@ -472,3 +472,9 @@
   Inspect child processes and post-link hooks before explaining a link-time
   bottleneck; then compare the same linker with and without the hook before
   attributing end-to-end gains to a linker switch.
+- Before creating a follow-up PR after a concurrent merge, compare the exact
+  branch and current master trees. PR #4552 merged the late Windows-only
+  deployment fix, so rebasing its branch produced no diff; the actual
+  follow-up was a Python cache test that assumed the new Linux linker
+  environment variable was absent. Run cache tests with the CI environment
+  set as well as locally with defaults.
