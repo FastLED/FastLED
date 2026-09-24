@@ -101,6 +101,16 @@ jobs:
         if: steps.v.outputs.released == 'false'
         run: PYTHONPATH=. uv run ci/release.py notes "${{ steps.v.outputs.version }}" > "$RUNNER_TEMP/notes.md"
 
+      - name: Recheck remote master immediately before release
+        if: inputs.dry_run == false && steps.v.outputs.released == 'false'
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/master
+          uv run python ci/release_gate.py require-master \
+            --sha "$CANDIDATE_SHA" --observed "$(git rev-parse FETCH_HEAD)"
+
       - name: Tag and create the GitHub release
         if: inputs.dry_run == false && steps.v.outputs.released == 'false' && steps.v.outputs.tagged == 'false'
         env:

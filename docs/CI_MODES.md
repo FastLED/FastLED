@@ -65,8 +65,12 @@ Wait for these runs to finish. Then manually run `release.yml` on `master`
 with `candidate_sha=<sha>` and `dry_run=true`. Its evidence gate reads each
 workflow's completed dispatch run, requires the same SHA and successful jobs,
 and requires both hosted macOS variants. After the dry run passes, repeat with
-`dry_run=false` to create the tag and release at that SHA. An ordinary version
-push, a green fractional run, or an individual board dispatch cannot tag.
+`dry_run=false` to create the tag and release at that SHA. The real run
+re-fetches `origin/master` immediately before the tag step and refuses a
+candidate that has since been superseded. The check narrows, but cannot
+eliminate, the network race between fetching and GitHub accepting the tag.
+An ordinary version push, a green fractional run, or an individual board
+dispatch cannot tag.
 
 The package registry crawler may read a new default-branch version before
 the tag exists. The release gate prevents an untested GitHub tag/release, but

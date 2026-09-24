@@ -17,8 +17,16 @@ def test_catalog_includes_board_tests_and_hosted_macos() -> None:
     assert "qemu_esp32c3_test.yml" in required
     assert "build_wasm.yml" in required
     assert "ci-labels.yml" in required
-    assert required["unit_test_macos.yml"] == 2
-    assert required["example_test_macos.yml"] == 2
+    assert required["unit_test_macos.yml"] == {
+        "test (macos-15-intel) / build",
+        "test (macos-15) / build",
+    }
+    assert required["example_test_macos.yml"] == required["unit_test_macos.yml"]
+    assert "build_uno / build" in required["build.yml"]
+    assert (
+        "esp32c3_qemu_test (Test, Test loop!) / qemu_test"
+        in required["qemu_esp32c3_test.yml"]
+    )
     assert "unit_test_linux.yml" in required
     assert "unit_test_windows.yml" in required
 
@@ -43,28 +51,52 @@ def test_run_requires_exact_sha_successful_dispatch_and_all_jobs(monkeypatch) ->
         return {"workflow_runs": [run]} if "/runs?" in path else jobs
 
     monkeypatch.setattr(release_gate, "api", fake_api)
-    assert release_gate.verify_run(SHA, "build_uno.yml", 1) == 17
+    assert release_gate.verify_run(SHA, "build_uno.yml", {"build"}) == 17
     for change in (
         {"head_sha": "b" * 40},
         {"event": "pull_request"},
         {"conclusion": "failure"},
     ):
         run.update(change)
-        assert release_gate.verify_run(SHA, "build_uno.yml", 1) is None
+        assert release_gate.verify_run(SHA, "build_uno.yml", {"build"}) is None
         run.update(
             {"head_sha": SHA, "event": "workflow_dispatch", "conclusion": "success"}
         )
     jobs["jobs"][0]["conclusion"] = "skipped"
-    assert release_gate.verify_run(SHA, "build_uno.yml", 1) is None
+    assert release_gate.verify_run(SHA, "build_uno.yml", {"build"}) is None
     jobs["jobs"] = []
-    assert release_gate.verify_run(SHA, "build_uno.yml", 1) is None
+    assert release_gate.verify_run(SHA, "build_uno.yml", {"build"}) is None
+
+
+def test_extra_successful_job_cannot_replace_required_cell(monkeypatch) -> None:
+    run = {
+        "head_sha": SHA,
+        "event": "workflow_dispatch",
+        "conclusion": "success",
+        "id": 19,
+    }
+    jobs = {
+        "jobs": [
+            {"name": "build_uno / build", "conclusion": "success"},
+            {"name": "unrelated / build", "conclusion": "success"},
+        ]
+    }
+
+    def fake_api(_method, path, _payload=None):
+        return {"workflow_runs": [run]} if "/runs?" in path else jobs
+
+    monkeypatch.setattr(release_gate, "api", fake_api)
+    expected = {"build_uno / build", "build_esp32dev / build"}
+    assert release_gate.verify_run(SHA, "build.yml", expected) is None
+    jobs["jobs"][1]["name"] = "build_esp32dev / build"
+    assert release_gate.verify_run(SHA, "build.yml", expected) == 19
 
 
 def test_macos_requires_both_hosted_architectures(monkeypatch) -> None:
     jobs = {
         "jobs": [
-            {"name": "test / build (macos-15-intel)", "conclusion": "success"},
-            {"name": "test / build (macos-15)", "conclusion": "success"},
+            {"name": "test (macos-15-intel) / build", "conclusion": "success"},
+            {"name": "test (macos-15) / build", "conclusion": "success"},
         ]
     }
 
@@ -83,14 +115,15 @@ def test_macos_requires_both_hosted_architectures(monkeypatch) -> None:
         return jobs
 
     monkeypatch.setattr(release_gate, "api", fake_api)
-    assert release_gate.verify_run(SHA, "unit_test_macos.yml", 2) == 18
-    jobs["jobs"][1]["name"] = "test / build (macos-15-intel)"
-    assert release_gate.verify_run(SHA, "unit_test_macos.yml", 2) is None
+    expected = {"test (macos-15-intel) / build", "test (macos-15) / build"}
+    assert release_gate.verify_run(SHA, "unit_test_macos.yml", expected) == 18
+    jobs["jobs"][1]["name"] = "test (macos-15-intel) / build"
+    assert release_gate.verify_run(SHA, "unit_test_macos.yml", expected) is None
 
 
 def test_missing_workflow_fails_entire_release(monkeypatch) -> None:
     monkeypatch.setattr(
-        release_gate, "required_workflows", lambda: {"build_uno.yml": 1}
+        release_gate, "required_workflows", lambda: {"build_uno.yml": {"build"}}
     )
     monkeypatch.setattr(release_gate, "verify_run", lambda *_args: None)
     with pytest.raises(ValueError, match="missing exact-SHA successful full CI"):
@@ -104,6 +137,12 @@ def test_dispatch_requires_candidate_at_current_master(monkeypatch) -> None:
     with pytest.raises(ValueError, match="current master HEAD"):
         release_gate.dispatch_full(SHA)
     assert calls == []
+
+
+def test_master_drift_after_evidence_rejects_release() -> None:
+    release_gate.require_master(SHA, SHA)
+    with pytest.raises(ValueError, match="master advanced after full CI"):
+        release_gate.require_master(SHA, "b" * 40)
 
 
 def test_release_workflow_is_manual_and_gate_precedes_writes() -> None:
@@ -126,6 +165,21 @@ def test_release_workflow_is_manual_and_gate_precedes_writes() -> None:
         ):
             assert i > gate_index
             assert "inputs.dry_run == false" in step["if"]
+    last_read_index = next(
+        i
+        for i, step in enumerate(steps)
+        if step.get("name") == "Recheck remote master immediately before release"
+    )
+    assert gate_index < last_read_index
+    assert (
+        "git fetch --no-tags origin refs/heads/master" in steps[last_read_index]["run"]
+    )
+    assert "ci/release_gate.py require-master" in steps[last_read_index]["run"]
+    assert '"$(git rev-parse FETCH_HEAD)"' in steps[last_read_index]["run"]
+    write_indexes = [
+        i for i, step in enumerate(steps) if "gh release create" in step.get("run", "")
+    ]
+    assert write_indexes and min(write_indexes) == last_read_index + 1
     assert "Require candidate is current master" in [
         step.get("name") for step in steps[:gate_index]
     ]
