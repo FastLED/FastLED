@@ -462,6 +462,7 @@ FL_TEST_CASE("FL_WARN unified - printf-style without _F suffix") {
         FL_WARN_F("Legacy: %d", n);
         FL_CHECK(true);
     }
+
 }
 
 FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
@@ -482,6 +483,38 @@ FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
         FL_CHECK(true);
     }
 }
+
+#define FL_TEST_STRINGIZE_IMPL(...) #__VA_ARGS__
+#define FL_TEST_STRINGIZE(...) FL_TEST_STRINGIZE_IMPL(__VA_ARGS__)
+
+FL_TEST_CASE("explicit _F logging macros bypass stream dispatch") {
+    const fl::string warn = FL_TEST_STRINGIZE(FL_WARN_F("literal"));
+    const fl::string error = FL_TEST_STRINGIZE(FL_ERROR_F("literal"));
+    const fl::string print = FL_TEST_STRINGIZE(FL_PRINT_F("literal"));
+    const fl::string async =
+        FL_TEST_STRINGIZE(FL_LOG_ASYNC_F(logger, "literal"));
+    const fl::string warn_if =
+        FL_TEST_STRINGIZE(FL_WARN_F_IF(true, "literal"));
+    const fl::string warn_once = FL_TEST_STRINGIZE(FL_WARN_F_ONCE("literal"));
+    const fl::string warn_every =
+        FL_TEST_STRINGIZE(FL_WARN_F_EVERY(10, "literal"));
+
+    FL_CHECK_NE(warn.find("log_emit_f"), fl::string::npos);
+    FL_CHECK_NE(error.find("log_emit_f"), fl::string::npos);
+    FL_CHECK_NE(print.find("fl::printf"), fl::string::npos);
+    FL_CHECK_NE(async.find("log_format_string"), fl::string::npos);
+    FL_CHECK_NE(warn_if.find("log_emit_f"), fl::string::npos);
+    FL_CHECK_NE(warn_once.find("log_emit_f"), fl::string::npos);
+    FL_CHECK_NE(warn_every.find("log_emit_f"), fl::string::npos);
+
+    FL_CHECK_EQ(warn.find("sstream"), fl::string::npos);
+    FL_CHECK_EQ(error.find("sstream"), fl::string::npos);
+    FL_CHECK_EQ(print.find("sstream"), fl::string::npos);
+    FL_CHECK_EQ(async.find("sstream"), fl::string::npos);
+}
+
+#undef FL_TEST_STRINGIZE
+#undef FL_TEST_STRINGIZE_IMPL
 
 FL_TEST_CASE("FL_INFO unified - printf-style") {
     FL_SUBCASE("FL_INFO with printf format") {
