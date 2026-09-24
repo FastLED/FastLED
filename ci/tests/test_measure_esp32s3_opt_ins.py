@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
+
 from tests.measure_esp32s3_opt_ins import (
     CONFIGS,
     BuildMeasurement,
+    UnsupportedConfigError,
     _run_compile_cmd,
     format_table,
+    select_configs,
 )
 
 
@@ -48,3 +52,22 @@ def test_comparison_table_records_symbol_and_firmware_deltas() -> None:
     assert "+1" in table
     assert "-10 B" in table
     assert table.isascii()
+
+
+def test_all_skips_overlay_configs_that_fbuild_cannot_apply() -> None:
+    requested, skipped = select_configs("all")
+
+    assert "baseline" in requested
+    assert "stage4" in requested
+    assert skipped == ["stage3", "stack", "max_savings"]
+    assert not set(requested) & set(skipped)
+
+
+def test_explicit_overlay_config_is_refused() -> None:
+    with pytest.raises(UnsupportedConfigError, match="fbuild/issues/1460"):
+        select_configs("baseline,stage3")
+
+
+def test_unknown_config_is_rejected() -> None:
+    with pytest.raises(ValueError, match="unknown config 'nope'"):
+        select_configs("nope")
