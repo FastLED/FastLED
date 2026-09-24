@@ -9,7 +9,7 @@
 - [x] CI/WASM slice: resolve #4525-#4527 with focused RED→GREEN regressions.
 - [x] Integrate and inspect all worker diffs in deterministic slice order.
 - [x] Run focused checks, full lint, and full Python/C++ test gates.
-- [ ] Run the pre-push review gate and address findings.
+- [x] Run the pre-push review gate and address findings.
 - [ ] Push a closing PR, wait for GitHub Actions and review threads, then merge.
 - [ ] Confirm #4518-#4528 closed, remove owned worktrees/branches, and sync clean master.
 
@@ -33,6 +33,12 @@
   passes 311/311 C++ unit tests plus 95/95 host examples.
 - The vector fix preserves the successfully appended prefix on allocation
   failure and keeps allocation failure recoverable in debug and release modes.
+- The review follow-ups preserve empty pointer identity across cv conversion,
+  keep generic empty iterators non-dereferencing, and report reversed pointer
+  ranges through `FL_ERROR_F` before returning a safe zero-length span.
+- Pre-push review is clean after three cycles; the final combined native gate
+  passes 311/311 unit tests and 95/95 host examples after rebuilding 867
+  targets affected by the public span header.
 - Upstream fingerprint false-green behavior discovered during validation is
   tracked as zackees/zccache#1650.
 
