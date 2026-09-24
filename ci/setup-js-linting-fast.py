@@ -103,7 +103,7 @@ def download_and_extract_node():
         raise ValueError(f"Unsupported architecture: {machine}")
 
     print(f"Downloading Node.js v{NODE_VERSION}...")
-    TOOLS_DIR.mkdir(exist_ok=True)
+    TOOLS_DIR.mkdir(parents=True, exist_ok=True)
     NODE_DIR.mkdir(exist_ok=True)
 
     if download_path.exists():

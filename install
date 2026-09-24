@@ -78,6 +78,10 @@ if [ -z "$FASTLED_DOCKER" ]; then
     if uv run ci/setup-js-linting-fast.py; then
         echo "✅ Fast JavaScript linting enabled - 53x faster than Deno!"
     else
+        if [ "${CI:-}" = "true" ] || [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+            echo "❌ JavaScript linter setup failed in CI; required lint tooling is unavailable." >&2
+            exit 1
+        fi
         echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
     fi
 else

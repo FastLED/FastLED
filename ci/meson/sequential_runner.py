@@ -224,6 +224,10 @@ def run_sequential_compile(
             break
         last_error_output = result.error_output
         all_suppressed_errors.extend(result.suppressed_errors)
+        if result.timed_out:
+            # A wall-clock deadline is a real build failure, not a missing or
+            # ambiguous Meson target. A later fuzzy candidate cannot mask it.
+            break
 
     ctx.build_timer.checkpoint("compile_done")
 

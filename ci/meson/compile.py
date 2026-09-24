@@ -5,12 +5,12 @@ import re
 import sys
 import time
 from collections import deque
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, cast
 
-from running_process import RunningProcess
+from running_process import RunningProcess, terminate_process_tree
 
 from ci.meson.cache_utils import (
     check_ninja_skip,
@@ -44,6 +44,141 @@ _LLD_PERM_DENIED_MAX_RETRIES = 3
 # ``2.0 * (attempt + 1)`` seconds to let the daemon drain its queue. See #4132.
 _ZCCACHE_TRANSIENT_MAX_RETRIES = 2
 
+# The cold full-debug/ASan build in #4529 took 1130.84s. Leave headroom for
+# slower hosted runners, but keep an absolute bound inside the 45-minute job.
+_COMPILE_HARD_TIMEOUT_SECONDS = 1800.0
+_COMPILE_QUIET_WARNING_SECONDS = 300.0
+_COMPILE_QUIET_DUMP_SECONDS = 600.0
+_COMPILE_POLL_SECONDS = 1.0
+
+
+class _CompileDeadlineExceeded(RuntimeError):
+    """A non-retryable build failure, even when fuzzy targets are available."""
+
+
+def _compile_process_tree(pid: int | None) -> str:
+    """Describe Meson and its compiler children while they are still alive."""
+    if pid is None:
+        return "Process tree unavailable: no child PID"
+    import psutil  # noqa: PLC0415 - diagnostic-only import
+
+    try:
+        parent = psutil.Process(pid)
+        lines: list[str] = []
+        for process in [parent, *parent.children(recursive=True)]:
+            try:
+                lines.append(
+                    f"PID {process.pid}: {process.status()} "
+                    f"CPU={process.cpu_times()} CMD={process.cmdline()}"
+                )
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                lines.append(f"PID {process.pid}: exited or inaccessible")
+        return "\n".join(lines)
+    except (psutil.NoSuchProcess, psutil.AccessDenied) as exc:
+        return f"Process tree unavailable for PID {pid}: {exc}"
+
+
+def _monitored_compile_lines(
+    proc: RunningProcess,
+    *,
+    command: list[str],
+    target: str | None,
+    started: float,
+    deadline_seconds: float | None = None,
+) -> Iterator[str]:
+    """Drain output while enforcing a wall deadline and quiet diagnostics."""
+    if deadline_seconds is None:
+        deadline_seconds = _COMPILE_HARD_TIMEOUT_SECONDS
+    last_output = time.monotonic()
+    last_milestone = "starting Meson compile"
+    warned = False
+    dumped = False
+    stream_ended = False
+    with proc.line_iter(timeout=_COMPILE_POLL_SECONDS) as lines:
+        while True:
+            now = time.monotonic()
+            elapsed = now - started
+            quiet = now - last_output
+            context = (
+                f"target={target or 'all'} pid={proc.pid} elapsed={elapsed:.0f}s "
+                f"quiet={quiet:.0f}s last={last_milestone}"
+            )
+            if elapsed >= deadline_seconds:
+                _ts_print(
+                    f"[BUILD] ERROR: Hard compilation deadline exceeded; {context}; "
+                    f"command={command}",
+                    file=sys.stderr,
+                )
+                _ts_print(_compile_process_tree(proc.pid), file=sys.stderr)
+                try:
+                    if proc.pid is not None:
+                        terminate_process_tree(proc.pid, timeout_seconds=3.0)
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as exc:
+                    _ts_print(
+                        f"[BUILD] Process-tree termination failed: {exc}",
+                        file=sys.stderr,
+                    )
+                finally:
+                    proc.kill()
+                raise _CompileDeadlineExceeded(
+                    f"Hard compilation deadline exceeded after {elapsed:.0f}s; "
+                    f"{context}"
+                )
+            if quiet >= _COMPILE_QUIET_WARNING_SECONDS and not warned:
+                _ts_print(
+                    f"[BUILD] WARNING: Compiler still quiet; {context}; "
+                    f"status={proc.poll()}",
+                    file=sys.stderr,
+                )
+                warned = True
+            dump_after = _COMPILE_QUIET_DUMP_SECONDS
+            if (
+                deadline_seconds >= _COMPILE_QUIET_DUMP_SECONDS
+                and deadline_seconds - 5 > _COMPILE_QUIET_WARNING_SECONDS
+            ):
+                dump_after = min(dump_after, deadline_seconds - 5)
+            if quiet >= dump_after and not dumped:
+                _ts_print(
+                    f"[BUILD] Sustained silence: process/tree diagnostic; {context}",
+                    file=sys.stderr,
+                )
+                _ts_print(_compile_process_tree(proc.pid), file=sys.stderr)
+                from ci.util.test_env import dump_thread_stacks
+
+                try:
+                    dump_thread_stacks()
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as exc:
+                    _ts_print(
+                        f"[BUILD] Stack diagnostic unavailable: {exc}",
+                        file=sys.stderr,
+                    )
+                dumped = True
+            if stream_ended:
+                if proc.poll() is not None:
+                    return
+                time.sleep(_COMPILE_POLL_SECONDS)
+                continue
+            try:
+                line = next(lines)
+            except TimeoutError:
+                continue
+            except StopIteration:
+                stream_ended = True
+                continue
+            last_output = time.monotonic()
+            warned = False
+            dumped = False
+            stripped = line.strip()
+            if stripped and ("[" in stripped or "Compiling" in stripped):
+                last_milestone = stripped[-180:]
+            yield line
+
 
 @dataclass
 class CompileResult:
@@ -60,6 +195,10 @@ class CompileResult:
 
     # NEW: Extracted error snippet (key error lines with context)
     error_snippet: Optional[str] = None
+
+    # A hard deadline is not a target-name resolution error and must not be
+    # retried as a different fuzzy candidate.
+    timed_out: bool = False
 
 
 # Stale-build patterns matched ONLY against lines that begin with
@@ -287,7 +426,8 @@ def _retry_ninja(
     describe: Callable[[str, int], str],
     before_retry: Callable[[], None] | None,
     label: str,
-    timeout: int,
+    started: float,
+    deadline_seconds: float,
     env: dict[str, str] | None,
     output_formatter: TimestampFormatter | None,
 ) -> _RetryOutcome:
@@ -304,26 +444,46 @@ def _retry_ninja(
     returncode = -1
     latest = output
     for _attempt in range(max_retries):
+        if time.monotonic() - started >= deadline_seconds:
+            raise _CompileDeadlineExceeded(
+                f"Hard compilation deadline exceeded before {label} retry; "
+                f"command={cmd}"
+            )
         _ts_print(f"[MESON] ⚠️  {describe(latest, _attempt + 1)}", file=sys.stderr)
         if before_retry is not None:
             before_retry()
         # Linear backoff: gives the daemon / OS / AV time to settle.
         time.sleep(backoff_seconds * (_attempt + 1))
+        if time.monotonic() - started >= deadline_seconds:
+            raise _CompileDeadlineExceeded(
+                f"Hard compilation deadline exceeded before {label} retry; "
+                f"command={cmd}"
+            )
         try:
             retry_proc = RunningProcess(
                 cmd,
-                timeout=timeout,
+                timeout=deadline_seconds,
                 auto_run=True,
                 check=False,
                 env=env,
                 output_formatter=output_formatter,
             )
-            retry_proc.wait(echo=False)
+            for _line in _monitored_compile_lines(
+                retry_proc,
+                command=cmd,
+                target=label,
+                started=started,
+                deadline_seconds=deadline_seconds,
+            ):
+                pass
+            retry_proc.wait(echo=False, timeout=_COMPILE_POLL_SECONDS)
             returncode = cast(int, retry_proc.returncode)
             latest = str(retry_proc.stdout)
             output = output + "\n" + latest
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
+            raise
+        except _CompileDeadlineExceeded:
             raise
         except Exception as retry_error:
             _ts_print(
@@ -442,13 +602,14 @@ def compile_meson(
 
     # Create tee for error log capture (stdout + stderr merged)
     stderr_tee = StreamTee(error_log_path, echo=False)
+    tee_closed = False
     last_error_lines: list[str] = []
 
     try:
         # Use RunningProcess for streaming output
         proc = RunningProcess(
             cmd,
-            timeout=600,  # 10 minute timeout for compilation
+            timeout=_COMPILE_HARD_TIMEOUT_SECONDS,
             auto_run=True,
             check=False,  # We'll check returncode manually
             output_formatter=TimestampFormatter(),
@@ -484,192 +645,172 @@ def compile_meson(
         # Stream output line by line to rewrite Ninja paths
         # In quiet mode or non-verbose mode, suppress all output (errors shown via error filter)
         # In verbose mode, show full compilation output for detailed debugging
-        import time as _time
+        compile_started = time.monotonic()
+        for line in _monitored_compile_lines(
+            proc, command=cmd, target=target, started=compile_started
+        ):
+            # Write to error log (captures both stdout and stderr)
+            stderr_tee.write_line(line)
 
-        last_line_time = _time.time()
-        with proc.line_iter(timeout=None) as it:
-            for line in it:
-                now = _time.time()
-                silence_duration = now - last_line_time
-                last_line_time = now
+            # Track errors for smart detection
+            if _is_compilation_error(line):
+                last_error_lines.append(line)
+                if len(last_error_lines) > 50:
+                    last_error_lines.pop(0)
 
-                # Dump stacks if compilation produced no output for >60s
-                if silence_duration > 60.0:
-                    try:
-                        from ci.util.test_env import dump_thread_stacks
+            # Filter out noisy Meson/Ninja INFO lines that clutter output
+            # Note: TimestampFormatter may add timestamp prefix, so check contains not startswith
+            stripped = line.strip()
+            if " INFO:" in stripped or stripped.startswith("INFO:"):
+                continue  # Skip Meson INFO lines
+            if "Entering directory" in stripped:
+                continue  # Skip Ninja directory change messages
+            if "calculating backend command" in stripped.lower():
+                continue  # Skip Meson backend calculation message
+            # Note: "Can't invoke target" errors are NOT filtered here.
+            # They are preserved in output for caller diagnostics (e.g., ambiguous target).
+            # The caller controls whether to display them via the quiet parameter.
+            if "ninja: no work to do" in stripped.lower():
+                continue  # Skip no-work ninja message (already up to date)
 
-                        _ts_print(
-                            f"[BUILD] WARNING: No output for {silence_duration:.0f}s - dumping stacks"
-                        )
-                        dump_thread_stacks()
-                    except KeyboardInterrupt as ki:
-                        handle_keyboard_interrupt(ki)
-                        raise
-                    except Exception:
-                        pass
-                # Write to error log (captures both stdout and stderr)
-                stderr_tee.write_line(line)
+            # Check for key build milestones (show even in quiet/non-verbose mode)
+            is_key_milestone = False
+            custom_message_shown = False
 
-                # Track errors for smart detection
-                if _is_compilation_error(line):
-                    last_error_lines.append(line)
-                    if len(last_error_lines) > 50:
-                        last_error_lines.pop(0)
-
-                # Filter out noisy Meson/Ninja INFO lines that clutter output
-                # Note: TimestampFormatter may add timestamp prefix, so check contains not startswith
-                stripped = line.strip()
-                if " INFO:" in stripped or stripped.startswith("INFO:"):
-                    continue  # Skip Meson INFO lines
-                if "Entering directory" in stripped:
-                    continue  # Skip Ninja directory change messages
-                if "calculating backend command" in stripped.lower():
-                    continue  # Skip Meson backend calculation message
-                # Note: "Can't invoke target" errors are NOT filtered here.
-                # They are preserved in output for caller diagnostics (e.g., ambiguous target).
-                # The caller controls whether to display them via the quiet parameter.
-                if "ninja: no work to do" in stripped.lower():
-                    continue  # Skip no-work ninja message (already up to date)
-
-                # Check for key build milestones (show even in quiet/non-verbose mode)
-                is_key_milestone = False
-                custom_message_shown = False
-
-                # Check for library archiving (static libraries like libcrash_handler.a)
-                archive_match = archive_pattern.search(stripped)
-                if archive_match:
-                    if "libcrash_handler" in stripped:
-                        is_key_milestone = True
-                        custom_message_shown = True
-                        lib_match = re.search(
-                            r"(ci[\\/]meson[\\/]native[\\/]lib\S+\.a)", stripped
-                        )
-                        if lib_match:
-                            rel_path = lib_match.group(1)
-                            full_path = build_dir / rel_path
-                            try:
-                                display_path = full_path.relative_to(Path.cwd())
-                            except ValueError:
-                                display_path = full_path
-                            _ts_print(f"[BUILD] ✓ Core library: {display_path}")
-                            seen_libcrash_handler = True
-
-                # Check for PCH compilation
-                pch_match = pch_pattern.search(stripped)
-                if pch_match:
+            # Check for library archiving (static libraries like libcrash_handler.a)
+            archive_match = archive_pattern.search(stripped)
+            if archive_match:
+                if "libcrash_handler" in stripped:
                     is_key_milestone = True
                     custom_message_shown = True
-                    seen_pch = True  # Track that we've seen PCH compilation
-                    # Extract PCH path from the line
-                    # Format: "[1/1] Generating tests/test_pch with a custom command"
-                    pch_path_match = re.search(
-                        r"Generating\s+(\S+test_pch)\b", stripped
+                    lib_match = re.search(
+                        r"(ci[\\/]meson[\\/]native[\\/]lib\S+\.a)", stripped
                     )
-                    if pch_path_match:
-                        rel_path = (
-                            pch_path_match.group(1) + ".h.pch"
-                        )  # Add extension for display
+                    if lib_match:
+                        rel_path = lib_match.group(1)
                         full_path = build_dir / rel_path
                         try:
                             display_path = full_path.relative_to(Path.cwd())
                         except ValueError:
                             display_path = full_path
-                        _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
+                        _ts_print(f"[BUILD] ✓ Core library: {display_path}")
+                        seen_libcrash_handler = True
 
-                # Check for fastled shared library linking (fastled.dll/fastled.so)
-                test_link_match = link_pattern.search(stripped)
-                if test_link_match:
-                    _link_rel_path = test_link_match.group(1)
-                    _link_stem = Path(_link_rel_path).stem
-                    if _link_stem == "fastled" and Path(
-                        _link_rel_path
-                    ).suffix.lower() in (".dll", ".so", ".dylib"):
-                        is_key_milestone = True
-                        custom_message_shown = True
-                        seen_libfastled = True
-                        _link_full = build_dir / _link_rel_path
-                        try:
-                            _link_display = _link_full.relative_to(Path.cwd())
-                        except ValueError:
-                            _link_display = _link_full
-                        _ts_print(f"[BUILD] ✓ Core library: {_link_display}")
-
-                # Check for test/example linking
-                if test_link_match:
-                    if (
-                        "tests/" in stripped
-                        or "tests\\" in stripped
-                        or "examples/" in stripped
-                        or "examples\\" in stripped
-                    ):
-                        # Exclude test infrastructure (runner.exe is not a test)
-                        # Extract test name from the stripped line
-                        test_name_match = re.search(
-                            r"[\\/](runner|test_runner|example_runner)\.", stripped
-                        )
-                        if not test_name_match:
-                            seen_any_test = (
-                                True  # Track that we've seen at least one test
-                            )
-                            # Show "Building tests..." stage message on first test
-                            if not shown_tests_stage:
-                                _ts_print("[BUILD] Building tests...")
-                                shown_tests_stage = True
-                            is_key_milestone = True
-
-                # Suppress output unless verbose mode enabled
-                # In quiet or non-verbose mode: still print error/failure lines to stderr
-                # In verbose mode: show full compilation output for detailed debugging
-                # WARNING: The milestone detection below (is_key_milestone) requires quiet=False!
-                #   Do NOT suppress milestone messages - they provide essential build progress feedback.
-                if quiet or not verbose:
-                    # Print error and failure lines so compiler errors are never silently swallowed
-                    # Exception: Store "Can't invoke target" errors in validation list (shown on self-healing)
-                    stripped_lower = stripped.lower()
-                    if "error:" in stripped_lower or "FAILED:" in stripped:
-                        # In quiet mode, store "Can't invoke target" errors for later diagnostic use
-                        # These are shown only when self-healing occurs (all targets fail)
-                        if quiet and "can't invoke target" in stripped_lower:
-                            # Cap at 5 errors to prevent list bloat
-                            if len(suppressed_errors) < 5:
-                                suppressed_errors.append(stripped)
-                            continue
-                        _ts_print(line, file=sys.stderr)
-                        continue
-
-                    # Show key milestones even in quiet/non-verbose mode
-                    # But skip if we already printed a custom message (like library path)
-                    if is_key_milestone and not custom_message_shown:
-                        _ts_print(f"[BUILD] {line}")
-
-                    continue
-
-                # Rewrite Ninja paths to show full build-relative paths for clarity
-                # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
-                # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
-                display_line = line
-                link_match = link_pattern.search(line)
-                if link_match:
-                    rel_path = link_match.group(1)
-                    # Convert build-relative path to project-relative path
+            # Check for PCH compilation
+            pch_match = pch_pattern.search(stripped)
+            if pch_match:
+                is_key_milestone = True
+                custom_message_shown = True
+                seen_pch = True  # Track that we've seen PCH compilation
+                # Extract PCH path from the line
+                # Format: "[1/1] Generating tests/test_pch with a custom command"
+                pch_path_match = re.search(r"Generating\s+(\S+test_pch)\b", stripped)
+                if pch_path_match:
+                    rel_path = (
+                        pch_path_match.group(1) + ".h.pch"
+                    )  # Add extension for display
                     full_path = build_dir / rel_path
                     try:
-                        # Make path relative to project root for cleaner display
                         display_path = full_path.relative_to(Path.cwd())
-                        # Rewrite the line with full path
-                        display_line = line.replace(rel_path, str(display_path))
                     except ValueError:
-                        # If path is outside project, show absolute path
-                        display_line = line.replace(rel_path, str(full_path))
+                        display_path = full_path
+                    _ts_print(f"[BUILD] ✓ Precompiled header: {display_path}")
 
-                # Echo the (possibly rewritten) line (only in verbose mode)
-                _ts_print(display_line)
+            # Check for fastled shared library linking (fastled.dll/fastled.so)
+            test_link_match = link_pattern.search(stripped)
+            if test_link_match:
+                _link_rel_path = test_link_match.group(1)
+                _link_stem = Path(_link_rel_path).stem
+                if _link_stem == "fastled" and Path(_link_rel_path).suffix.lower() in (
+                    ".dll",
+                    ".so",
+                    ".dylib",
+                ):
+                    is_key_milestone = True
+                    custom_message_shown = True
+                    seen_libfastled = True
+                    _link_full = build_dir / _link_rel_path
+                    try:
+                        _link_display = _link_full.relative_to(Path.cwd())
+                    except ValueError:
+                        _link_display = _link_full
+                    _ts_print(f"[BUILD] ✓ Core library: {_link_display}")
 
-        returncode = cast(int, proc.wait())
+            # Check for test/example linking
+            if test_link_match:
+                if (
+                    "tests/" in stripped
+                    or "tests\\" in stripped
+                    or "examples/" in stripped
+                    or "examples\\" in stripped
+                ):
+                    # Exclude test infrastructure (runner.exe is not a test)
+                    # Extract test name from the stripped line
+                    test_name_match = re.search(
+                        r"[\\/](runner|test_runner|example_runner)\.", stripped
+                    )
+                    if not test_name_match:
+                        seen_any_test = True  # Track that we've seen at least one test
+                        # Show "Building tests..." stage message on first test
+                        if not shown_tests_stage:
+                            _ts_print("[BUILD] Building tests...")
+                            shown_tests_stage = True
+                        is_key_milestone = True
+
+            # Suppress output unless verbose mode enabled
+            # In quiet or non-verbose mode: still print error/failure lines to stderr
+            # In verbose mode: show full compilation output for detailed debugging
+            # WARNING: The milestone detection below (is_key_milestone) requires quiet=False!
+            #   Do NOT suppress milestone messages - they provide essential build progress feedback.
+            if quiet or not verbose:
+                # Print error and failure lines so compiler errors are never silently swallowed
+                # Exception: Store "Can't invoke target" errors in validation list (shown on self-healing)
+                stripped_lower = stripped.lower()
+                if "error:" in stripped_lower or "FAILED:" in stripped:
+                    # In quiet mode, store "Can't invoke target" errors for later diagnostic use
+                    # These are shown only when self-healing occurs (all targets fail)
+                    if quiet and "can't invoke target" in stripped_lower:
+                        # Cap at 5 errors to prevent list bloat
+                        if len(suppressed_errors) < 5:
+                            suppressed_errors.append(stripped)
+                        continue
+                    _ts_print(line, file=sys.stderr)
+                    continue
+
+                # Show key milestones even in quiet/non-verbose mode
+                # But skip if we already printed a custom message (like library path)
+                if is_key_milestone and not custom_message_shown:
+                    _ts_print(f"[BUILD] {line}")
+
+                continue
+
+            # Rewrite Ninja paths to show full build-relative paths for clarity
+            # Ninja outputs paths relative to build directory (e.g., "tests/fx_frame.exe")
+            # Users expect to see full paths (e.g., ".build/meson-quick/tests/fx_frame.exe")
+            display_line = line
+            link_match = link_pattern.search(line)
+            if link_match:
+                rel_path = link_match.group(1)
+                # Convert build-relative path to project-relative path
+                full_path = build_dir / rel_path
+                try:
+                    # Make path relative to project root for cleaner display
+                    display_path = full_path.relative_to(Path.cwd())
+                    # Rewrite the line with full path
+                    display_line = line.replace(rel_path, str(display_path))
+                except ValueError:
+                    # If path is outside project, show absolute path
+                    display_line = line.replace(rel_path, str(full_path))
+
+            # Echo the (possibly rewritten) line (only in verbose mode)
+            _ts_print(display_line)
+
+        returncode = cast(int, proc.wait(timeout=_COMPILE_POLL_SECONDS))
 
         # Write standardized footer to error log
         stderr_tee.write_footer(returncode)
         stderr_tee.close()
+        tee_closed = True
 
         # Save last error snippet if compilation failed
         if returncode != 0 and last_error_lines:
@@ -793,7 +934,8 @@ def compile_meson(
                 describe=_describe_lld,
                 before_retry=_before_lld_retry,
                 label="Link",
-                timeout=600,
+                started=compile_started,
+                deadline_seconds=_COMPILE_HARD_TIMEOUT_SECONDS,
                 env=None,
                 output_formatter=TimestampFormatter(),
             )
@@ -826,7 +968,8 @@ def compile_meson(
                 describe=_describe_zccache,
                 before_retry=None,
                 label="zccache",
-                timeout=600,
+                started=compile_started,
+                deadline_seconds=_COMPILE_HARD_TIMEOUT_SECONDS,
                 env=None,
                 output_formatter=TimestampFormatter(),
             )
@@ -906,6 +1049,22 @@ def compile_meson(
             error_log_file=None,  # Success - no error log needed
         )
 
+    except _CompileDeadlineExceeded as exc:
+        if tee_closed:
+            # Retry failures occur after the initial attempt's tee is closed.
+            with error_log_path.open("a", encoding="utf-8") as error_log:
+                error_log.write(f"{exc}\n")
+        else:
+            stderr_tee.write_line(str(exc))
+            stderr_tee.write_footer(-1)
+            stderr_tee.close()
+        return CompileResult(
+            success=False,
+            error_output=str(exc),
+            suppressed_errors=[],
+            error_log_file=error_log_path,
+            timed_out=True,
+        )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise

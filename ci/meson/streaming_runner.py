@@ -420,7 +420,9 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
     setattr(test_callback, "kill_all", _kill_active_procs)
 
     # Debug builds with ASAN are significantly slower (esp. Windows CI).
-    compile_timeout = 2700 if ctx.use_debug else 600
+    # #4529 needed 1130.84s for a cold full-debug/ASan compile. Keep a
+    # measured margin while leaving the 45-minute CI job time for tests.
+    compile_timeout = 1800 if ctx.use_debug else 600
 
     include_examples = examples_are_included(ctx.exclude_suites)
     compile_target = "all-with-examples" if include_examples else None
@@ -428,6 +430,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
     if compile_target == "all-with-examples":
         _check_all_with_examples_target(ctx)
 
+    compile_started = time.monotonic()
     sr = stream_compile_and_run_tests(
         build_dir=ctx.build_dir,
         test_callback=test_callback,
@@ -450,16 +453,22 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             ctx.verbose,
             enable_examples=True,
         ):
-            sr = stream_compile_and_run_tests(
-                build_dir=ctx.build_dir,
-                test_callback=test_callback,
-                target=compile_target,
-                verbose=ctx.verbose,
-                compile_timeout=compile_timeout,
-                build_optimizer=ctx.build_optimizer,
-                test_file_filter=ctx.test_file_filter,
-                build_timer=ctx.build_timer,
-            )
+            remaining = compile_timeout - (time.monotonic() - compile_started)
+            if remaining <= 0:
+                sr.compile_output += (
+                    "\nHard compilation deadline exceeded before stale-build retry"
+                )
+            else:
+                sr = stream_compile_and_run_tests(
+                    build_dir=ctx.build_dir,
+                    test_callback=test_callback,
+                    target=compile_target,
+                    verbose=ctx.verbose,
+                    compile_timeout=remaining,
+                    build_optimizer=ctx.build_optimizer,
+                    test_file_filter=ctx.test_file_filter,
+                    build_timer=ctx.build_timer,
+                )
 
     if sr.success and ctx.build_optimizer is not None:
         ctx.build_optimizer.save_fingerprints(ctx.build_dir)

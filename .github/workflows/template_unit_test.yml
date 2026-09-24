@@ -63,6 +63,15 @@ jobs:
         run: ./install
         shell: bash
 
+      - name: JavaScript lint
+        if: runner.os == 'Linux'
+        run: |
+          set -o pipefail
+          bash lint --js 2>&1 | tee js-lint.log
+          grep -q 'ESLint completed successfully' js-lint.log
+          grep -q 'TypeScript type checking completed successfully' js-lint.log
+        shell: bash
+
       - name: Install Wild native linker (Linux only)
         if: runner.os == 'Linux'
         run: uv run python ci/tools/install_native_linker.py
@@ -96,6 +105,37 @@ jobs:
         # Both are fixed in the same change.
         run: |
           uv run soldr cargo test --release --manifest-path ci/lint_cpp_rs/Cargo.toml
+        shell: bash
+
+      - name: Provision clang-query for required AST lint
+        run: |
+          if command -v clang-query >/dev/null 2>&1; then
+            clang-query --version
+            exit 0
+          fi
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y clang-tools
+            if ! command -v clang-query >/dev/null 2>&1; then
+              query_bin="$(find /usr/bin -maxdepth 1 -name 'clang-query-*' | sort -V | tail -n 1)"
+              test -x "$query_bin"
+              mkdir -p "$RUNNER_TEMP/clang-query-bin"
+              ln -s "$query_bin" "$RUNNER_TEMP/clang-query-bin/clang-query"
+              echo "$RUNNER_TEMP/clang-query-bin" >> "$GITHUB_PATH"
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install llvm
+            echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
+          else
+            choco install llvm --no-progress -y
+            echo 'C:\Program Files\LLVM\bin' >> "$GITHUB_PATH"
+          fi
+        shell: bash
+
+      - name: Verify clang-query AST prerequisite
+        run: |
+          command -v clang-query
+          clang-query --version
         shell: bash
 
       - name: C++ lint (Rust path)
@@ -147,6 +187,15 @@ jobs:
           uv run pytest -q --tb=short "${smoke_py[@]}"
         shell: bash
 
+      - name: CI prerequisite and compile-deadline regressions
+        if: runner.os == 'Linux' && !inputs.full-suite
+        run: |
+          uv run pytest -q --tb=short \
+            ci/tests/test_setup_js_linting_fast.py \
+            ci/tests/test_ast_lint_prerequisite.py \
+            ci/tests/test_compile_deadline.py
+        shell: bash
+
       - name: Run All Unit Tests
         id: run_tests
         if: inputs.full-suite
@@ -163,7 +212,7 @@ jobs:
         env:
           FASTLED_BUILD_MODE: ${{ inputs.build-mode }}
         run: |
-          set -o pipefail
+          set -eo pipefail
           mapfile -t smoke_cpp < <(bash ci-native cpp)
           test "${#smoke_cpp[@]}" -gt 0
           for target in "${smoke_cpp[@]}"; do
