@@ -264,12 +264,11 @@ if build_mode == 'release'
   core_link_args += ['-flto=thin']
 endif
 
-# --deploy-dependencies copies runtime DLLs next to the output binary.
-# Only needed for runner executables and fastled.dll — NOT for test/example
-# DLLs, which find runtime DLLs via PATH set by the test runner.
-# Skipping this for ~270 DLLs avoids per-link overhead from ctc-clang++.
+# --deploy-dependencies copies runtime DLLs next to the output binary on
+# Windows. Linux and macOS resolve shared runtimes through loader paths;
+# deployment would add a Python post-link process without being needed.
 deploy_link_args = []
-if is_clang_tool_chain_wrapper
+if is_clang_tool_chain_wrapper and is_windows
   deploy_link_args += ['--deploy-dependencies']
 endif
 
@@ -572,15 +571,9 @@ fastled_lib_dir = meson.current_build_dir()
 # CLANG-TOOL-CHAIN RUNTIME DLL PATHS — removed as probe (#3129 A6)
 # ============================================================================
 # This block used to populate `runtime_dll_paths` by invoking
-# `ci/meson/get_runtime_dll_paths.py` and prepending its output to the test
-# environment's PATH in three call sites (tests/meson.build x2, examples/
-# meson.build x1). The upstream-blessed replacement is the
-# `ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy` env var (set at
-# ci/meson/runner_helpers.py:374-375 — zccache#33). Per #3129 A6 the local
-# PATH injection is belt-and-suspenders that may now be redundant; this
-# branch is the probe. The script itself
-# (ci/meson/get_runtime_dll_paths.py) is left in place in case revert is
-# needed.
+# `ci/meson/get_runtime_dll_paths.py`. Windows GNU now uses the zccache
+# post-link deploy hook; Linux/macOS use linked runtime search paths. The
+# script remains available for diagnosing runtime lookup failures.
 runtime_dll_paths = []
 
 # ============================================================================

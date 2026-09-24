@@ -366,23 +366,17 @@ def _start_zccache_session(build_dir: Path, build_mode: str) -> None:
     invocations through zccache use this session and get logged.
     The session auto-cleans up via PID monitoring when the process exits.
 
-    Except for Apple debug builds, also sets ZCCACHE_LINK_DEPLOY_CMD so
-    zccache invokes `clang-tool-chain-libdeploy` after each cache-miss link. This
-    materializes runtime DLLs next to the linked binary (on Windows
-    these otherwise don't get deployed because the native ctc-clang++
-    trampoline skips Python post-link hooks) and lets zccache's
-    side-effect scanner bundle them into the cached artifact set —
-    fixing flaky error-126 DLL load failures under parallel test
-    execution. See https://github.com/FastLED/FastLED/issues/2329.
+    On Windows, sets ZCCACHE_LINK_DEPLOY_CMD so zccache invokes
+    `clang-tool-chain-libdeploy` after cache-miss links. This materializes
+    runtime DLLs next to the linked binary and lets zccache include them in
+    cached artifacts, avoiding error-126 DLL load failures (#2329). Linux and
+    macOS resolve shared runtimes through their loader paths, so deployment
+    there adds a Python process to every link without being needed.
     """
-    if sys.platform == "darwin" and build_mode == "debug":
-        # Apple sanitizer builds use Xcode clang and compiler-rt as one matched
-        # toolchain. clang-tool-chain-libdeploy sources the bundled compiler-rt
-        # and can reintroduce the older, ABI-incompatible ASan runtime after the
-        # link, so it must not run on this path.
+    if sys.platform == "win32":
+        os.environ.setdefault("ZCCACHE_LINK_DEPLOY_CMD", "clang-tool-chain-libdeploy")
+    else:
         os.environ.pop("ZCCACHE_LINK_DEPLOY_CMD", None)
-    elif "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
-        os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
     os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
     # ZCCACHE_PROBE_BYPASS=1 setdefault removed as a probe per #3129 A9
     # (the CLI-side probe-bypass fast-path was internalised in zccache
