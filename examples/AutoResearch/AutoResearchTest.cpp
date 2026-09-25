@@ -1648,7 +1648,7 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
 // AutoResearch using the legacy template addLeds API (supports multi-lane)
 // Nearly identical to autoResearchChipsetTiming() — only channel creation differs:
 //   Normal:  FastLED.add(channel_config) → Channel
-//   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) -> CHIPSET<PIN> -> ClocklessIdf5 -> Channel
+//   Legacy:  LegacyClocklessProxy(pin, leds, numLeds) -> CHIPSET<PIN> -> ClocklessIdf5 -> SlimBridgeController -> RMT5 driver
 void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
                                  int& driver_total, int& driver_passed,
                                  uint32_t& out_show_duration_ms,

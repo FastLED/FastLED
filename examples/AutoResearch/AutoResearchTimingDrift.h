@@ -3,8 +3,8 @@
 ///
 /// Replays the reporter's minimal sketch as faithfully as possible:
 ///   - 35-LED WS2812B ring on the legacy template addLeds path
-///     (WS2812B<PIN> -> ClocklessControllerImpl -> ClocklessIdf5 -> Channel)
-///     via LegacyClocklessProxy.
+///     (WS2812B<PIN> -> ClocklessControllerImpl -> ClocklessIdf5 ->
+///     SlimBridgeController -> RMT5 driver) via LegacyClocklessProxy.
 ///   - FastLED.setMaxRefreshRate(800).
 ///   - millisDelay-gated 255-step fade: first step after 225ms, then 5ms
 ///     cadence; FastLED.show() throttled to a 5ms cadence; delay(1000)
