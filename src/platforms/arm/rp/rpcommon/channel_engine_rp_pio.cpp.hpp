@@ -278,6 +278,7 @@ bool ChannelEngineRpPio::startClockless(TxSlot& slot, size_t job_index) FL_NO_EX
     config.tx_pin = static_cast<u8>(channel->getPin());
     config.lane_count = job.lanes;
     config.timing = channel->getTiming();
+    config.packed = channel->getExtraZeroBitsPerByte() == 0;
     if (!slot.peripheral->configure(config)) {
         // configure() also rejects unencodable timing or an out-of-range
         // pin/lane layout; resource exhaustion (every PIO block's state
@@ -294,32 +295,71 @@ bool ChannelEngineRpPio::startClockless(TxSlot& slot, size_t job_index) FL_NO_EX
         return false;
     }
 
-    // Autopull is configured for lane_count bits. Every bit-plane occupies
-    // the MSBs of one DMA word, so the PIO emits exactly the requested bytes:
-    // no final zero-padding can become a partial extra LED symbol. XTRA0
-    // chipsets (GE8822, GW6205) expect that many zero bits after every byte;
-    // they are emitted as all-lanes-zero planes.
     const u8 extra_zero_bits = channel->getExtraZeroBitsPerByte();
+    const u8 lanes = job.lanes;
     fl::vector<u32>& words = slot.words;
     words.clear();
-    words.reserve(input.size() * (8u + extra_zero_bits));
-    for (size_t byte_index = 0; byte_index < input.size(); ++byte_index) {
-        for (int bit = 7; bit >= 0; --bit) {
-            u32 plane = 0;
-            for (u8 lane = 0; lane < job.lanes; ++lane) {
-                const u8 value = mInFlightChannels[job.first + lane]->getData()[byte_index];
-                plane |= static_cast<u32>((value >> bit) & 1u)
-                         << (job.lanes - 1u - lane);
+    size_t transfers = 0;
+    if (extra_zero_bits == 0) {
+        // Packed (#4621): each data byte becomes an 8*lanes-bit column of
+        // bit-planes, MSB plane first and lane 0 in each plane's MSB, split
+        // into transfers of rpPioPackedTransferBytes(lanes) bytes (high
+        // half first for 8 lanes). DMA memory equals the data size, and
+        // the stream holds no padding, so no partial extra LED symbol.
+        const u8 unit = rpPioPackedTransferBytes(lanes);
+        const size_t total_bytes = input.size() * lanes;
+        words.resize((total_bytes + 3u) / 4u, 0u);
+        size_t byte_offset = 0;
+        for (size_t byte_index = 0; byte_index < input.size(); ++byte_index) {
+            u32 high = 0;  // planes 7..4 for 8 lanes, else unused
+            u32 low = 0;
+            for (int bit = 7; bit >= 0; --bit) {
+                u32 plane = 0;
+                for (u8 lane = 0; lane < lanes; ++lane) {
+                    const u8 value = mInFlightChannels[job.first + lane]->getData()[byte_index];
+                    plane |= static_cast<u32>((value >> bit) & 1u) << (lanes - 1u - lane);
+                }
+                if (lanes == 8) {
+                    u32& half = bit >= 4 ? high : low;
+                    half = (half << 8) | plane;
+                } else {
+                    low = (low << lanes) | plane;
+                }
             }
-            words.push_back(plane << (32u - job.lanes));
+            // Store transfers little-endian: DMA reads narrow transfers from
+            // ascending byte addresses.
+            if (lanes == 8) {
+                words[byte_offset / 4u] = high;
+                words[byte_offset / 4u + 1u] = low;
+            } else {
+                words[byte_offset / 4u] |= low << (8u * (byte_offset % 4u));
+            }
+            byte_offset += lanes;
         }
-        for (u8 extra = 0; extra < extra_zero_bits; ++extra) {
-            words.push_back(0u);
+        transfers = total_bytes / unit;
+    } else {
+        // XTRA0 chipsets (GE8822, GW6205) expect that many zero bits after
+        // every byte, which breaks byte alignment: fall back to one 32-bit
+        // word per bit-plane (plane in the MSBs), zero planes for the tail.
+        words.reserve(input.size() * (8u + extra_zero_bits));
+        for (size_t byte_index = 0; byte_index < input.size(); ++byte_index) {
+            for (int bit = 7; bit >= 0; --bit) {
+                u32 plane = 0;
+                for (u8 lane = 0; lane < lanes; ++lane) {
+                    const u8 value = mInFlightChannels[job.first + lane]->getData()[byte_index];
+                    plane |= static_cast<u32>((value >> bit) & 1u) << (lanes - 1u - lane);
+                }
+                words.push_back(plane << (32u - lanes));
+            }
+            for (u8 extra = 0; extra < extra_zero_bits; ++extra) {
+                words.push_back(0u);
+            }
         }
+        transfers = words.size();
     }
     mLastStartAttempted = true;
-    mLastWordCount = words.size();
-    mLastStartSucceeded = slot.peripheral->startTxDma(words.data(), words.size());
+    mLastWordCount = transfers;
+    mLastStartSucceeded = slot.peripheral->startTxDma(words.data(), transfers);
     if (!mLastStartSucceeded) {
         slot.peripheral->deinitialize();
         words.clear();

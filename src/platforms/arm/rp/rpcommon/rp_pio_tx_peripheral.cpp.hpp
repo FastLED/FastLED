@@ -40,7 +40,7 @@ u32 scaledCycles(u32 ns, u32 clock_hz, float divider) FL_NO_EXCEPT {
 
 RpPioTxPeripheral::RpPioTxPeripheral(u8 pio_index, bool fallback_to_other_pios) FL_NO_EXCEPT
     : mPio(nullptr), mStateMachine(-1), mDmaChannel(-1), mPin(-1),
-      mProgramOffset(-1), mLaneCount(1), mPioIndex(pio_index), mFallbackToOtherPios(fallback_to_other_pios), mProgram(nullptr), mInitialized(false) {}
+      mProgramOffset(-1), mLaneCount(1), mPioIndex(pio_index), mFallbackToOtherPios(fallback_to_other_pios), mPacked(false), mStallArmed(false), mProgram(nullptr), mInitialized(false) {}
 
 RpPioTxPeripheral::~RpPioTxPeripheral() { deinitialize(); }
 
@@ -88,9 +88,13 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
                        static_cast<uint>(mProgramOffset + 3));
     sm_config_set_set_pins(&config, static_cast<uint>(mPin), mLaneCount);
     sm_config_set_out_pins(&config, static_cast<uint>(mPin), mLaneCount);
-    // One DMA word per emitted bit-plane. Autopull after lane_count shifts
-    // preserves exact byte boundaries and avoids final zero padding.
-    sm_config_set_out_shift(&config, false, true, mLaneCount);
+    // Packed (#4621): autopull after one whole transfer (8/16/32 bits); the
+    // stream length is an exact multiple, so no zero padding is emitted.
+    // Unpacked (XTRA0): one 32-bit DMA word per bit-plane, autopull after
+    // lane_count shifts.
+    const uint pull_threshold =
+        mPacked ? 8u * rpPioPackedTransferBytes(mLaneCount) : mLaneCount;
+    sm_config_set_out_shift(&config, false, true, pull_threshold);
     sm_config_set_clkdiv(&config, divider);
     // Hand every lane's pin to the PIO. Lanes are parked as plain SIO
     // outputs between frames, so connecting only mPin would leave lanes
@@ -139,12 +143,15 @@ bool RpPioTxPeripheral::configure(const RpPioTxConfig& config) FL_NO_EXCEPT {
         mDmaChannel = dma;
         mPin = config.tx_pin;
         mLaneCount = config.lane_count;
+        mPacked = config.packed;
         ready = createProgram(config.timing);
         if (!ready) deinitialize();
     }
     if (!ready) return false;
     dma_channel_config dma_config = dma_channel_get_default_config(static_cast<uint>(mDmaChannel));
-    channel_config_set_transfer_data_size(&dma_config, DMA_SIZE_32);
+    const u8 unit = mPacked ? rpPioPackedTransferBytes(mLaneCount) : 4;
+    channel_config_set_transfer_data_size(
+        &dma_config, unit == 1 ? DMA_SIZE_8 : unit == 2 ? DMA_SIZE_16 : DMA_SIZE_32);
     channel_config_set_read_increment(&dma_config, true);
     channel_config_set_write_increment(&dma_config, false);
     channel_config_set_dreq(&dma_config, pio_get_dreq(static_cast<PIO>(mPio),
@@ -156,12 +163,13 @@ bool RpPioTxPeripheral::configure(const RpPioTxConfig& config) FL_NO_EXCEPT {
     return true;
 }
 
-bool RpPioTxPeripheral::startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT {
-    if (!mInitialized || words == nullptr || word_count == 0 ||
+bool RpPioTxPeripheral::startTxDma(const u32* words, size_t transfer_count) FL_NO_EXCEPT {
+    if (!mInitialized || words == nullptr || transfer_count == 0 ||
         dma_channel_is_busy(static_cast<uint>(mDmaChannel))) return false;
+    mStallArmed = false;
     dma_channel_set_read_addr(static_cast<uint>(mDmaChannel), words, false);
     dma_channel_set_trans_count(static_cast<uint>(mDmaChannel),
-                                static_cast<u32>(word_count), true);
+                                static_cast<u32>(transfer_count), true);
     return true;
 }
 
@@ -172,9 +180,21 @@ bool RpPioTxPeripheral::isDmaBusy() const FL_NO_EXCEPT {
 bool RpPioTxPeripheral::isTerminalComplete() const FL_NO_EXCEPT {
     if (!mInitialized || isDmaBusy()) return false;
     const PIO pio = static_cast<PIO>(mPio);
-    // At offset 0 the next `out x, 1` is blocked by autopull because FIFO is
-    // empty. Reaching it proves the last bit's T3 low tail executed.
-    return pio_sm_is_tx_fifo_empty(pio, static_cast<uint>(mStateMachine)) &&
+    if (!pio_sm_is_tx_fifo_empty(pio, static_cast<uint>(mStateMachine))) return false;
+    // The FIFO is drained, but the OSR can still hold up to one whole
+    // transfer (8 planes when packed, #4621), and the SM passes the `out`
+    // at terminal_pc without stalling for each of them. Only an autopull
+    // stall on the empty FIFO proves the final bit's T3 low tail ran:
+    // clear the sticky TXSTALL flag now that no more data can arrive, and
+    // report completion once the SM stalls again (a stall that already
+    // began re-asserts the flag every cycle).
+    const u32 stall_bit = 1u << (PIO_FDEBUG_TXSTALL_LSB + static_cast<u32>(mStateMachine));
+    if (!mStallArmed) {
+        pio->fdebug = stall_bit;  // write-1-to-clear
+        mStallArmed = true;
+        return false;
+    }
+    return (pio->fdebug & stall_bit) != 0 &&
            pio_sm_get_pc(pio, static_cast<uint>(mStateMachine)) ==
                static_cast<uint>(mProgram->terminal_pc);
 }
@@ -223,6 +243,7 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
     mProgramOffset = -1;
     mLaneCount = 1;
     mProgram = nullptr;
+    mStallArmed = false;
     mInitialized = false;
 }
 

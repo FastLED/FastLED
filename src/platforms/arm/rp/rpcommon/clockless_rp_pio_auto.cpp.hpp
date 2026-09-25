@@ -197,6 +197,7 @@ class RP2040ParallelGroup {
                        const fl::vector<fl::u32>& words) {
         RpPioTxPeripheral peripheral(0);
         RpPioTxConfig config;
+        config.packed = false;  // one 32-bit word per bit-plane
         config.tx_pin = pin;
         config.lane_count = lanes;
         config.timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
