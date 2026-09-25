@@ -1,5 +1,11 @@
 // IWYU pragma: private
 
+// COctoWS2811Controller is intentionally NOT bridged onto ChannelManager (#4588).
+// It is an opt-in wrapper, compiled only under USE_OCTOWS2811. The PJRC
+// OctoWS2811 library owns its own DMA and framebuffers, so there is no FastLED
+// channel engine to bridge onto; a bridge would only duplicate the ObjectFLED
+// path that every other legacy Teensy 4 addLeds<>() controller already uses.
+
 #ifndef __INC_OCTOWS2811_CONTROLLER_H
 #define __INC_OCTOWS2811_CONTROLLER_H
 

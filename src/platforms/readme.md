@@ -324,7 +324,7 @@ Supported in this codebase:
 
 - Teensy 3.x (K20): [clockless_block_arm_k20.h](./arm/k20/README.md)
 - Teensy 3.6 (K66): [clockless_block_arm_k66.h](./arm/k66/README.md)
-- Teensy 4.x (i.MX RT1062): [block_clockless_arm_mxrt1062.h](./arm/mxrt1062/README.md)
+- Teensy 4.x (i.MX RT1062): [block_clockless_arm_mxrt1062.h](./arm/teensy/teensy4_common/README.md)
 - Arduino Due (SAM3X): [clockless_block_arm_sam.h](./arm/sam/README.md)
 - ESP8266: [clockless_block_esp8266.h](./esp/8266/README.md)
 - ESP32: I2S‑parallel backend (see [esp/32](./esp/32/README.md)) provides many‑lane output with identical timing

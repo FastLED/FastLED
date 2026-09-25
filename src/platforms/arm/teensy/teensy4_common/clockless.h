@@ -11,7 +11,8 @@
 /// for Teensy 4.0 and 4.1 (IMXRT1062 platform).
 ///
 /// Default: slim bridge onto ChannelEngineObjectFLED (parallel output, up to 42 strips)
-/// Fallback: Traditional bit-banging controller available in clockless_arm_mxrt1062.h
+/// Fallback: ClocklessController_BitBang (clockless_arm_mxrt1062.h) is a backward-compatible
+/// alias onto the same ObjectFLED slim bridge (#4588); there is no bit-bang path.
 
 #if defined(FL_IS_TEENSY_4X)  // Teensy 4.0/4.1
 
@@ -33,7 +34,7 @@ namespace fl {
 // engine's timing groups.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessObjectFLED
-    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::FLEX_IO, 0>> {
+    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::FLEX_IO, 0>, XTRA0> {
   public:
     ClocklessObjectFLED() FL_NO_EXCEPT = default;
 

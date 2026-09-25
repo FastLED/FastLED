@@ -3,216 +3,119 @@
 #ifndef __INC_BLOCK_CLOCKLESS_ARM_MXRT1062_H
 #define __INC_BLOCK_CLOCKLESS_ARM_MXRT1062_H
 
-#include "fl/chipsets/timing_traits.h"
-#include "fastled_delay.h"
 #include "platforms/arm/teensy/is_teensy.h"
-#include "fl/stl/compiler_control.h"
-#include "fl/stl/noexcept.h"
-
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_DEPRECATED_REGISTER
-
-namespace fl {
-// Definition for a single channel clockless controller for the teensy4
-// See clockless.h for detailed info on how the template parameters are used.
 
 #if defined(FL_IS_TEENSY_4X)
 
-#define __FL_T4_MASK ((1<<(LANES))-1)
+#include "cpixel_ledcontroller.h"
+#include "fl/channels/bus.h"
+#include "fl/channels/config.h"
+#include "fl/channels/data.h"
+#include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/chipsets/timing_traits.h"
+#include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/vector.h"
+#include "platforms/arm/teensy/teensy4_common/block_lane_pins.h"
+#include "platforms/arm/teensy/teensy4_common/block_lane_pins.hpp"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"
+
+namespace fl {
+
+// Legacy multi-lane "inline block" clockless controller for Teensy 4.x.
+//
+// Slim bridge (issue #4588): each lane owns one ChannelData that is
+// re-encoded every frame and enqueued on the ObjectFLED channel engine
+// (`BusTraits<Bus::FLEX_IO, 0>` == ChannelEngineObjectFLED). The lane pins are
+// the same GPIO block sequence the historical bit-bang `_BLOCK_PIN` switch
+// selected (see block_lane_pins.h); the engine transmits lanes with matching
+// timing in parallel.
 template <u8 LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, __FL_T4_MASK> {
-    static constexpr u32 T1 = TIMING::T1;
-    static constexpr u32 T2 = TIMING::T2;
-    static constexpr u32 T3 = TIMING::T3;
-    u8 m_bitOffsets[16];
-    u8 mNActualLanes;
-    u8 mNLowBit;
-    u8 mNHighBit;
-    u32 mNWriteMask;
-    u8 mNOutBlocks;
-    u32 m_offsets[3];
-    u32 MS_COUNTER;
-    CMinWait<WAIT_TIME> mWait;
+class FlexibleInlineBlockClocklessController
+    : public CPixelLEDController<RGB_ORDER, LANES, (1 << LANES) - 1> {
+    FL_STATIC_ASSERT(LANES >= 1 && LANES <= 16, "LANES must be in [1, 16]");
+    FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
+
+    using Traits = BusTraits<Bus::FLEX_IO, 0>;
+    using MultiPixels = PixelController<RGB_ORDER, LANES, (1 << LANES) - 1>;
+
+    u8 mPins[LANES];
+    u8 mNActualLanes = 0;
+    ChannelDataPtr mData[LANES];
 
 public:
+    FlexibleInlineBlockClocklessController() FL_NO_EXCEPT {
+        Traits::registerWithManager();
+    }
+
     int size() const FL_NO_EXCEPT override { return CLEDController::size() * mNActualLanes; }
 
-    // For each pin, if we've hit our lane count, break, otherwise set the pin to output,
-    // store the bit offset in our offset array, add this pin to the write mask, and if this
-    // pin ends a block sequence, then break out of the switch as well
-    #define _BLOCK_PIN(P) case P: {                             \
-        if(mNActualLanes == LANES) break;                      \
-        fl::FastPin<P>::setOutput();                            \
-        m_bitOffsets[mNActualLanes++] = fl::FastPin<P>::pinbit();  \
-        mNWriteMask |= fl::FastPin<P>::mask();                 \
-        if( P == 27 || P == 7 || P == 30) break;                \
+    void init() FL_NO_EXCEPT override {
+        mNActualLanes = teensy4BlockLanePins(FIRST_PIN, LANES, mPins);
+        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+        // Fold WAIT_TIME into reset_us, as SlimBridgeController does.
+        if (WAIT_TIME > 0 && static_cast<u32>(WAIT_TIME) > timing.reset_us) {
+            timing.reset_us = static_cast<u32>(WAIT_TIME);
+        }
+        for (u8 i = 0; i < mNActualLanes; ++i) {
+            mData[i] = ChannelData::create(mPins[i], timing, fl::vector_psram<u8>(),
+                                           ChannelPixelFormat::RGB);
+            mData[i]->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
+        }
     }
 
-    virtual void init() FL_NO_EXCEPT {
-        // pre-initialize
-        fl::memset(m_bitOffsets,0,16);
-        mNActualLanes = 0;
-        mNLowBit = 33;
-        mNHighBit = 0;
-        mNWriteMask = 0;
-	MS_COUNTER = 0;
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 
-        // setup the bits and data tracking for parallel output
-        switch(FIRST_PIN) {
-            // GPIO6 block output
-            _BLOCK_PIN( 1);
-            _BLOCK_PIN( 0);
-            _BLOCK_PIN(24);
-            _BLOCK_PIN(25);
-            _BLOCK_PIN(19);
-            _BLOCK_PIN(18);
-            _BLOCK_PIN(14);
-            _BLOCK_PIN(15);
-            _BLOCK_PIN(17);
-            _BLOCK_PIN(16);
-            _BLOCK_PIN(22);
-            _BLOCK_PIN(23);
-            _BLOCK_PIN(20);
-            _BLOCK_PIN(21);
-            _BLOCK_PIN(26);
-            _BLOCK_PIN(27);
-            // GPIO7 block output
-            _BLOCK_PIN(10);
-            _BLOCK_PIN(12);
-            _BLOCK_PIN(11);
-            _BLOCK_PIN(13);
-            _BLOCK_PIN( 6);
-            _BLOCK_PIN( 9);
-            _BLOCK_PIN(32);
-            _BLOCK_PIN( 8);
-            _BLOCK_PIN( 7);
-            // GPIO 37 block output
-            _BLOCK_PIN(37);
-            _BLOCK_PIN(36);
-            _BLOCK_PIN(35);
-            _BLOCK_PIN(34);
-            _BLOCK_PIN(39);
-            _BLOCK_PIN(38);
-            _BLOCK_PIN(28);
-            _BLOCK_PIN(31);
-            _BLOCK_PIN(30);
+protected:
+    void showPixels(MultiPixels& pixels) FL_NO_EXCEPT override {
+        if (mNActualLanes == 0) {
+            return;
+        }
+        IChannelDriver& driver = Traits::instance();
+        if (!ChannelManager::registry().isDriverEnabled(driver.getName().c_str())) {
+            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '%s' is disabled - dropping frame",
+                         driver.getName().c_str());
+            return;
+        }
+        bool inUse = false;
+        for (u8 i = 0; i < mNActualLanes; ++i) {
+            if (mData[i]->isInUse()) { inUse = true; }
+        }
+        if (inUse && !driver.waitForReady()) {
+            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '%s' did not become ready in time "
+                         "- dropping frame", driver.getName().c_str());
+            return;
         }
 
-        for(int i = 0; i < mNActualLanes; ++i) {
-            if(m_bitOffsets[i] < mNLowBit) { mNLowBit = m_bitOffsets[i]; }
-            if(m_bitOffsets[i] > mNHighBit) { mNHighBit = m_bitOffsets[i]; }
+        ChannelPixelFormat format = ChannelPixelFormat::RGB;
+        if (this->getRgbww().active()) {
+            format = ChannelPixelFormat::RGBWW;
+        } else if (this->getRgbw().active()) {
+            format = ChannelPixelFormat::RGBW;
         }
 
-        mNOutBlocks = (mNHighBit + 8)/8;
-
-    }
-
-    virtual u16 getMaxRefreshRate() const { return 400; }
-
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, __FL_T4_MASK> & pixels) FL_NO_EXCEPT {
-        mWait.wait();
-    #if FASTLED_ALLOW_INTERRUPTS == 0
-        u32 clocks = showRGBInternal(pixels);
-        // Adjust the timer
-        long microsTaken = CLKS_TO_MICROS(clocks);
-        MS_COUNTER += (1 + (microsTaken / 1000));
-    #else
-        showRGBInternal(pixels);
-    #endif
-		mWait.mark();
-	}
-
-  typedef union {
-    u8 bytes[32];
-    u8 bg[4][8];
-    u16 shorts[16];
-    u32 raw[8];
-  } _outlines;
-
-
-  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) FL_NO_EXCEPT {
-        _outlines b2;
-        transpose8x1(b.bg[3], b2.bg[3]);
-        transpose8x1(b.bg[2], b2.bg[2]);
-        transpose8x1(b.bg[1], b2.bg[1]);
-        transpose8x1(b.bg[0], b2.bg[0]);
-
-        FASTLED_REGISTER u8 d = pixels.template getd<PX>(pixels);
-        FASTLED_REGISTER u8 scale = pixels.template getscale<PX>(pixels);
-
-        int x = 0;
-        for(u32 i = 8; i > 0;) {
-            --i;
-            while(ARM_DWT_CYCCNT < next_mark);
-            *fl::FastPin<FIRST_PIN>::sport() = mNWriteMask;
-            next_mark = ARM_DWT_CYCCNT + m_offsets[0];
-
-            u32 out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
-
-            out = ((~out) & mNWriteMask);
-            while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
-            *fl::FastPin<FIRST_PIN>::cport() = out;
-
-            out = mNWriteMask;
-            while((next_mark - ARM_DWT_CYCCNT) > m_offsets[2]);
-            *fl::FastPin<FIRST_PIN>::cport() = out;
-
-            // Read and store up to two bytes
-            if (x < mNActualLanes) {
-                b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels, x, d, scale);
-                ++x;
-                if (x < mNActualLanes) {
-                    b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels, x, d, scale);
-                    ++x;
-                }
+        for (u8 lane = 0; lane < mNActualLanes; ++lane) {
+            // Single-lane view over this lane's pixels: the multi-lane
+            // controller stores lane `i` at mData + mOffsets[i] (initOffsets).
+            PixelController<RGB_ORDER> view(pixels.mData + pixels.mOffsets[lane], pixels.mLen,
+                                            pixels.mColorAdjustment, DISABLE_DITHER,
+                                            pixels.mAdvance != 0, 0);
+            view.mAdvance = pixels.mAdvance;
+            for (int c = 0; c < 3; ++c) {
+                view.d[c] = pixels.d[c];
+                view.e[c] = pixels.e[c];
             }
+
+            ChannelDataPtr& data = mData[lane];
+            data->setPixelFormat(format);
+            data->getData().clear();
+            fl::PixelIterator iterator(&view, this->getRgbw(), this->getRgbww());
+            iterator.writeWS2812(&data->getData());
+            driver.enqueue(data);
         }
-    }
-
-    u32 showRGBInternal(PixelController<RGB_ORDER,LANES, __FL_T4_MASK> &allpixels) FL_NO_EXCEPT {
-        allpixels.preStepFirstByteDithering();
-        _outlines b0;
-        u32 start = ARM_DWT_CYCCNT;
-
-        for(int i = 0; i < mNActualLanes; ++i) {
-            b0.bytes[m_bitOffsets[i]] = allpixels.loadAndScale0(i);
-        }
-
-        cli();
-
-        m_offsets[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
-        m_offsets[1] = _FASTLED_NS_TO_DWT(T2+T3);
-        m_offsets[2] = _FASTLED_NS_TO_DWT(T3);
-        u32 wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
-
-        u32 next_mark = ARM_DWT_CYCCNT + m_offsets[0];
-
-        while(allpixels.has(1)) {
-            allpixels.stepDithering();
-        #if (FASTLED_ALLOW_INTERRUPTS == 1)
-            cli();
-            // if interrupts took longer than 45µs, punt on the current frame
-            if(ARM_DWT_CYCCNT > next_mark) {
-                if((ARM_DWT_CYCCNT-next_mark) > wait_off) { sei(); return ARM_DWT_CYCCNT - start; }
-            }
-        #endif
-            // Write first byte, read next byte
-            writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
-
-            // Write second byte, read 3rd byte
-            writeBits<8+XTRA0,2>(next_mark, b0, allpixels);
-            allpixels.advanceData();
-
-            // Write third byte
-            writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
-        #if (FASTLED_ALLOW_INTERRUPTS == 1)
-            sei();
-        #endif
-        }
-
-        sei();
-
-        return ARM_DWT_CYCCNT - start;
     }
 };
 
@@ -221,9 +124,8 @@ class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN
 
 #define __FASTLED_HAS_FIBCC 1
 
-#endif //defined(FASTLED_TEENSY4)
 }  // namespace fl
 
-FL_DISABLE_WARNING_POP
+#endif  // FL_IS_TEENSY_4X
 
 #endif
