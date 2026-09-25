@@ -29,7 +29,7 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 jobs:
   test:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'ci-full'))
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && (contains(github.event.pull_request.labels.*.name, 'ci-full') || contains(github.event.pull_request.labels.*.name, 'ci-platforms-unit-test')))
     uses: ./.github/workflows/template_example_test.yml
     with:
       os: windows-latest
