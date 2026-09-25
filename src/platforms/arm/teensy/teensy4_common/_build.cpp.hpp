@@ -5,7 +5,6 @@
 /// Includes all implementation files in alphabetical order
 
 // begin current directory includes
-#include "platforms/arm/teensy/teensy4_common/clockless_objectfled.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/flexpwm_rx_channel.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/init_channel_driver_mxrt1062.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/rx_flexio_channel.cpp.hpp"
