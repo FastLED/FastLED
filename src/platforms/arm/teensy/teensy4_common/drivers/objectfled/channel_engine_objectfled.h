@@ -111,7 +111,7 @@ private:
     size_t mCurrentGroupIndex = 0;
 
     /// @brief One-time warning latches, one bit per pin (Teensy pins < 64).
-    u64 mWarnedInvalidPins = 0;
+    u64 mValidatedPins = 0;
     u64 mWarnedDuplicatePins = 0;
 
     /// @brief Returns the previous bit for `pin` and sets it. Pins outside

@@ -136,9 +136,21 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (!channelData) {
         return;
     }
+    const int pin = channelData->getPin();
+    // Loud one-time warning for an invalid pin (restores the old proxy's
+    // default-build FL_WARN). The strip is still enqueued so it keeps its
+    // in-use handshake; startTimingGroup() skips it.
+    if (!pinFlagTestAndSet(mValidatedPins, pin)) {
+        auto validation = mPeripheral->validatePin(static_cast<u8>(pin));
+        if (!validation.valid) {
+            FL_WARN("================================================================================");
+            FL_WARN("FASTLED ERROR: Strip on pin %s is INVALID and has been disabled", pin);
+            FL_WARN("%s", validation.error_message ? validation.error_message : "");
+            FL_WARN("================================================================================");
+        }
+    }
     // Reject a second strip on a pin already queued this frame: driving the
     // same GPIO twice from one DMA frame corrupts both strips (#4617 review).
-    const int pin = channelData->getPin();
     for (const auto& queued : mEnqueuedChannels) {
         if (queued->getPin() == pin) {
             if (!pinFlagTestAndSet(mWarnedDuplicatePins, pin)) {
@@ -238,12 +250,7 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         // Validate pin
         auto validation = mPeripheral->validatePin(pin);
         if (!validation.valid) {
-            if (!pinFlagTestAndSet(mWarnedInvalidPins, pin)) {
-                FL_WARN("================================================================================");
-                FL_WARN("FASTLED ERROR: Strip on pin %s is INVALID and has been disabled", (int)pin);
-                FL_WARN("%s", validation.error_message ? validation.error_message : "");
-                FL_WARN("================================================================================");
-            }
+            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
             continue;
         }
 
