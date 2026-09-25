@@ -22,6 +22,7 @@
 #include "fl/stl/mutex.h"
 #include "fl/stl/condition_variable.h"
 #include "fl/stl/limits.h"
+#include "fl/stl/singleton.h"
 
 #include "fl/stl/thread.h"
 #include "fl/stl/chrono.h"
@@ -77,10 +78,14 @@ struct stub_isr_handle_data {
 // =============================================================================
 
 // Track interrupt enable state for stub platform (starts enabled)
-// Uses function-local static to ensure single instance across translation units (C++11 compatible)
+struct GlobalInterruptState {
+    fl::atomic<bool> mEnabled;
+    GlobalInterruptState() FL_NO_EXCEPT : mEnabled(true) {}
+};
+
 inline fl::atomic<bool>& getGlobalInterruptState() FL_NO_EXCEPT {
-    static fl::atomic<bool> g_interrupts_enabled(true) FL_NO_EXCEPT;  // okay static in header
-    return g_interrupts_enabled;
+    // Process-wide registry: one instance across DLLs (#4641).
+    return fl::SingletonShared<GlobalInterruptState>::instance().mEnabled;
 }
 
 // =============================================================================
@@ -90,8 +95,8 @@ inline fl::atomic<bool>& getGlobalInterruptState() FL_NO_EXCEPT {
 class TimerThreadManager {
 public:
     static TimerThreadManager& instance() FL_NO_EXCEPT {
-        static TimerThreadManager inst;
-        return inst;
+        // Process-wide registry: one instance across DLLs (#4641).
+        return fl::SingletonShared<TimerThreadManager>::instance();
     }
 
     // Test synchronization support - allows tests to wait for ISR execution
@@ -178,6 +183,7 @@ public:
     }
 
 private:
+    friend class fl::SingletonShared<TimerThreadManager>;
     TimerThreadManager() : mShouldStop(false), mNextHandleId(1) {}
     TimerThreadManager(const TimerThreadManager&) = delete;
     TimerThreadManager& operator=(const TimerThreadManager&) = delete;

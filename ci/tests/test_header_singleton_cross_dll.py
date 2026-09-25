@@ -27,9 +27,6 @@ ALLOWLIST: set[str] = {
     # Only in the small-memory branch: a stateless no-op event hub, so a
     # per-DLL copy has no observable state.
     "src/fl/channels/channel_events.h",
-    # Host timer-thread manager, pulled in via platforms/isr.h. Not yet
-    # confirmed safe across DLLs; migrate to fl::SingletonShared.
-    "src/platforms/stub/isr_stub.hpp",
 }
 
 
