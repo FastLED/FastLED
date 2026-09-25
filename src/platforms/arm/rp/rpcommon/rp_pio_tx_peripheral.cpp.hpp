@@ -118,22 +118,30 @@ bool RpPioTxPeripheral::configure(const RpPioTxConfig& config) FL_NO_EXCEPT {
     if (config.tx_pin > 29 || (config.lane_count != 1 && config.lane_count != 2 &&
         config.lane_count != 4 && config.lane_count != 8) ||
         static_cast<u16>(config.tx_pin) + config.lane_count > 30) return false;
-    PIO pio = nullptr;
-    int sm = -1;
-    int dma = -1;
-    if (!RpPioDmaResourceManager::instance().claimPioDmaAndPin(
-            &pio, &sm, &dma, config.tx_pin, config.lane_count, mPioIndex)) {
-        return false;
+    // Prefer this instance's PIO block, then fall back to the others: a USB
+    // stack (e.g. Adafruit TinyUSB / Pico-PIO-USB) can hold state machines or
+    // instruction memory on one block while another sits idle (#4622). The
+    // claim and the program load are retried together, because either can be
+    // the step that runs out.
+    bool ready = false;
+    for (u8 attempt = 0; attempt < NUM_PIOS && !ready; ++attempt) {
+        const u8 pio_index = static_cast<u8>((mPioIndex + attempt) % NUM_PIOS);
+        PIO pio = nullptr;
+        int sm = -1;
+        int dma = -1;
+        if (!RpPioDmaResourceManager::instance().claimPioDmaAndPin(
+                &pio, &sm, &dma, config.tx_pin, config.lane_count, pio_index)) {
+            continue;
+        }
+        mPio = pio;
+        mStateMachine = sm;
+        mDmaChannel = dma;
+        mPin = config.tx_pin;
+        mLaneCount = config.lane_count;
+        ready = createProgram(config.timing);
+        if (!ready) deinitialize();
     }
-    mPio = pio;
-    mStateMachine = sm;
-    mDmaChannel = dma;
-    mPin = config.tx_pin;
-    mLaneCount = config.lane_count;
-    if (!createProgram(config.timing)) {
-        deinitialize();
-        return false;
-    }
+    if (!ready) return false;
     dma_channel_config dma_config = dma_channel_get_default_config(static_cast<uint>(mDmaChannel));
     channel_config_set_transfer_data_size(&dma_config, DMA_SIZE_32);
     channel_config_set_read_increment(&dma_config, true);

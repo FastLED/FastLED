@@ -2,6 +2,7 @@
 
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.h"
 
+#include "fl/log/log.h"
 #include "fl/stl/utility.h"
 
 namespace fl {
@@ -174,6 +175,7 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
         const ChannelDataPtr& next = mInFlightChannels[mCurrentChannel + run];
         if (!next || next->getPin() != channel->getPin() + run ||
             next->getTiming() != channel->getTiming() ||
+            next->getExtraZeroBitsPerByte() != channel->getExtraZeroBitsPerByte() ||
             next->getData().size() != input.size()) break;
         ++run;
     }
@@ -183,12 +185,28 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
     config.tx_pin = static_cast<u8>(channel->getPin());
     config.lane_count = mActiveLaneCount;
     config.timing = channel->getTiming();
-    if (!mPeripheral->configure(config)) return false;
+    if (!mPeripheral->configure(config)) {
+        // configure() also rejects unencodable timing or an out-of-range
+        // pin/lane layout; resource exhaustion (every PIO block's state
+        // machines, instruction memory, or the DMA channels taken, e.g. by a
+        // USB stack) is the usual cause for an otherwise valid strip.
+        FL_WARN_ONCE("RP PIO: cannot set up pin " << static_cast<u32>(config.tx_pin)
+                << " x" << static_cast<u32>(config.lane_count)
+                << " lanes: invalid pin/timing, or no free PIO state machine, "
+                   "program space or DMA channel on any PIO block. Frame "
+                   "dropped. FASTLED_RP2040_CLOCKLESS_PIO=0 selects the "
+                   "blocking bit-bang controller.");
+        return false;
+    }
 
     // Autopull is configured for eight bits. Every byte occupies the MSB of
     // one DMA word, so the PIO emits exactly the requested bytes: no final
     // zero-padding can become a partial extra LED symbol.
+    // XTRA0 chipsets (GE8822, GW6205) expect that many zero bits after every
+    // byte; they are emitted as all-lanes-zero planes.
+    const u8 extra_zero_bits = channel->getExtraZeroBitsPerByte();
     mPioWords.clear();
+    mPioWords.reserve(input.size() * (8u + extra_zero_bits));
     for (size_t byte_index = 0; byte_index < input.size(); ++byte_index) {
         for (int bit = 7; bit >= 0; --bit) {
             u32 plane = 0;
@@ -199,6 +217,9 @@ bool ChannelEngineRpPio::beginTransmission(const ChannelDataPtr& channel) FL_NO_
                          << (mActiveLaneCount - 1u - lane);
             }
             mPioWords.push_back(plane << (32u - mActiveLaneCount));
+        }
+        for (u8 extra = 0; extra < extra_zero_bits; ++extra) {
+            mPioWords.push_back(0u);
         }
     }
     mLastStartAttempted = true;

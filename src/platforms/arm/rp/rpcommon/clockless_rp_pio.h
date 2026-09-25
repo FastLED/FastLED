@@ -29,10 +29,11 @@ namespace fl {
 // every frame and enqueues it on the PIO channel engine
 // (`BusTraits<Bus::FLEX_IO, 0>` == ChannelEngineRpPio on PIO0). Legacy strips
 // and Channel API strips therefore share one PIO/DMA owner instead of two.
-// XTRA0 and FLIP are accepted for source compatibility and ignored.
+// XTRA0 travels on the ChannelData and the engine emits that many zero bits
+// after every byte (GE8822 / GW6205). FLIP is accepted and ignored.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessRpPio
-    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::FLEX_IO, 0>> {
+    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::FLEX_IO, 0>, XTRA0> {
   public:
     ClocklessRpPio() FL_NO_EXCEPT = default;
 

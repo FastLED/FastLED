@@ -214,6 +214,48 @@ FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes")
     FL_CHECK_FALSE(right->isInUse());
 }
 
+FL_TEST_CASE("RP PIO TX appends XTRA0 zero bits after every byte") {
+    RpPioTxPeripheralMock& peripheral = resetTxMock();
+    ChannelEngineRpPio engine(createTxMockPeripheral());
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0xFF);
+    bytes.push_back(0x81);
+    auto channel = makeChannel(4, bytes);
+    channel->setExtraZeroBitsPerByte(4);  // GE8822 / GW6205
+    engine.enqueue(channel);
+    engine.show();
+    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(24));
+    for (size_t index = 0; index < 8; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0x80000000u);
+    }
+    for (size_t index = 8; index < 12; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+    FL_CHECK_EQ(peripheral.capturedWords[12], 0x80000000u);  // 0x81 MSB
+    for (size_t index = 13; index < 19; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+    FL_CHECK_EQ(peripheral.capturedWords[19], 0x80000000u);  // 0x81 LSB
+    for (size_t index = 20; index < 24; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+}
+
+FL_TEST_CASE("RP PIO TX does not batch lanes with different XTRA0") {
+    RpPioTxPeripheralMock& peripheral = resetTxMock();
+    ChannelEngineRpPio engine(createTxMockPeripheral());
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0x80);
+    auto left = makeChannel(10, bytes);
+    auto right = makeChannel(11, bytes);
+    right->setExtraZeroBitsPerByte(4);
+    engine.enqueue(left);
+    engine.enqueue(right);
+    engine.show();
+    FL_CHECK_EQ(peripheral.lastConfig.lane_count, 1);
+    FL_CHECK_EQ(peripheral.capturedWords.size(), static_cast<size_t>(8));
+}
+
 FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs") {
     for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
         RpPioTxPeripheralMock& peripheral = resetTxMock();
