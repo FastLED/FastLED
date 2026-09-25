@@ -53,6 +53,10 @@ jobs:
           llvm-ar --version
           ld.lld --version
 
+      - name: Install Wild native linker (Linux only)
+        if: runner.os == 'Linux'
+        run: uv run python ci/tools/install_native_linker.py
+
       - name: Run Native Build
         run: |
           # Run C++ unit tests (uses Meson for native compilation)
