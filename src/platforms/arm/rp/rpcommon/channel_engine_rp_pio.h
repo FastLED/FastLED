@@ -4,6 +4,7 @@
 
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/rp/rpcommon/irp_pio_spi_peripheral.h"
@@ -15,12 +16,27 @@ namespace fl {
 /// mode-0 SPI: the latter is the arbitrary-pin fallback when SPI0/SPI1 cannot
 /// route the requested pin pair. Consecutive clockless lanes are batched only
 /// when timing and length exactly match.
+///
+/// Independent clockless batches (non-consecutive pins, different lengths or
+/// timings) transmit concurrently, each on its own state machine + DMA
+/// channel, when `extra_tx_factory` can supply more TX peripherals (#4620).
+/// Without a factory, or once PIO/DMA resources run out, the remaining
+/// batches wait for a busy one to finish and reuse its peripheral.
 class ChannelEngineRpPio final : public IChannelDriver {
   public:
+    using TxPeripheralFactory = fl::function<fl::shared_ptr<IRpPioTxPeripheral>()>;
+
+    /// Maximum concurrently transmitting clockless batches (TX peripherals):
+    /// one PIO block's state machines, so an engine's extra slots never
+    /// crowd out the other PIO blocks' engines.
+    static constexpr u8 kMaxTxSlots = 4;
+
     explicit ChannelEngineRpPio(fl::shared_ptr<IRpPioTxPeripheral> peripheral,
                                 fl::shared_ptr<IRpPioSpiPeripheral> spi_peripheral =
                                     fl::shared_ptr<IRpPioSpiPeripheral>(),
-                                const char* driver_name = "FLEX_IO") FL_NO_EXCEPT;
+                                const char* driver_name = "FLEX_IO",
+                                TxPeripheralFactory extra_tx_factory =
+                                    TxPeripheralFactory()) FL_NO_EXCEPT;
     ~ChannelEngineRpPio() override;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
@@ -42,26 +58,45 @@ class ChannelEngineRpPio final : public IChannelDriver {
     }
 
   private:
-    enum class Mode : u8 { Clockless, Spi };
+    /// One clockless batch: `lanes` consecutive in-flight channels.
+    struct Job {
+        size_t first = 0;
+        u8 lanes = 1;
+        bool spi = false;
+    };
 
-    bool startNextTransmission() FL_NO_EXCEPT;
-    bool beginTransmission(const ChannelDataPtr& channel) FL_NO_EXCEPT;
+    /// One TX peripheral (state machine + DMA) and the batch it carries.
+    struct TxSlot {
+        fl::shared_ptr<IRpPioTxPeripheral> peripheral;
+        fl::vector<u32> words;
+        size_t job = 0;
+        u32 latchStartUs = 0;
+        u32 latchDurationUs = 0;
+        bool active = false;
+        bool latchPending = false;
+    };
+
+    void buildJobs() FL_NO_EXCEPT;
+    bool dispatch() FL_NO_EXCEPT;
+    bool startClockless(TxSlot& slot, size_t job_index) FL_NO_EXCEPT;
+    bool startSpi(size_t job_index) FL_NO_EXCEPT;
+    TxSlot* idleTxSlot() FL_NO_EXCEPT;
+    bool anyActive() const FL_NO_EXCEPT;
     void releaseInFlight() FL_NO_EXCEPT;
     DriverState fail(const char* message) FL_NO_EXCEPT;
 
-    fl::shared_ptr<IRpPioTxPeripheral> mPeripheral;
     fl::shared_ptr<IRpPioSpiPeripheral> mSpiPeripheral;
+    TxPeripheralFactory mTxFactory;
     const char* mDriverName;
+    fl::vector<TxSlot> mTxSlots;
     fl::vector<ChannelDataPtr> mPendingChannels;
     fl::vector<ChannelDataPtr> mInFlightChannels;
-    fl::vector<u32> mPioWords;
-    size_t mCurrentChannel;
-    u32 mLatchStartUs;
-    u32 mLatchDurationUs;
-    u8 mActiveLaneCount;
-    Mode mActiveMode;
+    fl::vector<Job> mJobs;
+    fl::vector<u32> mSpiWords;
+    size_t mNextJob;
+    bool mSpiActive;
+    bool mTxExhausted;
     bool mActive;
-    bool mLatchPending;
     bool mFailed;
     bool mLastStartAttempted;
     bool mLastStartSucceeded;

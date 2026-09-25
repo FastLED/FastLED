@@ -38,9 +38,9 @@ u32 scaledCycles(u32 ns, u32 clock_hz, float divider) FL_NO_EXCEPT {
 
 }  // namespace
 
-RpPioTxPeripheral::RpPioTxPeripheral(u8 pio_index) FL_NO_EXCEPT
+RpPioTxPeripheral::RpPioTxPeripheral(u8 pio_index, bool fallback_to_other_pios) FL_NO_EXCEPT
     : mPio(nullptr), mStateMachine(-1), mDmaChannel(-1), mPin(-1),
-      mProgramOffset(-1), mLaneCount(1), mPioIndex(pio_index), mProgram(nullptr), mInitialized(false) {}
+      mProgramOffset(-1), mLaneCount(1), mPioIndex(pio_index), mFallbackToOtherPios(fallback_to_other_pios), mProgram(nullptr), mInitialized(false) {}
 
 RpPioTxPeripheral::~RpPioTxPeripheral() { deinitialize(); }
 
@@ -124,7 +124,8 @@ bool RpPioTxPeripheral::configure(const RpPioTxConfig& config) FL_NO_EXCEPT {
     // claim and the program load are retried together, because either can be
     // the step that runs out.
     bool ready = false;
-    for (u8 attempt = 0; attempt < NUM_PIOS && !ready; ++attempt) {
+    const u8 attempts = mFallbackToOtherPios ? static_cast<u8>(NUM_PIOS) : 1;
+    for (u8 attempt = 0; attempt < attempts && !ready; ++attempt) {
         const u8 pio_index = static_cast<u8>((mPioIndex + attempt) % NUM_PIOS);
         PIO pio = nullptr;
         int sm = -1;
