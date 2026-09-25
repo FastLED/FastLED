@@ -19,6 +19,7 @@ CPP_SMOKE = {
     "fastled_core": "tests/fastled_core.cpp",
     "fl_hsv2rgb_accuracy": "tests/fl/hsv2rgb_accuracy.cpp",
     "channel_driver_uart": "tests/platforms/esp/32/drivers/uart/channel_driver_uart.cpp",
+    "channel_driver_rmt": "tests/platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.cpp",
 }
 
 # Representative color-reference/corpus coverage from #4359, plus selector
@@ -30,6 +31,7 @@ PY_SMOKE = (
     "ci/tests/test_native_ci_modes.py",
     "ci/tests/test_github_actions_security.py",
     "ci/tests/test_compile_example_sharding.py",
+    "ci/tests/test_header_singleton_cross_dll.py",
 )
 
 
