@@ -1621,3 +1621,30 @@ FL_TEST_CASE("Args::resolveModeEnums") {
 }
 
 } // FL_TEST_FILE
+
+FL_TEST_CASE("CQ_OCTAVE coverage floor - integer decision boundaries (#4540)") {
+    using fl::audio::fft::detail::coverageFloorApplies;
+    // Strictly greater: fft/50 == cq does not replace, one more does.
+    FL_CHECK_FALSE(coverageFloorApplies(50u * 7u, 7u, 0u));
+    FL_CHECK(coverageFloorApplies(50u * 7u + 1u, 7u, 0u));
+    // Zero CQ (the coverage hole) takes any non-zero floor; zero never does.
+    FL_CHECK(coverageFloorApplies(1u, 0u, 0u));
+    FL_CHECK_FALSE(coverageFloorApplies(0u, 0u, 0u));
+    // A CQ detection within the main lobe (>= 20) blocks the floor.
+    FL_CHECK(coverageFloorApplies(100000u, 0u, 19u));
+    FL_CHECK_FALSE(coverageFloorApplies(100000u, 0u, 20u));
+    // No u32 overflow at saturation: cq * 50 exceeds 2^32.
+    const fl::u32 kMax = 0xFFFFFFFFu;
+    FL_CHECK_FALSE(coverageFloorApplies(kMax, kMax / 50u + 1u, 0u));
+    FL_CHECK(coverageFloorApplies(kMax, kMax / 50u - 1u, 0u));
+    // Matches the float rule `fft * 0.02f > cq` away from the exact
+    // 50:1 tie, over the magnitude range fastMag() produces.
+    for (fl::u32 cq = 0; cq < 400u; cq += 7u) {
+        for (fl::u32 fft = 0; fft < 25000u; fft += 13u) {
+            if (fft == cq * 50u) continue;
+            const bool asFloat = static_cast<float>(fft) * 0.02f >
+                                 static_cast<float>(cq);
+            FL_CHECK_EQ(coverageFloorApplies(fft, cq, 0u), asFloat);
+        }
+    }
+}

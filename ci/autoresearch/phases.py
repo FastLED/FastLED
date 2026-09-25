@@ -516,6 +516,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     coroutine_test_mode = args.coroutine
     ieee754_test_mode = args.ieee754
     math_test_mode = args.math
+    fft_test_mode = args.fft
     mp3_test_mode = args.mp3
     rpc_smoke_mode = args.rpc_smoke
     watchdog_soak_mode = args.watchdog_soak
@@ -672,6 +673,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             or coroutine_test_mode
             or ieee754_test_mode
             or math_test_mode
+            or fft_test_mode
             or mp3_test_mode
             or rpc_smoke_mode
             or net_server_mode
@@ -701,6 +703,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         or coroutine_test_mode
         or ieee754_test_mode
         or math_test_mode
+        or fft_test_mode
         or mp3_test_mode
         or rpc_smoke_mode
     ):
@@ -753,6 +756,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         and not coroutine_test_mode
         and not ieee754_test_mode
         and not math_test_mode
+        and not fft_test_mode
         and not mp3_test_mode
         and not rpc_smoke_mode
         and not watchdog_soak_mode
@@ -1318,6 +1322,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         coroutine_test_mode=coroutine_test_mode,
         ieee754_test_mode=ieee754_test_mode,
         math_test_mode=math_test_mode,
+        fft_test_mode=fft_test_mode,
         mp3_test_mode=mp3_test_mode,
         rpc_smoke_mode=rpc_smoke_mode,
         watchdog_soak_mode=watchdog_soak_mode,
@@ -1860,6 +1865,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         )
     elif ctx.math_test_mode:
         print("\n\U0001f4cc Math mode: skipping pin discovery and GPIO pre-test")
+    elif ctx.fft_test_mode:
+        print("\n\U0001f4cc FFT bench mode: skipping pin discovery and GPIO pre-test")
     elif ctx.mp3_test_mode:
         print("\n\U0001f4cc MP3 codec mode: skipping pin discovery and GPIO pre-test")
     elif ctx.rpc_smoke_mode or ctx.watchdog_soak_mode:
@@ -1956,6 +1963,8 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     elif ctx.ieee754_test_mode:
         pass
     elif ctx.math_test_mode:
+        pass
+    elif ctx.fft_test_mode:
         pass
     elif ctx.mp3_test_mode:
         pass
@@ -2669,6 +2678,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if ctx.math_test_mode:
         return await _run_math_tests(ctx)
 
+    if ctx.fft_test_mode:
+        return await _run_fft_tests(ctx)
+
     if ctx.mp3_test_mode:
         return await _run_mp3_tests(ctx)
 
@@ -2849,6 +2861,62 @@ async def _run_perf_wave2d_tests(ctx: RunContext) -> int:
     finally:
         if client is not None:
             await client.close()
+
+
+async def _run_fft_tests(ctx: RunContext) -> int:
+    """CQ_OCTAVE per-frame time and heap on device (#4540)."""
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    serial_iface = ctx.serial_iface
+
+    print()
+    print("=" * 60)
+    print("FFT BENCH MODE: CQ_OCTAVE per-frame cost")
+    print("=" * 60)
+    print()
+
+    configs = [(512, 16), (512, 64), (512, 128)]
+    client: RpcClient | None = None
+    failed = False
+    try:
+        print("   Connecting to device...", end="", flush=True)
+        client = RpcClient(upload_port, timeout=60.0, serial_interface=serial_iface)
+        await client.connect(boot_wait=1.0, drain_boot=True)
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+        print()
+        print(
+            f"   {'samples/bands':<14} {'first us':>10} {'warm us':>10}"
+            f" {'heap used':>10} {'warm growth':>12} {'checksum':>12}"
+        )
+        for samples, bands in configs:
+            response = await client.send_and_match(
+                "fftCqOctaveBench",
+                args=[{"samples": samples, "bands": bands, "frames": 50}],
+                match_key="success",
+                retries=2,
+            )
+            data = response.data
+            if not data.get("success", False):
+                print(f"   {samples}/{bands}: {Fore.RED}FAILED{Style.RESET_ALL} {data}")
+                failed = True
+                continue
+            used = int(data["heap_before"]) - int(data["heap_after_first"])
+            growth = int(data["heap_after_first"]) - int(data["heap_after_warm"])
+            print(
+                f"   {f'{samples}/{bands}':<14} {int(data['first_frame_us']):>10}"
+                f" {float(data['warm_frame_us']):>10.1f} {used:>10} {growth:>12}"
+                f" {float(data['checksum']):>12.1f}"
+            )
+            print(f"FFT_BENCH_JSON {json.dumps(data, sort_keys=True)}")
+    finally:
+        if client is not None:
+            await client.close()
+    print()
+    if failed:
+        print(f"{Fore.RED}FFT BENCH FAILED{Style.RESET_ALL}")
+        return 1
+    print(f"{Fore.GREEN}FFT BENCH COMPLETE{Style.RESET_ALL}")
+    return 0
 
 
 async def _run_math_tests(ctx: RunContext) -> int:

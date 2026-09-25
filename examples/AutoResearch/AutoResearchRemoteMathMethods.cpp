@@ -17,6 +17,9 @@
 #include "AutoResearchOta.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/system/heap.h"
+#include "fl/audio/fft/fft.h"
+#include "fl/audio/fft/fft_impl.h"
+#include "fl/math/math.h"
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
@@ -254,6 +257,70 @@ void AutoResearchRemoteControl::bindMathMethods(fl::Remote& remote) {
         response.set("libm_exp_us", static_cast<int64_t>(r.libm_exp_us));
         response.set("large_memory", static_cast<int64_t>(r.large_memory));
         response.set("sink", static_cast<double>(r.sink));
+        return response;
+    });
+
+    // Register "fftCqOctaveBench" - CQ_OCTAVE per-frame cost on device
+    // (#4540). Times the first frame (cold scratch) and the average warm
+    // frame, and reports free heap before construction, after the first
+    // frame, and after all warm frames, so per-frame heap growth shows up as
+    // a difference between the last two. The input is a fixed two-tone
+    // signal so results are comparable across builds.
+    remote.bind("fftCqOctaveBench", [](const fl::json& args) -> fl::json {
+        fl::i32 samples = 512;
+        fl::i32 bands = 16;
+        fl::i32 frames = 50;
+        const fl::json config = args.is_array() && args.size() > 0 ? args[0] : args;
+        if (!config.is_null() && config.is_object()) {
+            if (config.contains("samples") && config["samples"].is_int())
+                samples = static_cast<fl::i32>(config["samples"].as_int().value());
+            if (config.contains("bands") && config["bands"].is_int())
+                bands = static_cast<fl::i32>(config["bands"].as_int().value());
+            if (config.contains("frames") && config["frames"].is_int())
+                frames = static_cast<fl::i32>(config["frames"].as_int().value());
+        }
+        fl::json response = fl::json::object();
+        response.set("samples", static_cast<int64_t>(samples));
+        response.set("bands", static_cast<int64_t>(bands));
+        response.set("frames", static_cast<int64_t>(frames));
+        if (samples < 64 || samples > 4096 || bands < 2 || bands > 512 ||
+            frames < 1 || frames > 10000) {
+            response.set("success", false);
+            response.set("error", "out_of_range");
+            return response;
+        }
+        const fl::i32 kSampleRate = 44100;
+        fl::vector<fl::i16> signal(static_cast<fl::size>(samples));
+        for (fl::i32 i = 0; i < samples; ++i) {
+            const float t = static_cast<float>(i) / static_cast<float>(kSampleRate);
+            const float v = 0.5f * fl::sinf(2.0f * static_cast<float>(FL_M_PI) * 220.0f * t) +
+                            0.3f * fl::sinf(2.0f * static_cast<float>(FL_M_PI) * 1500.0f * t);
+            signal[static_cast<fl::size>(i)] = static_cast<fl::i16>(v * 20000.0f);
+        }
+        const fl::u32 heapBefore = static_cast<fl::u32>(fl::getFreeHeap().free_sram);
+        fl::audio::fft::Args fftArgs(samples, bands, 174.6f, 4698.3f, kSampleRate,
+                                     fl::audio::fft::Mode::CQ_OCTAVE);
+        fl::audio::fft::Impl fft(fftArgs);
+        fl::audio::fft::Bins out(static_cast<fl::size>(bands));
+        const fl::u32 t0 = fl::micros();
+        fft.run(signal, &out);
+        const fl::u32 firstUs = fl::micros() - t0;
+        const fl::u32 heapAfterFirst = static_cast<fl::u32>(fl::getFreeHeap().free_sram);
+        const fl::u32 t1 = fl::micros();
+        for (fl::i32 f = 0; f < frames; ++f) {
+            fft.run(signal, &out);
+        }
+        const fl::u32 warmTotalUs = fl::micros() - t1;
+        const fl::u32 heapAfterWarm = static_cast<fl::u32>(fl::getFreeHeap().free_sram);
+        float checksum = 0.0f;
+        for (float b : out.raw()) checksum += b;
+        response.set("success", true);
+        response.set("first_frame_us", static_cast<int64_t>(firstUs));
+        response.set("warm_frame_us", static_cast<double>(warmTotalUs) / frames);
+        response.set("heap_before", static_cast<int64_t>(heapBefore));
+        response.set("heap_after_first", static_cast<int64_t>(heapAfterFirst));
+        response.set("heap_after_warm", static_cast<int64_t>(heapAfterWarm));
+        response.set("checksum", static_cast<double>(checksum));
         return response;
     });
 

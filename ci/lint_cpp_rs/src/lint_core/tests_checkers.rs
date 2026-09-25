@@ -729,3 +729,67 @@ int b = 2;
         let visible = scan_visible(&src);
         assert!(visible[0].contains("after_ident"), "{visible:?}");
     }
+
+    fn int_template_violations(path: &str, src: &str) -> Vec<(usize, String)> {
+        IntTemplateArgChecker.check_file_content(&file(path, src))
+    }
+
+    #[test]
+    fn int_template_flags_every_template_and_cast_with_bare_int() {
+        // FastLED#4540: the #4531 shape `bash lint` used to accept, plus the
+        // general forms -- any template, any argument position, and casts.
+        let src = "struct S {
+    fl::vector<int> mCoverageFirst;
+    fl::flat_map<fl::string, int> byName;
+    fl::pair<int, u8> p;
+    my_template< unsigned int , 4> q;
+    fl::vector<fl::vector<int>> nested;
+};
+int n = static_cast<int>(x);
+auto m = fl::numeric_limits<int>::max();
+";
+        let lines: Vec<usize> = int_template_violations("src/fl/new_file.cpp.hpp", src)
+            .iter()
+            .map(|(l, _)| *l)
+            .collect();
+        assert_eq!(lines, vec![2, 3, 4, 5, 6, 8, 9]);
+    }
+
+    #[test]
+    fn int_template_ignores_declarations_params_comments_and_suppressions() {
+        let src = "template <int N> struct A {};
+template <typename T, int N> struct B {};
+template <int DATA_PIN, EOrder RGB_ORDER = RGB> void addLeds();
+void f(int a, int b);
+void g(char, int, long);
+for (int i = 0; i < n; ++i) {}
+bool lt = a < b;
+fl::vector<fl::u16> ok;
+fl::vector<interval> not_int;
+fl::vector<u32> also_ok;
+// fl::vector<int> in a comment
+/* static_cast<int>(x) in a block */
+/*
+fl::vector<int> multi-line block
+*/
+fl::vector<int> pins; // fl-lint: int-template-ok GPIO numbers are int in the public API
+";
+        let v = int_template_violations("src/fl/new_file.cpp.hpp", src);
+        assert!(v.is_empty(), "{v:?}");
+    }
+
+    #[test]
+    fn int_template_ratchets_per_file_baseline() {
+        let root = Path::new(".");
+        let c = IntTemplateArgChecker;
+        assert!(c.should_process_file("src/fl/audio/fft/fft_impl.cpp.hpp", root));
+        assert!(!c.should_process_file("src/third_party/x/y.h", root));
+        assert!(!c.should_process_file("src/fl/stl/vector.h", root));
+        assert!(!c.should_process_file("tests/fl/foo.cpp", root));
+        // A baselined file may keep its recorded count but not grow it.
+        let (path, allowed) = INT_TEMPLATE_ARG_BASELINE[0];
+        let at = "int x = static_cast<int>(y);\n".repeat(allowed);
+        assert!(int_template_violations(path, &at).is_empty());
+        let over = "int x = static_cast<int>(y);\n".repeat(allowed + 1);
+        assert_eq!(int_template_violations(path, &over).len(), allowed + 1);
+    }
