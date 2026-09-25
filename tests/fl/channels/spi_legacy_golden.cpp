@@ -612,4 +612,32 @@ FL_TEST_CASE("APA102 with explicit host default bus compiles and routes consiste
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
 }
 
+// ===========================================================================
+// MY9221 (#4636): not an SPI-channel chipset. Its addLedsSpiChannel<> body
+// must hand back the bit-bang MY9221Controller (FastPin-driven), not an
+// fl::Channel. Tests build with -fno-rtti, so instead of dynamic_cast this
+// pins the observable consequence: adding the MY9221 controller adds no
+// frame to what the capturing channel driver receives.
+// ===========================================================================
+
+FL_TEST_CASE("MY9221 legacy SPI-channel addLeds uses bit-bang MY9221Controller, not fl::Channel") {
+    SpiLegacyGoldenFixture fixture;
+    static CRGB leds[4] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80),
+                           CRGB(0x01, 0x02, 0x03), CRGB(0x00, 0x00, 0x00)};
+
+    // Baseline: frames enqueued per show() by every channel registered by
+    // earlier cases in this file.
+    FastLED.show();
+    const int baselineEnqueues = mockDriverInstance().enqueueCount;
+    mockDriverInstance().reset();
+
+    ::CLEDController& c = FastLED.addLedsSpiChannel<MY9221, 90, 91, RGB>(leds, 4);
+    FL_CHECK(static_cast<void*>(&c) != nullptr);
+
+    FastLED.show();
+    // The MY9221 path writes through FastPin, never the channel driver, so
+    // the mock sees exactly the same number of frames as before.
+    FL_CHECK_EQ(mockDriverInstance().enqueueCount, baselineEnqueues);
+}
+
 }  // FL_TEST_FILE

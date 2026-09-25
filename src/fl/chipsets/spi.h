@@ -147,7 +147,8 @@ struct SpiEncoder {
     /// @brief Create MY9221 encoder configuration
     /// @param clock_hz Clock frequency (default 1MHz)
     /// @note MY9221 uses dual-edge (DDR) clocking. The Channel SPI path cannot
-    ///       drive it correctly; use `addLeds<MY9221, DATA, CLOCK>(...)`.
+    ///       drive it correctly; legacy `addLeds<MY9221, DATA, CLOCK>(...)`
+    ///       dispatches to the bit-bang `MY9221Controller` automatically.
     static inline SpiEncoder my9221(u32 clock_hz = 1000000) FL_NO_EXCEPT {
         SpiEncoder config = {SpiChipset::MY9221, clock_hz};
         return config;

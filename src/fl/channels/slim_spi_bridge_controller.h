@@ -33,12 +33,10 @@
 /// writers directly -- byte-identical to the old path's `managed == false`
 /// case, which is the only case the old path could ever reach here.
 ///
-/// `SpiChipset::MY9221` stays on the old `TypedChannel<B, SpiChipsetConfig>`
-/// path in `FastLED.h`: `Channel::encodeMY9221()` never emits SPI bytes
-/// unmanaged -- it only ever feeds the colour-managed pipeline, which (per
-/// the note above) this controller can never reach -- so routing MY9221
-/// through here would silently drop every frame instead of transmitting
-/// nothing-but-documented like the old path does.
+/// `SpiChipset::MY9221` is never routed here: `FastLED.h` dispatches legacy
+/// `addLeds<MY9221>` to the bit-bang `MY9221Controller`
+/// (`fl/chipsets/my9221.h`), because the MY9221 clocks data on both clock
+/// edges (DDR) and cannot be carried as SPI bytes (#4636).
 
 #pragma once
 
@@ -229,8 +227,8 @@ private:
                 it.writeHD108(&out, false);
                 break;
             case fl::SpiChipset::MY9221:
-                // Never routed here -- FastLED.h keeps MY9221 on the old
-                // TypedChannel path (see file header comment). Defensive
+                // Never routed here -- FastLED.h sends MY9221 to the bit-bang
+                // MY9221Controller (see file header comment). Defensive
                 // no-op if this controller is ever instantiated directly
                 // with CHIPSET == MY9221.
                 break;
