@@ -127,6 +127,11 @@ public:
         name.append(static_cast<i32>(WAIT_TIME));
         name.append("_X");
         name.append(static_cast<i32>(XTRA0));
+        // TIMING types with identical numeric values are still distinct
+        // specializations with distinct static drivers; the driver address
+        // makes the registration key unique per TIMING type.
+        name.append("_@");
+        name.append(static_cast<u32>(reinterpret_cast<fl::uptr>(this)));
         return name;
     }
 
@@ -258,6 +263,11 @@ public:
         name.append(static_cast<i32>(WAIT_TIME));
         name.append("_X");
         name.append(static_cast<i32>(XTRA0));
+        // TIMING types with identical numeric values are still distinct
+        // specializations with distinct static drivers; the driver address
+        // makes the registration key unique per TIMING type.
+        name.append("_@");
+        name.append(static_cast<u32>(reinterpret_cast<fl::uptr>(this)));
         return name;
     }
 
