@@ -16,6 +16,12 @@ It also re-runs complete native Linux/Windows/hosted Intel+Apple Silicon
 macOS unit suites, the full Linux Python suite, and Linux/Windows/macOS
 example suites on the same PR head SHA. `labeled`/`unlabeled` retrigger these
 native wrappers without requiring another commit.
+Two host-only labels sit between the routine smoke run and `ci-full`:
+`ci-platforms-unit-test` runs the complete native unit suites on Linux,
+Windows and hosted Intel + Apple Silicon macOS, the full Linux Python suite,
+and the Windows/macOS example suites, but no board, size, QEMU, AVR8JS, bloat
+or WASM job. `ci-platforms-wasm` runs only the WASM tests (an alias of
+`ci-test:wasm`). Both combine with any other label.
 `workflow_dispatch` still runs an individual board workflow when explicitly
 requested. Selected board/test and native unit/example workflows use the PR
 head commit for checkout, and labeled
