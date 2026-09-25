@@ -137,6 +137,9 @@ STM32 platforms now support RGBW (4-channel) LED strips like SK6812.
 ### Implementation
 The clockless driver (`clockless_arm_stm32.h`) automatically detects RGBW mode and processes 4 bytes per pixel when needed, using the same precise timing as RGB mode.
 
+### Slim-bridge clockless path (#4594)
+`ClocklessController` is a `fl::SlimBridgeController`: `addLeds<>()` encodes pixels (colour order, scale, dither, RGBW) into a `ChannelData` buffer and hands it to a per-pin `ClocklessStm32Driver` (`IChannelDriver`). The driver wraps the unchanged bit-bang cores (M0 asm core from `m0clockless.h`; DWT/CYCCNT loop on Cortex-M3/M4/M7) and registers itself lazily with `ChannelManager::registry()` under the pin-only name `STM32_CLOCKLESS_P<pin>` the first time a controller is constructed. With `FASTLED_ALLOW_INTERRUPTS=1`, the interrupt window opens between 3-byte groups. Arduino GIGA uses its own `platforms/arm/giga/clockless_arm_giga.h` and stays on the legacy path.
+
 ## Optional feature defines
 
 - **`FASTLED_ALLOW_INTERRUPTS`**: Default `0`. Clockless timing on STM32 typically runs with interrupts off for stability.

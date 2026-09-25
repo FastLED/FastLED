@@ -32,6 +32,25 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 namespace fl {
 
 /*
+ * Why clocked SPI (APA102/SK9822) stays on this legacy SPIOutput path and is
+ * NOT routed through fl::SlimSpiBridgeController (#4594, see also the SAMD
+ * revert bdabb404fc):
+ *
+ *  - The only STM32 channel-API SPI engines are the SpiHw2/4/8 adapters in
+ *    drivers/spi_hw_{2,4,8}_stm32.cpp.hpp. They are Timer+DMA-stream GPIO
+ *    parallel emitters, not the SPI peripheral, and there is no SpiHw1.
+ *  - They are only registered when FL_STM32_HAS_SPI_HW_* is defined
+ *    (stm32_capabilities.h), i.e. on stream-DMA families (F2/F4/F7/H7/L4).
+ *    STM32F1/G4/U5 register no instances at all, so a single-lane APA102
+ *    strip would get no engine and produce no output.
+ *  - DATA_RATE_MHZ()/DATA_RATE_KHZ() on STM32 still encode a clock divider,
+ *    not Hz, which the channel API's SpiChipsetConfig would misinterpret.
+ *
+ * Until a real single-lane SPI-peripheral engine exists for every STM32
+ * family, FASTLED_SPI_USES_CHANNEL_API stays off for STM32.
+ */
+
+/*
  * STM32 Hardware SPI Driver
  *
  * This hardware SPI implementation supports STM32F1, STM32F4, and other
