@@ -861,7 +861,7 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     fl::atomic<int> completed_count(0);
     fl::atomic<int> sum(0);
 
-    printf("Test: Spawning 5 coroutines\n");
+    fl::printf("Test: Spawning 5 coroutines\n");
 
     // Store task objects to keep coroutines alive
     fl::vector<task::Handle> tasks;
@@ -870,38 +870,38 @@ FL_TEST_CASE("await in coroutine - multiple concurrent coroutines") {
     for (int i = 0; i < 5; i++) {
         CoroutineConfig config;
         config.func = [&, i]() {
-            printf("  Coroutine %d: Started\n", i);
+            fl::printf("  Coroutine %d: Started\n", i);
             // Each promise resolves to i*10 after (i*2)ms
             auto p = delayed_resolve<int>(i * 10, i * 2);
-            printf("  Coroutine %d: Created promise, calling await()\n", i);
+            fl::printf("  Coroutine %d: Created promise, calling await()\n", i);
             auto result = fl::task::await(p);
-            printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
+            fl::printf("  Coroutine %d: await() returned, ok=%d\n", i, result.ok());
 
             if (result.ok()) {
-                printf("  Coroutine %d: Adding value %d to sum\n", i, result.value());
+                fl::printf("  Coroutine %d: Adding value %d to sum\n", i, result.value());
                 sum.fetch_add(result.value());
             }
 
             completed_count.fetch_add(1);
-            printf("  Coroutine %d: Completed\n", i);
+            fl::printf("  Coroutine %d: Completed\n", i);
         };
         config.name = fl::string("TestCoro") + fl::to_string(i);
         tasks.push_back(task::coroutine(config));
-        printf("Test: Spawned coroutine %d\n", i);
+        fl::printf("Test: Spawned coroutine %d\n", i);
     }
 
     // Wait for all coroutines to complete (max 500ms to account for slow CI)
     int timeout = 0;
-    printf("Test: Waiting for coroutines to complete...\n");
+    fl::printf("Test: Waiting for coroutines to complete...\n");
     while (completed_count.load() < 5 && timeout < 500) {
         if (timeout % 100 == 0) {
-            printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
+            fl::printf("Test: timeout=%d, completed=%d, sum=%d\n", timeout, completed_count.load(), sum.load());
         }
         run(1000);
         delay(5);
         timeout += 5;
     }
-    printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
+    fl::printf("Test: Wait complete. completed=%d, sum=%d\n", completed_count.load(), sum.load());
 
     FL_CHECK(completed_count.load() == 5);
     FL_CHECK(sum.load() == 0 + 10 + 20 + 30 + 40);  // Sum of 0, 10, 20, 30, 40

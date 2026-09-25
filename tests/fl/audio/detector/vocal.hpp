@@ -420,7 +420,7 @@ FL_TEST_CASE("audio::detector::Vocal - guitar-like broadband not detected as voc
         detector.update(ctx);
     }
     float nc = Diag::getSpectralCentroid(detector) / static_cast<float>(Diag::getNumBins(detector));
-    printf("guitar-like: centroid=%.3f rolloff=%.3f formant=%.3f "
+    fl::printf("guitar-like: centroid=%.3f rolloff=%.3f formant=%.3f "
            "flatness=%.3f density=%.1f variance=%.4f confidence=%.3f isVocal=%d\n",
            nc, Diag::getSpectralRolloff(detector), Diag::getFormantRatio(detector),
            Diag::getSpectralFlatness(detector), Diag::getHarmonicDensity(detector),
@@ -444,7 +444,7 @@ FL_TEST_CASE("audio::detector::Vocal - voice-in-mix harmonic structure") {
         detector.update(ctx);
     }
     float nc = Diag::getSpectralCentroid(detector) / static_cast<float>(Diag::getNumBins(detector));
-    printf("voice-in-mix: centroid=%.3f rolloff=%.3f formant=%.3f "
+    fl::printf("voice-in-mix: centroid=%.3f rolloff=%.3f formant=%.3f "
            "flatness=%.3f density=%.1f variance=%.4f confidence=%.3f isVocal=%d\n",
            nc, Diag::getSpectralRolloff(detector), Diag::getFormantRatio(detector),
            Diag::getSpectralFlatness(detector), Diag::getHarmonicDensity(detector),
@@ -472,7 +472,7 @@ FL_TEST_CASE("audio::detector::Vocal - jittered vowel has measurable envelope ji
         detector.update(ctx);
     }
 
-    printf("jittered vowel: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
+    fl::printf("jittered vowel: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
            Diag::getEnvelopeJitter(detector), Diag::getAutocorrelationIrregularity(detector),
            Diag::getZeroCrossingCV(detector), detector.getConfidence(),
            detector.isVocal() ? 1 : 0);
@@ -495,7 +495,7 @@ FL_TEST_CASE("audio::detector::Vocal - guitar string decay has low irregularity"
         detector.update(ctx);
     }
 
-    printf("guitar string: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
+    fl::printf("guitar string: jitter=%.4f acfIrreg=%.4f zcCV=%.4f conf=%.3f isVocal=%d\n",
            Diag::getEnvelopeJitter(detector), Diag::getAutocorrelationIrregularity(detector),
            Diag::getZeroCrossingCV(detector), detector.getConfidence(),
            detector.isVocal() ? 1 : 0);
@@ -535,8 +535,8 @@ FL_TEST_CASE("audio::detector::Vocal - time-domain features print diagnostics") 
         {"guitar_string", genGuitar},
     };
 
-    printf("\n--- Time-domain feature diagnostics ---\n");
-    printf("%-16s  jitter  acfIrreg  zcCV    conf  isVocal\n", "signal");
+    fl::printf("\n--- Time-domain feature diagnostics ---\n");
+    fl::printf("%-16s  jitter  acfIrreg  zcCV    conf  isVocal\n", "signal");
 
     for (const auto& sig : signals) {
         audio::detector::Vocal det;
@@ -548,13 +548,13 @@ FL_TEST_CASE("audio::detector::Vocal - time-domain features print diagnostics") 
             ctx->getFFT(64);
             det.update(ctx);
         }
-        printf("%-16s  %.4f  %.4f    %.4f  %.3f  %d\n",
+        fl::printf("%-16s  %.4f  %.4f    %.4f  %.3f  %d\n",
                sig.name, Diag::getEnvelopeJitter(det),
                Diag::getAutocorrelationIrregularity(det),
                Diag::getZeroCrossingCV(det), det.getConfidence(),
                det.isVocal() ? 1 : 0);
     }
-    printf("--- end diagnostics ---\n");
+    fl::printf("--- end diagnostics ---\n");
 
     // This test always passes — it's for calibration output
     FL_CHECK(true);
@@ -655,8 +655,8 @@ inline audio::Sample makeVocalInFullMix(float vocalRatio, fl::u32 timestamp,
 // Diagnostic: show how vocal detector features degrade in a full mix.
 // Prints feature values at different vocal-to-backing ratios.
 FL_TEST_CASE("audio::detector::Vocal - full mix feature contamination diagnostic") {
-    printf("\n--- Full-mix vocal detection diagnostic ---\n");
-    printf("%-12s  flat    form    pres    jitter  acfIrr  zcCV    conf  isVocal\n",
+    fl::printf("\n--- Full-mix vocal detection diagnostic ---\n");
+    fl::printf("%-12s  flat    form    pres    jitter  acfIrr  zcCV    conf  isVocal\n",
            "mix_ratio");
 
     float ratios[] = {1.0f, 0.7f, 0.5f, 0.3f, 0.0f};
@@ -670,7 +670,7 @@ FL_TEST_CASE("audio::detector::Vocal - full mix feature contamination diagnostic
             ctx->getFFT(64);
             det.update(ctx);
         }
-        printf("vocal=%.1f     %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
+        fl::printf("vocal=%.1f     %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
                ratio,
                Diag::getSpectralFlatness(det),
                Diag::getFormantRatio(det),
@@ -681,7 +681,7 @@ FL_TEST_CASE("audio::detector::Vocal - full mix feature contamination diagnostic
                det.getConfidence(),
                det.isVocal() ? 1 : 0);
     }
-    printf("--- end diagnostic ---\n");
+    fl::printf("--- end diagnostic ---\n");
 
     // This test always passes — it's a diagnostic
     FL_CHECK(true);
@@ -705,7 +705,7 @@ FL_TEST_CASE("audio::detector::Vocal - isolated vocal vs vocal in full mix") {
     float isoForm = Diag::getFormantRatio(isoDetector);
     float isoPres = Diag::getVocalPresenceRatio(isoDetector);
 
-    printf("Isolated vocal: conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
+    fl::printf("Isolated vocal: conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
            isoConf, isoFlat, isoForm, isoPres, isoDetector.isVocal() ? 1 : 0);
 
     // 2. Same vocal mixed with drums/bass at equal level
@@ -723,7 +723,7 @@ FL_TEST_CASE("audio::detector::Vocal - isolated vocal vs vocal in full mix") {
     float mixForm = Diag::getFormantRatio(mixDetector);
     float mixPres = Diag::getVocalPresenceRatio(mixDetector);
 
-    printf("Vocal in mix:   conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
+    fl::printf("Vocal in mix:   conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
            mixConf, mixFlat, mixForm, mixPres, mixDetector.isVocal() ? 1 : 0);
 
     // 3. Backing track only (no vocal) — should NOT be detected
@@ -738,7 +738,7 @@ FL_TEST_CASE("audio::detector::Vocal - isolated vocal vs vocal in full mix") {
     }
     float backConf = backingDetector.getConfidence();
 
-    printf("Backing only:   conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
+    fl::printf("Backing only:   conf=%.3f flat=%.3f form=%.3f pres=%.3f isVocal=%d\n",
            backConf, Diag::getSpectralFlatness(backingDetector),
            Diag::getFormantRatio(backingDetector),
            Diag::getVocalPresenceRatio(backingDetector),
@@ -755,7 +755,7 @@ FL_TEST_CASE("audio::detector::Vocal - isolated vocal vs vocal in full mix") {
     // Vocal-in-mix should now be detected thanks to rebalanced weights
     // (formant elevated, flatness reduced, ZC penalty softened)
     float confDrop = isoConf - mixConf;
-    printf("Confidence drop (iso - mix): %.3f\n", confDrop);
+    fl::printf("Confidence drop (iso - mix): %.3f\n", confDrop);
 
     // The mix should have meaningfully higher confidence than backing-only
     FL_CHECK_GT(mixConf, backConf);
@@ -783,7 +783,7 @@ FL_TEST_CASE("audio::detector::Vocal - drums+bass backing track not vocal") {
         if (detector.isVocal()) vocalFrames++;
     }
 
-    printf("Backing track: %d/30 frames detected as vocal, final conf=%.3f\n",
+    fl::printf("Backing track: %d/30 frames detected as vocal, final conf=%.3f\n",
            vocalFrames, detector.getConfidence());
 
     // Drums+bass should never be detected as vocal
@@ -912,7 +912,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - vowel feature golden ranges") {
     };
     auto s = test_vocal::runSignal(genVowel);
 
-    printf("vowel golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f roll=%.3f conf=%.3f\n",
+    fl::printf("vowel golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f roll=%.3f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.centroid, s.rolloff, s.confidence);
 
     // Spectral features should be in voice territory
@@ -933,7 +933,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - pure sine feature golden ranges
     auto genSine = [](fl::u32 ts) { return makeSample(440.0f, ts); };
     auto s = test_vocal::runSignal(genSine);
 
-    printf("sine golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f roll=%.3f conf=%.3f\n",
+    fl::printf("sine golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f roll=%.3f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.centroid, s.rolloff, s.confidence);
 
     // Pure sine: very low flatness (tonal), moderate density (16 broad bins
@@ -952,7 +952,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - guitar string feature golden ra
     };
     auto s = test_vocal::runSignal(genGuitar);
 
-    printf("guitar golden: flat=%.3f form=%.3f dens=%.1f jitter=%.4f acf=%.4f conf=%.3f\n",
+    fl::printf("guitar golden: flat=%.3f form=%.3f dens=%.1f jitter=%.4f acf=%.4f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.jitter, s.acfIrreg, s.confidence);
 
     // Guitar: moderate flatness (16 broad bins), low jitter, low ACF irregularity
@@ -969,7 +969,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - white noise feature golden rang
     auto genNoise = [](fl::u32 ts) { return makeWhiteNoise(ts); };
     auto s = test_vocal::runSignal(genNoise);
 
-    printf("noise golden: flat=%.3f form=%.3f dens=%.1f conf=%.3f\n",
+    fl::printf("noise golden: flat=%.3f form=%.3f dens=%.1f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.confidence);
 
     // White noise: high flatness (uniform), high density (scaled for 16 broad bins)
@@ -984,7 +984,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - white noise feature golden rang
 FL_TEST_CASE("audio::detector::Vocal stability - guitar-like broadband feature golden ranges") {
     auto s = test_vocal::runSignal([](fl::u32 ts) { return makeGuitarLike(ts); });
 
-    printf("guitar-like golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f conf=%.3f\n",
+    fl::printf("guitar-like golden: flat=%.3f form=%.3f dens=%.1f cent=%.3f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.centroid, s.confidence);
 
     // Guitar-like broadband: moderate flatness, low formant
@@ -1065,7 +1065,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - separation: isolated vocal vs b
     auto backing = test_vocal::runMix(0.0f, 20);
 
     float confMargin = vocal.confidence - backing.confidence;
-    printf("separation iso vs backing: vocal=%.3f backing=%.3f margin=%.3f\n",
+    fl::printf("separation iso vs backing: vocal=%.3f backing=%.3f margin=%.3f\n",
            vocal.confidence, backing.confidence, confMargin);
 
     // Confidence margin must be at least 0.40 (isolated vocal vs drums+guitar+bass)
@@ -1077,7 +1077,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - separation: vocal-in-mix vs bac
     auto backing = test_vocal::runMix(0.0f, 20);
 
     float confMargin = vocMix.confidence - backing.confidence;
-    printf("separation mix vs backing: voc=%.3f back=%.3f margin=%.3f\n",
+    fl::printf("separation mix vs backing: voc=%.3f back=%.3f margin=%.3f\n",
            vocMix.confidence, backing.confidence, confMargin);
 
     // Vocal-in-mix must be measurably above backing
@@ -1095,7 +1095,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - separation: formant discriminat
     });
 
     float formantGap = vowel.formant - guitar.formant;
-    printf("formant gap: vowel=%.3f guitar=%.3f gap=%.3f\n",
+    fl::printf("formant gap: vowel=%.3f guitar=%.3f gap=%.3f\n",
            vowel.formant, guitar.formant, formantGap);
 
     // Formant ratio gap must be at least 0.30 — this is the primary
@@ -1120,7 +1120,7 @@ FL_TEST_CASE("audio::detector::Vocal stability - vocal flatness stable across mi
         flatnesses[i] = s.flatness;
     }
 
-    printf("flatness sweep: r=0.0→%.3f  r=0.3→%.3f  r=0.5→%.3f  r=0.7→%.3f  r=1.0→%.3f\n",
+    fl::printf("flatness sweep: r=0.0→%.3f  r=0.3→%.3f  r=0.5→%.3f  r=0.7→%.3f  r=1.0→%.3f\n",
            flatnesses[0], flatnesses[1], flatnesses[2], flatnesses[3], flatnesses[4]);
 
     // All should be in the moderate range (not tonal, not noise)
@@ -1148,22 +1148,22 @@ FL_TEST_CASE("audio::detector::Vocal weight-lock - full-band feature diagnostic"
     auto vocal10 = test_vocal::runFullBandMix(1.0f, 20);
     auto vocal05 = test_vocal::runFullBandMix(0.5f, 20);
 
-    printf("\n--- Full-band mix feature distributions ---\n");
-    printf("%-12s  flat    form    pres    jitter  acfIrr  zcCV    conf  isVocal\n",
+    fl::printf("\n--- Full-band mix feature distributions ---\n");
+    fl::printf("%-12s  flat    form    pres    jitter  acfIrr  zcCV    conf  isVocal\n",
            "signal");
-    printf("backing      %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
+    fl::printf("backing      %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
            backing.flatness, backing.formant, backing.presence,
            backing.jitter, backing.acfIrreg, backing.zcCV,
            backing.confidence, backing.isVocal ? 1 : 0);
-    printf("vocal=1.0    %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
+    fl::printf("vocal=1.0    %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
            vocal10.flatness, vocal10.formant, vocal10.presence,
            vocal10.jitter, vocal10.acfIrreg, vocal10.zcCV,
            vocal10.confidence, vocal10.isVocal ? 1 : 0);
-    printf("vocal=0.5    %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
+    fl::printf("vocal=0.5    %.3f   %.3f   %.3f   %.4f  %.4f  %.4f  %.3f  %d\n",
            vocal05.flatness, vocal05.formant, vocal05.presence,
            vocal05.jitter, vocal05.acfIrreg, vocal05.zcCV,
            vocal05.confidence, vocal05.isVocal ? 1 : 0);
-    printf("--- end full-band diagnostic ---\n");
+    fl::printf("--- end full-band diagnostic ---\n");
 
     FL_CHECK(true); // Diagnostic — always passes
 }
@@ -1180,7 +1180,7 @@ FL_TEST_CASE("audio::detector::Vocal weight-lock - full-band formant gap locks w
     auto backing = test_vocal::runFullBandMix(0.0f, 20);
     auto vocal = test_vocal::runFullBandMix(1.0f, 20);
 
-    printf("full-band formant: backing=%.3f vocal=%.3f gap=%.3f\n",
+    fl::printf("full-band formant: backing=%.3f vocal=%.3f gap=%.3f\n",
            backing.formant, vocal.formant, vocal.formant - backing.formant);
 
     // Drums mask guitar body resonances → backing formant is low.
@@ -1197,7 +1197,7 @@ FL_TEST_CASE("audio::detector::Vocal weight-lock - full-band vocal-in-mix separa
     auto vocal = test_vocal::runFullBandMix(1.0f, 20);
 
     float margin = vocal.confidence - backing.confidence;
-    printf("full-band separation: vocal=%.3f backing=%.3f margin=%.3f\n",
+    fl::printf("full-band separation: vocal=%.3f backing=%.3f margin=%.3f\n",
            vocal.confidence, backing.confidence, margin);
 
     // Voice must produce measurably higher confidence than backing.
@@ -1218,11 +1218,11 @@ FL_TEST_CASE("audio::detector::Vocal weight-lock - full-band confidence monotoni
         confs[i] = s.confidence;
     }
 
-    printf("full-band confidence sweep: ");
+    fl::printf("full-band confidence sweep: ");
     for (int i = 0; i < 5; ++i) {
-        printf("r=%.2f→%.3f  ", ratios[i], confs[i]);
+        fl::printf("r=%.2f→%.3f  ", ratios[i], confs[i]);
     }
-    printf("\n");
+    fl::printf("\n");
 
     // Vocal at full level must be above backing
     FL_CHECK_GT(confs[4], confs[0]);
@@ -1243,7 +1243,7 @@ FL_TEST_CASE("audio::detector::Vocal weight-lock - acoustic guitar body resonanc
         return makeAcousticGuitar(196.0f, ts);
     });
 
-    printf("acoustic guitar: flat=%.3f form=%.3f dens=%.1f jitter=%.4f acf=%.4f conf=%.3f\n",
+    fl::printf("acoustic guitar: flat=%.3f form=%.3f dens=%.1f jitter=%.4f acf=%.4f conf=%.3f\n",
            s.flatness, s.formant, s.density, s.jitter, s.acfIrreg, s.confidence);
 
     // Body resonances should produce measurable formant ratio
@@ -1359,7 +1359,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - sawtooth wave not vocal") {
         det.update(ctx);
     }
 
-    printf("sawtooth: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
+    fl::printf("sawtooth: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
            det.getConfidence(), det.isVocal() ? 1 : 0,
            Diag::getSpectralFlatness(det), Diag::getFormantRatio(det));
 
@@ -1380,7 +1380,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - AM tremolo tone not vocal") {
         det.update(ctx);
     }
 
-    printf("tremolo: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
+    fl::printf("tremolo: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
            det.getConfidence(), det.isVocal() ? 1 : 0,
            Diag::getSpectralFlatness(det), Diag::getFormantRatio(det));
 
@@ -1399,7 +1399,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - pitched tom not vocal") {
         det.update(ctx);
     }
 
-    printf("pitched tom: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
+    fl::printf("pitched tom: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
            det.getConfidence(), det.isVocal() ? 1 : 0,
            Diag::getSpectralFlatness(det), Diag::getFormantRatio(det));
 
@@ -1418,7 +1418,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - speech-band noise not vocal") 
         det.update(ctx);
     }
 
-    printf("speech-band noise: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
+    fl::printf("speech-band noise: conf=%.3f isVocal=%d flat=%.3f form=%.3f\n",
            det.getConfidence(), det.isVocal() ? 1 : 0,
            Diag::getSpectralFlatness(det), Diag::getFormantRatio(det));
 
@@ -1435,7 +1435,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - formant gap >= 0.35") {
     });
 
     float formantGap = vowel.formant - guitar.formant;
-    printf("degenerate formant gap: vowel=%.3f guitar=%.3f gap=%.3f\n",
+    fl::printf("degenerate formant gap: vowel=%.3f guitar=%.3f gap=%.3f\n",
            vowel.formant, guitar.formant, formantGap);
 
     // Tighter than existing 0.30 test — catches formant weight drops
@@ -1447,7 +1447,7 @@ FL_TEST_CASE("audio::detector::Vocal degenerate - full-band variance separation 
     auto backing = test_vocal::runFullBandMix(0.0f, 20);
 
     float confGap = vocal.confidence - backing.confidence;
-    printf("full-band conf gap: vocal=%.3f backing=%.3f gap=%.3f\n",
+    fl::printf("full-band conf gap: vocal=%.3f backing=%.3f gap=%.3f\n",
            vocal.confidence, backing.confidence, confGap);
 
     // Catches variance boost gain changes

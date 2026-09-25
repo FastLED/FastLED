@@ -786,7 +786,7 @@ FL_TEST_CASE("XYPath slider step serialization bug - C++ verification", fl::test
          auto optionalStep = stepValue.as_float();
          if (optionalStep.has_value()) {
              float offsetStep = *optionalStep;
-             printf("DEBUG: Parsed offset step\n");
+             fl::printf("DEBUG: Parsed offset step\n");
              FL_CHECK_CLOSE(offsetStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
          } else {
              FL_WARN("ERROR: could not parse offset step as float");
@@ -800,13 +800,13 @@ FL_TEST_CASE("XYPath slider step serialization bug - C++ verification", fl::test
      if (stepsJson.contains("step")) {
          auto optionalStep = stepsJson["step"].as_float();
          if (optionalStep.has_value()) {
-            printf("DEBUG: optionalStep.has_value()=%d\n", optionalStep.has_value() ? 1 : 0);
-             printf("DEBUG: About to call operator*\n");
+            fl::printf("DEBUG: optionalStep.has_value()=%d\n", optionalStep.has_value() ? 1 : 0);
+             fl::printf("DEBUG: About to call operator*\n");
              float stepsStep = *optionalStep;
-             printf("DEBUG: After operator* call\n");
-             printf("DEBUG: About to use stepsStep value\n");
+             fl::printf("DEBUG: After operator* call\n");
+             fl::printf("DEBUG: About to use stepsStep value\n");
              FL_CHECK_CLOSE(stepsStep, 1.0f, 0.001f);
-             printf("DEBUG: FL_CHECK_CLOSE passed\n");
+             fl::printf("DEBUG: FL_CHECK_CLOSE passed\n");
          } else {
              FL_WARN("ERROR: could not parse steps step as float");
              FL_CHECK(false);
@@ -820,10 +820,10 @@ FL_TEST_CASE("XYPath slider step serialization bug - C++ verification", fl::test
          auto optionalStep = lengthJson["step"].as_float();
          if (optionalStep.has_value()) {
             float lengthStep = *optionalStep;
-             printf("DEBUG: Parsed length step\n");
+             fl::printf("DEBUG: Parsed length step\n");
              // FL_CHECK_CLOSE(lengthStep, 0.01f, 0.001f);  // ✅ C++ generates correct 0.01
              FL_CHECK_CLOSE(lengthStep, 0.01f, 0.001f);
-             printf("DEBUG: FL_CHECK_CLOSE for lengthStep completed\n");
+             fl::printf("DEBUG: FL_CHECK_CLOSE for lengthStep completed\n");
          } else {
              FL_WARN("ERROR: could not parse length step as float");
              FL_CHECK(false);

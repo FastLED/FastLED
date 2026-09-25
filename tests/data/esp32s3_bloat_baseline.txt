@@ -1,3 +1,10 @@
+# 2026-09-25, PR #4632: -17,270 B, 367105 -> 349835, claiming savings that
+# merged to master without re-pinning -- chiefly #4630 (stop linking every
+# platform driver from opt-in registration) and the SlimBridgeController
+# refactors (#4603-#4605). Measured by CI run 36100731467 (bloat regression
+# job) on #4632, whose own change (host-native reld linking) cannot reach
+# ESP32-S3 firmware: board images are linked by fbuild, not reld.
+
 # 2026-09-24, PR #4579 (meta #4572): -2,948 B, 370053 -> 367105, claiming
 # the savings of #4574 (#4566, Channel::showPixels split, -170 B attributed on
 # host) and #4577 (#4565, shared format_scalar, -2,820 B attributed on host),
@@ -267,4 +274,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367105
+349835
