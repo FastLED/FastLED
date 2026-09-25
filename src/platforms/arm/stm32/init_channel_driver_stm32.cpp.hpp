@@ -16,8 +16,9 @@
 /// 2. Wrap them in SpiChannelEngineAdapter
 /// 3. Register unified adapter with ChannelManager
 ///
-/// Unlike ESP32, STM32 currently has no clockless drivers, so only
-/// true SPI hardware is registered.
+/// Clockless output is not registered here: per-pin bit-bang clockless
+/// drivers self-register from the controller (see clockless_arm_stm32.h),
+/// so only true SPI hardware is registered.
 
 #include "fl/stl/compiler_control.h"
 
@@ -133,7 +134,7 @@ void initChannelDrivers() {
     auto& manager = channelManager();
 
     // Register true SPI hardware (priority 6-8)
-    // STM32 currently has no clockless drivers, so only SPI hardware is registered
+    // Per-pin bit-bang clockless drivers self-register from the controller
     detail::addSpiHardwareIfPossible(manager);
 
     FL_DBG("STM32: Channel drivers initialized");
