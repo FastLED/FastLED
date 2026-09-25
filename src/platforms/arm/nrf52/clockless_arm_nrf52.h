@@ -28,6 +28,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/slim_bridge_controller.h"
+#include "fl/stl/bit_cast.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
@@ -228,7 +229,7 @@ public:
     /// Uses the address of a per-specialization static member, so no
     /// function-local static (and no __cxa_guard) is needed.
     static u32 typeId() FL_NO_EXCEPT {
-        return static_cast<u32>(reinterpret_cast<fl::uptr>(&sTypeTag));
+        return static_cast<u32>(fl::ptr_to_int(&sTypeTag));
     }
     static const char sTypeTag;
 

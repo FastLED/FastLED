@@ -12,7 +12,8 @@ This directory contains shared code for all Raspberry Pi RP2xxx platforms (RP204
 **Key Features**:
 - Hardware-timed waveforms using PIO state machines (via the channel engine)
 - DMA-based data transfer for efficient CPU usage
-- `FASTLED_RP2040_CLOCKLESS_PIO 0` selects a blocking Cortex-M0 bit-bang controller instead
+- `FASTLED_RP2040_CLOCKLESS_PIO 0` routes through `fl::SlimBridgeController` onto the blocking bit-bang engine `ChannelEngineRpBitBang` (`Bus::BIT_BANG`), with interrupts off for each frame
+- `FASTLED_RP2040_CLOCKLESS_PIO_AUTO 1` maps WS2812 `addLeds<>()` onto the same slim bridge / `ChannelEngineRpPio` (PIO0). Consecutive pins with matching length and timing share one multi-lane state machine, and independent strips run concurrently (#4620)
 - Supports all common clockless LED protocols with configurable timing
 
 **Platform Adaptation**:

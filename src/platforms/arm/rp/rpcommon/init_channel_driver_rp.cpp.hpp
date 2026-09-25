@@ -30,6 +30,9 @@
 #include "platforms/arm/rp/rpcommon/rp_uart_bus_traits.h"
 #include "platforms/arm/rp/rpcommon/rp_spi_bus_traits.h"
 #include "platforms/arm/rp/rpcommon/rp_pio_tx_bus_traits.h"
+#if !FASTLED_RP2040_CLOCKLESS_PIO
+#include "platforms/arm/rp/rpcommon/rp_bitbang_bus_traits.h"
+#endif
 
 namespace fl {
 
@@ -109,6 +112,10 @@ void initChannelDrivers() {
     BusTraits<Bus::FLEX_IO, 1>::registerWithManager();
 #if defined(FL_IS_RP2350)
     BusTraits<Bus::FLEX_IO, 2>::registerWithManager();
+#endif
+#if !FASTLED_RP2040_CLOCKLESS_PIO
+    // M0 CPU bit-bang fallback for legacy clockless strips (#4635).
+    BusTraits<Bus::BIT_BANG, 0>::registerWithManager();
 #endif
 
     FL_DBG("RP2040/RP2350: Channel drivers initialized");
