@@ -133,10 +133,24 @@ bool ChannelEngineObjectFLED::canHandle(const ChannelDataPtr& data) const FL_NO_
 }
 
 void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
-    if (channelData) {
-        channelData->setInUse(true);
-        mEnqueuedChannels.push_back(fl::move(channelData));
+    if (!channelData) {
+        return;
     }
+    // Reject a second strip on a pin already queued this frame: driving the
+    // same GPIO twice from one DMA frame corrupts both strips (#4617 review).
+    const int pin = channelData->getPin();
+    for (const auto& queued : mEnqueuedChannels) {
+        if (queued->getPin() == pin) {
+            if (!pinFlagTestAndSet(mWarnedDuplicatePins, pin)) {
+                FL_WARN("================================================================================");
+                FL_WARN("FASTLED ERROR: Pin %s is already in use - strip disabled", pin);
+                FL_WARN("================================================================================");
+            }
+            return;
+        }
+    }
+    channelData->setInUse(true);
+    mEnqueuedChannels.push_back(fl::move(channelData));
 }
 
 void ChannelEngineObjectFLED::show() FL_NO_EXCEPT {
@@ -224,7 +238,12 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         // Validate pin
         auto validation = mPeripheral->validatePin(pin);
         if (!validation.valid) {
-            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
+            if (!pinFlagTestAndSet(mWarnedInvalidPins, pin)) {
+                FL_WARN("================================================================================");
+                FL_WARN("FASTLED ERROR: Strip on pin %s is INVALID and has been disabled", (int)pin);
+                FL_WARN("%s", validation.error_message ? validation.error_message : "");
+                FL_WARN("================================================================================");
+            }
             continue;
         }
 
