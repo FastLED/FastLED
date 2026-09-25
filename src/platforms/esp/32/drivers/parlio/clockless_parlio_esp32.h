@@ -10,8 +10,7 @@
 
 #include "eorder.h"
 #include "fl/channels/bus.h"
-#include "fl/channels/channel.h"
-#include "fl/channels/config.h"
+#include "fl/channels/slim_bridge_controller.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
@@ -20,24 +19,12 @@
 namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessPARLIO : public Channel
+class ClocklessPARLIO
+    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::FLEX_IO, 0>>
 {
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
-    static ChipsetVariant makeChipset() FL_NO_EXCEPT {
-        return ClocklessChipset(DATA_PIN, makeTimingConfig<TIMING>());
-    }
-
 public:
-    ClocklessPARLIO() FL_NO_EXCEPT
-        : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
-    {
-        BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
-        setDriver(BusTraits<Bus::FLEX_IO, 0>::instancePtr());
-        addToList();
-    }
-
-    void init() FL_NO_EXCEPT override { }
     u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 800; }
 };
 
