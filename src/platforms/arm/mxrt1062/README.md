@@ -18,5 +18,5 @@ For detailed information about Teensy 4.x LPSPI dual/quad-mode support:
 - **Implementation Guide**: `LP_SPI.md` - Technical details for quad-mode pin configuration
 
 ## Notes
-- Very high CPU frequency; DWT-based timing and interrupt thresholds are critical for stability.
+- Clockless output timing: see [teensy4_common/README.md](../teensy/teensy4_common/README.md) (ObjectFLED DMA engine).
 - OctoWS2811 and SmartMatrix can offload large parallel outputs; ensure pin mappings and DMA settings match board wiring.

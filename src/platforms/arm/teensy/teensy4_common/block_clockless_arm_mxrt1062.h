@@ -20,6 +20,7 @@
 #include "fl/stl/static_assert.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/teensy/teensy4_common/block_lane_pins.h"
+#include "platforms/arm/teensy/teensy4_common/block_lane_pins.impl.hpp"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"
 
 namespace fl {

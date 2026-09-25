@@ -1,6 +1,7 @@
 #include "test.h"
 
 #include "platforms/arm/teensy/teensy4_common/block_lane_pins.h"
+#include "platforms/arm/teensy/teensy4_common/block_lane_pins.impl.hpp"
 
 using fl::teensy4BlockLanePins;
 using fl::u8;
