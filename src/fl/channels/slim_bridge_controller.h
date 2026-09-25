@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/vector.h"
 
@@ -56,7 +57,10 @@ namespace fl {
 ///                     driver honors the longer of the two (mirrors the
 ///                     historical `ClocklessIdf4` `reset_us` folding).
 /// @tparam DriverTraits Trait type satisfying the contract documented above.
-template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits>
+/// @tparam XTRA0       Legacy clockless trailing zero bits per byte, stored
+///                     on the ChannelData for engines that honour it.
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
+          int XTRA0 = 0>
 class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
 public:
     SlimBridgeController() FL_NO_EXCEPT {
@@ -70,6 +74,8 @@ public:
         }
         mData = ChannelData::create(DATA_PIN, timing, fl::vector_psram<u8>(),
                                      ChannelPixelFormat::RGB);
+        FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
+        mData->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
         // Idempotent by contract -- safe to call from every instantiation's
         // constructor (mirrors ClocklessIdf5's registerWithManager() call).
         DriverTraits::registerWithManager();
