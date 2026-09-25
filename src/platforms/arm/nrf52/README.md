@@ -37,12 +37,13 @@ the protocol reset interval lands at the desired update time.
 - `fastled_arm_nrf52.h`: Aggregator; includes pin/SPI/clockless and sysdefs.
 - `fastpin_arm_nrf52.h`, `fastpin_arm_nrf52_variants.h`: Pin helpers/variants.
 - `fastspi_arm_nrf52.h`: SPI backend.
-- `clockless_arm_nrf52.h`: Clockless driver.
+- `clockless_arm_nrf52.h`: Clockless driver. The legacy `addLeds<>()` `ClocklessController` is a `fl::SlimBridgeController` (#4595) over a per-specialization `ClocklessNrf52Driver` (`IChannelDriver`) that keeps the PWM EasyDMA sequence engine as the byte emitter; it self-registers with `ChannelManager` from the controller constructor, so sketches without clockless strips link no clockless channel code.
 - `arbiter_nrf52.h`: PWM arbitration utility (selects/guards PWM instances for drivers).
 - `led_sysdefs_arm_nrf52.h`: System defines for nRF52.
 
 
 Notes:
+- `addLeds<APA102>` (and other clocked SPI chipsets) stay on the legacy `SPIOutput` path: the SPI channel adapter has no multi-lane init for the SpiHw2/SpiHw4 instances registered here, and `DATA_RATE_MHZ` is still a clock divider on this platform.
 - Requires `CLOCKLESS_FREQUENCY` definition in many setups; PWM resources may be shared and must be arbitrated.
  - `arbiter_nrf52.h` exposes a small API to acquire/release PWM instances safely across users; ensure ISR handlers are lightweight.
 

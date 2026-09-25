@@ -9,6 +9,12 @@
 ///
 /// Priority Order:
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via Timer/PPI)
+///
+/// Clockless strips are NOT registered here. The legacy `addLeds<>()`
+/// `ClocklessController` (clockless_arm_nrf52.h) is a `SlimBridgeController`
+/// whose per-specialization `ClocklessNrf52Driver` self-registers through
+/// `ChannelManager::registry()` from the controller constructor, so a sketch
+/// with no clockless strip never links the clockless driver (#4595, #4630).
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/arm/nrf52/is_nrf52.h"
