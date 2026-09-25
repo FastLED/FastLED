@@ -125,6 +125,21 @@ FL_TEST_CASE("ObjectFLED engine - invalid pin is skipped") {
 // Basic Transmission
 //=============================================================================
 
+FL_TEST_CASE("ObjectFLED engine - duplicate pin is rejected") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+    auto first = createRGBChannelData(2, 1);
+    auto second = createRGBChannelData(2, 1);
+    engine.enqueue(first);
+    engine.enqueue(second);
+    FL_CHECK(second->isInUse() == false);
+    engine.show();
+    FL_CHECK(engine.poll() == DriverState::READY);
+    const auto* record = mock->getLastCreateRecord();
+    FL_REQUIRE(record != nullptr);
+    FL_CHECK(record->numPins == 1u);
+}
+
 FL_TEST_CASE("ObjectFLED engine - initial state is READY") {
     auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
     ChannelEngineObjectFLED engine(mock);

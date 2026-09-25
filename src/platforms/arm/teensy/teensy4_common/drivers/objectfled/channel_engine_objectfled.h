@@ -110,6 +110,22 @@ private:
 
     size_t mCurrentGroupIndex = 0;
 
+    /// @brief One-time warning latches, one bit per pin (Teensy pins < 64).
+    u64 mWarnedInvalidPins = 0;
+    u64 mWarnedDuplicatePins = 0;
+
+    /// @brief Returns the previous bit for `pin` and sets it. Pins outside
+    /// [0, 64) always report "already set" so they never spam.
+    static bool pinFlagTestAndSet(u64& flags, int pin) FL_NO_EXCEPT {
+        if (pin < 0 || pin >= 64) {
+            return true;
+        }
+        const u64 bit = u64(1) << pin;
+        const bool was = (flags & bit) != 0;
+        flags |= bit;
+        return was;
+    }
+
     bool startNextTimingGroup() FL_NO_EXCEPT;
     bool startTimingGroup(TimingGroup& group) FL_NO_EXCEPT;
     void finishTransmission() FL_NO_EXCEPT;

@@ -31,7 +31,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/arm/teensy/teensy4_common/init_channel_driver.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/channel_engine_flexio.h"
-#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"
 namespace fl {
 
 namespace detail {
@@ -117,10 +117,14 @@ static void addFlexIOIfPossible(ChannelManager& manager) {
 static void addObjectFLEDIfPossible(ChannelManager& manager) {
     FL_DBG("Teensy 4.x: Registering ObjectFLED channel driver");
 
-    auto engine = fl::make_shared<ChannelEngineObjectFLED>();
-    manager.addDriver(5, engine);
+    // Register the SAME singleton the legacy addLeds<> slim bridge uses
+    // (BusTraits<Bus::FLEX_IO, 0>), at its default bus priority. A second,
+    // separately constructed engine here would be replaced by the bridge's
+    // lazy registration, dropping queued Channel-API data (#4617 review).
+    (void)manager;
+    BusTraits<Bus::FLEX_IO, 0>::registerWithManager();
 
-    FL_DBG("Teensy 4.x: Registered ObjectFLED driver (priority 5)");
+    FL_DBG("Teensy 4.x: Registered ObjectFLED driver (default FLEX_IO priority)");
 }
 
 } // namespace detail
