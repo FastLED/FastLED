@@ -85,3 +85,21 @@ def test_esp32s3_full_sweep_has_bounded_timeout_headroom() -> None:
         template["jobs"]["build"]["timeout-minutes"] == "${{ inputs.timeout-minutes }}"
     )
     assert esp32s3["jobs"]["build"]["with"]["timeout-minutes"] == "60"
+
+
+def test_ci_platforms_unit_test_opens_every_host_suite() -> None:
+    # Full native unit (+ Linux Python) suites and host example suites on all
+    # OSes, exactly where ci-full opens them -- and nowhere else.
+    host = {
+        "unit_test_linux.yml": ("test", "full-suite"),
+        "unit_test_windows.yml": ("test", "full-suite"),
+    }
+    for name, (job, key) in host.items():
+        assert "ci-platforms-unit-test" in workflow(name)["jobs"][job]["with"][key]
+    for name in (
+        "unit_test_macos.yml",
+        "example_test_macos.yml",
+        "example_test_windows.yml",
+    ):
+        jobs = workflow(name)["jobs"]
+        assert all("ci-platforms-unit-test" in job["if"] for job in jobs.values()), name

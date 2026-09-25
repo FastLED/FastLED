@@ -43,4 +43,4 @@ jobs:
     with:
       os: ubuntu-latest
       build-mode: ${{ github.event_name == 'workflow_dispatch' && inputs.build-mode || 'debug-thin' }}
-      full-suite: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'ci-full') }}
+      full-suite: ${{ github.event_name == 'workflow_dispatch' || (contains(github.event.pull_request.labels.*.name, 'ci-full') || contains(github.event.pull_request.labels.*.name, 'ci-platforms-unit-test')) }}
