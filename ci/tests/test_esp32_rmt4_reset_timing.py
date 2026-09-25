@@ -38,8 +38,17 @@ def test_rmt4_keeps_idle_low_until_chipset_reset_time_elapses() -> None:
     assert "resetElapsedUs < state.resetDurationUs" in implementation
 
 
-def test_rmt4_legacy_wait_time_can_only_extend_trait_reset_time() -> None:
-    source = CLOCKLESS.read_text(encoding="utf-8")
+SLIM_BRIDGE = ROOT / "src" / "fl" / "channels" / "slim_bridge_controller.h"
 
-    assert "static_cast<u32>(WAIT_TIME) > timing.reset_us" in source
-    assert "timing.reset_us = static_cast<u32>(WAIT_TIME);" in source
+
+def test_rmt4_legacy_wait_time_can_only_extend_trait_reset_time() -> None:
+    # #4604 moved the RMT4 controller onto SlimBridgeController, which now
+    # owns the WAIT_TIME -> reset_us folding for every bridged driver.
+    clockless = CLOCKLESS.read_text(encoding="utf-8")
+    assert (
+        "public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, "
+        "BusTraits<Bus::RMT>>" in clockless
+    )
+    bridge = SLIM_BRIDGE.read_text(encoding="utf-8")
+    assert "static_cast<u32>(WAIT_TIME) > timing.reset_us" in bridge
+    assert "timing.reset_us = static_cast<u32>(WAIT_TIME);" in bridge

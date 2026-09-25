@@ -45,37 +45,55 @@ from ci.meson.path_normalization import (
     _enforce_strict_path_violations,
     normalize_meson_private_include_paths,
 )
+from ci.tools.reld import bridge_linker, ensure_reld
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
-# Build modes whose native link consumes LLVM bitcode (-flto); see meson.build.
-_LTO_BUILD_MODES = frozenset({"release"})
+_RELD_NAMES = frozenset({"reld", "reld.exe"})
 
 
-def resolve_native_linker(build_mode: str) -> tuple[str, str]:
-    """Validate the optional native linker and identify its linked contents."""
-    requested = os.environ.get("FASTLED_NATIVE_LINKER")
-    if requested is None:
-        return "lld", "lld"
-    if build_mode in _LTO_BUILD_MODES:
-        # Release links ThinLTO bitcode; the pinned Wild has no LLVM plugin
-        # and rejects it ("contains LLVM-IR, but linker plugin was not
-        # supplied"), so LTO modes always keep LLD (FastLED #4558).
-        return "lld", "lld"
-    if sys.platform != "linux":
-        raise ValueError("FASTLED_NATIVE_LINKER override is Linux-only")
-    path = Path(requested)
-    if not path.is_absolute():
-        raise ValueError("FASTLED_NATIVE_LINKER must be an absolute path")
-    if not path.is_file() or not os.access(path, os.X_OK):
-        raise ValueError("FASTLED_NATIVE_LINKER must name an executable file")
+def _sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
-    return str(path), f"{path}:{digest.hexdigest()}"
+    return digest.hexdigest()
+
+
+def resolve_native_linker(build_mode: str) -> tuple[str, str]:
+    """Select reld, FastLED's only native linker, and identify its contents.
+
+    reld links every host build on Linux, macOS and Windows; it routes ThinLTO
+    and non-ELF links to the clang-tool-chain bridge linker exported as
+    ``RELD_BRIDGE_LINKER``. ``FASTLED_NATIVE_LINKER`` may point at a different
+    reld build (e.g. a local checkout) but never at another linker.
+    """
+    del build_mode  # every mode, including ThinLTO release, links through reld
+    requested = os.environ.get("FASTLED_NATIVE_LINKER")
+    if requested is None:
+        path = ensure_reld()
+    else:
+        path = Path(requested)
+        if not path.is_absolute():
+            raise ValueError("FASTLED_NATIVE_LINKER must be an absolute path")
+        if path.name.lower() not in _RELD_NAMES:
+            raise ValueError(
+                f"FASTLED_NATIVE_LINKER must be a reld executable, got {path.name}"
+            )
+    if not path.is_file() or not os.access(path, os.X_OK):
+        raise ValueError(f"native linker {path} is not an executable file")
+    # Always overwrite: a stale RELD_BRIDGE_LINKER inherited from an older
+    # shell must never win over the pinned toolchain. Every supported build
+    # entry point (bash test / compile / profile) resolves this before Ninja
+    # runs, and Ninja inherits it; bare `ninja` is banned by repo policy.
+    bridge = bridge_linker()
+    os.environ["RELD_BRIDGE_LINKER"] = str(bridge)
+    # The identity covers reld *and* its bridge, so a changed bridge relinks.
+    return str(
+        path
+    ), f"{path}:{_sha256_file(path)}|bridge={bridge}:{_sha256_file(bridge)}"
 
 
 def invalidate_native_link_outputs(build_dir: Path) -> int:
@@ -575,7 +593,7 @@ def _write_zccache_input_sidecar(
     build_dir: Path,
     build_mode: str,
     source_hashes: "SourceHashes",
-    native_linker_identity: str = "lld",
+    native_linker_identity: str,
 ) -> Optional[Path]:
     """Persist FastLED's source/test/example hashes to a sidecar file the
     zccache configure-cache wrapper can hash via ``--input-file``.
@@ -613,8 +631,8 @@ def build_meson_setup_cmd(
     native_file_path: Path,
     build_dir: Path,
     build_mode: str,
-    native_linker: str = "lld",
-    native_linker_identity: str = "lld",
+    native_linker: str,
+    native_linker_identity: str,
     enable_examples: bool,
     enable_unit_tests: bool,
     reconfigure: bool,

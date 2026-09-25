@@ -29,7 +29,6 @@ from ci.meson.compiler import check_meson_version_compatibility
 from ci.meson.meson_cleanup import (
     CleanupResult,
     cleanup_build_artifacts,
-    detect_system_llvm_tools,
 )
 from ci.meson.meson_markers import (
     inject_ar_optimization_patches,
@@ -81,7 +80,6 @@ __all__ = [
     "_ensure_emcc_native_launcher",
     "_find_zccache_binary",
     "cleanup_build_artifacts",
-    "detect_system_llvm_tools",
     "find_strict_path_violations",
     "get_zccache_version",
     "inject_ar_optimization_patches",

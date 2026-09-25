@@ -60,10 +60,6 @@ jobs:
       - name: Install project dependencies
         run: uv sync
 
-      - name: Install Wild native linker (Linux only)
-        if: runner.os == 'Linux'
-        run: uv run python ci/tools/install_native_linker.py
-
       - name: Verify codec allocation hooks
         run: bash test --cpp tests/fl/codec.cpp
 

@@ -244,21 +244,17 @@ endforeach
 # ============================================================================
 # Core link arguments (shared by all targets)
 # ============================================================================
-core_link_args = ['-fuse-ld=lld']
+# reld is the only native linker on every platform and build mode (see
+# ci/tools/reld.py). setup_meson_build resolves and validates its absolute
+# path; ci/lint/banned_linkers.py rejects any other linker selection.
 native_linker = get_option('native_linker')
-if is_macos and build_mode == 'debug'
-  core_link_args = []
+if native_linker == ''
+  error('native_linker must be the reld path chosen by setup_meson_build')
 endif
-if native_linker != 'lld'
-  if build_machine.system() != 'linux'
-    error('native_linker override is Linux-only')
-  endif
-  if meson.is_cross_build()
-    error('native_linker override requires a native build')
-  endif
-  # setup_meson_build validates the absolute path using the host OS rules.
-  core_link_args = ['-fuse-ld=lld', '--ld-path=' + native_linker]
+if meson.is_cross_build()
+  error('native_linker applies to native builds only')
 endif
+core_link_args = ['-fuse-ld=lld', '--ld-path=' + native_linker]
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds
   core_link_args += ['-flto=thin']
