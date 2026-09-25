@@ -9,6 +9,7 @@
 
 #include "platforms/arm/stm32/clockless_arm_stm32.h"
 #include "platforms/arm/is_arm.h"
+#include "fl/chipsets/chipset_timing_config.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -39,7 +40,9 @@ u32 FL_STM32_CLOCKLESS_DRV::typeId() FL_NO_EXCEPT {
 
 FL_STM32_CLOCKLESS_TPL
 bool FL_STM32_CLOCKLESS_DRV::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
-    return data && data->isClockless() && data->getPin() == DATA_PIN;
+    return data && data->isClockless() && data->getPin() == DATA_PIN &&
+           data->getTiming() == makeTimingConfig<TIMING>() &&
+           data->getExtraZeroBitsPerByte() == static_cast<u8>(XTRA0);
 }
 
 FL_STM32_CLOCKLESS_TPL
