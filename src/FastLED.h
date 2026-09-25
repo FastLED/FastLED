@@ -1623,8 +1623,9 @@ public:
 	///
 	/// Post-#2428 the default build does NOT auto-register every driver —
 	/// only the platform-default driver TU links (via the legacy clockless
-	/// controller's Phase 5b pre-bind). This template provides the opt-in
-	/// path to add another driver and have it win priority dispatch.
+	/// `addLeds<>()` controller's `fl::SlimBridgeController` registration).
+	/// This template provides the opt-in path to add another driver and
+	/// have it win priority dispatch.
 	///
 	/// Naming `BusTraits<B>::instancePtr()` in the body is the ODR-use that
 	/// links the driver TU; the registration with the manager happens at
@@ -1632,8 +1633,11 @@ public:
 	///
 	/// **Must be called before `addLeds<>` / `FastLED.add()`** so newly-
 	/// constructed channels see the override during driver resolution.
-	/// Legacy clockless controllers that already pre-bound to the platform
-	/// default via Phase 5b will continue to use that pre-bind.
+	/// Legacy clockless `addLeds<>()` controllers route through
+	/// `fl::SlimBridgeController<...>`, whose driver is fixed at compile
+	/// time by its `DriverTraits` template parameter and registered with
+	/// `ChannelManager` in the constructor -- this template does not
+	/// rewrite already-constructed controllers.
 	///
 	/// @tparam B  Bus identifier. The caller must have the per-driver
 	///            `bus_traits.h` visible at the call site (which provides

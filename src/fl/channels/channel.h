@@ -305,27 +305,16 @@ protected:
     void init() override;
     using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
                                   fl::vector_psram<u8>&);
-    /// Compile-time controller adapters can bind a known encoder directly,
-    /// avoiding references to the runtime selector and unrelated writers.
-    static PixelEncoder ws2812PixelEncoder() FL_NO_EXCEPT;
-    /// @brief Protected constructor for template subclasses (e.g., ClocklessIdf5)
-    /// @param chipset Chipset configuration (clockless or SPI)
-    /// @param rgbOrder RGB channel ordering
-    /// @param mode Registration mode (AutoRegister or DeferRegister)
-    /// @note Does not set LED data or channel options - caller must do that
-    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT;
-    Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode,
-            PixelEncoder pixelEncoder) FL_NO_EXCEPT;
 
 private:
-    /// @brief Cold slow-path helper for `showPixels()` when the driver was
-    ///        NOT pre-bound via `setDriver()`. Handles dynamic
+    /// @brief Cold slow-path helper for `showPixels()`. Handles dynamic
     ///        `ChannelManager::selectDriverForChannel()` lookup AND the
-    ///        bus-key-miss diagnostics (#2455 / #2459).
+    ///        bus-key-miss diagnostics (#2455 / #2459). This is now the only
+    ///        driver-resolution path.
     ///
-    /// Marked `FL_NO_INLINE` so the legacy `addLeds<>` hot path stays compact —
-    /// see #2773 item 2.1. Returns `nullptr` on a hard miss (caller should
-    /// silently bail).
+    /// Marked `FL_NO_INLINE` to keep `showPixels()` compact -- see #2773
+    /// item 2.1. Returns `nullptr` on a hard miss (caller should silently
+    /// bail).
     FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver();
 
     /// @brief Cold helper for `showPixels()` when mChannelData is still in use
@@ -375,24 +364,6 @@ private:
                                          fl::vector_psram<u8>&) FL_NO_EXCEPT;
     FL_NO_INLINE static void encodeMY9221(Channel&, PixelIterator&, bool,
                                           fl::vector_psram<u8>&) FL_NO_EXCEPT;
-protected:
-
-    /// @brief Pre-bind a driver, bypassing `ChannelManager::selectDriverForChannel()`
-    ///        on every subsequent `showPixels()` call.
-    ///
-    /// Used by legacy `addLeds<>`-style controllers (e.g. `ClocklessIdf5`) to
-    /// route directly to a `BusTraits<DefaultBus>::instancePtr()` singleton at
-    /// construction time. Post-#2428 this is the mechanism that lets
-    /// `--gc-sections` drop unreferenced driver TUs from default builds
-    /// (Phase 5b — the binary-size fix for #2420 / #2421).
-    ///
-    /// @note Stored as `weak_ptr` to avoid holding the driver alive past the
-    ///       caller's intent. The caller (typically the static singleton in a
-    ///       BusTraits) owns the strong reference.
-    void setDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
-        mDriver = driver;
-        mDriverPreBound = true;
-    }
 
 private:
     /// @brief Private constructor (use create() factory method)
@@ -437,12 +408,9 @@ private:
     /// one dereference per frame at the point the pointer is taken.
     ColorPipelineStorage mPipeline;
 #endif
-    fl::weak_ptr<IChannelDriver> mDriver;  // Weak reference to driver (prevents dangling pointers)
-    bool mDriverPreBound = false;    // True if setDriver() was called (legacy addLeds<> path).
-                                     // When true, showPixels() uses mDriver directly and skips
-                                     // ChannelManager::selectDriverForChannel(). When false (the
-                                     // default), every showPixels() re-evaluates the manager's
-                                     // priority list so users can swap drivers at runtime.
+    fl::weak_ptr<IChannelDriver> mDriver;  // Cached dynamic driver (weak, prevents dangling pointers).
+                                     // Re-resolved by resolveDynamicDriver() on every showPixels()
+                                     // call so users can swap drivers at runtime.
     Bus mBus = Bus::AUTO;            // Typed driver selection (#2459). `Bus::AUTO` falls through
                                      // to `ChannelManager` priority dispatch; any other value
                                      // pins this channel to `busName(mBus)`.

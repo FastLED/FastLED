@@ -61,7 +61,9 @@ protected:
 
     /// @brief Protected constructor with registration mode
     /// @param mode Registration mode (AutoRegister or DeferRegister)
-    /// @note Subclasses can use DeferRegister to control when they join the linked list
+    /// @note Subclasses can use DeferRegister to control when they join the linked list.
+    ///       `fl::Channel` uses DeferRegister and joins the draw list when
+    ///       `FastLED.add(ChannelPtr)` calls `addToList()`.
     CLEDController(RegistrationMode mode) FL_NO_EXCEPT;
 
     void applyRgbw(const Rgbw& arg) FL_NO_EXCEPT {
@@ -106,6 +108,7 @@ public:
     }
     /// @brief Add this controller to the linked list
     /// @note Used with DeferRegister mode to explicitly add controller to list
+    ///       (for example, `fl::Channel` via `FastLED.add(ChannelPtr)`)
     /// @note Safe to call multiple times - won't add if already in list
     void addToList() FL_NO_EXCEPT;
 
