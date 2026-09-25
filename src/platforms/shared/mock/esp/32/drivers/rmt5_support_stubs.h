@@ -20,6 +20,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/singleton.h"
 
 // Platform constants for stub builds
 #define FASTLED_RMT5_CLOCK_HZ 40000000  // 40 MHz (stub value)
@@ -66,8 +67,8 @@ public:
 class NetworkStateTracker {
 public:
     static NetworkStateTracker& instance() FL_NO_EXCEPT {
-        static NetworkStateTracker inst;
-        return inst;
+        // Process-wide registry: one instance across DLLs (#4641).
+        return fl::SingletonShared<NetworkStateTracker>::instance();
     }
     bool hasChanged() FL_NO_EXCEPT { return false; }
     bool isActive() FL_NO_EXCEPT { return false; }
@@ -89,8 +90,8 @@ public:
     };
 
     static RmtMemoryManager& instance() FL_NO_EXCEPT {
-        static RmtMemoryManager mgr;
-        return mgr;
+        // Process-wide registry: one instance across DLLs (#4641).
+        return fl::SingletonShared<RmtMemoryManager>::instance();
     }
 
     static fl::size calculateMemoryBlocks(bool) FL_NO_EXCEPT { return 2; }

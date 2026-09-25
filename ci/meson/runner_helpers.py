@@ -366,17 +366,12 @@ def _start_zccache_session(build_dir: Path, build_mode: str) -> None:
     invocations through zccache use this session and get logged.
     The session auto-cleans up via PID monitoring when the process exits.
 
-    On Windows, sets ZCCACHE_LINK_DEPLOY_CMD so zccache invokes
-    `clang-tool-chain-libdeploy` after cache-miss links. This materializes
-    runtime DLLs next to the linked binary and lets zccache include them in
-    cached artifacts, avoiding error-126 DLL load failures (#2329). Linux and
-    macOS resolve shared runtimes through their loader paths, so deployment
-    there adds a Python process to every link without being needed.
+    No post-link deploy command is used on any platform: on Windows, reld
+    deploys runtime DLLs next to the linked binary (zackees/reld#208), and
+    zccache caches them as part of the link output. ZCCACHE_LINK_DEPLOY_CMD
+    is cleared so a stale inherited value never triggers the Python deploy.
     """
-    if sys.platform == "win32":
-        os.environ.setdefault("ZCCACHE_LINK_DEPLOY_CMD", "clang-tool-chain-libdeploy")
-    else:
-        os.environ.pop("ZCCACHE_LINK_DEPLOY_CMD", None)
+    os.environ.pop("ZCCACHE_LINK_DEPLOY_CMD", None)
     os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
     # ZCCACHE_PROBE_BYPASS=1 setdefault removed as a probe per #3129 A9
     # (the CLI-side probe-bypass fast-path was internalised in zccache

@@ -19,6 +19,7 @@ CPP_SMOKE = {
     "fastled_core": "tests/fastled_core.cpp",
     "fl_hsv2rgb_accuracy": "tests/fl/hsv2rgb_accuracy.cpp",
     "channel_driver_uart": "tests/platforms/esp/32/drivers/uart/channel_driver_uart.cpp",
+    "channel_driver_rmt": "tests/platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.cpp",
 }
 
 # Representative color-reference/corpus coverage from #4359, plus selector

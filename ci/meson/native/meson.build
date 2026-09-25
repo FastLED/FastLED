@@ -226,22 +226,6 @@ else
 endif
 
 # ============================================================================
-# Detect if clang-tool-chain Python wrapper is being used
-# ============================================================================
-# clang-tool-chain's Python wrapper commands (clang-tool-chain-cpp)
-# support --deploy-dependencies which copies
-# runtime DLLs. Raw clang++ binaries (even from .clang-tool-chain/ directory)
-# don't support this flag. We check for the wrapper executable name, not the
-# directory path.
-cpp_cmd_array = cpp_compiler.cmd_array()
-is_clang_tool_chain_wrapper = false
-foreach cmd_part : cpp_cmd_array
-  if cmd_part.contains('clang-tool-chain-cpp') or cmd_part.contains('clang-tool-chain-c') or cmd_part.contains('ctc-clang')
-    is_clang_tool_chain_wrapper = true
-  endif
-endforeach
-
-# ============================================================================
 # Core link arguments (shared by all targets)
 # ============================================================================
 # reld is the only native linker on every platform and build mode (see
@@ -254,18 +238,12 @@ endif
 if meson.is_cross_build()
   error('native_linker applies to native builds only')
 endif
+# reld deploys Windows runtime DLLs next to linked binaries itself
+# (zackees/reld#208), so no post-link deploy step is used.
 core_link_args = ['-fuse-ld=lld', '--ld-path=' + native_linker]
 if build_mode == 'release'
   # Enable thin LTO at link time for release builds
   core_link_args += ['-flto=thin']
-endif
-
-# --deploy-dependencies copies runtime DLLs next to the output binary on
-# Windows. Linux and macOS resolve shared runtimes through loader paths;
-# deployment would add a Python post-link process without being needed.
-deploy_link_args = []
-if is_clang_tool_chain_wrapper and is_windows
-  deploy_link_args += ['--deploy-dependencies']
 endif
 
 # Sanitizer link flags (used in debug mode)
@@ -328,7 +306,7 @@ endif
 # ============================================================================
 # Used for building fastled.dll/libfastled.so itself.
 # Similar to DLL args but without consumer-specific flags like -mconsole.
-fastled_shared_link_args = core_link_args + deploy_link_args + sanitizer_link_args
+fastled_shared_link_args = core_link_args + sanitizer_link_args
 if is_windows
   # NOTE: Do NOT use -static-libgcc/-static-libstdc++ here.
   # fastled.dll and consumer DLLs must share the same C++ runtime heap.
@@ -361,7 +339,7 @@ endif
 if build_mode == 'debug' or build_mode == 'debug-thin'
   # Debug mode: dynamic linking required for sanitizers
   # No --no-undefined: sanitizers resolve symbols at runtime
-  runner_link_args = core_link_args + deploy_link_args + sanitizer_link_args + ['-pthread']
+  runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
   if is_windows
     runner_link_args += ['-ldbghelp', '-lpsapi', '-lws2_32']
   endif
@@ -374,7 +352,7 @@ elif build_mode == 'quick'
   # that cause SIGSEGV crashes. Use dynamic linking on Linux like macOS.
   if is_windows
     # Windows: static linking works well with LoadLibrary
-    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+    runner_link_args = core_link_args + no_undefined_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
@@ -387,7 +365,7 @@ elif build_mode == 'quick'
     # no_undefined_link_args is empty on macOS (ld64.lld rejects the GNU flag;
     # Mach-O defaults to erroring on undefined symbols anyway).
     # See FastLED #2612 and PR #2567.
-    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+    runner_link_args = core_link_args + no_undefined_link_args + [
       '-pthread',
     ]
   endif
@@ -396,7 +374,7 @@ else
   # NOTE: Linux with glibc doesn't support static linking + dlopen() properly.
   if is_windows
     # Windows: static linking works well with LoadLibrary
-    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+    runner_link_args = core_link_args + no_undefined_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
@@ -408,7 +386,7 @@ else
     # Note: -lunwind is added conditionally below after checking availability
     # no_undefined_link_args is empty on macOS (ld64.lld rejects the GNU flag);
     # see comment above.
-    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+    runner_link_args = core_link_args + no_undefined_link_args + [
       '-pthread',
     ]
   endif
@@ -567,8 +545,8 @@ fastled_lib_dir = meson.current_build_dir()
 # CLANG-TOOL-CHAIN RUNTIME DLL PATHS — removed as probe (#3129 A6)
 # ============================================================================
 # This block used to populate `runtime_dll_paths` by invoking
-# `ci/meson/get_runtime_dll_paths.py`. Windows GNU now uses the zccache
-# post-link deploy hook; Linux/macOS use linked runtime search paths. The
+# `ci/meson/get_runtime_dll_paths.py`. reld now deploys Windows runtime DLLs
+# next to linked binaries (zackees/reld#208); Linux/macOS use linked runtime search paths. The
 # script remains available for diagnosing runtime lookup failures.
 runtime_dll_paths = []
 
