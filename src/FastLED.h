@@ -194,7 +194,9 @@
 #include "fl/channels/bus_info.h"     // for fl::deviceInfo (portable bus introspection)
 #include "fl/channels/bus_traits.h"   // for fl::BusTraits, fl::BusSupports (Phase 3b, #2428)
 #include "fl/channels/channel_typed.h"  // for fl::TypedChannel<B, Chipset> (Phase 3b, #2428)
+#include "fl/channels/slim_spi_bridge_controller.h"  // for fl::SlimSpiBridgeController (#4585)
 #include "fl/channels/rx/channel.h"
+#include "fl/stl/type_traits.h"  // for fl::true_type/false_type (SPI addLeds<> dispatch, #4585)
 
 #include "fl/audio/input.h"
 #include "fl/audio/audio_processor.h"
@@ -1153,14 +1155,34 @@ public:
 
 	#elif FASTLED_SPI_USES_CHANNEL_API
 
-	/// Add an SPI based CLEDController via Channel API.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	// Compile-time dispatch (#4585): every SPI chipset except MY9221 routes
+	// through the slim `fl::SlimSpiBridgeController` (no runtime `fl::Channel`
+	// instantiated). MY9221 stays on the old `TypedChannel<B, SpiChipsetConfig>`
+	// path because `Channel::encodeMY9221()` never emits bytes unmanaged --
+	// see `fl/channels/slim_spi_bridge_controller.h`'s file-level comment.
+	// C++11 has no `if constexpr`, so the two bodies are separate overloads
+	// selected via a `fl::true_type`/`fl::false_type` tag -- only the
+	// overload actually called gets instantiated, so the never-taken branch
+	// never names `SlimSpiBridgeController<..., MY9221, ...>`.
+	//
+	// DATA_PIN / CLOCK_PIN / RATE / VARIANT exist only to key the
+	// function-local statics exactly like the old per-`addLeds<>`-instantiation
+	// `static ChannelPtr sChannel` was keyed: two strips of the same chipset on
+	// different pins (or via different overloads) must get distinct controllers.
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::u32 RATE, int VARIANT,
+	         fl::EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
+	static ::CLEDController &addLedsSpiDispatch(CRGB *data, int nLedsOrOffset, int nLedsIfOffset,
+	                                             const fl::SpiChipsetConfig &spiCfg, fl::true_type /*useSlim*/) {
+		static fl::SlimSpiBridgeController<static_cast<fl::SpiChipset>(CHIPSET), RGB_ORDER, B, B_WHICH> sCtrl(spiCfg);
+		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::u32 RATE, int VARIANT,
+	         fl::EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
+	static ::CLEDController &addLedsSpiDispatch(CRGB *data, int nLedsOrOffset, int nLedsIfOffset,
+	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*useSlim*/) {
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
-		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
-			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
-		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
 		config.options.mBus = B;
 		config.options.mBusWhich = B_WHICH;
@@ -1170,6 +1192,16 @@ public:
 			add(sChannel);
 		}
 		return *sChannel;
+	}
+
+	/// Add an SPI based CLEDController via Channel API.
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
+	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
+			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
+		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
+		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, SPI_DATA_RATE, 0, RGB_ORDER, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset, spiCfg, UseSlim());
 	}
 
 	/// Add an SPI controller with an explicit ESP-IDF SPI host.
@@ -1178,22 +1210,13 @@ public:
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
-		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data, nLeds), RGB_ORDER);
-		config.options.mBus = B;
-		config.options.mBusWhich = B_WHICH;
-		static fl::ChannelPtr sChannel;
-		if (!sChannel) {
-			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
-			add(sChannel);
-		}
-		return *sChannel;
+		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, SPI_DATA_RATE, 1, RGB_ORDER, B, B_WHICH>(data, nLeds, 0, spiCfg, UseSlim());
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
-		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET));
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
@@ -1201,34 +1224,18 @@ public:
 		constexpr fl::EOrder order =
 			(static_cast<fl::SpiChipset>(CHIPSET) == fl::SpiChipset::HD108)
 				? GRB : RGB;
-		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), order);
-		config.options.mBus = B;
-		config.options.mBusWhich = B_WHICH;
-		static fl::ChannelPtr sChannel;
-		if (!sChannel) {
-			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
-			add(sChannel);
-		}
-		return *sChannel;
+		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, 0, 2, order, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset, spiCfg, UseSlim());
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
-		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET));
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
-		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
-		config.options.mBus = B;
-		config.options.mBusWhich = B_WHICH;
-		static fl::ChannelPtr sChannel;
-		if (!sChannel) {
-			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
-			add(sChannel);
-		}
-		return *sChannel;
+		typedef typename fl::conditional<CHIPSET != MY9221, fl::true_type, fl::false_type>::type UseSlim;
+		return addLedsSpiDispatch<CHIPSET, DATA_PIN, CLOCK_PIN, 0, 3, RGB_ORDER, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset, spiCfg, UseSlim());
 	}
 
 	#else
