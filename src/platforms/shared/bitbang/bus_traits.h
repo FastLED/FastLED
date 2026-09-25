@@ -25,7 +25,11 @@
 // FastLED #3459 / PR #3460). The shared bit-bang specialization must
 // step aside on that platform to avoid a redefinition. Every other
 // platform continues to use the universal-GPIO fallback below.
-#if !(defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA))
+// RP2040/RP2350 with FASTLED_RP2040_CLOCKLESS_PIO=0 likewise claims
+// `Bus::BIT_BANG` for ChannelEngineRpBitBang (rp_bitbang_bus_traits.h, #4635).
+#if !(defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)) && \
+    !((defined(FL_IS_RP2040) || defined(FL_IS_RP2350)) && \
+      defined(FASTLED_RP2040_CLOCKLESS_PIO) && !FASTLED_RP2040_CLOCKLESS_PIO)
 
 namespace fl {
 
@@ -49,4 +53,4 @@ template<> struct BusSupports<Bus::BIT_BANG, SpiChipsetConfig>  : fl::true_type 
 
 }  // namespace fl
 
-#endif  // !(FL_IS_ARM_LPC_845 && FASTLED_LPC_PWM_DMA)
+#endif  // !(LPC845 PWM_DMA) && !(RP with CLOCKLESS_PIO=0)

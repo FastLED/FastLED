@@ -7,8 +7,12 @@ The automatic parallel output driver enables **seamless parallel LED control** o
 - ✅ Works with standard `FastLED.addLeds()` calls
 - ✅ Automatically detects consecutive GPIO pins
 - ✅ Groups them for efficient parallel output (2, 4, or 8 pins)
-- ✅ Falls back to sequential output for non-consecutive pins
-- ✅ Uses the same PIO/DMA resources as manual setup
+- ✅ Runs non-consecutive (independent) strips concurrently on their own lanes (#4620)
+- ✅ Uses the same `ChannelEngineRpPio` (PIO0) owner as the default path and the Channel API
+
+`FASTLED_RP2040_CLOCKLESS_PIO_AUTO` maps WS2812 `addLeds<>()` onto the same slim bridge as the default path. Consecutive pins with matching LED count and timing are batched into one multi-lane state machine. The old `RectangularDrawBuffer` group manager and CPU transpose step have been removed.
+
+With `FASTLED_RP2040_CLOCKLESS_PIO=0`, clockless strips instead go through `fl::SlimBridgeController` onto the blocking bit-bang engine `ChannelEngineRpBitBang` (`Bus::BIT_BANG`). Interrupts are disabled for each frame.
 
 ## Quick Start
 
@@ -55,22 +59,21 @@ When `FastLED.show()` is called, the driver:
 3. **Detects consecutive runs**:
    - [2, 3, 4, 5] → Single 4-pin group
    - [2, 3, 5, 6] → Two 2-pin groups
-   - [2, 5, 10] → Three single-pin groups (sequential fallback)
-4. **Creates parallel groups** for consecutive pins (2, 4, or 8 pins)
-5. **Allocates PIO/DMA resources** per group
-6. **Outputs all groups** (parallel or sequential)
+   - [2, 5, 10] → Three independent single-lane strips (still concurrent)
+4. **Batches** consecutive pins with matching length and timing into one multi-lane PIO state machine
+5. **Outputs all lanes** through `ChannelEngineRpPio` on PIO0
 
 ### Parallel Group Sizes
 
 | Consecutive Pins | Group Size | PIO Output Mode |
 |------------------|------------|-----------------|
-| 2 pins | 2-lane parallel | Bit-transposed |
-| 3 pins | 2-lane + 1 sequential | Mixed |
-| 4 pins | 4-lane parallel | Bit-transposed |
-| 5-7 pins | 4-lane + fallback | Mixed |
-| 8+ pins | 8-lane parallel | Bit-transposed |
+| 2 pins | 2-lane parallel | Multi-lane SM |
+| 3 pins | 3-lane batch | Multi-lane SM |
+| 4 pins | 4-lane parallel | Multi-lane SM |
+| 5-7 pins | 5- to 7-lane batch | Multi-lane SM |
+| 8+ pins | 8-lane parallel | Multi-lane SM |
 
-Non-consecutive pins fall back to sequential (non-parallel) output.
+Non-consecutive pins become independent lanes that still run concurrently (#4620).
 
 ### Example: Mixed Groups
 
@@ -108,8 +111,8 @@ GPIO 0-7   (8 pins)
 
 ❌ **Invalid Configurations:**
 ```
-GPIO 2, 4, 6, 8  (non-consecutive - will use sequential fallback)
-GPIO 1, 3, 5     (non-consecutive - will use sequential fallback)
+GPIO 2, 4, 6, 8  (non-consecutive - independent lanes, run concurrently)
+GPIO 1, 3, 5     (non-consecutive - independent lanes, run concurrently)
 ```
 
 ### GPIO Pin Availability
@@ -129,20 +132,9 @@ GPIO 1, 3, 5     (non-consecutive - will use sequential fallback)
 
 ## Performance
 
-### Bit Transposition Overhead
+### Lane Packing
 
-The driver transposes LED data from standard RGB format to bit-parallel format:
-
-| Group Size | Transpose Time (100 LEDs) | CPU Overhead |
-|------------|---------------------------|--------------|
-| 2 strips   | ~20 µs @ 133 MHz | <1% |
-| 4 strips   | ~35 µs @ 133 MHz | ~2% |
-| 8 strips   | ~60 µs @ 133 MHz | ~3% |
-
-**Transpose algorithms:**
-- 8-strip: Hacker's Delight (optimized)
-- 4-strip: Nibble extraction
-- 2-strip: Bit extraction
+`ChannelEngineRpPio` packs lane data for its multi-lane state machine internally. The legacy CPU transpose (`parallel_transpose.h`) no longer exists.
 
 ### Frame Rate
 
@@ -157,19 +149,7 @@ The driver transposes LED data from standard RGB format to bit-parallel format:
 
 ### Memory Usage
 
-**Buffer allocation (RGB mode):**
-- **RectangularDrawBuffer**: `(max_leds × 3 bytes) × num_strips`
-  - Example: 100 LEDs × 4 strips = 1200 bytes
-- **Transpose buffer**: `max_leds × 24 bytes` per group
-  - Example: 100 LEDs = 2400 bytes per group
-- **Total for 4 strips × 100 LEDs:** ~3600 bytes (1200 + 2400)
-
-**Buffer allocation (RGBW mode):**
-- **RectangularDrawBuffer**: `(max_leds × 4 bytes) × num_strips`
-  - Example: 100 LEDs × 4 strips = 1600 bytes
-- **Transpose buffer**: `max_leds × 32 bytes` per group
-  - Example: 100 LEDs = 3200 bytes per group
-- **Total for 4 strips × 100 LEDs:** ~4800 bytes (1600 + 3200)
+Pixel buffers are owned by the channel engine: roughly one encoded buffer per multi-lane batch. There is no separate `RectangularDrawBuffer` or transpose buffer any more.
 
 **Memory location:**
 - RP2040: Main SRAM (264 KB)
@@ -184,9 +164,9 @@ The driver transposes LED data from standard RGB format to bit-parallel format:
 - ~32 PIO instructions for timing program
 
 **Example: 4-pin + 2-pin + 1-pin groups:**
-- 2 PIO state machines (4-pin + 2-pin groups)
+- 2 PIO state machines for the 4-pin and 2-pin batches
 - 2 DMA channels
-- 1 sequential fallback (1-pin group, uses existing driver)
+- plus 1 more SM + DMA channel for the 1-pin lane
 
 ## Usage
 
@@ -220,7 +200,7 @@ void loop() {
 
 1. **Consecutive pins required** for parallel output
    - Hardware limitation of PIO `out pins, N` instruction
-   - Non-consecutive pins fall back to sequential output
+   - Non-consecutive pins run as independent concurrent lanes
 
 2. **Maximum 12 DMA channels** (shared with other peripherals)
    - Each parallel group uses 1 DMA channel
@@ -238,8 +218,7 @@ void loop() {
 
 2. **RGBW mode fully supported** ✅
    - RGBW uses 4 bytes per LED vs 3 for RGB
-   - Buffer sizes increase accordingly (32 bytes vs 24 bytes per LED for transpose)
-   - Dedicated RGBW transpose functions for optimal performance
+   - Buffer sizes increase accordingly (4 bytes vs 3 bytes per LED)
    - Mixed RGB/RGBW strips in same parallel group supported (see RGBW section below)
 
 3. **Sequential fallback** uses the same timing-safe PIO/DMA engine in
@@ -255,7 +234,7 @@ void loop() {
 **Solutions:**
 - Reduce number of parallel groups (use fewer consecutive pins)
 - Disable other PIO-based features (e.g., parallel SPI)
-- Use sequential output for some strips
+- Batch more strips onto consecutive pins
 
 ### "Failed to claim DMA channel"
 
@@ -264,15 +243,7 @@ void loop() {
 **Solutions:**
 - Reduce number of parallel groups
 - Disable other DMA-based features
-- Use sequential output for some strips
-
-### Non-consecutive pins not outputting
-
-**Cause:** Sequential fallback not fully implemented yet.
-
-**Solutions:**
-- Use consecutive pins for now
-- Wait for future update with sequential fallback integration
+- Batch more strips onto consecutive pins
 
 ### Strips flicker or show wrong colors
 
@@ -381,31 +352,10 @@ void setup() {
 
 #### RGBW Performance
 
-| Strip Type | Bytes per LED | Transpose Buffer (100 LEDs) |
-|------------|---------------|----------------------------|
-| RGB (3 channels) | 3 | 2,400 bytes (24 bytes/LED) |
-| RGBW (4 channels) | 4 | 3,200 bytes (32 bytes/LED) |
-
 **Frame time impact:**
 - RGBW: ~33% more data to transfer (4 bytes vs 3)
 - PIO timing: ~1.25 µs per byte (WS2812 protocol)
 - 100 RGBW LEDs: ~500 µs vs ~375 µs for RGB
-- Still well within real-time performance requirements
-
-#### RGBW Transpose Functions
-
-The transpose functions support both RGB and RGBW via a `bytes_per_led` parameter:
-- `transpose_8strips(input, output, num_leds, bytes_per_led)`: 8 parallel strips
-- `transpose_4strips(input, output, num_leds, bytes_per_led)`: 4 parallel strips
-- `transpose_2strips(input, output, num_leds, bytes_per_led)`: 2 parallel strips
-
-The `bytes_per_led` parameter defaults to 3 (RGB) but can be set to 4 for RGBW.
-
-The correct function is automatically selected based on:
-1. Number of consecutive pins in the group (2, 4, or 8)
-2. Whether any strip in the group has RGBW enabled (sets `bytes_per_led = 4`)
-
-**No performance regression:** RGB-only groups use `bytes_per_led = 3` (default).
 
 ### Debug Output
 
@@ -417,87 +367,14 @@ Enable FastLED debug output to see grouping decisions:
 #include <FastLED.h>
 ```
 
-**Example output:**
-```
-Detecting pin groups from 4 pins
-Created 4-pin parallel group at GPIO 2
-Allocated resources for 4-pin parallel group at GPIO 2 (PIO0, SM0, DMA0)
-Transposed 4-pin group at GPIO 2 (100 LEDs, 2400 bytes)
-Parallel output for 4 pins starting at GPIO 2 (2400 bytes)
-```
-
 ## Technical Details
 
 ### Data Flow
 
 1. **User calls FastLED.show()**
-2. **beginShowLeds()** phase:
-   - Each controller queues its pin to singleton group
-   - Group collects all pins
-3. **showPixels()** phase:
-   - Each controller writes pixel data to RectangularDrawBuffer
-   - Buffer allocates rectangular memory (padded to max LED count)
-4. **endShowLeds()** phase:
-   - First controller triggers output
-   - Detect/rebuild pin groups if configuration changed
-   - Transpose data for parallel groups
-   - Start DMA transfers to PIO state machines
-5. **Guard ensures single output per frame**
-
-### Bit Transposition Format
-
-#### RGB Mode (3 channels)
-
-**Input (Standard RGB):**
-```
-Strip 0: [R0][G0][B0][R1][G1][B1]...
-Strip 1: [R0][G0][B0][R1][G1][B1]...
-Strip 2: [R0][G0][B0][R1][G1][B1]...
-Strip 3: [R0][G0][B0][R1][G1][B1]...
-```
-
-**Output (Bit-Transposed for 4-pin PIO):**
-```
-Byte 0:  [0][0][0][0][S3_R0_b7][S2_R0_b7][S1_R0_b7][S0_R0_b7]  // MSB of R0
-Byte 1:  [0][0][0][0][S3_R0_b6][S2_R0_b6][S1_R0_b6][S0_R0_b6]
-...
-Byte 7:  [0][0][0][0][S3_R0_b0][S2_R0_b0][S1_R0_b0][S0_R0_b0]  // LSB of R0
-Byte 8:  [0][0][0][0][S3_G0_b7][S2_G0_b7][S1_G0_b7][S0_G0_b7]  // MSB of G0
-...
-Byte 23: [0][0][0][0][S3_B0_b0][S2_B0_b0][S1_B0_b0][S0_B0_b0]  // LSB of B0
-```
-
-**Total:** 24 bytes per LED (8 bytes per channel × 3 channels)
-
-#### RGBW Mode (4 channels)
-
-**Input (Standard RGBW):**
-```
-Strip 0: [R0][G0][B0][W0][R1][G1][B1][W1]...
-Strip 1: [R0][G0][B0][W0][R1][G1][B1][W1]...
-Strip 2: [R0][G0][B0][W0][R1][G1][B1][W1]...
-Strip 3: [R0][G0][B0][W0][R1][G1][B1][W1]...
-```
-
-**Output (Bit-Transposed for 4-pin PIO):**
-```
-Byte 0:  [0][0][0][0][S3_R0_b7][S2_R0_b7][S1_R0_b7][S0_R0_b7]  // MSB of R0
-...
-Byte 7:  [0][0][0][0][S3_R0_b0][S2_R0_b0][S1_R0_b0][S0_R0_b0]  // LSB of R0
-Byte 8:  [0][0][0][0][S3_G0_b7][S2_G0_b7][S1_G0_b7][S0_G0_b7]  // MSB of G0
-...
-Byte 15: [0][0][0][0][S3_G0_b0][S2_G0_b0][S1_G0_b0][S0_G0_b0]  // LSB of G0
-Byte 16: [0][0][0][0][S3_B0_b7][S2_B0_b7][S1_B0_b7][S0_B0_b7]  // MSB of B0
-...
-Byte 23: [0][0][0][0][S3_B0_b0][S2_B0_b0][S1_B0_b0][S0_B0_b0]  // LSB of B0
-Byte 24: [0][0][0][0][S3_W0_b7][S2_W0_b7][S1_W0_b7][S0_W0_b7]  // MSB of W0
-...
-Byte 31: [0][0][0][0][S3_W0_b0][S2_W0_b0][S1_W0_b0][S0_W0_b0]  // LSB of W0
-```
-
-**Total:** 32 bytes per LED (8 bytes per channel × 4 channels)
-
-**PIO `out pins, 4` instruction:** Outputs lower 4 bits to GPIO 2-5 simultaneously.
+2. Each `addLeds<>()` controller is a `fl::SlimBridgeController` that enqueues a channel onto `ChannelEngineRpPio`
+3. The engine batches consecutive pins with matching length and timing into multi-lane state machines
+4. Output starts via PIO + DMA, and independent batches run concurrently
 
 ### Architecture Diagram
 
@@ -508,37 +385,15 @@ Byte 31: [0][0][0][0][S3_W0_b0][S2_W0_b0][S1_W0_b0][S0_W0_b0]  // LSB of W0
                    │
                    ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ ClocklessController_RP2040_PIO_WS2812<PIN>                      │
-│ - One instance per addLeds() call                               │
-│ - Stores: mPin (GPIO number)                                    │
+│ fl::SlimBridgeController (one per addLeds() call)               │
 └──────────────────┬───────────────────────────────────────────────┘
                    │
                    ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ RP2040ParallelGroup (Singleton)                                 │
-│ - RectangularDrawBuffer: Collects all LED data                  │
-│ - Pin grouping detection: Sorts & detects consecutive runs      │
-│ - PinGroup array: Stores groups with allocated PIO/DMA          │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-        ┌──────────┴──────────┬──────────┬──────────┐
-        ▼                     ▼          ▼          ▼
-┌─────────────────┐  ┌─────────────┐  ...  ┌─────────────┐
-│ PinGroup 1      │  │ PinGroup 2  │       │ PinGroup N  │
-│ - base_pin: 2   │  │ - base_pin  │       │ - base_pin  │
-│ - num_pins: 4   │  │ - num_pins  │       │ - num_pins  │
-│ - PIO0, SM0     │  │ - PIO/SM    │       │ - PIO/SM    │
-│ - DMA0          │  │ - DMA       │       │ - DMA       │
-│ - Transpose buf │  │ - Buffer    │       │ - Buffer    │
-└────────┬────────┘  └──────┬──────┘       └──────┬──────┘
-         │                  │                     │
-         ▼                  ▼                     ▼
-┌─────────────────────────────────────────────────────────┐
-│ Hardware: PIO State Machines + DMA                      │
-│ - PIO: Precise WS2812 timing via custom program         │
-│ - DMA: Non-blocking data transfer                       │
-│ - GPIO: Parallel output to consecutive pins             │
-└─────────────────────────────────────────────────────────┘
+│ ChannelEngineRpPio (PIO0, shared with Channel API)              │
+│ - Batches consecutive pins w/ matching length + timing          │
+│ - One multi-lane SM + DMA per batch; batches run concurrently   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Examples
@@ -561,3 +416,4 @@ https://github.com/FastLED/FastLED
   - 2/4/8-lane parallel output
   - Integration with standard FastLED API
   - RectangularDrawBuffer for multi-strip management
+- **#4635**: Auto path moved onto the slim bridge / `ChannelEngineRpPio`; `RP2040ParallelGroup`, `RectangularDrawBuffer` and `parallel_transpose.h` removed

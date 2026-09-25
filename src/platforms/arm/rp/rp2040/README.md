@@ -52,11 +52,11 @@ void loop() {
 ### How It Works
 
 The driver automatically:
-1. Detects consecutive GPIO pins from all `addLeds()` calls
-2. Groups them for parallel output (2, 4, or 8 pins per group)
-3. Allocates PIO state machines and DMA channels per group
-4. Transposes LED data to bit-parallel format
-5. Outputs all groups simultaneously
+1. Routes each WS2812 `addLeds()` through the slim bridge onto `ChannelEngineRpPio` (PIO0), the same engine the default path uses
+2. Batches consecutive pins with matching length and timing into one multi-lane state machine
+3. Runs independent strips concurrently (#4620)
+
+The old `RectangularDrawBuffer` group manager and transpose step have been removed.
 
 **Example:** Pins 2-5 (consecutive) → Single 4-lane parallel group using 1 PIO SM + 1 DMA channel
 
@@ -65,9 +65,9 @@ The driver automatically:
 **CRITICAL:** Pins must be consecutive GPIO numbers for parallel output (RP2040 PIO hardware limitation).
 
 - ✅ Valid: GPIO 2-5 (4 consecutive pins) → 4-lane parallel
-- ❌ Invalid: GPIO 2,4,6,8 (non-consecutive) → Falls back to sequential
+- ❌ Not batched: GPIO 2,4,6,8 (non-consecutive) → Separate lanes, still output concurrently
 
-See `src/platforms/arm/rp/rpcommon/PARALLEL_AUTO.md` for complete documentation.
+See `src/platforms/arm/rp/rpcommon/PARALLEL.md` for complete documentation.
 
 ### Examples
 
@@ -162,9 +162,9 @@ if (!controllers.empty()) {
 - **`FASTLED_ACCURATE_CLOCK`**: Enabled when interrupts are allowed to maintain timing math accuracy.
 - **`FASTLED_USE_PROGMEM`**: Default `0` (flat memory model).
 - **Clockless driver selection/tuning**
-  - **`FASTLED_RP2040_CLOCKLESS_PIO_AUTO`**: Enable automatic parallel grouping for clockless LEDs (WS2812, etc.). Uses standard `FastLED.addLeds()` API with automatic consecutive pin detection. Default `0` (disabled).
+  - **`FASTLED_RP2040_CLOCKLESS_PIO_AUTO`**: Enable automatic parallel grouping for clockless LEDs (WS2812, etc.). Uses the standard `FastLED.addLeds()` API on the slim bridge / `ChannelEngineRpPio`, and consecutive matching pins are batched. Default `0` (disabled).
   - **`FASTLED_RP2040_CLOCKLESS_PIO`**: Use PIO driver for clockless. Default `1`.
   - **`FASTLED_RP2040_CLOCKLESS_IRQ_SHARED`**: No effect since #4589 (legacy clockless now uses ChannelEngineRpPio).
-  - **`FASTLED_RP2040_CLOCKLESS_M0_FALLBACK`**: No effect since #4589; set `FASTLED_RP2040_CLOCKLESS_PIO 0` for the blocking M0 loop.
+  - **`FASTLED_RP2040_CLOCKLESS_M0_FALLBACK`**: No effect since #4589; set `FASTLED_RP2040_CLOCKLESS_PIO 0` for the blocking bit-bang engine (`ChannelEngineRpBitBang`, `Bus::BIT_BANG`, via `SlimBridgeController`, with interrupts off for each frame).
 
 Define these before including `FastLED.h` in your sketch.
