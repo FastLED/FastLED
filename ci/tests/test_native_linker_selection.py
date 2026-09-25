@@ -21,6 +21,12 @@ from ci.meson.meson_setup_phases import (
 )
 
 
+def _fake_bridge(tmp_path: Path, content: bytes = b"bridge") -> Path:
+    bridge = tmp_path / "bridge-linker"
+    bridge.write_bytes(content)
+    return bridge
+
+
 def _fake_reld(tmp_path: Path, name: str = "reld") -> Path:
     linker = tmp_path / name
     linker.write_bytes(b"one")
@@ -51,7 +57,9 @@ def test_reld_links_every_mode_on_every_host(
 ) -> None:
     # ThinLTO release included: reld routes LTO links to its bridge linker.
     monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", host)
-    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute.bridge_linker", lambda: _fake_bridge(tmp_path)
+    )
     reld = _fake_reld(tmp_path)
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(reld))
     selected, identity = resolve_native_linker(mode)
@@ -62,7 +70,9 @@ def test_reld_links_every_mode_on_every_host(
 def test_native_linker_override_must_be_an_absolute_reld_executable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute.bridge_linker", lambda: _fake_bridge(tmp_path)
+    )
     other = _fake_reld(tmp_path, "otherlinker")
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(other))
     with pytest.raises(ValueError, match="must be a reld executable"):
@@ -80,7 +90,9 @@ def test_native_linker_content_change_requires_reconfigure(
 ) -> None:
     linker = _fake_reld(tmp_path)
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
+    monkeypatch.setattr(
+        "ci.meson.meson_setup_execute.bridge_linker", lambda: _fake_bridge(tmp_path)
+    )
     _, old_identity = resolve_native_linker("debug-thin")
     markers = MarkerPaths.for_build_dir(tmp_path)
     markers.native_linker.write_text(old_identity)
@@ -254,3 +266,34 @@ def test_old_build_dir_registers_native_linker_before_reconfigure(
         ["meson", "setup", "--reconfigure", str(build_dir)],
         ["meson", "configure", str(build_dir), "-Dnative_linker=/opt/reld"],
     ]
+
+
+def test_bridge_is_part_of_identity_and_overrides_stale_env(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # CodeRabbit on #4632: a changed bridge must relink, and an inherited
+    # RELD_BRIDGE_LINKER must never beat the pinned toolchain.
+    reld = _fake_reld(tmp_path)
+    bridge = _fake_bridge(tmp_path, b"one")
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(reld))
+    monkeypatch.setenv("RELD_BRIDGE_LINKER", "/stale/bridge-linker")
+    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: bridge)
+    _, first = resolve_native_linker("quick")
+    assert os.environ["RELD_BRIDGE_LINKER"] == str(bridge)
+    assert f"bridge={bridge}:" in first
+    bridge.write_bytes(b"two")
+    _, second = resolve_native_linker("quick")
+    assert first != second
+
+
+def test_missing_bridge_fails_loudly(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci.tools import reld as reld_tools
+
+    monkeypatch.setattr(reld_tools.platform, "system", lambda: "Linux")
+    import clang_tool_chain.wrapper as wrapper
+
+    monkeypatch.setattr(wrapper, "find_tool_binary", lambda tool: tmp_path / "nope")
+    with pytest.raises(FileNotFoundError, match="bridge linker"):
+        reld_tools.bridge_linker()

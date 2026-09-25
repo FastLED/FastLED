@@ -160,35 +160,36 @@ def ensure_reld(cache_root: Path = CACHE_ROOT) -> Path:
     return linker
 
 
-def bridge_linker() -> Path | None:
-    """The clang-tool-chain lld that reld delegates bridged links to."""
-    tool = _BRIDGE_TOOL.get(platform.system())
+def bridge_linker() -> Path:
+    """The clang-tool-chain lld that reld delegates bridged links to.
+
+    Required on every host: ThinLTO links on Linux and all COFF/Mach-O links
+    on Windows/macOS go through the bridge, and without an explicit bridge
+    reld would silently pick whatever rust-lld is on the machine. clang-tool-
+    chain is a hard dependency of native builds, so a failed lookup is an
+    error, not a fallback (CodeRabbit on #4632).
+    """
+    system = platform.system()
+    tool = _BRIDGE_TOOL.get(system)
     if tool is None:
-        return None
-    try:
-        from clang_tool_chain.wrapper import (  # noqa: PLC0415 - optional dependency
-            find_tool_binary,
-        )
+        raise RuntimeError(f"reld has no bridge linker mapping for host {system}")
+    from clang_tool_chain.wrapper import (  # noqa: PLC0415 - heavy import, deferred
+        find_tool_binary,
+    )
 
-        found = Path(find_tool_binary(tool))
-    except KeyboardInterrupt as ki:
-        from ci.util.global_interrupt_handler import (  # noqa: PLC0415 - lazy
-            handle_keyboard_interrupt,
+    found = Path(find_tool_binary(tool))
+    if not found.is_file():
+        raise FileNotFoundError(
+            f"reld bridge linker {tool} not found in clang-tool-chain ({found}); "
+            "run ./install to provision the toolchain"
         )
-
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception:
-        return None
-    return found if found.is_file() else None
+    return found
 
 
 def main() -> None:
     linker = ensure_reld()
     print(linker)
-    bridge = bridge_linker()
-    if bridge is not None:
-        print(f"bridge: {bridge}")
+    print(f"bridge: {bridge_linker()}")
 
 
 if __name__ == "__main__":

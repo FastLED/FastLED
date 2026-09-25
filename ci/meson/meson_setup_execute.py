@@ -54,6 +54,14 @@ from ci.util.timestamp_print import ts_print as _ts_print
 _RELD_NAMES = frozenset({"reld", "reld.exe"})
 
 
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     """Select reld, FastLED's only native linker, and identify its contents.
 
@@ -76,14 +84,16 @@ def resolve_native_linker(build_mode: str) -> tuple[str, str]:
             )
     if not path.is_file() or not os.access(path, os.X_OK):
         raise ValueError(f"native linker {path} is not an executable file")
+    # Always overwrite: a stale RELD_BRIDGE_LINKER inherited from an older
+    # shell must never win over the pinned toolchain. Every supported build
+    # entry point (bash test / compile / profile) resolves this before Ninja
+    # runs, and Ninja inherits it; bare `ninja` is banned by repo policy.
     bridge = bridge_linker()
-    if bridge is not None:
-        os.environ.setdefault("RELD_BRIDGE_LINKER", str(bridge))
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return str(path), f"{path}:{digest.hexdigest()}"
+    os.environ["RELD_BRIDGE_LINKER"] = str(bridge)
+    # The identity covers reld *and* its bridge, so a changed bridge relinks.
+    return str(
+        path
+    ), f"{path}:{_sha256_file(path)}|bridge={bridge}:{_sha256_file(bridge)}"
 
 
 def invalidate_native_link_outputs(build_dir: Path) -> int:

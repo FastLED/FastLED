@@ -35,36 +35,47 @@ from ci.lint.banned_build_tools import _tracked_and_untracked_files
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
-ALLOWED_PATHS: frozenset[str] = frozenset(
-    {
-        # The reld wiring point: `-fuse-ld=lld --ld-path=<reld>` selects reld.
-        "ci/meson/native/meson.build",
-        # Provisions reld and names the clang-tool-chain lld it bridges to.
-        "ci/tools/reld.py",
-        # Parse linker *diagnostics* ("ld.lld: error: ..."), which reld's lld
-        # bridge still emits; they never choose a linker.
-        "ci/meson/link_retry.py",
-        "ci/meson/compile.py",
-        "ci/meson/streaming.py",
-        "ci/meson/streaming_runner.py",
-        "ci/meson/zccache_retry.py",
-        "ci/tests/test_link_retry.py",
-        # Board (fbuild) toolchain tool-name table for binary inspection.
-        "ci/compiler/build_config.py",
-        "ci/tests/test_build_info_from_fbuild.py",
-        # Enforcement: this lint and its tests must spell the names.
-        "ci/lint/banned_linkers.py",
-        "ci/tests/test_banned_linkers.py",
-    }
-)
+# Files that may name specific linker tokens, and exactly which ones. Every
+# other token in these files is still checked, so e.g. `-fuse-ld=mold` added
+# next to the reld wiring fails. ``None`` exempts the whole file (only the
+# enforcement code, which must spell every banned name).
+ALLOWED_TOKENS: dict[str, frozenset[str] | None] = {
+    # The reld wiring point (`-fuse-ld=lld --ld-path=<reld>`); comments there
+    # describe ld64.lld / lld flag compatibility of reld's bridge.
+    "ci/meson/native/meson.build": frozenset(
+        {"-fuse-ld=lld", "--ld-path=", "ld64.lld", "lld"}
+    ),
+    # Provisions reld and names the clang-tool-chain linker it bridges to.
+    "ci/tools/reld.py": frozenset({"ld.lld", "ld64.lld", "lld", "rust-lld"}),
+    # Parse linker *diagnostics* ("ld.lld: error: ..."), which reld's bridge
+    # still emits; they never choose a linker.
+    "ci/meson/link_retry.py": frozenset({"ld.lld"}),
+    "ci/meson/compile.py": frozenset({"ld.lld"}),
+    "ci/meson/streaming.py": frozenset({"ld.lld", "lld"}),
+    "ci/meson/streaming_runner.py": frozenset({"ld.lld"}),
+    "ci/meson/zccache_retry.py": frozenset({"ld.lld"}),
+    "ci/tests/test_link_retry.py": frozenset({"ld.lld"}),
+    # Board (fbuild) toolchain tool-name table for binary inspection.
+    "ci/compiler/build_config.py": frozenset({"ld.lld"}),
+    "ci/tests/test_build_info_from_fbuild.py": frozenset({"ld.lld"}),
+    # Enforcement: this lint and its tests must spell every banned name.
+    "ci/lint/banned_linkers.py": None,
+    "ci/tests/test_banned_linkers.py": None,
+}
+ALLOWED_PATHS: frozenset[str] = frozenset(ALLOWED_TOKENS)
 
 _SCANNED_SUFFIXES = (".py", ".yml", ".yaml", ".toml", ".sh", ".txt", ".ini", ".json")
 _SCANNED_NAMES = frozenset({"meson.build", "meson.options", "meson_options.txt"})
 
-_LINKER_FLAG_RE = re.compile(r"-fuse-ld=|--ld-path\b")
-_LINKER_TOOL_RE = re.compile(
-    r"(?<![\w%.-])(?:lld|ld\.lld|ld64\.lld|lld-link|rust-lld|mold|ld\.mold"
+_LINKER_RE = re.compile(
+    # Linker-selection flags, captured with their value.
+    r"-fuse-ld=[\w.+-]*|--ld-path=?"
+    # Linkers named as tools.
+    r"|(?<![\w%.-])(?:lld|ld\.lld|ld64\.lld|lld-link|rust-lld|mold|ld\.mold"
     r"|ld\.gold|ld\.bfd)(?![\w-])"
+    # Toolchain launchers that run a linker directly (clang-tool-chain-ld,
+    # ctc-ld.lld, ...), whose linker name is embedded in the command.
+    r"|\b(?:clang-tool-chain|ctc)-(?:ld64\.lld|ld\.lld|lld-link|lld|ld)(?![\w.-])"
     # Release archives are named wild-linker-<version>-<triple>.
     r"|\bwild-linker\b"
 )
@@ -91,13 +102,18 @@ def is_in_scope(rel_path: str) -> bool:
     return rel_path.endswith(_SCANNED_SUFFIXES) or name in _SCANNED_NAMES
 
 
-def find_banned_linkers(text: str) -> list[tuple[int, str, str]]:
-    """Return (line_no, token, line) for every non-reld linker selection."""
+def find_banned_linkers(
+    text: str, allowed: frozenset[str] = frozenset()
+) -> list[tuple[int, str, str]]:
+    """Return (line_no, token, line) for every non-reld linker token.
+
+    Every match on every line is reported, except tokens in ``allowed``.
+    """
     hits: list[tuple[int, str, str]] = []
     for line_no, line in enumerate(text.splitlines(), start=1):
-        match = _LINKER_FLAG_RE.search(line) or _LINKER_TOOL_RE.search(line)
-        if match is not None:
-            hits.append((line_no, match.group(0), line.rstrip()))
+        for match in _LINKER_RE.finditer(line):
+            if match.group(0) not in allowed:
+                hits.append((line_no, match.group(0), line.rstrip()))
     return hits
 
 
@@ -105,13 +121,16 @@ def scan(root: Path = PROJECT_ROOT) -> list[Violation]:
     violations: list[Violation] = []
     for rel_path in _tracked_and_untracked_files(root):
         rel_path = rel_path.replace("\\", "/")
-        if rel_path in ALLOWED_PATHS or not is_in_scope(rel_path):
+        if not is_in_scope(rel_path):
+            continue
+        allowed = ALLOWED_TOKENS.get(rel_path, frozenset())
+        if allowed is None:
             continue
         try:
             text = (root / rel_path).read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        for line_no, token, line in find_banned_linkers(text):
+        for line_no, token, line in find_banned_linkers(text, allowed):
             violations.append(Violation(rel_path, line_no, token, line))
     return violations
 
@@ -125,7 +144,7 @@ def run_banned_linkers_lint(root: Path = PROJECT_ROOT) -> bool:
     print(
         f"❌ Banned linkers: {len(violations)} non-reld linker reference(s). "
         "Host builds link only through reld (ci/tools/reld.py); remove the "
-        "selection, or add the file to ALLOWED_PATHS in "
+        "selection, or add the exact token for that file to ALLOWED_TOKENS in "
         "ci/lint/banned_linkers.py with a reason."
     )
     for v in violations:
