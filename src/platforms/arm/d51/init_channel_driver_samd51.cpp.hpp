@@ -9,6 +9,12 @@
 ///
 /// Priority Order:
 /// - SPI_UNIFIED (6-7): True SPI hardware (quad/dual-lane via SERCOM)
+///
+/// Clockless strips are NOT registered here. The legacy `addLeds<>()`
+/// `ClocklessController` (clockless_arm_d51.h) is a `SlimBridgeController` whose
+/// per-pin `ClocklessSamd51Driver` self-registers through
+/// `ChannelManager::registry()` from the controller constructor, so a sketch
+/// with no clockless strip never links the clockless driver (#4593, #4630).
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/arm/samd/is_samd.h"
