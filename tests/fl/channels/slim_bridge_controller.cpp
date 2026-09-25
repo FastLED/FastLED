@@ -140,6 +140,12 @@ struct SlimBridgeFixture {
 using TestController =
     SlimBridgeController<4, TIMING_WS2812_800KHZ, GRB, 280, TestDriverTraits>;
 
+// Exposes the protected CPixelLEDController::show overload for direct driving.
+class ExposedTestController : public TestController {
+  public:
+    using TestController::show;
+};
+
 }  // namespace slim_bridge_test
 
 using namespace slim_bridge_test;
@@ -264,7 +270,7 @@ FL_TEST_CASE("WAIT_TIME smaller than timing reset does not shrink reset_us") {
 
 FL_TEST_CASE("BUSY driver with failing waitForReady suppresses enqueue, READY recovers") {
     SlimBridgeFixture fixture;
-    TestController controller;
+    ExposedTestController controller;
     CRGB leds[1] = {CRGB(9, 9, 9)};
 
     // Previous frame still in flight and the driver never becomes READY:
