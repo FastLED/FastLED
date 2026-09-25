@@ -18,7 +18,7 @@ class RpPioTxPeripheral final : public IRpPioTxPeripheral {
     explicit RpPioTxPeripheral(u8 pio_index, bool fallback_to_other_pios = true) FL_NO_EXCEPT;
     ~RpPioTxPeripheral() override;
     bool configure(const RpPioTxConfig& config) FL_NO_EXCEPT override;
-    bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT override;
+    bool startTxDma(const u32* words, size_t transfer_count) FL_NO_EXCEPT override;
     bool isDmaBusy() const FL_NO_EXCEPT override;
     bool isTerminalComplete() const FL_NO_EXCEPT override;
     bool hasError() const FL_NO_EXCEPT override;
@@ -38,6 +38,8 @@ class RpPioTxPeripheral final : public IRpPioTxPeripheral {
     u8 mLaneCount;
     u8 mPioIndex;
     bool mFallbackToOtherPios;
+    bool mPacked;
+    mutable bool mStallArmed;  ///< TXSTALL cleared after the FIFO drained
     ProgramStorage* mProgram;
     bool mInitialized;
 };

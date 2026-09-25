@@ -26,9 +26,11 @@ class RpPioTxPeripheralMock final : public IRpPioTxPeripheral {
         return configureOk;
     }
 
-    bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT override {
+    bool startTxDma(const u32* words, size_t transfer_count) FL_NO_EXCEPT override {
         ++startCalls;
+        const size_t word_count = rpPioTxStorageWords(lastConfig, transfer_count);
         firstWord = word_count == 0 ? 0 : words[0];
+        transferCount = transfer_count;
         wordCount = word_count;
         capturedWords.clear();
         for (size_t index = 0; index < word_count; ++index) {
@@ -62,6 +64,7 @@ class RpPioTxPeripheralMock final : public IRpPioTxPeripheral {
         abortCalls = 0;
         deinitializeCalls = 0;
         wordCount = 0;
+        transferCount = 0;
         firstWord = 0;
         timeUs = 0;
         capturedWords.clear();
@@ -77,7 +80,8 @@ class RpPioTxPeripheralMock final : public IRpPioTxPeripheral {
     int startCalls = 0;
     int abortCalls = 0;
     int deinitializeCalls = 0;
-    size_t wordCount = 0;
+    size_t wordCount = 0;      ///< storage words captured
+    size_t transferCount = 0;  ///< DMA transfers requested
     u32 firstWord = 0;
     u32 timeUs = 0;
     fl::vector<u32> capturedWords;
