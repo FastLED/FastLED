@@ -32,7 +32,7 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 0), instancePtr());
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), instancePtr());
     }
 };
 

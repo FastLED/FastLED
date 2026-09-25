@@ -18,8 +18,12 @@
 
 namespace fl {
 
+ChannelManager& ChannelManager::registry() FL_NO_EXCEPT {
+    return Singleton<ChannelManager>::instance();
+}
+
 ChannelManager& ChannelManager::instance() {
-    auto& out = Singleton<ChannelManager>::instance();
+    auto& out = registry();
     // Lazy initialization of platform-specific channel drivers
     // C++11 guarantees thread-safe static initialization
     static bool sInitialized = false; // okay static in header

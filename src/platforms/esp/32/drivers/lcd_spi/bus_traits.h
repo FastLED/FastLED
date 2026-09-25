@@ -62,8 +62,8 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
 
     static void registerWithManager() FL_NO_EXCEPT {
         auto& holder = detail::lcd_cam_bus_holder();
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 0), holder.spi);
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::FLEX_IO, 0), holder.clockless);
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), holder.spi);
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), holder.clockless);
     }
 };
 

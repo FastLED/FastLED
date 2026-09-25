@@ -40,7 +40,7 @@ template<> struct BusTraits<Bus::SPI, 0> {
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT { return detail::rpSpiInstancePtr<0>(); }
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::SPI, 0), instancePtr());
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::SPI, 0), instancePtr());
     }
 };
 
@@ -49,7 +49,7 @@ template<> struct BusTraits<Bus::SPI, 1> {
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT { return detail::rpSpiInstancePtr<1>(); }
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::SPI, 1), instancePtr());
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::SPI, 1), instancePtr());
     }
 };
 

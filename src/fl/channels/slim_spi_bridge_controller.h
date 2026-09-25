@@ -107,7 +107,7 @@ protected:
         // single source of truth. A disabled driver means "drop this frame",
         // not "enqueue and hope" -- silently enqueuing to a disabled driver
         // is the #2517 silent-drop failure mode.
-        if (!ChannelManager::instance().isDriverEnabled(driver->getName().c_str())) {
+        if (!ChannelManager::registry().isDriverEnabled(driver->getName().c_str())) {
             FL_WARN_ONCE("SlimSpiBridgeController: driver '%s' is disabled - dropping frame",
                          driver->getName().c_str());
             return;
@@ -172,7 +172,7 @@ private:
         }
 
         fl::shared_ptr<IChannelDriver> driver =
-            ChannelManager::instance().selectDriverForChannel(mData, busKey);
+            ChannelManager::registry().selectDriverForChannel(mData, busKey);
 
 #if FASTLED_LOG_RUNTIME_ENABLED
         if (!driver && !mBusWarned) {
