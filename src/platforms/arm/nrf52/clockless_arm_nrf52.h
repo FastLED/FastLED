@@ -50,14 +50,6 @@ namespace fl {
 
 extern u32 isrCount;
 
-namespace nrf52_detail {
-// Hands out a distinct id per ClocklessNrf52Driver specialization.
-inline u32 nextClocklessTypeId() FL_NO_EXCEPT {
-    static u32 sNext = 0;
-    return ++sNext;
-}
-}  // namespace nrf52_detail
-
 /// @brief Single-pin clockless driver for nRF52 (PWM EasyDMA sequence engine).
 ///
 /// The input buffer is already colour-ordered, scaled and dithered by the
@@ -233,10 +225,12 @@ public:
 
     /// Distinct id per specialization: TIMING types with identical numeric
     /// values are still distinct specializations with distinct static state.
+    /// Uses the address of a per-specialization static member, so no
+    /// function-local static (and no __cxa_guard) is needed.
     static u32 typeId() FL_NO_EXCEPT {
-        static const u32 id = nrf52_detail::nextClocklessTypeId();
-        return id;
+        return static_cast<u32>(reinterpret_cast<fl::uptr>(&sTypeTag));
     }
+    static const char sTypeTag;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override {
         return data && data->isClockless() &&
@@ -402,6 +396,8 @@ template <u8 _DATA_PIN, typename TIMING, int _XTRA0, bool _FLIP, int _WAIT_TIME_
 u16 ClocklessNrf52Driver<_DATA_PIN, TIMING, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBuffer[_PWM_BUFFER_COUNT];
 template <u8 _DATA_PIN, typename TIMING, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 CMinWait<_WAIT_TIME_MICROSECONDS> ClocklessNrf52Driver<_DATA_PIN, TIMING, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::mWait;
+template <u8 _DATA_PIN, typename TIMING, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
+const char ClocklessNrf52Driver<_DATA_PIN, TIMING, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::sTypeTag = 0;
 
 /// @brief Driver traits for `SlimBridgeController` (one driver per specialization).
 template <u8 _DATA_PIN, typename TIMING, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
@@ -418,14 +414,7 @@ struct ClocklessNrf52Traits {
 
     /// The registered driver for this specialization (its name is unique per
     /// pin, timing, wait, XTRA0, FLIP and specialization id).
-    static IChannelDriver& instance() FL_NO_EXCEPT {
-        fl::shared_ptr<IChannelDriver> existing =
-            ChannelManager::registry().findDriverByName(sDriver.getName());
-        if (existing) {
-            return *existing;
-        }
-        return sDriver;
-    }
+    static IChannelDriver& instance() FL_NO_EXCEPT { return sDriver; }
 
     /// Idempotent: skip if this exact driver is already registered.
     static void registerWithManager() FL_NO_EXCEPT {
