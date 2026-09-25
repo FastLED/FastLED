@@ -58,8 +58,8 @@ struct resolve_bus<Bus::AUTO, Chipset> {
 /// exists so the templated `create()` factory can `static_assert` the
 /// bus/chipset compatibility before constructing a (non-template) `fl::Channel`.
 /// This matches the API requested in issue #2428 without forcing every existing
-/// `Channel` consumer (subclasses like `ClocklessIdf5`, `ChannelEvents`
-/// callbacks, `ChannelManager`) to be retemplated.
+/// `Channel` consumer (subclasses, `ChannelEvents` callbacks,
+/// `ChannelManager`) to be retemplated.
 template<Bus B, typename Chipset, fl::u8 Which = 0>
 class TypedChannel {
 public:

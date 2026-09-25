@@ -3,7 +3,7 @@
 // Maps a runtime pin number and chipset name to compile-time clockless template
 // instantiations via a switch statement. This allows AutoResearch testing of the
 // legacy template API path: CHIPSET<PIN> -> ClocklessControllerImpl ->
-// ClocklessIdf5 -> Channel.
+// ClocklessIdf5 -> SlimBridgeController -> RMT5 driver.
 
 #pragma once
 
