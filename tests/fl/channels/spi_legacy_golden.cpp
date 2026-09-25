@@ -121,6 +121,13 @@ inline void ensureMockRegistered() {
     registered = true;
     ChannelManager::instance().addDriver(100000,
         fl::make_shared_no_tracking(mockDriverInstance()));
+    // On host, Bus::AUTO resolves to Bus::BIT_BANG (fl/channels/bus.h), so
+    // the legacy addLeds<> path pins a "BIT_BANG" affinity and
+    // selectDriverForChannel() would return the real BIT_BANG driver ahead
+    // of priority dispatch. Make the mock exclusive: BIT_BANG (including any
+    // later idempotent re-registration) is disabled, findDriverByName()
+    // skips it, and dispatch falls through to the mock for every channel.
+    ChannelManager::instance().setExclusiveDriverByName("SPI_GOLDEN_MOCK");
 }
 
 /// Test fixture: clears capture state and normalizes FastLED global state
