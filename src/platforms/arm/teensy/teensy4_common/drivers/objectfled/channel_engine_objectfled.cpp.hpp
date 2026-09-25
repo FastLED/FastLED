@@ -152,6 +152,11 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     // Reject a second strip on a pin already queued this frame: driving the
     // same GPIO twice from one DMA frame corrupts both strips (#4617 review).
     for (const auto& queued : mEnqueuedChannels) {
+        if (queued == channelData) {
+            // Same strip re-enqueued before show() (e.g. showLeds() called
+            // twice in one frame): its buffer is already queued and current.
+            return;
+        }
         if (queued->getPin() == pin) {
             if (!pinFlagTestAndSet(mWarnedDuplicatePins, pin)) {
                 FL_WARN("================================================================================");
