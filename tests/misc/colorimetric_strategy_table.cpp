@@ -4994,44 +4994,44 @@ inline const char* status_for(const Strategy& strategy,
 
 inline void memory_string(u32 bytes, char out[24]) {
     if (bytes == kStrategyBytesUnknown) {
-        snprintf(out, 24, "%s", "missing");
+        fl::snprintf(out, 24, "%s", "missing");
         return;
     }
     if (bytes == 0) {
-        snprintf(out, 24, "%s", "0B");
+        fl::snprintf(out, 24, "%s", "0B");
     } else {
-        snprintf(out, 24, "%luB", static_cast<unsigned long>(bytes));
+        fl::snprintf(out, 24, "%luB", static_cast<unsigned long>(bytes));
     }
 }
 
 inline void signed_memory_delta_string(u32 value, u32 baseline, char out[32]) {
     if (value == kStrategyBytesUnknown || baseline == kStrategyBytesUnknown) {
-        snprintf(out, 32, "%s", "missing");
+        fl::snprintf(out, 32, "%s", "missing");
         return;
     }
     const i64 delta = static_cast<i64>(value) - static_cast<i64>(baseline);
     if (delta == 0) {
-        snprintf(out, 32, "%s", "0B");
+        fl::snprintf(out, 32, "%s", "0B");
     } else {
-        snprintf(out, 32, "%+lldB", static_cast<long long>(delta));
+        fl::snprintf(out, 32, "%+lldB", static_cast<long long>(delta));
     }
 }
 
 inline void memory_ratio_string(u32 value, u32 baseline, char out[32]) {
     if (value == kStrategyBytesUnknown || baseline == kStrategyBytesUnknown) {
-        snprintf(out, 32, "%s", "missing");
+        fl::snprintf(out, 32, "%s", "missing");
         return;
     }
     if (baseline == 0) {
         if (value == 0) {
-            snprintf(out, 32, "%s", "n/a");
+            fl::snprintf(out, 32, "%s", "n/a");
         } else {
-            snprintf(out, 32, "%s", "target 0");
+            fl::snprintf(out, 32, "%s", "target 0");
         }
         return;
     }
     const double ratio = static_cast<double>(value) / static_cast<double>(baseline);
-    snprintf(out, 32, "%.2fx", ratio);
+    fl::snprintf(out, 32, "%.2fx", ratio);
 }
 
 inline const char* memory_gap_class(const MemoryInfo& memory) {
@@ -5056,27 +5056,27 @@ inline void relative_string(const Strategy& strategy,
                             const ErrorStats& hermite_stats,
                             char out[64]) {
     if (stats.sample_count == 0) {
-        snprintf(out, 64, "n/a");
+        fl::snprintf(out, 64, "n/a");
         return;
     }
     if (stats.peak_lsb == 0) {
-        snprintf(out, 64, "exact / no LUT");
+        fl::snprintf(out, 64, "exact / no LUT");
         return;
     }
     const double err = static_cast<double>(hermite_stats.peak_lsb) /
                        static_cast<double>(stats.peak_lsb);
     const MemoryInfo hermite_memory = kStrategies[kHermiteN16Index].memory_info();
     if (memory.target_packed_bytes == kStrategyBytesUnknown) {
-        snprintf(out, 64, "%.1fx err / mem missing", err);
+        fl::snprintf(out, 64, "%.1fx err / mem missing", err);
         return;
     }
     if (memory.target_packed_bytes == 0) {
-        snprintf(out, 64, "%.1fx err / no table", err);
+        fl::snprintf(out, 64, "%.1fx err / no table", err);
         return;
     }
     const double mem = static_cast<double>(hermite_memory.target_packed_bytes) /
                        static_cast<double>(memory.target_packed_bytes);
-    snprintf(out, 64, "%.1fx err / %.1fx mem", err, mem);
+    fl::snprintf(out, 64, "%.1fx err / %.1fx mem", err, mem);
 }
 
 struct BenchStats {
@@ -5247,10 +5247,10 @@ inline MonotonicStats evaluate_strategy_scale_monotonicity(
 
 inline void monotonic_string(const MonotonicStats& stats, char out[48]) {
     if (stats.ray_count == 0) {
-        snprintf(out, 48, "%s", "n/a");
+        fl::snprintf(out, 48, "%s", "n/a");
         return;
     }
-    snprintf(out, 48, "%ld rays / %ld drops / %ld max",
+    fl::snprintf(out, 48, "%ld rays / %ld drops / %ld max",
              static_cast<long>(stats.violating_rays),
              static_cast<long>(stats.violation_count),
              static_cast<long>(stats.max_drop_lsb));
@@ -5548,65 +5548,65 @@ inline Q16StaticBoundStats evaluate_q16_static_bounds(int index,
 }
 
 inline void i64_value_string(i64 value, char out[32]) {
-    snprintf(out, 32, "%lld", static_cast<long long>(value));
+    fl::snprintf(out, 32, "%lld", static_cast<long long>(value));
 }
 
 inline void double_value_string(double value, char out[40]) {
     if (value <= 0.0) {
-        snprintf(out, 40, "%s", "n/a");
+        fl::snprintf(out, 40, "%s", "n/a");
         return;
     }
     const double u64_limit =
         static_cast<double>((fl::numeric_limits<unsigned long long>::max)());
     if (value > u64_limit - 1.0) {
-        snprintf(out, 40, "%s", ">u64");
+        fl::snprintf(out, 40, "%s", ">u64");
         return;
     }
     const unsigned long long rounded =
         static_cast<unsigned long long>(value + 0.5);
-    snprintf(out, 40, "%llu", rounded);
+    fl::snprintf(out, 40, "%llu", rounded);
 }
 
 inline void double_headroom_string(double value, char out[32]) {
     if (value <= 0.0) {
-        snprintf(out, 32, "%s", "n/a");
+        fl::snprintf(out, 32, "%s", "n/a");
         return;
     }
     const double limit =
         static_cast<double>((fl::numeric_limits<i64>::max)());
     if (value > limit) {
-        snprintf(out, 32, "%s", "<1x");
+        fl::snprintf(out, 32, "%s", "<1x");
         return;
     }
     const unsigned long long headroom =
         static_cast<unsigned long long>(limit / value);
-    snprintf(out, 32, "%llux", headroom);
+    fl::snprintf(out, 32, "%llux", headroom);
 }
 
 inline void i64_headroom_string(i64 value, char out[32]) {
     if (value <= 0) {
-        snprintf(out, 32, "%s", "n/a");
+        fl::snprintf(out, 32, "%s", "n/a");
         return;
     }
     const i64 limit = (fl::numeric_limits<i64>::max)();
     const i64 headroom = limit / value;
-    snprintf(out, 32, "%lldx", static_cast<long long>(headroom));
+    fl::snprintf(out, 32, "%lldx", static_cast<long long>(headroom));
 }
 
 inline void bench_string(const BenchStats& bench, char out[24]) {
     if (!bench.measured) {
-        snprintf(out, 24, "%10s", "n/a");
+        fl::snprintf(out, 24, "%10s", "n/a");
         return;
     }
-    snprintf(out, 24, "%9.1f", bench.host_ns_per_pixel);
+    fl::snprintf(out, 24, "%9.1f", bench.host_ns_per_pixel);
 }
 
 inline void lsb_stats_string(const ErrorStats& stats, char out[48]) {
     if (stats.sample_count == 0) {
-        snprintf(out, 48, "%29s", "n/a");
+        fl::snprintf(out, 48, "%29s", "n/a");
         return;
     }
-    snprintf(out, 48, "%4ld/%4ld/%4ld/%4ld",
+    fl::snprintf(out, 48, "%4ld/%4ld/%4ld/%4ld",
              static_cast<long>(stats.p50_lsb),
              static_cast<long>(stats.p95_lsb),
              static_cast<long>(stats.p99_lsb),
@@ -5615,18 +5615,18 @@ inline void lsb_stats_string(const ErrorStats& stats, char out[48]) {
 
 inline void mean_lsb_string(const ErrorStats& stats, char out[16]) {
     if (stats.sample_count == 0) {
-        snprintf(out, 16, "%s", "n/a");
+        fl::snprintf(out, 16, "%s", "n/a");
         return;
     }
-    snprintf(out, 16, "%.2f", stats.mean_lsb);
+    fl::snprintf(out, 16, "%.2f", stats.mean_lsb);
 }
 
 inline void target_de_string(const ErrorStats& stats, char out[64]) {
     if (stats.sample_count == 0) {
-        snprintf(out, 64, "%s", "n/a");
+        fl::snprintf(out, 64, "%s", "n/a");
         return;
     }
-    snprintf(out, 64, "%.2f/%.2f/%.2f/%.2f",
+    fl::snprintf(out, 64, "%.2f/%.2f/%.2f/%.2f",
              static_cast<double>(stats.p50_dE),
              static_cast<double>(stats.p95_dE),
              static_cast<double>(stats.peak_dE),
@@ -5811,200 +5811,200 @@ inline void host_fixed_fpu_ratio_string(int index,
                                         const BenchStats benches[kStrategyCount],
                                         char out[64]) {
     if (!benches[index].measured || !benches[kClosedFormIndex].measured) {
-        snprintf(out, 64, "n/a");
+        fl::snprintf(out, 64, "n/a");
         return;
     }
     if (index == kBilinearFixedIndex && benches[kBilinearN16Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kBilinearN16Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs bilinear_n16 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs bilinear_n16 host", ratio);
         return;
     }
     if (index == kBilinearN16Index && benches[kBilinearFixedIndex].measured) {
         const double ratio = benches[kBilinearFixedIndex].host_ns_per_pixel /
                              benches[kBilinearN16Index].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kWxOverdriveFixedIndex && benches[kWxOverdriveIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kWxOverdriveIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs wx_overdrive_float host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs wx_overdrive_float host", ratio);
         return;
     }
     if (index == kWxOverdriveIndex && benches[kWxOverdriveFixedIndex].measured) {
         const double ratio = benches[kWxOverdriveFixedIndex].host_ns_per_pixel /
                              benches[kWxOverdriveIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kWxLpResidualIndex && benches[kWxLpIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kWxLpIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs wx_lp_legacy_float host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs wx_lp_legacy_float host", ratio);
         return;
     }
     if (index == kWxLpBalancedIndex && benches[kWxLpIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kWxLpIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs wx_lp_legacy_float host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs wx_lp_legacy_float host", ratio);
         return;
     }
     if (index == kWxLpIndex && benches[kWxLpBalancedIndex].measured) {
         const double ratio = benches[kWxLpBalancedIndex].host_ns_per_pixel /
                              benches[kWxLpIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed balanced row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed balanced row %.2fx host", ratio);
         return;
     }
     if (index == kWxLpIndex && benches[kWxLpResidualIndex].measured) {
         const double ratio = benches[kWxLpResidualIndex].host_ns_per_pixel /
                              benches[kWxLpIndex].host_ns_per_pixel;
-        snprintf(out, 64, "rejected fixed row %.2fx host", ratio);
+        fl::snprintf(out, 64, "rejected fixed row %.2fx host", ratio);
         return;
     }
     if (index == kCellEncodingFixedIndex && benches[kCellEncodingIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kCellEncodingIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs cell_encoding_q16_n16 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs cell_encoding_q16_n16 host", ratio);
         return;
     }
     if (index == kCellEncodingIndex && benches[kCellEncodingFixedIndex].measured) {
         const double ratio = benches[kCellEncodingFixedIndex].host_ns_per_pixel /
                              benches[kCellEncodingIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kHermiteN16FixedIndex && benches[kHermiteN16Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kHermiteN16Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs hermite_n16 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs hermite_n16 host", ratio);
         return;
     }
     if (index == kHermiteN16Index && benches[kHermiteN16FixedIndex].measured) {
         const double ratio = benches[kHermiteN16FixedIndex].host_ns_per_pixel /
                              benches[kHermiteN16Index].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kHermiteN32FixedIndex && benches[kHermiteN32Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kHermiteN32Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs hermite_n32 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs hermite_n32 host", ratio);
         return;
     }
     if (index == kHermiteN32Index && benches[kHermiteN32FixedIndex].measured) {
         const double ratio = benches[kHermiteN32FixedIndex].host_ns_per_pixel /
                              benches[kHermiteN32Index].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kHullAdaptiveFixedIndex && benches[kHullAdaptiveIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kHullAdaptiveIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs hull_adaptive_n16 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs hull_adaptive_n16 host", ratio);
         return;
     }
     if (index == kHullAdaptiveIndex && benches[kHullAdaptiveFixedIndex].measured) {
         const double ratio = benches[kHullAdaptiveFixedIndex].host_ns_per_pixel /
                              benches[kHullAdaptiveIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kPolyPiecewiseFixedIndex && benches[kPolyPiecewiseIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kPolyPiecewiseIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs poly_piecewise_d3 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs poly_piecewise_d3 host", ratio);
         return;
     }
     if (index == kPolyPiecewiseIndex && benches[kPolyPiecewiseFixedIndex].measured) {
         const double ratio = benches[kPolyPiecewiseFixedIndex].host_ns_per_pixel /
                              benches[kPolyPiecewiseIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kTetrahedralFixedIndex && benches[kTetrahedralIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kTetrahedralIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs tetrahedral_rgb8 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs tetrahedral_rgb8 host", ratio);
         return;
     }
     if (index == kTetrahedralIndex && benches[kTetrahedralFixedIndex].measured) {
         const double ratio = benches[kTetrahedralFixedIndex].host_ns_per_pixel /
                              benches[kTetrahedralIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kTetrahedralU8FixedIndex && benches[kTetrahedralU8Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kTetrahedralU8Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_u8 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_u8 host", ratio);
         return;
     }
     if (index == kTetrahedralU8Index && benches[kTetrahedralU8FixedIndex].measured) {
         const double ratio = benches[kTetrahedralU8FixedIndex].host_ns_per_pixel /
                              benches[kTetrahedralU8Index].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kTetrahedralBoostFixedIndex
         && benches[kTetrahedralBoostIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kTetrahedralBoostIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_boosted host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_boosted host", ratio);
         return;
     }
     if (index == kTetrahedralBoostIndex
         && benches[kTetrahedralBoostFixedIndex].measured) {
         const double ratio = benches[kTetrahedralBoostFixedIndex].host_ns_per_pixel /
                              benches[kTetrahedralBoostIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kTetrahedralBoostU8FixedIndex
         && benches[kTetrahedralBoostU8Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kTetrahedralBoostU8Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_boosted_u8 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs tetrahedral_rgb8_boosted_u8 host", ratio);
         return;
     }
     if (index == kTetrahedralBoostU8Index
         && benches[kTetrahedralBoostU8FixedIndex].measured) {
         const double ratio = benches[kTetrahedralBoostU8FixedIndex].host_ns_per_pixel /
                              benches[kTetrahedralBoostU8Index].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
     if (index == kFixedQ16Index) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kClosedFormIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs float_closed_form host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs float_closed_form host", ratio);
         return;
     }
     if (index == kHybridQ16Index && benches[kFixedQ16Index].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kFixedQ16Index].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs fixed_analytical_q16 host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs fixed_analytical_q16 host", ratio);
         return;
     }
     if (index == kClosedFormIndex && benches[kFixedQ16Index].measured) {
         const double ratio = benches[kFixedQ16Index].host_ns_per_pixel /
                              benches[kClosedFormIndex].host_ns_per_pixel;
-        snprintf(out, 64, "Q16 paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "Q16 paired row %.2fx host", ratio);
         return;
     }
     if (index == kRgbwwStrictFixedIndex && benches[kRgbwwStrictIndex].measured) {
         const double ratio = benches[index].host_ns_per_pixel /
                              benches[kRgbwwStrictIndex].host_ns_per_pixel;
-        snprintf(out, 64, "%.2fx vs rgbww_strict_5ch_proto host", ratio);
+        fl::snprintf(out, 64, "%.2fx vs rgbww_strict_5ch_proto host", ratio);
         return;
     }
     if (index == kRgbwwStrictIndex && benches[kRgbwwStrictFixedIndex].measured) {
         const double ratio = benches[kRgbwwStrictFixedIndex].host_ns_per_pixel /
                              benches[kRgbwwStrictIndex].host_ns_per_pixel;
-        snprintf(out, 64, "fixed paired row %.2fx host", ratio);
+        fl::snprintf(out, 64, "fixed paired row %.2fx host", ratio);
         return;
     }
-    snprintf(out, 64, "no paired fixed/FPU row");
+    fl::snprintf(out, 64, "no paired fixed/FPU row");
 }
 
 inline const char* fpu_cycles_for(int index) {
@@ -6399,13 +6399,13 @@ inline void decision_cpu_string(int index,
     char mcu_ratio[64];
     strategy_mcu_fixed_fpu_ratio_string(index, mcu_ratio);
     if (!benches[index].measured) {
-        snprintf(out, 192, "host n/a; FPU %s; fixed %s; ratio %s",
+        fl::snprintf(out, 192, "host n/a; FPU %s; fixed %s; ratio %s",
                  fpu_cycles_for(index),
                  fixed_cycles_for(index),
                  mcu_ratio);
         return;
     }
-    snprintf(out, 192, "%.1f host; FPU %s; fixed %s; ratio %s",
+    fl::snprintf(out, 192, "%.1f host; FPU %s; fixed %s; ratio %s",
              benches[index].host_ns_per_pixel,
              fpu_cycles_for(index),
              fixed_cycles_for(index),
@@ -6442,28 +6442,28 @@ inline void mcu_fixed_fpu_ratio_string(const char* fpu_cycles,
     double fixed_value = 0.0;
     if (parse_cycle_cell_value(fpu_cycles, &fpu_value)
         && parse_cycle_cell_value(fixed_cycles, &fixed_value)) {
-        snprintf(out, 64, "%.2fx MCU", fixed_value / fpu_value);
+        fl::snprintf(out, 64, "%.2fx MCU", fixed_value / fpu_value);
         return;
     }
     if (text_contains(fpu_cycles, "rejected")
         || text_contains(fixed_cycles, "rejected")) {
-        snprintf(out, 64, "%s", "n/a rejected");
+        fl::snprintf(out, 64, "%s", "n/a rejected");
         return;
     }
     if (text_contains(fpu_cycles, "missing")
         && text_contains(fixed_cycles, "missing")) {
-        snprintf(out, 64, "%s", "missing FPU+fixed MCU");
+        fl::snprintf(out, 64, "%s", "missing FPU+fixed MCU");
         return;
     }
     if (text_contains(fpu_cycles, "missing")) {
-        snprintf(out, 64, "%s", "missing FPU MCU");
+        fl::snprintf(out, 64, "%s", "missing FPU MCU");
         return;
     }
     if (text_contains(fixed_cycles, "missing")) {
-        snprintf(out, 64, "%s", "missing fixed MCU");
+        fl::snprintf(out, 64, "%s", "missing fixed MCU");
         return;
     }
-    snprintf(out, 64, "%s", "missing MCU pair");
+    fl::snprintf(out, 64, "%s", "missing MCU pair");
 }
 
 inline void strategy_mcu_fixed_fpu_ratio_string(int index, char out[64]) {
@@ -6490,15 +6490,15 @@ inline void cpu_evidence_status_string(int index, char out[64]) {
     const bool fixed_measured = cycle_cell_has_measurement(fixed_cycles_for(index));
     const bool rejected = text_equals(kStrategies[index].stage, "REJECTED");
     if (fpu_measured && fixed_measured) {
-        snprintf(out, 64, "%s", "complete MCU cycle evidence");
+        fl::snprintf(out, 64, "%s", "complete MCU cycle evidence");
     } else if (rejected) {
-        snprintf(out, 64, "%s", "rejected row; cycles optional");
+        fl::snprintf(out, 64, "%s", "rejected row; cycles optional");
     } else if (fpu_measured) {
-        snprintf(out, 64, "%s", "fixed MCU cycles missing");
+        fl::snprintf(out, 64, "%s", "fixed MCU cycles missing");
     } else if (fixed_measured) {
-        snprintf(out, 64, "%s", "FPU MCU cycles missing");
+        fl::snprintf(out, 64, "%s", "FPU MCU cycles missing");
     } else {
-        snprintf(out, 64, "%s", "FPU+fixed MCU cycles missing");
+        fl::snprintf(out, 64, "%s", "FPU+fixed MCU cycles missing");
     }
 }
 
@@ -6527,7 +6527,7 @@ inline void append_blocker_token(char out[192], const char* token) {
     }
     if (used >= 191) return;
     const char* prefix = used > 0 ? "; " : "";
-    snprintf(out + used, 192 - used, "%s%s", prefix, token);
+    fl::snprintf(out + used, 192 - used, "%s%s", prefix, token);
 }
 
 inline u32 strategy_blocker_mask(
@@ -6605,7 +6605,7 @@ inline u32 strategy_blocker_mask(
 inline void strategy_blocker_string(u32 mask, char out[192]) {
     out[0] = '\0';
     if (mask == kBlockerNone) {
-        snprintf(out, 192, "%s", "none");
+        fl::snprintf(out, 192, "%s", "none");
         return;
     }
     if ((mask & kBlockerReferenceSurface) != 0) {
@@ -6639,42 +6639,42 @@ inline void strategy_blocker_string(u32 mask, char out[192]) {
 
 inline void strategy_blocker_close_action(u32 mask, char out[192]) {
     if (mask == kBlockerNone) {
-        snprintf(out, 192, "%s", "no open blocker for this row state");
+        fl::snprintf(out, 192, "%s", "no open blocker for this row state");
         return;
     }
     if ((mask & kBlockerReferenceSurface) != 0) {
-        snprintf(out, 192, "%s", "lock canonical reference and FPU LSB tolerance");
+        fl::snprintf(out, 192, "%s", "lock canonical reference and FPU LSB tolerance");
         return;
     }
     if ((mask & kBlockerMcuCycles) != 0) {
-        snprintf(out, 192, "%s", "measure named MCU/simulator FPU+fixed cycles");
+        fl::snprintf(out, 192, "%s", "measure named MCU/simulator FPU+fixed cycles");
         return;
     }
     if ((mask & kBlockerProductionIntegration) != 0) {
-        snprintf(out, 192, "%s", "land selected implementation outside harness");
+        fl::snprintf(out, 192, "%s", "land selected implementation outside harness");
         return;
     }
     if ((mask & kBlockerPackedStorage) != 0) {
-        snprintf(out, 192, "%s", "replace prototype layout with packed production format");
+        fl::snprintf(out, 192, "%s", "replace prototype layout with packed production format");
         return;
     }
     if ((mask & kBlockerAccuracyBudget) != 0) {
-        snprintf(out, 192, "%s", "improve accuracy or keep as failing/rejected evidence");
+        fl::snprintf(out, 192, "%s", "improve accuracy or keep as failing/rejected evidence");
         return;
     }
     if ((mask & kBlockerFormalProofProjection) != 0) {
-        snprintf(out, 192, "%s", "finish hull projection and overflow proof");
+        fl::snprintf(out, 192, "%s", "finish hull projection and overflow proof");
         return;
     }
     if ((mask & kBlockerConstrainedFit) != 0) {
-        snprintf(out, 192, "%s", "generate constrained monotonic coefficients");
+        fl::snprintf(out, 192, "%s", "generate constrained monotonic coefficients");
         return;
     }
     if ((mask & kBlockerHardwarePolicy) != 0) {
-        snprintf(out, 192, "%s", "validate RGBWW policy against hardware/LED bins");
+        fl::snprintf(out, 192, "%s", "validate RGBWW policy against hardware/LED bins");
         return;
     }
-    snprintf(out, 192, "%s", "resolve fixed-path production decision");
+    fl::snprintf(out, 192, "%s", "resolve fixed-path production decision");
 }
 
 inline bool prototype_row_has_production_plan(int index, u32 mask) {
@@ -6693,64 +6693,64 @@ inline bool rejected_row_has_evidence(int index) {
 
 inline void prototype_disposition_string(int index, u32 mask, char out[128]) {
     if (text_equals(kStrategies[index].stage, "PROTO")) {
-        snprintf(out, 128, "%s",
+        fl::snprintf(out, 128, "%s",
                  prototype_row_has_production_plan(index, mask)
                      ? "production plan recorded"
                      : "production plan missing");
         return;
     }
     if (text_equals(kStrategies[index].stage, "REJECTED")) {
-        snprintf(out, 128, "%s",
+        fl::snprintf(out, 128, "%s",
                  rejected_row_has_evidence(index)
                      ? "rejection evidence recorded"
                      : "rejection evidence missing");
         return;
     }
     if (text_equals(kStrategies[index].stage, "PROD")) {
-        snprintf(out, 128, "%s", "production implementation exists");
+        fl::snprintf(out, 128, "%s", "production implementation exists");
         return;
     }
-    snprintf(out, 128, "%s", "reference row; not prototype");
+    fl::snprintf(out, 128, "%s", "reference row; not prototype");
 }
 
 inline void production_gate_string(int index, char out[96]) {
     if (text_equals(kStrategies[index].stage, "REF")) {
-        snprintf(out, 96, "%s", "reference row");
+        fl::snprintf(out, 96, "%s", "reference row");
         return;
     }
     if (text_equals(kStrategies[index].stage, "REJECTED")) {
-        snprintf(out, 96, "%s", "rejected with evidence");
+        fl::snprintf(out, 96, "%s", "rejected with evidence");
         return;
     }
     if (text_equals(kStrategies[index].stage, "PROD")) {
-        snprintf(out, 96, "%s", "production path exists");
+        fl::snprintf(out, 96, "%s", "production path exists");
         return;
     }
-    snprintf(out, 96, "%s", "prototype only");
+    fl::snprintf(out, 96, "%s", "prototype only");
 }
 
 inline void strategy_readiness_string(int index, char out[128]) {
     if (text_equals(kStrategies[index].stage, "REJECTED")) {
-        snprintf(out, 128, "%s", "closed as rejected candidate");
+        fl::snprintf(out, 128, "%s", "closed as rejected candidate");
         return;
     }
     if (text_equals(kStrategies[index].stage, "REF")) {
         if (has_complete_mcu_cycle_evidence(index)) {
-            snprintf(out, 128, "%s", "reference complete");
+            fl::snprintf(out, 128, "%s", "reference complete");
         } else {
-            snprintf(out, 128, "%s", "reference row; target cycles still open");
+            fl::snprintf(out, 128, "%s", "reference row; target cycles still open");
         }
         return;
     }
     if (!has_complete_mcu_cycle_evidence(index)) {
-        snprintf(out, 128, "%s", "not shippable: MCU cycles missing");
+        fl::snprintf(out, 128, "%s", "not shippable: MCU cycles missing");
         return;
     }
     if (!text_equals(kStrategies[index].stage, "PROD")) {
-        snprintf(out, 128, "%s", "not shippable: production integration missing");
+        fl::snprintf(out, 128, "%s", "not shippable: production integration missing");
         return;
     }
-    snprintf(out, 128, "%s", "shippable evidence complete");
+    fl::snprintf(out, 128, "%s", "shippable evidence complete");
 }
 
 inline void print_cpu_pair_line(const CpuPair& pair,
@@ -6785,19 +6785,19 @@ inline void print_cpu_pair_line(const CpuPair& pair,
     if (benches[pair.fpu_index].measured && benches[pair.fixed_index].measured) {
         const double r = benches[pair.fixed_index].host_ns_per_pixel
                        / benches[pair.fpu_index].host_ns_per_pixel;
-        snprintf(ratio, sizeof(ratio), "%.2fx", r);
+        fl::snprintf(ratio, sizeof(ratio), "%.2fx", r);
     } else {
-        snprintf(ratio, sizeof(ratio), "%s", "n/a");
+        fl::snprintf(ratio, sizeof(ratio), "%s", "n/a");
     }
 
     char mcu[96];
-    snprintf(mcu, sizeof(mcu), "FPU %s; fixed %s",
+    fl::snprintf(mcu, sizeof(mcu), "FPU %s; fixed %s",
              fpu_cycles_for(pair.fpu_index),
              fixed_cycles_for(pair.fixed_index));
     pair_mcu_fixed_fpu_ratio_string(pair, mcu_ratio);
 
     char line[1536];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-21s | %-26s | %-30s | %11s | %12s | %14s | %-22s | %8s | %9s | %13s | %13s | %29s | %8s | %-41s | %s",
              pair.label,
              kStrategies[pair.fpu_index].name,
@@ -6834,14 +6834,14 @@ inline void print_strategy_readiness_line(
         target_stats[index],
         kBudgets[index][0],
         kBudgets[index][1]);
-    snprintf(accuracy, sizeof(accuracy), "%s", status);
+    fl::snprintf(accuracy, sizeof(accuracy), "%s", status);
     bench_string(benches[index], host);
     cpu_evidence_status_string(index, mcu);
     production_gate_string(index, production);
     strategy_readiness_string(index, readiness);
 
     char line[1408];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-26s| %-8s | %-10s | %-21s | %10s | %-31s | %-29s | %-43s | %s",
              kStrategies[index].name,
              kStrategies[index].stage,
@@ -6866,7 +6866,7 @@ inline void print_strategy_blocker_line(
     char memory_gap[32];
     strategy_blocker_string(mask, blockers);
     strategy_blocker_close_action(mask, close_action);
-    snprintf(memory_gap, sizeof(memory_gap), "%s", memory_gap_class(memories[index]));
+    fl::snprintf(memory_gap, sizeof(memory_gap), "%s", memory_gap_class(memories[index]));
     const char* accuracy = status_for(
         kStrategies[index],
         cf_stats[index],
@@ -6875,7 +6875,7 @@ inline void print_strategy_blocker_line(
         kBudgets[index][1]);
 
     char line[1280];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-26s| %-8s | %-10s | %-21s | %-58s | %s",
              kStrategies[index].name,
              kStrategies[index].stage,
@@ -6893,14 +6893,14 @@ inline void print_prototype_disposition_line(int index, u32 mask) {
     prototype_disposition_string(index, mask, disposition);
     strategy_blocker_string(mask, blockers);
     if (text_equals(kStrategies[index].stage, "REJECTED")) {
-        snprintf(close_action, sizeof(close_action), "%s",
+        fl::snprintf(close_action, sizeof(close_action), "%s",
                  "keep rejected row as negative evidence");
     } else {
         strategy_blocker_close_action(mask, close_action);
     }
 
     char line[1536];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-34s| %-8s | %-28s | %-58s | %-47s | %s",
              kStrategies[index].name,
              kStrategies[index].stage,
@@ -6923,7 +6923,7 @@ inline void print_cpu_evidence_coverage_line(
     cpu_evidence_status_string(index, status);
 
     char line[1024];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-26s| %-8s | %10s | %-20s | %-22s | %-31s | %-23s | %-29s | %s",
              kStrategies[index].name,
              kStrategies[index].stage,
@@ -6961,7 +6961,7 @@ inline void print_completion_gate_line(const char* gate,
                                        const char* evidence,
                                        const char* blocker) {
     char line[1024];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-34s | %-8s | %-58s | %s",
              gate,
              status,
@@ -6993,7 +6993,7 @@ inline void print_memory_gap_line(int index,
         memory.runtime_ram_bytes, memory.target_packed_bytes, runtime_ratio);
 
     char line[1280];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-26s| %-8s | %13s | %9s | %13s | %12s | %11s | %13s | %10s | %-21s | %s",
              kStrategies[index].name,
              kStrategies[index].stage,
@@ -7023,7 +7023,7 @@ inline void print_decision_line(const char* category,
     decision_cpu_string(index, benches, cpu);
     lsb_stats_string(cf_stats[index], lsb);
     char line[960];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-22s | %-26s | %-40s | %10s | %-72s | %19s | %s",
              category,
              kStrategies[index].name,
@@ -7050,7 +7050,7 @@ inline void print_memory_scaling_line(int n) {
     memory_string(packed_tetrahedral_u8_bytes(n), tetra_u8);
 
     char line[512];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%6ld | %15s | %13s | %15s | %20s | %20s | %19s",
              static_cast<long>(n),
              bilinear,
@@ -7187,7 +7187,7 @@ inline void print_reference_parity_line(
     char lsb[48];
     lsb_stats_string(stats, lsb);
     char line[640];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-14s | %7ld | %33s | %8.2f | %s",
              scope,
              static_cast<long>(stats.sample_count),
@@ -7330,7 +7330,7 @@ inline void print_lut_grid_accuracy_line(int n,
     mean_lsb_string(hermite, hermite_mean);
 
     char line[896];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%6ld | %14s | %18s | %33s | %11s | %13s | %17s | %31s | %11s | %7ld",
              static_cast<long>(n),
              bilinear_bytes,
@@ -7583,7 +7583,7 @@ inline void print_experimental_hermite_grid_line(
     mean_lsb_string(fixed_stats, fixed_mean);
 
     char line[896];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%6ld | %12s | %16s | %32s | %8s | %16s | %32s | %8s | %7ld",
              static_cast<long>(n),
              bytes,
@@ -7914,7 +7914,7 @@ inline void print_tetra_grid_scaling_line(int n,
     mean_lsb_string(u8_stats, u8_mean);
 
     char line[896];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%6ld | %9s | %13s | %27s | %8s | %8s | %12s | %25s | %8s | %7ld",
              static_cast<long>(n),
              i16_bytes,
@@ -8008,12 +8008,12 @@ inline TetraCompressionStats evaluate_tetra_compression_signal(
 
 inline void percent_string(u32 numerator, u32 denominator, char out[24]) {
     if (denominator == 0) {
-        snprintf(out, 24, "n/a");
+        fl::snprintf(out, 24, "n/a");
         return;
     }
     const double pct =
         100.0 * static_cast<double>(numerator) / static_cast<double>(denominator);
-    snprintf(out, 24, "%.1f%%", pct);
+    fl::snprintf(out, 24, "%.1f%%", pct);
 }
 
 inline void print_tetra_compression_line(const TetraCompressionStats& stats) {
@@ -8029,7 +8029,7 @@ inline void print_tetra_compression_line(const TetraCompressionStats& stats) {
     memory_string(stats.palette_u8_bytes, pal_u8);
 
     char line[768];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-7s | %6ld | %5lu | %13s | %16lu | %8s | %18s | %15lu | %8s | %17s",
              stats.boosted ? "boost" : "strict",
              static_cast<long>(stats.n),
@@ -8165,13 +8165,13 @@ inline void print_hybrid_seed_audit_line(
         && fixed_bench.host_ns_per_pixel > 0.0) {
         const double ratio =
             hybrid_bench.host_ns_per_pixel / fixed_bench.host_ns_per_pixel;
-        snprintf(host_ratio, sizeof(host_ratio), "%.2fx fixed host", ratio);
+        fl::snprintf(host_ratio, sizeof(host_ratio), "%.2fx fixed host", ratio);
     } else {
-        snprintf(host_ratio, sizeof(host_ratio), "host n/a");
+        fl::snprintf(host_ratio, sizeof(host_ratio), "host n/a");
     }
 
     char line[1024];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%7ld | %3ld | %13ld | %4ld | %8ld | %4ld/%4ld/%4ld/%4ld | %11ld | %8s | %13ld | %8s | %11ld | %27s | %s",
              static_cast<long>(stats.sample_count),
              static_cast<long>(stats.off_count),
@@ -8508,14 +8508,14 @@ inline const char* verifier_status_name(VerifierRow::Status status) {
 }
 
 inline void rgb16_string(u16 r, u16 g, u16 b, char out[40]) {
-    snprintf(out, 40, "%lu/%lu/%lu",
+    fl::snprintf(out, 40, "%lu/%lu/%lu",
              static_cast<unsigned long>(r),
              static_cast<unsigned long>(g),
              static_cast<unsigned long>(b));
 }
 
 inline void rgbw8_string(u8 r, u8 g, u8 b, u8 w, char out[32]) {
-    snprintf(out, 32, "%u/%u/%u/%u",
+    fl::snprintf(out, 32, "%u/%u/%u/%u",
              static_cast<unsigned>(r),
              static_cast<unsigned>(g),
              static_cast<unsigned>(b),
@@ -8695,7 +8695,7 @@ inline void print_fixture_drift_line(const char* scope,
     mean_lsb_string(stats, mean);
 
     char line[512];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-12s | %7ld | %31s | %8s | %s",
              scope,
              static_cast<long>(stats.sample_count),
@@ -8712,7 +8712,7 @@ inline void print_fixture_classification_line(const char* signal,
     char share[24];
     percent_string(static_cast<u32>(count), static_cast<u32>(total), share);
     char line[512];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-36s | %7ld/%-7ld | %8s | %s",
              signal,
              static_cast<long>(count),
@@ -8739,7 +8739,7 @@ inline void print_fixture_drift_example_line(
                  example.fixture_w, fixture);
 
     char line[768];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%4ld | %-20s | %-5s | %-20s | %-15s | %-15s | %5lu",
              static_cast<long>(rank),
              row.patch,
@@ -9071,7 +9071,7 @@ inline void print_rgbww_physical_policy_audit_line(
     lsb_stats_string(stats.fixed_output_delta, fixed_lsb);
 
     char line[1024];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%7ld | %13ld | %15ld | %14ld | %9s | %8ld | %8s | %11ld | %10s | %14ld | %13s | %13ld | %14ld | %27s",
              static_cast<long>(stats.sample_count),
              static_cast<long>(stats.native_single_white_violations),
@@ -9097,7 +9097,7 @@ inline void print_rgbww_policy_line(const char* route,
     char pct[24];
     percent_string(static_cast<u32>(count), static_cast<u32>(sample_count), pct);
     char line[512];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-14s | %7ld | %8s | %s",
              route,
              static_cast<long>(count),
@@ -9120,7 +9120,7 @@ inline void print_rgbww_policy_parity_line(const char* route,
     percent_string(static_cast<u32>(fixed_count),
                    static_cast<u32>(fixed.sample_count), fixed_pct);
     char line[512];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-14s | %9ld | %8s | %11ld | %9s | %+6ld",
              route,
              static_cast<long>(fpu_count),
@@ -9157,7 +9157,7 @@ inline void print_rgbww_route_error_line(
     mean_lsb_string(fixed, fixed_mean);
 
     char line[768];
-    snprintf(line, sizeof(line),
+    fl::snprintf(line, sizeof(line),
              "%-14s | %7ld | %8s | %31s | %8s | %31s | %8s",
              rgbww_route_name_for_slot(slot),
              static_cast<long>(fpu.sample_count),
@@ -9799,7 +9799,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
                                         kBudgets[i][0], kBudgets[i][1]);
 
         char line[1024];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-6s | %-8s | %-31s | %32s | %27s | %27s | %8s | %27s | %7ld | %-34s | %-10s | %s",
                  strategy.name,
                  strategy.stage,
@@ -9829,7 +9829,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             kStrategies[i].solve5 != nullptr ? "cube17/native/RGBWW"
                                              : "cube17/native/RGBW";
         char line[1024];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-8s | %-31s | %27s | %8s | %7ld | %s",
                  kStrategies[i].name,
                  kStrategies[i].topology,
@@ -9852,7 +9852,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         lsb_stats_string(cube_policy_stats[i], lsb);
         mean_lsb_string(cube_policy_stats[i], mean_lsb);
         char line[1024];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-25s | %34s | %8s | %7ld | cube17/native/policy",
                  kStrategies[i].name,
                  kStrategies[policy_index].name,
@@ -9947,7 +9947,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         char summary[48];
         monotonic_string(monotonic_stats[i], summary);
         char line[1024];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-8s | %10ld | %11ld | %14ld | %5ld | %12ld | %s",
                  kStrategies[i].name,
                  kStrategies[i].topology,
@@ -9988,7 +9988,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         i64_value_string(q16_range_stats[i].min_abs_divisor, min_divisor);
         i64_headroom_string(q16_range_stats[i].max_abs_numerator, headroom);
         char line[2048];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %7ld | %9ld | %14ld | %9s | %11s | %11s | %7s | %9s | %7s | %7s | %8ld | %13s | %14s | %11s | %9ld | %8ld | %22s | %s",
                  kStrategies[i].name,
                  static_cast<long>(q16_range_stats[i].sample_count),
@@ -10030,7 +10030,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         double_value_string(q16_static_bounds[i].max_ls2_scaled_numerator, numerator);
         double_headroom_string(q16_static_bounds[i].max_bound, headroom);
         char line[1280];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %11s | %16s | %20s | %16s | %19s | %12s | %s",
                  kStrategies[i].name,
                  coeff,
@@ -10077,7 +10077,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         memory_string(memories[i].per_profile_bytes, per_profile);
         memory_string(memories[i].per_controller_bytes, per_controller);
         char line[1536];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %13s | %17s | %11s | %11s | %14s | %-44s | %-61s | %s",
                  kStrategies[i].name,
                  target,
@@ -10269,7 +10269,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         host_fixed_fpu_ratio_string(i, benches, ratio);
         strategy_mcu_fixed_fpu_ratio_string(i, mcu_ratio);
         char line[1536];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-36s | %10s | %-18s | %-20s | %-22s | %-33s | %-39s | %-29s | %-50s | %-68s | %s",
                  kStrategies[i].name,
                  kStrategies[i].runtime_math,
@@ -10310,7 +10310,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ++cpu_operation_integer_division_count;
         }
         char line[1024];
-        snprintf(line, sizeof(line),
+        fl::snprintf(line, sizeof(line),
                  "%-26s| %-21s | %-17s | %-30s | %-26s | %s",
                  kStrategies[i].name,
                  op_class,
@@ -10550,7 +10550,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ++baseline_measured_count;
         }
     }
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "%ld/%ld baseline/reference rows measured",
              static_cast<long>(baseline_measured_count),
              static_cast<long>(sizeof(baseline_indices) / sizeof(baseline_indices[0])));
@@ -10562,7 +10562,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "keep legacy/reference rows runnable while comparing candidates"
             : "restore missing baseline/reference measurement rows");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "float/fixed rows measured; memory %luB target, %luB prototype",
              static_cast<unsigned long>(
                  memories[kHullAdaptiveIndex].target_packed_bytes),
@@ -10574,7 +10574,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "production packed-axis decoder and representative MCU validation missing");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "selected u8 fixed row measured: %luB, p95/peak %ld/%ld LSB",
              static_cast<unsigned long>(
                  memories[kTetrahedralU8FixedIndex].target_packed_bytes),
@@ -10586,7 +10586,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "integrate selected u8 fixed table and measure MCU cycles");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "double/fixed rows measured; fixed paired peak %ld LSB",
              static_cast<long>(pair_stats[kPolyPiecewiseFixedIndex].peak_lsb));
     emit_hypothesis_gate(
@@ -10595,7 +10595,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "offline coefficient generator and constrained monotonic fit missing");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "seeded row measured; paired delta peak %ld LSB, +%luB router",
              static_cast<long>(pair_stats[kHybridQ16Index].peak_lsb),
              static_cast<unsigned long>(
@@ -10607,7 +10607,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "de-prioritized unless seed speedup beats selected tetra path");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "float/fixed rows measured; memory %luB target, %luB prototype",
              static_cast<unsigned long>(
                  memories[kCellEncodingIndex].target_packed_bytes),
@@ -10619,7 +10619,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "packed cell format decision, compression sweep, and MCU validation missing");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "range/static audits measured; p95 %ld LSB vs strict reference",
              static_cast<long>(cf_stats[kFixedQ16Index].p95_lsb));
     emit_hypothesis_gate(
@@ -10628,7 +10628,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "hull projection, parity target, and formal overflow proof missing");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "rejected row measured; p95 %ld LSB with no memory gain",
              static_cast<long>(cf_stats[kBilinearFixedIndex].p95_lsb));
     emit_hypothesis_gate(
@@ -10637,7 +10637,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         hypothesis_evidence,
         "keep rejected evidence visible instead of deleting the row");
 
-    snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
+    fl::snprintf(hypothesis_evidence, sizeof(hypothesis_evidence),
              "layered reference measured; strict fixed row paired peak %ld LSB",
              static_cast<long>(pair_stats[kRgbwwStrictFixedIndex].peak_lsb));
     emit_hypothesis_gate(
@@ -10846,7 +10846,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         && cf_stats[kClosedFormIndex].peak_lsb == 0
         && cube_stats[kClosedFormIndex].sample_count == kCubeSamples
         && cube_stats[kClosedFormIndex].peak_lsb == 0;
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld verifier rows, %ld cube17 rows, peak %ld/%ld LSB",
              static_cast<long>(cf_stats[kClosedFormIndex].sample_count),
              static_cast<long>(cube_stats[kClosedFormIndex].sample_count),
@@ -10865,7 +10865,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         && public_dispatch_fixture_stats.peak_lsb == 0
         && public_dispatch_cube_stats.sample_count == kCubeSamples
         && public_dispatch_cube_stats.peak_lsb == 0;
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld verifier, %ld cube17 rows, peak %ld/%ld LSB",
              static_cast<long>(public_dispatch_fixture_stats.sample_count),
              static_cast<long>(public_dispatch_cube_stats.sample_count),
@@ -10884,7 +10884,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         && public_boosted_fixture_stats.peak_lsb == 0
         && public_boosted_cube_stats.sample_count == kCubeSamples
         && public_boosted_cube_stats.peak_lsb == 0;
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld verifier, %ld cube17 rows, peak %ld/%ld LSB",
              static_cast<long>(public_boosted_fixture_stats.sample_count),
              static_cast<long>(public_boosted_cube_stats.sample_count),
@@ -10901,7 +10901,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
     const bool closed_form_fixture_locked =
         closed_form_fixture_stats.sample_count == kVerifierRowCount
         && closed_form_fixture_stats.peak_lsb == 0;
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld fixture rows, p95/peak %ld/%ld LSB vs legacy cf_*",
              static_cast<long>(closed_form_fixture_stats.sample_count),
              static_cast<long>(closed_form_fixture_stats.p95_lsb),
@@ -10914,7 +10914,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "keep fixture parity as the live closed-form drift alarm"
             : "classify stale verifier data vs current-surface change before locking winners");
 
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld/%ld top rows and %ld/%ld nonzero rows match value expansion",
              static_cast<long>(
                  fixture_drift_classification.top_drift_legacy_value_expanded_count),
@@ -10929,7 +10929,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         reference_evidence,
         "decide whether classified drift is stale fixture data or a target change");
 
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "%ld rows scored against current closed form; no independent proof",
              static_cast<long>(accuracy_complete_count));
     emit_reference_surface_gate(
@@ -10938,7 +10938,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         reference_evidence,
         "prove or approve the canonical floating reference surface");
 
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "max-channel LSB metric exists; platform tolerance not frozen");
     emit_reference_surface_gate(
         "FPU deviation policy",
@@ -10946,7 +10946,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         reference_evidence,
         "define allowed FPU drift in max-channel LSB per target platform");
 
-    snprintf(reference_evidence, sizeof(reference_evidence),
+    fl::snprintf(reference_evidence, sizeof(reference_evidence),
              "six decision candidates remain provisional while target can move");
     emit_reference_surface_gate(
         "topology promotion freeze",
@@ -10996,13 +10996,13 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
     };
 
     char gate_evidence[192];
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld strategies registered with metadata and runnable rows",
              static_cast<long>(kStrategyCount));
     emit_completion_gate("strategy registry", "PASS", gate_evidence,
                          "keep new hypotheses registered instead of hidden");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld pass, %ld partial, %ld blocked reference audit rows",
              static_cast<long>(reference_surface_pass_count),
              static_cast<long>(reference_surface_partial_count),
@@ -11014,7 +11014,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "lock canonical float output and FPU LSB tolerance before topology decisions");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld pass, %ld partial, %ld blocked hypothesis checklist items",
              static_cast<long>(hypothesis_pass_count),
              static_cast<long>(hypothesis_partial_count),
@@ -11027,7 +11027,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "finish each named hypothesis close condition before closing the issue");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld open rows; ref %ld, MCU %ld, integration %ld, hardware %ld",
              static_cast<long>(blocker_open_rows),
              static_cast<long>(blocker_reference_surface_count),
@@ -11040,7 +11040,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "clear all structured blockers or mark rows rejected with evidence");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld PROTO plans, %ld/%ld REJECTED evidence rows",
              static_cast<long>(prototype_plan_count),
              static_cast<long>(prototype_row_count),
@@ -11058,7 +11058,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
                 ? "keep production plans and rejection evidence explicit"
                 : "add production close actions or rejection evidence");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld stats rows, %ld/%ld reference/sample labels",
              static_cast<long>(accuracy_complete_count),
              static_cast<long>(kStrategyCount),
@@ -11074,7 +11074,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "keep reference/sample labels explicit"
             : "fill missing max-channel LSB and target dE cells");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld byte rows, %ld/%ld source/scaling/tiny notes",
              static_cast<long>(memory_complete_count),
              static_cast<long>(kStrategyCount),
@@ -11090,7 +11090,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "converge over-target prototype formats before shipping"
             : "fill missing packed/prototype/runtime memory cells");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld rows have measured host ns/px",
              static_cast<long>(host_bench_count),
              static_cast<long>(kStrategyCount));
@@ -11102,7 +11102,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "do not treat host ns as MCU cycles"
             : "add runnable host benchmark rows");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld rows modeled; FPU %ld, fixed %ld, int-div %ld",
              static_cast<long>(cpu_operation_model_count),
              static_cast<long>(kStrategyCount),
@@ -11115,7 +11115,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "static op classes exist; representative cycle measurements still separate");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld rows have explicit FPU+fixed cycle cells",
              static_cast<long>(cpu_cycle_cell_count),
              static_cast<long>(kStrategyCount));
@@ -11127,7 +11127,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
             ? "keep measured cycles separate from missing/not-applicable reasons"
             : "fill every FPU/fixed cell with measured evidence or explicit reason");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld complete, %ld partial, %ld missing, %ld rejected",
              static_cast<long>(cpu_complete_count),
              static_cast<long>(cpu_partial_count),
@@ -11136,7 +11136,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
     emit_completion_gate("representative MCU cycles", "BLOCKED", gate_evidence,
                          "measure FPU and fixed cycles on named target/simulator");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld host, %ld/%ld memory, %ld/%ld MCU cells, %ld measured",
              static_cast<long>(paired_output_count),
              static_cast<long>(kCpuPairCount),
@@ -11153,7 +11153,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "host ratios exist; MCU fixed/FPU cycle ratios still missing");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld complete, %ld not shippable, %ld rejected",
              static_cast<long>(readiness_complete_count),
              static_cast<long>(readiness_not_shippable_count),
@@ -11161,7 +11161,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
     emit_completion_gate("production readiness", "BLOCKED", gate_evidence,
                          "land selected candidates outside the harness");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld/%ld observed range audits and %ld/%ld static bounds",
              static_cast<long>(q16_range_audit_count),
              static_cast<long>(q16_expected_audit_count),
@@ -11176,7 +11176,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "add formal overflow/projection proof for shippable Q16 rows");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld samples, native/two-channel white violations %ld/%ld",
              static_cast<long>(rgbww_physical_policy_stats.sample_count),
              static_cast<long>(
@@ -11194,7 +11194,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "host invariant audit exists; LED-bin/hardware validation still missing");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "default tetrahedral_rgb8_u8_fixed; small poly fixed; compare tetrahedral_rgb8");
     emit_completion_gate(
         "selected implementation focus",
@@ -11202,7 +11202,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         gate_evidence,
         "integrate selected fixed u8 tetra row outside harness and measure MCU cycles");
 
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "six provisional candidates printed; %ld shippable rows",
              static_cast<long>(readiness_complete_count));
     emit_completion_gate("provisional decision matrix", "PARTIAL", gate_evidence,
@@ -11212,7 +11212,7 @@ FL_TEST_CASE("colorimetric strategy comparison table") {
         kReferenceSurfaceLocked && kFpuTolerancePolicyLocked
         && readiness_complete_count >= 6
         && paired_mcu_ratio_measured_count == kCpuPairCount ? 6 : 0;
-    snprintf(gate_evidence, sizeof(gate_evidence),
+    fl::snprintf(gate_evidence, sizeof(gate_evidence),
              "%ld final winners named from %ld shippable rows",
              static_cast<long>(final_winner_count),
              static_cast<long>(readiness_complete_count));
