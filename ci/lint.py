@@ -13,6 +13,7 @@ from pathlib import Path
 
 from ci.lint.args_parser import LintArgs, parse_lint_args
 from ci.lint.banned_build_tools import run_banned_build_tools_lint
+from ci.lint.banned_linkers import run_banned_linkers_lint
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
@@ -261,6 +262,16 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="banned_build_tools",
                 display_name="BANNED BUILD TOOLS",
                 run_fn=lambda: run_banned_build_tools_lint(),
+                timeout=60.0,
+            )
+        )
+        # Banned linkers: host builds link only through reld (ci/tools/reld.py);
+        # any other linker selection in ci/, .github/ or Meson files fails.
+        stages.append(
+            LintStage(
+                name="banned_linkers",
+                display_name="BANNED LINKERS (RELD ONLY)",
+                run_fn=lambda: run_banned_linkers_lint(),
                 timeout=60.0,
             )
         )

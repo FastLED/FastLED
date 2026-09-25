@@ -1,5 +1,6 @@
-"""Focused native linker selection and cache identity checks."""
+"""Focused native linker (reld) selection and cache identity checks."""
 
+import os
 from pathlib import Path
 
 import pytest
@@ -20,77 +21,66 @@ from ci.meson.meson_setup_phases import (
 )
 
 
-def test_native_linker_defaults_to_lld(monkeypatch: pytest.MonkeyPatch) -> None:
+def _fake_reld(tmp_path: Path, name: str = "reld") -> Path:
+    linker = tmp_path / name
+    linker.write_bytes(b"one")
+    linker.chmod(0o755)
+    return linker
+
+
+def test_native_linker_defaults_to_pinned_reld_and_exports_bridge(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    reld = _fake_reld(tmp_path)
+    bridge = tmp_path / "bridge"
+    bridge.write_bytes(b"b")
     monkeypatch.delenv("FASTLED_NATIVE_LINKER", raising=False)
-    assert resolve_native_linker("debug-thin") == ("lld", "lld")
-
-
-@pytest.mark.parametrize("mode", ["quick", "debug", "debug-thin", "profile"])
-def test_native_linker_accepts_non_lto_native_modes(
-    mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
-    linker = tmp_path / "wild"
-    linker.write_bytes(b"one")
-    linker.chmod(0o755)
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    selected, identity = resolve_native_linker(mode)
-    assert selected == str(linker)
-    assert identity.startswith(f"{linker}:")
-
-
-def test_native_linker_keeps_lld_for_lto_release(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    # Wild 0.10 cannot link ThinLTO bitcode; release must not use it (#4558).
-    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
-    linker = tmp_path / "wild"
-    linker.write_bytes(b"one")
-    linker.chmod(0o755)
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    assert resolve_native_linker("release") == ("lld", "lld")
-
-
-def test_native_linker_requires_absolute_executable(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    linker = tmp_path / "wild"
-    linker.write_bytes(b"one")
-    linker.chmod(0o755)
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
+    monkeypatch.delenv("RELD_BRIDGE_LINKER", raising=False)
+    monkeypatch.setattr("ci.meson.meson_setup_execute.ensure_reld", lambda: reld)
+    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: bridge)
     selected, identity = resolve_native_linker("debug-thin")
-    assert selected == str(linker)
-    assert identity.startswith(f"{linker}:")
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", "wild")
-    with pytest.raises(ValueError, match="absolute"):
-        resolve_native_linker("debug-thin")
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(tmp_path / "missing"))
-    with pytest.raises(ValueError, match="executable"):
-        resolve_native_linker("debug-thin")
+    assert selected == str(reld)
+    assert identity.startswith(f"{reld}:")
+    assert os.environ["RELD_BRIDGE_LINKER"] == str(bridge)
 
 
-def test_native_linker_override_is_linux_only(
+@pytest.mark.parametrize("mode", ["quick", "debug", "debug-thin", "profile", "release"])
+@pytest.mark.parametrize("host", ["linux", "darwin", "win32"])
+def test_reld_links_every_mode_on_every_host(
+    mode: str, host: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # ThinLTO release included: reld routes LTO links to its bridge linker.
+    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", host)
+    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
+    reld = _fake_reld(tmp_path)
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(reld))
+    selected, identity = resolve_native_linker(mode)
+    assert selected == str(reld)
+    assert identity.startswith(f"{reld}:")
+
+
+def test_native_linker_override_must_be_an_absolute_reld_executable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    linker = tmp_path / "wild"
-    linker.write_bytes(b"one")
-    linker.chmod(0o755)
-    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    for host in ("darwin", "win32"):
-        monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", host)
-        with pytest.raises(ValueError, match="Linux-only"):
-            resolve_native_linker("quick")
+    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
+    other = _fake_reld(tmp_path, "otherlinker")
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(other))
+    with pytest.raises(ValueError, match="must be a reld executable"):
+        resolve_native_linker("quick")
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", "reld")
+    with pytest.raises(ValueError, match="absolute"):
+        resolve_native_linker("quick")
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(tmp_path / "missing" / "reld"))
+    with pytest.raises(ValueError, match="executable"):
+        resolve_native_linker("quick")
 
 
 def test_native_linker_content_change_requires_reconfigure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    linker = tmp_path / "wild"
-    linker.write_bytes(b"one")
-    linker.chmod(0o755)
+    linker = _fake_reld(tmp_path)
     monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
-    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
+    monkeypatch.setattr("ci.meson.meson_setup_execute.bridge_linker", lambda: None)
     _, old_identity = resolve_native_linker("debug-thin")
     markers = MarkerPaths.for_build_dir(tmp_path)
     markers.native_linker.write_text(old_identity)
@@ -187,7 +177,7 @@ def test_link_outputs_invalidate_before_linker_marker_is_committed(
         debug=True,
         check=False,
         build_mode="debug-thin",
-        native_linker="/opt/wild",
+        native_linker="/opt/reld",
         native_linker_identity="new linker identity",
         native_linker_changed=True,
         enable_examples=False,
@@ -214,21 +204,21 @@ def test_setup_command_and_cache_key_include_linker_identity(
         native_file_path=tmp_path / "native.ini",
         build_dir=tmp_path / "build",
         build_mode="debug-thin",
-        native_linker="/opt/wild",
-        native_linker_identity="/opt/wild:digest",
+        native_linker="/opt/reld",
+        native_linker_identity="/opt/reld:digest",
         enable_examples=False,
         enable_unit_tests=True,
         reconfigure=True,
     )
-    assert "-Dnative_linker=/opt/wild" in command
+    assert "-Dnative_linker=/opt/reld" in command
     sidecar = _write_zccache_input_sidecar(
         build_dir=tmp_path / "build",
         build_mode="debug-thin",
         source_hashes=hashes,
-        native_linker_identity="/opt/wild:digest",
+        native_linker_identity="/opt/reld:digest",
     )
     assert sidecar is not None
-    assert "native_linker=/opt/wild:digest" in sidecar.read_text()
+    assert "native_linker=/opt/reld:digest" in sidecar.read_text()
 
 
 def test_old_build_dir_registers_native_linker_before_reconfigure(
@@ -256,11 +246,11 @@ def test_old_build_dir_registers_native_linker_before_reconfigure(
     assert _migrate_native_linker_option(
         build_dir=build_dir,
         marker=marker,
-        native_linker="/opt/wild",
+        native_linker="/opt/reld",
         source_dir=tmp_path,
         env={},
     )
     assert calls == [
         ["meson", "setup", "--reconfigure", str(build_dir)],
-        ["meson", "configure", str(build_dir), "-Dnative_linker=/opt/wild"],
+        ["meson", "configure", str(build_dir), "-Dnative_linker=/opt/reld"],
     ]

@@ -171,7 +171,7 @@ def check_reconfigure_markers(
     debug: bool,
     check: bool,
     build_mode: str,
-    native_linker_identity: str = "lld",
+    native_linker_identity: str,
     enable_examples: bool,
     enable_full_examples: bool,
     enable_unit_tests: bool,

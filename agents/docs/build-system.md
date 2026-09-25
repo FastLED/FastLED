@@ -204,7 +204,8 @@ CXX=clang-tool-chain-cpp CC=clang-tool-chain-c meson setup builddir
 
 ## Unified GNU Build (Windows = Linux)
 clang-tool-chain provides a uniform GNU-style build environment across all platforms:
-- **Same link flags**: `-fuse-ld=lld`, `-pthread`, `-static`, `-rdynamic` work identically on Windows and Linux
+- **One linker everywhere: reld.** Every host-native link (tests, examples, profiles; all build modes, Linux/macOS/Windows) goes through [reld](https://github.com/zackees/reld), provisioned and SHA-256-pinned by `ci/tools/reld.py` into `.cached/reld/`. reld links ELF natively and routes ThinLTO and COFF/Mach-O links to its bridge (the clang-tool-chain lld, exported as `RELD_BRIDGE_LINKER`). `FASTLED_NATIVE_LINKER` may point at another reld build only. `bash lint` (`ci/lint/banned_linkers.py`) fails on any other linker selection in `ci/`, `.github/` or Meson files. Board links (fbuild, vendor GCC `ld`) and WebAssembly (`wasm-ld`) are out of scope.
+- **Same link flags**: `-pthread`, `-static`, `-rdynamic` work identically on Windows and Linux
 - **Same libraries**: Libraries like `libunwind` are available on Windows via DLL injection - no platform-specific code needed
 - **Meson configuration**: The root `meson.build` defines shared `runner_link_args`, `runner_cpp_args`, and `dll_link_args` used by both tests and examples
 - **Platform differences are minimal**: Only `dbghelp`/`psapi` (Windows debug libs) and macOS static linking restrictions require platform checks
