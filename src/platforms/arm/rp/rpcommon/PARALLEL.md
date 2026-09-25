@@ -2,7 +2,7 @@
 
 ## Overview
 
-The automatic parallel output driver enables **seamless parallel LED control** on RP2040/RP2350 platforms using the standard FastLED API. Unlike the manual `ParallelClocklessController`, this driver:
+The automatic parallel output driver enables **seamless parallel LED control** on RP2040/RP2350 platforms using the standard FastLED API. Legacy `addLeds<>()` strips are routed through `fl::SlimBridgeController` onto the shared `ChannelEngineRpPio`, which:
 
 - ✅ Works with standard `FastLED.addLeds()` calls
 - ✅ Automatically detects consecutive GPIO pins
@@ -188,34 +188,7 @@ The driver transposes LED data from standard RGB format to bit-parallel format:
 - 2 DMA channels
 - 1 sequential fallback (1-pin group, uses existing driver)
 
-## Comparison: Manual vs Automatic
-
-### Manual Parallel Setup (Old Way)
-
-```cpp
-#include <platforms/arm/rp/rp2040/clockless_arm_rp2040.h>
-
-CRGB leds[4][100];
-
-fl::ParallelClocklessController<
-    2, 4,               // Base pin, 4 lanes
-    400, 850, 50000,    // WS2812B timing
-    GRB
-> controller;
-
-void setup() {
-    for (int i = 0; i < 4; i++) {
-        controller.addStrip(i, leds[i], 100);
-    }
-    controller.init();
-}
-
-void loop() {
-    controller.showLeds(0xFF);  // NOT FastLED.show()!
-}
-```
-
-### Automatic Parallel Setup (New Way)
+## Usage
 
 ```cpp
 #define FASTLED_RP2040_CLOCKLESS_PIO_AUTO 1
@@ -240,7 +213,6 @@ void loop() {
 - ✅ Works with all FastLED features (brightness, color correction, etc.)
 - ✅ Automatic grouping detection
 - ✅ Graceful fallback for non-consecutive pins
-- ✅ Same performance as manual setup
 
 ## Limitations
 

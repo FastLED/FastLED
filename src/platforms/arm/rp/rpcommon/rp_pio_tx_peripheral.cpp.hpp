@@ -188,13 +188,17 @@ void RpPioTxPeripheral::deinitialize() FL_NO_EXCEPT {
         RpPioDmaResourceManager::instance().releasePioStateMachine(pio, mStateMachine);
     }
     if (mPin >= 0) {
-        // Direction before function: selecting SIO while its output-enable
-        // is still set from init hands the pad SIO's stale output value and
-        // briefly drives the line. Clearing the direction first means the
-        // mux switch lands on an input. Same order as the clockless
-        // teardown in clockless_rp_pio.h.
-        gpio_set_dir(static_cast<uint>(mPin), GPIO_IN);
-        gpio_set_function(static_cast<uint>(mPin), GPIO_FUNC_SIO);
+        // Park every lane as a driven-LOW SIO output so the data line never
+        // floats between frames (#4619 review). Order: latch LOW into SIO's
+        // output register, clear direction so the mux switch lands on an
+        // input (no stale-value glitch), select SIO, then enable the output.
+        for (u8 lane = 0; lane < mLaneCount; ++lane) {
+            const uint pin = static_cast<uint>(mPin) + lane;
+            gpio_put(pin, false);
+            gpio_set_dir(pin, GPIO_IN);
+            gpio_set_function(pin, GPIO_FUNC_SIO);
+            gpio_set_dir(pin, GPIO_OUT);
+        }
         RpPioDmaResourceManager::instance().releasePins(static_cast<u8>(mPin), mLaneCount);
     }
     delete mProgram; // ok bare allocation
