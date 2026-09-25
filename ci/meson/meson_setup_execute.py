@@ -50,10 +50,19 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
+# Build modes whose native link consumes LLVM bitcode (-flto); see meson.build.
+_LTO_BUILD_MODES = frozenset({"release"})
+
+
 def resolve_native_linker(build_mode: str) -> tuple[str, str]:
     """Validate the optional native linker and identify its linked contents."""
     requested = os.environ.get("FASTLED_NATIVE_LINKER")
     if requested is None:
+        return "lld", "lld"
+    if build_mode in _LTO_BUILD_MODES:
+        # Release links ThinLTO bitcode; the pinned Wild has no LLVM plugin
+        # and rejects it ("contains LLVM-IR, but linker plugin was not
+        # supplied"), so LTO modes always keep LLD (FastLED #4558).
         return "lld", "lld"
     if sys.platform != "linux":
         raise ValueError("FASTLED_NATIVE_LINKER override is Linux-only")

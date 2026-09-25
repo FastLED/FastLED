@@ -25,8 +25,8 @@ def test_native_linker_defaults_to_lld(monkeypatch: pytest.MonkeyPatch) -> None:
     assert resolve_native_linker("debug-thin") == ("lld", "lld")
 
 
-@pytest.mark.parametrize("mode", ["quick", "debug", "debug-thin", "release", "profile"])
-def test_native_linker_accepts_all_native_modes(
+@pytest.mark.parametrize("mode", ["quick", "debug", "debug-thin", "profile"])
+def test_native_linker_accepts_non_lto_native_modes(
     mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
@@ -37,6 +37,18 @@ def test_native_linker_accepts_all_native_modes(
     selected, identity = resolve_native_linker(mode)
     assert selected == str(linker)
     assert identity.startswith(f"{linker}:")
+
+
+def test_native_linker_keeps_lld_for_lto_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Wild 0.10 cannot link ThinLTO bitcode; release must not use it (#4558).
+    monkeypatch.setattr("ci.meson.meson_setup_execute.sys.platform", "linux")
+    linker = tmp_path / "wild"
+    linker.write_bytes(b"one")
+    linker.chmod(0o755)
+    monkeypatch.setenv("FASTLED_NATIVE_LINKER", str(linker))
+    assert resolve_native_linker("release") == ("lld", "lld")
 
 
 def test_native_linker_requires_absolute_executable(
