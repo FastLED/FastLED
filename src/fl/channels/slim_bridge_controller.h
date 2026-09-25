@@ -105,6 +105,10 @@ protected:
             }
         }
 
+        // Give subclasses a chance to observe the accepted frame before it is
+        // encoded (e.g. feeding ActiveStripTracker for stub/WASM channels).
+        onBeforeEncode(pixels);
+
         // (A5) Publish the pixel byte layout so the driver (and any
         // downstream padding/diagnostic code) knows the encoded stride.
         if (this->getRgbww().active()) {
@@ -123,6 +127,10 @@ protected:
 
         driver.enqueue(mData);
     }
+
+    /// Called once per accepted frame, after the enabled/ready gates pass and BEFORE the
+    /// frame is encoded and enqueued. Default: no-op. Used by stub/WASM to feed ActiveStripTracker.
+    virtual void onBeforeEncode(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT { (void)pixels; }
 
 private:
     ChannelDataPtr mData;
