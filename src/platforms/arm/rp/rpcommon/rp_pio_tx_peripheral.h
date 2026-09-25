@@ -12,7 +12,10 @@ namespace fl {
 
 class RpPioTxPeripheral final : public IRpPioTxPeripheral {
   public:
-    explicit RpPioTxPeripheral(u8 pio_index) FL_NO_EXCEPT;
+    /// @param fallback_to_other_pios try the other PIO blocks when
+    ///        `pio_index` has no free SM / program space (#4622). Extra
+    ///        concurrent slots pass false so they stay on their own block.
+    explicit RpPioTxPeripheral(u8 pio_index, bool fallback_to_other_pios = true) FL_NO_EXCEPT;
     ~RpPioTxPeripheral() override;
     bool configure(const RpPioTxConfig& config) FL_NO_EXCEPT override;
     bool startTxDma(const u32* words, size_t word_count) FL_NO_EXCEPT override;
@@ -34,6 +37,7 @@ class RpPioTxPeripheral final : public IRpPioTxPeripheral {
     int mProgramOffset;
     u8 mLaneCount;
     u8 mPioIndex;
+    bool mFallbackToOtherPios;
     ProgramStorage* mProgram;
     bool mInitialized;
 };

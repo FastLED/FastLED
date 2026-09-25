@@ -256,6 +256,95 @@ FL_TEST_CASE("RP PIO TX does not batch lanes with different XTRA0") {
     FL_CHECK_EQ(peripheral.capturedWords.size(), static_cast<size_t>(8));
 }
 
+FL_TEST_CASE("RP PIO TX runs independent strips concurrently") {
+    RpPioTxPeripheralMock& primary = resetTxMock();
+    fl::vector<fl::shared_ptr<RpPioTxPeripheralMock>> extras;
+    ChannelEngineRpPio engine(
+        createTxMockPeripheral(), fl::shared_ptr<IRpPioSpiPeripheral>(), "PIO0",
+        [&extras]() -> fl::shared_ptr<IRpPioTxPeripheral> {
+            auto mock = fl::make_shared<RpPioTxPeripheralMock>();
+            extras.push_back(mock);
+            return mock;
+        });
+    fl::vector_psram<u8> shortBytes;
+    shortBytes.push_back(0xFF);
+    fl::vector_psram<u8> longBytes;
+    longBytes.push_back(0x00);
+    longBytes.push_back(0x00);
+    auto first = makeChannel(5, shortBytes);
+    auto second = makeChannel(9, longBytes);  // other pin, other length
+    engine.enqueue(first);
+    engine.enqueue(second);
+    engine.show();
+    // Both strips are on the wire at once, each on its own peripheral.
+    FL_REQUIRE_EQ(extras.size(), static_cast<size_t>(1));
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 5);
+    FL_CHECK_EQ(primary.capturedWords.size(), static_cast<size_t>(8));
+    FL_CHECK_EQ(extras[0]->lastConfig.tx_pin, 9);
+    FL_CHECK_EQ(extras[0]->capturedWords.size(), static_cast<size_t>(16));
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+
+    // The short strip finishes first; the long one keeps the frame alive.
+    primary.dmaBusy = false;
+    primary.terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);  // latch starts
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);  // second still sending
+    FL_CHECK_EQ(primary.deinitializeCalls, 1);  // short strip released its SM
+    FL_CHECK(first->isInUse());  // frame not complete yet
+    extras[0]->dmaBusy = false;
+    extras[0]->terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    extras[0]->timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
+    FL_CHECK_EQ(primary.deinitializeCalls, 1);
+    FL_CHECK_EQ(extras[0]->deinitializeCalls, 1);
+}
+
+FL_TEST_CASE("RP PIO TX queues strips when no extra PIO resources are free") {
+    RpPioTxPeripheralMock& primary = resetTxMock();
+    fl::vector<fl::shared_ptr<RpPioTxPeripheralMock>> extras;
+    ChannelEngineRpPio engine(
+        createTxMockPeripheral(), fl::shared_ptr<IRpPioSpiPeripheral>(), "PIO0",
+        [&extras]() -> fl::shared_ptr<IRpPioTxPeripheral> {
+            auto mock = fl::make_shared<RpPioTxPeripheralMock>();
+            mock->configureOk = false;  // every other SM / DMA is taken
+            extras.push_back(mock);
+            return mock;
+        });
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0x42);
+    auto first = makeChannel(5, bytes);
+    auto second = makeChannel(9, bytes);
+    engine.enqueue(first);
+    engine.enqueue(second);
+    engine.show();
+    FL_CHECK_EQ(primary.startCalls, 1);
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 5);
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    const int extraConfigures = extras.empty() ? 0 : extras[0]->configureCalls;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    // No retry storm while the frame waits for the busy strip.
+    FL_CHECK_EQ(extras.empty() ? 0 : extras[0]->configureCalls, extraConfigures);
+
+    primary.dmaBusy = false;
+    primary.terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    FL_CHECK_EQ(primary.startCalls, 2);
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 9);
+    primary.dmaBusy = false;
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
+}
+
 FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs") {
     for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
         RpPioTxPeripheralMock& peripheral = resetTxMock();
