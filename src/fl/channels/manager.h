@@ -53,7 +53,19 @@ public:
     /// @brief Get the global singleton instance
     /// @return Reference to the singleton ChannelManager
     /// @note Thread-safe singleton initialization
+    ///
+    /// The first call registers the platform's default channel drivers
+    /// (`platforms::initChannelDrivers()`). Runtime-selection callers
+    /// (`FastLED.add(cfg)`, driver queries, `Channel` dispatch) use this.
     static ChannelManager& instance() FL_NO_EXCEPT;
+
+    /// @brief Get the singleton WITHOUT registering platform default drivers
+    ///
+    /// For opt-in registration paths (`BusTraits<B>::registerWithManager()`,
+    /// the legacy `addLeds<>` slim bridges) that name exactly one driver.
+    /// Referencing only this accessor keeps `initChannelDrivers()` -- and
+    /// every engine it constructs -- out of the link (#4618).
+    static ChannelManager& registry() FL_NO_EXCEPT;
 
     /// @brief Constructor
     ChannelManager() FL_NO_EXCEPT;

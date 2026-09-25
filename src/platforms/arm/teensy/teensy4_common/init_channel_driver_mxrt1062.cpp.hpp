@@ -112,7 +112,17 @@ static void addFlexIOIfPossible(ChannelManager& manager) {
     // ChannelEngineFlexIO: a separate instance would be replaced (and its
     // queued frames dropped) when anything later registers the traits
     // singleton under the same name (#4624 review).
-    manager.addDriver(8, BusTraits<Bus::FLEX_IO, 1>::instancePtr());
+    //
+    // Skip it when an opt-in path (addLeds<..., Bus::FLEX_IO, 1>,
+    // enableDrivers<>) already registered it via ChannelManager::registry():
+    // re-adding at priority 8 would replace that entry mid-sketch (warning +
+    // blocking waitForReady()) and make the final priority depend on call
+    // order (#4618 review).
+    auto flexio = BusTraits<Bus::FLEX_IO, 1>::instancePtr();
+    if (manager.findDriverByName(flexio->getName())) {
+        return;
+    }
+    manager.addDriver(8, flexio);
 
     FL_DBG("Teensy 4.x: Registered FlexIO driver (priority 8)");
 }

@@ -51,7 +51,7 @@ template<> struct BusTraits<Bus::UART> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::UART, 0), instancePtr());
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::UART, 0), instancePtr());
     }
 };
 
@@ -69,7 +69,7 @@ template<> struct BusTraits<Bus::UART, 1> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(default_bus_priority(Bus::UART, 1), instancePtr());
+        ChannelManager::registry().addDriver(default_bus_priority(Bus::UART, 1), instancePtr());
     }
 };
 

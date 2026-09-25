@@ -32,7 +32,7 @@ template<> struct BusTraits<Bus::UART> {
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
     static void registerWithManager() FL_NO_EXCEPT {
-        ChannelManager::instance().addDriver(1, instancePtr());
+        ChannelManager::registry().addDriver(1, instancePtr());
     }
 };
 
