@@ -8,7 +8,9 @@ build step without an earlier ``ci/tools/install_native_linker.py`` step in
 the same job.
 
 Host-native Meson steps are ``bash test`` (except Python-only ``--py`` runs),
-``bash profile``, ``test.py`` and ``ci/profile_runner.py``. MCU
+``bash profile``, ``test.py`` and ``ci/profile_runner.py``. Steps pinned to
+``--build-mode release`` are exempt: release links ThinLTO bitcode, which the
+pinned Wild cannot consume, so ``resolve_native_linker`` keeps LLD there. MCU
 cross-compilation (``bash compile``, fbuild) is deliberately out of scope.
 """
 
@@ -32,6 +34,8 @@ def _is_native_meson(command: str) -> bool:
         line = match.group(0)
         if "bash test" in line and "--py" in line and "--cpp" not in line:
             continue
+        if "--build-mode release" in line:
+            continue  # ThinLTO release links always keep LLD (#4558)
         return True
     return False
 
@@ -87,6 +91,10 @@ class NativeLinkerWorkflowCoverageTests(unittest.TestCase):
                         {"name": "Codec", "run": "bash test fl_codec --cpp"},
                         {"name": "Profile", "run": "bash profile x --iterations 1"},
                         {"name": "Python only", "run": "bash test --py --verbose"},
+                        {
+                            "name": "LTO",
+                            "run": "bash test x --cpp --build-mode release",
+                        },
                     ],
                 }
             }
