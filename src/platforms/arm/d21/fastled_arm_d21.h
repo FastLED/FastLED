@@ -7,4 +7,6 @@
 #include "platforms/arm/d21/fastpin_arm_d21.h"
 #include "platforms/arm/d21/clockless_arm_d21.h"
 
+#include "platforms/arm/samd/samd_spi_bus_traits.h"
+
 #endif
