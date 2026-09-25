@@ -272,7 +272,6 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/platforms/arm/teensy/pin_teensy.hpp", 1),
     ("src/platforms/arm/teensy/pin_teensy_native.hpp", 1),
     ("src/platforms/arm/teensy/sdfat/FatLib/FatFile.h", 2),
-    ("src/platforms/arm/teensy/teensy4_common/clockless_objectfled.cpp.hpp", 1),
     ("src/platforms/arm/teensy/teensy4_common/drivers/objectfled/channel_engine_objectfled.cpp.hpp", 1),
     ("src/platforms/arm/teensy/teensy4_common/drivers/objectfled/objectfled_diagnostics.cpp.hpp", 8),
     ("src/platforms/arm/teensy/teensy4_common/init_channel_driver_mxrt1062.cpp.hpp", 1),

@@ -9,7 +9,8 @@ Teensy 4.0/4.1 (IMXRT1062) support.
 - `clockless_arm_mxrt1062.h`: Single-lane clockless driver.
 - `block_clockless_arm_mxrt1062.h`: Block/multi-lane clockless.
 - `octows2811_controller.h`: OctoWS2811 integration.
-- `clockless_objectfled.h/cpp`: Legacy single-controller ObjectFLED wrapper.
+- `clockless.h`: legacy `addLeds<>()` clockless controller, a `fl::SlimBridgeController` over `ChannelEngineObjectFLED`.
+- `clockless_objectfled.h`: rectangular-frame sizing helpers used by `ChannelEngineObjectFLED`.
 - `led_sysdefs_arm_mxrt1062.h`: System defines for RT1062.
 - `spi_hw_4_mxrt1062.cpp`: Quad-SPI (4-lane) LPSPI driver.
 - `spi_hw_2_mxrt1062.cpp`: Dual-SPI (2-lane) LPSPI driver.
