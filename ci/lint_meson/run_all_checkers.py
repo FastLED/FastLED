@@ -10,6 +10,7 @@ Architecture mirrors ci/lint_cpp/run_all_checkers.py:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -22,13 +23,20 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def _collect_meson_files(root: Path) -> list[str]:
-    """Find repository Meson files, excluding generated and nested worktrees."""
-    excluded_directories = {".build", ".claude", ".git"}
-    return sorted(
-        str(path)
-        for path in root.rglob("meson.build")
-        if not excluded_directories.intersection(path.relative_to(root).parts)
-    )
+    """Find repository Meson files, excluding generated and nested worktrees.
+
+    Uses os.walk with pruning instead of Path.rglob: other lint stages run
+    concurrently and mutate build trees (e.g. the Rust linter's cargo
+    ``target/``), and rglob raises FileNotFoundError when a directory
+    vanishes mid-walk. os.walk ignores such errors by default.
+    """
+    excluded_directories = {".build", ".claude", ".git", ".venv", "target"}
+    found: list[str] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in excluded_directories]
+        if "meson.build" in filenames:
+            found.append(str(Path(dirpath) / "meson.build"))
+    return sorted(found)
 
 
 def _collect_violations(

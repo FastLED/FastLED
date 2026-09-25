@@ -92,11 +92,12 @@ class LintOrchestrator:
 
                 future = self.stage_futures[stage.name]
                 try:
-                    success, _ = future.result(timeout=stage.timeout)
+                    success, detail = future.result(timeout=stage.timeout)
                     if success:
                         print(f"  ✅ {stage.name} completed")
                     else:
-                        print(f"  ❌ {stage.name} FAILED")
+                        suffix = f": {detail}" if detail else ""
+                        print(f"  ❌ {stage.name} FAILED{suffix}")
                         failed_stages.append(stage.name)
                 except TimeoutError:
                     print(f"  ❌ {stage.name} TIMEOUT (>{stage.timeout}s)")
