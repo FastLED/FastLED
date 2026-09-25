@@ -30,7 +30,13 @@
 /// /ChannelConfig and call the identical `fl::Channel::encodeXXX()`, so a
 /// diff here still exercises (and pins) the real production code path.
 
-#define FASTLED_SPI_USES_CHANNEL_API 1
+// NOTE: tests are compiled with a shared PCH (tests/test_pch.h) that already
+// parsed FastLED.h with the host default FASTLED_SPI_USES_CHANNEL_API=0, so a
+// local `#define FASTLED_SPI_USES_CHANNEL_API 1` here is ignored and the
+// legacy SPIOutput controllers get instantiated instead. Each case therefore
+// calls `FastLED.addLedsSpiChannel<...>()` -- the always-declared bodies that
+// the public `addLeds<ESPIChipsets ...>()` overloads forward to verbatim when
+// FASTLED_SPI_USES_CHANNEL_API=1 (src/FastLED.h).
 
 #include "FastLED.h"
 #include "fl/channels/channel.h"
@@ -152,7 +158,7 @@ using namespace spi_legacy_golden;
 FL_TEST_CASE("APA102 default overload (RGB order, default speed) golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<APA102, 40, 41>(leds, 2);
+    FastLED.addLedsSpiChannel<APA102, 40, 41>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -196,7 +202,7 @@ FL_TEST_CASE("APA102 default overload (RGB order, default speed) golden bytes") 
 FL_TEST_CASE("APA102 explicit BGR order golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<APA102, 44, 45, BGR>(leds, 2);
+    FastLED.addLedsSpiChannel<APA102, 44, 45, BGR>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -222,7 +228,7 @@ FL_TEST_CASE("APA102 explicit BGR order golden bytes") {
 FL_TEST_CASE("APA102 brightness 64 golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<APA102, 48, 49>(leds, 2);
+    FastLED.addLedsSpiChannel<APA102, 48, 49>(leds, 2);
     FastLED.setBrightness(64);
 
     FastLED.show();
@@ -262,7 +268,7 @@ FL_TEST_CASE("APA102 brightness 64 golden bytes") {
 FL_TEST_CASE("SK9822 default overload golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<SK9822, 52, 53>(leds, 2);
+    FastLED.addLedsSpiChannel<SK9822, 52, 53>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -294,7 +300,7 @@ FL_TEST_CASE("SK9822 default overload golden bytes") {
 FL_TEST_CASE("SK9822 brightness 64 golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<SK9822, 56, 57>(leds, 2);
+    FastLED.addLedsSpiChannel<SK9822, 56, 57>(leds, 2);
     FastLED.setBrightness(64);
 
     FastLED.show();
@@ -326,7 +332,7 @@ FL_TEST_CASE("SK9822 brightness 64 golden bytes") {
 FL_TEST_CASE("HD107 explicit RGB order golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<HD107, 60, 61, RGB>(leds, 2);
+    FastLED.addLedsSpiChannel<HD107, 60, 61, RGB>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -358,7 +364,7 @@ FL_TEST_CASE("HD107 explicit RGB order golden bytes") {
 FL_TEST_CASE("HD108 default overload defaults to GRB order") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<HD108, 64, 65>(leds, 2);
+    FastLED.addLedsSpiChannel<HD108, 64, 65>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -397,7 +403,7 @@ FL_TEST_CASE("HD108 default overload defaults to GRB order") {
 FL_TEST_CASE("HD108 explicit RGB order golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<HD108, 68, 69, RGB>(leds, 2);
+    FastLED.addLedsSpiChannel<HD108, 68, 69, RGB>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -427,7 +433,7 @@ FL_TEST_CASE("HD108 explicit RGB order golden bytes") {
 FL_TEST_CASE("WS2801 golden bytes: 3 bytes/LED, no frame overhead") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<WS2801, 72, 73>(leds, 2);
+    FastLED.addLedsSpiChannel<WS2801, 72, 73>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -460,7 +466,7 @@ FL_TEST_CASE("WS2801 golden bytes: 3 bytes/LED, no frame overhead") {
 FL_TEST_CASE("LPD8806 golden bytes: GRB MSB-set encoding + latch") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[3] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80), CRGB(0x00, 0x00, 0x00)};
-    FastLED.addLeds<LPD8806, 76, 77>(leds, 3);
+    FastLED.addLedsSpiChannel<LPD8806, 76, 77>(leds, 3);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -502,7 +508,7 @@ FL_TEST_CASE("LPD8806 golden bytes: GRB MSB-set encoding + latch") {
 FL_TEST_CASE("P9813 golden bytes: flag-byte encoding + boundaries") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<P9813, 80, 81>(leds, 2);
+    FastLED.addLedsSpiChannel<P9813, 80, 81>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -547,7 +553,7 @@ FL_TEST_CASE("P9813 golden bytes: flag-byte encoding + boundaries") {
 FL_TEST_CASE("APA102 full 5-param form (explicit DATA_RATE_MHZ) golden bytes") {
     SpiLegacyGoldenFixture fixture;
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
-    FastLED.addLeds<APA102, 84, 85, RGB, DATA_RATE_MHZ(12)>(leds, 2);
+    FastLED.addLedsSpiChannel<APA102, 84, 85, RGB, DATA_RATE_MHZ(12)>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
@@ -583,7 +589,7 @@ FL_TEST_CASE("APA102 with explicit host default bus compiles and routes consiste
     CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     constexpr fl::Bus kHostDefaultSpiBus = fl::DefaultBus<fl::SpiChipsetConfig>::value;
     ::CLEDController& controller =
-        FastLED.addLeds<APA102, 88, 89, RGB, DATA_RATE_MHZ(6), kHostDefaultSpiBus>(leds, 2);
+        FastLED.addLedsSpiChannel<APA102, 88, 89, RGB, DATA_RATE_MHZ(6), kHostDefaultSpiBus>(leds, 2);
     (void)controller;
 
     // Does not crash, and the frame is still routed to the SPI-accepting
