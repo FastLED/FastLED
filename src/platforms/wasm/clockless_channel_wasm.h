@@ -10,14 +10,8 @@
 
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/chipsets/timing_traits.h"
-#include "fl/channels/bus.h"
-#include "fl/channels/data.h"
-#include "fl/channels/driver.h"
-#include "fl/channels/manager.h"
+#include "fl/channels/slim_bridge_controller.h"
 #include "fl/stl/vector.h"
-#include "pixel_iterator.h"
-#include "fl/log/log.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "platforms/stub/bus_traits.h"
 #include "fl/stl/noexcept.h"
@@ -29,54 +23,23 @@ namespace fl {
 /// This controller integrates with the channel driver infrastructure,
 /// allowing the legacy FastLED.addLeds<>() API to route through channel drivers
 /// for web builds. Uses stub driver (no real hardware in browser).
+///
+/// Registered with `ChannelManager` via the `SlimBridgeController` base
+/// constructor and flushed by `ChannelManager::onEndFrame()`.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class ClocklessController : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::BIT_BANG>> {
 private:
-    // Channel data for transmission
-    ChannelDataPtr mChannelData;
-
-    // Channel driver reference (selected dynamically from bus manager)
-    fl::shared_ptr<IChannelDriver> mDriver;
-
     // LED capture tracker for ActiveStripData (feeds frame data to JavaScript)
     ActiveStripTracker mTracker;
     fl::vector<u8> mCaptureData;
 
 public:
-    ClocklessController()
-        : mDriver(getWasmEngine())
-    {
-        // Create channel data with pin and timing configuration
-        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
-        mChannelData = ChannelData::create(DATA_PIN, timing);
-    }
-
-    void init() override { }
-    u16 getMaxRefreshRate() const override { return 400; }
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 
 protected:
-    // -- Show pixels
-    //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) override
-    {
-        if (!mDriver) {
-            FL_WARN_EVERY(100, "No Engine");
-            return;
-        }
-        // Wait for previous transmission to complete and release buffer
-        // This prevents race conditions when show() is called faster than hardware can transmit
-        u32 startTime = fl::millis();
-        if (mChannelData->isInUse()) {
-            FL_WARN_EVERY(100, "ClocklessController(wasm): driver should have finished transmitting by now - waiting");
-            bool finished = mDriver->waitForReady();
-            if (!finished) {
-                FL_ERROR("ClocklessController(wasm): Engine still busy after %sms", fl::millis() - startTime);
-                return;
-            }
-        }
-
-        // Capture LED data for ActiveStripData BEFORE encoding
-        // This feeds frame data to JavaScript via getFrameData()
+    // Feed ActiveStripData BEFORE the frame is encoded so JavaScript can
+    // retrieve it via getFrameData().
+    void onBeforeEncode(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
         mCaptureData.clear();
         PixelController<RGB> pixels_rgb = pixels;
         // disableColorAdjustment() removes color correction but keeps brightness
@@ -84,23 +47,6 @@ protected:
         auto capture_iterator = pixels_rgb.as_iterator(RgbwInvalid());
         capture_iterator.writeWS2812(&mCaptureData);
         mTracker.update(mCaptureData);
-
-        // Convert pixels to encoded byte data for channel driver
-        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        auto& data = mChannelData->getData();
-        data.clear();
-        iterator.writeWS2812(&data);
-
-        // Enqueue for transmission (will be sent when driver->show() is called)
-        mDriver->enqueue(mChannelData);
-    }
-
-    static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NO_EXCEPT {
-        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
-        // the `BusTraits<Bus::BIT_BANG>` singleton -- the portable fallback
-        // is the platform default for both stub and WASM builds. Naming the
-        // singleton here ODR-links the stub driver TU.
-        return BusTraits<Bus::BIT_BANG>::instancePtr();
     }
 };
 

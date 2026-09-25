@@ -146,6 +146,20 @@ class ExposedTestController : public TestController {
     using TestController::show;
 };
 
+/// Subclass exercising the onBeforeEncode() hook: counts how many times it
+/// was invoked, mirroring how stub/WASM controllers would feed
+/// ActiveStripTracker before encoding.
+class CountingHookController : public TestController {
+  public:
+    int beforeEncodeCount = 0;
+
+  protected:
+    void onBeforeEncode(PixelController<GRB>& pixels) FL_NO_EXCEPT override {
+        ++beforeEncodeCount;
+        (void)pixels;
+    }
+};
+
 }  // namespace slim_bridge_test
 
 using namespace slim_bridge_test;
@@ -305,6 +319,26 @@ FL_TEST_CASE("100 frames keep the same data() pointer and capacity") {
         FL_CHECK_EQ(mockDriverInstance().lastDataPtr, firstPtr);
         FL_CHECK_EQ(mockDriverInstance().lastCapacity, firstCapacity);
     }
+}
+
+FL_TEST_CASE("onBeforeEncode() hook fires once per accepted frame, not on dropped frames") {
+    SlimBridgeFixture fixture;
+    CountingHookController controller;
+    CRGB leds[4] = {};
+    FastLED.addLeds(&controller, leds, 4);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    FastLED.show();
+    FL_CHECK_EQ(controller.beforeEncodeCount, 1);
+
+    // Disable the driver: the frame is dropped before onBeforeEncode() runs.
+    ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", false);
+    auto restore = fl::make_scope_exit([&]() {
+        ChannelManager::instance().setDriverEnabled("SLIM_BRIDGE_MOCK", true);
+    });
+
+    FastLED.show();
+    FL_CHECK_EQ(controller.beforeEncodeCount, 1);
 }
 
 }  // FL_TEST_FILE

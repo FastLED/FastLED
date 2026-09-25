@@ -14,9 +14,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/channels/bus.h"
 #include "fl/channels/data.h"
-#include "fl/channels/driver.h"
-#include "fl/channels/manager.h"
-#include "fl/stl/weak_ptr.h"
+#include "fl/channels/slim_bridge_controller.h"
 #include "pixel_iterator.h"
 #include "fl/log/log.h"
 #include "fl/stl/vector.h"
@@ -32,72 +30,28 @@ namespace fl {
 /// This controller integrates with the channel driver infrastructure,
 /// allowing the legacy FastLED.addLeds<>() API to route through channel drivers
 /// for testing. It mirrors the architecture of ESP32's ClocklessIdf5.
+///
+/// The stub registers `BusTraits<Bus::BIT_BANG>` with `ChannelManager` via
+/// `registerWithManager()` in the `SlimBridgeController` base constructor;
+/// frames are flushed by `ChannelManager::onEndFrame()`.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class ClocklessController : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::BIT_BANG>> {
 private:
-    // Channel data for transmission
-    ChannelDataPtr mChannelData;
-
-    // Channel driver reference (weak pointer for lifetime safety)
-    fl::weak_ptr<IChannelDriver> mDriver;
-
     // LED capture tracker for simulation/testing
     ActiveStripTracker mTracker;
     fl::vector<u8> mCaptureData;
 
 public:
-    ClocklessController()
- FL_NO_EXCEPT {
-        // Create channel data with pin and timing configuration
-        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
-        mChannelData = ChannelData::create(DATA_PIN, timing);
-        // Phase 5b of #2428: pre-bind to the stub driver singleton so
-        // showPixels() bypasses ChannelManager entirely. Naming
-        // BusTraits<Bus::BIT_BANG>::instancePtr() here is the ODR-use that
-        // lets the linker keep ONLY the portable fallback driver TU -- post-#2428
-        // drivers do not auto-register, so this pre-bind is what links
-        // the stub singleton.
-        mDriver = BusTraits<Bus::BIT_BANG>::instancePtr();
-    }
-
-    virtual void init() FL_NO_EXCEPT override { }
-
 #if defined(FASTLED_TESTING)
     /// @brief Encoded controller output for host backend-path tests.
     const ChannelDataPtr& channelDataForTesting() const FL_NO_EXCEPT {
-        return mChannelData;
+        return this->channelData();
     }
 #endif
 
 protected:
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override
+    virtual void onBeforeEncode(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override
     {
-        // Phase 5b of #2428: use the pre-bound driver directly. Legacy
-        // `addLeds<>`-style controllers name `BusTraits<Bus::BIT_BANG>::instancePtr()`
-        // in their constructor so this is the platform-default stub driver.
-        // For runtime overrides, sketches use `FastLED.add(cfg)` (Channel API)
-        // with `cfg.options.mBus` -- the manager-driven Channel path stays.
-        fl::shared_ptr<IChannelDriver> driver = mDriver.lock();
-        if (!driver) {
-            FL_ERROR("ClocklessController(stub): No compatible driver found - cannot transmit");
-            return;
-        }
-
-        // Wait for previous transmission to complete and release buffer
-        // This prevents race conditions when show() is called faster than hardware can transmit
-        u32 startTime = fl::millis();
-        u32 lastWarnTime = startTime;
-        while (mChannelData->isInUse()) {
-            driver->poll();  // Keep polling until buffer is released
-
-            // Warn every second if still waiting (possible deadlock or hardware issue)
-            u32 elapsed = fl::millis() - startTime;
-            if (elapsed > 1000 && (fl::millis() - lastWarnTime) >= 1000) {
-                FL_WARN("ClocklessController(stub): Buffer still busy after %sms total - possible deadlock or slow hardware", elapsed);
-                lastWarnTime = fl::millis();
-            }
-        }
-
         // Capture LED data for simulation/testing BEFORE encoding
         // Use separate pixel controller with RGB order and no color adjustment
         mCaptureData.clear();
@@ -111,15 +65,6 @@ protected:
         auto capture_iterator = pixels_rgb.as_iterator(RgbwInvalid());
         capture_iterator.writeWS2812(&mCaptureData);
         mTracker.update(mCaptureData);
-
-        // Convert pixels to encoded byte data for transmission
-        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        auto& data = mChannelData->getData();
-        data.clear();
-        iterator.writeWS2812(&data);
-
-        // Enqueue for transmission (will be sent when driver->show() is called)
-        driver->enqueue(mChannelData);
     }
 };
 
