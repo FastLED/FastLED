@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-/// @file block_lane_pins.impl.hpp
+/// @file block_lane_pins.hpp
 /// @brief Definitions for block_lane_pins.h (issue #4588).
 
 #include "platforms/arm/teensy/teensy4_common/block_lane_pins.h"

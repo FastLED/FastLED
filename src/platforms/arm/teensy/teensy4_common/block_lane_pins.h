@@ -33,7 +33,7 @@ inline bool teensy4IsBlockTerminator(i32 pin);
 /// Fill `outPins` with up to `lanes` pins starting at `firstPin`, stopping
 /// after a block terminator. Returns the actual lane count, or 0 when
 /// `firstPin` is not a block pin. `outPins` must hold at least `lanes` entries.
-/// Defined in block_lane_pins.impl.hpp.
+/// Defined in block_lane_pins.hpp.
 inline u8 teensy4BlockLanePins(i32 firstPin, u8 lanes, u8* outPins);
 
 }  // namespace fl
