@@ -55,6 +55,42 @@
 
 using namespace fl;
 
+// MY9221 wire capture (#4636): explicit FastPin specializations for the two
+// pins only the MY9221 case below uses (90 = DI, 91 = DCKI). The stub
+// FastPin is a no-op, so these record the DI level sampled on every DCKI
+// edge (MY9221 is dual-edge clocked: one toggle shifts one bit).
+namespace my9221_wire {
+inline bool& dataLevel() { static bool v = false; return v; }
+inline fl::vector<fl::u8>& sampledBits() { static fl::vector<fl::u8> v; return v; }
+}  // namespace my9221_wire
+
+namespace fl {
+template <> class FastPin<90> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() { my9221_wire::dataLevel() = true; }
+    static void lo() { my9221_wire::dataLevel() = false; }
+    static void toggle() { my9221_wire::dataLevel() = !my9221_wire::dataLevel(); }
+    static void strobe() { toggle(); toggle(); }
+};
+template <> class FastPin<91> {
+  public:
+    typedef volatile RwReg* port_ptr_t;
+    typedef RwReg port_t;
+    static void setOutput() {}
+    static void setInput() {}
+    static void hi() {}
+    static void lo() {}
+    static void toggle() {
+        my9221_wire::sampledBits().push_back(my9221_wire::dataLevel() ? 1 : 0);
+    }
+    static void strobe() { toggle(); toggle(); }
+};
+}  // namespace fl
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 namespace spi_legacy_golden {
@@ -633,11 +669,34 @@ FL_TEST_CASE("MY9221 legacy SPI-channel addLeds uses bit-bang MY9221Controller, 
 
     ::CLEDController& c = FastLED.addLedsSpiChannel<MY9221, 90, 91, RGB>(leds, 4);
     FL_CHECK(static_cast<void*>(&c) != nullptr);
+    // New controllers default to binary dither; the fixture's setDither()
+    // ran before this one existed, so disable it here for exact wire words.
+    c.setDither(DISABLE_DITHER);
 
+    my9221_wire::sampledBits().clear();
     FastLED.show();
     // The MY9221 path writes through FastPin, never the channel driver, so
     // the mock sees exactly the same number of frames as before.
     FL_CHECK_EQ(mockDriverInstance().enqueueCount, baselineEnqueues);
+
+    // Wire check: command word 0x0010, then OUT3..OUT0 as 16-bit grayscale
+    // words (8-bit values, MSB first), one DI sample per DCKI edge.
+    const fl::u16 expectedWords[13] = {
+        0x0010,
+        0x00, 0x00, 0x00,  // OUT3 <- leds[3]
+        0x01, 0x02, 0x03,  // OUT2 <- leds[2]
+        0xFF, 0x00, 0x80,  // OUT1 <- leds[1]
+        0x10, 0x20, 0x30,  // OUT0 <- leds[0]
+    };
+    const fl::vector<fl::u8>& bits = my9221_wire::sampledBits();
+    FL_REQUIRE_EQ(bits.size(), (fl::size)(13 * 16));
+    for (int w = 0; w < 13; ++w) {
+        fl::u16 got = 0;
+        for (int b = 0; b < 16; ++b) {
+            got = static_cast<fl::u16>((got << 1) | bits[w * 16 + b]);
+        }
+        FL_CHECK_EQ(got, expectedWords[w]);
+    }
 }
 
 }  // FL_TEST_FILE

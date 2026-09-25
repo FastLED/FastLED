@@ -1189,6 +1189,13 @@ public:
 	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221 -> bit-bang*/) {
 		(void)spiCfg;
 		static MY9221Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, (RATE ? RATE : DATA_RATE_MHZ(1))> sCtrl;
+		// Register (and bind the LED buffer) only once per specialization; a
+		// repeated call must not rebind the shared controller's buffer.
+		static bool sRegistered = false;
+		if (sRegistered) {
+			return sCtrl;
+		}
+		sRegistered = true;
 		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
