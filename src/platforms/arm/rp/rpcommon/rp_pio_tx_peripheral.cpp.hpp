@@ -92,7 +92,12 @@ bool RpPioTxPeripheral::createProgram(const ChipsetTimingConfig& timing) FL_NO_E
     // preserves exact byte boundaries and avoids final zero padding.
     sm_config_set_out_shift(&config, false, true, mLaneCount);
     sm_config_set_clkdiv(&config, divider);
-    pio_gpio_init(pio, static_cast<uint>(mPin));
+    // Hand every lane's pin to the PIO. Lanes are parked as plain SIO
+    // outputs between frames, so connecting only mPin would leave lanes
+    // 1..N-1 of a multi-lane batch driving LOW instead of data.
+    for (u8 lane = 0; lane < mLaneCount; ++lane) {
+        pio_gpio_init(pio, static_cast<uint>(mPin + lane));
+    }
     pio_sm_set_consecutive_pindirs(pio, static_cast<uint>(mStateMachine),
                                    static_cast<uint>(mPin), mLaneCount, true);
     pio_sm_init(pio, static_cast<uint>(mStateMachine),
