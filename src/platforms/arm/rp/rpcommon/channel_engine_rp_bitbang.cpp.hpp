@@ -71,7 +71,7 @@ constexpr u32 kRpBitBangSetOverheadCycles = 12;
 static inline __attribute__((always_inline)) void rpBitBangDelay(u32 cycles) FL_NO_EXCEPT {
     u32 loops = cycles / 3u;
     if (loops == 0) return;
-    __asm__ volatile("1: subs %0, %0, #1\n\tbne 1b\n" : "+l"(loops) : : "cc");
+    __asm__ volatile(".syntax unified\n1: subs %0, %0, #1\n\tbne 1b\n" : "+l"(loops) : : "cc");
 }
 
 class RpBitBangDevicePin final : public IRpBitBangPin {
