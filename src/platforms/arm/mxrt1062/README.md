@@ -6,10 +6,10 @@ Teensy 4.0/4.1 (IMXRT1062) support.
 - `fastled_arm_mxrt1062.h`: Aggregator; includes pin/SPI/clockless and helpers.
 - `fastpin_arm_mxrt1062.h`: Pin helpers.
 - `fastspi_arm_mxrt1062.h`: SPI backend.
-- `clockless_arm_mxrt1062.h`: Single-lane clockless driver.
-- `block_clockless_arm_mxrt1062.h`: Block/multi-lane clockless.
-- `octows2811_controller.h`: OctoWS2811 integration.
 - `led_sysdefs_arm_mxrt1062.h`: System defines for RT1062.
+
+The clockless, block-clockless and OctoWS2811 controllers live in
+[`../teensy/teensy4_common/`](../teensy/teensy4_common/README.md).
 
 ## Multi-Lane SPI Support
 
