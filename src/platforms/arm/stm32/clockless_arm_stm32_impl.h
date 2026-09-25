@@ -2,19 +2,34 @@
 
 // IWYU pragma: private
 
-/// @file clockless_arm_stm32.impl.hpp
+/// @file clockless_arm_stm32_impl.h
 /// @brief Template member definitions for clockless_arm_stm32.h.
 ///
-/// Included only from clockless_arm_stm32.h, after the declarations.
+/// Included from fastled_arm_stm32.h, after clockless_arm_stm32.h.
 
 #include "platforms/arm/stm32/clockless_arm_stm32.h"
+#include "platforms/arm/is_arm.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
 #define FL_STM32_CLOCKLESS_TPL template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0>
 #define FL_STM32_CLOCKLESS_DRV ClocklessStm32Driver<DATA_PIN, TIMING, WAIT_TIME, XTRA0>
 
+namespace stm32_detail {
+// Hands out a distinct id per ClocklessStm32Driver specialization.
+inline u32 nextClocklessTypeId() FL_NO_EXCEPT {
+    static u32 sNext = 0;
+    return ++sNext;
+}
+}  // namespace stm32_detail
+
 // ---- Shared ClocklessStm32Driver members (both cores) ----------------------
+
+FL_STM32_CLOCKLESS_TPL
+FL_STM32_CLOCKLESS_DRV::ClocklessStm32Driver() FL_NO_EXCEPT : mPinReady(false) {}
 
 FL_STM32_CLOCKLESS_TPL
 u32 FL_STM32_CLOCKLESS_DRV::typeId() FL_NO_EXCEPT {
@@ -322,24 +337,27 @@ u32 FL_STM32_CLOCKLESS_DRV::showRGBInternal(
 // ---- ClocklessStm32Traits ---------------------------------------------------
 
 FL_STM32_CLOCKLESS_TPL
-typename ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::Driver
-    ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::sDriver;
+typename ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::Driver&
+ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::driver() FL_NO_EXCEPT {
+    static Driver sDriver;
+    return sDriver;
+}
 
 FL_STM32_CLOCKLESS_TPL
 fl::shared_ptr<typename ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::Driver>
 ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::instancePtr() FL_NO_EXCEPT {
-    return fl::make_shared_no_tracking(sDriver);
+    return fl::make_shared_no_tracking(driver());
 }
 
 FL_STM32_CLOCKLESS_TPL
 IChannelDriver& ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::instance() FL_NO_EXCEPT {
-    return sDriver;
+    return driver();
 }
 
 FL_STM32_CLOCKLESS_TPL
 void ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::registerWithManager() FL_NO_EXCEPT {
     ChannelManager& manager = ChannelManager::registry();
-    if (manager.findDriverByName(sDriver.getName())) {
+    if (manager.findDriverByName(driver().getName())) {
         return;
     }
     manager.addDriver(0, instancePtr());
@@ -356,3 +374,5 @@ u16 ClocklessController<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>::ge
 #undef FL_STM32_CLOCKLESS_TPL
 
 }  // namespace fl
+
+FL_DISABLE_WARNING_POP

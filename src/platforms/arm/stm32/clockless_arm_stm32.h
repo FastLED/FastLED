@@ -52,14 +52,11 @@ namespace fl {
 
 namespace stm32_detail {
 // Hands out a distinct id per ClocklessStm32Driver specialization.
-inline u32 nextClocklessTypeId() FL_NO_EXCEPT {
-    static u32 sNext = 0;
-    return ++sNext;
-}
+inline u32 nextClocklessTypeId() FL_NO_EXCEPT;
 }  // namespace stm32_detail
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
-// Member definitions live in clockless_arm_stm32.impl.hpp (included below).
+// Member definitions live in clockless_arm_stm32_impl.h (included by fastled_arm_stm32.h).
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
@@ -76,7 +73,7 @@ class ClocklessStm32Driver : public IChannelDriver {
     static u32 typeId() FL_NO_EXCEPT;
 
 public:
-    ClocklessStm32Driver() FL_NO_EXCEPT : mPinReady(false) {}
+    ClocklessStm32Driver() FL_NO_EXCEPT;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
@@ -125,7 +122,7 @@ class ClocklessStm32Driver : public IChannelDriver {
     typedef typename FastPin<DATA_PIN>::port_t data_t;
 
 public:
-    ClocklessStm32Driver() FL_NO_EXCEPT : mPinReady(false) {}
+    ClocklessStm32Driver() FL_NO_EXCEPT;
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
@@ -164,7 +161,7 @@ struct ClocklessStm32Traits {
 
     /// Storage for this specialization's driver: a static member (no
     /// function-local static guard), handed out as a no-tracking shared_ptr.
-    static Driver sDriver;
+    static Driver& driver() FL_NO_EXCEPT;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT;
     static IChannelDriver& instance() FL_NO_EXCEPT;
@@ -190,7 +187,5 @@ public:
 };
 
 }  // namespace fl
-
-#include "platforms/arm/stm32/clockless_arm_stm32.impl.hpp"  // IWYU pragma: keep
 
 FL_DISABLE_WARNING_POP
