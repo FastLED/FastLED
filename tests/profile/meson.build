@@ -28,6 +28,11 @@ if profile_test_files != ''
   if host_machine.system() == 'windows'
     profile_link_args += ['-ldbghelp', '-lpsapi']
   endif
+  # crash_handler_lib calls libunwind when USE_LIBUNWIND is set; a profile
+  # that installs the handler (runner_setup_crash_handler) needs it (#4610).
+  if has_libunwind
+    profile_link_args += ['-lunwind']
+  endif
 
   foreach profile_file : profile_test_files.split(';')
     # Extract test name from file path: json_memory_profile.cpp → json_memory_profile
