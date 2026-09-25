@@ -140,6 +140,20 @@ FL_TEST_CASE("ObjectFLED engine - duplicate pin is rejected") {
     FL_CHECK(record->numPins == 1u);
 }
 
+FL_TEST_CASE("ObjectFLED engine - same strip enqueued twice is sent once") {
+    auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
+    ChannelEngineObjectFLED engine(mock);
+    auto strip = createRGBChannelData(2, 1);
+    engine.enqueue(strip);
+    engine.enqueue(strip);  // e.g. showLeds() twice before show()
+    FL_CHECK(strip->isInUse());
+    engine.show();
+    FL_CHECK(engine.poll() == DriverState::READY);
+    const auto* record = mock->getLastCreateRecord();
+    FL_REQUIRE(record != nullptr);
+    FL_CHECK(record->numPins == 1u);
+}
+
 FL_TEST_CASE("ObjectFLED engine - initial state is READY") {
     auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
     ChannelEngineObjectFLED engine(mock);

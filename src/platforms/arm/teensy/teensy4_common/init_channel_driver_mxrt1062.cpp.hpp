@@ -31,6 +31,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/arm/teensy/teensy4_common/init_channel_driver.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/channel_engine_flexio.h"
+#include "platforms/arm/teensy/teensy4_common/drivers/flexio/bus_traits.h"
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"
 namespace fl {
 
@@ -107,8 +108,11 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) {
 static void addFlexIOIfPossible(ChannelManager& manager) {
     FL_DBG("Teensy 4.x: Registering FlexIO channel driver");
 
-    auto engine = fl::make_shared<ChannelEngineFlexIO>();
-    manager.addDriver(8, engine);
+    // Register the BusTraits<Bus::FLEX_IO, 1> singleton, not a second
+    // ChannelEngineFlexIO: a separate instance would be replaced (and its
+    // queued frames dropped) when anything later registers the traits
+    // singleton under the same name (#4624 review).
+    manager.addDriver(8, BusTraits<Bus::FLEX_IO, 1>::instancePtr());
 
     FL_DBG("Teensy 4.x: Registered FlexIO driver (priority 8)");
 }
@@ -143,7 +147,7 @@ void initChannelDrivers() {
     // Register FlexIO engine for clockless strips on FlexIO-capable pins (priority 8)
     detail::addFlexIOIfPossible(manager);
 
-    // Register ObjectFLED DMA engine for clockless strips (priority 5, fallback)
+    // Register ObjectFLED DMA engine for clockless strips (default FLEX_IO bus priority 4, fallback)
     detail::addObjectFLEDIfPossible(manager);
 
     // Register true SPI hardware (priority 6-7)
