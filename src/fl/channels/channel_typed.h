@@ -8,8 +8,11 @@
 /// issue #2428. It is intentionally a thin wrapper around the non-template
 /// `fl::Channel` runtime object so that:
 ///
-///   - Existing `Channel::create(cfg)` callers and `addLeds<>()` subclasses of
-///     the non-template `Channel` keep working unchanged (zero source impact).
+///   - Existing `Channel::create(cfg)` callers keep working unchanged. The
+///     legacy `addLeds<>()` path no longer subclasses `fl::Channel`; it runs
+///     through `fl::SlimBridgeController` (clockless) or
+///     `fl::SlimSpiBridgeController` (clocked SPI, except MY9221, which still
+///     uses `TypedChannel<B, SpiChipsetConfig>`).
 ///   - The new templated entry point (`Channel<B, Chipset>::create(cfg)`,
 ///     `FastLED.add<B, Chipset>(cfg)`) enforces the `Bus`<->`Chipset` contract
 ///     at compile time via `static_assert(BusSupports<B, Chipset>::value, ...)`.
@@ -58,8 +61,8 @@ struct resolve_bus<Bus::AUTO, Chipset> {
 /// exists so the templated `create()` factory can `static_assert` the
 /// bus/chipset compatibility before constructing a (non-template) `fl::Channel`.
 /// This matches the API requested in issue #2428 without forcing every existing
-/// `Channel` consumer (subclasses, `ChannelEvents` callbacks,
-/// `ChannelManager`) to be retemplated.
+/// `Channel` consumer (Channel-API callers, `ChannelEvents` callbacks,
+/// `ChannelManager`, and the MY9221 SPI fallback) to be retemplated.
 template<Bus B, typename Chipset, fl::u8 Which = 0>
 class TypedChannel {
 public:

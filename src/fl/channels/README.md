@@ -28,6 +28,8 @@ Two complementary dispatch modes are available (introduced by issue #2428, refin
   In either case, naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
 - **Runtime selection** — `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). The non-template path auto-enrolls every driver on the platform via `fl::enableAllDrivers()` and emits a one-time `FL_WARN_ONCE` explaining the binary-size trade-off (suppress with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`). For minimum binary size, use the compile-time path instead. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
 
+**Why `Channel` still derives from `CPixelLEDController<RGB>`:** `FastLED.add(ChannelPtr)` puts the channel on the `CLEDController` draw list via `addToDrawList()` (`DeferRegister`), and the MY9221 `addLeds<>` path returns a `Channel` as a `CLEDController&`. Removing the base would need a separate channel draw list in `FastLED.show()` and a slim/managed MY9221 path.
+
 ---
 
 ## Basic Usage
@@ -206,7 +208,7 @@ fl::TypedChannel<fl::Bus::DUAL_SPI, fl::ClocklessChipset>::create(cfg);  // comp
 
 `TypedChannel<Bus, Chipset>` lives in `fl/channels/channel_typed.h`. It returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
 
-**`addLeds<>` Bus pinning (#2460):** every `FastLED.addLeds<>` variant accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter. For legacy and clockless controller paths, an explicit `B != AUTO` ODR-uses `fl::BusTraits<B>::instance` via `fl::busKeepAlive<B>()` so `--gc-sections` retains the named driver TU. On platforms where SPI controllers use the Channel API, `TypedChannel` resolves `AUTO` to `DefaultBus<SpiChipsetConfig>`, registers only that selected bus specialization and its associated driver(s) with `ChannelManager`, and creates the channel without calling `enableAllDrivers()`.
+**`addLeds<>` Bus pinning (#2460):** every `FastLED.addLeds<>` variant accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter. Clockless `addLeds<>()` (routed through `fl::SlimBridgeController`) and non-Channel-API SPI paths ODR-use `fl::BusTraits<B>::instance` via `fl::busKeepAlive<B>()` for an explicit `B != AUTO` so `--gc-sections` retains the named driver TU. On platforms where SPI controllers use the Channel API, see the `SlimSpiBridgeController` paragraph below for how `AUTO` resolves and how the selected driver is registered with `ChannelManager`.
 
 ```cpp
 // Clockless: pin to RMT at compile time.
@@ -258,7 +260,7 @@ Passing `fl::Bus::AUTO` (the default) skips the pinning step and lets `ChannelMa
 
 ### Opt-In Driver Registration (`enableDrivers<>` / `enableAllDrivers` / `setExclusiveDriver<>`)
 
-**Default behaviour: no driver auto-registration.** Only the platform-default driver TU (named by the legacy clockless controller's Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`) is linked into the binary; every other driver is `--gc-sections`-eligible until something names its `BusTraits<Bus::X>::instancePtr()`. This is the binary-size fix for #2420 / #2421 — the old `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` macro has been removed; the default IS the opt-in path.
+**Default behaviour: no driver auto-registration.** Only the platform-default driver TU (named by the legacy clockless `addLeds<>()` controller's `fl::SlimBridgeController` registration via `BusTraits<DefaultBus<Chipset>>::instancePtr()`) is linked into the binary; every other driver is `--gc-sections`-eligible until something names its `BusTraits<Bus::X>::instancePtr()`. This is the binary-size fix for #2420 / #2421 — the old `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` macro has been removed; the default IS the opt-in path.
 
 To register additional drivers at runtime, sketches pick one of three opt-in calls:
 

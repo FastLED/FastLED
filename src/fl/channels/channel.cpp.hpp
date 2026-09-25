@@ -278,11 +278,6 @@ Channel::selectPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
     return nullptr;
 }
 
-Channel::PixelEncoder Channel::ws2812PixelEncoder() FL_NO_EXCEPT {
-    return &Channel::encodeWS2812;
-}
-
-
 i32 Channel::nextId() {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
@@ -342,25 +337,6 @@ const ChipsetTimingConfig& Channel::getTiming() const {
     }
     static const ChipsetTimingConfig sEmpty(0, 0, 0, 0);
     return sEmpty;
-}
-
-Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) FL_NO_EXCEPT
-    : Channel(chipset, rgbOrder, mode, selectPixelEncoder(chipset)) {}
-
-Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder,
-                 RegistrationMode mode, PixelEncoder pixelEncoder) FL_NO_EXCEPT
-    : CPixelLEDController<RGB>(mode)
-    , mChipset(chipset)
-    , mPixelEncoder(pixelEncoder)
-    , mRgbOrder(rgbOrder)
-    , mDriver()
-    , mBus(Bus::AUTO)
-    , mBusWhich(0)
-    , mId(nextId())
-    , mName(makeName(mId)) {
-    // NOTE: Do NOT call fl::pinMode() here â€” see comment in the
-    // Channel(ChipsetVariant, span, EOrder, ChannelOptions) constructor.
-    mChannelData = ChannelData::create(mChipset);
 }
 
 Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
@@ -818,16 +794,14 @@ void Channel::encodeMY9221(Channel& channel, PixelIterator& pixels,
                              spiChipsetFor(channel));
 }
 
-/// @brief Cold fallback for the non-pre-bound driver path. Handles dynamic
+/// @brief Resolve the driver for this channel. Handles dynamic
 ///        `ChannelManager::selectDriverForChannel` lookup AND the
 ///        bus-key-miss diagnostic chain. Hoisted out of `showPixels` so the
-///        hot legacy `addLeds<>` path stays compact â€” see #2773 item 2.1.
+///        hot path stays compact -- see #2773 item 2.1. This is the only
+///        driver-resolution path; there is no pre-bound fast path.
 ///
 /// Marked `noinline` (via `FL_NO_INLINE`) so the compiler doesn't fold the
-/// cold body back into `showPixels`. The whole helper is reachable only
-/// when `mDriverPreBound == false`, which on stock Blink is never true â€”
-/// LTO can use that across the call site to keep the cold body off the
-/// hot icache line.
+/// cold body back into `showPixels`.
 FL_NO_INLINE
 fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
 #if defined(FASTLED_DISABLE_DYNAMIC_DRIVER) && FASTLED_DISABLE_DYNAMIC_DRIVER
@@ -898,8 +872,8 @@ bool Channel::waitForInUseBuffer() FL_NO_EXCEPT {
 }
 
 // showPixels() is only a dispatcher (#4566): in-use wait, driver resolution,
-// encodeFrame(), submitFrame(). Each helper is FL_NO_INLINE so the static
-// (pre-bound) entry stays small and the bodies exist exactly once.
+// encodeFrame(), submitFrame(). Each helper is FL_NO_INLINE so the entry
+// point stays small and the bodies exist exactly once.
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     FL_SCOPED_TRACE;
 
@@ -908,40 +882,25 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         return;
     }
 
-    // Static-vs-dynamic entry boundary (Phase 5b of #2428, #4566): if the
-    // driver was pre-bound via setDriver() (legacy addLeds<>-style controllers
-    // naming BusTraits<Bus::X>::instancePtr() in their constructor), bypass
-    // ChannelManager entirely with an inline weak_ptr lock. Channels created
-    // via the manager-based API (Channel::create(cfg) without affinity) take
-    // the cold resolveDynamicDriver() path, keeping per-frame re-selection so
-    // users can swap drivers at runtime. The busKey construction, dynamic
-    // lookup, and diagnostics all live out of line in that helper.
+    // Channels created via the manager-based API (Channel::create(cfg))
+    // always resolve their driver dynamically through resolveDynamicDriver(),
+    // which handles the busKey construction, ChannelManager lookup, and
+    // diagnostics. Legacy addLeds<> controllers no longer go through Channel
+    // at all -- they route through fl::SlimBridgeController.
     fl::shared_ptr<IChannelDriver> driver;
-    if (mDriverPreBound) {
-        driver = mDriver.lock();
-        if (!driver) {
-            // Pre-bound driver got destroyed (singleton shutdown, etc.). Silent
-            // bail â€” this is unrecoverable from showPixels.
-            return;
-        }
-    } else {
 #if !defined(FASTLED_DISABLE_DYNAMIC_DRIVER) || !FASTLED_DISABLE_DYNAMIC_DRIVER
-        driver = resolveDynamicDriver();
-        if (!driver) {
-            return;
-        }
-#else
-        // Dynamic-driver lookup gated out via FASTLED_DISABLE_DYNAMIC_DRIVER
-        // (#2926). The else branch is dead at runtime for every legacy
-        // `addLeds<>` flavor â€” those pre-bind their driver in the ctor. The
-        // gate lets `--gc-sections` drop the resolveDynamicDriver body plus
-        // the ChannelManager::findDriverByName / selectDriverForChannel
-        // chain (~400-900 B). Channels created via `Channel::create(cfg)`
-        // without a pre-bound driver silently emit nothing under this flag â€”
-        // user accepts the constraint.
+    driver = resolveDynamicDriver();
+    if (!driver) {
         return;
-#endif
     }
+#else
+    // Dynamic-driver lookup gated out via FASTLED_DISABLE_DYNAMIC_DRIVER
+    // (#2926). The gate lets `--gc-sections` drop the resolveDynamicDriver
+    // body plus the ChannelManager::findDriverByName /
+    // selectDriverForChannel chain (~400-900 B). Under this flag, runtime
+    // Channels emit nothing -- user accepts the constraint.
+    return;
+#endif
 
     encodeFrame(pixels);
     submitFrame(driver);

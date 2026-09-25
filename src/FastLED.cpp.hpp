@@ -208,7 +208,7 @@ void CFastLED::add(fl::ChannelPtr channel) {
 	}
 	chnls.push_back(channel);
 	// Add channel to the CLEDController linked list
-	// Channel uses DeferRegister mode, so explicit addToDrawList() call is required
+	// fl::Channel uses DeferRegister mode, so explicit addToDrawList() call is required
 	// Note: addToDrawList() now fires onChannelAdded event
 	channel->addToDrawList();
 }
