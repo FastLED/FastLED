@@ -1391,16 +1391,26 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 #endif
 
     // Free run_results before building response to reclaim heap
-    // Only serialize pattern details when tests FAIL (saves heap on passing tests)
-    if (!passed && !run_results.empty()) {
+    // Only serialize pattern details when tests FAIL (saves heap on passing tests).
+    // WS2814 legacy runs are the exception: the host requires a size summary
+    // for every run as proof that 4 bytes/LED (RGBW) went on the wire, so
+    // passing runs emit just runNumber/totalLeds/totalBytes/passed (#4578).
+    const bool ws2814_legacy = use_legacy_api && !legacy_chipsets.empty() &&
+                               legacy_chipsets[0] == LegacyClocklessChipset::WS2814;
+    if ((!passed || ws2814_legacy) && !run_results.empty()) {
         fl::json patterns = fl::json::array();
         for (fl::size ri = 0; ri < run_results.size(); ri++) {
             const auto& rr = run_results[ri];
-            if (rr.passed) continue;  // Skip passing patterns
+            if (rr.passed && !ws2814_legacy) continue;  // Skip passing patterns
             fl::json pat = fl::json::object();
             pat.set("runNumber", static_cast<int64_t>(rr.run_number));
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("totalBytes", static_cast<int64_t>(rr.totalBytes));
+            pat.set("passed", rr.passed);
+            if (rr.passed) {
+                patterns.push_back(pat);
+                continue;
+            }
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
             pat.set("capturedBytes", static_cast<int64_t>(rr.capturedBytes));
             pat.set("captureWaitResult", static_cast<int64_t>(rr.captureWaitResult));
