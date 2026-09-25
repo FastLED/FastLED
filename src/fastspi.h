@@ -75,9 +75,10 @@
 #define FL_DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
 #define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))
 
-#elif defined(FASTLED_TEENSY4) || defined(ESP32) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || defined(FASTLED_STUB_IMPL)
+#elif defined(FASTLED_TEENSY4) || defined(ESP32) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || defined(FL_IS_SAMD) || defined(FASTLED_STUB_IMPL)
 // Hardware SPI platforms: return frequency in Hz
 // ESP32 always uses hardware SPI via GPIO matrix (no conditional needed)
+// SAMD21/SAMD51 route SPI chipsets through the slim SPI bridge, which takes Hz (#4593)
 #define FL_DATA_RATE_MHZ(X) (1000000 * (X))
 #define FL_DATA_RATE_KHZ(X) (1000 * (X))
 #define FL_TO_CLOCK_DIVIDER(FREQ_MHZ, CPU_FREQ_MHZ) ((CPU_FREQ_MHZ) / (FREQ_MHZ))

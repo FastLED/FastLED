@@ -13,7 +13,11 @@ SERCOM *SAMDHardwareSPIOutput<DATA_PIN, CLOCK_PIN,
 template <u8 DATA_PIN, u8 CLOCK_PIN, u32 SPI_CLOCK_DIVIDER>
 u32 SAMDHardwareSPIOutput<DATA_PIN, CLOCK_PIN,
                           SPI_CLOCK_DIVIDER>::clockHz() FL_NO_EXCEPT {
-    const u32 clock_hz = F_CPU / SPI_CLOCK_DIVIDER;
+    // DATA_RATE_MHZ/KHZ yield Hz on SAMD (#4593). Small values are legacy
+    // CPU-cycle dividers passed directly by older sketches.
+    const u32 clock_hz = SPI_CLOCK_DIVIDER > 1000u
+                             ? SPI_CLOCK_DIVIDER
+                             : F_CPU / (SPI_CLOCK_DIVIDER ? SPI_CLOCK_DIVIDER : 1u);
     return clock_hz > 24000000 ? 24000000 : clock_hz;
 }
 

@@ -16,6 +16,9 @@
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/slim_bridge_controller.h"
+#include "fl/channels/slim_spi_bridge_controller.h"
+#include "fl/channels/config.h"
+#include "fl/chipsets/spi.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/scope_exit.h"
@@ -339,6 +342,117 @@ FL_TEST_CASE("onBeforeEncode() hook fires once per accepted frame, not on droppe
 
     FastLED.show();
     FL_CHECK_EQ(controller.beforeEncodeCount, 1);
+}
+
+// ===========================================================================
+// SlimSpiBridgeController: Hz clock-rate contract (#4593, SAMD21/SAMD51)
+// ===========================================================================
+//
+// SAMD21/SAMD51 route legacy `addLeds<APA102/SK9822, ...>()` through
+// SlimSpiBridgeController once fastspi.h puts them on the Hz branch of
+// FL_DATA_RATE_MHZ and FastLED.h sets FASTLED_SPI_USES_CHANNEL_API=1. The
+// SAMD preprocessor branch cannot be flipped on host, so these cases pin the
+// contract that branch relies on: `addLedsSpiChannel<..., DATA_RATE_MHZ(N)>`
+// hands the channel a clock in Hz, and the encoded bytes at a SAMD-typical
+// rate are identical to the default-rate golden frame.
+//
+// These cases are last in the file on purpose: they make SLIM_BRIDGE_MOCK
+// the exclusive driver so it wins over the host's BIT_BANG affinity
+// (the same approach as tests/fl/channels/spi_legacy_golden.cpp).
+
+namespace slim_spi_hz_test {
+
+template <fl::SpiChipset CHIPSET>
+using SpiCtrl = SlimSpiBridgeController<CHIPSET, RGB, Bus::AUTO, 0>;
+
+inline void prepareSpiDispatch() {
+    TestDriverTraits::registerWithManager();
+    ChannelManager::instance().setExclusiveDriverByName("SLIM_BRIDGE_MOCK");
+    FastLED.setBrightness(255);
+    FastLED.setDither(DISABLE_DITHER);
+}
+
+inline u32 clockHzOf(const ChannelDataPtr& data) {
+    const SpiChipsetConfig* spi = data->getChipset().ptr<SpiChipsetConfig>();
+    return spi ? spi->timing.clock_hz : 0u;
+}
+
+inline fl::vector<u8> bytesOf(const ChannelDataPtr& data) {
+    fl::vector<u8> out;
+    const auto& src = data->getData();
+    for (fl::size i = 0; i < src.size(); ++i) {
+        out.push_back(src[i]);
+    }
+    return out;
+}
+
+/// Reference frame: a directly-constructed slim controller at the chipset's
+/// default rate (the rate the #4613 golden vectors were captured at).
+template <fl::SpiChipset CHIPSET>
+fl::vector<u8> defaultRateFrame(CRGB* leds, int n) {
+    SpiCtrl<CHIPSET> ref(SpiChipsetConfig(
+        90, 91, SpiEncoder::spiEncoderForChipset(CHIPSET)));
+    FastLED.addLeds(&ref, leds, n);
+    FastLED.show();
+    fl::vector<u8> bytes = bytesOf(ref.channelData());
+    ref.removeFromDrawList();
+    return bytes;
+}
+
+}  // namespace slim_spi_hz_test
+
+FL_TEST_CASE("DATA_RATE_MHZ/KHZ return Hz on the channel-API SPI branch") {
+    // Host takes the same Hz branch (FASTLED_STUB_IMPL) SAMD now joins.
+    FL_CHECK_EQ(static_cast<u32>(DATA_RATE_MHZ(12)), 12000000u);
+    FL_CHECK_EQ(static_cast<u32>(DATA_RATE_MHZ(24)), 24000000u);
+    FL_CHECK_EQ(static_cast<u32>(DATA_RATE_KHZ(500)), 500000u);
+}
+
+FL_TEST_CASE("SlimSpiBridge APA102 at DATA_RATE_MHZ(12): Hz clock, golden bytes") {
+    using namespace slim_spi_hz_test;
+    SlimBridgeFixture fixture;
+    prepareSpiDispatch();
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+
+    CLEDController& base =
+        FastLED.addLedsSpiChannel<APA102, 80, 81, RGB, DATA_RATE_MHZ(12)>(leds, 2);
+    auto& ctrl = static_cast<SpiCtrl<SpiChipset::APA102>&>(base);
+    FL_CHECK_EQ(clockHzOf(ctrl.channelData()), 12000000u);
+
+    FastLED.show();
+    const fl::vector<u8> atRate = bytesOf(ctrl.channelData());
+    ctrl.removeFromDrawList();
+
+    const fl::vector<u8> golden = defaultRateFrame<SpiChipset::APA102>(leds, 2);
+    FL_CHECK_EQ(atRate, golden);
+    // 4-byte zero start frame, [0xE0|bri5][B][G][R] per LED, 0xFF end frame.
+    FL_REQUIRE_EQ(atRate.size(), (fl::size)(4 + 4 * 2 + 4));
+    FL_CHECK_EQ(atRate[0], 0x00);
+    FL_CHECK_EQ(atRate[4] & 0xE0, 0xE0);
+    FL_CHECK_EQ(atRate[12], 0xFF);
+}
+
+FL_TEST_CASE("SlimSpiBridge SK9822 at DATA_RATE_MHZ(24): Hz clock, golden bytes") {
+    using namespace slim_spi_hz_test;
+    SlimBridgeFixture fixture;
+    prepareSpiDispatch();
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+
+    CLEDController& base =
+        FastLED.addLedsSpiChannel<SK9822, 82, 83, RGB, DATA_RATE_MHZ(24)>(leds, 2);
+    auto& ctrl = static_cast<SpiCtrl<SpiChipset::SK9822>&>(base);
+    FL_CHECK_EQ(clockHzOf(ctrl.channelData()), 24000000u);
+
+    FastLED.show();
+    const fl::vector<u8> atRate = bytesOf(ctrl.channelData());
+    ctrl.removeFromDrawList();
+
+    const fl::vector<u8> golden = defaultRateFrame<SpiChipset::SK9822>(leds, 2);
+    FL_CHECK_EQ(atRate, golden);
+    FL_REQUIRE_EQ(atRate.size(), (fl::size)(4 + 4 * 2 + 4));
+    FL_CHECK_EQ(atRate[0], 0x00);
+    FL_CHECK_EQ(atRate[4] & 0xE0, 0xE0);
+    FL_CHECK_EQ(atRate[12], 0xFF);
 }
 
 }  // FL_TEST_FILE

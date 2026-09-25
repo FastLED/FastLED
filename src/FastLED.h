@@ -120,7 +120,8 @@
 // template parameter can be passed directly to the channel encoder.
 #if !defined(FASTLED_SPI_USES_CHANNEL_API)
 #if FASTLED_HAS_CHANNELS && (defined(FL_IS_ESP32) || defined(FL_IS_TEENSY_4X) || \
-                            defined(FL_IS_RP2040) || defined(FL_IS_RP2350))
+                            defined(FL_IS_RP2040) || defined(FL_IS_RP2350) || \
+                            defined(FL_IS_SAMD))
 #define FASTLED_SPI_USES_CHANNEL_API 1
 #else
 #define FASTLED_SPI_USES_CHANNEL_API 0
