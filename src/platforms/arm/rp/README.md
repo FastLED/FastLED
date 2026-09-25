@@ -21,7 +21,7 @@ rp/
 │
 ├── rpcommon/                  # Shared code for all RP2xxx platforms
 │   ├── README.md              # Documentation for shared RP code
-│   ├── clockless_rp_pio.h     # Common PIO-based clockless LED driver
+│   ├── clockless_rp_pio.h     # Legacy clockless: slim bridge over ChannelEngineRpPio
 │   ├── pio_asm.h              # PIO assembly instruction macros
 │   ├── pio_gen.h              # PIO program generator for WS2812/etc
 │   ├── led_sysdefs_rp_common.h # Common system definitions
@@ -111,11 +111,10 @@ By default, FastLED uses PIO-based drivers for superior performance:
 
 ### M0 Fallback for Compatibility
 
-Enable the Cortex-M0 fallback driver alongside PIO:
+Use the blocking Cortex-M0 bit-bang driver instead of the PIO channel engine:
 
 ```cpp
-// Enable both PIO and M0 drivers
-#define FASTLED_RP2040_CLOCKLESS_M0_FALLBACK 1
+#define FASTLED_RP2040_CLOCKLESS_PIO 0
 ```
 
 ### Clock Speed Override

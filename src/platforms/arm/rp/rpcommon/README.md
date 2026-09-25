@@ -7,13 +7,12 @@ This directory contains shared code for all Raspberry Pi RP2xxx platforms (RP204
 ### PIO-Based Clockless LED Driver
 
 #### `clockless_rp_pio.h`
-**Purpose**: Core PIO-based implementation for clockless LED protocols (WS2812, WS2811, SK6812, etc.)
+**Purpose**: Legacy `addLeds<>()` clockless controller. Since #4589 it is a `fl::SlimBridgeController` over `ChannelEngineRpPio` (`BusTraits<Bus::FLEX_IO, 0>`), so legacy and Channel API strips share one PIO/DMA owner.
 
 **Key Features**:
-- Hardware-timed waveforms using PIO state machines
+- Hardware-timed waveforms using PIO state machines (via the channel engine)
 - DMA-based data transfer for efficient CPU usage
-- Automatic PIO instance selection (2 PIOs on RP2040, 3 on RP2350)
-- Fallback to Cortex-M0 bit-banging if PIO unavailable
+- `FASTLED_RP2040_CLOCKLESS_PIO 0` selects a blocking Cortex-M0 bit-bang controller instead
 - Supports all common clockless LED protocols with configurable timing
 
 **Platform Adaptation**:
