@@ -129,8 +129,8 @@ if (!controllers.empty()) {
 - **`FASTLED_USE_PROGMEM`**: Default `0` (flat memory model).
 - **Clockless driver selection/tuning**
   - **`FASTLED_RP2040_CLOCKLESS_PIO`**: Use PIO driver for clockless. Default `1`.
-  - **`FASTLED_RP2040_CLOCKLESS_IRQ_SHARED`**: Share IRQ usage between PIO and other subsystems. Default `1`.
-  - **`FASTLED_RP2040_CLOCKLESS_M0_FALLBACK`**: Fallback to a Cortex‑M0 timing loop if PIO is disabled/unavailable. Default `0`.
+  - **`FASTLED_RP2040_CLOCKLESS_IRQ_SHARED`**: No effect since #4589 (legacy clockless now uses ChannelEngineRpPio).
+  - **`FASTLED_RP2040_CLOCKLESS_M0_FALLBACK`**: No effect since #4589; set `FASTLED_RP2040_CLOCKLESS_PIO 0` for the blocking M0 loop.
 
 Define these before including `FastLED.h` in your sketch.
 
