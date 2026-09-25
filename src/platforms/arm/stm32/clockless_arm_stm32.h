@@ -49,6 +49,14 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 #include "platforms/arm/common/m0clockless.h"
 
 namespace fl {
+
+namespace stm32_detail {
+// Hands out a distinct id per ClocklessStm32Driver specialization.
+inline u32 nextClocklessTypeId() FL_NO_EXCEPT {
+    static u32 sNext = 0;
+    return ++sNext;
+}
+}  // namespace stm32_detail
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
 
@@ -63,6 +71,12 @@ namespace fl {
 /// zero dither and simply shifts the bytes out.
 template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
+    // Stable id unique to this template specialization.
+    static u32 typeId() FL_NO_EXCEPT {
+        static const u32 id = stm32_detail::nextClocklessTypeId();
+        return id;
+    }
+
 public:
     ClocklessStm32Driver() FL_NO_EXCEPT : mPinReady(false) {}
 
@@ -128,10 +142,10 @@ public:
         name.append("_X");
         name.append(static_cast<i32>(XTRA0));
         // TIMING types with identical numeric values are still distinct
-        // specializations with distinct static drivers; the driver address
-        // makes the registration key unique per TIMING type.
-        name.append("_@");
-        name.append(static_cast<u32>(reinterpret_cast<fl::uptr>(this)));
+        // specializations with distinct static drivers; a
+        // per-specialization type id makes the registration key unique.
+        name.append("_#");
+        name.append(typeId());
         return name;
     }
 
@@ -205,6 +219,12 @@ private:
 /// expanded) by the bridge's `PixelIterator`; the core only shifts bytes out.
 template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
+    // Stable id unique to this template specialization.
+    static u32 typeId() FL_NO_EXCEPT {
+        static const u32 id = stm32_detail::nextClocklessTypeId();
+        return id;
+    }
+
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t data_t;
 
@@ -264,10 +284,10 @@ public:
         name.append("_X");
         name.append(static_cast<i32>(XTRA0));
         // TIMING types with identical numeric values are still distinct
-        // specializations with distinct static drivers; the driver address
-        // makes the registration key unique per TIMING type.
-        name.append("_@");
-        name.append(static_cast<u32>(reinterpret_cast<fl::uptr>(this)));
+        // specializations with distinct static drivers; a
+        // per-specialization type id makes the registration key unique.
+        name.append("_#");
+        name.append(typeId());
         return name;
     }
 
