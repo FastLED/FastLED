@@ -23,6 +23,11 @@
 
 namespace fl {
 
+using audio::fft::Args;
+using audio::fft::Bins;
+using audio::fft::Impl;
+using audio::fft::Mode;
+
 // Generate a synthetic audio buffer: mix of sine waves spanning the
 // frequency range to exercise all CQ bins.
 static void generateTestSignal(fl::vector<fl::i16> &buf, int samples,

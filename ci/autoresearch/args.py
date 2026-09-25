@@ -30,6 +30,7 @@ class Args:
     coroutine: bool
     ieee754: bool
     math: bool
+    fft: bool
     rpc_smoke: bool
     # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
     # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
@@ -384,6 +385,11 @@ See Also:
             "--math",
             action="store_true",
             help="Run on-device fl::exp accuracy (ulp vs libm) and speed benchmark (#4288)",
+        )
+        driver_group.add_argument(
+            "--fft",
+            action="store_true",
+            help="Run on-device CQ_OCTAVE FFT per-frame time and heap benchmark (#4540)",
         )
         driver_group.add_argument(
             "--ieee754",
@@ -893,6 +899,7 @@ See Also:
             coroutine=parsed.coroutine,
             ieee754=parsed.ieee754,
             math=parsed.math,
+            fft=parsed.fft,
             mp3=parsed.mp3,
             rpc_smoke=parsed.rpc_smoke,
             watchdog_soak=parsed.watchdog_soak,

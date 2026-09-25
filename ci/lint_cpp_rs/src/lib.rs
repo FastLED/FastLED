@@ -26,4 +26,5 @@ include!("checkers/prefer_constexpr.rs");
 include!("checkers/container_ptr.rs");
 include!("checkers/r1_cleanup.rs");
 include!("checkers/file_legal.rs");
+include!("checkers/int_template.rs");
 include!("lint_core/tests.rs");

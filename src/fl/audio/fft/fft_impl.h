@@ -4,6 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/int.h"
 
 namespace fl {
 namespace audio {
@@ -50,6 +51,21 @@ class Impl {
   private:
     fl::unique_ptr<Context> mContext;
 };
+
+namespace detail {
+
+/// CQ_OCTAVE coverage supplement decision (FastLED#4301/#4540), integer form
+/// used in FIXED16: the full-rate FFT floor (`fftMag / 50`) replaces a CQ
+/// band's magnitude `cqMag` only when no CQ band within one FFT main lobe
+/// detected energy (`localCqMax < 20`) and the floor is strictly larger.
+/// Widened to u64 so no u32 input can overflow.
+inline bool coverageFloorApplies(u32 fftMag, u32 cqMag,
+                                 u32 localCqMax) FL_NO_EXCEPT {
+    return localCqMax < 20u &&
+           static_cast<u64>(fftMag) > static_cast<u64>(cqMag) * 50u;
+}
+
+} // namespace detail
 
 } // namespace fft
 } // namespace audio

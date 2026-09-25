@@ -25,6 +25,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/assert.h"
 
 #ifndef FL_AUDIO_SAMPLE_RATE
 #define FL_AUDIO_SAMPLE_RATE 44100
@@ -163,8 +164,15 @@ class Context {
         fl::vector<kiss_fft_scalar> windowed;
         fl::vector<kiss_fft_cpx> fftOut;
         fl::vector<u32> rawBinsI;
+        // CQ magnitudes snapshotted before the coverage supplement edits
+        // rawBins. FIXED16 keeps them as the integers fastMag() produced so
+        // the supplement decision stays integer (#4540).
+#ifdef FIXED_POINT
+        fl::vector<u32> cqSnapshot;
+#else
         fl::vector<float> cqSnapshot;
-        fl::vector<int> coverageMaxQueue;
+#endif
+        fl::vector<u16> coverageMaxQueue;  // band indices, < mTotalBands
     };
 
     static FftScratch &scratch() {
@@ -659,6 +667,10 @@ class Context {
         computeWindow(mWindowBuf, samples, Window::BLACKMAN_HARRIS);
         const float mainLobeHz = 4.0f * static_cast<float>(sr) /
                                  static_cast<float>(samples);
+        // Band indices are stored as u16. `centerFreqs` above is a stack
+        // array of `bands` floats, so any band count that fits a real task
+        // stack is far below 65536.
+        FL_ASSERT(bands <= 0xFFFF, "CQ_OCTAVE band count exceeds u16 index range");
         mCoverageFirst.resize(bands);
         mCoverageLast.resize(bands);
         int firstNearby = 0;
@@ -672,8 +684,8 @@ class Context {
                    centerFreqs[lastNearby + 1] - centerFreqs[i] <= mainLobeHz) {
                 ++lastNearby;
             }
-            mCoverageFirst[i] = firstNearby;
-            mCoverageLast[i] = lastNearby;
+            mCoverageFirst[i] = static_cast<u16>(firstNearby);
+            mCoverageLast[i] = static_cast<u16>(lastNearby);
         }
         // Note: CQ kernels already apply Hamming windowing in frequency domain.
         // Adding time-domain Hanning would double-window and over-attenuate.
@@ -764,12 +776,19 @@ class Context {
         fl::memset(s.rawBinsI.data(), 0, sizeof(u32) * mTotalBands);
         logRebinRange(s.mag.data(), N, static_cast<float>(mSampleRate), 0,
                       mTotalBands, s.rawBinsI.data(), mLogBinLut);
+        // Coverage floor = 1/50 (0.02) of the full-rate FFT magnitude; a CQ
+        // band at or above 20 counts as a detection. FIXED16 decides with
+        // detail::coverageFloorApplies(); float modes keep float compares.
         static constexpr float kCoverageGain = 0.02f;
-        static constexpr float kDetectedCqMagnitude = 20.0f;
         s.cqSnapshot.resize(mTotalBands);
         s.coverageMaxQueue.resize(mTotalBands);
         for (int i = 0; i < mTotalBands; ++i) {
+#ifdef FIXED_POINT
+            // Exact: rawBins[i] was set from an integer fastMag() above.
+            s.cqSnapshot[i] = static_cast<u32>(rawBins[i]);
+#else
             s.cqSnapshot[i] = rawBins[i];
+#endif
         }
         int head = 0;
         int tail = 0;
@@ -781,17 +800,28 @@ class Context {
                            s.cqSnapshot[next]) {
                     --tail;
                 }
-                s.coverageMaxQueue[tail++] = next++;
+                s.coverageMaxQueue[tail++] = static_cast<u16>(next++);
             }
             while (head < tail &&
                    s.coverageMaxQueue[head] < mCoverageFirst[i]) {
                 ++head;
             }
+#ifdef FIXED_POINT
+            // Integer form of `localCq < 20 && fft/50 > cq`; float appears
+            // only when writing the Bins output.
+            if (detail::coverageFloorApplies(
+                    s.rawBinsI[i], s.cqSnapshot[i],
+                    s.cqSnapshot[s.coverageMaxQueue[head]])) {
+                rawBins[i] = static_cast<float>(s.rawBinsI[i]) * kCoverageGain;
+            }
+#else
             const float localCq = s.cqSnapshot[s.coverageMaxQueue[head]];
+            static constexpr float kDetectedCqMagnitude = 20.0f;
             float coverage = static_cast<float>(s.rawBinsI[i]) * kCoverageGain;
             if (localCq < kDetectedCqMagnitude && coverage > rawBins[i]) {
                 rawBins[i] = coverage;
             }
+#endif
         }
     }
 
@@ -1182,8 +1212,8 @@ class Context {
 
     // Pre-computed bin mapping LUTs (built at init, used at runtime)
     fl::vector<u8> mLogBinLut;       // FFT bin k → log-bin index (primary fft::FFT)
-    fl::vector<int> mCoverageFirst;   // first CQ band within one FFT main lobe
-    fl::vector<int> mCoverageLast;    // last CQ band within one FFT main lobe
+    fl::vector<u16> mCoverageFirst;   // first CQ band within one FFT main lobe
+    fl::vector<u16> mCoverageLast;    // last CQ band within one FFT main lobe
     fl::vector<u8> mLinearBinLut;    // FFT bin k → linear-bin index (primary fft::FFT)
     fl::vector<u8> mLogBinLutMid;    // HYBRID mid-tier LUT (256pt)
     fl::vector<u8> mLogBinLutBass;   // HYBRID bass-tier LUT (64pt)
