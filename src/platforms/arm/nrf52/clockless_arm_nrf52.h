@@ -240,7 +240,7 @@ public:
 
     bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override {
         return data && data->isClockless() &&
-               data->getPin() == static_cast<int>(_DATA_PIN) &&
+               data->getPin() == _DATA_PIN &&
                data->getTiming() == makeTimingConfig<TIMING>() &&
                data->getExtraZeroBitsPerByte() == static_cast<u8>(_XTRA0);
     }
