@@ -36,6 +36,14 @@ class ClocklessRpPio
   public:
     ClocklessRpPio() FL_NO_EXCEPT = default;
 
+    // Drive the data line LOW before the first frame: the engine only claims
+    // the pin while transmitting, so without this the pad sits as an input
+    // until the first show() (#4619 review).
+    void init() FL_NO_EXCEPT override {
+        FastPin<DATA_PIN>::lo();
+        FastPin<DATA_PIN>::setOutput();
+    }
+
     u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 };
 

@@ -10,7 +10,7 @@
 ///
 /// ## Overview
 ///
-/// Unlike the manual ParallelClocklessController, this driver:
+/// Through the shared ChannelEngineRpPio back end, this driver:
 /// - Works with standard `FastLED.addLeds()` API
 /// - Automatically detects consecutive GPIO pins
 /// - Groups them for parallel output (2, 4, or 8 pins)

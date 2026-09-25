@@ -2,8 +2,8 @@
 /// @brief Example: Automatic parallel WS2812 strips on RP2040/RP2350
 ///
 /// This sketch demonstrates the new automatic parallel grouping feature for
-/// RP2040/RP2350 boards. Unlike the manual ParallelClocklessController, this
-/// uses the standard FastLED.addLeds() API and automatically detects consecutive
+/// RP2040/RP2350 boards. It uses the standard FastLED.addLeds() API and
+/// automatically detects consecutive
 /// GPIO pins for parallel output.
 ///
 /// ## Hardware Setup
