@@ -61,7 +61,7 @@ namespace fl {
 /// The input buffer is already colour-ordered, scaled and dithered by the
 /// bridge's `PixelIterator`, so the asm core runs with identity scale and
 /// zero dither and simply shifts the bytes out.
-template <int DATA_PIN, typename TIMING, int WAIT_TIME>
+template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
 public:
     ClocklessStm32Driver() FL_NO_EXCEPT : mPinReady(false) {}
@@ -111,8 +111,22 @@ public:
     }
 
     fl::string getName() const FL_NO_EXCEPT override {
+        // Unique per template specialization so controllers sharing a pin
+        // with different timings keep separate drivers.
         fl::string name = fl::string::from_literal("STM32_CLOCKLESS_P");
         name.append(static_cast<i32>(DATA_PIN));
+        name.append("_T");
+        name.append(static_cast<i32>(TIMING::T1));
+        name.append("_");
+        name.append(static_cast<i32>(TIMING::T2));
+        name.append("_");
+        name.append(static_cast<i32>(TIMING::T3));
+        name.append("_R");
+        name.append(static_cast<i32>(TIMING::RESET));
+        name.append("_W");
+        name.append(static_cast<i32>(WAIT_TIME));
+        name.append("_X");
+        name.append(static_cast<i32>(XTRA0));
         return name;
     }
 
@@ -184,7 +198,7 @@ private:
 ///
 /// The input buffer is already colour-ordered, scaled and dithered (and RGBW
 /// expanded) by the bridge's `PixelIterator`; the core only shifts bytes out.
-template <int DATA_PIN, typename TIMING, int WAIT_TIME>
+template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0 = 0>
 class ClocklessStm32Driver : public IChannelDriver {
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -228,8 +242,22 @@ public:
     }
 
     fl::string getName() const FL_NO_EXCEPT override {
+        // Unique per template specialization so controllers sharing a pin
+        // with different timings keep separate drivers.
         fl::string name = fl::string::from_literal("STM32_CLOCKLESS_P");
         name.append(static_cast<i32>(DATA_PIN));
+        name.append("_T");
+        name.append(static_cast<i32>(TIMING::T1));
+        name.append("_");
+        name.append(static_cast<i32>(TIMING::T2));
+        name.append("_");
+        name.append(static_cast<i32>(TIMING::T3));
+        name.append("_R");
+        name.append(static_cast<i32>(TIMING::RESET));
+        name.append("_W");
+        name.append(static_cast<i32>(WAIT_TIME));
+        name.append("_X");
+        name.append(static_cast<i32>(XTRA0));
         return name;
     }
 
@@ -363,7 +391,7 @@ private:
             }
             for (; pos < end; ++pos) {
                 u8 b = bytes[pos];
-                writeBits<8>(next_mark, port, hi, lo, b, t1_clocks, t1t2_clocks, t1t2t3_clocks);
+                writeBits<8 + XTRA0>(next_mark, port, hi, lo, b, t1_clocks, t1t2_clocks, t1t2t3_clocks);
             }
 
             #if (FASTLED_ALLOW_INTERRUPTS == 1)
@@ -389,33 +417,24 @@ private:
 
 #endif
 
-/// @brief Driver traits for `SlimBridgeController` (per pin/timing singleton).
-template <int DATA_PIN, typename TIMING, int WAIT_TIME>
+/// @brief Driver traits for `SlimBridgeController` (one driver per
+/// pin/timing/wait/XTRA0 specialization; never shared across timings).
+template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0>
 struct ClocklessStm32Traits {
-    using Driver = ClocklessStm32Driver<DATA_PIN, TIMING, WAIT_TIME>;
+    using Driver = ClocklessStm32Driver<DATA_PIN, TIMING, WAIT_TIME, XTRA0>;
 
-    /// Storage for this pin/timing's driver: a static member (no function-local
-    /// static guard), handed out as a no-tracking shared_ptr.
+    /// Storage for this specialization's driver: a static member (no
+    /// function-local static guard), handed out as a no-tracking shared_ptr.
     static Driver sDriver;
 
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
         return fl::make_shared_no_tracking(sDriver);
     }
 
-    /// The driver actually used for this pin: the first one registered under
-    /// the pin-only name, so every timing specialization on the same pin queues
-    /// frames to the single registered driver.
-    static IChannelDriver& instance() FL_NO_EXCEPT {
-        fl::shared_ptr<IChannelDriver> existing =
-            ChannelManager::registry().findDriverByName(sDriver.getName());
-        if (existing) {
-            return *existing;
-        }
-        return sDriver;
-    }
+    static IChannelDriver& instance() FL_NO_EXCEPT { return sDriver; }
 
-    /// Idempotent: skip if a driver for this pin is already registered (by any
-    /// timing specialization), so a second controller does not replace it.
+    /// Idempotent: the driver name is unique per specialization, so this only
+    /// skips re-registering this exact driver.
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager& manager = ChannelManager::registry();
         if (manager.findDriverByName(sDriver.getName())) {
@@ -425,20 +444,20 @@ struct ClocklessStm32Traits {
     }
 };
 
-template <int DATA_PIN, typename TIMING, int WAIT_TIME>
-typename ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME>::Driver ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME>::sDriver;
+template <int DATA_PIN, typename TIMING, int WAIT_TIME, int XTRA0>
+typename ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::Driver ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>::sDriver;
 
 /// @brief STM32 Clockless LED Controller (slim bridge, issue #4594)
 /// @tparam DATA_PIN Pin number for data line output
 /// @tparam TIMING ChipsetTiming structure containing T1, T2, T3, and RESET values
 /// @tparam RGB_ORDER Color order (RGB, GRB, etc.)
-/// @tparam XTRA0 Extra bits per byte (forwarded to the bridge)
+/// @tparam XTRA0 Extra trailing zero bits sent after each byte
 /// @tparam FLIP Flip the output bit order if true (unused)
 /// @tparam WAIT_TIME Wait time between updates in microseconds
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController
     : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME,
-                                  ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME>, XTRA0> {
+                                  ClocklessStm32Traits<DATA_PIN, TIMING, WAIT_TIME, XTRA0>, XTRA0> {
 public:
     u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 };
