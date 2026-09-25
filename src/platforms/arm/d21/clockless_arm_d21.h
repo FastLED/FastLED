@@ -152,24 +152,39 @@ template <int DATA_PIN, typename TIMING, int WAIT_TIME>
 struct ClocklessSamd21Traits {
     using Driver = ClocklessSamd21Driver<DATA_PIN, TIMING, WAIT_TIME>;
 
+    /// Storage for this pin/timing's driver: a static member (no function-local
+    /// static guard), handed out as a no-tracking shared_ptr.
+    static Driver sDriver;
+
     static fl::shared_ptr<Driver> instancePtr() FL_NO_EXCEPT {
-        static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
-        return gHolder;
+        return fl::make_shared_no_tracking(sDriver);
     }
 
-    static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
+    /// The driver actually used for this pin: the first one registered under
+    /// the pin-only name, so every timing specialization on the same pin queues
+    /// frames to the single registered driver.
+    static IChannelDriver& instance() FL_NO_EXCEPT {
+        fl::shared_ptr<IChannelDriver> existing =
+            ChannelManager::registry().findDriverByName(sDriver.getName());
+        if (existing) {
+            return *existing;
+        }
+        return sDriver;
+    }
 
-    /// Idempotent: skip if this pin's driver is already registered, so a
-    /// second controller on the same pin does not trigger a replace.
+    /// Idempotent: skip if a driver for this pin is already registered (by any
+    /// timing specialization), so a second controller does not replace it.
     static void registerWithManager() FL_NO_EXCEPT {
         ChannelManager& manager = ChannelManager::registry();
-        fl::shared_ptr<Driver> driver = instancePtr();
-        if (manager.findDriverByName(driver->getName())) {
+        if (manager.findDriverByName(sDriver.getName())) {
             return;
         }
-        manager.addDriver(0, driver);
+        manager.addDriver(0, instancePtr());
     }
 };
+
+template <int DATA_PIN, typename TIMING, int WAIT_TIME>
+typename ClocklessSamd21Traits<DATA_PIN, TIMING, WAIT_TIME>::Driver ClocklessSamd21Traits<DATA_PIN, TIMING, WAIT_TIME>::sDriver;
 
 /// @brief ARM D21 (SAMD21) Clockless LED Controller
 /// @tparam DATA_PIN Pin number for data line output
