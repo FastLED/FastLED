@@ -34,91 +34,27 @@
 // Signal to the world that we have a ClocklessController to allow WS2812 and others
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-#include "crgb.h"
-#include "eorder.h"
-#include "pixel_iterator.h"
-#include "fl/channels/bus.h"
-#include "fl/channels/data.h"
-#include "fl/channels/driver.h"
-#include "fl/channels/manager.h"
+#include "fl/channels/slim_bridge_controller.h"
 #include "platforms/esp/32/core/fastpin_esp32.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/bus_traits.h"
-#include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 
 namespace fl {
 
+// Thin bridge (issue #4584): registration with ChannelManager happens in
+// SlimBridgeController's constructor via DriverTraits::registerWithManager(),
+// which is the only path that makes ChannelManager::onEndFrame() aware of
+// this driver so it actually gets its show() called.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessIdf4 : public CPixelLEDController<RGB_ORDER>
+class ClocklessIdf4 : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::RMT>>
 {
 private:
-    // Channel data for transmission
-    ChannelDataPtr mChannelData;
-
-    // Channel driver reference (selected dynamically from bus manager)
-    fl::shared_ptr<IChannelDriver> mDriver;
-
     // -- Verify that the pin is valid
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessIdf4() FL_NO_EXCEPT
-        : mDriver(getRmtEngine())
-    {
-        // Create channel data with pin and timing configuration
-        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
-        if (WAIT_TIME > 0 && static_cast<u32>(WAIT_TIME) > timing.reset_us) {
-            timing.reset_us = static_cast<u32>(WAIT_TIME);
-        }
-        mChannelData = ChannelData::create(DATA_PIN, timing);
-    }
-
-    void init() FL_NO_EXCEPT override { }
-    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
-
-protected:
-    // -- Show pixels
-    //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override
-    {
-        if (!mDriver) {
-            FL_WARN_EVERY(100, "No Engine");
-            return;
-        }
-        // Wait for previous transmission to complete and release buffer
-        // This prevents race conditions when show() is called faster than hardware can transmit
-        u32 startTime = fl::millis();
-        u32 lastWarnTime = startTime;
-        if (mChannelData->isInUse()) {
-            FL_WARN_EVERY(100, "ClocklessIdf4: driver should have finished transmitting by now - waiting");
-            bool finished = mDriver->waitForReady();
-            if (!finished) {
-                FL_ERROR("ClocklessIdf4: Engine still busy after %sms", fl::millis() - startTime);
-                return;
-            }
-
-        }
-
-        // Convert pixels to encoded byte data
-        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        auto& data = mChannelData->getData();
-        data.clear();
-        iterator.writeWS2812(&data);
-
-        // Enqueue for transmission (will be sent when driver->show() is called)
-        mDriver->enqueue(mChannelData);
-    }
-
-    static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NO_EXCEPT {
-        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
-        // the `BusTraits<Bus::RMT>` singleton. Naming
-        // `BusTraits<Bus::RMT>::instancePtr()` here is the ODR-use that
-        // lets the linker keep ONLY the RMT4 driver TU -- post-#2428 the
-        // ChannelManager-driven registry path is gone.
-        return BusTraits<Bus::RMT>::instancePtr();
-    }
-
+    u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 };
 
 // Backward compatibility alias
