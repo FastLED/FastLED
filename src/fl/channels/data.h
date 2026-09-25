@@ -105,6 +105,16 @@ public:
         mPixelFormat = pixelFormat;
     }
 
+    /// @brief Clockless zero bits the wire appends after every encoded byte
+    ///
+    /// Carries the legacy `ClocklessController<..., XTRA0>` parameter
+    /// (e.g. GE8822 / GW6205 use 4). 0 for ordinary chipsets. Engines that
+    /// cannot emit extra bits ignore it.
+    u8 getExtraZeroBitsPerByte() const FL_NO_EXCEPT { return mExtraZeroBits; }
+
+    /// @brief Set the per-byte trailing zero-bit count (see getter)
+    void setExtraZeroBitsPerByte(u8 bits) FL_NO_EXCEPT { mExtraZeroBits = bits; }
+
     /// @brief Get encoded bytes per pixel/element, or 0 if unknown
     u8 getBytesPerPixel() const FL_NO_EXCEPT {
         return channelPixelFormatBytesPerPixel(mPixelFormat);
@@ -180,6 +190,7 @@ private:
     ChannelPixelFormat mPixelFormat;        ///< Explicit byte layout for encoded data
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<u8> mEncodedData; ///< Encoded transmission bytes (PSRAM)
+    u8 mExtraZeroBits = 0;                  ///< Trailing zero bits per byte (legacy XTRA0)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
 };
 

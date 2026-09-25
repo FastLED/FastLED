@@ -34,7 +34,13 @@ struct RpPioTxBusHolder {
         : peripheral(fl::make_shared<RpPioTxPeripheral>(Which)),
           spiPeripheral(fl::make_shared<RpPioSpiPeripheral>(Which)),
           driver(fl::make_shared<ChannelEngineRpPio>(
-              peripheral, spiPeripheral, rpPioDriverName<Which>())) {}
+              peripheral, spiPeripheral, rpPioDriverName<Which>(),
+              // Extra TX state machines let independent strips transmit
+              // concurrently (#4620); each claims PIO/DMA only while sending
+              // and stays on this engine's own PIO block.
+              []() -> fl::shared_ptr<IRpPioTxPeripheral> {
+                  return fl::make_shared<RpPioTxPeripheral>(Which, false);
+              })) {}
 };
 
 template<u8 Which>

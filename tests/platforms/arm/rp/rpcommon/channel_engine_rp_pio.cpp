@@ -116,20 +116,13 @@ FL_TEST_CASE("RP PIO TX waits for terminal state after DMA") {
     engine.enqueue(channel);
     engine.show();
     FL_REQUIRE(channel->isInUse());
-    FL_CHECK_EQ(peripheral.wordCount, static_cast<size_t>(32));
-    FL_CHECK_EQ(peripheral.firstWord, 0x00000000u);
-    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(32));
-    FL_CHECK_EQ(peripheral.capturedWords[0], 0x00000000u);
-    for (size_t index = 0; index < 8; ++index) {
-        FL_CHECK_EQ(peripheral.capturedWords[index], 0u); // 0x00
-        FL_CHECK_EQ(peripheral.capturedWords[8 + index], 0x80000000u); // 0xFF
-    }
-    FL_CHECK_EQ(peripheral.capturedWords[16], 0x80000000u); // 0xAA MSB
-    FL_CHECK_EQ(peripheral.capturedWords[17], 0u);
-    FL_CHECK_EQ(peripheral.capturedWords[18], 0x80000000u);
-    FL_CHECK_EQ(peripheral.capturedWords[19], 0u);
-    FL_CHECK_EQ(peripheral.capturedWords[24], 0u); // 0x55 MSB
-    FL_CHECK_EQ(peripheral.capturedWords[25], 0x80000000u);
+    // Packed single lane (#4621): one DMA byte per data byte, read
+    // little-endian by an 8-bit DMA -> 00 FF AA 55 on the wire.
+    FL_CHECK(peripheral.lastConfig.packed);
+    FL_CHECK_EQ(peripheral.transferCount, static_cast<size_t>(4));
+    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(1));
+    FL_CHECK_EQ(peripheral.capturedWords[0], 0x55AAFF00u);
+    FL_CHECK_EQ(engine.lastWordCount(), static_cast<size_t>(4));
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
     peripheral.dmaBusy = false;
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
@@ -199,12 +192,11 @@ FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes")
     engine.show();
     FL_REQUIRE_EQ(peripheral.lastConfig.tx_pin, 10);
     FL_REQUIRE_EQ(peripheral.lastConfig.lane_count, 2);
-    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(8));
-    // Lane 0 occupies the most-significant emitted bit and lane 1 the next.
-    FL_CHECK_EQ(peripheral.capturedWords[0], 0x80000000u);
-    for (size_t index = 1; index < peripheral.capturedWords.size(); ++index) {
-        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
-    }
+    // One 16-bit transfer per data byte: 8 two-bit planes, MSB plane first,
+    // lane 0 in each plane's MSB.
+    FL_CHECK_EQ(peripheral.transferCount, static_cast<size_t>(1));
+    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(1));
+    FL_CHECK_EQ(peripheral.capturedWords[0], 0x00008000u);
     peripheral.dmaBusy = false;
     peripheral.terminal = true;
     FL_REQUIRE_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
@@ -212,6 +204,138 @@ FL_TEST_CASE("RP PIO TX batches only equal-length consecutive compatible lanes")
     FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
     FL_CHECK_FALSE(left->isInUse());
     FL_CHECK_FALSE(right->isInUse());
+}
+
+FL_TEST_CASE("RP PIO TX appends XTRA0 zero bits after every byte") {
+    RpPioTxPeripheralMock& peripheral = resetTxMock();
+    ChannelEngineRpPio engine(createTxMockPeripheral());
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0xFF);
+    bytes.push_back(0x81);
+    auto channel = makeChannel(4, bytes);
+    channel->setExtraZeroBitsPerByte(4);  // GE8822 / GW6205
+    engine.enqueue(channel);
+    engine.show();
+    FL_CHECK_FALSE(peripheral.lastConfig.packed);  // XTRA0 breaks byte packing
+    FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(24));
+    for (size_t index = 0; index < 8; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0x80000000u);
+    }
+    for (size_t index = 8; index < 12; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+    FL_CHECK_EQ(peripheral.capturedWords[12], 0x80000000u);  // 0x81 MSB
+    for (size_t index = 13; index < 19; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+    FL_CHECK_EQ(peripheral.capturedWords[19], 0x80000000u);  // 0x81 LSB
+    for (size_t index = 20; index < 24; ++index) {
+        FL_CHECK_EQ(peripheral.capturedWords[index], 0u);
+    }
+}
+
+FL_TEST_CASE("RP PIO TX does not batch lanes with different XTRA0") {
+    RpPioTxPeripheralMock& peripheral = resetTxMock();
+    ChannelEngineRpPio engine(createTxMockPeripheral());
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0x80);
+    auto left = makeChannel(10, bytes);
+    auto right = makeChannel(11, bytes);
+    right->setExtraZeroBitsPerByte(4);
+    engine.enqueue(left);
+    engine.enqueue(right);
+    engine.show();
+    FL_CHECK_EQ(peripheral.lastConfig.lane_count, 1);
+    FL_CHECK_EQ(peripheral.transferCount, static_cast<size_t>(1));
+}
+
+FL_TEST_CASE("RP PIO TX runs independent strips concurrently") {
+    RpPioTxPeripheralMock& primary = resetTxMock();
+    fl::vector<fl::shared_ptr<RpPioTxPeripheralMock>> extras;
+    ChannelEngineRpPio engine(
+        createTxMockPeripheral(), fl::shared_ptr<IRpPioSpiPeripheral>(), "PIO0",
+        [&extras]() -> fl::shared_ptr<IRpPioTxPeripheral> {
+            auto mock = fl::make_shared<RpPioTxPeripheralMock>();
+            extras.push_back(mock);
+            return mock;
+        });
+    fl::vector_psram<u8> shortBytes;
+    shortBytes.push_back(0xFF);
+    fl::vector_psram<u8> longBytes;
+    longBytes.push_back(0x00);
+    longBytes.push_back(0x00);
+    auto first = makeChannel(5, shortBytes);
+    auto second = makeChannel(9, longBytes);  // other pin, other length
+    engine.enqueue(first);
+    engine.enqueue(second);
+    engine.show();
+    // Both strips are on the wire at once, each on its own peripheral.
+    FL_REQUIRE_EQ(extras.size(), static_cast<size_t>(1));
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 5);
+    FL_CHECK_EQ(primary.transferCount, static_cast<size_t>(1));
+    FL_CHECK_EQ(extras[0]->lastConfig.tx_pin, 9);
+    FL_CHECK_EQ(extras[0]->transferCount, static_cast<size_t>(2));
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+
+    // The short strip finishes first; the long one keeps the frame alive.
+    primary.dmaBusy = false;
+    primary.terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);  // latch starts
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);  // second still sending
+    FL_CHECK_EQ(primary.deinitializeCalls, 1);  // short strip released its SM
+    FL_CHECK(first->isInUse());  // frame not complete yet
+    extras[0]->dmaBusy = false;
+    extras[0]->terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    extras[0]->timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
+    FL_CHECK_EQ(primary.deinitializeCalls, 1);
+    FL_CHECK_EQ(extras[0]->deinitializeCalls, 1);
+}
+
+FL_TEST_CASE("RP PIO TX queues strips when no extra PIO resources are free") {
+    RpPioTxPeripheralMock& primary = resetTxMock();
+    fl::vector<fl::shared_ptr<RpPioTxPeripheralMock>> extras;
+    ChannelEngineRpPio engine(
+        createTxMockPeripheral(), fl::shared_ptr<IRpPioSpiPeripheral>(), "PIO0",
+        [&extras]() -> fl::shared_ptr<IRpPioTxPeripheral> {
+            auto mock = fl::make_shared<RpPioTxPeripheralMock>();
+            mock->configureOk = false;  // every other SM / DMA is taken
+            extras.push_back(mock);
+            return mock;
+        });
+    fl::vector_psram<u8> bytes;
+    bytes.push_back(0x42);
+    auto first = makeChannel(5, bytes);
+    auto second = makeChannel(9, bytes);
+    engine.enqueue(first);
+    engine.enqueue(second);
+    engine.show();
+    FL_CHECK_EQ(primary.startCalls, 1);
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 5);
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    const int extraConfigures = extras.empty() ? 0 : extras[0]->configureCalls;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    // No retry storm while the frame waits for the busy strip.
+    FL_CHECK_EQ(extras.empty() ? 0 : extras[0]->configureCalls, extraConfigures);
+
+    primary.dmaBusy = false;
+    primary.terminal = true;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::BUSY);
+    FL_CHECK_EQ(primary.startCalls, 2);
+    FL_CHECK_EQ(primary.lastConfig.tx_pin, 9);
+    primary.dmaBusy = false;
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::DRAINING);
+    primary.timeUs += 1000;
+    FL_CHECK_EQ(engine.poll(), IChannelDriver::DriverState::READY);
+    FL_CHECK_FALSE(first->isInUse());
+    FL_CHECK_FALSE(second->isInUse());
 }
 
 FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs") {
@@ -225,9 +349,35 @@ FL_TEST_CASE("RP PIO TX selects four and eight lane batches only for full runs")
         }
         engine.show();
         FL_CHECK_EQ(peripheral.lastConfig.lane_count, lanes);
-        FL_CHECK_EQ(peripheral.capturedWords.size(), static_cast<size_t>(8));
-        FL_CHECK_EQ(peripheral.capturedWords[0],
-                    ((1u << lanes) - 1u) << (32u - lanes));
+        // 4 lanes: one 32-bit column; 8 lanes: two words, planes 7..4 first.
+        const size_t words = lanes == 8 ? 2 : 1;
+        FL_CHECK_EQ(peripheral.transferCount, words);
+        FL_REQUIRE_EQ(peripheral.capturedWords.size(), words);
+        for (size_t index = 0; index < words; ++index) {
+            FL_CHECK_EQ(peripheral.capturedWords[index], 0xFFFFFFFFu);
+        }
+    }
+}
+
+FL_TEST_CASE("RP PIO TX packs multi-lane planes MSB-plane and lane-0 first") {
+    for (u8 lanes = 4; lanes <= 8; lanes = static_cast<u8>(lanes * 2)) {
+        RpPioTxPeripheralMock& peripheral = resetTxMock();
+        ChannelEngineRpPio engine(createTxMockPeripheral());
+        for (u8 lane = 0; lane < lanes; ++lane) {
+            fl::vector_psram<u8> bytes;
+            // lane 0: MSB set (first plane, top bit); last lane: LSB set.
+            bytes.push_back(lane == 0 ? 0x80 : lane == lanes - 1 ? 0x01 : 0x00);
+            engine.enqueue(makeChannel(12 + lane, bytes));
+        }
+        engine.show();
+        if (lanes == 4) {
+            FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(1));
+            FL_CHECK_EQ(peripheral.capturedWords[0], 0x80000001u);
+        } else {
+            FL_REQUIRE_EQ(peripheral.capturedWords.size(), static_cast<size_t>(2));
+            FL_CHECK_EQ(peripheral.capturedWords[0], 0x80000000u);  // planes 7..4
+            FL_CHECK_EQ(peripheral.capturedWords[1], 0x00000001u);  // planes 3..0
+        }
     }
 }
 
