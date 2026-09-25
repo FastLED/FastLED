@@ -611,7 +611,6 @@ mod history_tests {
             "src/colorutils.h",
             "src/fastspi.h",
             "src/pixeltypes.h",
-            "src/platforms/esp/32/clockless_block_esp32.h",
         ];
         let histories = collect_file_legal_history_for_paths(
             project_root,
@@ -642,10 +641,6 @@ mod history_tests {
                 "Mark Kriegsman missing from {path}"
             );
         }
-        let esp32 = histories
-            .get("src/platforms/esp/32/clockless_block_esp32.h")
-            .expect("missing ESP32 clockless header history");
-        assert!(esp32.authors.iter().any(|author| author.name == "Sam Guyer"));
     }
 
     #[test]

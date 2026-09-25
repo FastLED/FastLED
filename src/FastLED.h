@@ -1162,15 +1162,14 @@ public:
 	// (0). Under FASTLED_SPI_USES_CHANNEL_API the public addLeds<> overloads
 	// below forward here verbatim.
 	//
-	// Compile-time dispatch (#4585): every SPI chipset except MY9221 routes
-	// through the slim `fl::SlimSpiBridgeController` (no runtime `fl::Channel`
-	// instantiated). MY9221 stays on the old `TypedChannel<B, SpiChipsetConfig>`
-	// path because `Channel::encodeMY9221()` never emits bytes unmanaged --
-	// see `fl/channels/slim_spi_bridge_controller.h`'s file-level comment.
-	// C++11 has no `if constexpr`, so the two bodies are separate overloads
-	// selected via a `fl::true_type`/`fl::false_type` tag -- only the
-	// overload actually called gets instantiated, so the never-taken branch
-	// never names `SlimSpiBridgeController<..., MY9221, ...>`.
+	// Compile-time dispatch (#4585, #4636): every SPI chipset routes through
+	// the slim `fl::SlimSpiBridgeController`. MY9221 uses the bit-bang
+	// `MY9221Controller` instead, because it is dual-edge (DDR) clocked and
+	// cannot be carried as SPI bytes. No runtime `fl::Channel` is ever built
+	// for legacy `addLeds<>`. C++11 has no `if constexpr`, so the two bodies
+	// are separate overloads selected via a `fl::true_type`/`fl::false_type`
+	// tag -- only the overload actually called gets instantiated, so the
+	// never-taken branch never names `SlimSpiBridgeController<..., MY9221, ...>`.
 	//
 	// DATA_PIN / CLOCK_PIN / RATE / VARIANT exist only to key the
 	// function-local statics exactly like the old per-`addLeds<>`-instantiation
@@ -1187,18 +1186,17 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::u32 RATE, int VARIANT,
 	         fl::EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
 	static ::CLEDController &addLedsSpiDispatch(CRGB *data, int nLedsOrOffset, int nLedsIfOffset,
-	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*useSlim*/) {
-		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
-		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
-		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
-		config.options.mBus = B;
-		config.options.mBusWhich = B_WHICH;
-		static fl::ChannelPtr sChannel;
-		if (!sChannel) {
-			sChannel = fl::TypedChannel<B, fl::SpiChipsetConfig, B_WHICH>::create(config);
-			add(sChannel);
+	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221 -> bit-bang*/) {
+		(void)spiCfg;
+		static MY9221Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, (RATE ? RATE : DATA_RATE_MHZ(1))> sCtrl;
+		// Register (and bind the LED buffer) only once per specialization; a
+		// repeated call must not rebind the shared controller's buffer.
+		static bool sRegistered = false;
+		if (sRegistered) {
+			return sCtrl;
 		}
-		return *sChannel;
+		sRegistered = true;
+		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add an SPI based CLEDController via Channel API.

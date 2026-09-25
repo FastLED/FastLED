@@ -67,8 +67,7 @@ src/platforms/esp/32/
 └── [Root-level files]           # Platform abstraction
     ├── interrupt.h              # Interrupt control interface
     ├── interrupt.cpp            # Interrupt control implementation
-    ├── isr_esp32.cpp            # ISR API implementation (IDF 5.0+)
-    └── clockless_block_esp32.h  # Experimental (not in production)
+    └── isr_esp32.cpp            # ISR API implementation (IDF 5.0+)
 ```
 
 ## Driver Dispatcher Pattern
