@@ -130,6 +130,10 @@ inline void ensureMockRegistered() {
     ChannelManager::instance().setExclusiveDriverByName("SPI_GOLDEN_MOCK");
 }
 
+/// LED buffers are function-static: controllers registered by earlier cases
+/// persist and are re-shown by later cases, so their buffers must outlive
+/// the case that created them.
+///
 /// Test fixture: clears capture state and normalizes FastLED global state
 /// before each case. Does NOT remove previously-registered addLeds<>()
 /// controllers -- they are function-local statics that persist for the
@@ -164,12 +168,12 @@ using namespace spi_legacy_golden;
 
 FL_TEST_CASE("APA102 default overload (RGB order, default speed) golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<APA102, 40, 41>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // Differential: build the same ChannelConfig directly, the way
     // FastLED.h's Channel-API addLeds<>() does for the default overload
@@ -183,7 +187,7 @@ FL_TEST_CASE("APA102 default overload (RGB order, default speed) golden bytes") 
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy.size(), reference.size());
     FL_CHECK_EQ(legacy, reference);
@@ -208,12 +212,12 @@ FL_TEST_CASE("APA102 default overload (RGB order, default speed) golden bytes") 
 
 FL_TEST_CASE("APA102 explicit BGR order golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<APA102, 44, 45, BGR>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::APA102);
@@ -224,7 +228,7 @@ FL_TEST_CASE("APA102 explicit BGR order golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
@@ -234,13 +238,13 @@ FL_TEST_CASE("APA102 explicit BGR order golden bytes") {
 
 FL_TEST_CASE("APA102 brightness 64 golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<APA102, 48, 49>(leds, 2);
     FastLED.setBrightness(64);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived (global brightness scaling
     // pipeline is not safely hand-derivable byte-for-byte).
@@ -252,7 +256,7 @@ FL_TEST_CASE("APA102 brightness 64 golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
@@ -274,12 +278,12 @@ FL_TEST_CASE("APA102 brightness 64 golden bytes") {
 
 FL_TEST_CASE("SK9822 default overload golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<SK9822, 52, 53>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::SK9822);
@@ -290,7 +294,7 @@ FL_TEST_CASE("SK9822 default overload golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     // Same 4+4n+end framing as APA102 (encoders/apa102.h / sk9822.h share
@@ -306,13 +310,13 @@ FL_TEST_CASE("SK9822 default overload golden bytes") {
 
 FL_TEST_CASE("SK9822 brightness 64 golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<SK9822, 56, 57>(leds, 2);
     FastLED.setBrightness(64);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::SK9822);
@@ -323,7 +327,7 @@ FL_TEST_CASE("SK9822 brightness 64 golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
@@ -338,12 +342,12 @@ FL_TEST_CASE("SK9822 brightness 64 golden bytes") {
 
 FL_TEST_CASE("HD107 explicit RGB order golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<HD107, 60, 61, RGB>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived. HD107 shares Channel::encodeAPA102
     // (channel.cpp.hpp) with APA102 -- only the SpiEncoder's default clock_hz
@@ -356,7 +360,7 @@ FL_TEST_CASE("HD107 explicit RGB order golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
@@ -370,12 +374,12 @@ FL_TEST_CASE("HD107 explicit RGB order golden bytes") {
 
 FL_TEST_CASE("HD108 default overload defaults to GRB order") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<HD108, 64, 65>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // FastLED.h's default-order Channel-API overload special-cases HD108 to
     // GRB (src/FastLED.h: "HD108 defaults to GRB; all other SPI chipsets
@@ -390,7 +394,7 @@ FL_TEST_CASE("HD108 default overload defaults to GRB order") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
 
@@ -409,12 +413,12 @@ FL_TEST_CASE("HD108 default overload defaults to GRB order") {
 
 FL_TEST_CASE("HD108 explicit RGB order golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<HD108, 68, 69, RGB>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::HD108);
@@ -425,7 +429,7 @@ FL_TEST_CASE("HD108 explicit RGB order golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(8 + 2 * 8 + (2 / 2 + 4)));
@@ -439,12 +443,12 @@ FL_TEST_CASE("HD108 explicit RGB order golden bytes") {
 
 FL_TEST_CASE("WS2801 golden bytes: 3 bytes/LED, no frame overhead") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<WS2801, 72, 73>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::WS2801);
@@ -455,7 +459,7 @@ FL_TEST_CASE("WS2801 golden bytes: 3 bytes/LED, no frame overhead") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     // Structural invariant, hand-derived from
@@ -472,12 +476,12 @@ FL_TEST_CASE("WS2801 golden bytes: 3 bytes/LED, no frame overhead") {
 
 FL_TEST_CASE("LPD8806 golden bytes: GRB MSB-set encoding + latch") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[3] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80), CRGB(0x00, 0x00, 0x00)};
+    static CRGB leds[3] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80), CRGB(0x00, 0x00, 0x00)};
     FastLED.addLedsSpiChannel<LPD8806, 76, 77>(leds, 3);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::LPD8806);
@@ -488,7 +492,7 @@ FL_TEST_CASE("LPD8806 golden bytes: GRB MSB-set encoding + latch") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
 
@@ -514,12 +518,12 @@ FL_TEST_CASE("LPD8806 golden bytes: GRB MSB-set encoding + latch") {
 
 FL_TEST_CASE("P9813 golden bytes: flag-byte encoding + boundaries") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<P9813, 80, 81>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived
     SpiEncoder encoder = SpiEncoder::spiEncoderForChipset(SpiChipset::P9813);
@@ -530,7 +534,7 @@ FL_TEST_CASE("P9813 golden bytes: flag-byte encoding + boundaries") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
 
@@ -559,12 +563,12 @@ FL_TEST_CASE("P9813 golden bytes: flag-byte encoding + boundaries") {
 
 FL_TEST_CASE("APA102 full 5-param form (explicit DATA_RATE_MHZ) golden bytes") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     FastLED.addLedsSpiChannel<APA102, 84, 85, RGB, DATA_RATE_MHZ(12)>(leds, 2);
 
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
 
     // differential: literal not hand-derived. DATA_RATE_MHZ(12) only changes
     // the SpiEncoder's clock_hz, which is not part of the encoded byte
@@ -577,7 +581,7 @@ FL_TEST_CASE("APA102 full 5-param form (explicit DATA_RATE_MHZ) golden bytes") {
     mockDriverInstance().reset();
     FastLED.show();
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& reference = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> reference = mockDriverInstance().capturedData.back();
 
     FL_CHECK_EQ(legacy, reference);
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
@@ -593,7 +597,7 @@ FL_TEST_CASE("APA102 full 5-param form (explicit DATA_RATE_MHZ) golden bytes") {
 
 FL_TEST_CASE("APA102 with explicit host default bus compiles and routes consistently") {
     SpiLegacyGoldenFixture fixture;
-    CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
+    static CRGB leds[2] = {CRGB(0x10, 0x20, 0x30), CRGB(0xFF, 0x00, 0x80)};
     constexpr fl::Bus kHostDefaultSpiBus = fl::DefaultBus<fl::SpiChipsetConfig>::value;
     ::CLEDController& controller =
         FastLED.addLedsSpiChannel<APA102, 88, 89, RGB, DATA_RATE_MHZ(6), kHostDefaultSpiBus>(leds, 2);
@@ -604,7 +608,7 @@ FL_TEST_CASE("APA102 with explicit host default bus compiles and routes consiste
     FastLED.show();
     FL_CHECK_GT(mockDriverInstance().enqueueCount, 0);
     FL_REQUIRE_FALSE(mockDriverInstance().capturedData.empty());
-    const auto& legacy = mockDriverInstance().capturedData.back();
+    const fl::vector<u8> legacy = mockDriverInstance().capturedData.back();
     FL_REQUIRE_EQ(legacy.size(), (fl::size)(4 + 4 * 2 + 4));
 }
 
