@@ -16,7 +16,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 
 SINGLETON_RE = re.compile(
-    r"static\s+[\w:<>]+\s*&\s*instance\s*\(\s*\)[^{;]*\{\s*static\s+"
+    r"static\s+[\w:<>]+\s*&\s*instance\s*\(\s*\)[^{;]*\{"
+    r"(?:\s|//[^\n]*\n|/\*.*?\*/)*static\s+",
+    re.DOTALL,
 )
 
 # Pre-existing offenders. This list must only shrink; never add
@@ -60,7 +62,16 @@ def test_regex_self_check() -> None:
         "}\n"
         "static Foo& instance();\n"
     )
+    commented = (
+        "static Foo& instance() {\n"
+        "    // one per process\n"
+        "    /* note */\n"
+        "    static Foo s;\n"
+        "    return s;\n"
+        "}\n"
+    )
     assert find_offenders(positive) == [1]
+    assert find_offenders(commented) == [1]
     assert find_offenders(negative) == []
 
 

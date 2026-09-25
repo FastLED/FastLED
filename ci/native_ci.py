@@ -31,6 +31,7 @@ PY_SMOKE = (
     "ci/tests/test_native_ci_modes.py",
     "ci/tests/test_github_actions_security.py",
     "ci/tests/test_compile_example_sharding.py",
+    "ci/tests/test_header_singleton_cross_dll.py",
 )
 
 
