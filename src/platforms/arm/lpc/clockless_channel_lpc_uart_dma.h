@@ -4,6 +4,14 @@
 
 /// @file clockless_channel_lpc_uart_dma.h
 /// @brief LPC845 channels-API ClocklessController adapter for UART DMA.
+///
+/// Thin subclass of `fl::SlimBridgeController` (see
+/// `fl/channels/slim_bridge_controller.h`) over `BusTraits<Bus::UART>`.
+/// Flushing no longer happens per-frame in `showPixels()`: the controller
+/// only enqueues into its `ChannelData`, and `ChannelManager`'s end-of-show
+/// path is responsible for driving the actual flush. `SlimBridgeController`
+/// itself sets the RGB/RGBW/RGBWW pixel format on the encoded `ChannelData`
+/// based on the caller's `getRgbw()`/`getRgbww()` state.
 
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
@@ -15,16 +23,9 @@
 
 #include "eorder.h"
 #include "fl/channels/bus.h"
-#include "fl/channels/data.h"
-#include "fl/channels/driver.h"
-#include "fl/channels/manager.h"
+#include "fl/channels/slim_bridge_controller.h"
 #include "fl/chipsets/timing_traits.h"
-#include "fl/log/log.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/stl/noexcept.h"
-#include "fl/stl/shared_ptr.h"
-#include "fl/stl/vector.h"
-#include "pixel_iterator.h"
 #include "platforms/arm/lpc/drivers/uart_dma/bus_traits.h"
 
 namespace fl {
@@ -38,45 +39,10 @@ template <int DATA_PIN,
           int XTRA0 = 0,
           bool FLIP = false,
           int WAIT_TIME = 0>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-private:
-    ChannelDataPtr mChannelData;
-    fl::shared_ptr<IChannelDriver> mDriver;
-
+class ClocklessController
+    : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::UART>> {
 public:
-    ClocklessController()
-        : mDriver(getLpcEngine())
-    {
-        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
-        mChannelData = ChannelData::create(DATA_PIN, timing);
-    }
-
-    void init() override {}
     u16 getMaxRefreshRate() const override { return 400; }
-
-protected:
-    void showPixels(PixelController<RGB_ORDER>& pixels) override {
-        if (!mDriver) {
-            FL_WARN_EVERY(100, "LPC UART DMA channel engine unavailable");
-            return;
-        }
-        if (mChannelData->isInUse() && !mDriver->waitForReady()) {
-            FL_ERROR("LPC UART DMA: engine still busy after wait");
-            return;
-        }
-
-        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        auto& data = mChannelData->getData();
-        data.clear();
-        iterator.writeWS2812(&data);
-
-        mDriver->enqueue(mChannelData);
-        mDriver->show();
-    }
-
-    static fl::shared_ptr<IChannelDriver> getLpcEngine() FL_NO_EXCEPT {
-        return BusTraits<Bus::UART>::instancePtr();
-    }
 };
 
 template <int DATA_PIN, typename TIMING_LIKE, EOrder RGB_ORDER = RGB,
