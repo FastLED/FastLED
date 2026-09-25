@@ -107,10 +107,7 @@ template<> struct DefaultBus<SpiChipsetConfig> {
 };
 #endif
 
-#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350) || defined(FL_IS_SAMD)
-
-// SAMD21/SAMD51 register the SERCOM SpiHw2 adapter ("SPI_UNIFIED") in
-// init_channel_driver_samd21/51.cpp.hpp (#4593).
+#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::SPI;
@@ -217,10 +214,6 @@ inline const char* busDriverName(Bus b, fl::u8 which = 0, bool spi = false) FL_N
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
             (void)spi;
             return which == 0 ? "SPI0" : "SPI1";
-#elif defined(FL_IS_SAMD)
-            (void)which;
-            (void)spi;
-            return "SPI_UNIFIED";
 #else
             (void)spi;
             return busName(b, which);

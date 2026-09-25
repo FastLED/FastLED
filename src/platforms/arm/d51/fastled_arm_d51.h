@@ -8,6 +8,4 @@
 #include "platforms/fastspi_arduino_core.h"
 #include "platforms/arm/d51/clockless_arm_d51.h"
 
-#include "platforms/arm/samd/samd_spi_bus_traits.h"
-
 #endif
