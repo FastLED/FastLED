@@ -974,6 +974,61 @@ class TestParseArgsAndBuildCommands:
         assert result.drivers == [driver]
         assert result.json_rpc_commands[0]["params"]["driver"] == driver
 
+    @pytest.mark.parametrize("environment", ("rp2040", "rp2350"))
+    def test_legacy_flex_io_defaults_to_pio0_on_rp(
+        self, fake_project_dir: Path, environment: str
+    ) -> None:
+        # #4623: legacy addLeds<> templates are compile-time bound to PIO0
+        # (BusTraits<Bus::FLEX_IO, 0>); the channel default PIO1 made the run
+        # transmit on PIO0 while diagnosing PIO1, failing with zero_capture.
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            legacy=True,
+            rp_pio_index=None,
+            environment_positional=environment,
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO0"]
+        assert result.json_rpc_commands[0]["params"]["driver"] == "PIO0"
+
+    def test_flex_io_defaults_to_pio1_on_rp_without_legacy(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            rp_pio_index=None,
+            environment_positional="rp2350",
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.drivers == ["PIO1"]
+
+    def test_legacy_flex_io_rejects_non_pio0_on_rp(
+        self, fake_project_dir: Path
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            flex_io=True,
+            legacy=True,
+            rp_pio_index=1,
+            environment_positional="rp2350",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
     def test_flex_io_rejects_pio2_on_rp2040(self, fake_project_dir: Path) -> None:
         args = _make_args(
             parlio=False,

@@ -116,6 +116,34 @@ def _is_spi_family_driver(driver: str) -> bool:
     return driver.startswith("SPI") and driver[3:].isdigit()
 
 
+def _resolved_rp_pio_index(args: Args) -> int:
+    """Return the RP PIO engine index, applying the mode-dependent default.
+
+    Legacy ``addLeds<>()`` templates are compile-time bound to PIO0
+    (``BusTraits<Bus::FLEX_IO, 0>``), so ``--legacy`` defaults to PIO0; the
+    Channel API path keeps its historical PIO1 default (#4623).
+    """
+    if args.rp_pio_index is not None:
+        return args.rp_pio_index
+    return 0 if args.legacy else 1
+
+
+def _rp_legacy_pio_index_invalid(args: Args, environment: str | None) -> bool:
+    """Report and return True when an RP ``--legacy`` run selects a non-PIO0 engine."""
+    if (
+        args.legacy
+        and args.flex_io
+        and _active_rp2xxx_environment(environment) is not None
+        and _resolved_rp_pio_index(args) != 0
+    ):
+        print(
+            f"{Fore.RED}❌ --legacy on RP2040/RP2350 requires --rp-engine-index 0; "
+            f"legacy chipset templates are compile-time bound to PIO0{Style.RESET_ALL}"
+        )
+        return True
+    return False
+
+
 def _driver_name_for_environment(
     driver: str,
     final_environment: str | None,
@@ -189,7 +217,7 @@ def _normalize_deferred_driver_names(ctx: RunContext) -> None:
         pio_names = (
             ["PIO0", "PIO1"]
             if args.rp_pio_both and args.flex_io
-            else [f"PIO{args.rp_pio_index}"]
+            else [f"PIO{_resolved_rp_pio_index(args)}"]
         )
         _replace_driver_selection(ctx, "FLEX_IO", pio_names)
     elif _is_teensy4_environment(environment):
@@ -610,7 +638,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             else:
                 drivers.append(
                     _driver_name_for_environment(
-                        "FLEX_IO", final_environment, args.rp_pio_index
+                        "FLEX_IO", final_environment, _resolved_rp_pio_index(args)
                     )
                 )
 
@@ -638,9 +666,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             f"{Fore.RED}❌ --rp-engine-both requires --flex-io --parallel{Style.RESET_ALL}"
         )
         return 1
+    if _rp_legacy_pio_index_invalid(args, final_environment):
+        return 1
     if (
         args.flex_io
-        and args.rp_pio_index == 2
+        and _resolved_rp_pio_index(args) == 2
         and _active_rp2xxx_environment(final_environment) not in RP2350_ENVIRONMENTS
     ):
         print(
@@ -1477,6 +1507,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         print()
 
     ctx.final_environment = _canonical_board_environment(ctx.final_environment)
+    # Board auto-detection can resolve to RP after parse-time validation ran.
+    if _rp_legacy_pio_index_invalid(args, ctx.final_environment):
+        return 1
     _normalize_deferred_driver_names(ctx)
 
     # Deferred synthesis (#3281). When the board wasn't known at parse time,
