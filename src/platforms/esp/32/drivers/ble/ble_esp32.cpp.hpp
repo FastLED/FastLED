@@ -171,7 +171,7 @@ static int fl_ble_gatt_access_cb(u16 conn_handle, u16 attr_handle, // ok no noex
         fl::string val;
         val.resize(om_len);
         u16 out_len = 0;
-        int rc = ble_hs_mbuf_to_flat(ctxt->om, &val[0], om_len, &out_len);
+        int rc = ble_hs_mbuf_to_flat(ctxt->om, val.c_str_mutable(), om_len, &out_len);
         if (rc != 0) {
             FL_WARN("[BLE RX] mbuf_to_flat failed rc=%s", rc);
             return BLE_ATT_ERR_UNLIKELY;

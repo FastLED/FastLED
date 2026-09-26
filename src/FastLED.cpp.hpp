@@ -81,6 +81,7 @@ fl::u8 fl::detail::ditherFrame() FL_NO_EXCEPT {
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
+// FL_LINT_ALLOW_GLOBAL(extern ABI: smartmatrix_t3.h declares `extern SmartMatrix *pSmartMatrix`)
 void *pSmartMatrix = nullptr;
 
 FL_DISABLE_WARNING_PUSH

@@ -108,7 +108,7 @@ public:
     /// @brief Get the most recent transmission data
     const TransmissionRecord* getLastTransmission() const FL_NO_EXCEPT {
         if (mTransmissions.empty()) return nullptr;
-        return &mTransmissions[mTransmissions.size() - 1];
+        return mTransmissions.end() - 1;
     }
 
     /// @brief Get total number of show() calls

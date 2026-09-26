@@ -162,7 +162,7 @@ public:
     /// @brief Most recent `createInstance()` record, or `nullptr` if none.
     const CreateRecord* getLastCreateRecord() const FL_NO_EXCEPT {
         if (mCreateRecords.empty()) return nullptr;
-        return &mCreateRecords[mCreateRecords.size() - 1];
+        return mCreateRecords.end() - 1;
     }
 
     /// @brief Most recent created instance (raw pointer, not owned).

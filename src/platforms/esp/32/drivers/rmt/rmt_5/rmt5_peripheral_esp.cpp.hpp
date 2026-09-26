@@ -148,9 +148,6 @@ Rmt5PeripheralESPImpl::~Rmt5PeripheralESPImpl() {
 // Channel Lifecycle Methods
 //=============================================================================
 
-/// Track the GPIO number for the last created TX channel (for diagnostic purposes)
-static volatile int s_lastTxChannelGpio = -1;
-
 bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
                                              void** out_handle) FL_NO_EXCEPT {
     if (out_handle == nullptr) {
@@ -205,9 +202,6 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     //
     // The root cause appears to be something else - need to investigate further.
     // Reference: GitHub ESP-IDF issues #11768, #15861
-
-    // Store GPIO for later diagnostic access
-    s_lastTxChannelGpio = config.gpio_num;
 
     *out_handle = static_cast<void*>(channel);
     return true;
@@ -272,15 +266,6 @@ bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) FL_NO_EXCEPT {
 //=============================================================================
 // Transmission Methods
 //=============================================================================
-
-/// Static counter to track TX done callback invocations (for debugging RMT TX â†’ RX issues)
-static volatile u32 s_txDoneCallbackCount = 0;
-
-/// Static counter to track encoder encode callback invocations (ISR context)
-static volatile u32 s_encoderCallCount = 0;
-
-/// Static counter to track total symbols encoded
-static volatile size_t s_totalSymbolsEncoded = 0;
 
 bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
                                       const u8* buffer, size_t buffer_size) FL_NO_EXCEPT {
@@ -364,8 +349,6 @@ static bool FL_IRAM txDoneCallbackWrapper(
     rmt_channel_handle_t channel,
     const rmt_tx_done_event_data_t* edata,
     void* user_data) FL_NO_EXCEPT {
-    // Increment callback counter (avoiding deprecated volatile++ warning)
-    s_txDoneCallbackCount = s_txDoneCallbackCount + 1;
     TxCallbackContext* ctx = static_cast<TxCallbackContext*>(user_data);
     if (ctx == nullptr || ctx->callback == nullptr) {
         return false;

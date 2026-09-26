@@ -46,23 +46,10 @@ TESTS_ROOT = PROJECT_ROOT / "tests"
 # owns its own exit code, and this orchestrator tallies the same findings a
 # second time, so both layers have to agree or the stricter one wins.
 # ci/tests/test_warn_only_checkers_sync.py asserts the two lists match.
-WARN_ONLY_CHECKERS = frozenset(
-    {
-        # FastLED#3482 -- pre-existing namespace-scope globals; migration to
-        # fl::Singleton<T> tracked under FastLED#3481. Promote to hard-fail
-        # via FastLED#3492 when the count reaches zero.
-        "SingletonElisionChecker",
-        # FastLED#3483 -- integer constants split out of
-        # SingletonElisionChecker. Same rollout: report while the ~30 sites
-        # gain `constexpr`, then promote. One fix silences both rules.
-        "PreferConstexprChecker",
-        # FastLED#3287 -- raw pointers into CONTIGUOUS fl:: containers are
-        # brittle rather than UB. The non-contiguous tier
-        # (ContainerNonContiguousPtrChecker) hard-fails; this one reports
-        # while the existing sites migrate to fl::span / iterators.
-        "ContainerElementAddressChecker",
-    }
-)
+# Empty since FastLED#4557 promoted SingletonElisionChecker,
+# PreferConstexprChecker and ContainerElementAddressChecker to hard-fail.
+# Add a checker here only for a time-boxed rollout with a tracking issue.
+WARN_ONLY_CHECKERS: frozenset[str] = frozenset()
 
 
 def collect_all_files_by_directory() -> dict[str, list[str]]:

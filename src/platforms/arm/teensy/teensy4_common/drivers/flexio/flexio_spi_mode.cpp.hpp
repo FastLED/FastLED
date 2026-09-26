@@ -105,15 +105,15 @@ static constexpr u32 kSpiClockMaxHz = 25000000u;   // 25 MHz ceiling
 // Module State
 // ============================================================================
 
-static DMAChannel* sSpiDmaChannel = nullptr;
-static volatile bool sSpiDmaComplete = true;
-static bool sSpiInitialized = false;
+static DMAChannel* sSpiDmaChannel = nullptr;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile bool sSpiDmaComplete = true;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static bool sSpiInitialized = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static FlexIOSPIPinInfo sSpiCurrentPins{};
 // Saved IOMUXC mux values so flexio_spi_deinit() can return the pads to a
 // safe ALT5 (GPIO) input without remembering the original alt function the
 // user had configured. ALT5 + SION=0 = pin functions as a plain GPIO input.
-static u32 sSpiSavedMosiMux = 0;
-static u32 sSpiSavedSclkMux = 0;
+static u32 sSpiSavedMosiMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sSpiSavedSclkMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 
 // ============================================================================
 // DMA ISR

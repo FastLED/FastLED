@@ -103,7 +103,7 @@ inline fl::url resolve_host(fl::string_view path) FL_NO_EXCEPT {
     fl::string content;
     content.resize(sz);
     if (sz > 0) {
-        lnk.read(&content[0], sz);
+        lnk.read(content.c_str_mutable(), sz);
     }
     lnk.close();
     return parse_lnk(fl::string_view(content.data(), content.size()));

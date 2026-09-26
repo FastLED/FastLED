@@ -177,16 +177,16 @@ static u8 lpuart_dmamux_tx_source(u8 index) {
     }
 }
 
-static DMAChannel* sLpDmaChannel = nullptr;
-static volatile bool sLpDmaComplete = true;
-static bool sLpInitialized = false;
+static DMAChannel* sLpDmaChannel = nullptr;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile bool sLpDmaComplete = true;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static bool sLpInitialized = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static LpuartPinInfo sLpPinInfo{};
 // CodeRabbit-flagged: honour the public reset_us contract. We record
 // the requested reset/latch micros at init time and the millis() at
 // which the last frame finished; lpuart_show_encoded waits for the
 // reset window to elapse before starting the next frame.
-static u32 sLpResetUs = 280;
-static volatile u32 sLpLastFrameEndUs = 0;
+static u32 sLpResetUs = 280;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile u32 sLpLastFrameEndUs = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 
 // Max strip size: 1024 raw bytes -> 4096 UART bytes. Larger strips would
 // need a heap allocation; defer to FX-MED-2-style truncation warning.

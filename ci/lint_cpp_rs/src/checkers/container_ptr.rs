@@ -324,7 +324,6 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
             if after < bytes.len() && bytes[after] == b'[' {
                 let form = format!("&{name}[...]");
                 uses.push((name, form));
-                cursor = after;
                 break;
             }
 
@@ -337,7 +336,6 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
             } else if after < bytes.len() && bytes[after] == b'.' {
                 1
             } else {
-                cursor = after;
                 break;
             };
 
@@ -354,7 +352,6 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
                 member_end += 1;
             }
             if member_end == member_start {
-                cursor = member_end;
                 break;
             }
             let member = &code[member_start..member_end];
@@ -372,7 +369,6 @@ fn find_element_address_uses(code: &str) -> Vec<(String, String)> {
                     "back" => uses.push((name.clone(), format!("&{name}.back()"))),
                     _ => {}
                 }
-                cursor = paren;
                 break;
             }
 

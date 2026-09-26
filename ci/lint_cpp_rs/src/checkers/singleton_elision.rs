@@ -421,6 +421,14 @@ impl FileContentChecker for SingletonElisionChecker {
             // will inline; no storage). Keep the check when it's not
             // literal-shaped since address-taken constexpr still emits.
             if decl.is_constexpr {
+                // A namespace-scope `constexpr` of a plain integral type
+                // (`constexpr i32 kX = 4 << 16;`, `= kOther / 2`) has internal
+                // linkage and a compile-time value: the compiler folds every
+                // use and emits no storage, whatever the RHS spelling. Moving
+                // it into `fl::Singleton<T>` would only ADD code (FastLED#4557).
+                if is_integral_type_name(&decl.type_pretty) {
+                    continue;
+                }
                 if let Some(rhs) = decl.rhs.as_deref() {
                     if is_trivial_rhs(rhs) {
                         continue;

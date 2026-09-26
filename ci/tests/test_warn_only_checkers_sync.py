@@ -18,9 +18,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RUST_SOURCE = PROJECT_ROOT / "ci" / "lint_cpp_rs" / "src" / "lint_core" / "warn_only.rs"
 
 
-def _parse_rust_warn_only() -> set[str]:
-    """Extract the string literals from the Rust WARN_ONLY_CHECKERS slice."""
-    text = RUST_SOURCE.read_text(encoding="utf-8")
+def _parse_warn_only_slice(text: str) -> set[str]:
+    """Extract the string literals from a Rust WARN_ONLY_CHECKERS slice."""
     match = re.search(
         r"pub const WARN_ONLY_CHECKERS:\s*&\[&str\]\s*=\s*&\[(.*?)\];",
         text,
@@ -34,6 +33,10 @@ def _parse_rust_warn_only() -> set[str]:
     return set(re.findall(r'"([^"]+)"', body))
 
 
+def _parse_rust_warn_only() -> set[str]:
+    return _parse_warn_only_slice(RUST_SOURCE.read_text(encoding="utf-8"))
+
+
 def test_warn_only_lists_match() -> None:
     rust = _parse_rust_warn_only()
     python = set(WARN_ONLY_CHECKERS)
@@ -44,10 +47,28 @@ def test_warn_only_lists_match() -> None:
     )
 
 
-def test_warn_only_list_is_not_empty() -> None:
+def test_parser_reads_entries() -> None:
     """Guards the parser itself.
 
-    An empty result would make test_warn_only_lists_match pass vacuously if
-    the regex ever stopped matching.
+    The real list is empty after FastLED#4557, so without this a regex that
+    stopped matching entries would make test_warn_only_lists_match pass
+    vacuously.
     """
-    assert _parse_rust_warn_only(), "parsed an empty Rust warn-only list"
+    sample = (
+        "pub const WARN_ONLY_CHECKERS: &[&str] = &[\n"
+        '    // "CommentedChecker" in prose\n'
+        '    "FooChecker",\n'
+        "];\n"
+    )
+    assert _parse_warn_only_slice(sample) == {"FooChecker"}
+
+
+def test_promoted_checkers_hard_fail() -> None:
+    """FastLED#4557: these must never silently return to warn-only."""
+    promoted = {
+        "SingletonElisionChecker",
+        "PreferConstexprChecker",
+        "ContainerElementAddressChecker",
+    }
+    assert not promoted & _parse_rust_warn_only()
+    assert not promoted & set(WARN_ONLY_CHECKERS)
