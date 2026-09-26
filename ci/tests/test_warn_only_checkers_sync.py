@@ -20,6 +20,9 @@ RUST_SOURCE = PROJECT_ROOT / "ci" / "lint_cpp_rs" / "src" / "lint_core" / "warn_
 
 def _parse_warn_only_slice(text: str) -> set[str]:
     """Extract the string literals from a Rust WARN_ONLY_CHECKERS slice."""
+    # Strip line comments first so neither a checker name mentioned in prose
+    # nor a `];` inside a comment can affect the match.
+    text = re.sub(r"//[^\n]*", "", text)
     match = re.search(
         r"pub const WARN_ONLY_CHECKERS:\s*&\[&str\]\s*=\s*&\[(.*?)\];",
         text,
@@ -27,10 +30,7 @@ def _parse_warn_only_slice(text: str) -> set[str]:
     )
     assert match is not None, f"WARN_ONLY_CHECKERS not found in {RUST_SOURCE}"
 
-    body = match.group(1)
-    # Strip line comments so a checker name mentioned in prose is not counted.
-    body = re.sub(r"//[^\n]*", "", body)
-    return set(re.findall(r'"([^"]+)"', body))
+    return set(re.findall(r'"([^"]+)"', match.group(1)))
 
 
 def _parse_rust_warn_only() -> set[str]:
@@ -56,7 +56,7 @@ def test_parser_reads_entries() -> None:
     """
     sample = (
         "pub const WARN_ONLY_CHECKERS: &[&str] = &[\n"
-        '    // "CommentedChecker" in prose\n'
+        '    // "CommentedChecker" in prose; a stray ]; here too\n'
         '    "FooChecker",\n'
         "];\n"
     )
