@@ -1087,3 +1087,37 @@ def test_multiple_esp32_spi_buses_is_filtered_to_esp32() -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+class TestExampleFiltersMatchSomeBoard:
+    """Every example @filter must admit at least one known board (#4627)."""
+
+    def test_rp_parallel_io_matches_rp2040_and_rp2350(self) -> None:
+        from ci.boards import create_board
+
+        ino = (
+            Path(__file__).resolve().parents[2]
+            / "examples/SpecialDrivers/RP/Parallel_IO/Parallel_IO.ino"
+        )
+        sketch_filter = parse_filter_from_sketch(ino)
+        assert sketch_filter is not None and not sketch_filter.is_empty()
+        for board_name in ("rp2040", "rp2350"):
+            skip, reason = should_skip_sketch(create_board(board_name), sketch_filter)
+            assert not skip, f"{board_name}: {reason}"
+
+    def test_every_filtered_example_admits_a_board(self) -> None:
+        from ci.boards import ALL
+
+        examples = Path(__file__).resolve().parents[2] / "examples"
+        orphans: list[str] = []
+        for ino in sorted(examples.rglob("*.ino")):
+            sketch_filter = parse_filter_from_sketch(ino)
+            if sketch_filter is None or sketch_filter.is_empty():
+                continue
+            if "nonexistent_disable" in sketch_filter.source:
+                continue  # intentionally disabled sketch
+            if sketch_filter.source == "(platform is native)":
+                continue  # host-only sketches are built by the native runner
+            if all(should_skip_sketch(b, sketch_filter)[0] for b in ALL):
+                orphans.append(f"{ino.relative_to(examples)}: {sketch_filter.source}")
+        assert not orphans, "Filters matching no board:\n" + "\n".join(orphans)
