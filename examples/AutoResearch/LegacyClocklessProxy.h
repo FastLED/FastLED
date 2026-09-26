@@ -111,6 +111,15 @@ inline const char* legacyClocklessBoundDriverName() {
   #endif
 #elif defined(FL_IS_TEENSY_4X)
     return "OBJECT_FLED";
+#elif defined(FL_IS_RP)
+    // RP legacy templates are slim bridges onto PIO0
+    // (BusTraits<Bus::FLEX_IO, 0>), or the M0 bit-bang engine when the PIO
+    // path is disabled (#4623).
+  #if FASTLED_RP2040_CLOCKLESS_PIO
+    return "PIO0";
+  #else
+    return "BIT_BANG";
+  #endif
 #else
     return nullptr;
 #endif

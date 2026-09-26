@@ -132,7 +132,7 @@ class Args:
     # RP PL011 UART engine used by --uart on RP2040/RP2350.
     rp_uart_index: int
     # RP PIO TX engine used by --flex-io on RP2040/RP2350.
-    rp_pio_index: int
+    rp_pio_index: int | None
     # Select both PIO TX engines for a parallel RP run.
     rp_pio_both: bool
 
@@ -343,8 +343,11 @@ See Also:
             dest="rp_pio_index",
             type=int,
             choices=(0, 1, 2),
-            default=1,
-            help="RP PIO engine for --flex-io; PIO2 requires RP2350 (default: 1).",
+            default=None,
+            help=(
+                "RP PIO engine for --flex-io; PIO2 requires RP2350 "
+                "(default: 1, or 0 with --legacy since legacy templates bind PIO0)."
+            ),
         )
         driver_group.add_argument(
             "--rp-engine-both",
