@@ -17,6 +17,14 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 walkdir = "2.5"
 
+# FastLED#4557: warnings in THIS crate are errors, so an unused binding or a
+# dead assignment fails the lint build (and the C++ lint CI job) instead of
+# scrolling past. Package-local on purpose: `[lints]` applies only to
+# fastled-lint's own targets, never to dependencies (their lints are capped),
+# unlike a global RUSTFLAGS=-Dwarnings policy.
+[lints.rust]
+warnings = "deny"
+
 # Dev profile = the production build for this lint tool. Cargo defaults
 # (opt-level=0, incremental=true) plus line-tables-only debuginfo so
 # panic stack traces still resolve to file:line - enough for diagnosing

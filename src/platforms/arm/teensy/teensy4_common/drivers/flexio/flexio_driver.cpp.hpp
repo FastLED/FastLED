@@ -136,18 +136,18 @@ static volatile u32* FLEXIO2_TIMCMP    = (volatile u32*)(kFLEXIO2_BASE + 0x500);
 // Module State
 // ============================================================================
 
-static DMAChannel* sDmaChannel = nullptr;
-static volatile bool sDmaComplete = true;
-static bool sInitialized = false;
-static u8 sFlexIOPin = 0;
-static u32 sLatchCycles = 0;
+static DMAChannel* sDmaChannel = nullptr;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile bool sDmaComplete = true;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static bool sInitialized = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u8 sFlexIOPin = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sLatchCycles = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static FlexIOPinInfo sCurrentPinInfo{};
 
 static constexpr u32 kMaxPixelBytes = 4096;
 DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
-static volatile u32 sDmaErrorCount = 0;
-static volatile u32 sLastDmaEs = 0;
+static volatile u32 sDmaErrorCount = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile u32 sLastDmaEs = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 
 static void flexio_dma_isr() {
     // Guard: deinit() can delete sDmaChannel while a pending IRQ is still

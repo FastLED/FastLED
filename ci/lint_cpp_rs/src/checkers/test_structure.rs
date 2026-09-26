@@ -184,11 +184,11 @@ impl FileContentChecker for TestPathStructureChecker {
         vec![(
             1,
             format!(
-                "Test file has no corresponding source file at matching path. Test is at '{}' but no source file found at 'src/{}', 'src/{}', or 'src/{}'. \n\nREQUIRED ACTIONS (in order of preference):\n  1. RENAME the test to match the source file it's testing (best option)\n  2. MERGE this test into an existing test file that tests the same source — each test\n     file costs compile time, so consolidating into fewer files is strongly preferred\n  3. MOVE to 'tests/misc/{test_name}' if this truly doesn't test a specific source file\n\n⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\nresort for rare infrastructure files that genuinely cannot be organized. AI agents\nshould NEVER add this comment — instead fix the path or consolidate tests.\n\nAvoid creating tests in 'tests/misc/' - prefer mirroring source directory structure.\nTest organization should mirror source organization for maintainability.\nNote: Source matcher checks .h, .hpp, and .cpp.hpp files.",
+                "Test file has no corresponding source file at matching path. Test is at '{}' but no source file found at '{}', '{}', or '{}'. \n\nREQUIRED ACTIONS (in order of preference):\n  1. RENAME the test to match the source file it's testing (best option)\n  2. MERGE this test into an existing test file that tests the same source — each test\n     file costs compile time, so consolidating into fewer files is strongly preferred\n  3. MOVE to 'tests/misc/{test_name}' if this truly doesn't test a specific source file\n\n⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\nresort for rare infrastructure files that genuinely cannot be organized. AI agents\nshould NEVER add this comment — instead fix the path or consolidate tests.\n\nAvoid creating tests in 'tests/misc/' - prefer mirroring source directory structure.\nTest organization should mirror source organization for maintainability.\nNote: Source matcher checks .h, .hpp, and .cpp.hpp files.",
                 python_path_display(&project_rel),
-                python_path_display(&format!("{test_name_no_ext}.h")),
-                python_path_display(&format!("{test_name_no_ext}.hpp")),
-                python_path_display(&format!("{test_name_no_ext}.cpp.hpp")),
+                python_path_display(&expected_h),
+                python_path_display(&expected_hpp),
+                python_path_display(&expected_cpp_hpp),
             ),
         )]
     }

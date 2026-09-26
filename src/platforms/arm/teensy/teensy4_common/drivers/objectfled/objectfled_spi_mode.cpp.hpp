@@ -117,9 +117,9 @@ static constexpr u32 kSpiClockMaxHz = 25000000u;
 // Module state (file-static, ISR-shared)
 // ============================================================================
 
-static DMAChannel* sSpiDmaChannel = nullptr;
-static volatile bool sSpiDmaComplete = true;
-static bool sSpiInitialized = false;
+static DMAChannel* sSpiDmaChannel = nullptr;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile bool sSpiDmaComplete = true;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static bool sSpiInitialized = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
 
 // Pre-encoded DMA bit-pattern buffer. DMAMEM = OCRAM2 (uncached on T4),
@@ -128,8 +128,8 @@ static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
 static DMAMEM u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((used, aligned(32)));
 
 // Saved IOMUXC pad-mux values so deinit() can restore pad ALT5 (GPIO).
-static u32 sSpiSavedMosiMux = 0;
-static u32 sSpiSavedSclkMux = 0;
+static u32 sSpiSavedMosiMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sSpiSavedSclkMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 
 // Diagnostics snapshot captured in wait() BEFORE recovery clears state.
 // Read by `objectfled_spi_read_diagnostics()` after wait() returns.

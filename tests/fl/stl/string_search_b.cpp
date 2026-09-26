@@ -912,7 +912,7 @@ FL_TEST_CASE("String find_last_not_of operations") {
         const fl::string s = "test";
         const char& ref = s.at(0);
         FL_CHECK(ref == 't');
-        FL_CHECK(&ref == &s.at(0));  // same memory location
+        FL_CHECK(&ref == s.c_str());  // same memory location
     }
 
     FL_SUBCASE("at() with zero position") {

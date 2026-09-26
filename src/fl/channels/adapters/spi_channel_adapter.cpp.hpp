@@ -314,9 +314,9 @@ fl::vector<SpiChannelEngineAdapter::ClockPinGroup> SpiChannelEngineAdapter::grou
 
         // Find existing group for this clock pin
         ClockPinGroup* existingGroup = nullptr;
-        for (size_t i = 0; i < groups.size(); i++) {
-            if (groups[i].clockPin == clockPin && groups[i].requestedBus == spiConfig.spiBus) {
-                existingGroup = &groups[i];
+        for (ClockPinGroup& group : groups) {
+            if (group.clockPin == clockPin && group.requestedBus == spiConfig.spiBus) {
+                existingGroup = &group;
                 break;
             }
         }

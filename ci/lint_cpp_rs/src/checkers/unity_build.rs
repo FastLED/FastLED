@@ -184,7 +184,6 @@ fn unity_build_check_single_file(file_path: &str) -> Vec<String> {
 
     let project_root_path = PathBuf::from(&root_prefix);
     let src_dir = project_root_path.join("src");
-    let build_dir = src_dir.join("fl").join("build");
 
     // Build-file path under src/fl/build/<name>.cpp ?
     if project_rel.starts_with("fl/build/") && project_rel.ends_with(".cpp") {

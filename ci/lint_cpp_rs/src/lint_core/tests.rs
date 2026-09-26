@@ -683,6 +683,23 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
     }
 
     #[test]
+    fn singleton_elision_skips_integral_constexpr_expressions() {
+        // FastLED#4557: an integral `constexpr` folds away whatever its RHS
+        // looks like; only non-integral (`auto`, tables, classes) stay flagged.
+        for decl in [
+            "constexpr i32 kX = 4 << 16;",
+            "constexpr u32 kX = kIn * kPer;",
+            "static constexpr fl::u32 kX = kOther / 2;",
+        ] {
+            let src = format!("namespace fl {{\n{decl}\n}}\n");
+            assert!(
+                singleton_elision_violations(&src).is_empty(),
+                "expected `{decl}` to be skipped",
+            );
+        }
+    }
+
+    #[test]
     fn singleton_elision_honors_allow_global_marker() {
         let src = "namespace fl {\n\
                    // FL_LINT_ALLOW_GLOBAL(deliberate)\n\

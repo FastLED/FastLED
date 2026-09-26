@@ -1,6 +1,6 @@
-/// Massive parallel output example using BulkClockless<OFLED> for Teensy 4.0/4.1.
+/// Massive parallel output example using the ObjectFLED driver on Teensy 4.0/4.1.
 ///
-/// This example demonstrates the new BulkClockless API with OFLED (ObjectFLED) peripheral,
+/// ObjectFLED (Bus::FLEX_IO slot 0) drives the strips in parallel via DMA,
 /// supporting up to 42 parallel strips on Teensy 4.1 or 16 strips on Teensy 4.0.
 ///
 /// Key Features:
@@ -26,7 +26,6 @@
 #define PIN_STRIP2 1
 #define PIN_STRIP3 4
 
-// All strips must have the same length in a single BulkClockless instance
 #define NUM_LEDS 100
 fl::CRGB strip1[NUM_LEDS];
 fl::CRGB strip2[NUM_LEDS];
@@ -39,7 +38,7 @@ void wait_for_serial(uint32_t timeout = 3000) {
 
 void print_startup_info() {
     Serial.println("\n*********************************************");
-    Serial.println("* TeensyMassiveParallel - BulkClockless     *");
+    Serial.println("* TeensyMassiveParallel - ObjectFLED        *");
     Serial.println("*********************************************");
     FL_DBG("CPU speed: " << (F_CPU_ACTUAL / 1000000) << " MHz   Temp: " << tempmonGetTemp()
            << " C  " << (tempmonGetTemp() * 9.0 / 5.0 + 32) << " F");
@@ -54,18 +53,14 @@ void setup() {
     Serial.begin(115200);
     wait_for_serial(3000);
 
-    // Add LED strips using the new BulkClockless API
-    // All strips in a single instance must have the same length
-    auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
-        {PIN_STRIP1, strip1, NUM_LEDS, fl::ScreenMap()},
-        {PIN_STRIP2, strip2, NUM_LEDS, fl::ScreenMap()},
-        {PIN_STRIP3, strip3, NUM_LEDS, fl::ScreenMap()}
-    });
+    // Route every clockless strip through ObjectFLED (Bus::FLEX_IO slot 0
+    // on Teensy 4.x), which drives all strips in parallel via DMA.
+    FastLED.setExclusiveDriver<fl::Bus::FLEX_IO, 0>();
 
-    // Optional: Set per-strip color correction
-    bulk.get(PIN_STRIP1)->setCorrection(TypicalLEDStrip);
-    bulk.get(PIN_STRIP2)->setCorrection(TypicalSMD5050);
-    bulk.get(PIN_STRIP3)->setCorrection(UncorrectedColor);
+    // Per-strip color correction is set on each controller.
+    FastLED.addLeds<WS2812B, PIN_STRIP1, GRB>(strip1, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<WS2812B, PIN_STRIP2, GRB>(strip2, NUM_LEDS).setCorrection(TypicalSMD5050);
+    FastLED.addLeds<WS2812B, PIN_STRIP3, GRB>(strip3, NUM_LEDS).setCorrection(UncorrectedColor);
 
     FastLED.setBrightness(8);
     print_startup_info();
