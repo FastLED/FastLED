@@ -1,7 +1,8 @@
 """ESP32-S3 NEOPIXEL Blink flash-bloat regression gate (FastLED #2886 Stage 6).
 
 Asserts `bash bloat esp32s3 --build` produces a `report.json` whose
-`total_flash` is at most the pinned baseline in
+`image_flash` (the firmware image size from ELF section headers; #4468)
+is at most the pinned baseline in
 `tests/data/esp32s3_bloat_baseline.txt`.
 
 THE BASELINE IS A RATCHET, AND IT MOVES IN BOTH DIRECTIONS
@@ -267,6 +268,27 @@ def linked_pipeline_symbols(report: dict[str, Any]) -> list[str]:
     return sorted(found)
 
 
+@typechecked
+def gate_flash(report: dict[str, Any]) -> int:
+    """The byte count this gate compares: `image_flash` from report.json.
+
+    `image_flash` is the sum of allocated, file-backed ELF sections, read by
+    fbuild from section headers (FastLED/fbuild#1456). `total_flash` is the sum
+    of attributed symbol rows; it depended on which `nm` ran and put a local
+    build ~4 KB over CI for the same image (#4468), so it is not used here.
+    A missing or malformed value raises ValueError: falling back to
+    `total_flash` would compare a different metric against the baseline.
+    """
+
+    value = report.get("image_flash")
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(
+            f"report.json has no usable `image_flash` (got {value!r}); fbuild "
+            "older than the pyproject.toml pin? Run `uv sync`."
+        )
+    return value
+
+
 def run_bloat(skip_build: bool) -> None:
     cmd: list[str] = ["bash", "bloat", "esp32s3"]
     if not skip_build:
@@ -343,7 +365,11 @@ def main() -> int:
         return 2
 
     data = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
-    total_flash = int(data["total_flash"])
+    try:
+        image_flash = gate_flash(data)
+    except ValueError as error:
+        print(f"esp32s3-bloat-regression: {error}", file=sys.stderr)
+        return 2
 
     try:
         leaked = linked_pipeline_symbols(data)
@@ -366,20 +392,20 @@ def main() -> int:
         )
         return 1
 
-    delta = total_flash - baseline
+    delta = image_flash - baseline
     if delta <= 0:
         headroom = -delta
         if headroom > kHeadroomTolerance:
             print(
-                f"esp32s3-bloat-regression: FAIL — total_flash="
-                f"{total_flash:,} B is {headroom:,} B UNDER "
+                f"esp32s3-bloat-regression: FAIL — image_flash="
+                f"{image_flash:,} B is {headroom:,} B UNDER "
                 f"baseline={baseline:,} B.",
                 file=sys.stderr,
             )
             print(
                 "esp32s3-bloat-regression: a saving has to be claimed. Set "
                 f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} to "
-                f"{total_flash} in this PR. Left unclaimed, the slack hides "
+                f"{image_flash} in this PR. Left unclaimed, the slack hides "
                 "the next regression inside it -- which is exactly what "
                 "happened before #4200, where 232 B of stale headroom made a "
                 "429 B cost print as 197 B.",
@@ -387,21 +413,21 @@ def main() -> int:
             )
             return 1
         print(
-            f"esp32s3-bloat-regression: PASS — total_flash={total_flash:,} B "
+            f"esp32s3-bloat-regression: PASS — image_flash={image_flash:,} B "
             f"<= baseline={baseline:,} B (headroom={headroom:,} B).",
             flush=True,
         )
         return 0
 
     print(
-        f"esp32s3-bloat-regression: FAIL — total_flash={total_flash:,} B "
+        f"esp32s3-bloat-regression: FAIL — image_flash={image_flash:,} B "
         f"exceeds baseline={baseline:,} B by {delta:,} B.",
         file=sys.stderr,
     )
     print(
         "esp32s3-bloat-regression: if the cost is intentional, set "
         f"{BASELINE_FILE.relative_to(PROJECT_ROOT).as_posix()} to "
-        f"{total_flash} in this PR and write the reason into that file as a "
+        f"{image_flash} in this PR and write the reason into that file as a "
         "`#` comment -- an upward move is a decision and should read like one "
         "in git log. Otherwise, this is where the flash went:",
         file=sys.stderr,

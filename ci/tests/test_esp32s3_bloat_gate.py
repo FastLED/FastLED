@@ -20,6 +20,7 @@ from typeguard import typechecked
 
 from tests.test_esp32s3_bloat_regression import (
     comment_lines,
+    gate_flash,
     kHeadroomTolerance,
     linked_pipeline_symbols,
     parse_baseline,
@@ -214,3 +215,24 @@ def test_an_unreadable_report_is_refused_not_passed(report: dict[str, Any]) -> N
 
     with pytest.raises(ValueError):
         linked_pipeline_symbols(report)
+
+
+def test_the_gate_reads_image_flash_not_the_attributed_sum() -> None:
+    # #4468: `total_flash` sums attributed symbol rows and moved ~4 KB between
+    # machines for byte-identical images; `image_flash` comes from the ELF
+    # section headers (FastLED/fbuild#1456) and does not.
+    report: dict[str, Any] = {"total_flash": 390_344, "image_flash": 448_835}
+    assert gate_flash(report) == 448_835
+
+
+@pytest.mark.parametrize("value", [None, True, "448835", -1])
+def test_a_report_without_a_usable_image_flash_is_an_infra_failure(
+    value: object,
+) -> None:
+    # An fbuild older than the pin emits no `image_flash`; falling back to
+    # `total_flash` would compare two different metrics against one baseline.
+    report: dict[str, Any] = {"total_flash": 390_344}
+    if value is not None:
+        report["image_flash"] = value
+    with pytest.raises(ValueError):
+        gate_flash(report)
