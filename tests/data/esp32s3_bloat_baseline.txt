@@ -1,3 +1,15 @@
+# 2026-09-26, PR #4655 (issue #4468, FastLED/fbuild#1456): metric change,
+# 349854 -> 401971. The gate now compares report.json `image_flash` (the
+# allocated, file-backed ELF section bytes fbuild 2.5.28 reads from section
+# headers) instead of `total_flash` (the attributed-symbol sum). It is not code
+# growth: the same CI run (36235931865) measured total_flash=349,825 B, within
+# 29 B of the old pin. `total_flash` put a local build ~4 KB over CI because
+# host `nm` gave zero-sized labels such as `_stext` a size. With fbuild 2.5.28
+# the local build of this commit measures image_flash=401,823 B and
+# total_flash=349,658 B, so local and CI now differ by ~150 B. That remainder
+# is locally cached framework objects, not attribution. CI stays the
+# authority for this pin.
+
 # 2026-09-25, PR #4632 (after merging master fd9ffbbeea): +19 B,
 # 349835 -> 349854. Layout drift from master commits merged into the branch
 # after the -17,270 B claim above was measured (CI run 36104596347). #4632
@@ -280,4 +292,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-349854
+401971
