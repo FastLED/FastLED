@@ -1100,6 +1100,7 @@ class TestExampleFiltersMatchSomeBoard:
             / "examples/SpecialDrivers/RP/Parallel_IO/Parallel_IO.ino"
         )
         sketch_filter = parse_filter_from_sketch(ino)
+        assert sketch_filter is not None and not sketch_filter.is_empty()
         for board_name in ("rp2040", "rp2350"):
             skip, reason = should_skip_sketch(create_board(board_name), sketch_filter)
             assert not skip, f"{board_name}: {reason}"
