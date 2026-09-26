@@ -1,6 +1,6 @@
 name: bloat regression esp32s3
 
-# Asserts that `bash bloat esp32s3` total_flash equals the pinned
+# Asserts that `bash bloat esp32s3` image_flash equals the pinned
 # baseline in tests/data/esp32s3_bloat_baseline.txt, within build noise.
 # The baseline is a ratchet and it moves in BOTH directions: a PR that
 # lands a saving must re-pin it down, and a PR whose cost is intentional

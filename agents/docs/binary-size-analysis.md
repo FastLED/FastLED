@@ -49,7 +49,7 @@ Every run writes BOTH files side by side under `.build/symbols/<board>/`:
 
 | File | What's in it |
 |---|---|
-| `report.json` | Machine-readable: `{ symbols: [...], sections: [...], total_flash, total_ram, ... }`. Per-symbol rows carry `archive`, `object`, `output_section`, `source`, `region`, demangled `demangled` name. Suitable for diffing two builds. |
+| `report.json` | Machine-readable: `{ symbols: [...], sections: [...], total_flash, image_flash, total_ram, ... }`. `total_flash` is the sum of attributed symbol rows (a breakdown). `image_flash` (fbuild >= 2.5.28) is the allocated, file-backed ELF section bytes, independent of `nm`; compare it across machines, and it is what the ESP32-S3 bloat gate uses (#4468). Per-symbol rows carry `archive`, `object`, `output_section`, `source`, `region`, demangled `demangled` name. Suitable for diffing two builds. |
 | `report.md` | Human-readable GitHub-style tables: top FLASH symbols, top RAM symbols, per-archive flash roll-up. Renders inline on PRs. |
 
 ## Lessons baked in (do not re-discover)
