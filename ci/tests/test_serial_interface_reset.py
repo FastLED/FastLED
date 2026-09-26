@@ -3,8 +3,142 @@
 from __future__ import annotations
 
 import asyncio
+import sys
+import types
 
 import pytest
+
+
+def test_factory_prefers_supported_native_async_monitor(monkeypatch) -> None:
+    """The complete async API bypasses the thread-pool compatibility path."""
+    from ci.util.serial_interface import create_serial_interface
+
+    class _NativeMonitor:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+            self.writes: list[str] = []
+            self.read_count = 0
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args) -> None:
+            return None
+
+        async def read_lines(self, timeout: float = 30.0) -> list[str]:
+            self.read_count += 1
+            return ["reply", "following"]
+
+        async def write(self, data: str) -> int:
+            self.writes.append(data)
+            return len(data)
+
+        async def in_waiting(self) -> int:
+            return 0
+
+        async def reset_input_buffer(self) -> None:
+            return None
+
+        async def reset_device(self, **_kwargs) -> bool:
+            return True
+
+    fake_api = types.ModuleType("fbuild.api")
+    fake_api.AsyncSerialMonitor = _NativeMonitor
+    fake_api.SerialMonitor = type(
+        "SyncMustNotBeUsed",
+        (),
+        {"__init__": lambda self, **kwargs: pytest.fail("sync fallback used")},
+    )
+    monkeypatch.setitem(sys.modules, "fbuild.api", fake_api)
+
+    adapter = create_serial_interface("TEST_PORT")
+    assert type(adapter).__name__ == "NativeFbuildSerialAdapter"
+
+    async def exercise() -> None:
+        await adapter.connect()
+        await adapter.write("hello")
+        first_read = adapter.read_lines(timeout=1.0)
+        assert await anext(first_read) == "reply"
+        await first_read.aclose()
+        assert [line async for line in adapter.read_lines(timeout=1.0)] == ["following"]
+        assert await adapter.reset_device(None)
+        await adapter.close()
+
+    asyncio.run(exercise())
+    assert adapter._monitor.writes == ["hello"]
+    assert adapter._monitor.read_count == 1
+
+
+def test_factory_falls_back_when_native_api_is_incomplete(monkeypatch) -> None:
+    """Older fbuild wheels expose an experimental, incompatible async class."""
+    from ci.util.serial_interface import FbuildSerialAdapter, create_serial_interface
+
+    class _OldAsyncMonitor:
+        async def read_lines(self, timeout_secs: float = 30.0) -> list[str]:
+            return []
+
+    fake_api = types.ModuleType("fbuild.api")
+    fake_api.AsyncSerialMonitor = _OldAsyncMonitor
+    fake_api.SerialMonitor = lambda **kwargs: object()
+    monkeypatch.setitem(sys.modules, "fbuild.api", fake_api)
+
+    adapter = create_serial_interface("TEST_PORT")
+    try:
+        assert isinstance(adapter, FbuildSerialAdapter)
+    finally:
+        adapter._executor.shutdown(wait=True)
+
+
+def test_factory_falls_back_when_native_api_is_absent(monkeypatch) -> None:
+    """Wheels predating AsyncSerialMonitor keep using the sync adapter."""
+    from ci.util.serial_interface import FbuildSerialAdapter, create_serial_interface
+
+    fake_api = types.ModuleType("fbuild.api")
+    fake_api.SerialMonitor = lambda **kwargs: object()
+    monkeypatch.setitem(sys.modules, "fbuild.api", fake_api)
+
+    adapter = create_serial_interface("TEST_PORT")
+    try:
+        assert isinstance(adapter, FbuildSerialAdapter)
+    finally:
+        adapter._executor.shutdown(wait=True)
+
+
+def test_native_adapter_recovers_lost_daemon_once(monkeypatch) -> None:
+    """The native path retains post-deploy daemon restart behavior."""
+    from collections import deque
+
+    from ci.util import serial_interface
+    from ci.util.serial_interface import NativeFbuildSerialAdapter
+
+    class _Monitor:
+        def __init__(self, fails: bool) -> None:
+            self.fails = fails
+            self.enters = 0
+
+        async def __aenter__(self):
+            self.enters += 1
+            if self.fails:
+                raise ConnectionError("failed to connect to daemon WebSocket: refused")
+            return self
+
+    first = _Monitor(fails=True)
+    second = _Monitor(fails=False)
+    recovered = iter([second])
+    restarts: list[bool] = []
+    monkeypatch.setattr(
+        serial_interface, "ensure_fbuild_daemon", lambda: restarts.append(True)
+    )
+
+    adapter = object.__new__(NativeFbuildSerialAdapter)
+    adapter._monitor = first
+    adapter._new_monitor = lambda: next(recovered)
+    adapter._pending_lines = deque()
+    asyncio.run(adapter.connect())
+
+    assert restarts == [True]
+    assert first.enters == second.enters == 1
+    assert adapter._monitor is second
 
 
 def test_serial_interface_protocol_has_reset_device() -> None:
