@@ -20,6 +20,6 @@
 /// @reddit: reddit.com/u/Tiny_Structure_7
 /// FastLED integration by Zach Vorhies
 
-// @filter: (platform is teensy) and (target is Teensy40 or Teensy41)
+// @filter: (platform is teensy) and (board is teensy40 or teensy41)
 
 #include "./TeensyMassiveParallel.h"

@@ -41,7 +41,7 @@
 /// #include <FastLED.h>
 /// ```
 
-// @filter: (platform is rp2040)
+// @filter: (platform is rp)
 
 // Enable automatic parallel grouping driver
 #define FASTLED_RP2040_CLOCKLESS_PIO_AUTO 1
