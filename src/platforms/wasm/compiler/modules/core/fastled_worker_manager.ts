@@ -579,6 +579,9 @@ export class FastLEDWorkerManager {
    * @param {Object} payload - Frame render data
    */
   handleFrameRendered(payload) {
+    // In worker mode FastLED_onFrame never runs on the main thread, so count
+    // the worker's frames here (the e2e smoke test reads this counter).
+    globalThis.fastLEDFrameCount = (globalThis.fastLEDFrameCount || 0) + 1;
     // Emit event for frame rendering
     fastLEDEvents.emit('frame:rendered', {
       source: 'background_worker',
