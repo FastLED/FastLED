@@ -3,8 +3,109 @@
 from __future__ import annotations
 
 import asyncio
+import sys
+from types import ModuleType
 
 import pytest
+
+
+def test_factory_uses_supported_async_monitor(monkeypatch) -> None:
+    """The supported fbuild API runs without the sync thread adapter."""
+    from ci.util import serial_interface
+
+    api = ModuleType("fbuild.api")
+
+    class AsyncMonitor:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+            self.writes = []
+            self.read_count = 0
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return False
+
+        async def write(self, data):
+            self.writes.append(data)
+            return len(data)
+
+        async def read_lines(self, timeout=30.0):
+            self.read_count += 1
+            if self.read_count == 1:
+                return ["reply"]
+            await asyncio.sleep(timeout)
+            return []
+
+        async def reset_device(self, board=None, wait_for_output=False, timeout=5.0):
+            assert wait_for_output and timeout == 5.0
+            return True
+
+    api.AsyncSerialMonitor = AsyncMonitor
+    monkeypatch.setitem(sys.modules, "fbuild.api", api)
+    monkeypatch.setattr(
+        serial_interface, "_supported_async_fbuild", lambda: AsyncMonitor
+    )
+
+    adapter = serial_interface.create_serial_interface("COM9")
+
+    async def exercise():
+        await adapter.connect()
+        await adapter.write("ping")
+        lines = [line async for line in adapter.read_lines(0.01)]
+        reset = await adapter.reset_device(None)
+        await adapter.close()
+        return lines, reset
+
+    lines, reset = asyncio.run(exercise())
+    assert lines == ["reply"]
+    assert reset
+    assert adapter._monitor.writes == ["ping"]
+    assert not hasattr(adapter, "_executor")
+
+
+def test_async_monitor_requires_supported_fbuild_version(monkeypatch) -> None:
+    """Older experimental async APIs keep using the sync fallback."""
+    from ci.util import serial_interface
+
+    api = ModuleType("fbuild.api")
+    marker = object()
+    api.AsyncSerialMonitor = marker
+    monkeypatch.setitem(sys.modules, "fbuild.api", api)
+
+    monkeypatch.setattr(serial_interface, "version", lambda name: "2.5.28")
+    assert serial_interface._supported_async_fbuild() is None
+    monkeypatch.setattr(serial_interface, "version", lambda name: "2.5.29")
+    assert serial_interface._supported_async_fbuild() is marker
+
+
+def test_async_adapter_recovers_lost_daemon(monkeypatch) -> None:
+    from ci.util import serial_interface
+
+    attempts = []
+    restarted = []
+
+    class AsyncMonitor:
+        def __init__(self, **kwargs):
+            self.fail = not attempts
+            attempts.append(self)
+
+        async def __aenter__(self):
+            if self.fail:
+                raise RuntimeError(
+                    "failed to connect to daemon WebSocket: connection refused"
+                )
+            return self
+
+    monkeypatch.setattr(
+        serial_interface, "ensure_fbuild_daemon", lambda: restarted.append(True)
+    )
+    adapter = serial_interface.AsyncFbuildSerialAdapter(AsyncMonitor, "COM9")
+    asyncio.run(adapter.connect())
+    assert len(attempts) == 2
+    assert restarted == [True]
+    assert adapter._monitor is attempts[-1]
 
 
 def test_serial_interface_protocol_has_reset_device() -> None:

@@ -1,19 +1,21 @@
 """Normalized serial interface for fbuild and pyserial backends.
 
-Provides a common async interface that both pyserial and fbuild serial monitors
-can be accessed through. The fbuild adapter offloads sync calls to a thread
-executor when running inside an async event loop.
+Provides a common async interface for pyserial and fbuild serial monitors.
+Supported fbuild releases use the native async monitor. Older releases keep
+the thread executor adapter.
 """
 
 from __future__ import annotations
 
 import _thread
 import asyncio
+import re
 import threading
 import time
 import warnings
 from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
+from importlib.metadata import PackageNotFoundError, version
 from typing import Protocol, runtime_checkable
 
 import serial as pyserial
@@ -331,6 +333,96 @@ class FbuildSerialAdapter:
             return False
 
 
+def _supported_async_fbuild():  # type: ignore[no-untyped-def]
+    """Use only the supported async contract, introduced in fbuild 2.5.29."""
+    try:
+        installed = version("fbuild")
+    except PackageNotFoundError:
+        return None
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)", installed)
+    if match is None or tuple(map(int, match.groups())) < (2, 5, 29):
+        return None
+    from fbuild.api import AsyncSerialMonitor
+
+    return AsyncSerialMonitor
+
+
+class AsyncFbuildSerialAdapter:
+    """Native asyncio adapter for the supported fbuild serial monitor."""
+
+    def __init__(
+        self,
+        monitor_type,  # type: ignore[no-untyped-def]
+        port: str,
+        baud_rate: int = 115200,
+        auto_reconnect: bool = True,
+        verbose: bool = False,
+    ) -> None:
+        self._monitor_type = monitor_type
+        self._monitor_args = {
+            "port": port,
+            "baud_rate": baud_rate,
+            "auto_reconnect": auto_reconnect,
+            "verbose": verbose,
+        }
+        self._monitor = self._new_monitor()
+
+    def _new_monitor(self):  # type: ignore[no-untyped-def]
+        return self._monitor_type(**self._monitor_args)
+
+    @staticmethod
+    def _restart_daemon() -> None:
+        try:
+            ensure_fbuild_daemon()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+
+    async def connect(self) -> None:
+        try:
+            await self._monitor.__aenter__()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as first_error:
+            if not FbuildSerialAdapter._is_daemon_connection_error(first_error):
+                raise
+            await asyncio.to_thread(self._restart_daemon)
+            self._monitor = self._new_monitor()
+            try:
+                await self._monitor.__aenter__()
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as recovery_error:
+                raise recovery_error from first_error
+
+    async def close(self) -> None:
+        await self._monitor.__aexit__(None, None, None)
+
+    async def write(self, data: str) -> None:
+        await self._monitor.write(data)
+
+    async def read_lines(self, timeout: float) -> AsyncIterator[str]:
+        deadline = time.monotonic() + timeout
+        while (remaining := deadline - time.monotonic()) > 0:
+            for line in await self._monitor.read_lines(timeout=remaining):
+                yield line
+
+    async def reset_device(self, board: str | None) -> bool:
+        try:
+            return bool(
+                await self._monitor.reset_device(
+                    board=board, wait_for_output=True, timeout=5.0
+                )
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            return False
+
+
 def create_serial_interface(
     port: str,
     baud_rate: int = 115200,
@@ -348,7 +440,7 @@ def create_serial_interface(
         verbose: Enable verbose debug output
 
     Returns:
-        SerialInterface implementation (PySerialAdapter or FbuildSerialAdapter)
+        SerialInterface implementation.
     """
     if use_pyserial:
         return PySerialAdapter(
@@ -357,10 +449,14 @@ def create_serial_interface(
             auto_reconnect=auto_reconnect,
             verbose=verbose,
         )
-    else:
-        return FbuildSerialAdapter(
-            port=port,
-            baud_rate=baud_rate,
-            auto_reconnect=auto_reconnect,
-            verbose=verbose,
+    monitor_type = _supported_async_fbuild()
+    if monitor_type is not None:
+        return AsyncFbuildSerialAdapter(
+            monitor_type, port, baud_rate, auto_reconnect, verbose
         )
+    return FbuildSerialAdapter(
+        port=port,
+        baud_rate=baud_rate,
+        auto_reconnect=auto_reconnect,
+        verbose=verbose,
+    )
