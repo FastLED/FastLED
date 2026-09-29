@@ -26,15 +26,15 @@ from pathlib import Path, PurePosixPath
 from urllib.request import urlopen
 
 
-VERSION = "0.2.2"
-# reld v0.2.2 SHA256SUMS, one entry per supported host triple.
+VERSION = "0.2.3"
+# reld v0.2.3 SHA256SUMS, one entry per supported host triple.
 SHA256: dict[str, str] = {
-    "x86_64-unknown-linux-gnu": "1f040907a4305b4a1c11206ce0f21b2ff7443cafa325a1cfa3d337bb440b2297",
-    "aarch64-unknown-linux-gnu": "1da0a8db650adb62d19f85381c2e45e7d745a1d1ea47f774728a30e970773eac",
-    "x86_64-apple-darwin": "80b5d294fa9cfcce56a7afd080d373f6d509555c2d4d37a7f869eda8c93e4728",
-    "aarch64-apple-darwin": "9636c92d06a4f0ab3648986c8b9c2e63c507bdb13c4042af1eb4945e03aa7165",
-    "x86_64-pc-windows-msvc": "d3c720d928959a1db1f718a2f7f02c8e23998ee14e5e02f8d13ada17d3429873",
-    "aarch64-pc-windows-msvc": "b23cbfb5fa8f070930f5a05ae1aa91f3a29e8c1897397d9a759fc176b315cbd0",
+    "x86_64-unknown-linux-gnu": "33927b4b243c418ce81094ccb0741ddd4d06cf77fc2b56d29d9cc8a6b8ff297d",
+    "aarch64-unknown-linux-gnu": "45e89ee11e838f66f37cf6cd5fe35178d296219cd3a0d92172e1740cb75df3f1",
+    "x86_64-apple-darwin": "073565e1fff66671ab27bbc83f4fe31b9dd6bcdc2163ce1e06b6eb5f7b185e8f",
+    "aarch64-apple-darwin": "d688c529eda43a18bed4477d0aa5fb7bd1982caf84b2689e850e5f88317e20d8",
+    "x86_64-pc-windows-msvc": "be053e50da77dfecd559d764bd4f3659da3e84a278b425849ee95c5de50f699f",
+    "aarch64-pc-windows-msvc": "eba79aa6c769fd825f3f842838c88bcbb0bbf5b715c19a16b05c4bd377261a4d",
 }
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
