@@ -57,6 +57,10 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/vector.h"
 #include "platforms/arm/lpc/drivers/sct_dma/channel_engine_lpc_sct_dma.h" // ok platform headers — AutoResearch driver-specific test needs the concrete engine type
+// The LPC BusTraits<Bus::BIT_BANG> specialization this file names. It used to
+// arrive only via clockless_channel_lpc.h, which is skipped when another
+// ClocklessController was already picked, leaving the type incomplete.
+#include "platforms/arm/lpc/drivers/sct_dma/bus_traits.h" // ok platform headers — same reason
 
 namespace autoresearch {
 namespace pwm_dma_cl {
