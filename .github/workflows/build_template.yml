@@ -190,6 +190,13 @@ jobs:
             if [ -f "$daemon_log" ]; then
               echo "--- fbuild daemon.log: warnings/errors and signal exits (last 60) ---"
               grep -aE "WARN|ERROR|exit_code=-|kill|signal" "$daemon_log" | tail -n 60 || true
+              echo "--- fbuild daemon.log: daemon lifecycle (start/idle/evict/shutdown/exit) ---"
+              grep -aiE "daemon starting|startup complete|identity|is idle|eviction|shutdown|exiting|yielding|restart|cancel|disconnect|abort|terminat" "$daemon_log" | tail -n 80 || true
+              echo "--- fbuild daemon.log: compile_end with nonzero exit ---"
+              grep -a "compile_end" "$daemon_log" | grep -av "exit_code=0" | tail -n 40 || true
+              echo "--- daemon.log size/lines: $(wc -c < "$daemon_log") bytes, $(wc -l < "$daemon_log") lines; first line: ---"
+              head -n 1 "$daemon_log"
+              cp "$daemon_log" .build/fbuild-daemon.log.txt || true  # uploaded with the .build artifact on failure
               echo "--- fbuild daemon.log: last 40 lines ---"
               tail -n 40 "$daemon_log"
             else
