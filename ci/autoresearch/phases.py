@@ -144,6 +144,43 @@ def _rp_legacy_pio_index_invalid(args: Args, environment: str | None) -> bool:
     return False
 
 
+def _legacy_lane_rx_overlap(
+    args: Args, max_lanes: int, environment: str | None
+) -> bool:
+    """Report and return True when a legacy multi-lane TX lane drives the RX pin.
+
+    Lane i transmits on ``tx_pin + i`` and only lane 0 is captured, so RX on
+    ``tx_pin`` is the supported RMT internal loopback while RX on lanes
+    1..N-1 reads garbage and reports a misleading zero_capture. Without
+    ``--rx-pin`` the firmware default for ``environment`` applies; with no
+    environment yet (auto-detect) the check is re-run after detection.
+    """
+    if not args.legacy or args.tx_pin is None or max_lanes < 2:
+        return False
+    rx_pin = args.rx_pin
+    if rx_pin is None and environment:
+        rx_pin = default_pins_for_environment(environment)[1]
+    max_pin = args.tx_pin + max_lanes - 1
+    if rx_pin is None or not args.tx_pin < rx_pin <= max_pin:
+        return False
+    print(
+        f"\u274c Error: --legacy {max_lanes} lanes use TX pins "
+        f"{args.tx_pin}-{max_pin}, which include RX pin {rx_pin}; "
+        "wire the loopback to an RX pin outside lanes 1+"
+    )
+    return True
+
+
+def _legacy_command_max_lanes(commands: list[dict[str, Any]]) -> int:
+    """Largest lane count any runSingleTest command requests."""
+    counts = [
+        len(params.get("laneSizes", []))
+        for params in (command.get("params") for command in commands)
+        if isinstance(params, dict)
+    ]
+    return max(counts, default=1)
+
+
 def _driver_name_for_environment(
     driver: str,
     final_environment: str | None,
@@ -860,6 +897,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
                 )
                 return 1
+            if _legacy_lane_rx_overlap(args, requested_max_lanes, final_environment):
+                return 1
         min_lanes = requested_min_lanes
         max_lanes = requested_max_lanes
         legacy_chipset_names = {
@@ -1509,6 +1548,12 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
     ctx.final_environment = _canonical_board_environment(ctx.final_environment)
     # Board auto-detection can resolve to RP after parse-time validation ran.
     if _rp_legacy_pio_index_invalid(args, ctx.final_environment):
+        return 1
+    if _legacy_lane_rx_overlap(
+        args,
+        _legacy_command_max_lanes(ctx.json_rpc_commands),
+        ctx.final_environment,
+    ):
         return 1
     _normalize_deferred_driver_names(ctx)
 

@@ -27,6 +27,8 @@ from ci.autoresearch.phases import (
     _build_environment_for_mode,
     _is_valid_rp_concurrency_result,
     _is_valid_rp_pio_parallel_result,
+    _legacy_command_max_lanes,
+    _legacy_lane_rx_overlap,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -599,6 +601,73 @@ class TestParseArgsAndBuildCommands:
         assert params["laneSizes"] == [100, 100, 100]
         assert params["legacyChipsets"] == ["WS2814", "WS2814", "WS2814"]
         assert "legacyRgbw" not in params
+
+    def test_legacy_multi_lane_rejects_rx_pin_inside_tx_lanes(
+        self, fake_project_dir: Path
+    ) -> None:
+        # 4 lanes from TX 0 drive GPIO 0-3; RX on GPIO 1 would be driven too.
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            lanes="4",
+            tx_pin=0,
+            rx_pin=1,
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
+    @pytest.mark.parametrize(
+        ("rx_pin", "environment", "rejected"),
+        [
+            (3, "esp32c6", True),  # last lane pin
+            (4, "esp32c6", False),  # just past the lanes
+            (0, "esp32c6", False),  # lane 0 itself: RMT internal loopback
+            (None, "esp32s3", True),  # default RX 2 is lane 2
+            (None, "esp32c6", False),  # default RX 0 is lane 0
+        ],
+    )
+    def test_legacy_multi_lane_rx_pin_bounds(
+        self,
+        fake_project_dir: Path,
+        rx_pin: int | None,
+        environment: str,
+        rejected: bool,
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            lanes="4",
+            tx_pin=0,
+            rx_pin=rx_pin,
+            environment_positional=environment,
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert (result == 1) is rejected
+
+    def test_legacy_lane_rx_overlap_rechecks_after_auto_detect(self) -> None:
+        # Parse time with no board: the default RX is unknown, so it passes.
+        # After detection resolves esp32s3 (default RX 2), lane 2 conflicts.
+        args = _make_args(legacy=True, tx_pin=0, rx_pin=None)
+        assert not _legacy_lane_rx_overlap(args, 4, None)
+        assert _legacy_lane_rx_overlap(args, 4, "esp32s3")
+        assert not _legacy_lane_rx_overlap(args, 1, "esp32s3")
+
+    def test_legacy_command_max_lanes(self) -> None:
+        commands = [
+            {"method": "setPins", "params": [{"txPin": 0}]},
+            {"method": "runSingleTest", "params": {"laneSizes": [10, 10]}},
+            {"method": "runSingleTest", "params": {"laneSizes": [10] * 4}},
+        ]
+        assert _legacy_command_max_lanes(commands) == 4
+        assert _legacy_command_max_lanes([]) == 1
 
     def test_ws2818_esp32s3_rmt_legacy_canonical_command(
         self, fake_project_dir: Path
