@@ -19,12 +19,33 @@ FL_NO_INLINE const char* log_kind_name(log_kind kind) FL_NO_EXCEPT {
     return "LOG";
 }
 
+// Writes "<file>(<line>): <KIND>: " with plain prints. Deliberately not
+// fl::printf: every log site reaches this prefix, so a format string here
+// linked the whole printf engine into images whose own logs never format
+// anything (~3 KB on the LPC845; FastLED#4671).
 FL_NO_INLINE void log_emit_prefix(log_kind kind, const char* file,
                                   int line) FL_NO_EXCEPT {
-    fl::printf("%s(%d): %s: ", file, line, log_kind_name(kind));
+    char digits[12];  // "-2147483648" + NUL
+    char* p = digits + sizeof(digits);
+    *--p = '\0';
+    unsigned magnitude = line < 0 ? 0u - static_cast<unsigned>(line)
+                                  : static_cast<unsigned>(line);
+    do {
+        *--p = static_cast<char>('0' + magnitude % 10u);
+        magnitude /= 10u;
+    } while (magnitude != 0u);
+    if (line < 0) {
+        *--p = '-';
+    }
+    fl::print(file);
+    fl::print("(");
+    fl::print(p);
+    fl::print("): ");
+    fl::print(log_kind_name(kind));
+    fl::print(": ");
 }
 
-FL_NO_INLINE void log_emit_newline() FL_NO_EXCEPT { fl::printf("\n"); }
+FL_NO_INLINE void log_emit_newline() FL_NO_EXCEPT { fl::print("\n"); }
 
 // =============================================================================
 // Centralised log emit (#2963 Proposal B, Option 3)

@@ -341,4 +341,53 @@ FL_TEST_CASE("onBeforeEncode() hook fires once per accepted frame, not on droppe
     FL_CHECK_EQ(controller.beforeEncodeCount, 1);
 }
 
+
+// --- Direct-show mode (small-memory tier, FastLED#4671) -------------------
+// On !FL_PLATFORM_HAS_LARGE_MEMORY the bridge bypasses ChannelManager: it
+// never registers the driver and calls driver.show() itself, so the
+// registry (~3 KB) is not linked. Exercised here explicitly via DIRECT_SHOW.
+
+inline SlimBridgeMockDriver& directDriverInstance() {
+    static SlimBridgeMockDriver driver;
+    return driver;
+}
+
+inline int& directRegisterCount() {
+    static int count = 0;
+    return count;
+}
+
+struct DirectDriverTraits {
+    static IChannelDriver& instance() FL_NO_EXCEPT { return directDriverInstance(); }
+    static void registerWithManager() FL_NO_EXCEPT { ++directRegisterCount(); }
+};
+
+using DirectController = SlimBridgeController<7, TIMING_WS2812_800KHZ, GRB, 280,
+                                              DirectDriverTraits, 0, /*DIRECT_SHOW=*/true>;
+
+FL_TEST_CASE("Direct-show bridge never registers with ChannelManager") {
+    int before = directRegisterCount();
+    DirectController controller;
+    (void)controller;
+    FL_CHECK_EQ(directRegisterCount(), before);
+}
+
+FL_TEST_CASE("Direct-show bridge enqueues and shows the frame itself") {
+    SlimBridgeMockDriver& driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.showCount = 0;
+    driver.mState = DriverState::READY;
+    DirectController controller;
+    CRGB leds[2] = {CRGB(255, 0, 0), CRGB(0, 255, 0)};  // full scale: dither-proof
+    FastLED.addLeds(&controller, leds, 2);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    // The driver is not registered, so only the controller can call show().
+    FastLED.show();
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    FL_CHECK_EQ(driver.showCount, 1);
+    // GRB order, same bytes as the manager-backed golden test.
+    FL_CHECK_EQ(driver.lastBytes, fl::vector<u8>({0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00}));
+}
+
 }  // FL_TEST_FILE

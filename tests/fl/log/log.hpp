@@ -601,3 +601,21 @@ FL_TEST_CASE("warning macro edge cases") {
         FL_CHECK(true);
     }
 }
+
+// The prefix is built without fl::printf so logging does not link the printf
+// engine (FastLED#4671); pin its exact text, including a negative line.
+FL_TEST_CASE("log_emit_prefix writes file(line): KIND: without printf") {
+    static fl::string captured;
+    captured.clear();
+    fl::inject_print_handler([](const char* s) { captured += s; });
+    fl::detail::log_emit_prefix(fl::detail::log_kind::WARN, "src/fl/x.h", 42);
+    fl::detail::log_emit_newline();
+    fl::detail::log_emit_prefix(fl::detail::log_kind::ERROR, "a.cpp", 0);
+    fl::detail::log_emit_prefix(fl::detail::log_kind::INFO, "b.cpp", -7);
+    fl::detail::log_emit_prefix(fl::detail::log_kind::INFO, "c.cpp", 2147483647);
+    fl::clear_print_handler();
+    FL_CHECK_EQ(captured, fl::string("src/fl/x.h(42): WARN: \n"
+                                     "a.cpp(0): ERROR: "
+                                     "b.cpp(-7): INFO: "
+                                     "c.cpp(2147483647): INFO: "));
+}
