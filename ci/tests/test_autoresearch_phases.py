@@ -547,6 +547,34 @@ class TestParseArgsAndBuildCommands:
             }
             assert "legacyRgbw" not in command["params"]
 
+    def test_default_chipset_esp32c6_rmt_legacy_binds_rmt(
+        self, fake_project_dir: Path
+    ) -> None:
+        # Without the define, C6 legacy templates bind PARLIO and every
+        # `--rmt --legacy` request fails with LegacyDriverMismatch.
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            strip_sizes="1,2",
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ) as mock_synth:
+            result = _parse_args_and_build_commands(args)
+
+        assert isinstance(result, RunContext)
+        mock_synth.assert_called_once_with(
+            "esp32c6",
+            project_root=fake_project_dir.resolve(),
+            verbose=False,
+            extra_defines=["FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1"],
+        )
+        assert result.drivers == ["RMT"]
+
     def test_ws2814_legacy_chipset_repeats_for_each_lane(
         self, fake_project_dir: Path
     ) -> None:
