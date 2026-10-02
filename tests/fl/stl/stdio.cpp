@@ -1530,8 +1530,6 @@ FL_TEST_CASE("printf scalar format_arg matrix (issue 4565)") {
     }
 }
 
-} // FL_TEST_FILE
-
 // Pins the per-specifier behavior of integral vs floating arguments, which
 // are formatted by separate out-of-line paths so integer-only programs never
 // link float formatting (FastLED#4671).
@@ -1561,3 +1559,5 @@ FL_TEST_CASE("fl::snprintf integral and floating specifier matrix") {
     FL_CHECK_EQ(fmt_f("%y", 1.0f), fl::string("<unknown_format>"));
     FL_CHECK_EQ(fmt_i("%y", 1), fl::string("<unknown_format>"));
 }
+
+} // FL_TEST_FILE
