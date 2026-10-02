@@ -572,6 +572,22 @@ class TestParseArgsAndBuildCommands:
         assert params["legacyChipsets"] == ["WS2814", "WS2814", "WS2814"]
         assert "legacyRgbw" not in params
 
+    def test_legacy_multi_lane_rejects_rx_pin_inside_tx_lanes(
+        self, fake_project_dir: Path
+    ) -> None:
+        # 4 lanes from TX 0 drive GPIO 0-3; RX on GPIO 1 would be driven too.
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            lanes="4",
+            tx_pin=0,
+            rx_pin=1,
+            environment_positional="esp32c6",
+            project_dir=fake_project_dir,
+        )
+        assert _parse_args_and_build_commands(args) == 1
+
     def test_ws2818_esp32s3_rmt_legacy_canonical_command(
         self, fake_project_dir: Path
     ) -> None:

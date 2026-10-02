@@ -860,6 +860,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     "\u274c Error: --legacy multi-lane supports consecutive TX pins 0-8 only; pin 22 is single-lane for the current ObjectFLED loopback"
                 )
                 return 1
+            if args.rx_pin is not None and args.tx_pin <= args.rx_pin <= max_pin:
+                # A lane would drive the RX pin, so the capture reads garbage
+                # and the run reports a misleading zero_capture.
+                print(
+                    f"\u274c Error: --legacy {requested_max_lanes} lanes use TX pins "
+                    f"{args.tx_pin}-{max_pin}, which include --rx-pin {args.rx_pin}; "
+                    "wire the loopback to an RX pin outside that range"
+                )
+                return 1
         min_lanes = requested_min_lanes
         max_lanes = requested_max_lanes
         legacy_chipset_names = {
