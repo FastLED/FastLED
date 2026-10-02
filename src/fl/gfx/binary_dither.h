@@ -63,7 +63,6 @@
 ///                           the zeroing that keeps the asm drivers defined).
 /// `fl::Dither` is the one selected by `NO_DITHERING`.
 
-#include "led_sysdefs.h"  // IWYU pragma: keep  (NO_DITHERING, which selects fl::Dither)
 #include "fl/stl/int.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
@@ -221,8 +220,12 @@ struct NoDither {
     static FASTLED_FORCE_INLINE u8 apply(u8 b, u8) FL_NO_EXCEPT { return b; }
 };
 
-/// The policy this build uses. `NO_DITHERING=1` (forced on limited AVR parts)
-/// selects `NoDither`.
+/// The policy this build uses. `NO_DITHERING=1` (forced on limited AVR parts
+/// by led_sysdefs_avr.h) selects `NoDither`. Like the code this replaced, it
+/// reads `NO_DITHERING` as already defined by `FastLED.h` -> `led_sysdefs.h`;
+/// it deliberately does not include `led_sysdefs.h` itself, because that pulls
+/// in `<Arduino.h>` and every unity TU that reaches `pixel_controller.h`
+/// would parse the whole platform SDK (#4672).
 #if defined(NO_DITHERING) && (NO_DITHERING == 1)
 typedef NoDither Dither;
 #else

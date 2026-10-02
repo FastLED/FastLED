@@ -25,10 +25,10 @@
 #include "fl/math/math8.h"
 #include "eorder.h"
 #include "dither_mode.h"
-#include "fl/gfx/binary_dither.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "fl/stl/variant.h"  // for PixelControllerAny.
+#include "fl/gfx/binary_dither.h"  // last: reads NO_DITHERING, like the code it replaced
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SIGN_CONVERSION
