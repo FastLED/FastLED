@@ -434,10 +434,10 @@ bash autoresearch esp32s3 --rmt --timeout 120
 bash autoresearch --all --skip-lint --timeout 180
 ```
 
-For the ESP32-C6 WS2814 legacy/RMT command above, the synthesised
-AutoResearch build injects `FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1`. This narrowly
-binds the public legacy chipset template to the existing RMT controller for
-that validation run; ordinary ESP32-C6 sketches retain their PARLIO default.
+For any `--legacy --rmt` command (any chipset), the synthesised AutoResearch
+build injects `FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1`. This binds the public
+legacy chipset template to the existing RMT controller for that validation
+run; ordinary ESP32-C6 sketches retain their PARLIO default.
 
 ### LPC845 Fault-Emit Validation
 

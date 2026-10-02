@@ -159,7 +159,11 @@ def test_native_adapter_reads_past_first_batch_until_timeout() -> None:
             self.batches = [["E (3215) task_wdt: log"], ['REMOTE: {"id":1}']]
 
         async def read_lines(self, timeout: float) -> list[str]:
-            return self.batches.pop(0) if self.batches else []
+            # Like the real monitor: drain a batch, else wait out the timeout.
+            if self.batches:
+                return self.batches.pop(0)
+            await asyncio.sleep(timeout)
+            return []
 
     adapter = object.__new__(NativeFbuildSerialAdapter)
     adapter._monitor = _Monitor()

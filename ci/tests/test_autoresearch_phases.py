@@ -1644,8 +1644,9 @@ class TestResolvePortAndEnvironment:
         assert ctx.upload_port is None
         auto_detect.assert_not_called()
 
-    def test_ws2814_deferred_synthesis_injects_rmt_binding(
-        self, tmp_path: Path
+    @pytest.mark.parametrize("chipset", ["ws2814", "ws2812"])
+    def test_legacy_rmt_deferred_synthesis_injects_rmt_binding(
+        self, tmp_path: Path, chipset: str
     ) -> None:
         (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
         staged_dir = tmp_path / ".build" / "fbuild" / "esp32c6"
@@ -1656,7 +1657,7 @@ class TestResolvePortAndEnvironment:
             parlio=False,
             rmt=True,
             legacy=True,
-            chipset="ws2814",
+            chipset=chipset,
             project_dir=tmp_path,
         )
         ctx = _make_ctx(
