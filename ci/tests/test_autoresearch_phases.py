@@ -3400,3 +3400,14 @@ def test_prune_to_device_drivers_keeps_registered_drivers():
 
     assert ok is True
     assert ctx.drivers == ["PARLIO"]
+
+
+def test_prune_to_device_drivers_reports_malformed_response(capsys):
+    ctx = _make_ctx(args=_make_args(all=True))
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result={"not": "a list"}), QuietContext(quiet=False)
+        )
+    )
+    assert ok is False
+    assert "FAILURE class=malformed_response method=drivers" in capsys.readouterr().out

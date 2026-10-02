@@ -4688,7 +4688,13 @@ async def _prune_to_device_drivers(
         qctx.emit("FAILURE class=timeout method=drivers")
         return False
     if not isinstance(listed, list):
-        raise RpcError(f"drivers returned a non-array result: {listed!r}")
+        print(
+            f"{Fore.RED}\u274c drivers() returned a non-array result: "
+            f"{listed!r}{Style.RESET_ALL}"
+        )
+        print("   Failure class: malformed_response")
+        qctx.emit("FAILURE class=malformed_response method=drivers")
+        return False
     available = {
         entry["name"]
         for entry in listed
