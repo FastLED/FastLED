@@ -30,6 +30,7 @@ from ci.autoresearch.phases import (
     _legacy_command_max_lanes,
     _legacy_lane_rx_overlap,
     _parse_args_and_build_commands,
+    _prune_to_device_drivers,
     _prune_unavailable_drivers,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -3350,3 +3351,52 @@ def test_prune_unavailable_drivers_drops_parallel_tests_left_with_one_driver():
 
     assert _prune_unavailable_drivers(ctx, {"OBJECT_FLED"}) == ["FLEX_IO"]
     assert ctx.json_rpc_commands == []
+
+
+def _drivers_client(result: Any = None, error: Exception | None = None) -> MagicMock:
+    client = MagicMock()
+    if error is not None:
+        client.send = AsyncMock(side_effect=error)
+    else:
+        client.send = AsyncMock(return_value=MagicMock(data=result))
+    return client
+
+
+def test_prune_to_device_drivers_reports_timeout_as_test_failure(capsys):
+    """A `drivers` preflight timeout is classified like a test-loop timeout."""
+    ctx = _make_ctx(args=_make_args(all=True))
+    qctx = QuietContext(quiet=False)
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(ctx, _drivers_client(error=RpcTimeoutError("x")), qctx)
+    )
+
+    assert ok is False
+    assert "FAILURE class=timeout method=drivers" in capsys.readouterr().out
+
+
+def test_prune_to_device_drivers_fails_when_nothing_is_runnable(capsys):
+    ctx = _make_ctx(args=_make_args(all=True))  # one PARLIO runSingleTest
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result=[{"name": "RMT"}]), QuietContext(quiet=False)
+        )
+    )
+
+    assert ok is False
+    assert ctx.json_rpc_commands == []
+    assert "FAILURE class=no_runnable_driver" in capsys.readouterr().out
+
+
+def test_prune_to_device_drivers_keeps_registered_drivers():
+    ctx = _make_ctx(args=_make_args(all=True))
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result=[{"name": "PARLIO"}]), QuietContext(quiet=False)
+        )
+    )
+
+    assert ok is True
+    assert ctx.drivers == ["PARLIO"]
