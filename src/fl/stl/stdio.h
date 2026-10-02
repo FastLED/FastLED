@@ -458,8 +458,14 @@ struct ScalarArg {
     double d;      // kDouble
 };
 
-// The shared specifier switch. Defined in `stdio.cpp.hpp`.
-void format_scalar(sstream& stream, const FormatSpec& spec, const ScalarArg& a) FL_NO_EXCEPT;
+// The shared specifier switches, defined in `stdio.cpp.hpp`. Integral and
+// floating kinds get separate functions, chosen at compile time by
+// format_arg<T>, so a program that only formats integers never references
+// float formatting or the soft-float double routines it pulls in. With a
+// single switch, any `%d`/`%s` log linked ~10 KB of float code on FPU-less
+// parts (FastLED#4671).
+void format_integral(sstream& stream, const FormatSpec& spec, const ScalarArg& a) FL_NO_EXCEPT;
+void format_floating(sstream& stream, const FormatSpec& spec, const ScalarArg& a) FL_NO_EXCEPT;
 
 // Maps a built-in type to its ScalarArg::Kind; -1 keeps the generic template.
 template<typename T> struct scalar_kind { enum : int { value = -1 }; };
@@ -478,29 +484,34 @@ template<> struct scalar_kind<unsigned long long> { enum : int { value = ScalarA
 template<> struct scalar_kind<float> { enum : int { value = ScalarArg::kFloat }; };
 template<> struct scalar_kind<double> { enum : int { value = ScalarArg::kDouble }; };
 
+// Fill the arg and hand it to the switch for its family. Only the floating
+// overload names format_floating, so only floating instantiations link it.
 template<typename T>
 typename fl::enable_if<fl::is_integral<T>::value>::type
-fill_scalar_arg(ScalarArg& a, const T& arg) FL_NO_EXCEPT {
+format_scalar_arg(sstream& stream, const FormatSpec& spec, ScalarArg& a,
+                  const T& arg) FL_NO_EXCEPT {
     a.s = static_cast<fl::i64>(arg);
     a.u = static_cast<fl::u64>(arg);
+    format_integral(stream, spec, a);
 }
 
 template<typename T>
 typename fl::enable_if<fl::is_floating_point<T>::value>::type
-fill_scalar_arg(ScalarArg& a, const T& arg) FL_NO_EXCEPT {
+format_scalar_arg(sstream& stream, const FormatSpec& spec, ScalarArg& a,
+                  const T& arg) FL_NO_EXCEPT {
     a.f = static_cast<float>(arg);
     a.d = static_cast<double>(arg);
+    format_floating(stream, spec, a);
 }
 
-// Format built-in scalar types: thin adapter onto format_scalar.
+// Format built-in scalar types: thin adapter onto the shared switches.
 template<typename T>
 typename fl::enable_if<(scalar_kind<T>::value >= 0)>::type
 format_arg(sstream& stream, const FormatSpec& spec, const T& arg) FL_NO_EXCEPT {
     ScalarArg a = {};
     a.kind = static_cast<ScalarArg::Kind>(scalar_kind<T>::value);
     a.size = static_cast<fl::u8>(sizeof(T));
-    fill_scalar_arg(a, arg);
-    format_scalar(stream, spec, a);
+    format_scalar_arg(stream, spec, a, arg);
 }
 
 // Format other non-pointer types (enums, user types) (d, i, u, o, x, X, f, c, s)

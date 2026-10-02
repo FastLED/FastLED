@@ -108,10 +108,10 @@ FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
             // replace flow entirely so we don't waitForReady() or emit a
             // spurious "Replacing" warning.
             if (entry.driver == driver && entry.priority == priority) {
-                FL_DBG("ChannelManager::addDriver() - '%s' already registered at priority %s (idempotent no-op)", engineName->c_str(), priority);
+                FL_DBG("ChannelManager::addDriver() - '" << engineName->c_str() << "' already registered at priority " << priority << " (idempotent no-op)");
                 return false;
             }
-            FL_WARN("ChannelManager::addDriver() - Replacing existing driver '%s'", engineName->c_str());
+            FL_WARN("ChannelManager::addDriver() - Replacing existing driver '" << engineName->c_str() << "'");
 
             FL_DBG("ChannelManager: Waiting for all drivers to become READY before replacement");
             waitForReady();
@@ -122,7 +122,7 @@ FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
                 if (mDrivers[i].name != *engineName) {
                     continue;
                 }
-                FL_DBG("ChannelManager: Removing old driver '%s' (shared_ptr may delete)", engineName->c_str());
+                FL_DBG("ChannelManager: Removing old driver '" << engineName->c_str() << "' (shared_ptr may delete)");
                 if (mDrivers[i].driver) {
                     mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
                 }
@@ -190,7 +190,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
         capStr = "NONE";
     }
 
-    FL_DBG("ChannelManager: Added driver '%s' (priority %s, caps: %s)", engineName.c_str(), priority, capStr.c_str());
+    FL_DBG("ChannelManager: Added driver '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
 #endif
 
     // Sort drivers by priority descending (higher values first) after each insertion
@@ -209,7 +209,7 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
     // Find and remove the driver from the list
     for (size_t i = 0; i < mDrivers.size(); ++i) {
         if (mDrivers[i].driver == driver) {
-            FL_DBG("ChannelManager: Removing driver '%s'", mDrivers[i].name);
+            FL_DBG("ChannelManager: Removing driver '" << mDrivers[i].name << "'");
 
             mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
 
@@ -231,7 +231,7 @@ void ChannelManager::clearAllDrivers() {
     // This prevents clearing drivers that are still transmitting
     waitForReady();
 
-    FL_DBG("ChannelManager: Clearing %s drivers", mDrivers.size());
+    FL_DBG("ChannelManager: Clearing " << mDrivers.size() << " drivers");
 
     for (auto& entry : mDrivers) {
         if (entry.driver) {
@@ -260,12 +260,12 @@ void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
         if (entry.name == name) {
             entry.enabled = enabled;
             found = true;
-            FL_DBG("ChannelManager: Driver '%s' %s", name, (enabled ? "enabled" : "disabled"));
+            FL_DBG("ChannelManager: Driver '" << name << "' " << (enabled ? "enabled" : "disabled"));
         }
     }
 
     if (!found) {
-        FL_ERROR("ChannelManager::setDriverEnabled() - Driver '%s' not found in registry", name);
+        FL_ERROR("ChannelManager::setDriverEnabled() - Driver '" << name << "' not found in registry");
     }
 }
 
@@ -296,7 +296,7 @@ bool ChannelManager::setExclusiveDriverByName(const char* name) {
     }
 
     if (!found) {
-        FL_ERROR("ChannelManager::setExclusiveDriverByName() - Driver '%s' not found in registry", name);
+        FL_ERROR("ChannelManager::setExclusiveDriverByName() - Driver '" << name << "' not found in registry");
     }
     return found;
 }
@@ -313,13 +313,13 @@ bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
         if (entry.name == name) {
             entry.priority = priority;
             found = true;
-            FL_DBG("ChannelManager: Driver '%s' priority changed to %s", name, priority);
+            FL_DBG("ChannelManager: Driver '" << name << "' priority changed to " << priority);
             break;
         }
     }
 
     if (!found) {
-        FL_ERROR("ChannelManager::setDriverPriority() - Driver '%s' not found in registry", name);
+        FL_ERROR("ChannelManager::setDriverPriority() - Driver '" << name << "' not found in registry");
         return false;
     }
 
@@ -343,7 +343,7 @@ bool ChannelManager::isDriverEnabled(const char* name) const {
         }
     }
 
-    FL_ERROR("ChannelManager::isDriverEnabled() - Driver '%s' not found in registry", name);
+    FL_ERROR("ChannelManager::isDriverEnabled() - Driver '" << name << "' not found in registry");
     return false;
 }
 
@@ -400,7 +400,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string&
     }
     auto driver = findDriverByName(name);
     if (!driver) {
-        FL_ERROR("ChannelManager::getDriverByName() - Driver '%s' not found or not enabled", name.c_str());
+        FL_ERROR("ChannelManager::getDriverByName() - Driver '" << name.c_str() << "' not found or not enabled");
     }
     return driver;
 }
@@ -426,7 +426,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
             break;  // diagnostic emitted at the channel layer
         }
         if (!driver->canHandle(data)) {
-            FL_WARN_ONCE("ChannelManager: Affinity driver '%s' cannot handle channel data (chipset/bus mismatch). Falling back to AUTO/priority dispatch.", affinity);
+            FL_WARN_ONCE("ChannelManager: Affinity driver '" << affinity << "' cannot handle channel data (chipset/bus mismatch). Falling back to AUTO/priority dispatch.");
             break;
         }
         return driver;

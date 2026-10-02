@@ -213,8 +213,7 @@ bool ChannelEngineLpcUartDma::beginTransmission(
         data.data(), data.size(), mEncodedBuffer.data(), mEncodedBuffer.size(),
         lut);
     if (written == 0) {
-        FL_WARN("LPC UART DMA: encode failed for %u bytes",
-                  static_cast<unsigned>(data.size()));
+        FL_WARN("LPC UART DMA: encode failed for " << static_cast<unsigned>(data.size()) << " bytes");
         return false;
     }
 
