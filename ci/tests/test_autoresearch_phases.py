@@ -30,6 +30,7 @@ from ci.autoresearch.phases import (
     _legacy_command_max_lanes,
     _legacy_lane_rx_overlap,
     _parse_args_and_build_commands,
+    _prune_unavailable_drivers,
     _resolve_port_and_environment,
     _run_build_deploy,
     _run_rp_spi_loopback_tests,
@@ -3272,3 +3273,80 @@ def test_coroutine_exit_code_defaults_trust_older_firmware() -> None:
     """
     assert coroutine_exit_code({"success": True}) == 0
     assert coroutine_exit_code({}) == 1
+
+
+def _single(driver: str) -> dict[str, Any]:
+    return {"method": "runSingleTest", "params": {"driver": driver, "laneSizes": [100]}}
+
+
+def test_prune_unavailable_drivers_drops_drivers_the_device_lacks():
+    """`--all` on an ESP32-C6 must not send LCD/Teensy drivers it never registers."""
+    ctx = _make_ctx(
+        drivers=["PARLIO", "RMT", "LCD_RGB", "OBJECT_FLED"],
+        json_rpc_commands=[
+            {"method": "setLaneSizes", "params": [100]},
+            _single("PARLIO"),
+            _single("RMT"),
+            _single("LCD_RGB"),
+            _single("OBJECT_FLED"),
+        ],
+    )
+
+    skipped = _prune_unavailable_drivers(ctx, {"PARLIO", "RMT", "SPI", "UART"})
+
+    assert skipped == ["LCD_RGB", "OBJECT_FLED"]
+    assert ctx.drivers == ["PARLIO", "RMT"]
+    assert [c["method"] for c in ctx.json_rpc_commands] == [
+        "setLaneSizes",
+        "runSingleTest",
+        "runSingleTest",
+    ]
+    assert [c["params"]["driver"] for c in ctx.json_rpc_commands[1:]] == [
+        "PARLIO",
+        "RMT",
+    ]
+
+
+def test_prune_unavailable_drivers_filters_parallel_entries():
+    ctx = _make_ctx(
+        drivers=["PARLIO", "RMT", "LCD_RGB"],
+        json_rpc_commands=[
+            {
+                "method": "runParallelTest",
+                "params": {
+                    "drivers": [
+                        {"driver": "PARLIO", "laneSizes": [100]},
+                        {"driver": "RMT", "laneSizes": [100]},
+                        {"driver": "LCD_RGB", "laneSizes": [100]},
+                    ]
+                },
+            }
+        ],
+    )
+
+    assert _prune_unavailable_drivers(ctx, {"PARLIO", "RMT"}) == ["LCD_RGB"]
+    assert ctx.json_rpc_commands[0]["params"]["drivers"] == [
+        {"driver": "PARLIO", "laneSizes": [100]},
+        {"driver": "RMT", "laneSizes": [100]},
+    ]
+
+
+def test_prune_unavailable_drivers_drops_parallel_tests_left_with_one_driver():
+    """The firmware rejects runParallelTest with fewer than two drivers."""
+    ctx = _make_ctx(
+        drivers=["OBJECT_FLED", "FLEX_IO"],
+        json_rpc_commands=[
+            {
+                "method": "runParallelTest",
+                "params": {
+                    "drivers": [
+                        {"driver": "OBJECT_FLED", "laneSizes": [100]},
+                        {"driver": "FLEX_IO", "laneSizes": [100]},
+                    ]
+                },
+            }
+        ],
+    )
+
+    assert _prune_unavailable_drivers(ctx, {"OBJECT_FLED"}) == ["FLEX_IO"]
+    assert ctx.json_rpc_commands == []
