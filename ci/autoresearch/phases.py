@@ -1211,7 +1211,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     # against perfectly healthy firmware. The two flags are mutually
     # exclusive host-side (both claim DMA0 channels + flash budget).
     bench_defines: list[str] = []
-    if args.legacy and args.rmt and args.chipset in {"ws2814", "ws2818"}:
+    if args.legacy and args.rmt:
         # ESP32-C6/P4/H2/C5 normally bind legacy templates to PARLIO. This
         # request-scoped define moves the existing public template path to
         # the existing RMT controller so the requested/reported driver is real.
@@ -1523,7 +1523,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
         # Same driver-gate defines as the parse-time synthesis path — the
         # LPC bench harnesses compile out without their gate macro.
         deferred_defines: list[str] = []
-        if args.legacy and args.rmt and args.chipset in {"ws2814", "ws2818"}:
+        if args.legacy and args.rmt:
             deferred_defines.append("FL_ESP32_LEGACY_CLOCKLESS_USE_RMT=1")
         if getattr(args, "dma_spi", False):
             deferred_defines.append("FASTLED_LPC_SPI_DMA=1")
