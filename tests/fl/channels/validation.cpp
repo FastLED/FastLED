@@ -130,6 +130,33 @@ FL_TEST_CASE("ISR validation capture uses a frame-sized power-of-two buffer") {
                 26400u);
 }
 
+FL_TEST_CASE("Oversampled capture accepts a 1-LED frame after idle (#4609)") {
+    constexpr u32 kIdleNs = 100000u;     // RxChannelConfig default
+    constexpr size_t kMinRuns = 64u;     // PARLIO_RX sampler floor
+    // One WS2812 LED as captured on ESP32-C6: a ~2 ms idle LOW lead run,
+    // then 24 HIGH and 23 LOW bit runs.
+    FL_CHECK(validation::isWholeCaptureFrame(48u, true, 2086875u, kIdleNs,
+                                             kMinRuns));
+    // Window opened mid-frame: short LOW lead, or a HIGH lead.
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(48u, true, 625u, kIdleNs,
+                                                   kMinRuns));
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(48u, false, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    // An idle lead with no signal after it, or a lone glitch, is not a frame.
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(1u, true, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(2u, true, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    // One byte after the idle lead is the shortest accepted frame.
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(15u, true, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    FL_CHECK(validation::isWholeCaptureFrame(16u, true, 2086875u, kIdleNs,
+                                             kMinRuns));
+    // Long captures keep passing on run count alone.
+    FL_CHECK(validation::isWholeCaptureFrame(96u, true, 625u, kIdleNs,
+                                             kMinRuns));
+}
+
 // The sampler's own constants, from the header the RP device is built from,
 // so these expectations cannot drift from the numbers production computes.
 constexpr u32 kSamplePeriodNs = 1000000000u / kRpPioRxClockHz;
