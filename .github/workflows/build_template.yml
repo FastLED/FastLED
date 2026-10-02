@@ -173,6 +173,28 @@ jobs:
             else
               echo "ALL EXAMPLES SUCCESSFULLY COMPILED"
             fi
+
+            # A compiler that dies with "exit code -9" was SIGKILLed. Print
+            # what tells the kernel OOM killer apart from a userland kill
+            # (FastLED#4675, FastLED/fbuild#1628): runner size, kernel OOM
+            # records, and the fbuild daemon's own log.
+            echo ""
+            echo "############################################"
+            echo "Kill diagnostics (FastLED#4675)"
+            echo "############################################"
+            echo "nproc: $(nproc)"
+            free -m || true
+            echo "--- kernel OOM-killer records ---"
+            sudo dmesg 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" || echo "(none)"
+            daemon_log="$HOME/.fbuild/prod/daemon/daemon.log"
+            if [ -f "$daemon_log" ]; then
+              echo "--- fbuild daemon.log: warnings/errors and signal exits (last 60) ---"
+              grep -aE "WARN|ERROR|exit_code=-|kill|signal" "$daemon_log" | tail -n 60 || true
+              echo "--- fbuild daemon.log: last 40 lines ---"
+              tail -n 40 "$daemon_log"
+            else
+              echo "(no fbuild daemon log at $daemon_log)"
+            fi
           } | tee "$SUMMARY_FILE"
 
           # Exit with error if failures exist
