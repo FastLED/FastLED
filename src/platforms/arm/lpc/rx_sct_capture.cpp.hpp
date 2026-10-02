@@ -38,6 +38,9 @@
 #include "fl/channels/rx/decode_ws2812.h"
 #include "fl/log/log.h"
 #include "fl/stl/static_assert.h"
+#if defined(FASTLED_LPC_RX_SCT_DMA) && defined(FL_IS_ARM_LPC_845)
+#include "platforms/arm/lpc/lpc_dma_descriptor_table.h"
+#endif
 
 namespace fl {
 
@@ -160,6 +163,11 @@ constexpr fl::u32 kCtrlClrCtrL = (1u << 3);
 //   0x4=ACMP_O, 0x5..0x8=PININT4..7, 0x9=T0_DMAREQ_M0, 0xA=T0_DMAREQ_M1,
 //   0xB=DMA_INMUX0, 0xC=DMA_INMUX1. Reset = 0x0F (no trigger).
 constexpr fl::u32 kOffDmaItrigInmux0 = 0x040u;  // +0x004*k for DMA channel k
+// SCT_INMUX[n] (offset 0x020 + 4n) selects the source of SCT input n:
+// 0 = SCT0_GPIO_IN_A (the SWM-routed pin), ..., reset = 0xF (none).
+constexpr fl::u32 kOffSctInmux0    = 0x020u;
+constexpr fl::u32 kSctInmuxGpioInA = 0x0u;
+constexpr fl::u32 kSctInmuxNone    = 0xFu;
 constexpr fl::u8  kItrigSctDma0 = 0x2u;
 constexpr fl::u8  kItrigSctDma1 = 0x3u;
 
@@ -229,11 +237,17 @@ inline volatile fl::u32& dma(fl::u32 offset) FL_NO_EXCEPT { return reg(kDmaBase,
 // Assign or unassign the user's GPIO pin to SCT input 0 (SCT0_GPIO_IN_A_I)
 // via SWM PINASSIGN6 byte[31:24]. The byte value is the encoded pin number
 // (PIO0_n -> n; PIO1_n -> 0x20+n).
+// The SWM assignment alone does not reach the SCT: SCT input 0 is fed by
+// INPUTMUX SCT_INMUX[0], which resets to 0xF (no source). Point it at
+// SCT0_GPIO_IN_A while the pin is assigned and back at nothing on release;
+// without this the SCT saw no edges at all (LPC845-BRK, 2026-10-02).
 inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NO_EXCEPT {
     volatile fl::u32& r = reg(kSwmBase, kOffPINASSIGN6);
     fl::u32 v = r;
     v = (v & 0x00FFFFFFu) | (static_cast<fl::u32>(swm_byte) << 24);
     r = v;
+    reg(kInputMuxBase, kOffSctInmux0) =
+        (swm_byte == kSwmUnassign) ? kSctInmuxNone : kSctInmuxGpioInA;
 }
 
 // Convert an unsigned tick delta (free-running 32-bit SCT counter, F_CPU
@@ -291,35 +305,25 @@ FL_STATIC_ASSERT(kDmaRingSize >= 1 && kDmaRingSize <= 1024,
 FL_ALIGNAS(4) fl::u32 g_dma_rising[kDmaRingSize];
 FL_ALIGNAS(4) fl::u32 g_dma_falling[kDmaRingSize];
 
-// DMA descriptor table. UM11029 §16.7.1 requires 256-byte alignment for
-// chips with up to 16 channels; LPC845 has 25 channels and the required
-// alignment grows to 512 bytes (the highest channel descriptor must land
-// in the same 512-byte aligned region). Each descriptor is 16 bytes:
-//   [ 0]  reserved (some SDKs label this XFERCFG mirror)
-//   [ 4]  SRC_END_ADDR
-//   [ 8]  DST_END_ADDR
-//   [12]  LINK_ADDR (0 = single-shot)
-//
-// We allocate the full 25-channel table (400 bytes used + 112 bytes
-// alignment slack = 512 bytes) — DMA->SRAMBASE only accepts the table
-// base, not a slice.
-struct FL_ALIGNAS(16) DmaDescriptor {
-    fl::u32 reserved;
-    fl::u32 src_end_addr;
-    fl::u32 dst_end_addr;
-    fl::u32 link_addr;
-};
-FL_ALIGNAS(512) DmaDescriptor g_dma_descriptors[25];
+// DMA descriptors live in the process-wide 25-channel table that every
+// LPC845 DMA user shares (lpc_dma_descriptor_table.h). This driver owns
+// channels 0 and 1 (the SCT_DMA0/1 request lines); the UART-DMA clockless
+// TX it is usually capturing owns another channel of the same table.
 
 // Compute how many DMA transfers (= captured edges) have landed in the
-// channel's ring. The CHANNEL.XFERCFG register exposes the live residual
-// count and the CFGVALID flag (UM11029 §16.6 Table 321):
-//   * While the channel is armed, residual = (N-1) - K where K = writes done
-//   * On natural completion (K == N), CFGVALID drops to 0 and residual = 0
+// channel's ring. While the channel is armed the CHANNEL.XFERCFG residual
+// is (N-1) - K, K = writes done (UM11029 §16.6 Table 321). On completion
+// the residual wraps to 0x3FF and CFGVALID stays SET (observed on
+// silicon), so completion is the wrapped residual on a channel that has
+// left ACTIVE0. Requiring both keeps an armed channel that never saw a
+// trigger at zero edges whichever way ACTIVE0 reads before the first
+// transfer. (At N == 1024 the armed residual is also 0x3FF; there ACTIVE0
+// alone decides, and it reads set while armed on LPC845 silicon.)
 inline fl::u32 dmaChannelEdgeCount(fl::u32 ch) FL_NO_EXCEPT {
     const fl::u32 cfgnow = dma(kDmaChXferCfg(ch));
     const fl::u32 residual = (cfgnow >> 16) & 0x3FFu;
-    const bool completed = (cfgnow & kXferCfgValid) == 0;
+    const bool active = (dma(kOffDmaActive0) & (1u << ch)) != 0u;
+    const bool completed = !active && residual == 0x3FFu;
     if (completed) {
         return static_cast<fl::u32>(kDmaRingSize);
     }
@@ -389,19 +393,20 @@ bool LpcSctRxChannel::begin(const RxConfig& config) FL_NO_EXCEPT {
     mEdges.reserve(mCapacity);
 
 #if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
-    // ---- 1. Power up SCT + SWM (and DMA when the DMA path is opted in),
-    //         then pulse their resets. ----
+    // ---- 1. Power up SCT + SWM (and DMA when the DMA path is opted in).
+    //         Only the SCT is ours to reset. SWM holds every movable pin
+    //         assignment on the chip -- pulsing its reset unrouted USART0,
+    //         so the console went silent for good after the first capture
+    //         -- and DMA0 is shared with the UART-DMA clockless TX whose
+    //         output this channel usually captures. Just make sure those
+    //         two are clocked and out of reset. ----
     reg(kSysconBase, kOffSYSAHBCLKCTRL0) |= (kClkSCT | kClkSWM
 #if defined(FASTLED_LPC_RX_SCT_DMA)
         | kClkDMA
 #endif
         );
     volatile fl::u32& presetctrl = reg(kSysconBase, kOffPRESETCTRL0);
-    presetctrl &= ~(kRstSCT | kRstSWM
-#if defined(FASTLED_LPC_RX_SCT_DMA)
-        | kRstDMA
-#endif
-        );   // assert reset (low pulse)
+    presetctrl &= ~kRstSCT;   // assert SCT reset (low pulse)
     presetctrl |=  (kRstSCT | kRstSWM
 #if defined(FASTLED_LPC_RX_SCT_DMA)
         | kRstDMA
@@ -447,11 +452,16 @@ bool LpcSctRxChannel::begin(const RxConfig& config) FL_NO_EXCEPT {
     reg(kInputMuxBase, kOffDmaItrigInmux0 + 4u * 1) = kItrigSctDma1;
 
     // ---- 7. DMA controller setup. ----
-    // SRAMBASE must hold the channel-descriptor table base address.
-    // Required alignment is 512 bytes (LPC845 has 25 channels — UM11029
-    // §16.7.1). `g_dma_descriptors` is `alignas(512)`.
-    dma(kOffDmaCtrl)     = 1u;                                    // global enable
-    dma(kOffDmaSramBase) = reinterpret_cast<fl::u32>(&g_dma_descriptors[0]);  // ok reinterpret cast — DMA descriptor table base
+    // The controller is shared, so instead of resetting it, quiesce just
+    // our two channels (a previous capture may have left them armed) and
+    // use whichever 25-channel descriptor table SRAMBASE already holds.
+    dma(kOffDmaEnableClr0) = (1u << 0) | (1u << 1);
+    dma(kOffDmaAbort0)     = (1u << 0) | (1u << 1);
+    dma(kOffDmaCtrl)       = 1u;                                  // global enable
+    fl::lpc::ensureDmaSramBase();
+    volatile fl::lpc::DmaChannelDescriptor* const descriptors =
+        reinterpret_cast<volatile fl::lpc::DmaChannelDescriptor*>(  // ok reinterpret cast — DMA descriptor table base
+            dma(kOffDmaSramBase));
 
     // Pre-zero the rings so partial captures are detectable (we still
     // count edges via XFERCOUNT residual; the zero-fill is defensive).
@@ -466,19 +476,23 @@ bool LpcSctRxChannel::begin(const RxConfig& config) FL_NO_EXCEPT {
     //   * DST: g_dma_rising/falling, post-increment by 4 bytes per word
     //     → dst_end_addr = &ring[kDmaRingSize - 1] (last word in ring)
     //   * LINK: 0 — single-shot, no auto-reload
-    g_dma_descriptors[0].reserved     = 0u;
-    g_dma_descriptors[0].src_end_addr = reinterpret_cast<fl::u32>(sct_cap_addr(0));  // ok reinterpret cast — MMIO source addr
-    g_dma_descriptors[0].dst_end_addr = reinterpret_cast<fl::u32>(&g_dma_rising[kDmaRingSize - 1]);  // ok reinterpret cast — RAM dest addr
-    g_dma_descriptors[0].link_addr    = 0u;
+    descriptors[0].reserved = 0u;
+    descriptors[0].src_end  = reinterpret_cast<fl::u32>(sct_cap_addr(0));  // ok reinterpret cast — MMIO source addr
+    descriptors[0].dst_end  = reinterpret_cast<fl::u32>(&g_dma_rising[kDmaRingSize - 1]);  // ok reinterpret cast — RAM dest addr
+    descriptors[0].link     = 0u;
 
-    g_dma_descriptors[1].reserved     = 0u;
-    g_dma_descriptors[1].src_end_addr = reinterpret_cast<fl::u32>(sct_cap_addr(1));  // ok reinterpret cast — MMIO source addr
-    g_dma_descriptors[1].dst_end_addr = reinterpret_cast<fl::u32>(&g_dma_falling[kDmaRingSize - 1]);  // ok reinterpret cast — RAM dest addr
-    g_dma_descriptors[1].link_addr    = 0u;
+    descriptors[1].reserved = 0u;
+    descriptors[1].src_end  = reinterpret_cast<fl::u32>(sct_cap_addr(1));  // ok reinterpret cast — MMIO source addr
+    descriptors[1].dst_end  = reinterpret_cast<fl::u32>(&g_dma_falling[kDmaRingSize - 1]);  // ok reinterpret cast — RAM dest addr
+    descriptors[1].link     = 0u;
 
     // Channel CFG: hardware trigger via INPUTMUX, rising-edge trigger
     // polarity (the SCT_DMAn lines pulse high on each capture event).
-    const fl::u32 chan_cfg = kDmaCfgHwTrigEn | kDmaCfgTrigPolHi;   // edge-triggered (TRIGTYPE=0)
+    // TRIGBURST with BURSTPOWER=0 makes each trigger move ONE word. Without
+    // it the first edge triggered the whole descriptor, filling the ring
+    // with copies of the first capture (9 edges -> 128 words on silicon).
+    const fl::u32 chan_cfg = kDmaCfgHwTrigEn | kDmaCfgTrigPolHi    // edge-triggered (TRIGTYPE=0)
+                           | kDmaCfgTrigBurst;                     // BURSTPOWER=0: 1 word/trigger
     dma(kDmaChCfg(0)) = chan_cfg;
     dma(kDmaChCfg(1)) = chan_cfg;
 

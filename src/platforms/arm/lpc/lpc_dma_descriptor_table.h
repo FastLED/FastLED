@@ -20,11 +20,11 @@
 /// Sharing semantics: the table covers all 25 channels, so multiple
 /// drivers share one table as long as their channel numbers differ —
 /// which the drivers already guarantee (SPI uses the SPI-TX request
-/// channel, the SCT engine uses the SCT-request channels). If some
-/// other component (e.g. `rx_sct_capture.cpp.hpp`, which predates this
-/// header and owns a private full-size table) programmed SRAMBASE
-/// first, `ensureDmaSramBase()` leaves it alone — any full 25-channel
-/// table is interchangeable.
+/// channel, the SCT engine and the SCT RX capture use the SCT-request
+/// channels). If some other component programmed SRAMBASE first,
+/// `ensureDmaSramBase()` leaves it alone — any full 25-channel table is
+/// interchangeable — so users address their descriptors through
+/// `DMA0->SRAMBASE` rather than assuming this table is the live one.
 ///
 /// RAM cost: 400 bytes used + up to 112 bytes of alignment slack
 /// (SRAMBASE bits 8:0 are reserved → the table must be 512-byte
