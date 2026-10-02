@@ -65,8 +65,7 @@ protected:
             return;
         }
 
-        // Pass both configs so setRgbww() strips get 5-byte frames.
-        fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
+        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         auto& data = mChannelData->getData();
         data.clear();
         iterator.writeWS2812(&data);
