@@ -27,6 +27,8 @@ from ci.autoresearch.phases import (
     _build_environment_for_mode,
     _is_valid_rp_concurrency_result,
     _is_valid_rp_pio_parallel_result,
+    _legacy_command_max_lanes,
+    _legacy_lane_rx_overlap,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
@@ -621,6 +623,23 @@ class TestParseArgsAndBuildCommands:
         ):
             result = _parse_args_and_build_commands(args)
         assert (result == 1) is rejected
+
+    def test_legacy_lane_rx_overlap_rechecks_after_auto_detect(self) -> None:
+        # Parse time with no board: the default RX is unknown, so it passes.
+        # After detection resolves esp32s3 (default RX 2), lane 2 conflicts.
+        args = _make_args(legacy=True, tx_pin=0, rx_pin=None)
+        assert not _legacy_lane_rx_overlap(args, 4, None)
+        assert _legacy_lane_rx_overlap(args, 4, "esp32s3")
+        assert not _legacy_lane_rx_overlap(args, 1, "esp32s3")
+
+    def test_legacy_command_max_lanes(self) -> None:
+        commands = [
+            {"method": "setPins", "params": [{"txPin": 0}]},
+            {"method": "runSingleTest", "params": {"laneSizes": [10, 10]}},
+            {"method": "runSingleTest", "params": {"laneSizes": [10] * 4}},
+        ]
+        assert _legacy_command_max_lanes(commands) == 4
+        assert _legacy_command_max_lanes([]) == 1
 
     def test_ws2818_esp32s3_rmt_legacy_canonical_command(
         self, fake_project_dir: Path
