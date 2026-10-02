@@ -1531,3 +1531,33 @@ FL_TEST_CASE("printf scalar format_arg matrix (issue 4565)") {
 }
 
 } // FL_TEST_FILE
+
+// Pins the per-specifier behavior of integral vs floating arguments, which
+// are formatted by separate out-of-line paths so integer-only programs never
+// link float formatting (FastLED#4671).
+FL_TEST_CASE("fl::snprintf integral and floating specifier matrix") {
+    char buf[64];
+    auto fmt_i = [&](const char* f, int v) { fl::snprintf(buf, sizeof(buf), f, v); return fl::string(buf); };
+    auto fmt_f = [&](const char* f, float v) { fl::snprintf(buf, sizeof(buf), f, v); return fl::string(buf); };
+    auto fmt_d = [&](const char* f, double v) { fl::snprintf(buf, sizeof(buf), f, v); return fl::string(buf); };
+
+    FL_CHECK_EQ(fmt_i("%d", -7), fl::string("-7"));
+    FL_CHECK_EQ(fmt_i("%+d", 7), fl::string("+7"));
+    FL_CHECK_EQ(fmt_i("%u", 7), fl::string("7"));
+    FL_CHECK_EQ(fmt_i("%o", 8), fl::string("10"));
+    FL_CHECK_EQ(fmt_i("%#x", 255), fl::string("0xff"));
+    FL_CHECK_EQ(fmt_i("%c", 'A'), fl::string("A"));
+    FL_CHECK_EQ(fmt_i("%s", 12), fl::string("12"));
+    FL_CHECK_EQ(fmt_i("%f", 3), fl::string("<type_error>"));
+    FL_CHECK_EQ(fmt_i("%5d", 42), fl::string("   42"));
+
+    FL_CHECK_EQ(fmt_f("%.2f", 1.5f), fl::string("1.50"));
+    FL_CHECK_EQ(fmt_d("%.1f", 2.25), fl::string("2.3"));
+    FL_CHECK_EQ(fmt_f("%d", 1.0f), fl::string("<type_error>"));
+    FL_CHECK_EQ(fmt_d("%u", 1.0), fl::string("<type_error>"));
+    FL_CHECK_EQ(fmt_f("%c", 1.0f), fl::string("<type_error>"));
+    FL_CHECK_EQ(fmt_f("%o", 1.0f), fl::string("<type_error>"));
+    FL_CHECK_EQ(fmt_f("%s", 1.5f), fl::string("1.50"));
+    FL_CHECK_EQ(fmt_f("%y", 1.0f), fl::string("<unknown_format>"));
+    FL_CHECK_EQ(fmt_i("%y", 1), fl::string("<unknown_format>"));
+}

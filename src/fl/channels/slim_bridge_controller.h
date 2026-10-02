@@ -95,8 +95,7 @@ protected:
         // not "enqueue and hope" -- silently enqueuing to a disabled driver
         // is the #2517 silent-drop failure mode.
         if (!ChannelManager::registry().isDriverEnabled(driver.getName().c_str())) {
-            FL_WARN_ONCE("SlimBridgeController: driver '%s' is disabled - dropping frame",
-                         driver.getName().c_str());
+            FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' is disabled - dropping frame");
             return;
         }
 
@@ -105,8 +104,7 @@ protected:
         // than racing the driver's in-progress DMA/RMT transfer.
         if (mData->isInUse()) {
             if (!driver.waitForReady()) {
-                FL_WARN_ONCE("SlimBridgeController: driver '%s' did not become ready in time "
-                             "- dropping frame", driver.getName().c_str());
+                FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' did not become ready in time - dropping frame");
                 return;
             }
         }
