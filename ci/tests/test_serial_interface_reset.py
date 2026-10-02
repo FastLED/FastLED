@@ -26,8 +26,12 @@ def test_factory_prefers_supported_native_async_monitor(monkeypatch) -> None:
             return None
 
         async def read_lines(self, timeout: float = 30.0) -> list[str]:
+            # Like the real monitor: one batch, then wait out the timeout.
             self.read_count += 1
-            return ["reply", "following"]
+            if self.read_count == 1:
+                return ["reply", "following"]
+            await asyncio.sleep(timeout)
+            return []
 
         async def write(self, data: str) -> int:
             self.writes.append(data)
@@ -60,13 +64,16 @@ def test_factory_prefers_supported_native_async_monitor(monkeypatch) -> None:
         first_read = adapter.read_lines(timeout=1.0)
         assert await anext(first_read) == "reply"
         await first_read.aclose()
-        assert [line async for line in adapter.read_lines(timeout=1.0)] == ["following"]
+        assert [line async for line in adapter.read_lines(timeout=0.05)] == [
+            "following"
+        ]
         assert await adapter.reset_device(None)
         await adapter.close()
 
     asyncio.run(exercise())
     assert adapter._monitor.writes == ["hello"]
-    assert adapter._monitor.read_count == 1
+    # The second read drains the preserved line, then waits out its timeout.
+    assert adapter._monitor.read_count == 2
 
 
 def test_factory_falls_back_when_native_api_is_incomplete(monkeypatch) -> None:
@@ -139,6 +146,37 @@ def test_native_adapter_recovers_lost_daemon_once(monkeypatch) -> None:
     assert restarts == [True]
     assert first.enters == second.enters == 1
     assert adapter._monitor is second
+
+
+def test_native_adapter_reads_past_first_batch_until_timeout() -> None:
+    """A reply in a later native batch than a log line is still delivered."""
+    from collections import deque
+
+    from ci.util.serial_interface import NativeFbuildSerialAdapter
+
+    class _Monitor:
+        def __init__(self) -> None:
+            self.batches = [["E (3215) task_wdt: log"], ['REMOTE: {"id":1}']]
+
+        async def read_lines(self, timeout: float) -> list[str]:
+            return self.batches.pop(0) if self.batches else []
+
+    adapter = object.__new__(NativeFbuildSerialAdapter)
+    adapter._monitor = _Monitor()
+    adapter._pending_lines = deque()
+
+    async def _collect() -> list[str]:
+        lines: list[str] = []
+        async for line in adapter.read_lines(timeout=5.0):
+            lines.append(line)
+            if line.startswith("REMOTE:"):
+                break
+        return lines
+
+    assert asyncio.run(_collect()) == [
+        "E (3215) task_wdt: log",
+        'REMOTE: {"id":1}',
+    ]
 
 
 def test_serial_interface_protocol_has_reset_device() -> None:

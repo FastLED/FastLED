@@ -387,13 +387,21 @@ class NativeFbuildSerialAdapter:
         await self._monitor.write(data)
 
     async def read_lines(self, timeout: float) -> AsyncIterator[str]:
-        # Keep undelivered lines if the consumer closes the generator early.
-        # Native read_lines() already returns the first available batch and
-        # cancellation leaves its own queue untouched.
-        if not self._pending_lines:
-            self._pending_lines.extend(await self._monitor.read_lines(timeout=timeout))
-        while self._pending_lines:
-            yield self._pending_lines.popleft()
+        # Native read_lines() returns only the first available batch, so keep
+        # reading until the caller's timeout like FbuildSerialAdapter does:
+        # an RPC reply often arrives in a later batch than boot or log lines.
+        # Keep undelivered lines if the consumer closes the generator early;
+        # cancellation leaves the native queue untouched.
+        deadline = time.monotonic() + timeout
+        while True:
+            while self._pending_lines:
+                yield self._pending_lines.popleft()
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return
+            self._pending_lines.extend(
+                await self._monitor.read_lines(timeout=remaining)
+            )
 
     async def reset_device(self, board: str | None) -> bool:
         try:
