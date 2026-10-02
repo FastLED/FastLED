@@ -5,10 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.29 for native async serial sessions and the earlier
-    # `fbuild symbols` image_flash report used by the ESP32-S3 bloat gate.
+    # Pin to fbuild 2.5.30 so ESP32 boards on pioarduino 53.x/54.x and plain
+    # RP2040/RP2350 boards build again (both regressed in 2.5.28/2.5.29).
     #
     # Pin history:
+    #   2.5.30 -- resolves the unified ESP32 toolchain by registry version for
+    #              pioarduino 53.x/54.x and drops -fuse-cxa-atexit for pre-GCC 14
+    #              SDKs (FastLED/fbuild#1605); stops inferring Bluetooth-only
+    #              Arduino-Pico libraries such as BTstackLib when Bluetooth is
+    #              off (FastLED/fbuild#1606).
     #   2.5.29 -- exposes the native async serial session API used by the
     #              test adapter (FastLED/fbuild#1485).
     #   2.5.28 -- `fbuild symbols` reports `image_flash` (allocated ELF
@@ -264,7 +269,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.29",
+    "fbuild==2.5.30",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
