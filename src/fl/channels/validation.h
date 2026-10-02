@@ -91,6 +91,26 @@ inline size_t captureEdgeCapacity(size_t shared_buffer_bytes,
     return capacity;
 }
 
+/// @brief Whether an oversampled capture holds a whole frame, not a fragment.
+///
+/// An oversampling RX backend opens its sample window at arm time, so a
+/// frame already on the wire at that moment is captured only from the
+/// middle. A frame is whole when the window saw the line idle LOW for at
+/// least the idle threshold before the first HIGH, which is the same rule
+/// that ends a frame. Without that lead idle, only a long run count is
+/// accepted as evidence of a real frame.
+///
+/// Counting runs alone rejects short frames: one WS2812 LED is 24 bits, at
+/// most 49 runs with the lead idle, under a 64-run floor (#4609).
+inline bool isWholeCaptureFrame(size_t run_count, bool lead_run_is_low,
+                                u32 lead_run_ns, u32 idle_threshold_ns,
+                                size_t min_frame_runs) FL_NO_EXCEPT {
+    if (run_count >= min_frame_runs) {
+        return true;
+    }
+    return run_count > 1 && lead_run_is_low && lead_run_ns > idle_threshold_ns;
+}
+
 /// @brief Largest frame, in wire bytes, an RP PIO RX capture can hold.
 ///
 /// Two independent ceilings bound a capture, and each is the binding one in

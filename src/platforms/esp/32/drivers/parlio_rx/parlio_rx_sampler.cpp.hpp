@@ -27,6 +27,7 @@
     defined(SOC_PARLIO_RX_UNITS_PER_GROUP) && SOC_PARLIO_RX_UNITS_PER_GROUP > 0 && \
     ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
 
+#include "fl/channels/validation.h"
 #include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
@@ -67,8 +68,9 @@ constexpr u32 kNsPerSample = 62;
 constexpr size_t kCaptureBytes = 32768;
 
 /// Minimum level runs for a capture to count as a real frame rather than
-/// the tail of one already in flight when sampling started. A 100-LED
-/// frame is ~4800 runs; anything under this is a fragment.
+/// the tail of one already in flight when sampling started, unless the
+/// window saw a full idle LOW before the first HIGH. A 100-LED frame is
+/// ~4800 runs; a 1-LED frame is 48 and relies on that lead idle (#4609).
 constexpr size_t kMinFrameRuns = 64;
 
 /// Hard cap on stored level runs, mirroring the I2S-RX backend.
@@ -436,7 +438,13 @@ class ParlioRxSampler final : public RxDevice {
             if (mSawFirstEdge && mCurLevel == 0 &&
                 static_cast<u64>(mCurRunSamples) * kNsPerSample >
                     mSignalRangeMaxNs) {
-                if (mRuns.size() >= kMinFrameRuns) {
+                // mRuns[0] is the idle LOW before the first HIGH when the
+                // window opened on an idle line (flushCurrentRun keeps it
+                // once mSawFirstEdge is set).
+                if (validation::isWholeCaptureFrame(
+                        mRuns.size(), !mRuns.empty() && mRuns[0].level() == 0,
+                        mRuns.empty() ? 0u : mRuns[0].duration_ns(),
+                        mSignalRangeMaxNs, kMinFrameRuns)) {
                     flushCurrentRun();
                     mFinished = true;
                 } else {
