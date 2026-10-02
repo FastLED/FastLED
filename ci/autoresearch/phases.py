@@ -242,6 +242,40 @@ def _replace_driver_selection(
         params["drivers"] = expanded_entries
 
 
+def _prune_unavailable_drivers(ctx: RunContext, available: set[str]) -> list[str]:
+    """Drop drivers the device does not register from the inventory and RPCs.
+
+    `--all` is a cross-platform superset; sending a driver the firmware never
+    registered fails the run with `UnknownDriver`. Returns the skipped names.
+    """
+    skipped = [driver for driver in ctx.drivers if driver not in available]
+    ctx.drivers = [driver for driver in ctx.drivers if driver in available]
+
+    kept: list[dict[str, Any]] = []
+    for command in ctx.json_rpc_commands:
+        params = command.get("params")
+        if isinstance(params, dict):
+            driver = params.get("driver")
+            if isinstance(driver, str) and driver not in available:
+                continue
+            entries = params.get("drivers")
+            if isinstance(entries, list):
+                params["drivers"] = [
+                    entry
+                    for entry in entries
+                    if not isinstance(entry, dict) or entry.get("driver") in available
+                ]
+                # Firmware rejects a parallel test with fewer than two drivers.
+                if (
+                    command.get("method") == "runParallelTest"
+                    and len(params["drivers"]) < 2
+                ):
+                    continue
+        kept.append(command)
+    ctx.json_rpc_commands = kept
+    return skipped
+
+
 def _normalize_deferred_driver_names(ctx: RunContext) -> None:
     """Apply platform-specific names after USB board auto-detection."""
     environment = ctx.final_environment
@@ -4629,6 +4663,62 @@ def _display_rp_uart_diagnostics(data: dict[str, Any]) -> None:
     )
 
 
+async def _prune_to_device_drivers(
+    ctx: RunContext, client: RpcClient, qctx: QuietContext
+) -> bool:
+    """`--all` preflight: drop drivers the firmware does not register.
+
+    Returns False after reporting the failure (timeout, crash, or nothing
+    left to run) the same way the test loop does, so the caller aborts.
+    """
+    try:
+        listed = (
+            await client.send(
+                "drivers", args=[], timeout=ctx.remaining_seconds(minimum=1.0)
+            )
+        ).data
+    except RpcCrashError:
+        print(f"{Fore.RED}\u274c Device crashed during drivers(){Style.RESET_ALL}")
+        print("   Failure class: crash")
+        qctx.emit("FAILURE class=crash method=drivers")
+        return False
+    except RpcTimeoutError:
+        print(f"{Fore.RED}\u274c RPC timeout during drivers(){Style.RESET_ALL}")
+        print("   Failure class: timeout")
+        qctx.emit("FAILURE class=timeout method=drivers")
+        return False
+    if not isinstance(listed, list):
+        print(
+            f"{Fore.RED}\u274c drivers() returned a non-array result: "
+            f"{listed!r}{Style.RESET_ALL}"
+        )
+        print("   Failure class: malformed_response")
+        qctx.emit("FAILURE class=malformed_response method=drivers")
+        return False
+    available = {
+        entry["name"]
+        for entry in listed
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str)
+    }
+    skipped = _prune_unavailable_drivers(ctx, available)
+    if skipped:
+        print(
+            f"\u23ed\ufe0f  --all: skipping drivers this firmware does not "
+            f"register: {', '.join(skipped)}"
+        )
+    if not any(
+        command.get("method") in _TEST_RPC_METHODS for command in ctx.json_rpc_commands
+    ):
+        print(
+            f"{Fore.RED}\u274c --all: no runnable test left after skipping "
+            f"unregistered drivers (device reports: "
+            f"{', '.join(sorted(available)) or 'none'}){Style.RESET_ALL}"
+        )
+        qctx.emit("FAILURE class=no_runnable_driver method=drivers")
+        return False
+    return True
+
+
 async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
     """Execute main RPC test loop."""
     upload_port = ctx.upload_port
@@ -4669,10 +4759,16 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
             await client.connect(boot_wait=1.0, drain_boot=True)
         print(f"{Fore.GREEN}\u2713 Connected{Style.RESET_ALL}")
 
+        if ctx.args.all and not await _prune_to_device_drivers(ctx, client, qctx):
+            test_failed = True
+            stop_word_found = "ERROR"
+        json_rpc_commands = ctx.json_rpc_commands
+
         print(f"\n\U0001f527 Executing {len(json_rpc_commands)} RPC command(s)...")
         print("\u2500" * 60)
 
-        for i, cmd in enumerate(json_rpc_commands, 1):
+        # A failed --all preflight already recorded its failure; run nothing.
+        for i, cmd in enumerate([] if test_failed else json_rpc_commands, 1):
             method = cmd.get("method", "unknown")
             params = cmd.get("params", [])
             setup_method = method in {
