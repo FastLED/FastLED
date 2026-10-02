@@ -588,6 +588,40 @@ class TestParseArgsAndBuildCommands:
         )
         assert _parse_args_and_build_commands(args) == 1
 
+    @pytest.mark.parametrize(
+        ("rx_pin", "environment", "rejected"),
+        [
+            (3, "esp32c6", True),  # last lane pin
+            (4, "esp32c6", False),  # just past the lanes
+            (0, "esp32c6", False),  # lane 0 itself: RMT internal loopback
+            (None, "esp32s3", True),  # default RX 2 is lane 2
+            (None, "esp32c6", False),  # default RX 0 is lane 0
+        ],
+    )
+    def test_legacy_multi_lane_rx_pin_bounds(
+        self,
+        fake_project_dir: Path,
+        rx_pin: int | None,
+        environment: str,
+        rejected: bool,
+    ) -> None:
+        args = _make_args(
+            parlio=False,
+            rmt=True,
+            legacy=True,
+            lanes="4",
+            tx_pin=0,
+            rx_pin=rx_pin,
+            environment_positional=environment,
+            project_dir=fake_project_dir,
+        )
+        with patch(
+            "ci.autoresearch.staging.synthesise_autoresearch_project",
+            return_value=fake_project_dir,
+        ):
+            result = _parse_args_and_build_commands(args)
+        assert (result == 1) is rejected
+
     def test_ws2818_esp32s3_rmt_legacy_canonical_command(
         self, fake_project_dir: Path
     ) -> None:
