@@ -142,9 +142,16 @@ FL_TEST_CASE("Oversampled capture accepts a 1-LED frame after idle (#4609)") {
                                                    kMinRuns));
     FL_CHECK_FALSE(validation::isWholeCaptureFrame(48u, false, 2086875u,
                                                    kIdleNs, kMinRuns));
-    // An idle lead with no signal after it is not a frame.
+    // An idle lead with no signal after it, or a lone glitch, is not a frame.
     FL_CHECK_FALSE(validation::isWholeCaptureFrame(1u, true, 2086875u,
                                                    kIdleNs, kMinRuns));
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(2u, true, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    // One byte after the idle lead is the shortest accepted frame.
+    FL_CHECK_FALSE(validation::isWholeCaptureFrame(15u, true, 2086875u,
+                                                   kIdleNs, kMinRuns));
+    FL_CHECK(validation::isWholeCaptureFrame(16u, true, 2086875u, kIdleNs,
+                                             kMinRuns));
     // Long captures keep passing on run count alone.
     FL_CHECK(validation::isWholeCaptureFrame(96u, true, 625u, kIdleNs,
                                              kMinRuns));

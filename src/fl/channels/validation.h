@@ -101,14 +101,18 @@ inline size_t captureEdgeCapacity(size_t shared_buffer_bytes,
 /// accepted as evidence of a real frame.
 ///
 /// Counting runs alone rejects short frames: one WS2812 LED is 24 bits, at
-/// most 49 runs with the lead idle, under a 64-run floor (#4609).
+/// most 49 runs with the lead idle, under a 64-run floor (#4609). After an
+/// idle lead, at least one byte (8 HIGH + 7 LOW runs) must follow, so a lone
+/// glitch after idle is still discarded and the capture resyncs.
 inline bool isWholeCaptureFrame(size_t run_count, bool lead_run_is_low,
                                 u32 lead_run_ns, u32 idle_threshold_ns,
                                 size_t min_frame_runs) FL_NO_EXCEPT {
+    constexpr size_t kLeadPlusOneByteRuns = 1 + 8 + 7;
     if (run_count >= min_frame_runs) {
         return true;
     }
-    return run_count > 1 && lead_run_is_low && lead_run_ns > idle_threshold_ns;
+    return run_count >= kLeadPlusOneByteRuns && lead_run_is_low &&
+           lead_run_ns > idle_threshold_ns;
 }
 
 /// @brief Largest frame, in wire bytes, an RP PIO RX capture can hold.

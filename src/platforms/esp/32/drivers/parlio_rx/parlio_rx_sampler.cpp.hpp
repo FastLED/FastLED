@@ -451,8 +451,9 @@ class ParlioRxSampler final : public RxDevice {
                     // Fragment of a frame that was already transmitting
                     // when the DMA window opened. Discard it and resync on
                     // the next frame rather than reporting a short capture.
+                    // Keep mCurRunSamples: this idle becomes the next
+                    // frame's lead run, which isWholeCaptureFrame checks.
                     mRuns.clear();
-                    mCurRunSamples = 0;
                     mSawFirstEdge = false;
                 }
             }
