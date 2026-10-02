@@ -24,8 +24,45 @@
 #include "fl/channels/config.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/log/log.h"
+#include "fl/system/sketch_macros.h"
+
+/// Small-memory tier: the bridge drives its driver directly instead of
+/// through ChannelManager, so the registry (~3 KB) is not linked. Measured on
+/// the LPC845, where it decides whether AutoResearch fits in 64 KB
+/// (FastLED#4671). Override with -DFL_SLIM_BRIDGE_DIRECT_SHOW=0/1.
+#ifndef FL_SLIM_BRIDGE_DIRECT_SHOW
+#define FL_SLIM_BRIDGE_DIRECT_SHOW (!FL_PLATFORM_HAS_LARGE_MEMORY)
+#endif
 
 namespace fl {
+
+/// How a SlimBridgeController reaches its driver. Specialized (not an
+/// `if`) so the direct variant never names ChannelManager at all.
+template <bool DIRECT_SHOW>
+struct SlimBridgeShowPolicy;
+
+/// Default: registered with ChannelManager, which owns enable/disable and
+/// flushes every registered driver once at the end of FastLED.show().
+template <>
+struct SlimBridgeShowPolicy<false> {
+    template <typename DriverTraits>
+    static void attach() FL_NO_EXCEPT { DriverTraits::registerWithManager(); }
+    static bool enabled(IChannelDriver& driver) FL_NO_EXCEPT {
+        return ChannelManager::registry().isDriverEnabled(driver.getName().c_str());
+    }
+    static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
+};
+
+/// Direct: no registry, so there is no runtime enable/disable or
+/// exclusive-driver selection, and no end-of-show flush -- the controller
+/// shows its own frame, as the pre-bridge LPC controllers did.
+template <>
+struct SlimBridgeShowPolicy<true> {
+    template <typename DriverTraits>
+    static void attach() FL_NO_EXCEPT {}
+    static bool enabled(IChannelDriver&) FL_NO_EXCEPT { return true; }
+    static void afterEnqueue(IChannelDriver& driver) FL_NO_EXCEPT { driver.show(); }
+};
 
 /// @brief Shared legacy `addLeds<>()` bridge controller over an `IChannelDriver`.
 ///
@@ -59,9 +96,14 @@ namespace fl {
 /// @tparam DriverTraits Trait type satisfying the contract documented above.
 /// @tparam XTRA0       Legacy clockless trailing zero bits per byte, stored
 ///                     on the ChannelData for engines that honour it.
+/// @tparam DIRECT_SHOW Bypass ChannelManager (see SlimBridgeShowPolicy).
+///                     Defaults to the platform tier via
+///                     FL_SLIM_BRIDGE_DIRECT_SHOW.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
-          int XTRA0 = 0>
+          int XTRA0 = 0, bool DIRECT_SHOW = (FL_SLIM_BRIDGE_DIRECT_SHOW != 0)>
 class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
+    using Policy = SlimBridgeShowPolicy<DIRECT_SHOW>;
+
 public:
     SlimBridgeController() FL_NO_EXCEPT {
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
@@ -78,7 +120,8 @@ public:
         mData->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
         // Idempotent by contract -- safe to call from every instantiation's
         // constructor (mirrors ClocklessIdf5's registerWithManager() call).
-        DriverTraits::registerWithManager();
+        // A no-op in direct-show mode.
+        Policy::template attach<DriverTraits>();
     }
 
     void init() FL_NO_EXCEPT override {}
@@ -94,7 +137,7 @@ protected:
         // single source of truth. A disabled driver means "drop this frame",
         // not "enqueue and hope" -- silently enqueuing to a disabled driver
         // is the #2517 silent-drop failure mode.
-        if (!ChannelManager::registry().isDriverEnabled(driver.getName().c_str())) {
+        if (!Policy::enabled(driver)) {
             FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' is disabled - dropping frame");
             return;
         }
@@ -130,6 +173,7 @@ protected:
         iterator.writeWS2812(&mData->getData());
 
         driver.enqueue(mData);
+        Policy::afterEnqueue(driver);
     }
 
     /// Called once per accepted frame, after the enabled/ready gates pass and BEFORE the
