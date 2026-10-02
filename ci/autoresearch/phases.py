@@ -538,6 +538,32 @@ async def _run_native_autoresearch(args: Args, build_mode: str = "quick") -> int
 # ============================================================
 
 
+def _lpc_rx_defines(args: Args) -> list[str]:
+    """Build defines selecting the LPC845 SCT RX backend for the requested modes.
+
+    The DMA loopback modes also pass FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK so
+    the low-memory sketch can leave out the unrelated pinToggleRx RPC: with
+    the real RX-DMA capture linked, the 64 KB part has no room for both
+    (~1 KB). An explicit --pin-toggle-rx keeps it.
+    """
+    pin_toggle = bool(getattr(args, "pin_toggle_rx", False))
+    dma_loopback = bool(getattr(args, "ws2812_loopback", False)) or bool(
+        getattr(args, "pwm_dma_cl", False)
+    )
+    defines: list[str] = []
+    if pin_toggle:
+        defines.append("FASTLED_LPC_RX_SCT=1")
+    if dma_loopback:
+        defines.append("FASTLED_LPC_RX_SCT_DMA=1")
+        if not pin_toggle:
+            defines.append("FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK=1")
+        # The sketch caps a capture at 192 edges; 2 x 512-word rings (4 KB)
+        # left too little heap/stack on the 16 KB part and the RPC layer
+        # faulted at boot.
+        defines.append("FL_LPC_RX_SCT_DMA_RING_WORDS=128")
+    return defines
+
+
 def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     """Parse CLI args, validate modes, build JSON-RPC command list.
 
@@ -1278,12 +1304,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         bench_defines.append("FASTLED_LPC_DMA_ISR=1")
     requested_env = (args.environment or args.environment_positional or "").lower()
     if requested_env in LPC_WS2812_ENVS:
-        if getattr(args, "pin_toggle_rx", False):
-            bench_defines.append("FASTLED_LPC_RX_SCT=1")
-        if getattr(args, "ws2812_loopback", False) or getattr(
-            args, "pwm_dma_cl", False
-        ):
-            bench_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
+        bench_defines.extend(_lpc_rx_defines(args))
     if getattr(args, "uart", False) and requested_env in LPC_WS2812_ENVS:
         bench_defines.append("FASTLED_LPC_UART_DMA=1")
         bench_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
@@ -1580,12 +1601,7 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             deferred_defines.append("FASTLED_AUTORESEARCH_LPC_UART_DMA=1")
             deferred_defines.append("FASTLED_LPC_DMA_ISR=1")
         if (ctx.final_environment or "").lower() in LPC_WS2812_ENVS:
-            if getattr(args, "pin_toggle_rx", False):
-                deferred_defines.append("FASTLED_LPC_RX_SCT=1")
-            if getattr(args, "ws2812_loopback", False) or getattr(
-                args, "pwm_dma_cl", False
-            ):
-                deferred_defines.append("FASTLED_LPC_RX_SCT_DMA=1")
+            deferred_defines.extend(_lpc_rx_defines(args))
         if (
             getattr(args, "uart", False)
             and (ctx.final_environment or "").lower() in LPC_WS2812_ENVS
@@ -3685,6 +3701,27 @@ async def _run_lpc_fault_emit_tests(ctx: RunContext) -> int:
     return 0
 
 
+async def _release_harness_port(ctx: RunContext) -> None:
+    """Close the harness's serial interface before a child bench opens the port.
+
+    FastLED#4207: a second client on a port this process already holds
+    connects without error and then answers nothing, so the child would
+    report a liveness/schema failure against healthy firmware. The benches
+    that call this are terminal for their mode (the dispatcher returns their
+    result directly), so the harness no longer needs the port.
+    """
+    if ctx.serial_iface is None:
+        return
+    try:
+        await ctx.serial_iface.close()
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as exc:  # noqa: BLE001 - teardown must not mask the test
+        print(f"   (warning: releasing harness serial interface: {exc})")
+    ctx.serial_iface = None
+
+
 async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
     """Run the FastLED #3021 Phase-1 SCT-RX pin-toggle bench.
 
@@ -3706,6 +3743,7 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
+    await _release_harness_port(ctx)
     cmd = [
         "uv",
         "run",
@@ -3752,6 +3790,7 @@ async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
+    await _release_harness_port(ctx)
     cmd = [
         "uv",
         "run",
@@ -3805,6 +3844,7 @@ async def _run_lpc_pwm_dma_cl_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
+    await _release_harness_port(ctx)
     cmd = [
         "uv",
         "run",
@@ -3868,6 +3908,7 @@ async def _run_lpc_dma_spi_tests(ctx: RunContext) -> int:
     print("=" * 60)
     print()
 
+    await _release_harness_port(ctx)
     cmd = [
         "uv",
         "run",
@@ -3913,22 +3954,7 @@ async def _run_rp_spi_loopback_tests(ctx: RunContext) -> int:
     print("   Rates: 1 MHz, 8 MHz, 24 MHz; byte-exact MISO capture + wire-idle")
     print("=" * 60)
     print()
-    # FastLED#4207: a second RpcBench on a port this process already holds
-    # connects without error and then answers nothing -- every call returns
-    # None. The child would fail its schema probe and report it as
-    # "deployed firmware schema does not contain rpSpiLoopback" against a
-    # board that does expose the method. This phase is terminal for
-    # --rp-spi-loopback (the dispatcher returns our result directly), so
-    # release the harness's interface before handing the port over.
-    if ctx.serial_iface is not None:
-        try:
-            await ctx.serial_iface.close()
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as exc:  # noqa: BLE001 - teardown must not mask the test
-            print(f"   (warning: releasing harness serial interface: {exc})")
-        ctx.serial_iface = None
+    await _release_harness_port(ctx)
 
     cmd = [
         "uv",

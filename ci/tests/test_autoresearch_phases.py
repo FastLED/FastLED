@@ -29,9 +29,14 @@ from ci.autoresearch.phases import (
     _is_valid_rp_pio_parallel_result,
     _legacy_command_max_lanes,
     _legacy_lane_rx_overlap,
+    _lpc_rx_defines,
     _parse_args_and_build_commands,
     _resolve_port_and_environment,
     _run_build_deploy,
+    _run_lpc_dma_spi_tests,
+    _run_lpc_pin_toggle_rx_tests,
+    _run_lpc_pwm_dma_cl_tests,
+    _run_lpc_ws2812_loopback_tests,
     _run_rp_spi_loopback_tests,
     _run_rp_spi_public_api_tests,
     _run_schema_and_pin_setup,
@@ -3272,3 +3277,53 @@ def test_coroutine_exit_code_defaults_trust_older_firmware() -> None:
     """
     assert coroutine_exit_code({"success": True}) == 0
     assert coroutine_exit_code({}) == 1
+
+
+def test_lpc_rx_defines_per_mode():
+    """DMA loopback builds drop pinToggleRx unless it is requested too."""
+    assert _lpc_rx_defines(_make_args(pin_toggle_rx=True)) == ["FASTLED_LPC_RX_SCT=1"]
+    assert _lpc_rx_defines(_make_args(ws2812_loopback=True)) == [
+        "FASTLED_LPC_RX_SCT_DMA=1",
+        "FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK=1",
+        "FL_LPC_RX_SCT_DMA_RING_WORDS=128",
+    ]
+    assert _lpc_rx_defines(_make_args(ws2812_loopback=True, pin_toggle_rx=True)) == [
+        "FASTLED_LPC_RX_SCT=1",
+        "FASTLED_LPC_RX_SCT_DMA=1",
+        "FL_LPC_RX_SCT_DMA_RING_WORDS=128",
+    ]
+    assert _lpc_rx_defines(_make_args()) == []
+
+
+@pytest.mark.parametrize(
+    "bench",
+    [
+        _run_lpc_pin_toggle_rx_tests,
+        _run_lpc_ws2812_loopback_tests,
+        _run_lpc_pwm_dma_cl_tests,
+        _run_lpc_dma_spi_tests,
+    ],
+)
+def test_lpc_subprocess_benches_release_the_harness_port(bench):
+    """FastLED#4207: the child's RPC client is inert while the harness still
+    holds the port, so each LPC bench must release it before spawning."""
+    iface = MagicMock()
+    iface.close = AsyncMock()
+    ctx = _make_ctx(
+        args=_make_args(parlio=False),
+        drivers=[],
+        gpio_only_mode=False,
+        final_environment="lpc845",
+        upload_port="/dev/ttyACM3",
+        serial_iface=iface,
+    )
+    seen_open_iface = []
+
+    def fake_run(*_a, **_k):
+        seen_open_iface.append(ctx.serial_iface)
+        return MagicMock(returncode=0)
+
+    with patch(f"{_PATCH_MOD}.RunningProcess.run", side_effect=fake_run):
+        asyncio.run(bench(ctx))
+    iface.close.assert_awaited_once()
+    assert seen_open_iface == [None]

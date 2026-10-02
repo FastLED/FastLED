@@ -277,7 +277,16 @@ inline fl::u32 ticksToNs(fl::u32 ticks) FL_NO_EXCEPT {
 //   * 512 entries per direction → 512 rising + 512 falling = 1024 total
 //     edges = 1024 / (24 * 2) = ~21 WS2812 LEDs per capture window
 //   * For longer captures, bump kDmaRingSize at the cost of SRAM
-constexpr fl::size kDmaRingSize = 512;
+//   * Override with FL_LPC_RX_SCT_DMA_RING_WORDS (1..1024; the DMA
+//     XFERCOUNT field limits one descriptor to 1024 transfers). The
+//     AutoResearch low-memory loopback captures at most 192 edges and uses
+//     128 so the 4 KB of rings do not starve heap/stack (see ci/autoresearch/phases.py _lpc_rx_defines).
+#ifndef FL_LPC_RX_SCT_DMA_RING_WORDS
+#define FL_LPC_RX_SCT_DMA_RING_WORDS 512
+#endif
+constexpr fl::size kDmaRingSize = FL_LPC_RX_SCT_DMA_RING_WORDS;
+FL_STATIC_ASSERT(kDmaRingSize >= 1 && kDmaRingSize <= 1024,
+                 "FL_LPC_RX_SCT_DMA_RING_WORDS must be in 1..1024 (DMA XFERCOUNT)");
 
 FL_ALIGNAS(4) fl::u32 g_dma_rising[kDmaRingSize];
 FL_ALIGNAS(4) fl::u32 g_dma_falling[kDmaRingSize];
