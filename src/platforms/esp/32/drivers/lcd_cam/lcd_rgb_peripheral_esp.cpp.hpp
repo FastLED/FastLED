@@ -109,7 +109,13 @@ bool LcdRgbPeripheralEsp::initialize(const LcdRgbPeripheralConfig& config) FL_NO
     panel_config.timings.v_res = config.v_res;
     panel_config.timings.hsync_pulse_width = 1;
     panel_config.timings.hsync_back_porch = 0;
-    panel_config.timings.hsync_front_porch = 0;
+    // A frame longer than 4096 pixels spans several lines (12-bit
+    // lcd_ha_width). With a zero front porch an ESP32-P4 never finishes a
+    // multi-line frame (no VSYNC, the driver stays busy); one pixel of front
+    // porch fixes that. With the 1-pixel HSYNC that blanks the data line for
+    // ~625 ns between lines, inside the low phase of a line's last bit, which
+    // WS2812-class LEDs accept as a longer low (FastLED#4669).
+    panel_config.timings.hsync_front_porch = 1;
     panel_config.timings.vsync_pulse_width = 1;
     panel_config.timings.vsync_back_porch = 1;
     panel_config.timings.vsync_front_porch = config.vsync_front_porch;
@@ -219,13 +225,18 @@ bool LcdRgbPeripheralEsp::drawFrame(const u16* buffer, size_t size_bytes) FL_NO_
 
     mBusy = true;
 
-    // Calculate width in pixels (each pixel is 2 bytes)
-    size_t width = size_bytes / 2;
+    // The buffer holds whole lines of h_res pixels (2 bytes each).
+    const size_t width = mConfig.h_res;
+    const size_t height = (width > 0) ? size_bytes / (2 * width) : 0;
+    if (width == 0 || height == 0 || height > mConfig.v_res) {
+        mBusy = false;
+        return false;
+    }
 
     esp_err_t err = esp_lcd_panel_draw_bitmap(
         mPanelHandle,
-        0, 0,           // x, y offset
-        width, 1,       // width (pixels), height
+        0, 0,  // x, y offset
+        static_cast<fl::i32>(width), static_cast<fl::i32>(height),
         buffer
     );
 

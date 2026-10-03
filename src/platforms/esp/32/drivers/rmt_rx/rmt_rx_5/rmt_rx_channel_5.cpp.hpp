@@ -221,6 +221,33 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 }
 
 /**
+ * @brief Decode a gap symbol's bit from its HIGH time alone
+ * @return 0 or 1 when the symbol is HIGH-then-LOW with a valid bit HIGH time,
+ * -1 otherwise
+ *
+ * A gap symbol is a bit whose LOW phase a TX hand-off stretched (a DMA chunk
+ * boundary, an LCD line blank). Its HIGH phase is still a real bit, so it is
+ * classified by HIGH time exactly as the shared decodeWs2812Edges() does.
+ * Skipping the whole symbol instead dropped that bit and shifted the rest of
+ * the frame by one bit (LCD_RGB on ESP32-P4, FastLED#4669).
+ */
+inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
+                        u32 ns_per_tick) {
+    const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
+    if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
+        return -1;
+    }
+    const u32 high_ns = ticksToNs(rmt_sym.duration0, ns_per_tick);
+    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+        return 1;
+    }
+    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+        return 0;
+    }
+    return -1;
+}
+
+/**
  * @brief Decode single symbol to bit value
  * @param symbol RMT symbol to decode
  * @param timing Timing thresholds
@@ -397,15 +424,18 @@ decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
             break; // End of frame
         }
 
-        // Check for gap pulse (DMA transfer gap, e.g., PARLIO ~20us gaps)
-        // Skip gap pulses without decoding them as bits
+        // Gap pulse (TX hand-off gap, e.g. PARLIO DMA ~20us, LCD line blank):
+        // keep the bit its HIGH phase carries; skip only a symbol without one.
+        int bit;
         if (isGapPulse(symbols[i], timing, ns_per_tick)) {
-            FL_LOG_RX("decodeRmtSymbols: gap pulse detected at symbol " << i << ", skipping");
-            continue; // Skip to next symbol
+            bit = decodeGapBit(symbols[i], timing, ns_per_tick);
+            if (bit < 0) {
+                FL_LOG_RX("decodeRmtSymbols: gap pulse detected at symbol " << i << ", skipping");
+                continue; // Skip to next symbol
+            }
+        } else {
+            bit = decodeBit(symbols[i], timing, ns_per_tick);
         }
-
-        // Decode symbol to bit
-        int bit = decodeBit(symbols[i], timing, ns_per_tick);
         if (bit < 0) {
             error_count++;
             u32 high_ns = ticksToNs(rmt_symbols[i].duration0, ns_per_tick);
