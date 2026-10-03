@@ -5,10 +5,24 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.30 so ESP32 boards on pioarduino 53.x/54.x and plain
-    # RP2040/RP2350 boards build again (both regressed in 2.5.28/2.5.29).
+    # Pin to fbuild 2.5.33 so Linux builds stop SIGKILLing library compiles
+    # (exit -9, empty stderr) when the Tokio thread that forked them retires.
     #
     # Pin history:
+    #   2.5.33 -- contained children fork on a process-lifetime thread, so the
+    #              Linux owner-death signal (PR_SET_PDEATHSIG) no longer kills
+    #              long library TUs such as fl.fx mid-compile on CI
+    #              (FastLED/fbuild#1628/#1631, FastLED#4675).
+    #   2.5.32 -- `fbuild port udev --install` and a deploy/monitor/debug
+    #              preflight install USB rules (tty, raw usb, hidraw, uaccess)
+    #              behind an explained cross-distro root prompt; the rules
+    #              no longer silently fail on distros without plugdev
+    #              (FastLED/fbuild#1621). Needed for probe-rs LPC845 deploys
+    #              on Linux.
+    #   2.5.31 -- waits for a timed-out native espflash op to release the port
+    #              before the esptool fallback (FastLED/fbuild#1614); clears RTS
+    #              before DTR at open (FastLED/fbuild#1617); deploy spawns the
+    #              build-resolved esptool (FastLED/fbuild#1616).
     #   2.5.30 -- resolves the unified ESP32 toolchain by registry version for
     #              pioarduino 53.x/54.x and drops -fuse-cxa-atexit for pre-GCC 14
     #              SDKs (FastLED/fbuild#1605); stops inferring Bluetooth-only
@@ -269,7 +283,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.30",
+    "fbuild==2.5.33",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented

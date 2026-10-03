@@ -162,7 +162,7 @@ void ColorManagedPixelSource::loadRGBScaleAndBrightness(
 #endif
 
 bool ColorManagedPixelSource::temporalDitherEnabled() const FL_NO_EXCEPT {
-        return (mController.e[0] | mController.e[1] | mController.e[2]) != 0;
+        return mController.ditherActive();
 }
 
 u8 ColorManagedPixelSource::quantizeDithered(i32 drive,
