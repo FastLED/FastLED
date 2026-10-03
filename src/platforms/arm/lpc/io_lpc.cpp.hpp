@@ -32,13 +32,24 @@
 // '{' was dropped on about half of all RPCs, so the device answered
 // -32600 "method" (or nothing) instead of the call. Receive through
 // USART0's RXRDY interrupt into a small ring instead.
+//
+// Ownership: the ring serves FastLED's serial input API -- fl::serial_begin()
+// and fl::available()/peek()/read()/readStringUntil(), which Remote/RPC and
+// AutoResearch use. A sketch that only uses Arduino `Serial` is unaffected:
+// none of this code runs. Once fl::serial_begin() enables the interrupt, or
+// an fl:: read drains RXDAT, received bytes belong to that API, so a sketch
+// that mixes it with direct `Serial.read()`/`Serial.available()` must read
+// through fl:: instead. Build with -DFL_LPC_SERIAL_RX_RING=0 to restore the
+// polled HardwareSerial path (and its overrun losses).
+#ifndef FL_LPC_SERIAL_RX_RING
 #define FL_LPC_SERIAL_RX_RING 1
+#endif
 // IWYU pragma: begin_keep
 #include "platforms/arm/lpc/led_sysdefs_arm_lpc.h"  // vendor CMSIS PAL: USART0, NVIC, PRIMASK
 // IWYU pragma: end_keep
 #endif
 
-#if defined(FL_LPC_SERIAL_RX_RING)
+#if defined(FL_LPC_SERIAL_RX_RING) && FL_LPC_SERIAL_RX_RING
 // Bytes buffered between the USART0 ISR and the polled readers. The ISR
 // keeps up with the line however long a request is; the ring only has to
 // cover how long the reader goes without draining (5.5 ms at 64 bytes).
@@ -135,7 +146,7 @@ namespace platforms {
 
 void begin(u32 baudRate) FL_NO_EXCEPT {
     Serial.begin(baudRate);
-#if defined(FL_LPC_SERIAL_RX_RING)
+#if defined(FL_LPC_SERIAL_RX_RING) && FL_LPC_SERIAL_RX_RING
     lpc_serial_rx::Masked masked;  // also discards a byte left in RXDAT
     lpc_serial_rx::ring().tail = lpc_serial_rx::ring().head;
     USART0->INTENSET = USART_INTENSET_RXRDYEN_MASK;
@@ -162,7 +173,7 @@ void println(const char* str) FL_NO_EXCEPT {
     Serial.print("\r\n");
 }
 
-#if defined(FL_LPC_SERIAL_RX_RING)
+#if defined(FL_LPC_SERIAL_RX_RING) && FL_LPC_SERIAL_RX_RING
 int available() FL_NO_EXCEPT {
     lpc_serial_rx::Masked masked;
     const lpc_serial_rx::Ring& r = lpc_serial_rx::ring();
