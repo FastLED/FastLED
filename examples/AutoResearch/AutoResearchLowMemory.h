@@ -319,6 +319,10 @@ inline void autoResearchLowMemorySetup() {
     !defined(FASTLED_AUTORESEARCH_FAULT_TEST)
     // pinToggleRx (FastLED #3021 Phase 1) — bit-bang square wave on tx_pin
     // and capture SCT edges on rx_pin. CSV stats out.
+#if !defined(FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK)
+    // Left out of the RX-DMA loopback builds (--ws2812-loopback/--pwm-dma-cl):
+    // with the DMA capture linked, the 64 KB LPC845 has no room for this
+    // unrelated ~1 KB diagnostic. --pin-toggle-rx builds keep it.
     remote.bind("pinToggleRx",
         [](int tx_pin, int rx_pin, int freq_hz, int duration_ms) -> fl::string {
             if (tx_pin < 0 || rx_pin < 0 || freq_hz <= 0 || duration_ms <= 0) {
@@ -380,6 +384,7 @@ inline void autoResearchLowMemorySetup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
+#endif  // !FASTLED_AUTORESEARCH_LPC_DMA_LOOPBACK
 
 #if defined(FASTLED_AUTORESEARCH_LPC_WS2812)
     // ws2812SctTest (FastLED #3021 Phase 2) -- WS2812 byte-match loopback.
