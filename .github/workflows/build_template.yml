@@ -185,7 +185,11 @@ jobs:
             echo "nproc: $(nproc)"
             free -m || true
             echo "--- kernel OOM-killer records ---"
-            sudo dmesg 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" || echo "(none)"
+            if kernel_log="$(sudo dmesg 2>/dev/null)"; then
+              grep -iE "out of memory|oom-kill|killed process" <<< "$kernel_log" || echo "(none)"
+            else
+              echo "(kernel log unavailable: sudo dmesg failed)"
+            fi
             daemon_log="$HOME/.fbuild/prod/daemon/daemon.log"
             if [ -f "$daemon_log" ]; then
               echo "--- fbuild daemon.log: warnings/errors and signal exits (last 60) ---"
