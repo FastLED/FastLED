@@ -941,7 +941,7 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     // a dropped submission -- no driver, a disabled one, a busy buffer --
     // does not consume a phase and the cycle's average stays unbiased. Both
     // the legacy offsets and the colour-managed temporal dither read it.
-    if ((pixels.e[0] | pixels.e[1] | pixels.e[2]) != 0) {
+    if (pixels.ditherActive()) {
         pixels.reseed_binary_dithering(mDitherPhase);
     }
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,

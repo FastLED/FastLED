@@ -196,6 +196,9 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
     // Calculate number of LEDs (RGB = 3 bytes per LED)
     int numLeds = static_cast<int>(maxChannelSize / 3);
     int numLanes = static_cast<int>(channelData.size());
+    if (numLeds == 0) {
+        return false;  // under one LED of data: nothing to frame
+    }
 
     // Initialize or reconfigure if needed
     bool needsInit = !mInitialized ||
@@ -237,8 +240,22 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
         pconfig.disp_gpio = -1;
         pconfig.pclk_hz = 3200000;  // 3.2 MHz for WS2812 timing
         pconfig.num_lanes = mConfig.num_lanes;
-        pconfig.h_res = mNumLeds * 24 * 4;  // 4 pixels per bit
-        pconfig.v_res = 1;
+        // LCD_CAM's horizontal active width (lcd_ha_width) is 12 bits on
+        // ESP32-S3 and ESP32-P4: a line holds at most 4096 pixels, and a
+        // longer one is silently cut to h_res mod 4096 (100 LEDs = 9600 px
+        // went out as its first 1408 px, 44 of 300 bytes; FastLED#4669).
+        // Fold the frame into lines of whole LEDs, so the short horizontal
+        // blank between lines (see LcdRgbPeripheralEsp::initialize()) falls
+        // after a bit's low phase and only stretches that low time. Unused
+        // pixels of the last line stay idle low and lengthen the reset gap.
+        constexpr size_t kPixelsPerLed = 24 * 4;  // 4 pixels per bit
+        constexpr size_t kMaxLineWidthPx = 4096;
+        constexpr size_t kMaxLedsPerLine = kMaxLineWidthPx / kPixelsPerLed;
+        const size_t numLedsU = static_cast<size_t>(mNumLeds);
+        const size_t ledsPerLine =
+            numLedsU < kMaxLedsPerLine ? numLedsU : kMaxLedsPerLine;
+        pconfig.h_res = ledsPerLine * kPixelsPerLed;
+        pconfig.v_res = (numLedsU + ledsPerLine - 1) / ledsPerLine;
         pconfig.vsync_front_porch = 0;
         pconfig.use_psram = mConfig.use_psram;
 
@@ -260,8 +277,7 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
         mPeripheral->registerDrawCallback(nullptr, nullptr);
 
         // Calculate buffer size
-        size_t data_size = mNumLeds * 24 * 4 * 2;  // 4 pixels per bit, 2 bytes per pixel
-        mBufferSize = data_size;
+        mBufferSize = pconfig.h_res * pconfig.v_res * 2;  // 2 bytes per pixel
 
         // Allocate double buffers
         for (int i = 0; i < 2; i++) {
