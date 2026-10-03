@@ -5,12 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.32 so ESP32 deploys survive a native verify timeout,
-    # serial attach no longer resets ESP32 USB-Serial-JTAG chips (the ESP32-P4
-    # re-enumerated and dropped every session), and ESP32 deploy uses the
-    # build-provisioned esptool instead of one on PATH.
+    # Pin to fbuild 2.5.33 so Linux builds stop SIGKILLing library compiles
+    # (exit -9, empty stderr) when the Tokio thread that forked them retires.
     #
     # Pin history:
+    #   2.5.33 -- contained children fork on a process-lifetime thread, so the
+    #              Linux owner-death signal (PR_SET_PDEATHSIG) no longer kills
+    #              long library TUs such as fl.fx mid-compile on CI
+    #              (FastLED/fbuild#1628/#1631, FastLED#4675).
     #   2.5.32 -- `fbuild port udev --install` and a deploy/monitor/debug
     #              preflight install USB rules (tty, raw usb, hidraw, uaccess)
     #              behind an explained cross-distro root prompt; the rules
@@ -281,7 +283,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.32",
+    "fbuild==2.5.33",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
