@@ -22,6 +22,7 @@ def _make_ctx(
 ) -> RunContext:
     return RunContext(
         args=SimpleNamespace(
+            all=False,
             pin_toggle_rx=False,
             ws2812_loopback=False,
             tx_pin=None,

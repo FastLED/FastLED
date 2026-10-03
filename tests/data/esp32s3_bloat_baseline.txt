@@ -1,3 +1,11 @@
+# 2026-10-03: pin ESP32-S3 to pioarduino 55.03.311 explicitly. fbuild 2.5.28
+# silently substituted that platform for the requested 54.03.20 release, so
+# the 401971 B baseline was never measured against the declared platform.
+# fbuild 2.5.33 honors the pin. CI run 37156587071 measures
+# image_flash=398799 B with Arduino 3.3.11, ESP-IDF 5.5.5 and the 20260121
+# Xtensa toolchain. The same source measures 398863 B locally (64 B higher).
+# Re-pin the ratchet to the CI build rather than the misleading old pin.
+#
 # 2026-09-26, PR #4655 (issue #4468, FastLED/fbuild#1456): metric change,
 # 349854 -> 401971. The gate now compares report.json `image_flash` (the
 # allocated, file-backed ELF section bytes fbuild 2.5.28 reads from section
@@ -292,4 +300,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-401971
+398799
