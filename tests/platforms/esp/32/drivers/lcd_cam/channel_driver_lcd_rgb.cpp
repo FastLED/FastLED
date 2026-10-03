@@ -432,6 +432,52 @@ FL_TEST_CASE("ChannelEngineLcdRgb - 100 LED transmission") {
     FL_CHECK(mock.getDrawCount() >= 1);
 }
 
+// LCD_CAM's horizontal active width (lcd_ha_width) is a 12-bit field on
+// ESP32-S3 and ESP32-P4, so a line holds at most 4096 pixels and the hardware
+// silently keeps only h_res mod 4096 of a longer one. One 9600-pixel line for
+// 100 LEDs went out as its first 1408 pixels -- 44 of 300 bytes on the wire
+// (FastLED#4669). The frame has to be folded into lines the register can
+// hold, each carrying whole LEDs so the blank between lines lands after a
+// bit's low phase.
+FL_TEST_CASE("ChannelEngineLcdRgb - frame lines fit the 12-bit active width") {
+    resetMockState();
+
+    auto peripheral = createMockPeripheral();
+    ChannelEngineLcdRgb driver(peripheral);
+
+    const size_t numLeds = 100;
+    const size_t pixelsPerLed = 24 * 4;
+    driver.enqueue(createTestChannelData(1, numLeds));
+    driver.show();
+
+    while (driver.poll() != IChannelDriver::DriverState::READY) {
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(1));  // ok sleep for
+    }
+
+    auto& mock = LcdRgbPeripheralMock::instance();
+    const LcdRgbPeripheralConfig& config = mock.getConfig();
+    FL_REQUIRE_LE(config.h_res, static_cast<size_t>(4096));
+    FL_REQUIRE_EQ(config.h_res % pixelsPerLed, static_cast<size_t>(0));
+    const size_t ledsPerLine = config.h_res / pixelsPerLed;
+    FL_REQUIRE_GT(ledsPerLine, static_cast<size_t>(0));
+    FL_CHECK_GE(ledsPerLine * config.v_res, numLeds);
+
+    auto frameData = mock.getLastFrameData();
+    FL_REQUIRE_EQ(frameData.size(), config.h_res * config.v_res);
+    for (size_t line = 0; line < config.v_res; line++) {
+        const size_t lineStart = line * config.h_res;
+        const size_t ledsHere =
+            fl::min(ledsPerLine, numLeds - line * ledsPerLine);
+        // Every line opens on a bit (bits start high) ...
+        FL_CHECK_EQ(frameData[lineStart], static_cast<u16>(0xFFFF));
+        // ... and pixels after the last LED (last line only) are idle low.
+        for (size_t i = lineStart + ledsHere * pixelsPerLed;
+             i < lineStart + config.h_res; i++) {
+            FL_CHECK_EQ(frameData[i], static_cast<u16>(0));
+        }
+    }
+}
+
 FL_TEST_CASE("ChannelEngineLcdRgb - 1000 LED transmission") {
     resetMockState();
 

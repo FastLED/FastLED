@@ -24,6 +24,7 @@
 // Include ESP-IDF headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
+#include "driver/gpio.h"
 #include "driver/gptimer.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
@@ -81,9 +82,12 @@ public:
     void freeDmaBuffer(void* ptr) FL_NO_EXCEPT override;
 
 private:
+    bool deleteTxUnitKeepingPinsDriven() FL_NO_EXCEPT;
+
     ::parlio_tx_unit_handle_t mTxUnit;  ///< ESP-IDF TX unit handle
     bool mEnabled;                       ///< Track enable state (for cleanup)
     bool mPreferPsram;                   ///< Prefer PSRAM for DMA buffers
+    int mDataPins[16];                   ///< Data GPIOs of mTxUnit (-1 = unused)
 };
 
 //=============================================================================
@@ -110,6 +114,9 @@ ParlioPeripheralESPImpl::ParlioPeripheralESPImpl()
     : mTxUnit(nullptr),
       mEnabled(false),
       mPreferPsram(true) {
+    for (int& pin : mDataPins) {
+        pin = -1;
+    }
 }
 
 ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
@@ -130,13 +137,9 @@ ParlioPeripheralESPImpl::~ParlioPeripheralESPImpl() {
             mEnabled = false;
         }
 
-        // Delete TX unit
-        err = parlio_del_tx_unit(mTxUnit);
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("ParlioPeripheralESP: Failed to delete TX unit: %s", err);
+        if (!deleteTxUnitKeepingPinsDriven()) {
+            mTxUnit = nullptr;
         }
-
-        mTxUnit = nullptr;
     }
 }
 
@@ -207,6 +210,9 @@ bool ParlioPeripheralESPImpl::initialize(const ParlioPeripheralConfig& config) F
         return false;
     }
     FL_LOG_PARLIO("PARLIO_PERIPH: parlio_new_tx_unit() SUCCESS - handle=%s", (void*)mTxUnit);
+    for (size_t i = 0; i < 16; i++) {
+        mDataPins[i] = (i < config.data_width) ? config.gpio_pins[i] : -1;
+    }
 
     FL_LOG_PARLIO("PARLIO: Initialized (data_width=%s, clock=%s Hz)", config.data_width, config.clock_freq_hz);
 
@@ -227,14 +233,49 @@ bool ParlioPeripheralESPImpl::deinitialize() FL_NO_EXCEPT {
         mEnabled = false;
     }
 
-    // Delete TX unit to free hardware resources
-    esp_err_t err = parlio_del_tx_unit(mTxUnit);
-    if (err != ESP_OK) {
-        FL_WARN("ParlioPeripheralESP: Failed to delete TX unit during deinitialize: %s (%s)", esp_err_to_name(err), err);
-        return false;
+    return deleteTxUnitKeepingPinsDriven();
+}
+
+// parlio_del_tx_unit() calls gpio_output_disable() on every data pin and only
+// then tears the unit down (ISR, DMA, group), which takes ~350 us on an
+// ESP32-P4. The engine deletes and recreates the TX unit on every frame -- that
+// is what routes a pad another driver borrowed back to PARLIO -- so every
+// frame began with the data line floating for that long. A WS2812 DIN reads
+// whatever its pad pull makes of it; on the P4 loopback bench (RX pad pulled
+// up) RMT RX saw a rising edge, then >100 us of HIGH, hit its idle threshold
+// and ended before the frame started, so PARLIO looked like it emitted nothing
+// (FastLED#4669). Latch each pad across the delete so it keeps driving the
+// idle level, re-drive it low as a plain GPIO, then release the latch.
+// parlio_new_tx_unit() routes the pad back to PARLIO.
+bool ParlioPeripheralESPImpl::deleteTxUnitKeepingPinsDriven() FL_NO_EXCEPT {
+    for (int pin : mDataPins) {
+        if (pin >= 0) {
+            gpio_hold_en(static_cast<gpio_num_t>(pin));
+        }
     }
 
+    const esp_err_t err = parlio_del_tx_unit(mTxUnit);
+
+    for (int& pin : mDataPins) {
+        if (pin < 0) {
+            continue;
+        }
+        const gpio_num_t gpio = static_cast<gpio_num_t>(pin);
+        if (err == ESP_OK) {
+            gpio_set_level(gpio, 0);
+            gpio_set_direction(gpio, GPIO_MODE_OUTPUT);
+        }
+        gpio_hold_dis(gpio);
+    }
+
+    if (err != ESP_OK) {
+        FL_WARN("ParlioPeripheralESP: Failed to delete TX unit: %s (%s)", esp_err_to_name(err), err);
+        return false;
+    }
     mTxUnit = nullptr;
+    for (int& pin : mDataPins) {
+        pin = -1;
+    }
     return true;
 }
 

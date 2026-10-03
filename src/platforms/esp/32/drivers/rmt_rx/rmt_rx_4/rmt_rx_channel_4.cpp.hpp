@@ -142,6 +142,33 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
     return false;
 }
 
+/**
+ * @brief Decode a gap symbol's bit from its HIGH time alone
+ * @return 0 or 1 when the symbol is HIGH-then-LOW with a valid bit HIGH time,
+ * -1 otherwise
+ *
+ * A gap symbol is a bit whose LOW phase a TX hand-off stretched (a DMA chunk
+ * boundary, an LCD line blank). Its HIGH phase is still a real bit, so it is
+ * classified by HIGH time exactly as the shared decodeWs2812Edges() does.
+ * Skipping the whole symbol instead dropped that bit and shifted the rest of
+ * the frame by one bit (LCD_RGB on ESP32-P4, FastLED#4669).
+ */
+inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
+                        u32 ns_per_tick) {
+    const auto item = fl::bit_cast<rmt_item32_t>(symbol);
+    if (item.level0 != 1 || item.level1 != 0) {
+        return -1;
+    }
+    const u32 high_ns = ticksToNs(item.duration0, ns_per_tick);
+    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
+        return 1;
+    }
+    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
+        return 0;
+    }
+    return -1;
+}
+
 inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
                      u32 ns_per_tick) {
     const auto item = fl::bit_cast<rmt_item32_t>(symbol);
@@ -183,10 +210,16 @@ fl::result<u32, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
         if (isResetPulse(symbols[i], timing, ns_per_tick)) {
             break;
         }
+        int bit;
         if (isGapPulse(symbols[i], timing, ns_per_tick)) {
-            continue;
+            // Keep the bit a stretched-LOW symbol carries (see decodeGapBit).
+            bit = decodeGapBit(symbols[i], timing, ns_per_tick);
+            if (bit < 0) {
+                continue;
+            }
+        } else {
+            bit = decodeBit(symbols[i], timing, ns_per_tick);
         }
-        int bit = decodeBit(symbols[i], timing, ns_per_tick);
         if (bit < 0) {
             return fl::result<u32, DecodeError>::failure(
                 DecodeError::INVALID_SYMBOL);

@@ -134,7 +134,7 @@ protected:
 
         // Dither reseed mirrors Channel::encodeFrame(): only reseed when a
         // non-zero dither mode is set.
-        if ((pixels.e[0] | pixels.e[1] | pixels.e[2]) != 0) {
+        if (pixels.ditherActive()) {
             pixels.reseed_binary_dithering(mDitherPhase);
         }
 

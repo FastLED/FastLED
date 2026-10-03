@@ -31,6 +31,8 @@ from ci.autoresearch.phases import (
     _legacy_lane_rx_overlap,
     _lpc_rx_defines,
     _parse_args_and_build_commands,
+    _prune_to_device_drivers,
+    _prune_unavailable_drivers,
     _resolve_port_and_environment,
     _run_build_deploy,
     _run_lpc_dma_spi_tests,
@@ -3327,3 +3329,140 @@ def test_lpc_subprocess_benches_release_the_harness_port(bench):
         asyncio.run(bench(ctx))
     iface.close.assert_awaited_once()
     assert seen_open_iface == [None]
+
+
+def _single(driver: str) -> dict[str, Any]:
+    return {"method": "runSingleTest", "params": {"driver": driver, "laneSizes": [100]}}
+
+
+def test_prune_unavailable_drivers_drops_drivers_the_device_lacks():
+    """`--all` on an ESP32-C6 must not send LCD/Teensy drivers it never registers."""
+    ctx = _make_ctx(
+        drivers=["PARLIO", "RMT", "LCD_RGB", "OBJECT_FLED"],
+        json_rpc_commands=[
+            {"method": "setLaneSizes", "params": [100]},
+            _single("PARLIO"),
+            _single("RMT"),
+            _single("LCD_RGB"),
+            _single("OBJECT_FLED"),
+        ],
+    )
+
+    skipped = _prune_unavailable_drivers(ctx, {"PARLIO", "RMT", "SPI", "UART"})
+
+    assert skipped == ["LCD_RGB", "OBJECT_FLED"]
+    assert ctx.drivers == ["PARLIO", "RMT"]
+    assert [c["method"] for c in ctx.json_rpc_commands] == [
+        "setLaneSizes",
+        "runSingleTest",
+        "runSingleTest",
+    ]
+    assert [c["params"]["driver"] for c in ctx.json_rpc_commands[1:]] == [
+        "PARLIO",
+        "RMT",
+    ]
+
+
+def test_prune_unavailable_drivers_filters_parallel_entries():
+    ctx = _make_ctx(
+        drivers=["PARLIO", "RMT", "LCD_RGB"],
+        json_rpc_commands=[
+            {
+                "method": "runParallelTest",
+                "params": {
+                    "drivers": [
+                        {"driver": "PARLIO", "laneSizes": [100]},
+                        {"driver": "RMT", "laneSizes": [100]},
+                        {"driver": "LCD_RGB", "laneSizes": [100]},
+                    ]
+                },
+            }
+        ],
+    )
+
+    assert _prune_unavailable_drivers(ctx, {"PARLIO", "RMT"}) == ["LCD_RGB"]
+    assert ctx.json_rpc_commands[0]["params"]["drivers"] == [
+        {"driver": "PARLIO", "laneSizes": [100]},
+        {"driver": "RMT", "laneSizes": [100]},
+    ]
+
+
+def test_prune_unavailable_drivers_drops_parallel_tests_left_with_one_driver():
+    """The firmware rejects runParallelTest with fewer than two drivers."""
+    ctx = _make_ctx(
+        drivers=["OBJECT_FLED", "FLEX_IO"],
+        json_rpc_commands=[
+            {
+                "method": "runParallelTest",
+                "params": {
+                    "drivers": [
+                        {"driver": "OBJECT_FLED", "laneSizes": [100]},
+                        {"driver": "FLEX_IO", "laneSizes": [100]},
+                    ]
+                },
+            }
+        ],
+    )
+
+    assert _prune_unavailable_drivers(ctx, {"OBJECT_FLED"}) == ["FLEX_IO"]
+    assert ctx.json_rpc_commands == []
+
+
+def _drivers_client(result: Any = None, error: Exception | None = None) -> MagicMock:
+    client = MagicMock()
+    if error is not None:
+        client.send = AsyncMock(side_effect=error)
+    else:
+        client.send = AsyncMock(return_value=MagicMock(data=result))
+    return client
+
+
+def test_prune_to_device_drivers_reports_timeout_as_test_failure(capsys):
+    """A `drivers` preflight timeout is classified like a test-loop timeout."""
+    ctx = _make_ctx(args=_make_args(all=True))
+    qctx = QuietContext(quiet=False)
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(ctx, _drivers_client(error=RpcTimeoutError("x")), qctx)
+    )
+
+    assert ok is False
+    assert "FAILURE class=timeout method=drivers" in capsys.readouterr().out
+
+
+def test_prune_to_device_drivers_fails_when_nothing_is_runnable(capsys):
+    ctx = _make_ctx(args=_make_args(all=True))  # one PARLIO runSingleTest
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result=[{"name": "RMT"}]), QuietContext(quiet=False)
+        )
+    )
+
+    assert ok is False
+    assert ctx.json_rpc_commands == []
+    assert "FAILURE class=no_runnable_driver" in capsys.readouterr().out
+
+
+def test_prune_to_device_drivers_keeps_registered_drivers():
+    ctx = _make_ctx(args=_make_args(all=True))
+
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result=[{"name": "PARLIO"}]), QuietContext(quiet=False)
+        )
+    )
+
+    assert ok is True
+    assert ctx.drivers == ["PARLIO"]
+
+
+def test_prune_to_device_drivers_reports_malformed_response(capsys):
+    ctx = _make_ctx(args=_make_args(all=True))
+    ok = asyncio.run(
+        _prune_to_device_drivers(
+            ctx, _drivers_client(result={"not": "a list"}), QuietContext(quiet=False)
+        )
+    )
+    assert ok is False
+    assert "FAILURE class=malformed_response method=drivers" in capsys.readouterr().out
