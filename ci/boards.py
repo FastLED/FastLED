@@ -17,6 +17,7 @@ ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip"
 ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.34/platform-espressif32.zip"
 ESP32_IDF_5_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.35/platform-espressif32.zip"
+ESP32_IDF_5_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip"
 # IDF 6.0 preview via pioarduino prep_IDF6 branch (commit 98230ad4aa, 2026-05-25).
 # platform.json in this branch pins framework-arduinoespressif32 to
 # arduino-esp32/archive/master.zip — arduino-esp32 master built on ESP-IDF v6.0.1+.
@@ -949,7 +950,7 @@ ESP32_C6_DEVKITC_1 = Board(
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
-    platform=ESP32_IDF_5_4_PIOARDUINO,
+    platform=ESP32_IDF_5_5_5_PIOARDUINO,
     framework="arduino",
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
