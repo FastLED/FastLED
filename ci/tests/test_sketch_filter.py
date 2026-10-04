@@ -742,6 +742,19 @@ class TestAnalogOutputFilter:
         )
 
 
+def test_atmega8a_tiny_memory_skips_perfdisc() -> None:
+    from ci.boards import ATMEGA8A
+
+    assert ATMEGA8A.memory_class == "tiny"
+    perfdisc = (
+        Path(__file__).parent.parent.parent / "examples" / "PerfDisc" / "PerfDisc.ino"
+    )
+    sketch_filter = parse_filter_from_sketch(perfdisc)
+    assert sketch_filter is not None
+    should_skip, _ = should_skip_sketch(ATMEGA8A, sketch_filter)
+    assert should_skip
+
+
 class TestAudioInputFilter:
     """Test AudioInput example filter behavior."""
 

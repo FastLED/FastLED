@@ -5,7 +5,12 @@
 #include "FastLED.h"
 
 
-#define NUM_LEDS      100
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// Pixel storage plus palettes must fit in 512 B SRAM on ATtiny85.
+#define NUM_LEDS 16
+#else
+#define NUM_LEDS 100
+#endif
 #define LED_TYPE   WS2811
 #define COLOR_ORDER   GRB
 #define DATA_PIN        3

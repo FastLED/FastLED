@@ -12,8 +12,13 @@
 //
 
 // Params for width and height
-#if defined(__AVR_ATtinyxy4__)
-// Tiny 4x4 matrix for this memory constrained device.
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega8A__) || \
+    defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny88__)
+// A 16x16 framebuffer alone uses 768 B, more than these boards can spare.
+const uint8_t kMatrixWidth = 4;
+const uint8_t kMatrixHeight = 4;
+#elif defined(__AVR_ATtinyxy4__)
+// Small matrix for this memory constrained device.
 const uint8_t kMatrixWidth = 8;
 const uint8_t kMatrixHeight = 8;
 #else

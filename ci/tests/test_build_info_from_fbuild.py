@@ -67,6 +67,16 @@ def test_synthesizes_build_info_from_compile_commands(tmp_path: Path) -> None:
     assert set(env["aliases"]) >= {"nm", "objdump", "c++filt", "size", "ld"}
 
 
+def test_synthesizes_build_info_for_nested_example(tmp_path: Path) -> None:
+    _make_fbuild_tree(tmp_path, "clang")
+    board = create_board("esp32s3")
+
+    assert generate_build_info_json_from_existing_build(
+        tmp_path, board, "Multiple/ArrayOfLedArrays"
+    )
+    assert (tmp_path / "build_info_Multiple" / "ArrayOfLedArrays.json").is_file()
+
+
 def test_prefers_fbuild_emitted_build_info(tmp_path: Path) -> None:
     out = _make_fbuild_tree(tmp_path, "avr-gcc")
     board = create_board("uno")

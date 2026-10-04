@@ -12,7 +12,12 @@
 //#define CLK_PIN   4
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
-#define NUM_LEDS    200
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// Keep the rainbow buffer usable on 512 B SRAM parts.
+#define NUM_LEDS 32
+#else
+#define NUM_LEDS 200
+#endif
 #define BRIGHTNESS  255
 
 CRGB leds[NUM_LEDS];
