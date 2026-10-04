@@ -77,6 +77,18 @@ def test_synthesizes_build_info_for_nested_example(tmp_path: Path) -> None:
     assert (tmp_path / "build_info_Multiple" / "ArrayOfLedArrays.json").is_file()
 
 
+def test_rejects_build_info_path_escape(tmp_path: Path) -> None:
+    _make_fbuild_tree(tmp_path, "clang")
+    outside = tmp_path.parent / f"escape_{tmp_path.name}"
+
+    assert not generate_build_info_json_from_existing_build(
+        tmp_path,
+        create_board("esp32s3"),
+        f"Blink/../../{outside.name}/Blink",
+    )
+    assert not outside.exists()
+
+
 def test_prefers_fbuild_emitted_build_info(tmp_path: Path) -> None:
     out = _make_fbuild_tree(tmp_path, "avr-gcc")
     board = create_board("uno")

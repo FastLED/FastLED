@@ -13,7 +13,8 @@
 
 // Params for width and height
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega8A__) || \
-    defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny88__)
+    defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny88__) || \
+    defined(__AVR_ATtiny204__) || defined(__AVR_ATtiny404__)
 // A 16x16 framebuffer alone uses 768 B, more than these boards can spare.
 const uint8_t kMatrixWidth = 4;
 const uint8_t kMatrixHeight = 4;
