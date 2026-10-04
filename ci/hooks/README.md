@@ -4,6 +4,11 @@
 
 This directory contains pre-command hooks that prevent Claude AI agents from running dangerous or forbidden build commands that could bypass FastLED's build system safety checks.
 
+Claude launches these hooks with `uv run --frozen --no-sync python` from the
+project root. Keep both flags: hooks use the existing environment without
+resolving or installing project dependencies, so an in-progress `pyproject.toml`
+pin cannot disable every hook. Run `uv sync` separately when dependencies change.
+
 ## check_forbidden_commands.py
 
 **Purpose:** Blocks direct invocation of build system commands that should go through FastLED's bash wrapper scripts.
