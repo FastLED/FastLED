@@ -734,6 +734,10 @@ SPARKFUN_XRP_CONTROLLER_2350B = Board(
     platform="https://github.com/maxgerhardt/platform-raspberrypi",
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico/releases/download/5.7.0/rp2040-5.7.0.zip",
     board_build_core="earlephilhower",
+    # PicoOTA stages the incoming image in the filesystem. The board's default
+    # 16 MB/no-FS layout fails PicoOTA's 128 KiB minimum at compile time;
+    # its 16 MB/2 MB menu option leaves room for full firmware images.
+    board_build_filesystem_size="2m",
 )
 
 APOLLO3_RED_BOARD = Board(
